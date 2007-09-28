@@ -1,0 +1,52 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:section title="Extended E-mail Notification">
+    <f:entry title="SMTP server"
+             help="/help/tasks/mailer/smtp-server.html">
+      <input class="setting-input" name="ext_mailer_smtp_server"
+        type="text" value="${descriptor.smtpServer}"/>
+    </f:entry>
+    <f:entry title="Default user e-mail suffix"
+             help="/help/tasks/mailer/default-suffix.html">
+      <input class="setting-input" name="ext_mailer_default_suffix"
+        type="text" value="${descriptor.defaultSuffix}"/>
+    </f:entry>
+    <f:entry title="System Admin E-mail Address"
+             help="/help/tasks/mailer/admin-address.html">
+      <f:textbox name="ext_mailer_admin_address" value="${descriptor.adminAddress}"
+          checkUrl="'${rootURL}/publisher/Mailer/addressCheck?value='+encode(this.value)"/>
+    </f:entry>
+    <f:entry title="Hudson URL"
+             help="/help/tasks/mailer/url.html">
+      <input class="setting-input" name="ext_mailer_hudson_url"
+        type="text" value="${h.ifThenElse(descriptor.url!=null,descriptor.url,h.inferHudsonURL(request))}"/>
+    </f:entry>
+    <f:advanced>
+      <f:optionalBlock name="mailer.useSMTPAuth" title="Use SMTP Authentication" checked="${descriptor.smtpAuthUsername!=null}"
+          help="/help/tasks/mailer/smtpAuth.html">
+        <f:entry title="User Name">
+          <input class="setting-input" name="mailer.SMTPAuth.userName"
+                 type="text" value="${descriptor.smtpAuthUsername}"/>
+        </f:entry>
+        <f:entry title="Password">
+          <input class="setting-input" name="mailer.SMTPAuth.password"
+                 type="password" value="${descriptor.smtpAuthPassword}"/>
+        </f:entry>
+      </f:optionalBlock>
+      <f:entry title="Use SSL"
+               help="/help/tasks/mailer/smtp-use-ssl.html">
+        <f:checkbox name="ext_mailer_smtp_use_ssl" checked="${descriptor.useSsl}" />
+      </f:entry>
+		<f:entry title="Default Subject"
+				 help="/plugin/emailext/help-globalConfig-defaultSubject.html">
+			<input class="setting-input" name="ext_mailer_default_subject"
+		       	   type="text" value="${descriptor.defaultSubject}"/>
+		</f:entry>
+		<f:entry title="Default Content"
+				 help="/plugin/emailext/help-globalConfig-defaultBody.html">
+			<textarea class="setting-input" name="ext_mailer_default_body">
+				${descriptor.defaultBody}
+			</textarea>
+		</f:entry>
+    </f:advanced>
+  </f:section>
+</j:jelly>

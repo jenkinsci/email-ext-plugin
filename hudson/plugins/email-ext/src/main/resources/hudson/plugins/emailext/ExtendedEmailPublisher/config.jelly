@@ -1,0 +1,72 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" 
+		 xmlns:d="jelly:define" xmlns:l="/lib/layout" 
+		 xmlns:t="/lib/hudson" xmlns:f="/lib/form" 
+		 xmlns:m="/hudson/plugins/emailext/tags">
+	<!--
+		This script defines the view for the extended email plugin.
+	-->
+	
+	<script type="text/javascript" src="${rootURL}/plugin/emailext/scripts/emailext-behavior.js"></script>
+	
+	<f:entry title="Global Recipient List"
+     		description="Comma-separated list of email address that should recieve notifications."
+     		help="/plugin/emailext/help-config-recipientList.html">
+	    <input class="setting-input validated" name="recipientlist_recipients"
+            type="text" value="${instance.recipientList}"
+            checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encode(this.value)"/>
+    </f:entry>
+	<!-- Configure advanced properties like per-build-result status email contents, 
+		 whether or not to send email to developers who made changes, and whether or
+		 not to send email to the global list of devs-->
+	<f:advanced> 
+		<tr>
+			<td></td>
+			<td colspan="3" style="margin-left:10px">
+				<table width="100%">
+     				<tr>
+     					<td></td>
+     					<td>
+     						<div style="font-weight:bold">Build Status</div>
+     					</td>
+     					<td>
+   							<div style="font-weight:bold">Send To Recipient List</div>
+   						</td>
+   						<td>
+   							<div style="font-weight:bold">Send To Committers</div>
+   						</td>
+   						<td>
+   							<div style="font-weight:bold">More Configuration</div>
+   						</td>
+   						<td class="setting-help">
+   							<a href="#" class="help-button" helpURL="${rootURL}/plugin/emailext/help-config-email.html"><img src="${rootURL}/images/16x16/help.gif" alt="Help for feature: Email Config" /></a>
+   						</td>
+   					</tr>
+   					<tr class="help-area"><td></td><td colspan="4"><div class="help">Loading...</div></td><td></td></tr>
+			     	<m:mailtype title="Failed" mailType="failureMail" 
+			     				mailTypeObj="${instance.failureMail}" sendToList="${true}" 
+			     				sendToDevs="${true}" help="${rootURL}/plugin/emailext/help-config-failureMail.html"></m:mailtype>
+			     				
+					<m:mailtype title="Still Failing" mailType="stillFailingMail" 
+			     				mailTypeObj="${instance.stillFailingMail}" sendToList="${false}" 
+			     				sendToDevs="${true}" help="${rootURL}/plugin/emailext/help-config-stillFailingMail.html"></m:mailtype>
+			     				
+					<m:mailtype title="Unstable" mailType="unstableMail" 
+			     				mailTypeObj="${instance.unstableMail}" sendToList="${true}" 
+			     				sendToDevs="${true}" help="${rootURL}/plugin/emailext/help-config-unstableMail.html"></m:mailtype>
+			      
+					<m:mailtype title="Still Unstable" mailType="stillUnstableMail" 
+			     				mailTypeObj="${instance.stillUnstableMail}" sendToList="${false}" 
+			     				sendToDevs="${true}" help="${rootURL}/plugin/emailext/help-config-stillUnstableMail.html"></m:mailtype>      
+			     				
+					<m:mailtype title="Successful" mailType="successfulMail" 
+			     				mailTypeObj="${instance.successfulMail}" sendToList="${false}" 
+			     				sendToDevs="${false}" help="${rootURL}/plugin/emailext/help-config-successfulMail.html"></m:mailtype>      
+			      
+					<m:mailtype title="Fixed" mailType="fixedMail" 
+			     				mailTypeObj="${instance.fixedMail}" sendToList="${true}" 
+			     				sendToDevs="${true}" help="${rootURL}/plugin/emailext/help-config-fixedMail.html"></m:mailtype>      
+				</table>
+			</td>
+		</tr>
+	</f:advanced>
+</j:jelly>
