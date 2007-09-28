@@ -9,6 +9,10 @@
   
   <artifactId>email-ext</artifactId>
   <packaging>hpi</packaging>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.1</version>
   <name>Hudson Email Extension Plugin</name>
+
+  <scm>
+    <tag>email-ext-1_1</tag>
+  </scm>
 </project>
