@@ -473,9 +473,9 @@ public class ExtendedEmailPublisher extends Publisher {
             hudsonUrl = url;
 
             //specify authentication information
-            if(req.getParameter("mailer.useSMTPAuth")!=null) {
-                smtpAuthUsername = nullify(req.getParameter("mailer.SMTPAuth.userName"));
-                smtpAuthPassword = nullify(req.getParameter("mailer.SMTPAuth.password"));
+            if(req.getParameter("extmailer.useSMTPAuth")!=null) {
+                smtpAuthUsername = nullify(req.getParameter("extmailer.SMTPAuth.userName"));
+                smtpAuthPassword = nullify(req.getParameter("extmailer.SMTPAuth.password"));
             } else {
                 smtpAuthUsername = smtpAuthPassword = null;
             }

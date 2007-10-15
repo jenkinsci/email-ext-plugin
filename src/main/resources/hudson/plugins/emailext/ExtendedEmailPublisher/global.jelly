@@ -18,17 +18,17 @@
     <f:entry title="Hudson URL"
              help="/help/tasks/mailer/url.html">
       <input class="setting-input" name="ext_mailer_hudson_url"
-        type="text" value="${h.ifThenElse(descriptor.url!=null,descriptor.url,h.inferHudsonURL(request))}"/>
+        type="text" value="${h.ifThenElse(descriptor.hudsonUrl!=null,descriptor.hudsonUrl,h.inferHudsonURL(request))}"/>
     </f:entry>
     <f:advanced>
-      <f:optionalBlock name="mailer.useSMTPAuth" title="Use SMTP Authentication" checked="${descriptor.smtpAuthUsername!=null}"
+      <f:optionalBlock name="extmailer.useSMTPAuth" title="Use SMTP Authentication" checked="${descriptor.smtpAuthUsername!=null}"
           help="/help/tasks/mailer/smtpAuth.html">
         <f:entry title="User Name">
-          <input class="setting-input" name="mailer.SMTPAuth.userName"
+          <input class="setting-input" name="extmailer.SMTPAuth.userName"
                  type="text" value="${descriptor.smtpAuthUsername}"/>
         </f:entry>
         <f:entry title="Password">
-          <input class="setting-input" name="mailer.SMTPAuth.password"
+          <input class="setting-input" name="extmailer.SMTPAuth.password"
                  type="password" value="${descriptor.smtpAuthPassword}"/>
         </f:entry>
       </f:optionalBlock>
