@@ -497,8 +497,9 @@ public class ExtendedEmailPublisher extends Publisher {
 			return v;
 		}
 		
+                @Override
 		public String getHelpFile() {
-            return "/plugin/emailext/help-config.html";
+            return "/plugin/email-ext/help-config.html";
         }
 		
 		public void doAddressCheck(StaplerRequest req, StaplerResponse rsp,
