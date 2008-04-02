@@ -5,7 +5,7 @@
       <input class="setting-input" name="ext_mailer_smtp_server"
         type="text" value="${descriptor.smtpServer}"/>
     </f:entry>
-    <f:entry title="Default user e-mail suffix"
+    <f:entry title="Default user E-mail suffix"
              help="/help/tasks/mailer/default-suffix.html">
       <input class="setting-input" name="ext_mailer_default_suffix"
         type="text" value="${descriptor.defaultSuffix}"/>
@@ -37,12 +37,12 @@
         <f:checkbox name="ext_mailer_smtp_use_ssl" checked="${descriptor.useSsl}" />
       </f:entry>
 		<f:entry title="Default Subject"
-				 help="/plugin/emailext/help-globalConfig-defaultSubject.html">
+				 help="${rootURL}/plugin/email-ext/content-help">
 			<input class="setting-input" name="ext_mailer_default_subject"
 		       	   type="text" value="${descriptor.defaultSubject}"/>
 		</f:entry>
 		<f:entry title="Default Content"
-				 help="/plugin/emailext/help-globalConfig-defaultBody.html">
+				 help="${rootURL}/plugin/email-ext/help-globalConfig-defaultBody.html">
 			<textarea class="setting-input" name="ext_mailer_default_body">
 				${descriptor.defaultBody}
 			</textarea>

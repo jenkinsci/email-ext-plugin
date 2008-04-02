@@ -1,0 +1,22 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" 
+		 xmlns:d="jelly:define" xmlns:l="/lib/layout" 
+		 xmlns:t="/lib/hudson" xmlns:f="/lib/form" 
+		 >
+	<!--
+		This script defines the view for content help.
+	-->
+	
+<div>
+  <p>
+	Customize the subject line of the email notification.
+  	The plugin can replace certain symbols in the subject and body fields of the email
+  	so that you can include special information from the build.  If you leave this blank,
+  	the default email subject-line, configured in the system configuration, will be used.
+  </p>
+  <ul>
+  		<li>
+			hello  			
+	  	</li>
+  </ul>
+</div>
+</j:jelly>

@@ -1,14 +1,14 @@
 package hudson.plugins.emailext;
 
 import hudson.Launcher;
-import hudson.Util;
 import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.Project;
-import hudson.model.Result;
 import hudson.model.User;
-import hudson.scm.ChangeLogSet;
+import hudson.plugins.emailext.plugins.EmailContent;
+import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.scm.ChangeLogSet.Entry;
 import hudson.tasks.Builder;
 import hudson.tasks.Mailer;
@@ -17,9 +17,12 @@ import hudson.util.FormFieldValidator;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
@@ -74,92 +77,174 @@ public class ExtendedEmailPublisher extends Publisher {
     
     public static final String COMMA_SEPARATED_SPLIT_REGEXP = "[,\\s]+";
 
-	private static final String PROJECT_NAME = "\\$PROJECT_NAME";
-	private static final String BUILD_NUMBER = "\\$BUILD_NUMBER";
-	private static final String BUILD_STATUS = "\\$BUILD_STATUS";
-	private static final String BUILD_URL = "\\$BUILD_URL";
-	private static final String PROJECT_URL = "\\$PROJECT_URL";
-	private static final String HUDSON_URL = "\\$HUDSON_URL";
-	private static final String CHANGES = "$CHANGES";
-	private static final String BUILD_LOG = "$BUILD_LOG";
 	private static final String DEFAULT_BODY = "\\$DEFAULT_CONTENT";
 	private static final String DEFAULT_SUBJECT = "\\$DEFAULT_SUBJECT";
 	
-	private static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
-	private static final String DEFAULT_BODY_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:\n\n" +
+	private static final String PROJECT_DEFAULT_BODY = "\\$PROJECT_DEFAULT_CONTENT";
+	private static final String PROJECT_DEFAULT_SUBJECT = "\\$PROJECT_DEFAULT_SUBJECT";
+	
+	private static final Map<String,EmailContent> EMAIL_CONTENT_TYPE_MAP = new HashMap<String,EmailContent>();
+	private static final Map<String,EmailTriggerDescriptor> EMAIL_TRIGGER_TYPE_MAP = new HashMap<String,EmailTriggerDescriptor>();
+	
+	
+	/* These are the old default subjects and bodies that are used in previous versions of the plugin */
+	public static final String OLD_DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
+	public static final String OLD_DEFAULT_BODY_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:\n\n" +
 		"Check console output at $HUDSON_URL/$BUILD_URL to view the results.";
+	
+	/* These are the new default subject and body that replace the old version */
+	public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
+	public static final String DEFAULT_BODY_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:\n\n" +
+		"Check console output at $BUILD_URL to view the results.";
+	
+	/* These are the new default subject and body that replace the old version */
+	public static final String PROJECT_DEFAULT_SUBJECT_TEXT = "$PROJECT_DEFAULT_SUBJECT";
+	public static final String PROJECT_DEFAULT_BODY_TEXT = "$PROJECT_DEFAULT_CONTENT";
+	
+    public static void addEmailContentType(EmailContent contentType) throws EmailExtException{
+    	if(EMAIL_CONTENT_TYPE_MAP.containsKey(contentType.getToken()))
+    		throw new EmailExtException("An email content type with token= "
+    				+contentType.getToken() + " has already been added.");
+    	
+    	EMAIL_CONTENT_TYPE_MAP.put(contentType.getToken(), contentType);
+    }
     
-    /**
-     * Email to send when a build has a fatal error
-     */
-    public EmailType failureMail;
-    /**
-     * Email to send when the build status changes from stable to unstable
-     */
-    public EmailType unstableMail;
-    /**
-     * Email to send when the build status is still failing
-     */
-    public EmailType stillFailingMail;
-    /**
-     * Email to send when the is still unstable
-     */
-    public EmailType stillUnstableMail;
-    /**
-     * Email to send when the build status changes from unstable or failing to stable/successful
-     */
-    public EmailType fixedMail;
-    /**
-     * Email to send when the build status is still stable/successful
-     */
-    public EmailType successfulMail;
+    public static void removeEmailContentType(EmailContent contentType){
+    	if(EMAIL_CONTENT_TYPE_MAP.containsKey(contentType.getToken()))
+    		EMAIL_CONTENT_TYPE_MAP.remove(contentType);
+    }
 
+    public static void addEmailTriggerType(EmailTriggerDescriptor triggerType) throws EmailExtException{
+    	if(EMAIL_TRIGGER_TYPE_MAP.containsKey(triggerType.getMailerId()))
+    		throw new EmailExtException("An email trigger type with name= "
+    				+triggerType.getTriggerName() + " has already been added.");
+    	EMAIL_TRIGGER_TYPE_MAP.put(triggerType.getMailerId(), triggerType);
+    }
+    
+    public static void removeEmailTriggerType(EmailTriggerDescriptor triggerType){
+    	if(EMAIL_TRIGGER_TYPE_MAP.containsKey(triggerType.getMailerId()))
+    		EMAIL_TRIGGER_TYPE_MAP.remove(triggerType.getMailerId());
+    }
+    
+    public static Collection<EmailTriggerDescriptor> getEmailTriggers(){
+    	return EMAIL_TRIGGER_TYPE_MAP.values();
+    }
+    
+    public static Collection<String> getEmailTriggerNames(){
+    	return EMAIL_TRIGGER_TYPE_MAP.keySet();
+    }
+    
+    public static List<EmailTrigger> getTriggersForNonConfiguredInstance(){
+    	List<EmailTrigger> retList = new ArrayList<EmailTrigger>();
+		for(String triggerName : EMAIL_TRIGGER_TYPE_MAP.keySet()){
+			retList.add(EMAIL_TRIGGER_TYPE_MAP.get(triggerName).getNewInstance(null));
+		}
+		return retList;
+    }
+    
+    public static Collection<EmailContent> getEmailContentTypes(){
+		return EMAIL_CONTENT_TYPE_MAP.values();
+    }
+    
     
     /**
-     * An array of email recipient lists.  These can be configured to be used for each email type.
+     * A comma-separated list of email recipient that will be used for every trigger.
      */
     public String recipientList;
-    
+
+	/** This is the list of email triggers that the project has configured */
+	private List<EmailTrigger> configuredTriggers = new ArrayList<EmailTrigger>();
+
+	public String defaultSubject;
+
+	public String defaultContent;
+	
+	/**
+	 * Get the list of configured email triggers for this project.
+	 */
+	public List<EmailTrigger> getConfiguredTriggers() {
+		if(configuredTriggers == null)
+			configuredTriggers = new ArrayList<EmailTrigger>();
+		return configuredTriggers;
+	}
+
+	/**
+	 * Get the list of non-configured email triggers for this project.
+	 */
+	public List<EmailTrigger> getNonConfiguredTriggers(){
+		List<EmailTrigger> confTriggers = getConfiguredTriggers();
+		
+		List<EmailTrigger> retList = new ArrayList<EmailTrigger>();
+		for(String triggerName : EMAIL_TRIGGER_TYPE_MAP.keySet()){
+			boolean contains = false;
+			for(EmailTrigger trigger : confTriggers){
+				if(trigger.getDescriptor().getTriggerName().equals(triggerName)){
+					contains = true;
+					break;
+				}
+			}
+			if(!contains){
+				retList.add(EMAIL_TRIGGER_TYPE_MAP.get(triggerName).getNewInstance(null));
+			}
+		}
+		return retList;
+	}
+
+	/**
+	 * Return true if the project has been configured, otherwise returns false
+	 */
+	public boolean isConfigured(){
+		return !getConfiguredTriggers().isEmpty();
+	}
+	public boolean getConfigured(){
+		return isConfigured();
+	}
+
 	public boolean perform(Build build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 		return _perform(build,launcher,listener);
 	}
 	
     public <P extends Project<P,B>,B extends Build<P,B>> boolean _perform(B build, Launcher launcher, BuildListener listener) throws InterruptedException {
-    	Result buildResult = build.getResult();
-    	boolean succeeded = false;
-    	EmailType type= null;
-        if(buildResult == Result.FAILURE){
-        	B prevBuild = build.getPreviousBuild();
-	    	if(prevBuild!=null && (prevBuild.getResult() == Result.FAILURE))
-	    		type = stillFailingMail;
-	    	else
-	        	type = failureMail;
-        }
-        else if(buildResult == Result.UNSTABLE){
-        	B prevBuild = build.getPreviousBuild();
-        	if(prevBuild!=null && (prevBuild.getResult() == Result.UNSTABLE))
-        		type = stillUnstableMail;
-        	else
-        		type = unstableMail;
-        }
-        else if(buildResult == Result.SUCCESS){
-        	B prevBuild = build.getPreviousBuild();
-        	if(prevBuild!=null && (prevBuild.getResult() == Result.UNSTABLE || prevBuild.getResult() == Result.FAILURE))
-        		type = fixedMail;
-        	else
-        		type = successfulMail;
-        }
-                	
-        if(type != null){
-        	if(type.getHasRecipients())
-        		succeeded = sendMail(type,build,listener);
-        	else{
-        		succeeded = true;
-        		listener.getLogger().println("There are no recipients configured for this type of email, so no email will be sent.");
-        	}
-        }
+       	boolean emailTriggered = false;
         
-    	return succeeded;
+       	Map<String,EmailTrigger> triggered = new HashMap<String, EmailTrigger>();
+       	
+    	for(EmailTrigger trigger : configuredTriggers){
+    		if(trigger.trigger(build)){
+    			String tName = trigger.getDescriptor().getTriggerName();
+    			triggered.put(tName,trigger);
+    			listener.getLogger().println("Email was triggered for: " + tName);
+    			emailTriggered = true;
+    		}
+    	}
+    	
+    	//Go through and remove triggers that are replaced by others
+    	List<String> replacedTriggers = new ArrayList<String>();
+    	
+    	for(String triggerName : triggered.keySet()){
+    		replacedTriggers.addAll(triggered.get(triggerName).getDescriptor().getTriggerReplaceList());
+    	}
+    	for(String triggerName : replacedTriggers){
+    		triggered.remove(triggerName);
+    		listener.getLogger().println("Trigger " + triggerName + " was overridden by another trigger and will not send an email.");
+    	}
+    	
+    	if(emailTriggered && triggered.isEmpty()){
+    		listener.getLogger().println("There is a circular trigger replacement with the email triggers.  No email is sent.");
+    		return false;
+    	}
+    	else if(triggered.isEmpty()){
+    		listener.getLogger().println("No emails were triggered.");
+    		return true;
+    	}
+    	
+    	listener.getLogger().println("There are " + triggered.size() + " triggered emails.");
+    	for(String triggerName :triggered.keySet()){
+    		listener.getLogger().println("Sending email for trigger: " + triggerName);
+    		sendMail(triggered.get(triggerName).getEmail(), build, listener);
+    	}
+        
+    	return true;
     }
     
     private <P extends Project<P,B>,B extends Build<P,B>> boolean sendMail(EmailType mailType,B build, BuildListener listener){
@@ -178,7 +263,7 @@ public class ExtendedEmailPublisher extends Publisher {
                     + " to empty list of recipients, ignored.");
             }
     	}catch(MessagingException e){
-    		LOGGER.log(Level.WARNING, "Could not send email.");
+    		LOGGER.log(Level.WARNING, "Could not send email.",e);
     		listener.getLogger().println("Could not send email as a part of the post-build publishers.");
     	}
     	
@@ -233,63 +318,49 @@ public class ExtendedEmailPublisher extends Publisher {
     }
     
     private <P extends Project<P,B>,B extends Build<P,B>> String transformText(EmailType type,String origText,B build){
-    	String status = getEmailTypeAsString(type);
- 
-    	String changes = "";
-    	String log = "Not implemented yet.";
 
-    	if(origText.indexOf(CHANGES)>=0)
-    		changes = getChangesSinceLastBuild(build);
-    	
-    	String newText = origText.replaceAll(DEFAULT_BODY, Matcher.quoteReplacement(DESCRIPTOR.getDefaultBody()))
-    							 .replaceAll(DEFAULT_SUBJECT, Matcher.quoteReplacement(DESCRIPTOR.getDefaultSubject()))
-    							 .replaceAll(PROJECT_NAME, build.getProject().getName())
-    							 .replaceAll(PROJECT_URL, Util.encode(build.getProject().getUrl()))
-    							 .replaceAll(BUILD_NUMBER, ""+build.getNumber())
-    							 .replaceAll(BUILD_STATUS, status)
-    							 .replaceAll(BUILD_LOG, log)
-    							 .replaceAll(CHANGES, changes)
-    							 .replaceAll(BUILD_URL, Util.encode(build.getUrl()))
-    							 .replaceAll(HUDSON_URL, Util.encode(DESCRIPTOR.hudsonUrl));
+    	String newText = origText.replaceAll(PROJECT_DEFAULT_BODY, Matcher.quoteReplacement(defaultContent))
+		 						 .replaceAll(PROJECT_DEFAULT_SUBJECT, Matcher.quoteReplacement(defaultSubject))
+    							 .replaceAll(DEFAULT_BODY, Matcher.quoteReplacement(DESCRIPTOR.getDefaultBody()))
+    							 .replaceAll(DEFAULT_SUBJECT, Matcher.quoteReplacement(DESCRIPTOR.getDefaultSubject()));
+    					
+    	newText = replaceTokensWithContent(newText, type, build);
     	return newText;
     }
-
-	private <P extends Project<P,B>,B extends Build<P,B>> String getChangesSinceLastBuild(B build) {
-    	StringBuffer buf= new StringBuffer();
-        for (ChangeLogSet.Entry entry : build.getChangeSet()) {
-            buf.append('[');
-            buf.append(entry.getAuthor().getFullName());
-            buf.append("] ");
-            String m = entry.getMsg();
-            buf.append(m);
-            if (!m.endsWith("\n")) {
-                buf.append('\n');
-            }
-            buf.append('\n');
-        }
-        return buf.toString();
-	}
     
-    
-
-	private String getEmailTypeAsString(EmailType type) {
-		String status;
-		if(type==successfulMail)
-    		status = "Successful";
-    	else if(type==stillUnstableMail)
-    		status = "Still Unstable";
-    	else if(type==failureMail)
-    		status = "Failed";
-    	else if(type==fixedMail)
-    		status = "Fixed";
-    	else if(type==stillFailingMail)
-    		status = "Still Failing";
-    	else if(type==unstableMail)
-    		status = "Unstable";
-    	else
-    		status = "Unknown";
-		return status;
-	}
+    public <P extends Project<P,B>,B extends Build<P,B>> String replaceTokensWithContent(String origText,EmailType type,Build<P,B> build){
+    	StringBuffer sb = new StringBuffer();
+    	
+    	//split the string based on the $ character
+    	String[] tokens = origText.split("\\$");
+    	for(int i=0;i<tokens.length;i++){
+    		String token = tokens[i];
+    		
+			//split when we find the first character that is not in the alphabet (a-z or A-Z),
+			//not a number (0-9), or not an underscore (_)
+    		String[] tokenParts = token.split("[^a-zA-Z0-9_]");
+    		String tokenPart = tokenParts[0];
+    		String nonTokenPart = token.substring(tokenPart.length());
+    			    		
+    		EmailContent content = EMAIL_CONTENT_TYPE_MAP.get(tokenPart);
+    		if(content!=null){
+    			String contentText = content.getContent(build, type);
+    			if(content.hasNestedContent()){
+    				String replacedNestedText = replaceTokensWithContent(contentText, type, build);
+    				sb.append(replacedNestedText);
+    			}
+    			else
+    				sb.append(contentText);
+    			
+    			sb.append(nonTokenPart);
+    		}
+    		else if (token !=null && token.length() > 0){
+    			sb.append(token);
+    		}
+		}
+       	
+    	return sb.toString();
+    }
 
     public Descriptor<Publisher> getDescriptor() {
 		return DESCRIPTOR;
@@ -424,21 +495,32 @@ public class ExtendedEmailPublisher extends Publisher {
 			//Save the recipient lists
 			String listRecipients = req.getParameter("recipientlist_recipients");
 			
-			//Save configuration for each build type
+			//Save configuration for each trigger type
 			ExtendedEmailPublisher m = new ExtendedEmailPublisher();
 			m.recipientList = listRecipients;
-			m.unstableMail = createMailType(req,"unstableMail");
-			m.failureMail = createMailType(req,"failureMail");
-			m.stillFailingMail = createMailType(req,"stillFailingMail");
-			m.fixedMail = createMailType(req,"fixedMail");
-			m.successfulMail = createMailType(req,"successfulMail");
-			m.stillUnstableMail = createMailType(req,"stillUnstableMail");
-
+			m.defaultSubject = req.getParameter("project_default_subject");
+			m.defaultContent = req.getParameter("project_default_content");
+			m.configuredTriggers = new ArrayList<EmailTrigger>();
+			
+			//Create a new email trigger for each one that is configured
+			for(String mailerId : EMAIL_TRIGGER_TYPE_MAP.keySet()){
+				EmailType type = createMailType(req,mailerId);
+				if(type!=null){
+					EmailTrigger trigger = EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(type);
+					m.configuredTriggers.add(trigger);
+				}
+			}
+			
 			req.bindParameters(m,"ext_mailer_");
 			return m;
 		}
 		
 		private EmailType createMailType(StaplerRequest req, String mailType){
+			if(req.getParameter("mailer." + mailType+ ".configured") ==null)
+				return null;
+			if(!req.getParameter("mailer." +mailType+ ".configured").equalsIgnoreCase("true"))
+				return null;
+			
 			EmailType m = new EmailType();
 			String prefix = "mailer." + mailType + ".";
 			m.setSubject(req.getParameter(prefix + "subject"));
@@ -541,5 +623,7 @@ public class ExtendedEmailPublisher extends Publisher {
         }
 		
 	}
+
+
 
 }

@@ -1,8 +1,13 @@
 package hudson.plugins.emailext;
 
-import junit.framework.TestCase;
+import org.jmock.MockObjectTestCase;
 
-public class ExtendedEmailPublisherTest extends TestCase {
+public class ExtendedEmailPublisherTest extends MockObjectTestCase {
+
+	
+	public void setUp(){
+		
+	}
 
 	public void testSplitCommaSeparatedString(){
 		String test = "asdf.fasdfd@fadsf.cadfad, asdfd, adsfadfaife, qwf.235f.adfd.#@adfe.cadfe";
@@ -11,4 +16,6 @@ public class ExtendedEmailPublisherTest extends TestCase {
 		
 		assertEquals(4,tests.length);
 	}
+
+	
 }
