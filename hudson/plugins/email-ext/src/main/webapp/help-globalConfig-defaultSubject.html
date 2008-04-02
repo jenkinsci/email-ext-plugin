@@ -1,0 +1,32 @@
+<div>
+  <p>
+	Customize the default subject line of the email notifications.
+  	The plugin can replace certain symbols in the subject and body fields of the email
+  	so that you can include special information from the build.
+  </p>
+
+<ul>
+	<li>
+		<i>$HUDSON_URL</i> - Inserts a url pointing to Hudson's dashboard.  This must be 
+		configured on the system configuration page.  All other URLs are relative to this
+		absolute URL.
+	</li>
+	<li>
+  		<i>$PROJECT_NAME</i> - Inserts the project's name.
+	</li>
+	<li>
+		<i>$BUILD_NUMBER</i> - Inserts the build number.
+	</li>
+	<li>
+		<i>$BUILD_STATUS</i> - Inserts the status of the build.
+	</li>
+	<li>
+		<i>$BUILD_URL</i> - Inserts a url pointing to this build's results page.  This
+		URL is relative to the $HUDSON_URL
+	</li>
+	<li>
+		<i>$PROJECT_URL</i> - Inserts a url pointing to this project's status page.  This
+		URL is relative to the $HUDSON_URL
+	</li>
+</ul>
+</div>

@@ -1,0 +1,117 @@
+<!--
+	Section header
+	
+	<%@attribute name="title" required="true" %>
+	<%@attribute name="mailType" required="true" %>
+	<%@attribute name="mailTypeObj" required="true" %>
+	<%@attribute name="sendToList" required="true" %>
+	<%@attribute name="sendToDevs" required="true" %>
+	<%@attribute name="configured" required="true" %>
+-->
+
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
+	xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+	xmlns:f="/lib/form" xmlns:m="/hudson/plugins/emailext/tags">
+
+	<j:set var="rowShown" value="" />
+	<j:if test="${configured != true}">
+		<j:set var="rowShown" value="display:none;" />
+	</j:if>
+
+	<tr id="${mailType}" style="${rowShown}" >
+		<td></td>
+		<td>
+			<input type="hidden" id="mailer.${mailType}.configured"
+				name="mailer.${mailType}.configured"
+				value="${configured}" />
+			<div>
+				${title}
+				<a href="#${mailType}hideAnchor" onclick="toggleMailHelp('${mailType}')">
+					<img src="${rootURL}/images/16x16/help.gif"
+						alt="Help for feature: Email Config" />
+				</a>
+			</div>
+		</td>
+		<j:choose>
+			<j:when test="${configured != true}">
+				<td>
+					<f:checkbox
+						name="mailer.${mailType}.sendToRecipientList"
+						checked="${sendToList}" />
+				</td>
+				<td>
+					<f:checkbox
+						name="mailer.${mailType}.sendToDevelopers"
+						checked="${sendToDevs}" />
+				</td>
+			</j:when>
+			<j:otherwise>
+				<td>
+					<f:checkbox
+						name="mailer.${mailType}.sendToRecipientList"
+						checked="${mailTypeObj.sendToRecipientList}" />
+				</td>
+				<td>
+					<f:checkbox
+						name="mailer.${mailType}.sendToDevelopers"
+						checked="${mailTypeObj.sendToDevelopers}" />
+				</td>
+			</j:otherwise>
+		</j:choose>
+		<td>
+			<a id="${mailType}edit" name="${mailType}editAnchor"
+				href="#${mailType}hideAnchor"
+				onclick="javascript:swapEdit('${mailType}')">
+				<img src="${rootURL}/images/16x16/document_add.gif"
+					alt="View More Options" />
+				(expand)
+			</a>
+			<a id="${mailType}hide" name="${mailType}hideAnchor"
+				href="#${mailType}editAnchor"
+				onclick="javascript:swapEdit('${mailType}')">
+				<img src="${rootURL}/images/16x16/document_delete.gif"
+					alt="Hide Options" />
+				(collapse)
+			</a>
+		</td>
+		<td>
+			<input type="button" onclick="removeTrigger('${mailType}')" value="Delete"/>
+		</td>
+	</tr>
+	<tr id="${mailType}help" style="display:none;">
+		<td></td>
+		<td colspan="5">
+			<div class="mailHelp" id="${mailType}.helpDiv">${trigger.descriptor.helpText}</div>
+		</td>
+	</tr>
+	<tr id="${mailType}elm">
+		<td></td>
+		<td></td>
+		<td colspan="4">
+			<table width="100%">
+				<f:entry
+					title="Recipient List">
+					<input class="setting-input"
+						name="mailer.${mailType}.recipientList" type="text"
+						value="${mailTypeObj.recipientList}" />
+				</f:entry>
+				<f:entry
+					title="Subject">
+					<input class="setting-input"
+						name="mailer.${mailType}.subject" type="text"
+						value="${mailTypeObj.subject}" />
+				</f:entry>
+				<f:entry
+					title="Content">
+					<textarea class="setting-input"
+						name="mailer.${mailType}.body">${mailTypeObj.body}</textarea>
+				</f:entry>
+			</table>
+		</td>
+	</tr>
+
+	<!-- Initialize the way it is displayed.  Start it off hidden -->
+	<script type="text/javascript">swapEdit("${mailType}");</script>
+
+	<d:invokeBody />
+</j:jelly>

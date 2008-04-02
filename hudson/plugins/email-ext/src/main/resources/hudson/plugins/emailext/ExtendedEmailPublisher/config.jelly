@@ -1,0 +1,174 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" 
+		 xmlns:d="jelly:define" xmlns:l="/lib/layout" 
+		 xmlns:t="/lib/hudson" xmlns:f="/lib/form" 
+		 xmlns:m="/hudson/plugins/emailext/tags">
+	<!--
+		This script defines the view for the extended email plugin.
+	-->
+	
+	<script type="text/javascript" src="${rootURL}/plugin/email-ext/scripts/emailext-behavior.js"></script>
+	<style type="text/css">
+		.mailHelp{
+			border: solid #bbb 1px;
+  			background-color: #f0f0f0;
+  			padding: 1em;
+			margin-bottom: 1em;
+		}
+	</style>
+	
+	<!-- This is the help section.  It displays a bunch of dynamic help for everything in the plugin. -->
+	<tr><td colspan="3">Configure email recipients, content, and what should trigger a notification</td>
+		<td >
+			<j:invokeStatic var="advancedHelpText" method="getAdvancedEmailHelpText" className="hudson.plugins.emailext.EmailExtHelp"/>
+			<a href="#advancedHelpAnchor" name="advancedHelpAnchor" onclick="toggleAdvancedMailHelp()"><img src="${rootURL}/images/16x16/help.gif" alt="Help for feature: Email Config" /></a>
+		</td>
+	</tr>
+	<tr >
+		<td colspan="4"><div id="advancedEmailHelpConf" style="display:none" class="mailHelp">${advancedHelpText}</div></td>
+		<td></td>
+	</tr>
+	
+	<!-- This is the global recipent list entry. -->
+	<f:entry title="Global Recipient List"
+     		description="Comma-separated list of email address that should recieve notifications.">
+	    <input class="setting-input validated" name="recipientlist_recipients"
+            type="text" value="${instance.recipientList}"
+            checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encode(this.value)"/>
+    </f:entry>
+    
+	<!-- This is the default subject line for the project. -->
+    <f:entry title="Default Subject">
+     	<j:choose>
+     		<j:when test="${instance.configured}">
+	    		<input class="setting-input" name="project_default_subject"
+            		type="text" value="${instance.defaultSubject}"/>
+            </j:when>
+            <j:otherwise>
+            	<input class="setting-input" name="project_default_subject"
+            		type="text" value="$DEFAULT_SUBJECT"/>
+            </j:otherwise>
+        </j:choose>
+    </f:entry>
+
+	<!-- This is the default content for the project. -->
+    <f:entry title="Default Content">
+     	<j:choose>
+     		<j:when test="${instance.configured}">
+			    <textarea class="setting-input"	name="project_default_content">${instance.defaultContent}</textarea>
+			</j:when>
+			<j:otherwise>
+				<textarea class="setting-input"	name="project_default_content">$DEFAULT_CONTENT</textarea>
+			</j:otherwise>
+		</j:choose>
+    </f:entry>
+    
+	<!-- Configure advanced properties like per-build-result status email contents, 
+		 whether or not to send email to developers who made changes, and whether or
+		 not to send email to the global list of devs-->
+	<f:advanced> 
+		
+		<tr>
+			<td></td>
+			<td colspan="3" style="margin-left:10px">
+				<table width="100%" cell-padding="0" cell-spacing="0">
+				  <tbody id="configured-email-triggers">
+     				<tr>
+     					<td></td>
+     					<td>
+     						<div style="font-weight:bold">Trigger</div>
+     					</td>
+     					<td>
+   							<div style="font-weight:bold">Send To Recipient List</div>
+   						</td>
+   						<td>
+   							<div style="font-weight:bold">Send To Committers</div>
+   						</td>
+   						<td>
+   							<div style="font-weight:bold">More Configuration</div>
+   						</td>
+   						<td>
+   							<div style="font-weight:bold">Remove</div>
+   						</td>
+   						<td>
+   						</td>
+   					</tr>
+   					<j:forEach var="trigger" items="${instance.configuredTriggers}">
+						<m:mailtype title="${trigger.descriptor.triggerName}" 
+										mailType="${trigger.descriptor.mailerId}"
+					     				mailTypeObj="${trigger.email}" 
+					     				sendToList="${trigger.defaultSendToList}" 
+					     				sendToDevs="${trigger.defaultSendToDevs}" 
+					     				trigger="${trigger}"
+					     				configured="${true}">
+					    </m:mailtype>
+					    <script type="text/javascript">
+					    	if(configuredTriggerCSV != "")
+					    		configuredTriggerCSV = configuredTriggerCSV + ",";
+					    	configuredTriggerCSV = configuredTriggerCSV + "${trigger.descriptor.mailerId}";
+					    </script>
+					</j:forEach>
+					
+					<tr id="after-last-configured-row">
+						<td></td>
+						<td colspan="5"><span style="font-weight:bold">Add a Trigger: </span>
+							<j:invokeStatic var="triggerTypes" method="getEmailTriggerNames" className="hudson.plugins.emailext.ExtendedEmailPublisher"/>  
+							<select id="non-configured-options" onchange="selectTrigger(this)">
+							  <option value="select" >select</option>
+							  <j:forEach var="trigger" items="${triggerTypes}">
+							      <option value="${trigger}" id="${trigger}option">
+							      		  	${trigger}
+							      </option>
+							  </j:forEach>
+							</select>
+						</td>
+						<td></td>
+					</tr>
+				  </tbody>
+				</table>
+				
+				<!-- This table is for non-configured types.  We'll do some dom manipulation
+					 to make sure that when a trigger is selected from the dropdown that it
+					 is added to the configured table.  Also, if a configured trigger is 
+					 deleted from the configured table, we'll add it here. -->
+				<table style="display:none;">
+					<tbody id="non-configured-email-triggers" >
+						<j:choose>
+							<j:when test="${instance==null}">
+								<j:invokeStatic var="nonConfigTriggers" method="getTriggersForNonConfiguredInstance" className="hudson.plugins.emailext.ExtendedEmailPublisher"/>  
+							</j:when>
+							<j:otherwise>
+								<j:set var="nonConfigTriggers" value="${instance.nonConfiguredTriggers}" />
+							</j:otherwise>
+						</j:choose>
+						<j:forEach var="trigger" items="${nonConfigTriggers}">
+							<m:mailtype title="${trigger.descriptor.triggerName}" 
+											mailType="${trigger.descriptor.mailerId}"
+						     				mailTypeObj="${trigger.email}" 
+						     				sendToList="${trigger.defaultSendToList}" 
+						     				sendToDevs="${trigger.defaultSendToDevs}" 
+						     				trigger="${trigger}"
+						     				configured="${false}">
+						    </m:mailtype>
+						</j:forEach>
+					</tbody>
+				</table>
+				
+				<!-- This select element is used to hold option elements for the configured mailers. 
+				     We'll do some dom manipulation to make sure that configured triggers' select
+				     option elements are placed here so that they are not shown.-->
+				<select style="display:none;" id="configured-options">
+				</select>
+			</td>
+		</tr>
+	</f:advanced>
+	
+	<script type="text/javascript">
+		hideConfiguredOptions();
+		<j:if test="${!instance.configured}">
+			addTrigger("Failure");
+		</j:if>
+		
+		var advHelpElm = document.getElementById("advancedEmailHelpConf");
+		advHelpElm.style.display="none";
+	</script>
+</j:jelly>
