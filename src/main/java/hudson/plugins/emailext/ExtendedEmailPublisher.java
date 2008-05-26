@@ -257,7 +257,7 @@ public class ExtendedEmailPublisher extends Publisher {
     	return true;
     }
     
-    private <P extends Project<P,B>,B extends Build<P,B>> boolean sendMail(EmailType mailType,B build, BuildListener listener){
+    public <P extends Project<P,B>,B extends Build<P,B>> boolean sendMail(EmailType mailType,B build, BuildListener listener){
     	try{
     		MimeMessage msg = createMail(mailType,build,listener);
     		Address[] allRecipients = msg.getAllRecipients();
