@@ -113,6 +113,10 @@ public class ExtendedEmailPublisher extends Publisher {
     	if(EMAIL_CONTENT_TYPE_MAP.containsKey(contentType.getToken()))
     		EMAIL_CONTENT_TYPE_MAP.remove(contentType);
     }
+    
+    public static EmailContent getEmailContentType(String token) {
+        return EMAIL_CONTENT_TYPE_MAP.get(token);
+    }
 
     public static void addEmailTriggerType(EmailTriggerDescriptor triggerType) throws EmailExtException{
     	if(EMAIL_TRIGGER_TYPE_MAP.containsKey(triggerType.getMailerId()))
@@ -124,6 +128,10 @@ public class ExtendedEmailPublisher extends Publisher {
     public static void removeEmailTriggerType(EmailTriggerDescriptor triggerType){
     	if(EMAIL_TRIGGER_TYPE_MAP.containsKey(triggerType.getMailerId()))
     		EMAIL_TRIGGER_TYPE_MAP.remove(triggerType.getMailerId());
+    }
+    
+    public static EmailTriggerDescriptor getEmailTriggerType(String mailerId) {
+        return EMAIL_TRIGGER_TYPE_MAP.get(mailerId);
     }
     
     public static Collection<EmailTriggerDescriptor> getEmailTriggers(){
@@ -203,6 +211,8 @@ public class ExtendedEmailPublisher extends Publisher {
 	public boolean perform(Build build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 		return _perform(build,launcher,listener);
 	}
+        
+        
 	
     public <P extends Project<P,B>,B extends Build<P,B>> boolean _perform(B build, Launcher launcher, BuildListener listener) throws InterruptedException {
        	boolean emailTriggered = false;
