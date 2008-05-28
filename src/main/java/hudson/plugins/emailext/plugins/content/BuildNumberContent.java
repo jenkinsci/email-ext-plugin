@@ -1,5 +1,7 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.Project;
 import hudson.plugins.emailext.EmailType;
@@ -9,8 +11,8 @@ public class BuildNumberContent implements EmailContent {
 	
 	private static final String TOKEN = "BUILD_NUMBER";
 
-	public <P extends Project<P, B>, B extends Build<P, B>> String getContent(
-			Build<P, B> build,
+	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(
+			AbstractBuild<P, B> build,
 			EmailType emailType) {
 		return String.valueOf(build.getNumber());
 	}

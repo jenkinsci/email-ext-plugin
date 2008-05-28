@@ -1,5 +1,7 @@
 package hudson.plugins.emailext.plugins;
 
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.Project;
 import hudson.plugins.emailext.EmailType;
@@ -16,7 +18,7 @@ public interface EmailContent {
 	/**
 	 * This method returns the generated content that should replace the token.
 	 */
-	public <P extends Project<P,B>, B extends Build<P,B>> String getContent(Build<P, B> build, EmailType emailType);
+	public <P extends AbstractProject<P,B>, B extends AbstractBuild<P,B>> String getContent(AbstractBuild<P, B> build, EmailType emailType);
 
 	/**
 	 * Specifies whether or not the content returned by this object can have nested

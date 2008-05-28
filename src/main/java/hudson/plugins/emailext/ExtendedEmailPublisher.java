@@ -1,6 +1,8 @@
 package hudson.plugins.emailext;
 
 import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
@@ -208,13 +210,14 @@ public class ExtendedEmailPublisher extends Publisher {
 		return isConfigured();
 	}
 
-	public boolean perform(Build build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+        @Override
+	public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
 		return _perform(build,launcher,listener);
 	}
         
         
 	
-    public <P extends Project<P,B>,B extends Build<P,B>> boolean _perform(B build, Launcher launcher, BuildListener listener) throws InterruptedException {
+    public <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>> boolean _perform(B build, Launcher launcher, BuildListener listener) throws InterruptedException {
        	boolean emailTriggered = false;
         
        	Map<String,EmailTrigger> triggered = new HashMap<String, EmailTrigger>();
@@ -257,7 +260,7 @@ public class ExtendedEmailPublisher extends Publisher {
     	return true;
     }
     
-    public <P extends Project<P,B>,B extends Build<P,B>> boolean sendMail(EmailType mailType,B build, BuildListener listener){
+    public <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>> boolean sendMail(EmailType mailType,B build, BuildListener listener){
     	try{
     		MimeMessage msg = createMail(mailType,build,listener);
     		Address[] allRecipients = msg.getAllRecipients();
@@ -280,7 +283,7 @@ public class ExtendedEmailPublisher extends Publisher {
     	return false;
     }
 
-    private <P extends Project<P,B>,B extends Build<P,B>> MimeMessage createMail(EmailType type,B build,BuildListener listener) throws MessagingException {
+    private <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>> MimeMessage createMail(EmailType type,B build,BuildListener listener) throws MessagingException {
         MimeMessage msg = new MimeMessage(ExtendedEmailPublisher.DESCRIPTOR.createSession());
 
         //Set the contents of the email
@@ -327,7 +330,7 @@ public class ExtendedEmailPublisher extends Publisher {
         return msg;
     }
     
-    private <P extends Project<P,B>,B extends Build<P,B>> String transformText(EmailType type,String origText,B build){
+    private <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>> String transformText(EmailType type,String origText,B build){
 
     	String newText = origText.replaceAll(PROJECT_DEFAULT_BODY, Matcher.quoteReplacement(defaultContent))
 		 						 .replaceAll(PROJECT_DEFAULT_SUBJECT, Matcher.quoteReplacement(defaultSubject))
@@ -338,7 +341,7 @@ public class ExtendedEmailPublisher extends Publisher {
     	return newText;
     }
     
-    public <P extends Project<P,B>,B extends Build<P,B>> String replaceTokensWithContent(String origText,EmailType type,Build<P,B> build){
+    public <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>> String replaceTokensWithContent(String origText,EmailType type,AbstractBuild<P,B> build){
     	StringBuffer sb = new StringBuffer();
     	
     	//split the string based on the $ character

@@ -1,5 +1,7 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.Project;
 import hudson.plugins.emailext.EmailType;
@@ -9,14 +11,14 @@ public class ChangesSinceLastSuccessfulBuildContent implements EmailContent {
 	
 	private static final String TOKEN = "CHANGES_SINCE_LAST_SUCCESS";
 
-	public <P extends Project<P, B>, B extends Build<P, B>> String getContent(
-			Build<P, B> build,
+	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(
+			AbstractBuild<P, B> build,
 			EmailType emailType) {
 		
 		//Use this object since it already formats the changes per build
 		ChangesSinceLastBuildContent changes = new ChangesSinceLastBuildContent();
 		
-		Build<P,B> lastSuccessfulBuild = build.getPreviousNotFailedBuild();
+		AbstractBuild<P,B> lastSuccessfulBuild = build.getPreviousNotFailedBuild();
 		
 		StringBuffer sb = new StringBuffer();
 		

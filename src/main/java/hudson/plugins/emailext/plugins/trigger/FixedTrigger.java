@@ -1,5 +1,7 @@
 package hudson.plugins.emailext.plugins.trigger;
 
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.Project;
 import hudson.model.Result;
@@ -12,7 +14,7 @@ public class FixedTrigger extends EmailTrigger {
 	
 
 	@Override
-	public <P extends Project<P, B>, B extends Build<P, B>> boolean trigger(
+	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean trigger(
 			B build) {
 		
 		Result buildResult = build.getResult();
