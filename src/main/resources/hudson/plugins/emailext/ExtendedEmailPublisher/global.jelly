@@ -36,6 +36,11 @@
                help="/help/tasks/mailer/smtp-use-ssl.html">
         <f:checkbox name="ext_mailer_smtp_use_ssl" checked="${descriptor.useSsl}" />
       </f:entry>
+      <f:entry title="SMTP port"
+               help="/help/tasks/mailer/smtp-port.html">
+        <input class="setting-input" name="ext_mailer_smtp_port"
+          type="text" value="${descriptor.smtpPort}"/>
+      </f:entry>
 		<f:entry title="Default Subject"
 				 help="${rootURL}/plugin/email-ext/content-help">
 			<input class="setting-input" name="ext_mailer_default_subject"
