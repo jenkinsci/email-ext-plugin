@@ -3,6 +3,7 @@ package hudson.plugins.emailext;
 import hudson.Plugin;
 import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import hudson.plugins.emailext.plugins.content.BuildLogContent;
 import hudson.plugins.emailext.plugins.content.BuildNumberContent;
 import hudson.plugins.emailext.plugins.content.BuildStatusContent;
 import hudson.plugins.emailext.plugins.content.BuildURLContent;
@@ -46,6 +47,7 @@ public class EmailExtensionPlugin extends Plugin {
     	addEmailContentPlugin(new HudsonURLContent());
     	addEmailContentPlugin(new ProjectNameContent());
     	addEmailContentPlugin(new ProjectURLContent());
+        addEmailContentPlugin(new BuildLogContent());
     	
     	addEmailTriggerPlugin(FailureTrigger.DESCRIPTOR);
     	addEmailTriggerPlugin(StillFailingTrigger.DESCRIPTOR);
