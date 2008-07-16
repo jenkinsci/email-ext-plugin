@@ -8,6 +8,7 @@ import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.Project;
 import hudson.model.User;
+import hudson.model.Hudson;
 import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
@@ -486,8 +487,11 @@ public class ExtendedEmailPublisher extends Publisher {
         }
 
 		public String getHudsonUrl() {
-			return hudsonUrl;
-		}
+                    if(hudsonUrl!=null)
+                        return hudsonUrl;
+                    // if the value is not configured yet, try to get some reasonable default from elsewhere.
+                    return Hudson.getInstance().getRootUrl();
+                }
 
 		public String getSmtpServer() {
 			return smtpHost;
