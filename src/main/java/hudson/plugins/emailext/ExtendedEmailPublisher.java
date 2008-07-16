@@ -487,10 +487,7 @@ public class ExtendedEmailPublisher extends Publisher {
         }
 
 		public String getHudsonUrl() {
-                    if(hudsonUrl!=null)
-                        return hudsonUrl;
-                    // if the value is not configured yet, try to get some reasonable default from elsewhere.
-                    return Hudson.getInstance().getRootUrl();
+			return hudsonUrl;
                 }
 
 		public String getSmtpServer() {
@@ -583,6 +580,8 @@ public class ExtendedEmailPublisher extends Publisher {
             String url = nullify(req.getParameter("ext_mailer_hudson_url"));
             if(url!=null && !url.endsWith("/"))
                 url += '/';
+            if(url==null)
+                url = Hudson.getInstance().getRootUrl();
             hudsonUrl = url;
 
             //specify authentication information
