@@ -376,6 +376,11 @@ public class ExtendedEmailPublisher extends Publisher {
     	return sb.toString();
     }
 
+    @Override
+    public boolean needsToRunAfterFinalized() {
+        return true;
+    }
+    
     public Descriptor<Publisher> getDescriptor() {
 		return DESCRIPTOR;
 	}
