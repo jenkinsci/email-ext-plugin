@@ -4,22 +4,18 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.plugins.EmailContent;
-//import hudson.tasks.Mailer;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
 
 import java.util.List;
-//import java.util.logging.Logger;
 
 /**
- * An EmailContent for failing tets. Shows tests that have failed.
+ * An EmailContent for failing tests. Only shows tests that have failed.
  * 
- * @author dvrzalik
+ * @author markltbaker
  */
 public class FailedTestsContent implements EmailContent {
     
-   // private static final Logger LOGGER = Logger.getLogger(Mailer.class.getName());
-
     public String getToken() {
         return "FAILED_TESTS";
     }
