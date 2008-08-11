@@ -15,7 +15,7 @@ public class BuildURLContent implements EmailContent {
 	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(
 			AbstractBuild<P, B> build,
 			EmailType emailType) {
-		return "$HUDSON_URL/" + Util.encode(build.getUrl());
+		return "$HUDSON_URL$" + Util.encode(build.getUrl());
 	}
 
 	public String getToken() {

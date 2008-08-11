@@ -41,7 +41,7 @@ public class ChangesSinceLastBuildContent implements EmailContent {
 	}
 
 	public String getHelpText() {
-		return "Displays the changes since the last build. (Not implemented yet)";
+		return "Displays the changes since the last build.";
 	}
 
 }
