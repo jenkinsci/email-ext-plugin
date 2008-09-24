@@ -3,17 +3,14 @@ package hudson.plugins.emailext;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
-import hudson.model.Project;
 import hudson.model.User;
 import hudson.model.Hudson;
 import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.scm.ChangeLogSet.Entry;
-import hudson.tasks.Builder;
 import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
 import hudson.util.FormFieldValidator;
@@ -49,23 +46,8 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 /**
- * Sample {@link Builder}.
+ * {@link Publisher} that sends notification e-mail.
  *
- * <p>
- * When the user configures the project and enables this builder,
- * {@link DescriptorImpl#newInstance(StaplerRequest)} is invoked
- * and a new {@link ExtendedEmailPublisher} is created. The created
- * instance is persisted to the project configuration XML by using
- * XStream, so this allows you to use instance fields (like {@link #name})
- * to remember the configuration.
- *
- * <p>
- * When a build is performed, the {@link #perform(Build, Launcher, BuildListener)} method
- * will be invoked. This Publisher seeks to solve some of the issues people are having with
- * Hudson's default email publisher.  Mainly that you cannot send emails on a successful 
- * build.  This plugin should allow you to send any combination of email based on build
- * status and recipients.
- * 
  * @author kyle.sweeney@valtech.com
  *
  */
@@ -278,7 +260,7 @@ public class ExtendedEmailPublisher extends Publisher {
             }
     	}catch(MessagingException e){
     		LOGGER.log(Level.WARNING, "Could not send email.",e);
-    		listener.getLogger().println("Could not send email as a part of the post-build publishers.");
+            e.printStackTrace(listener.error("Could not send email as a part of the post-build publishers."));
     	}
     	
     	return false;
