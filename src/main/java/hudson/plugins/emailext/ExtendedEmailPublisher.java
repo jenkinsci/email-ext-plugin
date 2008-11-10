@@ -474,8 +474,10 @@ public class ExtendedEmailPublisher extends Publisher {
         }
 
 		public String getHudsonUrl() {
+            if(hudsonUrl==null)
+                return Hudson.getInstance().getRootUrl();
 			return hudsonUrl;
-                }
+		}
 
 		public String getSmtpServer() {
 			return smtpHost;
