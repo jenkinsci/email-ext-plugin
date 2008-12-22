@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.mail.Address;
 import javax.mail.Authenticator;
@@ -289,16 +290,25 @@ public class ExtendedEmailPublisher extends Publisher {
         //Get the list of developers who made changes between this build and the last
         //if this mail type is configured that way
         if (type.getSendToDevelopers()) {
-            Set<User> users = new HashSet<User>();
-            for (Entry change : build.getChangeSet()) {
-                User a = change.getAuthor();
-                if (users.add(a)) {
-                    String adrs = a.getProperty(Mailer.UserProperty.class).getAddress();
-                    if (adrs != null)
+            Set<User> users;
+            if (type.getIncludeCulprits()) {
+            	users = build.getCulprits();
+            } else {
+                users = new HashSet<User>();
+                for (Entry change : build.getChangeSet()) {
+                    users.add(change.getAuthor());
+                }
+            }
+            for (User user : users) {
+                String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
+                if (adrs != null)
+                    try {
                         rcp.add(new InternetAddress(adrs));
-                    else {
-                        listener.getLogger().println("Failed to send e-mail to " + a.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
+                    } catch(AddressException ae) {
+                        LOGGER.log(Level.WARNING, "Could not create email address.", ae);
                     }
+                else {
+                    listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
                 }
             }
         }
@@ -325,37 +335,28 @@ public class ExtendedEmailPublisher extends Publisher {
     }
     
     public <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>> String replaceTokensWithContent(String origText,EmailType type,AbstractBuild<P,B> build){
-    	StringBuffer sb = new StringBuffer();
-    	
-    	//split the string based on the $ character
-    	String[] tokens = origText.split("\\$");
-    	for(int i=0;i<tokens.length;i++){
-    		String token = tokens[i];
-    		
-			//split when we find the first character that is not in the alphabet (a-z or A-Z),
-			//not a number (0-9), or not an underscore (_)
-    		String[] tokenParts = token.split("[^a-zA-Z0-9_]");
-    		String tokenPart = tokenParts[0];
-    		String nonTokenPart = token.substring(tokenPart.length());
-    			    		
-    		EmailContent content = EMAIL_CONTENT_TYPE_MAP.get(tokenPart);
-    		if(content!=null){
-    			String contentText = content.getContent(build, type);
-    			if(content.hasNestedContent()){
-    				String replacedNestedText = replaceTokensWithContent(contentText, type, build);
-    				sb.append(replacedNestedText);
-    			}
-    			else
-    				sb.append(contentText);
-    			
-    			sb.append(nonTokenPart);
-    		}
-    		else if (token !=null && token.length() > 0){
-    			sb.append(token);
-    		}
-		}
-       	
-    	return sb.toString();
+        StringBuffer sb = new StringBuffer();
+
+        Pattern tokenPattern = Pattern.compile("\\$[a-zA-Z0-9_]+");
+        Matcher tokenMatcher = tokenPattern.matcher(origText);
+        
+        while (tokenMatcher.find()) {
+            String token = tokenMatcher.group().substring(1);
+            EmailContent content = EMAIL_CONTENT_TYPE_MAP.get(token);
+            String replacement;
+            if (content != null) {
+                replacement = content.getContent(build, type);
+                if (content.hasNestedContent()) {
+                    replacement = replaceTokensWithContent(replacement, type, build);
+                }
+            } else {
+                replacement = tokenMatcher.group();
+            }
+            tokenMatcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+        }
+        tokenMatcher.appendTail(sb);
+        
+        return sb.toString();
     }
 
     @Override
@@ -545,6 +546,7 @@ public class ExtendedEmailPublisher extends Publisher {
 			m.setRecipientList(req.getParameter(prefix + "recipientList"));
 			m.setSendToRecipientList(req.getParameter(prefix + "sendToRecipientList")!=null);
 			m.setSendToDevelopers(req.getParameter(prefix + "sendToDevelopers")!=null);
+			m.setIncludeCulprits(req.getParameter(prefix + "includeCulprits")!=null);
 			return m;
 		}
 		

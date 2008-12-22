@@ -6,6 +6,7 @@
 	<%@attribute name="mailTypeObj" required="true" %>
 	<%@attribute name="sendToList" required="true" %>
 	<%@attribute name="sendToDevs" required="true" %>
+	<%@attribute name="includeCulps" required="true" %>
 	<%@attribute name="configured" required="true" %>
 -->
 
@@ -44,6 +45,11 @@
 						name="mailer.${mailType}.sendToDevelopers"
 						checked="${sendToDevs}" />
 				</td>
+				<td>
+					<f:checkbox
+						name="mailer.${mailType}.includeCulprits"
+						checked="${includeCulps}" />
+				</td>
 			</j:when>
 			<j:otherwise>
 				<td>
@@ -55,6 +61,11 @@
 					<f:checkbox
 						name="mailer.${mailType}.sendToDevelopers"
 						checked="${mailTypeObj.sendToDevelopers}" />
+				</td>
+				<td>
+					<f:checkbox
+						name="mailer.${mailType}.includeCulprits"
+						checked="${mailTypeObj.includeCulprits}" />
 				</td>
 			</j:otherwise>
 		</j:choose>

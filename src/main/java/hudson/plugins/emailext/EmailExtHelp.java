@@ -13,7 +13,7 @@ public class EmailExtHelp {
     	sb.append("<td><div><b>Help</b></div></td>" +
     			"<td>" +
     			"<p><b>Global Recipient List - </b>This is a comma or whitespace " +
-    			"separated list of email addresses that should recieve emails for a" +
+    			"separated list of email addresses that should receive emails for a" +
     			" trigger.</p>\n" +
     			
     			"<p><b>Default Subject - </b>This is the default email subject that " +
@@ -42,6 +42,10 @@ public class EmailExtHelp {
     			"<p><b>Send To Committers - </b>If this is checked, an email will" +
     			" be sent all users who are listed under \"changes\" for the build.  This" +
 				" will use the default email suffix from Hudson's configuration page.</p>\n" +
+    			
+    			"<p><b>Include Culprits - </b>If this is checked and Send To Committers " +
+    			"is checked, emails will include everyone who committed since " +
+    			"the last successful build.</p>\n" +
 				
     			"<p><b>More Configuration - </b>You can change more settings for each " +
     			"email trigger by clicking on the \"+(expand)\" link.</p>\n" +
@@ -62,7 +66,7 @@ public class EmailExtHelp {
     			"<td><div><b>More Configuration Help</b></div></td>" +
     			"<td>" +
     			"<p><b>Recipient List - </b>This is a comma or whitespace " +
-    			"separated list of email addresses that should recieve emails for the" +
+    			"separated list of email addresses that should receive emails for the" +
     			" selected trigger.</p>\n" +
     			
     			"<p><b>Subject - </b>This is email subject that " +

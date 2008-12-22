@@ -30,7 +30,7 @@
 	
 	<!-- This is the global recipent list entry. -->
 	<f:entry title="Global Recipient List"
-     		description="Comma-separated list of email address that should recieve notifications.">
+     		description="Comma-separated list of email address that should receive notifications.">
 	    <input class="setting-input validated" name="recipientlist_recipients"
             type="text" value="${instance.recipientList}"
             checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encode(this.value)"/>
@@ -84,6 +84,9 @@
    							<div style="font-weight:bold">Send To Committers</div>
    						</td>
    						<td>
+   							<div style="font-weight:bold">Include Culprits</div>
+   						</td>
+   						<td>
    							<div style="font-weight:bold">More Configuration</div>
    						</td>
    						<td>
@@ -98,6 +101,7 @@
 					     				mailTypeObj="${trigger.email}" 
 					     				sendToList="${trigger.defaultSendToList}" 
 					     				sendToDevs="${trigger.defaultSendToDevs}" 
+					     				includeCulps="${trigger.defaultIncludeCulps}"
 					     				trigger="${trigger}"
 					     				configured="${true}">
 					    </m:mailtype>
@@ -146,6 +150,7 @@
 						     				mailTypeObj="${trigger.email}" 
 						     				sendToList="${trigger.defaultSendToList}" 
 						     				sendToDevs="${trigger.defaultSendToDevs}" 
+						     				includeCulps="${trigger.defaultIncludeCulps}"
 						     				trigger="${trigger}"
 						     				configured="${false}">
 						    </m:mailtype>

@@ -29,6 +29,11 @@ public class EmailType {
 	private boolean sendToDevelopers;
 	
 	/**
+	 * Specifies whether or not we should send this email to all developers since the last success
+	 */
+	private boolean includeCulprits;
+	
+	/**
 	 * A comma-separated list of names of the recipientLists that we should send emails to 
 	 */
 	private boolean sendToRecipientList;
@@ -38,6 +43,7 @@ public class EmailType {
 		body = "";
 		recipientList = "";
 		sendToDevelopers = false;
+		includeCulprits = false;
 		sendToRecipientList = false;
 	}
 
@@ -60,6 +66,14 @@ public class EmailType {
 
 	public void setSendToDevelopers(boolean sendToDevelopers) {
 		this.sendToDevelopers = sendToDevelopers;
+	}
+
+	public boolean getIncludeCulprits() {
+		return includeCulprits;
+	}
+
+	public void setIncludeCulprits(boolean includeCulprits) {
+		this.includeCulprits = includeCulprits;
 	}
 
 	public boolean getSendToRecipientList() {

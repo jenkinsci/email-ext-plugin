@@ -1,6 +1,6 @@
 <div>
   <p>
-    This lets you customize who recieves emails for each build status. 
+    This lets you customize who receives emails for each build status. 
   </p>
   <p>
   	Selecting the checkboxes will cause Hudson to send emails to the checked
@@ -14,6 +14,10 @@
 	<li>
 		<i>Send To Committers</i> - an email will be sent to
     	all users who checked in changes since the last build.
+	</li>
+	<li>
+		<i>Include Culprits</i> - make Send To Committers include
+    	all users who checked in changes since the last successful build.
 	</li>
 	<li>
 		<i>More Configuration</i> - The contents of the email for each build status 
