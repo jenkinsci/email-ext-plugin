@@ -337,7 +337,7 @@ public class ExtendedEmailPublisher extends Publisher {
     public <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>> String replaceTokensWithContent(String origText,EmailType type,AbstractBuild<P,B> build){
         StringBuffer sb = new StringBuffer();
 
-        Pattern tokenPattern = Pattern.compile("\\$[a-zA-Z0-9_]+");
+        Pattern tokenPattern = Pattern.compile("\\$[a-zA-Z0-9_]*");
         Matcher tokenMatcher = tokenPattern.matcher(origText);
         
         while (tokenMatcher.find()) {
@@ -350,7 +350,7 @@ public class ExtendedEmailPublisher extends Publisher {
                     replacement = replaceTokensWithContent(replacement, type, build);
                 }
             } else {
-                replacement = tokenMatcher.group();
+                replacement = token;
             }
             tokenMatcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
         }
