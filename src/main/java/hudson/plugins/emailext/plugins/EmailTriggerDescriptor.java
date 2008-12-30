@@ -16,10 +16,10 @@ public abstract class EmailTriggerDescriptor {
 	
 	/**
 	 * Get a name that can be used to determine which properties in the jelly script
-	 * applyt to this trigger.
-	 * @return
+	 * apply to this trigger.
+	 * @return the jelly name of the trigger type
 	 */
-	public String getMailerId(){
+	public String getMailerId() {
 		return getTriggerName().replaceAll(MAILER_ID_REGEX, "-");
 	}
 	
@@ -32,7 +32,7 @@ public abstract class EmailTriggerDescriptor {
 	 * @param triggerName is the name of a trigger that should be deactivated if it is specified.
 	 * @see #getTriggerName()
 	 */
-	public void addTriggerNameToReplace(String triggerName){
+	public void addTriggerNameToReplace(String triggerName) {
 		replacesList.add(triggerName);
 	}
 
@@ -42,7 +42,7 @@ public abstract class EmailTriggerDescriptor {
 	
 	protected abstract EmailTrigger newInstance();
 	
-	public EmailTrigger getNewInstance(EmailType type){
+	public EmailTrigger getNewInstance(EmailType type) {
 		EmailTrigger trigger = newInstance();
 		trigger.setEmail(type);
 		return trigger;
