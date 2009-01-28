@@ -2,8 +2,6 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
-import hudson.model.Project;
 import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
@@ -12,22 +10,21 @@ public class FixedTrigger extends EmailTrigger {
 
 	public static final String TRIGGER_NAME = "Fixed";
 	
-
 	@Override
-	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean trigger(
-			B build) {
+	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
+	boolean trigger(B build) {
 		
 		Result buildResult = build.getResult();
 		
-		if(buildResult == Result.SUCCESS){
+		if (buildResult == Result.SUCCESS) {
 			B prevBuild = build.getPreviousBuild();
-        	if(prevBuild!=null && (prevBuild.getResult() == Result.UNSTABLE || prevBuild.getResult() == Result.FAILURE))
-        		return true;
+			if (prevBuild != null && (prevBuild.getResult() == Result.UNSTABLE || prevBuild.getResult() == Result.FAILURE)) {
+				return true;
+			}
 		}
 
 		return false;
 	}
-
 	
 	@Override
 	public EmailTriggerDescriptor getDescriptor() {
@@ -36,9 +33,9 @@ public class FixedTrigger extends EmailTrigger {
 	
 	public static DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 	
-	public static final class DescriptorImpl extends EmailTriggerDescriptor{
+	public static final class DescriptorImpl extends EmailTriggerDescriptor {
 		
-		public DescriptorImpl(){
+		public DescriptorImpl() {
 			addTriggerNameToReplace(SuccessTrigger.TRIGGER_NAME);
 		}
 		
@@ -54,8 +51,8 @@ public class FixedTrigger extends EmailTrigger {
 
 		@Override
 		public String getHelpText() {
-			return "An email will be sent when the build status changes from Failure " +
-				   "or Unstable to Successful.";
+			return "An email will be sent when the build status changes from \"Failure\" " +
+				   "or \"Unstable\" to \"Successful\".";
 		}
 		
 	}

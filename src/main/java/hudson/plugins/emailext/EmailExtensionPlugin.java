@@ -32,48 +32,48 @@ import hudson.tasks.BuildStep;
  * @plugin
  */
 public class EmailExtensionPlugin extends Plugin {
-    public void start() throws Exception {
-        // plugins normally extend Hudson by providing custom implementations
-        // of 'extension points'. In this case, we are adding the EmailExtension plugin 
-    	// to the list of publishers.
-   	
-    	BuildStep.PUBLISHERS.add(ExtendedEmailPublisher.DESCRIPTOR);
-    	
-    	//We are also adding different Content plugins to the list of content types.
-    	addEmailContentPlugin(new BuildNumberContent());
-    	addEmailContentPlugin(new BuildStatusContent());
-    	addEmailContentPlugin(new BuildURLContent());
-    	addEmailContentPlugin(new ChangesSinceLastBuildContent());
-    	addEmailContentPlugin(new ChangesSinceLastSuccessfulBuildContent());
-    	addEmailContentPlugin(new HudsonURLContent());
-    	addEmailContentPlugin(new ProjectNameContent());
-    	addEmailContentPlugin(new ProjectURLContent());
-        addEmailContentPlugin(new BuildLogContent());
-        addEmailContentPlugin(new FailedTestsContent());
-    	
-    	addEmailTriggerPlugin(FailureTrigger.DESCRIPTOR);
-    	addEmailTriggerPlugin(StillFailingTrigger.DESCRIPTOR);
-    	addEmailTriggerPlugin(UnstableTrigger.DESCRIPTOR);
-    	addEmailTriggerPlugin(StillUnstableTrigger.DESCRIPTOR);
-    	addEmailTriggerPlugin(SuccessTrigger.DESCRIPTOR);
-    	addEmailTriggerPlugin(FixedTrigger.DESCRIPTOR);
-    }
-    
-    private void addEmailContentPlugin(EmailContent content){
-    	try{
-    		ExtendedEmailPublisher.addEmailContentType(content);
-    	}
-    	catch (EmailExtException e){
-    		System.out.println("Content type " + content + " was already added.");
-    	}
-    }
-    
-    private void addEmailTriggerPlugin(EmailTriggerDescriptor trigger){
-    	try{
-    		ExtendedEmailPublisher.addEmailTriggerType(trigger);
-    	}
-    	catch (EmailExtException e){
-    		System.out.println("Trigger type " + trigger.getTriggerName() + " was already added.");
-    	}
-    }
+	
+	public void start() throws Exception {
+		// plugins normally extend Hudson by providing custom implementations
+		// of 'extension points'. In this case, we are adding the EmailExtension plugin 
+		// to the list of publishers.
+		
+		BuildStep.PUBLISHERS.add(ExtendedEmailPublisher.DESCRIPTOR);
+		
+		//We are also adding different Content plugins to the list of content types.
+		addEmailContentPlugin(new BuildLogContent());
+		addEmailContentPlugin(new BuildNumberContent());
+		addEmailContentPlugin(new BuildStatusContent());
+		addEmailContentPlugin(new BuildURLContent());
+		addEmailContentPlugin(new ChangesSinceLastBuildContent());
+		addEmailContentPlugin(new ChangesSinceLastSuccessfulBuildContent());
+		addEmailContentPlugin(new FailedTestsContent());
+		addEmailContentPlugin(new HudsonURLContent());
+		addEmailContentPlugin(new ProjectNameContent());
+		addEmailContentPlugin(new ProjectURLContent());
+		
+		addEmailTriggerPlugin(FailureTrigger.DESCRIPTOR);
+		addEmailTriggerPlugin(StillFailingTrigger.DESCRIPTOR);
+		addEmailTriggerPlugin(UnstableTrigger.DESCRIPTOR);
+		addEmailTriggerPlugin(StillUnstableTrigger.DESCRIPTOR);
+		addEmailTriggerPlugin(SuccessTrigger.DESCRIPTOR);
+		addEmailTriggerPlugin(FixedTrigger.DESCRIPTOR);
+	}
+	
+	private void addEmailContentPlugin(EmailContent content) {
+		try {
+			ExtendedEmailPublisher.addEmailContentType(content);
+		} catch (EmailExtException e) {
+			System.out.println("Content type " + content + " was already added.");
+		}
+	}
+	
+	private void addEmailTriggerPlugin(EmailTriggerDescriptor trigger) {
+		try {
+			ExtendedEmailPublisher.addEmailTriggerType(trigger);
+		} catch (EmailExtException e) {
+			System.out.println("Trigger type " + trigger.getTriggerName() + " was already added.");
+		}
+	}
+	
 }

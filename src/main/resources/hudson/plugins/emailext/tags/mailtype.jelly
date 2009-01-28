@@ -91,31 +91,36 @@
 	</tr>
 	<tr id="${mailType}help" style="display:none;">
 		<td></td>
-		<td colspan="5">
+		<td colspan="6">
 			<div class="mailHelp" id="${mailType}.helpDiv">${trigger.descriptor.helpText}</div>
 		</td>
 	</tr>
 	<tr id="${mailType}elm">
 		<td></td>
 		<td></td>
-		<td colspan="4">
+		<td colspan="5">
 			<table width="100%">
 				<f:entry
-					title="Recipient List">
+					title="Recipient List"
+					help="${rootURL}/plugin/email-ext/help/projectConfig/mailType/recipientList.html">
 					<input class="setting-input"
 						name="mailer.${mailType}.recipientList" type="text"
 						value="${mailTypeObj.recipientList}" />
 				</f:entry>
 				<f:entry
-					title="Subject">
+					title="Subject"
+					help="${rootURL}/plugin/email-ext/help/projectConfig/mailType/subject.html">
 					<input class="setting-input"
 						name="mailer.${mailType}.subject" type="text"
 						value="${mailTypeObj.subject}" />
 				</f:entry>
 				<f:entry
-					title="Content">
-					<textarea class="setting-input"
-						name="mailer.${mailType}.body">${mailTypeObj.body}</textarea>
+					title="Content"
+					help="${rootURL}/plugin/email-ext/help/projectConfig/mailType/body.html">
+					<f:textarea
+						class="setting-input"
+						name="mailer.${mailType}.body"
+						value="${mailTypeObj.body}"/>
 				</f:entry>
 			</table>
 		</td>

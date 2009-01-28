@@ -2,8 +2,6 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
-import hudson.model.Project;
 import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
@@ -12,16 +10,18 @@ public class FailureTrigger extends EmailTrigger {
 	
 	public static final String TRIGGER_NAME = "Failure";
 	
-	public FailureTrigger(){
+	public FailureTrigger() {
 		
 	}
 
 	@Override
-	public <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>> boolean trigger(B build) {
+	public <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>>
+	boolean trigger(B build) {
 		Result buildResult = build.getResult();
 		
-		if(buildResult == Result.FAILURE)
+		if (buildResult == Result.FAILURE) {
 			return true;
+		}
 		
 		return false;
 	}
@@ -33,7 +33,7 @@ public class FailureTrigger extends EmailTrigger {
 	
 	public static DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 	
-	public static final class DescriptorImpl extends EmailTriggerDescriptor{
+	public static final class DescriptorImpl extends EmailTriggerDescriptor {
 
 		@Override
 		public String getTriggerName() {
@@ -48,8 +48,8 @@ public class FailureTrigger extends EmailTrigger {
 		@Override
 		public String getHelpText() {
 			return "An email will be sent any time the build fails.  If the \"Still Failing\" "+
-			       "trigger is configured, then a failure email will not be sent if multiple builds" +
-			       "fail without a successful build.";
+				   "trigger is configured, and the previous build status was \"Failure\", " +
+				   "then the \"Still Failing\" trigger will send an email instead.";
 		}
 		
 	}

@@ -140,9 +140,9 @@ function toggleMailHelp(mailerId)
 		mailHelpRow.style.display="none";
 }
 
-function toggleAdvancedMailHelp()
+function toggleContentTokenHelp()
 {
-	var mailHelp = document.getElementById("advancedEmailHelpConf");
+	var mailHelp = document.getElementById("contentTokenHelpConf");
 	if(mailHelp.style.display=="none")
 		mailHelp.style.display="";
 	else

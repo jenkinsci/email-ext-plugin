@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class EmailTriggerDescriptor {
+	
 	private static final String MAILER_ID_REGEX = "\\s";
 	protected List<String> replacesList = new ArrayList<String>();
 	
@@ -49,4 +50,5 @@ public abstract class EmailTriggerDescriptor {
 	}
 	
 	public abstract String getHelpText();
+	
 }

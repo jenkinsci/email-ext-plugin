@@ -1,9 +1,10 @@
 package hudson.plugins.emailext.plugins;
 
+import java.util.List;
+import java.util.Map;
+
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
-import hudson.model.Project;
 import hudson.plugins.emailext.EmailType;
 
 public interface EmailContent {
@@ -16,9 +17,23 @@ public interface EmailContent {
 	public String getToken();
 	
 	/**
-	 * This method returns the generated content that should replace the token.
+	 * These are the arguments accepted when generating the content for this token.
 	 */
-	public <P extends AbstractProject<P,B>, B extends AbstractBuild<P,B>> String getContent(AbstractBuild<P, B> build, EmailType emailType);
+	public List<String> getArguments();
+	
+	/**
+	 * This is a string that will be rendered in the help section of the plugin.
+	 * It describes what the content does and what it puts in the email.
+	 */
+	public String getHelpText();
+	
+	/**
+	 * This method returns the generated content that should replace the token.
+	 * @param args the arguments for generating the content
+	 */
+	public <P extends AbstractProject<P,B>, B extends AbstractBuild<P,B>>
+	String getContent(AbstractBuild<P, B> build, EmailType emailType,
+			Map<String, ?> args);
 
 	/**
 	 * Specifies whether or not the content returned by this object can have nested
@@ -26,9 +41,46 @@ public interface EmailContent {
 	 */
 	public boolean hasNestedContent();
 	
-	/**
-	 * This is a string that will be rendered in the help section of the plugin.
-	 * It describes what the content does and what it puts in the email.
-	 */
-	public String getHelpText();
+	public abstract class Args {
+		
+		private Args() {}
+		
+		public static String get(Map<String, ?> args, String name, String defaultValue)  {
+			Object arg = args.get(name);
+			if (arg instanceof String) {
+				return (String)arg;
+			} else {
+				return defaultValue;
+			}
+		}
+		
+		public static int get(Map<String, ?> args, String name, int defaultValue)  {
+			Object arg = args.get(name);
+			if (arg instanceof Integer) {
+				return ((Integer)arg).intValue();
+			} else {
+				return defaultValue;
+			}
+		}
+		
+		public static float get(Map<String, ?> args, String name, float defaultValue)  {
+			Object arg = args.get(name);
+			if (arg instanceof Float) {
+				return ((Float)arg).floatValue();
+			} else {
+				return defaultValue;
+			}
+		}
+		
+		public static boolean get(Map<String, ?> args, String name, boolean defaultValue)  {
+			Object arg = args.get(name);
+			if (arg instanceof Boolean) {
+				return ((Boolean)arg).booleanValue();
+			} else {
+				return defaultValue;
+			}
+		}
+		
+	}
+
 }

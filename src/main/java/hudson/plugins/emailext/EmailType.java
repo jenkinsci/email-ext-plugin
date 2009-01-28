@@ -1,6 +1,5 @@
 package hudson.plugins.emailext;
 
-
 /**
  * This class defines what the contents of an email will be if it gets sent.
  * 
@@ -24,17 +23,20 @@ public class EmailType {
 	private String body;
 	
 	/**
-	 * Specifies whether or not we should send this email to the developer/s who made changes
+	 * Specifies whether or not we should send this email to the developer/s
+	 * who made changes.
 	 */
 	private boolean sendToDevelopers;
 	
 	/**
-	 * Specifies whether or not we should send this email to all developers since the last success
+	 * Specifies whether or not we should send this email to all developers
+	 * since the last success.
 	 */
 	private boolean includeCulprits;
 	
 	/**
-	 * A comma-separated list of names of the recipientLists that we should send emails to 
+	 * A comma-separated list of names of the recipientLists
+	 * that we should send emails to.
 	 */
 	private boolean sendToRecipientList;
 	
@@ -50,12 +52,15 @@ public class EmailType {
 	public String getBody() {
 		return body;
 	}
+	
 	public void setBody(String body) {
 		this.body = body;
 	}
+	
 	public String getSubject() {
 		return subject;
 	}
+	
 	public void setSubject(String subject) {
 		this.subject = subject;
 	}
@@ -84,11 +89,11 @@ public class EmailType {
 		this.sendToRecipientList = sendToRecipientList;
 	}
 
-	public boolean getHasRecipients(){
-		if(!sendToRecipientList && !sendToDevelopers && (recipientList==null || recipientList.trim().length()==0))
-			return false;
-		
-		return true;
+	public boolean getHasRecipients() {
+		return
+			sendToRecipientList ||
+			sendToDevelopers ||
+			(recipientList != null && recipientList.trim().length() != 0);
 	}
 
 	public String getRecipientList() {

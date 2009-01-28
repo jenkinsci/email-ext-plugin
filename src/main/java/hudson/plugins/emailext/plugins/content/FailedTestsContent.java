@@ -7,7 +7,9 @@ import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An EmailContent for failing tests. Only shows tests that have failed.
@@ -15,26 +17,37 @@ import java.util.List;
  * @author markltbaker
  */
 public class FailedTestsContent implements EmailContent {
-    
-    public String getToken() {
-        return "FAILED_TESTS";
-    }
-
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, EmailType emailType) {
-        
-        StringBuffer buffer = new StringBuffer();
-        AbstractTestResultAction<?> testResult = build.getTestResultAction();
+	
+	private static final String TOKEN = "FAILED_TESTS";
+	
+	public String getToken() {
+		return TOKEN;
+	}
+	
+	public List<String> getArguments() {
+		return Collections.emptyList();
+	}
+	
+	public String getHelpText() {
+		return "Displays failing unit test information, if any tests have failed.";
+	}
+	
+	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
+	String getContent(AbstractBuild<P, B> build, EmailType emailType,
+			Map<String, ?> args) {
 		
-        if (null == testResult) {
-        	return "No tests ran.";
-        }
-        
+		StringBuffer buffer = new StringBuffer();
+		AbstractTestResultAction<?> testResult = build.getTestResultAction();
+		
+		if (null == testResult) {
+			return "No tests ran.";
+		}
+		
 		int failCount = testResult.getFailCount();
 		
 		if (failCount == 0){
 			buffer.append("All tests passed");
-		}
-		else {
+		} else {
 			buffer.append(failCount);
 			buffer.append(" tests failed.");
 			buffer.append('\n');
@@ -44,10 +57,10 @@ public class FailedTestsContent implements EmailContent {
 				outputTest(buffer, failedTest);
 			}
 		}
-        
-        return buffer.toString();
-    }
-
+		
+		return buffer.toString();
+	}
+	
 	private void outputTest(StringBuffer buffer, CaseResult failedTest) {
 		buffer.append(failedTest.getStatus().toString());
 		buffer.append(":  ");
@@ -59,12 +72,9 @@ public class FailedTestsContent implements EmailContent {
 		buffer.append(failedTest.getErrorStackTrace());
 		buffer.append("\n\n");
 	}
-
-    public boolean hasNestedContent() {
-        return false;
-    }
-
-    public String getHelpText() {
-        return "Displays failing unit test information, if any tests have failed.";
-    }
+	
+	public boolean hasNestedContent() {
+		return false;
+	}
+	
 }
