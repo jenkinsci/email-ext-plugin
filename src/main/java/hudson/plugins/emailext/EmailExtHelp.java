@@ -2,17 +2,32 @@ package hudson.plugins.emailext;
 
 import hudson.plugins.emailext.plugins.EmailContent;
 
+/**
+ * Produces all the dynamically generated help text.
+ */
 public class EmailExtHelp {
 
+	/**
+	 * Generates the help text for the content tokens available
+	 * while configuring a project.
+	 * 
+	 * @return the help text
+	 */
 	public static String getContentTokenHelpText() {
 		return getTokenHelpText(true);
 	}
 	
+	/**
+	 * Generates the help text for the content tokens available
+	 * while doing global configuration.
+	 * 
+	 * @return the help text
+	 */
 	public static String getGlobalContentTokenHelpText() {
 		return getTokenHelpText(false);
 	}
 	
-	public static String getTokenHelpText(boolean displayDefaultTokens) {
+	private static String getTokenHelpText(boolean displayDefaultTokens) {
 		StringBuffer sb = new StringBuffer();
 		
 		// This is the help for the content tokens

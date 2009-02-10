@@ -64,7 +64,7 @@ public class EmailExtensionPlugin extends Plugin {
 		try {
 			ExtendedEmailPublisher.addEmailContentType(content);
 		} catch (EmailExtException e) {
-			System.out.println("Content type " + content + " was already added.");
+			System.err.println(e.getMessage());
 		}
 	}
 	
@@ -72,7 +72,7 @@ public class EmailExtensionPlugin extends Plugin {
 		try {
 			ExtendedEmailPublisher.addEmailTriggerType(trigger);
 		} catch (EmailExtException e) {
-			System.out.println("Trigger type " + trigger.getTriggerName() + " was already added.");
+			System.err.println(e.getMessage());
 		}
 	}
 	

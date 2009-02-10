@@ -25,6 +25,23 @@
             checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encode(this.value)"/>
     </f:entry>
     
+	<!-- This is the content type for the emails. -->
+    <f:entry title="Content Type"
+             help="${rootURL}/plugin/email-ext/help/projectConfig/contentType.html">
+      <select class="setting-input"
+              name="project_content_type">
+        <f:option value="default"
+                  selected="${'default'==instance.contentType}"
+          >Default Content Type</f:option>
+        <f:option value="text/plain"
+                  selected="${'text/plain'==instance.contentType}"
+          >Plain Text (text/plain)</f:option>
+        <f:option value="text/html"
+                  selected="${'text/html'==instance.contentType}"
+          >HTML (text/html)</f:option>
+      </select>
+    </f:entry>
+
 	<!-- This is the default subject line for the project. -->
     <f:entry title="Default Subject"
              help="${rootURL}/plugin/email-ext/help/projectConfig/defaultSubject.html">

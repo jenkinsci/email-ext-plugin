@@ -11,7 +11,7 @@ public class EmailType {
 	 * A recipient list for only this email type.
 	 */
 	private String recipientList;
-
+	
 	/**
 	 * The subject of the email
 	 */
@@ -48,14 +48,6 @@ public class EmailType {
 		includeCulprits = false;
 		sendToRecipientList = false;
 	}
-
-	public String getBody() {
-		return body;
-	}
-	
-	public void setBody(String body) {
-		this.body = body;
-	}
 	
 	public String getSubject() {
 		return subject;
@@ -64,43 +56,52 @@ public class EmailType {
 	public void setSubject(String subject) {
 		this.subject = subject;
 	}
-
+	
+	public String getBody() {
+		return body;
+	}
+	
+	public void setBody(String body) {
+		this.body = body;
+	}
+	
 	public boolean getSendToDevelopers() {
 		return sendToDevelopers;
 	}
-
+	
 	public void setSendToDevelopers(boolean sendToDevelopers) {
 		this.sendToDevelopers = sendToDevelopers;
 	}
-
+	
 	public boolean getIncludeCulprits() {
 		return includeCulprits;
 	}
-
+	
 	public void setIncludeCulprits(boolean includeCulprits) {
 		this.includeCulprits = includeCulprits;
 	}
-
+	
 	public boolean getSendToRecipientList() {
 		return sendToRecipientList;
 	}
-
+	
 	public void setSendToRecipientList(boolean sendToRecipientList) {
 		this.sendToRecipientList = sendToRecipientList;
 	}
-
+	
 	public boolean getHasRecipients() {
 		return
 			sendToRecipientList ||
 			sendToDevelopers ||
 			(recipientList != null && recipientList.trim().length() != 0);
 	}
-
+	
 	public String getRecipientList() {
 		return recipientList;
 	}
-
+	
 	public void setRecipientList(String recipientList) {
 		this.recipientList = recipientList;
 	}
+	
 }

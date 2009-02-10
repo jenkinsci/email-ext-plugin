@@ -77,8 +77,8 @@ public class ExtendedEmailPublisher extends Publisher {
 	
 	public static void addEmailContentType(EmailContent contentType) throws EmailExtException {
 		if(EMAIL_CONTENT_TYPE_MAP.containsKey(contentType.getToken()))
-			throw new EmailExtException("An email content type with token= "
-					+contentType.getToken() + " has already been added.");
+			throw new EmailExtException("An email content type with token name " +
+					contentType.getToken() + " was already added.");
 		
 		EMAIL_CONTENT_TYPE_MAP.put(contentType.getToken(), contentType);
 	}
@@ -94,8 +94,8 @@ public class ExtendedEmailPublisher extends Publisher {
 
 	public static void addEmailTriggerType(EmailTriggerDescriptor triggerType) throws EmailExtException {
 		if(EMAIL_TRIGGER_TYPE_MAP.containsKey(triggerType.getMailerId()))
-			throw new EmailExtException("An email trigger type with name= "
-					+triggerType.getTriggerName() + " has already been added.");
+			throw new EmailExtException("An email trigger type with name " +
+					triggerType.getTriggerName() + " was already added.");
 		EMAIL_TRIGGER_TYPE_MAP.put(triggerType.getMailerId(), triggerType);
 	}
 	
@@ -136,6 +136,8 @@ public class ExtendedEmailPublisher extends Publisher {
 
 	/** This is the list of email triggers that the project has configured */
 	private List<EmailTrigger> configuredTriggers = new ArrayList<EmailTrigger>();
+
+	public String contentType;
 
 	public String defaultSubject;
 
@@ -231,9 +233,10 @@ public class ExtendedEmailPublisher extends Publisher {
 		return true;
 	}
 	
-	public <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>> boolean sendMail(EmailType mailType,B build, BuildListener listener) {
+	public <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>>
+	boolean sendMail(EmailType mailType, B build, BuildListener listener) {
 		try {
-			MimeMessage msg = createMail(mailType,build,listener);
+			MimeMessage msg = createMail(mailType, build, listener);
 			Address[] allRecipients = msg.getAllRecipients();
 			if (allRecipients != null) {
 				StringBuffer buf = new StringBuffer("Sending e-mails to:");
@@ -246,7 +249,7 @@ public class ExtendedEmailPublisher extends Publisher {
 				listener.getLogger().println("An attempt to send an e-mail"
 					+ " to empty list of recipients, ignored.");
 			}
-		}catch(MessagingException e) {
+		} catch(MessagingException e) {
 			LOGGER.log(Level.WARNING, "Could not send email.",e);
 			e.printStackTrace(listener.error("Could not send email as a part of the post-build publishers."));
 		}
@@ -254,28 +257,38 @@ public class ExtendedEmailPublisher extends Publisher {
 		return false;
 	}
 
-	private <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>> MimeMessage createMail(EmailType type,B build,BuildListener listener) throws MessagingException {
+	private <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>>
+	MimeMessage createMail(EmailType type, B build, BuildListener listener) throws MessagingException {
 		MimeMessage msg = new MimeMessage(ExtendedEmailPublisher.DESCRIPTOR.createSession());
 
 		//Set the contents of the email
-		msg.setContent("", "text/plain");
 		msg.setFrom(new InternetAddress(ExtendedEmailPublisher.DESCRIPTOR.getAdminAddress()));
 		msg.setSentDate(new Date());
 		String subject = transformText(type,type.getSubject(),build);
 		msg.setSubject(subject);
 		String text = transformText(type,type.getBody(),build);
-		msg.setText(text);
-
-		//Get the recipients from the global list of addresses
-		List<InternetAddress> rcp = new ArrayList<InternetAddress>();
-		if (type.getSendToRecipientList()) {
-			String[] recipients = recipientList.split(COMMA_SEPARATED_SPLIT_REGEXP);
-			for(int i=0;i<recipients.length;i++) {
-				rcp.add(new InternetAddress(recipients[i]));
+		msg.setContent(text, contentType);
+		String messageContentType = contentType;
+		// contentType is null if the project was not reconfigured after upgrading.
+		if (messageContentType == null || "default".equals(messageContentType)) {
+			messageContentType = DESCRIPTOR.getDefaultContentType();
+			// The defaultContentType is null if the main Hudson configuration
+			// was not reconfigured after upgrading.
+			if (messageContentType == null) {
+				messageContentType = "text/plain";
 			}
 		}
-		//Get the list of developers who made changes between this build and the last
-		//if this mail type is configured that way
+		msg.setContent(text, messageContentType);
+
+		// Get the recipients from the global list of addresses
+		List<InternetAddress> recipientAddresses = new ArrayList<InternetAddress>();
+		if (type.getSendToRecipientList()) {
+			for (String recipient : recipientList.split(COMMA_SEPARATED_SPLIT_REGEXP)) {
+				addAddress(recipientAddresses, recipient, listener);
+			}
+		}
+		// Get the list of developers who made changes between this build and the last
+		// if this mail type is configured that way
 		if (type.getSendToDevelopers()) {
 			Set<User> users;
 			if (type.getIncludeCulprits()) {
@@ -289,25 +302,31 @@ public class ExtendedEmailPublisher extends Publisher {
 			for (User user : users) {
 				String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
 				if (adrs != null)
-					try {
-						rcp.add(new InternetAddress(adrs));
-					} catch(AddressException ae) {
-						LOGGER.log(Level.WARNING, "Could not create email address.", ae);
-					}
+					addAddress(recipientAddresses, adrs, listener);
 				else {
 					listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
 				}
 			}
 		}
 		//Get the list of recipients that are uniquely specified for this type of email 
-		if(type.getRecipientList() != null && type.getRecipientList().trim().length()>0) {
+		if (type.getRecipientList() != null && type.getRecipientList().trim().length() > 0) {
 			String[] typeRecipients = type.getRecipientList().split(COMMA_SEPARATED_SPLIT_REGEXP);
-			for(int i=0;i<typeRecipients.length;i++)
-				rcp.add(new InternetAddress(typeRecipients[i]));
+			for (int i = 0; i < typeRecipients.length; i++) {
+				recipientAddresses.add(new InternetAddress(typeRecipients[i]));
+			}
 		}
 		
-		msg.setRecipients(Message.RecipientType.TO, rcp.toArray(new InternetAddress[rcp.size()]));
+		msg.setRecipients(Message.RecipientType.TO, recipientAddresses.toArray(new InternetAddress[recipientAddresses.size()]));
 		return msg;
+	}
+
+	private static void addAddress(List<InternetAddress> addresses, String address, BuildListener listener) {
+		try {
+			addresses.add(new InternetAddress(address));
+		} catch(AddressException ae) {
+			LOGGER.log(Level.WARNING, "Could not create email address.", ae);
+			listener.getLogger().println("Failed to create e-mail address for " + address);
+		}
 	}
 	
 	private <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>> String transformText(EmailType type,String origText,B build) {
@@ -495,6 +514,11 @@ public class ExtendedEmailPublisher extends Publisher {
 		private String smtpPort;
 		
 		/**
+		 * This is a global default content type (mime type) for emails.
+		 */
+		private String defaultContentType;
+		
+		/**
 		 * This is a global default subject line for sending emails.
 		 */
 		private String defaultSubject;
@@ -510,8 +534,9 @@ public class ExtendedEmailPublisher extends Publisher {
 		
 		public String getAdminAddress() {
 			String v = adminAddress;
-			if(v==null)
+			if (v == null) {
 				v = "address not configured yet <nobody>";
+			}
 			return v;
 		}
 
@@ -559,8 +584,9 @@ public class ExtendedEmailPublisher extends Publisher {
 		}
 
 		public String getHudsonUrl() {
-			if(hudsonUrl==null)
+			if (hudsonUrl == null) {
 				return Hudson.getInstance().getRootUrl();
+			}
 			return hudsonUrl;
 		}
 
@@ -584,12 +610,16 @@ public class ExtendedEmailPublisher extends Publisher {
 			return smtpPort;
 		}
 		
-		public String getDefaultBody() {
-			return defaultBody;
+		public String getDefaultContentType() {
+			return defaultContentType;
 		}
-
+		
 		public String getDefaultSubject() {
 			return defaultSubject;
+		}
+		
+		public String getDefaultBody() {
+			return defaultBody;
 		}
 
 		@Override
@@ -600,13 +630,14 @@ public class ExtendedEmailPublisher extends Publisher {
 			// Save configuration for each trigger type
 			ExtendedEmailPublisher m = new ExtendedEmailPublisher();
 			m.recipientList = listRecipients;
+			m.contentType = req.getParameter("project_content_type");
 			m.defaultSubject = req.getParameter("project_default_subject");
 			m.defaultContent = req.getParameter("project_default_content");
 			m.configuredTriggers = new ArrayList<EmailTrigger>();
 			
 			// Create a new email trigger for each one that is configured
 			for (String mailerId : EMAIL_TRIGGER_TYPE_MAP.keySet()) {
-				EmailType type = createMailType(req,mailerId);
+				EmailType type = createMailType(req, mailerId);
 				if (type != null) {
 					EmailTrigger trigger = EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(type);
 					m.configuredTriggers.add(trigger);
@@ -618,9 +649,9 @@ public class ExtendedEmailPublisher extends Publisher {
 		}
 		
 		private EmailType createMailType(StaplerRequest req, String mailType) {
-			if(req.getParameter("mailer." + mailType+ ".configured") ==null)
+			if(req.getParameter("mailer." + mailType + ".configured") == null)
 				return null;
-			if(!req.getParameter("mailer." +mailType+ ".configured").equalsIgnoreCase("true"))
+			if(!req.getParameter("mailer." + mailType + ".configured").equalsIgnoreCase("true"))
 				return null;
 			
 			EmailType m = new EmailType();
@@ -654,14 +685,16 @@ public class ExtendedEmailPublisher extends Publisher {
 			
 			// Specify the url to this hudson instance
 			String url = nullify(req.getParameter("ext_mailer_hudson_url"));
-			if(url!=null && !url.endsWith("/"))
+			if (url != null && !url.endsWith("/")) {
 				url += '/';
-			if(url==null)
+			}
+			if (url == null) {
 				url = Hudson.getInstance().getRootUrl();
+			}
 			hudsonUrl = url;
 
 			// specify authentication information
-			if(req.getParameter("extmailer.useSMTPAuth")!=null) {
+			if (req.getParameter("extmailer.useSMTPAuth") != null) {
 				smtpAuthUsername = nullify(req.getParameter("extmailer.SMTPAuth.userName"));
 				smtpAuthPassword = nullify(req.getParameter("extmailer.SMTPAuth.password"));
 			} else {
@@ -669,11 +702,13 @@ public class ExtendedEmailPublisher extends Publisher {
 			}
 			
 			// specify if the mail server uses ssl for authentication
-			useSsl = req.getParameter("ext_mailer_smtp_use_ssl")!=null;
+			useSsl = req.getParameter("ext_mailer_smtp_use_ssl") != null;
 			
 			// specify custom smtp port
 			smtpPort = nullify(req.getParameter("ext_mailer_smtp_port"));
 			
+			defaultContentType = nullify(req.getParameter("ext_mailer_default_content_type"));
+
 			// Allow global defaults to be set for the subject and body of the email
 			defaultSubject = nullify(req.getParameter("ext_mailer_default_subject"));
 			defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
