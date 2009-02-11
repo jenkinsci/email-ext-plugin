@@ -118,7 +118,7 @@ public class ExtendedEmailPublisherTest extends MockObjectTestCase {
 		ExtendedEmailPublisher.Tokenizer tokenizer;
 		tokenizer = new ExtendedEmailPublisher.Tokenizer(
 				"${BUILD_URL, S=false}\n" +
-				"${null,null=null, f= false}");
+				"${null,null=true, f= false}");
 		assertTrue(tokenizer.find());
 		assertEquals("BUILD_URL", tokenizer.getTokenName());
 		assertEquals(1, tokenizer.getArgs().size());
@@ -126,7 +126,7 @@ public class ExtendedEmailPublisherTest extends MockObjectTestCase {
 		assertTrue(tokenizer.find());
 		assertEquals("null", tokenizer.getTokenName());
 		assertEquals(2, tokenizer.getArgs().size());
-		assertEquals(null, tokenizer.getArgs().get("null"));
+		assertEquals(true, tokenizer.getArgs().get("null"));
 		assertEquals(false, tokenizer.getArgs().get("f"));
 		assertFalse(tokenizer.find());
 	}
