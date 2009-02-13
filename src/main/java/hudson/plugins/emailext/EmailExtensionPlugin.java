@@ -9,6 +9,7 @@ import hudson.plugins.emailext.plugins.content.BuildStatusContent;
 import hudson.plugins.emailext.plugins.content.BuildURLContent;
 import hudson.plugins.emailext.plugins.content.ChangesSinceLastBuildContent;
 import hudson.plugins.emailext.plugins.content.ChangesSinceLastSuccessfulBuildContent;
+import hudson.plugins.emailext.plugins.content.EnvContent;
 import hudson.plugins.emailext.plugins.content.FailedTestsContent;
 import hudson.plugins.emailext.plugins.content.HudsonURLContent;
 import hudson.plugins.emailext.plugins.content.ProjectNameContent;
@@ -47,6 +48,7 @@ public class EmailExtensionPlugin extends Plugin {
 		addEmailContentPlugin(new BuildURLContent());
 		addEmailContentPlugin(new ChangesSinceLastBuildContent());
 		addEmailContentPlugin(new ChangesSinceLastSuccessfulBuildContent());
+		addEmailContentPlugin(new EnvContent());
 		addEmailContentPlugin(new FailedTestsContent());
 		addEmailContentPlugin(new HudsonURLContent());
 		addEmailContentPlugin(new ProjectNameContent());
