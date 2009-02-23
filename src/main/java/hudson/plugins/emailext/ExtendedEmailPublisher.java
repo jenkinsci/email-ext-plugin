@@ -137,10 +137,19 @@ public class ExtendedEmailPublisher extends Publisher {
 	/** This is the list of email triggers that the project has configured */
 	private List<EmailTrigger> configuredTriggers = new ArrayList<EmailTrigger>();
 
+	/**
+	 * The contentType of the emails for this project.
+	 */
 	public String contentType;
 
+	/**
+	 * The default subject of the emails for this project.  ($PROJECT_DEFAULT_SUBJECT)
+	 */
 	public String defaultSubject;
 
+	/**
+	 * The default body of the emails for this project.  ($PROJECT_DEFAULT_BODY)
+	 */
 	public String defaultContent;
 	
 	/**
@@ -180,6 +189,10 @@ public class ExtendedEmailPublisher extends Publisher {
 	public boolean isConfigured() {
 		return !getConfiguredTriggers().isEmpty();
 	}
+	
+	/**
+	 * Return true if the project has been configured, otherwise returns false
+	 */
 	public boolean getConfigured() {
 		return isConfigured();
 	}
@@ -473,6 +486,9 @@ public class ExtendedEmailPublisher extends Publisher {
 	
 	public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
+	/*
+	 * These settings are the settings that are global.
+	 */
 	public static final class DescriptorImpl extends Descriptor<Publisher> {
 		/**
 		 * The default e-mail address suffix appended to the user name found from changelog,
@@ -522,6 +538,7 @@ public class ExtendedEmailPublisher extends Publisher {
 		 * This is a global default subject line for sending emails.
 		 */
 		private String defaultSubject;
+		
 		/**
 		 * This is a global default body for sending emails.
 		 */
