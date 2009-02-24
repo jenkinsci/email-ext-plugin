@@ -4,6 +4,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.plugins.emailext.EmailType;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.Util;
 import hudson.plugins.emailext.Util.PrintfSpec;
 import hudson.plugins.emailext.plugins.EmailContent;
@@ -56,8 +57,8 @@ public class ChangesSinceLastSuccessfulBuildContent implements EmailContent {
 	}
 
 	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
-	String getContent(AbstractBuild<P, B> build, EmailType emailType,
-			Map<String, ?> args) {
+	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
+			EmailType emailType, Map<String, ?> args) {
 		if (build.getPreviousBuild() == null) {
 			return "";
 		}
@@ -99,14 +100,14 @@ public class ChangesSinceLastSuccessfulBuildContent implements EmailContent {
 					currentBuild = currentBuild.getNextBuild();
 				}
 			}
-			appendBuild(sb, formatString, emailType, currentBuild, childArgs);
+			appendBuild(sb, formatString, publisher, emailType, currentBuild, childArgs);
 		}
 		
 		return sb.toString();
 	}
 
 	private <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
-	void appendBuild(StringBuffer buf, String formatString,	final EmailType emailType,
+	void appendBuild(StringBuffer buf, String formatString, final ExtendedEmailPublisher publisher, final EmailType emailType,
 			final AbstractBuild<P, B> currentBuild, final Map<String, Object> childArgs) {
 		// Use this object since it already formats the changes per build
 		final ChangesSinceLastBuildContent changes = new ChangesSinceLastBuildContent();
@@ -116,7 +117,7 @@ public class ChangesSinceLastSuccessfulBuildContent implements EmailContent {
 			public boolean printSpec(StringBuffer buf, char formatChar) {
 				switch (formatChar) {
 				case 'c':
-					buf.append(changes.getContent(currentBuild, emailType, childArgs));
+					buf.append(changes.getContent(currentBuild, publisher, emailType, childArgs));
 					return true;
 				case 'n':
 					buf.append(currentBuild.getNumber());

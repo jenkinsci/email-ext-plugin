@@ -3,6 +3,7 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.plugins.emailext.EmailType;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
@@ -33,8 +34,8 @@ public class FailedTestsContent implements EmailContent {
 	}
 	
 	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
-	String getContent(AbstractBuild<P, B> build, EmailType emailType,
-			Map<String, ?> args) {
+	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
+			EmailType emailType, Map<String, ?> args) {
 		
 		StringBuffer buffer = new StringBuffer();
 		AbstractTestResultAction<?> testResult = build.getTestResultAction();

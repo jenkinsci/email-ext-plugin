@@ -4,6 +4,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.plugins.emailext.EmailType;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailContent;
 
 import java.util.Collections;
@@ -27,8 +28,8 @@ public class BuildStatusContent implements EmailContent {
 	}
 	
 	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
-	String getContent(AbstractBuild<P, B> build, EmailType emailType,
-			Map<String, ?> args) {
+	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
+			EmailType emailType, Map<String, ?> args) {
 		Result buildResult = build.getResult();
 
 		if (buildResult == Result.FAILURE) {

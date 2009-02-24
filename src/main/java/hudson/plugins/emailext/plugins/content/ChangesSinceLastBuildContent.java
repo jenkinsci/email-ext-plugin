@@ -3,6 +3,7 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.plugins.emailext.EmailType;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.Util;
 import hudson.plugins.emailext.Util.PrintfSpec;
 import hudson.plugins.emailext.plugins.EmailContent;
@@ -60,8 +61,8 @@ public class ChangesSinceLastBuildContent implements EmailContent {
 	}
 	
 	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
-	String getContent(AbstractBuild<P, B> build, EmailType emailType,
-			Map<String, ?> args) {
+	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
+			EmailType emailType, Map<String, ?> args) {
 		boolean showPaths = Args.get(args, SHOW_PATHS_ARG_NAME, SHOW_PATHS_DEFAULT_VALUE);
 		String formatStringDefault = showPaths ? FORMAT_DEFAULT_VALUE_WITH_PATHS : FORMAT_DEFAULT_VALUE;
 		String formatString = Args.get(args, FORMAT_ARG_NAME, formatStringDefault);

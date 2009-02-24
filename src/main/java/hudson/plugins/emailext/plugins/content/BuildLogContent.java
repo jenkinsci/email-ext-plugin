@@ -3,6 +3,7 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.plugins.emailext.EmailType;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.tasks.Mailer;
 import java.io.IOException;
@@ -46,8 +47,8 @@ public class BuildLogContent implements EmailContent {
 	}
 
 	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
-	String getContent(AbstractBuild<P, B> build, EmailType emailType,
-			Map<String, ?> args) {
+	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
+			EmailType emailType, Map<String, ?> args) {
 		
 		StringBuffer buffer = new StringBuffer();
 		// getLog() chokes and dies if called with a number <= 0.

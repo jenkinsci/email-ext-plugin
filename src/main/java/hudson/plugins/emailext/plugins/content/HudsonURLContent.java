@@ -28,8 +28,8 @@ public class HudsonURLContent implements EmailContent {
 	}
 	
 	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
-	String getContent(AbstractBuild<P, B> build, EmailType emailType,
-			Map<String, ?> args) {
+	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
+			EmailType emailType, Map<String, ?> args) {
 		String hudsonUrl = ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl();
 		if(!hudsonUrl.endsWith("/"))
 			hudsonUrl += "/";

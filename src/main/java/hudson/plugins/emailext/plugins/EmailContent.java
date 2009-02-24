@@ -6,6 +6,7 @@ import java.util.Map;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.plugins.emailext.EmailType;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 
 public interface EmailContent {
 	
@@ -29,11 +30,12 @@ public interface EmailContent {
 	
 	/**
 	 * This method returns the generated content that should replace the token.
+	 * @param publisher TODO
 	 * @param args the arguments for generating the content
 	 */
 	public <P extends AbstractProject<P,B>, B extends AbstractBuild<P,B>>
-	String getContent(AbstractBuild<P, B> build, EmailType emailType,
-			Map<String, ?> args);
+	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
+			EmailType emailType, Map<String, ?> args);
 
 	/**
 	 * Specifies whether or not the content returned by this object can have nested

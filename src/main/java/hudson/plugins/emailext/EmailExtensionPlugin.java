@@ -1,6 +1,7 @@
 package hudson.plugins.emailext;
 
 import hudson.Plugin;
+import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.content.BuildLogContent;
@@ -64,7 +65,7 @@ public class EmailExtensionPlugin extends Plugin {
 	
 	private void addEmailContentPlugin(EmailContent content) {
 		try {
-			ExtendedEmailPublisher.addEmailContentType(content);
+			ContentBuilder.addEmailContentType(content);
 		} catch (EmailExtException e) {
 			System.err.println(e.getMessage());
 		}

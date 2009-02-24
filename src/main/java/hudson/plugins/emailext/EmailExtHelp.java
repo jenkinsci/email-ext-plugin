@@ -1,5 +1,6 @@
 package hudson.plugins.emailext;
 
+import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.EmailContent;
 
 /**
@@ -54,7 +55,7 @@ public class EmailExtHelp {
 				"Default Subject or Content fields.  Doing this has an undefined result. </li>\n");
 		}
 		
-		for (EmailContent content : ExtendedEmailPublisher.getEmailContentTypes()) {
+		for (EmailContent content : ContentBuilder.getEmailContentTypes()) {
 			sb.append("<li><b>${");
 			sb.append(content.getToken());
 			for (String arg : content.getArguments()) {
