@@ -11,7 +11,7 @@
   <packaging>hpi</packaging>
   <version>2.3-SNAPSHOT</version>
   <name>Hudson Email Extension Plugin</name>
-  <url>http://hudson.gotdns.com/wiki/display/HUDSON/Email-ext+plugin</url>
+  <url>http://wiki.hudson-ci.org/display/HUDSON/Email-ext+plugin</url>
   
   <dependencies>
   	<dependency>
