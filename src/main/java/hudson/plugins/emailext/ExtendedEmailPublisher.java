@@ -240,10 +240,21 @@ public class ExtendedEmailPublisher extends Publisher {
 
 	private <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>>
 	MimeMessage createMail(EmailType type, B build, BuildListener listener) throws MessagingException {
-		MimeMessage msg = new MimeMessage(ExtendedEmailPublisher.DESCRIPTOR.createSession());
+		boolean overrideGlobalSettings = ExtendedEmailPublisher.DESCRIPTOR.getOverrideGlobalSettings();
+
+		MimeMessage msg;
+		
+		// If not overriding global settings, use the Mailer class to create a session and set the from address
+		// Else we'll do it ourselves
+		if (!overrideGlobalSettings) {
+			msg = new MimeMessage(Mailer.descriptor().createSession());
+			msg.setFrom(new InternetAddress(Mailer.descriptor().getAdminAddress()));
+		} else {
+			msg = new MimeMessage(ExtendedEmailPublisher.DESCRIPTOR.createSession());
+			msg.setFrom(new InternetAddress(ExtendedEmailPublisher.DESCRIPTOR.getAdminAddress()));
+		}
 
 		//Set the contents of the email
-		msg.setFrom(new InternetAddress(ExtendedEmailPublisher.DESCRIPTOR.getAdminAddress()));
 		msg.setSentDate(new Date());
 		String subject = new ContentBuilder().transformText(type.getSubject(), this, type, build);
 		msg.setSubject(subject);
@@ -379,6 +390,8 @@ public class ExtendedEmailPublisher extends Publisher {
 		 */
 		private String defaultBody;
 
+		private boolean overrideGlobalSettings;
+		
 		@Override
 		public String getDisplayName() {
 			return "Editable Email Notification";
@@ -398,6 +411,17 @@ public class ExtendedEmailPublisher extends Publisher {
 		
 		/** JavaMail session. */
 		public Session createSession() {
+			/*
+			 * 				Mailer.DescriptorImpl desc = Mailer.descriptor();
+				smtpHost = nullify(desc.getSmtpServer());
+				adminAddress = desc.getAdminAddress();
+				defaultSuffix = nullify(desc.getDefaultSuffix());
+				hudsonUrl = desc.getUrl();
+				smtpAuthUsername = desc.getSmtpAuthUserName();
+				smtpAuthPassword = desc.getSmtpAuthPassword();
+				useSsl = desc.getUseSsl();
+				smtpPort = desc.getSmtpPort();
+			 */
 			Properties props = new Properties(System.getProperties());
 			if(smtpHost!=null)
 				props.put("mail.smtp.host",smtpHost);
@@ -472,6 +496,10 @@ public class ExtendedEmailPublisher extends Publisher {
 		
 		public String getDefaultBody() {
 			return defaultBody;
+		}
+		
+		public boolean getOverrideGlobalSettings() {
+			return overrideGlobalSettings;
 		}
 
 		@Override
@@ -564,6 +592,8 @@ public class ExtendedEmailPublisher extends Publisher {
 			// Allow global defaults to be set for the subject and body of the email
 			defaultSubject = nullify(req.getParameter("ext_mailer_default_subject"));
 			defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
+			
+			overrideGlobalSettings = req.getParameter("ext_mailer_use_global_settings") != null;
 			
 			save();
 			return super.configure(req);
