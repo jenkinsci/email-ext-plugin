@@ -9,7 +9,7 @@
             margin-bottom: 1em;
         }
     </style>
-    <f:optionalBlock name="ext_mailer_override_global_settings" checked="${descriptor.overrideGlobalSettings}" title="Override Global Settings" help="/help/tasks/mailer/override-global-settings.html">
+    <f:optionalBlock name="ext_mailer_override_global_settings" checked="${descriptor.overrideGlobalSettings}" title="Override Global Settings" help="${rootURL}/plugin/email-ext/help/globalConfig/override-global-settings.html">
 	    <f:entry title="SMTP server"
 	             help="/help/tasks/mailer/smtp-server.html">
 	      <input class="setting-input" name="ext_mailer_smtp_server"
