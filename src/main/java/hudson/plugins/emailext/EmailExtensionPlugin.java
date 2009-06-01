@@ -15,6 +15,7 @@ import hudson.plugins.emailext.plugins.content.FailedTestsContent;
 import hudson.plugins.emailext.plugins.content.HudsonURLContent;
 import hudson.plugins.emailext.plugins.content.ProjectNameContent;
 import hudson.plugins.emailext.plugins.content.ProjectURLContent;
+import hudson.plugins.emailext.plugins.content.SVNRevisionContent;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
@@ -54,6 +55,7 @@ public class EmailExtensionPlugin extends Plugin {
 		addEmailContentPlugin(new HudsonURLContent());
 		addEmailContentPlugin(new ProjectNameContent());
 		addEmailContentPlugin(new ProjectURLContent());
+		addEmailContentPlugin(new SVNRevisionContent());
 		
 		addEmailTriggerPlugin(FailureTrigger.DESCRIPTOR);
 		addEmailTriggerPlugin(StillFailingTrigger.DESCRIPTOR);
