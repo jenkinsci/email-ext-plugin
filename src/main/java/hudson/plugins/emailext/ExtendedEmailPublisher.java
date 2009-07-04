@@ -91,8 +91,8 @@ public class ExtendedEmailPublisher extends Publisher {
 	
 	public static List<EmailTrigger> getTriggersForNonConfiguredInstance() {
 		List<EmailTrigger> retList = new ArrayList<EmailTrigger>();
-		for(String triggerName : EMAIL_TRIGGER_TYPE_MAP.keySet()) {
-			retList.add(EMAIL_TRIGGER_TYPE_MAP.get(triggerName).getNewInstance(null));
+		for(String mailerId : EMAIL_TRIGGER_TYPE_MAP.keySet()) {
+			retList.add(EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(null));
 		}
 		return retList;
 	}
@@ -136,16 +136,16 @@ public class ExtendedEmailPublisher extends Publisher {
 		List<EmailTrigger> confTriggers = getConfiguredTriggers();
 		
 		List<EmailTrigger> retList = new ArrayList<EmailTrigger>();
-		for(String triggerName : EMAIL_TRIGGER_TYPE_MAP.keySet()) {
+		for(String mailerId : EMAIL_TRIGGER_TYPE_MAP.keySet()) {
 			boolean contains = false;
 			for(EmailTrigger trigger : confTriggers) {
-				if(trigger.getDescriptor().getTriggerName().equals(triggerName)) {
+				if(trigger.getDescriptor().getMailerId().equals(mailerId)) {
 					contains = true;
 					break;
 				}
 			}
 			if(!contains) {
-				retList.add(EMAIL_TRIGGER_TYPE_MAP.get(triggerName).getNewInstance(null));
+				retList.add(EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(null));
 			}
 		}
 		return retList;

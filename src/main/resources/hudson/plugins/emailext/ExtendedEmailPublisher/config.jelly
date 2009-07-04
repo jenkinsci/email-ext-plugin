@@ -228,7 +228,7 @@
 			addTrigger("Failure");
 		</j:if>
 		
-		var advHelpElm = document.getElementById("advancedEmailHelpConf");
-		advHelpElm.style.display="none";
+		//var advHelpElm = document.getElementById("advancedEmailHelpConf");
+		//advHelpElm.style.display="none";
 	</script>
 </j:jelly>
