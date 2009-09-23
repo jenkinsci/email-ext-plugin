@@ -1,19 +1,22 @@
 package hudson.plugins.emailext;
 
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.scm.ChangeLogSet.Entry;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Mailer;
+import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
-import hudson.util.FormFieldValidator;
+import hudson.util.FormValidation;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,9 +43,9 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.ServletException;
 
+import net.sf.json.JSONObject;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
 
 /**
  * {@link Publisher} that sends notification e-mail.
@@ -50,7 +53,7 @@ import org.kohsuke.stapler.StaplerResponse;
  * @author kyle.sweeney@valtech.com
  *
  */
-public class ExtendedEmailPublisher extends Publisher {
+public class ExtendedEmailPublisher extends Notifier {
 	
 	private static final Logger LOGGER = Logger.getLogger(Mailer.class.getName());
 
@@ -325,17 +328,23 @@ public class ExtendedEmailPublisher extends Publisher {
 	public boolean needsToRunAfterFinalized() {
 		return true;
 	}
-	
-	public Descriptor<Publisher> getDescriptor() {
+
+	public BuildStepMonitor getRequiredMonitorService() {
+		return BuildStepMonitor.BUILD;
+	}
+
+	@Override
+	public BuildStepDescriptor<Publisher> getDescriptor() {
 		return DESCRIPTOR;
 	}
 	
+	@Extension
 	public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
 	/*
 	 * These settings are the settings that are global.
 	 */
-	public static final class DescriptorImpl extends Descriptor<Publisher> {
+	public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 		/**
 		 * The default e-mail address suffix appended to the user name found from changelog,
 		 * to send e-mails. Null if not configured.
@@ -453,6 +462,7 @@ public class ExtendedEmailPublisher extends Publisher {
 			final String un = getSmtpAuthUsername();
 			if (un == null) return null;
 			return new Authenticator() {
+				@Override
 				protected PasswordAuthentication getPasswordAuthentication() {
 					return new PasswordAuthentication(getSmtpAuthUsername(), getSmtpAuthPassword());
 				}
@@ -502,8 +512,12 @@ public class ExtendedEmailPublisher extends Publisher {
 			return overrideGlobalSettings;
 		}
 
+		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+			return true;
+                }
+
 		@Override
-		public Publisher newInstance(StaplerRequest req) throws hudson.model.Descriptor.FormException {
+		public Publisher newInstance(StaplerRequest req, JSONObject formData) throws hudson.model.Descriptor.FormException {
 			// Save the recipient lists
 			String listRecipients = req.getParameter("recipientlist_recipients");
 			
@@ -555,7 +569,7 @@ public class ExtendedEmailPublisher extends Publisher {
 		}
 
 		@Override
-		public boolean configure(StaplerRequest req) throws FormException {
+		public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
 			// Most of this stuff is the same as the built-in email publisher
 
 			// Configure the smtp server
@@ -596,7 +610,7 @@ public class ExtendedEmailPublisher extends Publisher {
 			overrideGlobalSettings = req.getParameter("ext_mailer_use_global_settings") != null;
 			
 			save();
-			return super.configure(req);
+			return super.configure(req, formData);
 		}
 		
 		private String nullify(String v) {
@@ -610,42 +624,32 @@ public class ExtendedEmailPublisher extends Publisher {
 			return "/plugin/email-ext/help/main.html";
 		}
 		
-		public void doAddressCheck(StaplerRequest req, StaplerResponse rsp,
-				@QueryParameter("value") final String value) throws IOException, ServletException {
-			new FormFieldValidator(req,rsp,false) {
-				protected void check() throws IOException, ServletException {
-					try {
-						new InternetAddress(value);
-						ok();
-					} catch (AddressException e) {
-						error(e.getMessage());
-					}
-				}
-			}.process();
+		public FormValidation doAddressCheck(
+				@QueryParameter final String value) throws IOException, ServletException {
+			try {
+				new InternetAddress(value);
+				return FormValidation.ok();
+			} catch (AddressException e) {
+				return FormValidation.error(e.getMessage());
+			}
 		}
 		
-		public void doRecipientListRecipientsCheck(StaplerRequest req, StaplerResponse rsp,
-				@QueryParameter("value") final String value) throws IOException, ServletException {
-			new FormFieldValidator(req,rsp,false) {
-				protected void check() throws IOException, ServletException {
-					if(value != null && value.trim().length() > 0) {
-						String[] names = value.split(COMMA_SEPARATED_SPLIT_REGEXP);
-						try {
-							for(int i=0;i<names.length;i++) {
-								if(names[i].trim().length()>0) {
-									new InternetAddress(names[i]);
-								}
-							}
-							ok();
-						}
-						catch(AddressException e) {
-							error(e.getMessage());
+		public FormValidation doRecipientListRecipientsCheck(
+				@QueryParameter final String value) throws IOException, ServletException {
+			if(value != null && value.trim().length() > 0) {
+				String[] names = value.split(COMMA_SEPARATED_SPLIT_REGEXP);
+				try {
+					for(int i=0;i<names.length;i++) {
+						if(names[i].trim().length()>0) {
+							new InternetAddress(names[i]);
 						}
 					}
-					else
-						ok();
 				}
-			}.process();
+				catch(AddressException e) {
+					return FormValidation.error(e.getMessage());
+				}
+			}
+			return FormValidation.ok();
 		}
 		
 	}

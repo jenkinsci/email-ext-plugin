@@ -7,6 +7,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
+import java.io.IOException;
 
 public interface EmailContent {
 	
@@ -35,7 +36,7 @@ public interface EmailContent {
 	 */
 	public <P extends AbstractProject<P,B>, B extends AbstractBuild<P,B>>
 	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
-			EmailType emailType, Map<String, ?> args);
+			EmailType emailType, Map<String, ?> args) throws IOException, InterruptedException;
 
 	/**
 	 * Specifies whether or not the content returned by this object can have nested

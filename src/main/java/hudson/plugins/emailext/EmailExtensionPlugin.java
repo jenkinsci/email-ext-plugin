@@ -22,7 +22,6 @@ import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillUnstableTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.plugins.emailext.plugins.trigger.UnstableTrigger;
-import hudson.tasks.BuildStep;
 
 /**
  * Entry point of a plugin.
@@ -36,14 +35,9 @@ import hudson.tasks.BuildStep;
  */
 public class EmailExtensionPlugin extends Plugin {
 	
-	public void start() throws Exception {
-		// plugins normally extend Hudson by providing custom implementations
-		// of 'extension points'. In this case, we are adding the EmailExtension plugin 
-		// to the list of publishers.
-		
-		BuildStep.PUBLISHERS.add(ExtendedEmailPublisher.DESCRIPTOR);
-		
-		//We are also adding different Content plugins to the list of content types.
+	@Override
+	public void start() throws Exception {		
+		//We are adding different Content plugins to the list of content types.
 		addEmailContentPlugin(new BuildLogContent());
 		addEmailContentPlugin(new BuildNumberContent());
 		addEmailContentPlugin(new BuildStatusContent());

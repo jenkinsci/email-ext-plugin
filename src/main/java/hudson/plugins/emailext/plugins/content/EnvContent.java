@@ -2,10 +2,12 @@ package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.TaskListener;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailContent;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -43,10 +45,10 @@ public class EnvContent implements EmailContent {
 
 	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
 	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
-			EmailType emailType, Map<String, ?> args) {
+			EmailType emailType, Map<String, ?> args) throws IOException, InterruptedException {
 		String var = Args.get(args, VAR_ARG_NAME, VAR_DEFAULT_VALUE);
 
-		Map<String, String> env = build.getEnvVars();
+		Map<String, String> env = build.getEnvironment(TaskListener.NULL);
 		if (var.length() == 0) {
 			return env.toString();
 		} else {
