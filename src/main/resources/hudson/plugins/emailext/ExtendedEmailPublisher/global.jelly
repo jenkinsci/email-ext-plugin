@@ -11,22 +11,22 @@
     </style>
     <f:optionalBlock name="ext_mailer_override_global_settings" checked="${descriptor.overrideGlobalSettings}" title="Override Global Settings" help="${rootURL}/plugin/email-ext/help/globalConfig/override-global-settings.html">
 	    <f:entry title="SMTP server"
-	             help="/help/tasks/mailer/smtp-server.html">
+	             help="/descriptor/hudson.tasks.Mailer/help/smtpServer">
 	      <input class="setting-input" name="ext_mailer_smtp_server"
 	        type="text" value="${descriptor.smtpServer}"/>
 	    </f:entry>
 	    <f:entry title="Default user E-mail suffix"
-	             help="/help/tasks/mailer/default-suffix.html">
+	             help="/descriptor/hudson.tasks.Mailer/help/defaultSuffix">
 	      <input class="setting-input" name="ext_mailer_default_suffix"
 	        type="text" value="${descriptor.defaultSuffix}"/>
 	    </f:entry>
 	    <f:entry title="System Admin E-mail Address"
-	             help="/help/tasks/mailer/admin-address.html">
+	             help="/descriptor/hudson.tasks.Mailer/help/adminAddress">
 	      <f:textbox name="ext_mailer_admin_address" value="${descriptor.adminAddress}"
 	          checkUrl="'${rootURL}/publisher/Mailer/addressCheck?value='+encode(this.value)"/>
 	    </f:entry>
 	    <f:entry title="Hudson URL"
-	             help="/help/tasks/mailer/url.html">
+	             help="/descriptor/hudson.tasks.Mailer/help/url">
 	      <input class="setting-input" name="ext_mailer_hudson_url"
 	        type="text" value="${h.ifThenElse(descriptor.hudsonUrl!=null,descriptor.hudsonUrl,h.inferHudsonURL(request))}"/>
 	    </f:entry>
@@ -43,11 +43,11 @@
 	        </f:entry>
 	      </f:optionalBlock>
 	      <f:entry title="Use SSL"
-	               help="/help/tasks/mailer/smtp-use-ssl.html">
+	               help="/descriptor/hudson.tasks.Mailer/help/useSsl">
 	        <f:checkbox name="ext_mailer_smtp_use_ssl" checked="${descriptor.useSsl}" />
 	      </f:entry>
 	      <f:entry title="SMTP port"
-	               help="/help/tasks/mailer/smtp-port.html">
+	               help="/descriptor/hudson.tasks.Mailer/help/smtpPort">
 	        <input class="setting-input" name="ext_mailer_smtp_port"
 	          type="text" value="${descriptor.smtpPort}"/>
 	      </f:entry>
