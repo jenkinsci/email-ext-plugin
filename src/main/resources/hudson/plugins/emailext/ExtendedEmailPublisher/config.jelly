@@ -19,7 +19,7 @@
 	<!-- This is the global recipent list entry. -->
 	<f:entry title="Global Recipient List"
      		 description="Comma-separated list of email address that should receive notifications."
-             help="${rootURL}/plugin/email-ext/help/projectConfig/globalRecipientList.html">
+             help="/plugin/email-ext/help/projectConfig/globalRecipientList.html">
 	    <input class="setting-input validated" name="recipientlist_recipients"
             type="text" value="${instance.recipientList}"
             checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encode(this.value)"/>
@@ -27,7 +27,7 @@
     
 	<!-- This is the content type for the emails. -->
     <f:entry title="Content Type"
-             help="${rootURL}/plugin/email-ext/help/projectConfig/contentType.html">
+             help="/plugin/email-ext/help/projectConfig/contentType.html">
       <select class="setting-input"
               name="project_content_type">
         <f:option value="default"
@@ -44,7 +44,7 @@
 
 	<!-- This is the default subject line for the project. -->
     <f:entry title="Default Subject"
-             help="${rootURL}/plugin/email-ext/help/projectConfig/defaultSubject.html">
+             help="/plugin/email-ext/help/projectConfig/defaultSubject.html">
      	<j:choose>
      		<j:when test="${instance.configured}">
 	    		<input class="setting-input" name="project_default_subject"
@@ -59,7 +59,7 @@
 
 	<!-- This is the default content for the project. -->
     <f:entry title="Default Content"
-             help="${rootURL}/plugin/email-ext/help/projectConfig/defaultBody.html">
+             help="/plugin/email-ext/help/projectConfig/defaultBody.html">
      	<j:choose>
      		<j:when test="${instance.configured}">
 			    <f:textarea
@@ -82,7 +82,7 @@
 		<td colspan="2">Content Token Reference</td>
 		<td >
 			<j:invokeStatic var="contentTokenText" method="getContentTokenHelpText" className="hudson.plugins.emailext.EmailExtHelp"/>
-			<a href="#contentTokenHelpAnchor" name="contentTokenAnchor" onclick="toggleContentTokenHelp()"><img src="${rootURL}/images/16x16/help.gif" alt="Help for feature: Content Token Reference" /></a>
+			<a href="#contentTokenHelpAnchor" name="contentTokenAnchor" onclick="toggleContentTokenHelp();return false"><img src="${rootURL}/images/16x16/help.gif" alt="Help for feature: Content Token Reference" /></a>
 		</td>
 	</tr>
 	<tr >

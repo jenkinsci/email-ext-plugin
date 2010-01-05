@@ -27,7 +27,7 @@
 				value="${configured}" />
 			<div>
 				${title}
-				<a href="#${mailType}hideAnchor" onclick="toggleMailHelp('${mailType}')">
+				<a href="#${mailType}hideAnchor" onclick="toggleMailHelp('${mailType}');return false">
 					<img src="${rootURL}/images/16x16/help.gif"
 						alt="Help for feature: Email Config" />
 				</a>
@@ -72,14 +72,14 @@
 		<td>
 			<a id="${mailType}edit" name="${mailType}editAnchor"
 				href="#${mailType}hideAnchor"
-				onclick="javascript:swapEdit('${mailType}')">
+				onclick="javascript:swapEdit('${mailType}');return false">
 				<img src="${rootURL}/images/16x16/document_add.gif"
 					alt="View More Options" />
 				(expand)
 			</a>
 			<a id="${mailType}hide" name="${mailType}hideAnchor"
 				href="#${mailType}editAnchor"
-				onclick="javascript:swapEdit('${mailType}')">
+				onclick="javascript:swapEdit('${mailType}');return false">
 				<img src="${rootURL}/images/16x16/document_delete.gif"
 					alt="Hide Options" />
 				(collapse)
