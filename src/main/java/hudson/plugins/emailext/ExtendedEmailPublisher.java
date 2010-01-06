@@ -519,43 +519,37 @@ public class ExtendedEmailPublisher extends Notifier {
 		@Override
 		public Publisher newInstance(StaplerRequest req, JSONObject formData) throws hudson.model.Descriptor.FormException {
 			// Save the recipient lists
-			String listRecipients = req.getParameter("recipientlist_recipients");
+			String listRecipients = formData.getString("recipientlist_recipients");
 			
 			// Save configuration for each trigger type
 			ExtendedEmailPublisher m = new ExtendedEmailPublisher();
 			m.recipientList = listRecipients;
-			m.contentType = req.getParameter("project_content_type");
-			m.defaultSubject = req.getParameter("project_default_subject");
-			m.defaultContent = req.getParameter("project_default_content");
+			m.contentType = formData.getString("project_content_type");
+			m.defaultSubject = formData.getString("project_default_subject");
+			m.defaultContent = formData.getString("project_default_content");
 			m.configuredTriggers = new ArrayList<EmailTrigger>();
 			
 			// Create a new email trigger for each one that is configured
 			for (String mailerId : EMAIL_TRIGGER_TYPE_MAP.keySet()) {
-				EmailType type = createMailType(req, mailerId);
-				if (type != null) {
+				if("true".equalsIgnoreCase(formData.optString("mailer_" + mailerId + "_configured"))) {
+					EmailType type = createMailType(formData, mailerId);
 					EmailTrigger trigger = EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(type);
 					m.configuredTriggers.add(trigger);
 				}
 			}
 			
-			req.bindParameters(m, "ext_mailer_");
 			return m;
 		}
 		
-		private EmailType createMailType(StaplerRequest req, String mailType) {
-			if(req.getParameter("mailer." + mailType + ".configured") == null)
-				return null;
-			if(!req.getParameter("mailer." + mailType + ".configured").equalsIgnoreCase("true"))
-				return null;
-			
+		private EmailType createMailType(JSONObject formData, String mailType) {
 			EmailType m = new EmailType();
-			String prefix = "mailer." + mailType + ".";
-			m.setSubject(req.getParameter(prefix + "subject"));
-			m.setBody(req.getParameter(prefix + "body"));
-			m.setRecipientList(req.getParameter(prefix + "recipientList"));
-			m.setSendToRecipientList(req.getParameter(prefix + "sendToRecipientList")!=null);
-			m.setSendToDevelopers(req.getParameter(prefix + "sendToDevelopers")!=null);
-			m.setIncludeCulprits(req.getParameter(prefix + "includeCulprits")!=null);
+			String prefix = "mailer_" + mailType + '_';
+			m.setSubject(formData.getString(prefix + "subject"));
+			m.setBody(formData.getString(prefix + "body"));
+			m.setRecipientList(formData.getString(prefix + "recipientList"));
+			m.setSendToRecipientList(formData.optBoolean(prefix + "sendToRecipientList"));
+			m.setSendToDevelopers(formData.optBoolean(prefix + "sendToDevelopers"));
+			m.setIncludeCulprits(formData.optBoolean(prefix + "includeCulprits"));
 			return m;
 		}
 		

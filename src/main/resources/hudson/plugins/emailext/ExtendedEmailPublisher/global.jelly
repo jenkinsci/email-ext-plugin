@@ -1,14 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
   <f:section title="Extended E-mail Notification">
     <script type="text/javascript" src="${rootURL}/plugin/email-ext/scripts/emailext-behavior.js"></script>
-    <style type="text/css">
-        .mailHelp{
-            border: solid #bbb 1px;
-            background-color: #f0f0f0;
-            padding: 1em;
-            margin-bottom: 1em;
-        }
-    </style>
     <f:optionalBlock name="ext_mailer_override_global_settings" checked="${descriptor.overrideGlobalSettings}" title="Override Global Settings" help="/plugin/email-ext/help/globalConfig/override-global-settings.html">
 	    <f:entry title="SMTP server"
 	             help="/descriptor/hudson.tasks.Mailer/help/smtpServer">
@@ -82,12 +74,12 @@
         <td colspan="2">Content Token Reference</td>
         <td>
           <j:invokeStatic var="contentTokenText" method="getGlobalContentTokenHelpText" className="hudson.plugins.emailext.EmailExtHelp"/>
-          <a href="#contentTokenHelpAnchor" name="contentTokenAnchor" onclick="toggleContentTokenHelp();return false"><img src="${rootURL}/images/16x16/help.gif" alt="Help for feature: Content Token Reference" /></a>
+          <a href="#contentTokenHelpAnchor" name="contentTokenAnchor" onclick="toggleContentTokenHelp('');return false"><img src="${rootURL}/images/16x16/help.gif" alt="Help for feature: Content Token Reference" /></a>
         </td>
       </tr>
       <tr>
         <td></td>
-        <td colspan="2"><div id="contentTokenHelpConf" style="display:none" class="mailHelp">${contentTokenText}</div></td>
+        <td colspan="2"><div id="contentTokenHelpConf" class="help" style="display:none">${contentTokenText}</div></td>
         <td></td>
       </tr>
   </f:section>

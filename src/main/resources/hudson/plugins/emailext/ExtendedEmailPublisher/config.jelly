@@ -5,16 +5,15 @@
 	<!--
 		This script defines the view for the extended email plugin.
 	-->
-	
-	<script type="text/javascript" src="${rootURL}/plugin/email-ext/scripts/emailext-behavior.js"></script>
-	<style type="text/css">
-		.mailHelp{
-			border: solid #bbb 1px;
-  			background-color: #f0f0f0;
-  			padding: 1em;
-			margin-bottom: 1em;
-		}
-	</style>
+
+	<!-- In case form is repeated, uniquify ids with a prefix -->
+	<j:set var="secId" value="emailext-${h.generateId()}-"/>
+	<!-- Also only include javascript once -->
+	<j:if test="${request.getAttribute('emailext.seen')==null}">
+	  ${request.setAttribute('emailext.seen','1')}
+	  <script type="text/javascript" src="${rootURL}/plugin/email-ext/scripts/emailext-behavior.js"></script>
+	  <script type="text/javascript">var emailExtInit = new Array();</script>
+	</j:if>
 	
 	<!-- This is the global recipent list entry. -->
 	<f:entry title="Global Recipient List"
@@ -82,12 +81,12 @@
 		<td colspan="2">Content Token Reference</td>
 		<td >
 			<j:invokeStatic var="contentTokenText" method="getContentTokenHelpText" className="hudson.plugins.emailext.EmailExtHelp"/>
-			<a href="#contentTokenHelpAnchor" name="contentTokenAnchor" onclick="toggleContentTokenHelp();return false"><img src="${rootURL}/images/16x16/help.gif" alt="Help for feature: Content Token Reference" /></a>
+			<a href="#contentTokenHelpAnchor" name="contentTokenAnchor" onclick="toggleContentTokenHelp('${secId}');return false"><img src="${rootURL}/images/16x16/help.gif" alt="Help for feature: Content Token Reference" /></a>
 		</td>
 	</tr>
-	<tr >
+	<tr>
 		<td></td>
-		<td colspan="2"><div id="contentTokenHelpConf" style="display:none" class="mailHelp">${contentTokenText}</div></td>
+		<td colspan="2"><div id="${secId}contentTokenHelpConf" class="help" style="display:none">${contentTokenText}</div></td>
 		<td></td>
 	</tr>
 	
@@ -100,7 +99,7 @@
 			<td></td>
 			<td colspan="3" style="margin-left:10px">
 				<table width="100%" cell-padding="0" cell-spacing="0">
-				  <tbody id="configured-email-triggers">
+				  <tbody id="${secId}configured-email-triggers">
      				<tr>
      					<td></td>
      					<td>
@@ -144,25 +143,29 @@
 					     				sendToDevs="${trigger.defaultSendToDevs}" 
 					     				includeCulps="${trigger.defaultIncludeCulps}"
 					     				trigger="${trigger}"
-					     				configured="${true}">
+					     				configured="${true}"
+					     				secId="${secId}">
 					    </m:mailtype>
-					    <script type="text/javascript">
-					    	if(configuredTriggerCSV != "")
-					    		configuredTriggerCSV = configuredTriggerCSV + ",";
-					    	configuredTriggerCSV = configuredTriggerCSV + "${trigger.descriptor.mailerId}";
-					    </script>
 					</j:forEach>
 					
-					<tr id="after-last-configured-row">
+					<j:choose>
+						<j:when test="${instance==null}">
+							<j:invokeStatic var="nonConfigTriggers" method="getTriggersForNonConfiguredInstance" className="hudson.plugins.emailext.ExtendedEmailPublisher"/>  
+						</j:when>
+						<j:otherwise>
+							<j:set var="nonConfigTriggers" value="${instance.nonConfiguredTriggers}" />
+						</j:otherwise>
+					</j:choose>
+					<tr id="${secId}after-last-configured-row">
 						<td></td>
 						<td colspan="6"><span style="font-weight:bold">Add a Trigger: </span>
 							<span style="font-weight:bold"> </span>
-							<j:invokeStatic var="triggerTypes" method="getEmailTriggerNames" className="hudson.plugins.emailext.ExtendedEmailPublisher"/>  
-							<select id="non-configured-options" onchange="selectTrigger(this)">
-							  <option value="select" >select</option>
-							  <j:forEach var="trigger" items="${triggerTypes}">
-							      <option value="${trigger}" id="${trigger}option">
-							      		  	${trigger}
+							<select id="${secId}non-configured-options" onchange="selectTrigger(this,'${secId}')">
+							  <option value="select">select</option>
+							  <j:forEach var="trigger" items="${nonConfigTriggers}">
+							      <j:set var="triggerId" value="${trigger.descriptor.mailerId}"/>
+							      <option value="${triggerId}" id="${secId}${triggerId}option">
+							        ${triggerId}
 							      </option>
 							  </j:forEach>
 							</select>
@@ -189,16 +192,8 @@
 					 to make sure that when a trigger is selected from the dropdown that it
 					 is added to the configured table.  Also, if a configured trigger is 
 					 deleted from the configured table, we'll add it here. -->
-				<table style="display:none;">
-					<tbody id="non-configured-email-triggers" >
-						<j:choose>
-							<j:when test="${instance==null}">
-								<j:invokeStatic var="nonConfigTriggers" method="getTriggersForNonConfiguredInstance" className="hudson.plugins.emailext.ExtendedEmailPublisher"/>  
-							</j:when>
-							<j:otherwise>
-								<j:set var="nonConfigTriggers" value="${instance.nonConfiguredTriggers}" />
-							</j:otherwise>
-						</j:choose>
+				<table style="display:none">
+					<tbody id="${secId}non-configured-email-triggers" >
 						<j:forEach var="trigger" items="${nonConfigTriggers}">
 							<m:mailtype title="${trigger.descriptor.triggerName}" 
 											mailType="${trigger.descriptor.mailerId}"
@@ -207,7 +202,8 @@
 						     				sendToDevs="${trigger.defaultSendToDevs}" 
 						     				includeCulps="${trigger.defaultIncludeCulps}"
 						     				trigger="${trigger}"
-						     				configured="${false}">
+						     				configured="${false}"
+						     				secId="${secId}">
 						    </m:mailtype>
 						</j:forEach>
 					</tbody>
@@ -216,19 +212,22 @@
 				<!-- This select element is used to hold option elements for the configured mailers. 
 				     We'll do some dom manipulation to make sure that configured triggers' select
 				     option elements are placed here so that they are not shown.-->
-				<select style="display:none;" id="configured-options">
+				<select style="display:none" id="${secId}configured-options">
+					<j:forEach var="trigger" items="${instance.configuredTriggers}">
+						<j:set var="triggerId" value="${trigger.descriptor.mailerId}"/>
+						<option value="${triggerId}" id="${secId}${triggerId}option">
+							${triggerId}
+						</option>
+					</j:forEach>
 				</select>
 			</td>
 		</tr>
 	</f:advanced>
-	
-	<script type="text/javascript">
-		hideConfiguredOptions();
-		<j:if test="${!instance.configured}">
-			addTrigger("Failure");
-		</j:if>
-		
-		//var advHelpElm = document.getElementById("advancedEmailHelpConf");
-		//advHelpElm.style.display="none";
-	</script>
+
+	<j:if test="${!instance.configured}">
+		<script type="text/javascript">
+			if (!emailExtInit['${secId}']) addTrigger('Failure','${secId}');
+			emailExtInit['${secId}'] = 1;
+		</script>
+	</j:if>
 </j:jelly>

@@ -1,16 +1,13 @@
-var configuredTriggerCSV = "";
 
 function hideElement(elmID)
 {
 	var elm = document.getElementById(elmID);
-	
 	elm.style.display = "none";
 }
 
 function showElement(elmID)
 {
 	var elm = document.getElementById(elmID);
-	
 	elm.style.display = "";
 }
 
@@ -36,30 +33,13 @@ function swapEdit(swapName)
 	}
 }
 
-//This function is called when the page loads to remove any configured email triggers
-//from the dropdown select element.  This way it will be less confusing to the user
-//as to which triggers they can add or already have configured.
-function hideConfiguredOptions()
-{
-	var nonConfigOpts = document.getElementById("non-configured-options");
-	var configOpts = document.getElementById("configured-options");
-	
-	var confTriggerNames = configuredTriggerCSV.split(",");
-	
-	for(var i=0;i<confTriggerNames.length;i++){
-		var opt = document.getElementById(confTriggerNames[i]+"option");
-		if(opt!=null)
-			switchElementContainer(nonConfigOpts,configOpts,opt);
-	}
-}
-
 function switchElementContainer(oldParent,newParent,child)
 {
 	oldParent.removeChild(child);
 	newParent.appendChild(child);
 }
 
-function selectTrigger(selectElement)
+function selectTrigger(selectElement,secId)
 {
 	var selInd = selectElement.selectedIndex;
 	
@@ -71,15 +51,17 @@ function selectTrigger(selectElement)
 	
 	selectElement.selectedIndex = 0;
 
-	addTrigger(mailerId);
+	addTrigger(mailerId,secId);
 }
 
-function addTrigger(mailerId)
+function addTrigger(mailerId,secId)
 {
-	var nonConfigTriggers = document.getElementById("non-configured-email-triggers");
+	var configId = secId+"mailer."+mailerId+".configured";
+	mailerId = secId + mailerId;
+	var nonConfigTriggers = document.getElementById(secId+"non-configured-email-triggers");
 	var triggerRow = document.getElementById(mailerId);
-	var configTriggers = document.getElementById("configured-email-triggers");
-	var afterThisElement = document.getElementById("after-last-configured-row");
+	var configTriggers = document.getElementById(secId+"configured-email-triggers");
+	var afterThisElement = document.getElementById(secId+"after-last-configured-row");
 	nonConfigTriggers.removeChild(triggerRow);
 	configTriggers.insertBefore(triggerRow,afterThisElement);
 	triggerRow.style.display="";
@@ -92,21 +74,22 @@ function addTrigger(mailerId)
 	nonConfigTriggers.removeChild(triggerAdv);
 	configTriggers.insertBefore(triggerAdv,afterThisElement);
 	
-	var nonConfigOptions = document.getElementById("non-configured-options");
-	var configOptions = document.getElementById("configured-options");
+	var nonConfigOptions = document.getElementById(secId+"non-configured-options");
+	var configOptions = document.getElementById(secId+"configured-options");
 	var option = document.getElementById(mailerId + "option");
 	switchElementContainer(nonConfigOptions,configOptions,option);
 	
-	document.getElementById("mailer."+mailerId+".configured").value = "true";
+	document.getElementById(configId).value = "true";
 }
 
-function removeTrigger(mailerId)
+function removeTrigger(mailerId,secId)
 {
-	document.getElementById("mailer."+mailerId+".configured").value = "false";
+	document.getElementById(secId+"mailer."+mailerId+".configured").value = "false";
+	mailerId = secId + mailerId;
 
-	var nonConfigTriggers = document.getElementById("non-configured-email-triggers");
+	var nonConfigTriggers = document.getElementById(secId+"non-configured-email-triggers");
 	var triggerRow = document.getElementById(mailerId);
-	var configTriggers = document.getElementById("configured-email-triggers"); 
+	var configTriggers = document.getElementById(secId+"configured-email-triggers"); 
 	switchElementContainer(configTriggers,nonConfigTriggers,triggerRow);
 
 	var triggerHelp = document.getElementById(mailerId+"help");
@@ -115,36 +98,28 @@ function removeTrigger(mailerId)
 	var triggerAdv = document.getElementById(mailerId+"elm");
 	switchElementContainer(configTriggers,nonConfigTriggers,triggerAdv);
 
-	
-	var nonConfigOptions = document.getElementById("non-configured-options");
-	var configOptions = document.getElementById("configured-options");
+	var nonConfigOptions = document.getElementById(secId+"non-configured-options");
+	var configOptions = document.getElementById(secId+"configured-options");
 	var option = document.getElementById(mailerId + "option");
 	switchElementContainer(configOptions,nonConfigOptions,option);
 	
 	if(triggerAdv.style.display != "none")
 		swapEdit(mailerId);
-		
+	
 	if(triggerHelp.style.display != "none")
 		triggerHelp.style.display="none";
 		
-	var selectElement = document.getElementById("non-configured-options");
-	selectElement.selectedIndex = 0;
+	nonConfigOptions.selectedIndex = 0;
 }
 
 function toggleMailHelp(mailerId)
 {
 	var mailHelpRow = document.getElementById(mailerId+"help");
-	if(mailHelpRow.style.display=="none")
-		mailHelpRow.style.display="";
-	else
-		mailHelpRow.style.display="none";
+	mailHelpRow.style.display = (mailHelpRow.style.display=="none") ? "" : "none";
 }
 
-function toggleContentTokenHelp()
+function toggleContentTokenHelp(secId)
 {
-	var mailHelp = document.getElementById("contentTokenHelpConf");
-	if(mailHelp.style.display=="none")
-		mailHelp.style.display="";
-	else
-		mailHelp.style.display="none";
+	var mailHelp = document.getElementById(secId+"contentTokenHelpConf");
+	mailHelp.style.display = (mailHelp.style.display=="none") ? "block" : "none";
 }
