@@ -460,7 +460,6 @@ public class ExtendedEmailPublisher extends Notifier {
 				 * and thats done in mail sender, and it would be a bit of a hack to get it all to
 				 * coordinate, and we can make it work through setting mail.smtp properties.
 				 */
-				props.put("mail.smtp.auth","true");
 				if (props.getProperty("mail.smtp.socketFactory.port") == null) {
 					String port = smtpPort==null?"465":smtpPort;
 					props.put("mail.smtp.port", port);
@@ -471,6 +470,8 @@ public class ExtendedEmailPublisher extends Notifier {
 				}
 				props.put("mail.smtp.socketFactory.fallback", "false");
 			}
+			if (smtpAuthUsername!=null)
+				props.put("mail.smtp.auth","true");
 			return Session.getInstance(props,getAuthenticator());
 		}
 		
