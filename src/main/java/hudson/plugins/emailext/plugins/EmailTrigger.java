@@ -45,4 +45,10 @@ public abstract class EmailTrigger {
 		return false;
 	}
 	
+	/**
+	 * Should this trigger run before the build?  Defaults to false.
+	 */
+	public boolean isPreBuild() {
+		return false;
+	}
 }

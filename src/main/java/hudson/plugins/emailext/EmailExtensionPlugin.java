@@ -18,6 +18,7 @@ import hudson.plugins.emailext.plugins.content.ProjectURLContent;
 import hudson.plugins.emailext.plugins.content.SVNRevisionContent;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
+import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillUnstableTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
@@ -31,12 +32,11 @@ import hudson.plugins.emailext.plugins.trigger.UnstableTrigger;
  * See javadoc of {@link Plugin} for more about what can be done on this class.
  *
  * @author kyle.sweeney@valtech.com
- * @plugin
  */
 public class EmailExtensionPlugin extends Plugin {
 	
 	@Override
-	public void start() throws Exception {		
+	public void start() throws Exception {
 		//We are adding different Content plugins to the list of content types.
 		addEmailContentPlugin(new BuildLogContent());
 		addEmailContentPlugin(new BuildNumberContent());
@@ -51,6 +51,7 @@ public class EmailExtensionPlugin extends Plugin {
 		addEmailContentPlugin(new ProjectURLContent());
 		addEmailContentPlugin(new SVNRevisionContent());
 		
+		addEmailTriggerPlugin(PreBuildTrigger.DESCRIPTOR);
 		addEmailTriggerPlugin(FailureTrigger.DESCRIPTOR);
 		addEmailTriggerPlugin(StillFailingTrigger.DESCRIPTOR);
 		addEmailTriggerPlugin(UnstableTrigger.DESCRIPTOR);

@@ -170,19 +170,23 @@ public class ExtendedEmailPublisher extends Notifier {
 		return isConfigured();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-		return _perform(build,launcher,listener);
+	public boolean prebuild(AbstractBuild<?,?> build, BuildListener listener) {
+		return _perform(build,listener,true);
+	}
+
+	@Override
+	public boolean perform(AbstractBuild<?,?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+		return _perform(build,listener,false);
 	}
 	
-	public <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>> boolean _perform(B build, Launcher launcher, BuildListener listener) throws InterruptedException {
+	private boolean _perform(AbstractBuild<?,?> build, BuildListener listener, boolean forPreBuild) {
 	   	boolean emailTriggered = false;
 		
 	   	Map<String,EmailTrigger> triggered = new HashMap<String, EmailTrigger>();
 	   	
 		for(EmailTrigger trigger : configuredTriggers) {
-			if(trigger.trigger(build)) {
+			if(trigger.isPreBuild() == forPreBuild && trigger.trigger((AbstractBuild)build)) {
 				String tName = trigger.getDescriptor().getTriggerName();
 				triggered.put(tName,trigger);
 				listener.getLogger().println("Email was triggered for: " + tName);
@@ -210,7 +214,6 @@ public class ExtendedEmailPublisher extends Notifier {
 			return true;
 		}
 		
-		listener.getLogger().println("There are " + triggered.size() + " triggered emails.");
 		for(String triggerName :triggered.keySet()) {
 			listener.getLogger().println("Sending email for trigger: " + triggerName);
 			sendMail(triggered.get(triggerName).getEmail(), build, listener);
@@ -219,18 +222,18 @@ public class ExtendedEmailPublisher extends Notifier {
 		return true;
 	}
 	
-	public <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>>
-	boolean sendMail(EmailType mailType, B build, BuildListener listener) {
+	private boolean sendMail(EmailType mailType, AbstractBuild<?,?> build, BuildListener listener) {
 		try {
 			MimeMessage msg = createMail(mailType, build, listener);
 			Address[] allRecipients = msg.getAllRecipients();
 			if (allRecipients != null) {
-				StringBuffer buf = new StringBuffer("Sending e-mails to:");
+				StringBuilder buf = new StringBuilder("Sending email to:");
 				for (Address a : allRecipients)
 					buf.append(' ').append(a);
 				listener.getLogger().println(buf);
 				Transport.send(msg);
-				build.addAction(new MailMessageIdAction(msg.getMessageID()));
+				if (build.getAction(MailMessageIdAction.class) == null)
+					build.addAction(new MailMessageIdAction(msg.getMessageID()));
 				return true;
 			} else {
 				listener.getLogger().println("An attempt to send an e-mail"
@@ -244,8 +247,7 @@ public class ExtendedEmailPublisher extends Notifier {
 		return false;
 	}
 
-	private <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>>
-	MimeMessage createMail(EmailType type, B build, BuildListener listener) throws MessagingException {
+	private MimeMessage createMail(EmailType type, AbstractBuild<?,?> build, BuildListener listener) throws MessagingException {
 		boolean overrideGlobalSettings = ExtendedEmailPublisher.DESCRIPTOR.getOverrideGlobalSettings();
 
 		MimeMessage msg;
@@ -262,9 +264,9 @@ public class ExtendedEmailPublisher extends Notifier {
 
 		//Set the contents of the email
 		msg.setSentDate(new Date());
-		String subject = new ContentBuilder().transformText(type.getSubject(), this, type, build);
+		String subject = new ContentBuilder().transformText(type.getSubject(), this, type, (AbstractBuild)build);
 		msg.setSubject(subject);
-		String text = new ContentBuilder().transformText(type.getBody(), this, type, build);
+		String text = new ContentBuilder().transformText(type.getBody(), this, type, (AbstractBuild)build);
 		msg.setContent(text, contentType);
 		String messageContentType = contentType;
 		// contentType is null if the project was not reconfigured after upgrading.
@@ -306,7 +308,7 @@ public class ExtendedEmailPublisher extends Notifier {
 				}
 			}
 		}
-		//Get the list of recipients that are uniquely specified for this type of email 
+		//Get the list of recipients that are uniquely specified for this type of email
 		if (type.getRecipientList() != null && type.getRecipientList().trim().length() > 0) {
 			String[] typeRecipients = type.getRecipientList().split(COMMA_SEPARATED_SPLIT_REGEXP);
 			for (int i = 0; i < typeRecipients.length; i++) {
@@ -622,7 +624,7 @@ public class ExtendedEmailPublisher extends Notifier {
 		}
 		
 		private String nullify(String v) {
-			if(v!=null && v.length()==0)	
+			if(v!=null && v.length()==0)
 				v=null;
 			return v;
 		}
