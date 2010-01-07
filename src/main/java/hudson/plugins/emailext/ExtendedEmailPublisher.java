@@ -617,7 +617,7 @@ public class ExtendedEmailPublisher extends Notifier {
 			defaultSubject = nullify(req.getParameter("ext_mailer_default_subject"));
 			defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
 			
-			overrideGlobalSettings = req.getParameter("ext_mailer_use_global_settings") != null;
+			overrideGlobalSettings = req.getParameter("ext_mailer_override_global_settings") != null;
 			
 			save();
 			return super.configure(req, formData);
