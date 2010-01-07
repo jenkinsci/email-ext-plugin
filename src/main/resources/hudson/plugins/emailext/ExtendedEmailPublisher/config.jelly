@@ -10,7 +10,7 @@
 	<j:set var="secId" value="emailext-${h.generateId()}-"/>
 	<!-- Also only include javascript once -->
 	<j:if test="${request.getAttribute('emailext.seen')==null}">
-	  ${request.setAttribute('emailext.seen','1')}
+	  <j:set var="unused" value="${request.setAttribute('emailext.seen','1')}"/>
 	  <script type="text/javascript" src="${rootURL}/plugin/email-ext/scripts/emailext-behavior.js"></script>
 	  <script type="text/javascript">var emailExtInit = new Array();</script>
 	</j:if>
