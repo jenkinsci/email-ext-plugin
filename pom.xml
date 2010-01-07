@@ -12,9 +12,15 @@
   <version>2.4-SNAPSHOT</version>
   <name>Hudson Email Extension Plugin</name>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Email-ext+plugin</url>
+  <developers>
+    <developer>
+      <id>kdsweeney</id>
+      <name>Kyle Sweeney</name>
+    </developer>
+  </developers>
   
   <dependencies>
-  	<dependency>
+    <dependency>
       <groupId>jmock</groupId>
       <artifactId>jmock</artifactId>
       <version>1.0.1</version>
