@@ -29,7 +29,7 @@ public class ProjectNameContent implements EmailContent {
 	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
 	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
 			EmailType emailType, Map<String, ?> args) {
-		return build.getProject().getName();
+		return build.getProject().getFullDisplayName();
 	}
 
 	public boolean hasNestedContent() {
