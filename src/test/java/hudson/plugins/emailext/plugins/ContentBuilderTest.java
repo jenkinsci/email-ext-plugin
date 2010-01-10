@@ -1,8 +1,9 @@
 package hudson.plugins.emailext.plugins;
 
-import org.jmock.MockObjectTestCase;
+import junit.framework.TestCase;
 
-public class ContentBuilderTest extends MockObjectTestCase {
+public class ContentBuilderTest extends TestCase
+{
 
 	public void testTokenizer1() {
 		ContentBuilder.Tokenizer tokenizer;
