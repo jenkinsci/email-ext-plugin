@@ -14,24 +14,14 @@ import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.scm.ChangeLogSet.Entry;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
-import hudson.tasks.Mailer;
 import hudson.tasks.MailMessageIdAction;
+import hudson.tasks.Mailer;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import net.sf.json.JSONObject;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
 
 import javax.mail.Address;
 import javax.mail.Authenticator;
@@ -44,10 +34,18 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.ServletException;
-
-import net.sf.json.JSONObject;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * {@link Publisher} that sends notification e-mail.
@@ -111,9 +109,14 @@ public class ExtendedEmailPublisher extends Notifier {
 	private List<EmailTrigger> configuredTriggers = new ArrayList<EmailTrigger>();
 
 	/**
-	 * The contentType of the emails for this project.
+	 * The contentType of the emails for this project (text/html, text/plain, etc).
 	 */
 	public String contentType;
+
+    /**
+     * The charset of the emails for this project (us-ascii, utf-8, etc).
+     */
+    public String charset;
 
 	/**
 	 * The default subject of the emails for this project.  ($PROJECT_DEFAULT_SUBJECT)
@@ -262,23 +265,13 @@ public class ExtendedEmailPublisher extends Notifier {
 			msg.setFrom(new InternetAddress(ExtendedEmailPublisher.DESCRIPTOR.getAdminAddress()));
 		}
 
-		//Set the contents of the email
-		msg.setSentDate(new Date());
-		String subject = new ContentBuilder().transformText(type.getSubject(), this, type, (AbstractBuild)build);
-		msg.setSubject(subject);
-		String text = new ContentBuilder().transformText(type.getBody(), this, type, (AbstractBuild)build);
-		msg.setContent(text, contentType);
-		String messageContentType = contentType;
-		// contentType is null if the project was not reconfigured after upgrading.
-		if (messageContentType == null || "default".equals(messageContentType)) {
-			messageContentType = DESCRIPTOR.getDefaultContentType();
-			// The defaultContentType is null if the main Hudson configuration
-			// was not reconfigured after upgrading.
-			if (messageContentType == null) {
-				messageContentType = "text/plain";
-			}
-		}
-		msg.setContent(text, messageContentType);
+        // Set the contents of the email
+
+        msg.setSentDate(new Date());
+
+        setSubject( type, build, msg );
+
+        setContent( type, build, msg );
 
 		// Get the recipients from the global list of addresses
 		List<InternetAddress> recipientAddresses = new ArrayList<InternetAddress>();
@@ -331,7 +324,53 @@ public class ExtendedEmailPublisher extends Notifier {
 		return msg;
 	}
 
-	private static void addAddress(List<InternetAddress> addresses, String address, BuildListener listener) {
+    private void setSubject( final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg )
+        throws MessagingException
+    {
+        final String charset = getCharset();
+
+        String subject = new ContentBuilder().transformText(type.getSubject(), this, type, (AbstractBuild)build);
+        if (charset == null) {
+            msg.setSubject( subject );
+        } else {
+            msg.setSubject(subject, charset);
+        }
+    }
+
+    private void setContent( final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg )
+        throws MessagingException
+    {
+        final String text = new ContentBuilder().transformText(type.getBody(), this, type, (AbstractBuild)build);
+        final String charset = getCharset();
+
+        String messageContentType = contentType;
+        // contentType is null if the project was not reconfigured after upgrading.
+        if (messageContentType == null || "default".equals(messageContentType)) {
+            messageContentType = DESCRIPTOR.getDefaultContentType();
+            // The defaultContentType is null if the main Hudson configuration
+            // was not reconfigured after upgrading.
+            if (messageContentType == null) {
+                messageContentType = "text/plain";
+            }
+        }
+        // Charset is null if the project was not reconfigured after upgrading
+        if (charset != null) {
+            //  Add the charset to the message content
+            messageContentType += "; charset=" + getCharset();
+        }
+        msg.setContent(text, messageContentType);
+    }
+
+    private String getCharset()
+    {
+        // charset is null if the project was not reconfigured after upgrading.
+        if ( charset != null && !"default".equals( charset )) {
+            return charset;
+        }
+        return DESCRIPTOR.getDefaultCharset();
+    }
+
+    private static void addAddress(List<InternetAddress> addresses, String address, BuildListener listener) {
 		try {
 			addresses.add(new InternetAddress(address));
 		} catch(AddressException ae) {
@@ -404,7 +443,12 @@ public class ExtendedEmailPublisher extends Notifier {
 		 * This is a global default content type (mime type) for emails.
 		 */
 		private String defaultContentType;
-		
+    
+        /**
+         * This is the global default charset for emails.
+         */
+        private String defaultCharset;
+
 		/**
 		 * This is a global default subject line for sending emails.
 		 */
@@ -516,8 +560,13 @@ public class ExtendedEmailPublisher extends Notifier {
 		public String getDefaultContentType() {
 			return defaultContentType;
 		}
-		
-		public String getDefaultSubject() {
+
+        public String getDefaultCharset()
+        {
+            return defaultCharset;
+        }
+
+        public String getDefaultSubject() {
 			return defaultSubject;
 		}
 		
@@ -542,6 +591,7 @@ public class ExtendedEmailPublisher extends Notifier {
 			ExtendedEmailPublisher m = new ExtendedEmailPublisher();
 			m.recipientList = listRecipients;
 			m.contentType = formData.getString("project_content_type");
+            m.charset = formData.getString("project_charset");
 			m.defaultSubject = formData.getString("project_default_subject");
 			m.defaultContent = formData.getString("project_default_content");
 			m.configuredTriggers = new ArrayList<EmailTrigger>();
@@ -613,6 +663,7 @@ public class ExtendedEmailPublisher extends Notifier {
 			smtpPort = nullify(req.getParameter("ext_mailer_smtp_port"));
 			
 			defaultContentType = nullify(req.getParameter("ext_mailer_default_content_type"));
+            defaultCharset = nullify(req.getParameter( "ext_mailer_default_charset" ));
 
 			// Allow global defaults to be set for the subject and body of the email
 			defaultSubject = nullify(req.getParameter("ext_mailer_default_subject"));

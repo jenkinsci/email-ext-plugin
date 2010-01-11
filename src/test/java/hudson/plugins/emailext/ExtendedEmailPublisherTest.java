@@ -4,14 +4,17 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
+import net.sf.json.JSONObject;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.mock_javamail.Mailbox;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -70,7 +73,7 @@ public class ExtendedEmailPublisherTest
         throws Exception
     {
         PreBuildTrigger trigger = new PreBuildTrigger();
-        addEmail( trigger );
+        addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
         FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
@@ -85,7 +88,7 @@ public class ExtendedEmailPublisherTest
         throws Exception
     {
         SuccessTrigger successTrigger = new SuccessTrigger();
-        addEmail( successTrigger );
+        addEmailType( successTrigger );
         publisher.getConfiguredTriggers().add( successTrigger );
 
         FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
@@ -102,7 +105,7 @@ public class ExtendedEmailPublisherTest
         project.getBuildersList().add( new FailureBuilder() );
 
         SuccessTrigger trigger = new SuccessTrigger();
-        addEmail( trigger );
+        addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
         FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
@@ -119,7 +122,7 @@ public class ExtendedEmailPublisherTest
         project.getBuildersList().add( new FailureBuilder() );
 
         FixedTrigger trigger = new FixedTrigger();
-        addEmail( trigger );
+        addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
         FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
@@ -137,7 +140,7 @@ public class ExtendedEmailPublisherTest
         project.getBuildersList().add( new FailureBuilder() );
 
         FixedTrigger trigger = new FixedTrigger();
-        addEmail( trigger );
+        addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
         FreeStyleBuild build1 = project.scheduleBuild2( 0 ).get();
@@ -156,7 +159,7 @@ public class ExtendedEmailPublisherTest
         throws Exception
     {
         StillFailingTrigger trigger = new StillFailingTrigger();
-        addEmail( trigger );
+        addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
         FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
@@ -173,7 +176,7 @@ public class ExtendedEmailPublisherTest
         project.getBuildersList().add( new FailureBuilder() );
 
         StillFailingTrigger trigger = new StillFailingTrigger();
-        addEmail( trigger );
+        addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
         // only fail once
@@ -191,7 +194,7 @@ public class ExtendedEmailPublisherTest
         project.getBuildersList().add( new FailureBuilder() );
 
         StillFailingTrigger trigger = new StillFailingTrigger();
-        addEmail( trigger );
+        addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
         // only fail once
@@ -213,7 +216,7 @@ public class ExtendedEmailPublisherTest
         project.getBuildersList().add( new FailureBuilder() );
 
         StillFailingTrigger trigger = new StillFailingTrigger();
-        addEmail( trigger );
+        addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
         // first failure
@@ -229,13 +232,118 @@ public class ExtendedEmailPublisherTest
                       Mailbox.get( "ashlux@gmail.com" ).size() );
     }
 
-    private void addEmail( EmailTrigger trigger )
+    public void testShouldUseUsAsciiByDefault()
+        throws Exception
+    {
+        project.getBuildersList().add( new FailureBuilder() );
+
+        FailureTrigger trigger = new FailureTrigger();
+        addEmailType( trigger );
+        publisher.getConfiguredTriggers().add( trigger );
+
+        FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
+        assertBuildStatus( Result.FAILURE, build );
+
+        Mailbox mailbox = Mailbox.get( "ashlux@gmail.com" );
+        assertEquals( "We should an email since the build failed.", 1, mailbox.size() );
+        assertThat( "Default charset should be used.", mailbox.get( 0 ).getContentType(),
+                    containsString( "charset=us-ascii" ) ); // preserve compatibility with previous plugin versions
+    }
+
+    public void testShouldUseUtf8WhenUtf8IsTheCharsetSelected()
+        throws Exception
+    {
+        publisher.charset = "utf-8";
+
+        project.getBuildersList().add( new FailureBuilder() );
+
+        FailureTrigger trigger = new FailureTrigger();
+        addEmailType( trigger );
+        publisher.getConfiguredTriggers().add( trigger );
+
+        FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
+        assertBuildStatus( Result.FAILURE, build );
+
+        Mailbox mailbox = Mailbox.get( "ashlux@gmail.com" );
+        assertEquals( "We should an email since the build failed.", 1, mailbox.size() );
+        assertThat( "Default charset should be used.", mailbox.get( 0 ).getContentType(),
+                    containsString( "charset=utf-8" ) ); // preserve compatibility with previous plugin versions
+    }
+
+    public void testShouldUseDefaultGlobalCharsetWhenNoCharsetSelected()
+        throws Exception
+    {
+        publisher.charset = null; // Will be null after upgrades
+        Field field = ExtendedEmailPublisher.DESCRIPTOR.getClass().getDeclaredField( "defaultCharset" );
+        field.setAccessible( true );
+        field.set( ExtendedEmailPublisher.DESCRIPTOR, "utf-8" );
+
+        project.getBuildersList().add( new FailureBuilder() );
+
+        FailureTrigger trigger = new FailureTrigger();
+        addEmailType( trigger );
+        publisher.getConfiguredTriggers().add( trigger );
+
+        FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
+        assertBuildStatus( Result.FAILURE, build );
+
+        Mailbox mailbox = Mailbox.get( "ashlux@gmail.com" );
+        assertEquals( "We should an email since the build failed.", 1, mailbox.size() );
+        assertThat( "Default charset should be used.", mailbox.get( 0 ).getContentType(),
+                    containsString( "charset=utf-8" ) ); // preserve compatibility with previous plugin versions
+
+    }
+
+    public void testShouldUseDefaultGlobalCharsetWhenDefaultCharsetSelected()
+        throws Exception
+    {
+        publisher.charset = "default"; // Can be "default" after reconfiguring project
+        Field field = ExtendedEmailPublisher.DESCRIPTOR.getClass().getDeclaredField( "defaultCharset" );
+        field.setAccessible( true );
+        field.set( ExtendedEmailPublisher.DESCRIPTOR, "utf-8" );
+
+        project.getBuildersList().add( new FailureBuilder() );
+
+        FailureTrigger trigger = new FailureTrigger();
+        addEmailType( trigger );
+        publisher.getConfiguredTriggers().add( trigger );
+
+        FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
+        assertBuildStatus( Result.FAILURE, build );
+
+        Mailbox mailbox = Mailbox.get( "ashlux@gmail.com" );
+        assertEquals( "We should an email since the build failed.", 1, mailbox.size() );
+        assertThat( "Default charset should be used.", mailbox.get( 0 ).getContentType(),
+                    containsString( "charset=utf-8" ) ); // preserve compatibility with previous plugin versions
+
+    }
+
+    public void testNewInstance_shouldGetBasicInformation()
+        throws Exception
+    {
+        JSONObject form = new JSONObject();
+        form.put( "project_content_type", "default" );
+        form.put( "project_charset", "utf-8" );
+        form.put( "recipientlist_recipients", "ashlux@gmail.com" );
+        form.put( "project_default_subject", "Make millions in Nigeria" );
+        form.put( "project_default_content", "Give me a $1000 check and I'll mail you back $5000!!!" );
+
+        publisher = (ExtendedEmailPublisher) ExtendedEmailPublisher.DESCRIPTOR.newInstance( null, form );
+
+        assertEquals( "default", publisher.contentType );
+        assertEquals( "utf-8", publisher.charset );
+        assertEquals( "ashlux@gmail.com", publisher.recipientList );
+        assertEquals( "Make millions in Nigeria", publisher.defaultSubject );
+        assertEquals( "Give me a $1000 check and I'll mail you back $5000!!!", publisher.defaultContent );
+    }
+
+    private void addEmailType( EmailTrigger trigger )
     {
         trigger.setEmail( new EmailType()
         {{
                 setRecipientList( "ashlux@gmail.com" );
-                setSubject( "Build has started." );
-                setBody( "Are you ready for this?" );
+                setSubject( "Yet another Hudson email" );
+                setBody( "Boom goes the dynamite." );
             }} );
     }
 }

@@ -41,6 +41,20 @@
       </select>
     </f:entry>
 
+    <!-- This is the charset for the emails -->
+    <f:entry title="Charset"
+             help="/plugin/email-ext/help/projectConfig/charset.html">
+      <select class="setting-input"
+              name="project_charset">
+          <f:option value="default"
+                    selected="${'default'==instance.charset}">Default Charset</f:option>
+          <f:option value="us-ascii"
+                    selected="${'us-ascii'==instance.charset}">us-ascii</f:option>
+          <f:option value="utf-8"
+                    selected="${'utf-8'==instance.charset}">utf-8</f:option>
+      </select>
+    </f:entry>
+
 	<!-- This is the default subject line for the project. -->
     <f:entry title="Default Subject"
              help="/plugin/email-ext/help/projectConfig/defaultSubject.html">
