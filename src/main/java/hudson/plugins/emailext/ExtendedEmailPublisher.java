@@ -67,6 +67,8 @@ public class ExtendedEmailPublisher extends Notifier {
 	
 	public static final String PROJECT_DEFAULT_SUBJECT_TEXT = "$PROJECT_DEFAULT_SUBJECT";
 	public static final String PROJECT_DEFAULT_BODY_TEXT = "$PROJECT_DEFAULT_CONTENT";
+
+    public static final String CHARSET = "utf-8";
 	
 	public static void addEmailTriggerType(EmailTriggerDescriptor triggerType) throws EmailExtException {
 		if(EMAIL_TRIGGER_TYPE_MAP.containsKey(triggerType.getMailerId()))
@@ -112,11 +114,6 @@ public class ExtendedEmailPublisher extends Notifier {
 	 * The contentType of the emails for this project (text/html, text/plain, etc).
 	 */
 	public String contentType;
-
-    /**
-     * The charset of the emails for this project (us-ascii, utf-8, etc).
-     */
-    public String charset;
 
 	/**
 	 * The default subject of the emails for this project.  ($PROJECT_DEFAULT_SUBJECT)
@@ -327,21 +324,14 @@ public class ExtendedEmailPublisher extends Notifier {
     private void setSubject( final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg )
         throws MessagingException
     {
-        final String charset = getCharset();
-
         String subject = new ContentBuilder().transformText(type.getSubject(), this, type, (AbstractBuild)build);
-        if (charset == null) {
-            msg.setSubject( subject );
-        } else {
-            msg.setSubject(subject, charset);
-        }
+        msg.setSubject(subject, CHARSET);
     }
 
     private void setContent( final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg )
         throws MessagingException
     {
         final String text = new ContentBuilder().transformText(type.getBody(), this, type, (AbstractBuild)build);
-        final String charset = getCharset();
 
         String messageContentType = contentType;
         // contentType is null if the project was not reconfigured after upgrading.
@@ -353,21 +343,9 @@ public class ExtendedEmailPublisher extends Notifier {
                 messageContentType = "text/plain";
             }
         }
-        // Charset is null if the project was not reconfigured after upgrading
-        if (charset != null) {
-            //  Add the charset to the message content
-            messageContentType += "; charset=" + getCharset();
-        }
-        msg.setContent(text, messageContentType);
-    }
+        messageContentType += "; charset=" + CHARSET;
 
-    private String getCharset()
-    {
-        // charset is null if the project was not reconfigured after upgrading.
-        if ( charset != null && !"default".equals( charset )) {
-            return charset;
-        }
-        return DESCRIPTOR.getDefaultCharset();
+        msg.setContent(text, messageContentType);
     }
 
     private static void addAddress(List<InternetAddress> addresses, String address, BuildListener listener) {
@@ -443,11 +421,6 @@ public class ExtendedEmailPublisher extends Notifier {
 		 * This is a global default content type (mime type) for emails.
 		 */
 		private String defaultContentType;
-    
-        /**
-         * This is the global default charset for emails.
-         */
-        private String defaultCharset;
 
 		/**
 		 * This is a global default subject line for sending emails.
@@ -561,11 +534,6 @@ public class ExtendedEmailPublisher extends Notifier {
 			return defaultContentType;
 		}
 
-        public String getDefaultCharset()
-        {
-            return defaultCharset;
-        }
-
         public String getDefaultSubject() {
 			return defaultSubject;
 		}
@@ -591,7 +559,6 @@ public class ExtendedEmailPublisher extends Notifier {
 			ExtendedEmailPublisher m = new ExtendedEmailPublisher();
 			m.recipientList = listRecipients;
 			m.contentType = formData.getString("project_content_type");
-            m.charset = formData.getString("project_charset");
 			m.defaultSubject = formData.getString("project_default_subject");
 			m.defaultContent = formData.getString("project_default_content");
 			m.configuredTriggers = new ArrayList<EmailTrigger>();
@@ -663,7 +630,6 @@ public class ExtendedEmailPublisher extends Notifier {
 			smtpPort = nullify(req.getParameter("ext_mailer_smtp_port"));
 			
 			defaultContentType = nullify(req.getParameter("ext_mailer_default_content_type"));
-            defaultCharset = nullify(req.getParameter( "ext_mailer_default_charset" ));
 
 			// Allow global defaults to be set for the subject and body of the email
 			defaultSubject = nullify(req.getParameter("ext_mailer_default_subject"));

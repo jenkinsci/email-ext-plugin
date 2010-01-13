@@ -14,7 +14,6 @@ import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.mock_javamail.Mailbox;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -232,7 +231,7 @@ public class ExtendedEmailPublisherTest
                       Mailbox.get( "ashlux@gmail.com" ).size() );
     }
 
-    public void testShouldUseUsAsciiByDefault()
+    public void testShouldSendEmailUsingUtf8ByDefault()
         throws Exception
     {
         project.getBuildersList().add( new FailureBuilder() );
@@ -246,76 +245,8 @@ public class ExtendedEmailPublisherTest
 
         Mailbox mailbox = Mailbox.get( "ashlux@gmail.com" );
         assertEquals( "We should an email since the build failed.", 1, mailbox.size() );
-        assertThat( "Default charset should be used.", mailbox.get( 0 ).getContentType(),
-                    containsString( "charset=us-ascii" ) ); // preserve compatibility with previous plugin versions
-    }
-
-    public void testShouldUseUtf8WhenUtf8IsTheCharsetSelected()
-        throws Exception
-    {
-        publisher.charset = "utf-8";
-
-        project.getBuildersList().add( new FailureBuilder() );
-
-        FailureTrigger trigger = new FailureTrigger();
-        addEmailType( trigger );
-        publisher.getConfiguredTriggers().add( trigger );
-
-        FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
-        assertBuildStatus( Result.FAILURE, build );
-
-        Mailbox mailbox = Mailbox.get( "ashlux@gmail.com" );
-        assertEquals( "We should an email since the build failed.", 1, mailbox.size() );
-        assertThat( "Default charset should be used.", mailbox.get( 0 ).getContentType(),
-                    containsString( "charset=utf-8" ) ); // preserve compatibility with previous plugin versions
-    }
-
-    public void testShouldUseDefaultGlobalCharsetWhenNoCharsetSelected()
-        throws Exception
-    {
-        publisher.charset = null; // Will be null after upgrades
-        Field field = ExtendedEmailPublisher.DESCRIPTOR.getClass().getDeclaredField( "defaultCharset" );
-        field.setAccessible( true );
-        field.set( ExtendedEmailPublisher.DESCRIPTOR, "utf-8" );
-
-        project.getBuildersList().add( new FailureBuilder() );
-
-        FailureTrigger trigger = new FailureTrigger();
-        addEmailType( trigger );
-        publisher.getConfiguredTriggers().add( trigger );
-
-        FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
-        assertBuildStatus( Result.FAILURE, build );
-
-        Mailbox mailbox = Mailbox.get( "ashlux@gmail.com" );
-        assertEquals( "We should an email since the build failed.", 1, mailbox.size() );
-        assertThat( "Default charset should be used.", mailbox.get( 0 ).getContentType(),
-                    containsString( "charset=utf-8" ) ); // preserve compatibility with previous plugin versions
-
-    }
-
-    public void testShouldUseDefaultGlobalCharsetWhenDefaultCharsetSelected()
-        throws Exception
-    {
-        publisher.charset = "default"; // Can be "default" after reconfiguring project
-        Field field = ExtendedEmailPublisher.DESCRIPTOR.getClass().getDeclaredField( "defaultCharset" );
-        field.setAccessible( true );
-        field.set( ExtendedEmailPublisher.DESCRIPTOR, "utf-8" );
-
-        project.getBuildersList().add( new FailureBuilder() );
-
-        FailureTrigger trigger = new FailureTrigger();
-        addEmailType( trigger );
-        publisher.getConfiguredTriggers().add( trigger );
-
-        FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
-        assertBuildStatus( Result.FAILURE, build );
-
-        Mailbox mailbox = Mailbox.get( "ashlux@gmail.com" );
-        assertEquals( "We should an email since the build failed.", 1, mailbox.size() );
-        assertThat( "Default charset should be used.", mailbox.get( 0 ).getContentType(),
-                    containsString( "charset=utf-8" ) ); // preserve compatibility with previous plugin versions
-
+        assertThat( "UTF-8 charset should be used.", mailbox.get( 0 ).getContentType(),
+                    containsString( "charset=utf-8" ) );
     }
 
     public void testNewInstance_shouldGetBasicInformation()
@@ -323,7 +254,6 @@ public class ExtendedEmailPublisherTest
     {
         JSONObject form = new JSONObject();
         form.put( "project_content_type", "default" );
-        form.put( "project_charset", "utf-8" );
         form.put( "recipientlist_recipients", "ashlux@gmail.com" );
         form.put( "project_default_subject", "Make millions in Nigeria" );
         form.put( "project_default_content", "Give me a $1000 check and I'll mail you back $5000!!!" );
@@ -331,7 +261,6 @@ public class ExtendedEmailPublisherTest
         publisher = (ExtendedEmailPublisher) ExtendedEmailPublisher.DESCRIPTOR.newInstance( null, form );
 
         assertEquals( "default", publisher.contentType );
-        assertEquals( "utf-8", publisher.charset );
         assertEquals( "ashlux@gmail.com", publisher.recipientList );
         assertEquals( "Make millions in Nigeria", publisher.defaultSubject );
         assertEquals( "Give me a $1000 check and I'll mail you back $5000!!!", publisher.defaultContent );
