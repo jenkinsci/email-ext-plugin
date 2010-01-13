@@ -28,11 +28,11 @@ public class ContentBuilder {
 	
 	private static final Logger LOGGER = Logger.getLogger(Mailer.class.getName());
 
-	private static final String DEFAULT_BODY = "\\$DEFAULT_CONTENT";
-	private static final String DEFAULT_SUBJECT = "\\$DEFAULT_SUBJECT";
+	private static final String DEFAULT_BODY = "\\$DEFAULT_CONTENT|\\$\\{DEFAULT_CONTENT\\}";
+	private static final String DEFAULT_SUBJECT = "\\$DEFAULT_SUBJECT|\\$\\{DEFAULT_SUBJECT\\}";
 	
-	private static final String PROJECT_DEFAULT_BODY = "\\$PROJECT_DEFAULT_CONTENT";
-	private static final String PROJECT_DEFAULT_SUBJECT = "\\$PROJECT_DEFAULT_SUBJECT";
+	private static final String PROJECT_DEFAULT_BODY = "\\$PROJECT_DEFAULT_CONTENT|\\$\\{PROJECT_DEFAULT_CONTENT\\}";
+	private static final String PROJECT_DEFAULT_SUBJECT = "\\$PROJECT_DEFAULT_SUBJECT|\\$\\{PROJECT_DEFAULT_SUBJECT\\}";
 	
 	private static final Map<String,EmailContent> EMAIL_CONTENT_TYPE_MAP = new LinkedHashMap<String,EmailContent>();
 	
