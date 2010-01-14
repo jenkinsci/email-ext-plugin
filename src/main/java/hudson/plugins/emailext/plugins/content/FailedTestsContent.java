@@ -66,6 +66,8 @@ public class FailedTestsContent implements EmailContent {
 		buffer.append(failedTest.getStatus().toString());
 		buffer.append(":  ");
 		buffer.append(failedTest.getClassName());
+        buffer.append(".");
+        buffer.append(failedTest.getDisplayName());
 		buffer.append("\n\n");
 		buffer.append("Error Message:\n");
 		buffer.append(failedTest.getErrorDetails());

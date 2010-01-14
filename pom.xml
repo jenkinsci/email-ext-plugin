@@ -6,7 +6,7 @@
     <version>1.319</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  
+
   <artifactId>email-ext</artifactId>
   <packaging>hpi</packaging>
   <version>2.5-SNAPSHOT</version>
@@ -52,4 +52,5 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
 </project>
