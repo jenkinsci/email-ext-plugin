@@ -62,11 +62,11 @@ public class ChangesSinceLastSuccessfulBuildContent implements EmailContent {
 		if (build.getPreviousBuild() == null) {
 			return "";
 		}
-		
+
 		AbstractBuild<P,B> firstIncludedBuild = build;
 		{
 			B prev = firstIncludedBuild.getPreviousBuild();
-			while (prev != null && prev.getResult() == Result.FAILURE) {
+			while (prev != null && prev.getResult() != Result.SUCCESS) {
 				firstIncludedBuild = prev;
 				prev = firstIncludedBuild.getPreviousBuild();
 			}
