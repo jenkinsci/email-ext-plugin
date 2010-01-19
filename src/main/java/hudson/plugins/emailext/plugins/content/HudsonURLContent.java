@@ -31,6 +31,7 @@ public class HudsonURLContent implements EmailContent {
 	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
 			EmailType emailType, Map<String, ?> args) {
 		String hudsonUrl = ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl();
+		if(hudsonUrl==null) return "";
 		if(!hudsonUrl.endsWith("/"))
 			hudsonUrl += "/";
 		
@@ -40,5 +41,4 @@ public class HudsonURLContent implements EmailContent {
 	public boolean hasNestedContent() {
 		return false;
 	}
-
 }
