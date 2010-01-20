@@ -30,8 +30,14 @@ public class BuildStatusContent implements EmailContent {
 	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
 	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
 			EmailType emailType, Map<String, ?> args) {
-		Result buildResult = build.getResult();
 
+        // Build can be "building" when the pre-build trigger is used.
+        // Reporting "success", "still failing", etc doesn't make sense in this case.
+        if (build.isBuilding()) {
+            return "Building";
+        }
+        
+        Result buildResult = build.getResult();
 		if (buildResult == Result.FAILURE) {
 			B prevBuild = build.getPreviousBuild();
 			if (prevBuild != null && (prevBuild.getResult() == Result.FAILURE)) {
