@@ -12,7 +12,13 @@
   <version>2.5-SNAPSHOT</version>
   <name>Hudson Email Extension Plugin</name>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Email-ext+plugin</url>
+
   <developers>
+    <developer>
+      <id>ashlux</id>
+      <name>Ash Lux</name>
+      <email>ashlux@gmail.com</email>
+    </developer>
     <developer>
       <id>kdsweeney</id>
       <name>Kyle Sweeney</name>
