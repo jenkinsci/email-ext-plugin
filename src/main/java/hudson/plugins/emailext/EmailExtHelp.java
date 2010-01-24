@@ -33,9 +33,10 @@ public class EmailExtHelp {
 		
 		// This is the help for the content tokens
 		sb.append("\n" +
-				"<p>Arguments may be given for each token in the form name=<i>value</i>, " +
-				"and all arguments are optional.  The {'s and }'s may be omitted if there are " +
-				"no arguments.  Examples: $TOKEN, ${TOKEN}, ${TOKEN, count=100}.</p>\n" +
+				"<p>All arguments are optional. Arguments may be given for each token in the " +
+                "form <i>name=\"value\"</i> for strings and in the form <i>name=value</i> for booleans and numbers.  " +
+                "The {'s and }'s may be omitted if there are no arguments.</p>" +
+                "<p>Examples: $TOKEN, ${TOKEN}, ${TOKEN, count=100}, ${ENV, var=\"PATH\"}</p>\n" +
 				"<b>Available Tokens</b>\n" +
 				"<ul>\n");
 		
