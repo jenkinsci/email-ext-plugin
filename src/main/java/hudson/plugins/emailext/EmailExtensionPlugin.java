@@ -4,25 +4,8 @@ import hudson.Plugin;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import hudson.plugins.emailext.plugins.content.BuildLogContent;
-import hudson.plugins.emailext.plugins.content.BuildNumberContent;
-import hudson.plugins.emailext.plugins.content.BuildStatusContent;
-import hudson.plugins.emailext.plugins.content.BuildURLContent;
-import hudson.plugins.emailext.plugins.content.ChangesSinceLastBuildContent;
-import hudson.plugins.emailext.plugins.content.ChangesSinceLastSuccessfulBuildContent;
-import hudson.plugins.emailext.plugins.content.EnvContent;
-import hudson.plugins.emailext.plugins.content.FailedTestsContent;
-import hudson.plugins.emailext.plugins.content.HudsonURLContent;
-import hudson.plugins.emailext.plugins.content.ProjectNameContent;
-import hudson.plugins.emailext.plugins.content.ProjectURLContent;
-import hudson.plugins.emailext.plugins.content.SVNRevisionContent;
-import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
-import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
-import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
-import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
-import hudson.plugins.emailext.plugins.trigger.StillUnstableTrigger;
-import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
-import hudson.plugins.emailext.plugins.trigger.UnstableTrigger;
+import hudson.plugins.emailext.plugins.content.*;
+import hudson.plugins.emailext.plugins.trigger.*;
 
 /**
  * Entry point of a plugin.
@@ -50,6 +33,7 @@ public class EmailExtensionPlugin extends Plugin {
 		addEmailContentPlugin(new ProjectNameContent());
 		addEmailContentPlugin(new ProjectURLContent());
 		addEmailContentPlugin(new SVNRevisionContent());
+        addEmailContentPlugin(new CauseContent());
 		
 		addEmailTriggerPlugin(PreBuildTrigger.DESCRIPTOR);
 		addEmailTriggerPlugin(FailureTrigger.DESCRIPTOR);
