@@ -1,20 +1,18 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" 
-		 xmlns:d="jelly:define" xmlns:l="/lib/layout" 
-		 xmlns:t="/lib/hudson" xmlns:f="/lib/form" 
-		 xmlns:m="/hudson/plugins/emailext/tags">
-	<!--
-		This script defines the view for the extended email plugin.
-	-->
+         xmlns:d="jelly:define" xmlns:l="/lib/layout" 
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form" 
+         xmlns:m="/hudson/plugins/emailext/tags">
+    <!--
+        This script defines the view for the extended email plugin.
+    -->
 
-	<!-- In case form is repeated, uniquify ids with a prefix -->
-	<j:set var="secId" value="emailext-${h.generateId()}-"/>
-	<!-- Also only include javascript once -->
-	<j:if test="${request.getAttribute('emailext.seen')==null}">
-	  <j:set var="unused" value="${request.setAttribute('emailext.seen','1')}"/>
-	  <script type="text/javascript" src="${rootURL}/plugin/email-ext/scripts/emailext-behavior.js"></script>
-	  <script type="text/javascript">var emailExtInit = new Array();</script>
-	</j:if>
-	
+    <!-- In case form is repeated, uniquify ids with a prefix -->
+    <j:set var="secId" value="emailext-${h.generateId()}-"/>
+    <st:once>
+      <script type="text/javascript" src="${rootURL}/plugin/email-ext/scripts/emailext-behavior.js"></script>
+      <script type="text/javascript">var emailExtInit = new Array();</script>
+    </st:once>
+
 	<!-- This is the global recipent list entry. -->
 	<f:entry title="Global Recipient List"
      		 description="Comma-separated list of email address that should receive notifications."
