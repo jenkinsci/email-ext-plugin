@@ -23,6 +23,11 @@
       <id>kdsweeney</id>
       <name>Kyle Sweeney</name>
     </developer>
+    <developer>
+      <id>krwalker</id>
+      <name>K. R. Walker</name>
+      <email>krwalker@stellarscience.com</email>
+    </developer>
   </developers>
 
   <dependencies>
