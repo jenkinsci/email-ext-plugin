@@ -91,9 +91,9 @@ public class ChangesSinceLastBuildContent implements EmailContent {
 					} catch (NoSuchMethodException e) { // getMethod()
 						// If it is not implemented, swallow the %d
 					} catch (IllegalAccessException e) { // invoke()
-						// Won't happen, getDate will be public
+						// in case getDate is not public
 					} catch (InvocationTargetException e) { // invoke()
-						// Won't happen, entry is the right type
+						// various possible reasons
 					}
 					return true;
 				}
@@ -130,9 +130,9 @@ public class ChangesSinceLastBuildContent implements EmailContent {
 					} catch (NoSuchMethodException e) { // getMethod()
 						// If it is not implemented, swallow the %r
 					} catch (IllegalAccessException e) { // invoke()
-						// Won't happen, getDate will be public
+						// in case getRevision is not public
 					} catch (InvocationTargetException e) { // invoke()
-						// Won't happen, entry is the right type
+						// various possible reasons
 					}
 					return true;
 				}
