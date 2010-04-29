@@ -6,6 +6,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Hudson;
+import hudson.model.ParametersAction;
 import hudson.model.Result;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
@@ -124,7 +125,7 @@ public class ExtendedEmailPublisher extends Notifier {
 	 * The default body of the emails for this project.  ($PROJECT_DEFAULT_BODY)
 	 */
 	public String defaultContent;
-	
+
 	/**
 	 * Get the list of configured email triggers for this project.
 	 */
@@ -270,10 +271,15 @@ public class ExtendedEmailPublisher extends Notifier {
 
         setContent( type, build, msg );
 
+        // substitute build parameters if available
+        ParametersAction parameters = build.getAction(ParametersAction.class);
+
 		// Get the recipients from the global list of addresses
 		List<InternetAddress> recipientAddresses = new ArrayList<InternetAddress>();
 		if (type.getSendToRecipientList()) {
 			for (String recipient : recipientList.split(COMMA_SEPARATED_SPLIT_REGEXP)) {
+                                if (parameters != null)
+                                    recipient = parameters.substitute(build, recipient);
 				addAddress(recipientAddresses, recipient, listener);
 			}
 		}
