@@ -1,8 +1,6 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 
@@ -15,8 +13,7 @@ public class PreBuildTrigger extends EmailTrigger {
 	}
 
 	@Override
-	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
-	boolean trigger(B build) {
+	public boolean trigger(AbstractBuild<?,?> build) {
 		return true;
 	}
 	

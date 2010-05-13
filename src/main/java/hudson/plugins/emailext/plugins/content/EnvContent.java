@@ -73,14 +73,14 @@ public class EnvContent implements EmailContent {
 		BuildListener listener = new StreamBuildListener(new NullStream());
 		Launcher launcher = node.createLauncher(listener);
 		try {
-			for (NodeProperty nodeProperty : Hudson.getInstance().getGlobalNodeProperties()) {
+			for (NodeProperty<?> nodeProperty : Hudson.getInstance().getGlobalNodeProperties()) {
 				Environment environment = nodeProperty.setUp(build, launcher, listener);
 				if (environment != null) {
 					buildEnvironments.add(environment);
 				}
 			}
 
-			for (NodeProperty nodeProperty : node.getNodeProperties()) {
+			for (NodeProperty<?> nodeProperty : node.getNodeProperties()) {
 				Environment environment = nodeProperty.setUp(build, launcher, listener);
 				if (environment != null) {
 					buildEnvironments.add(environment);

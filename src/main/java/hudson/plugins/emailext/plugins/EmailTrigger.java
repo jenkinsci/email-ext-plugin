@@ -1,7 +1,6 @@
 package hudson.plugins.emailext.plugins;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 
@@ -15,8 +14,7 @@ public abstract class EmailTrigger {
 	 * @param build The Build object after the project has been built
 	 * @return true if the conditions have been met to trigger a build of this type
 	 */
-	public abstract <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>>
-	boolean trigger(B build);
+	public abstract boolean trigger(AbstractBuild<?,?> build);
 
 	/**
 	 * Get the email that is with this trigger.

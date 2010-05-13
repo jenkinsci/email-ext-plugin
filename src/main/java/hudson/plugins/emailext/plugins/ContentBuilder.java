@@ -59,8 +59,7 @@ public class ContentBuilder {
 		return EMAIL_CONTENT_TYPE_MAP.values();
 	}
 	
-	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
-	String transformText(String origText, ExtendedEmailPublisher publisher, EmailType type, B build) {
+	public String transformText(String origText, ExtendedEmailPublisher publisher, EmailType type, AbstractBuild<?,?> build) {
 		String newText = origText.replaceAll(PROJECT_DEFAULT_BODY, Matcher.quoteReplacement(publisher.defaultContent))
 		 						 .replaceAll(PROJECT_DEFAULT_SUBJECT, Matcher.quoteReplacement(publisher.defaultSubject))
 								 .replaceAll(DEFAULT_BODY, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultBody()))

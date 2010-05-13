@@ -1,7 +1,6 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
@@ -11,12 +10,11 @@ public class StillFailingTrigger extends EmailTrigger {
 	public static final String TRIGGER_NAME = "Still Failing";
 	
 	@Override
-	public <P extends AbstractProject<P,B>,B extends AbstractBuild<P,B>>
-	boolean trigger(B build) {
+	public boolean trigger(AbstractBuild<?,?> build) {
 		Result buildResult = build.getResult();
 		
 		if(buildResult == Result.FAILURE){
-			B prevBuild = build.getPreviousBuild();
+			AbstractBuild<?,?> prevBuild = build.getPreviousBuild();
 			if (prevBuild != null && (prevBuild.getResult() == Result.FAILURE)) {
 				return true;
 			}
