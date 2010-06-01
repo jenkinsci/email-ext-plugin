@@ -52,6 +52,7 @@ public class EmailExtensionPlugin extends Plugin {
 		addEmailContentPlugin(new BuildURLContent());
 		addEmailContentPlugin(new ChangesSinceLastBuildContent());
 		addEmailContentPlugin(new ChangesSinceLastSuccessfulBuildContent());
+		addEmailContentPlugin(new ChangesSinceLastUnstableBuildContent());
 		addEmailContentPlugin(new EnvContent());
 		addEmailContentPlugin(new FailedTestsContent());
 		addEmailContentPlugin(new HudsonURLContent());
