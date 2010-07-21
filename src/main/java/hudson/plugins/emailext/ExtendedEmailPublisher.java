@@ -7,7 +7,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Hudson;
-import hudson.model.ParametersAction;
 import hudson.model.Result;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
