@@ -1,5 +1,6 @@
 package hudson.plugins.emailext;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -240,7 +241,7 @@ public class ExtendedEmailPublisher extends Notifier {
 				listener.getLogger().println("An attempt to send an e-mail"
 					+ " to empty list of recipients, ignored.");
 			}
-		} catch(MessagingException e) {
+		} catch(Exception e) {
 			LOGGER.log(Level.WARNING, "Could not send email.",e);
 			e.printStackTrace(listener.error("Could not send email as a part of the post-build publishers."));
 		}
@@ -248,7 +249,7 @@ public class ExtendedEmailPublisher extends Notifier {
 		return false;
 	}
 
-	private MimeMessage createMail(EmailType type, AbstractBuild<?,?> build, BuildListener listener) throws MessagingException {
+	private MimeMessage createMail(EmailType type, AbstractBuild<?,?> build, BuildListener listener) throws MessagingException, IOException, InterruptedException {
 		boolean overrideGlobalSettings = ExtendedEmailPublisher.DESCRIPTOR.getOverrideGlobalSettings();
 
 		MimeMessage msg;
@@ -271,15 +272,12 @@ public class ExtendedEmailPublisher extends Notifier {
 
         setContent( type, build, msg );
 
-        // substitute build parameters if available
-        ParametersAction parameters = build.getAction(ParametersAction.class);
+        EnvVars env = build.getEnvironment(listener);
 
 		// Get the recipients from the global list of addresses
 		List<InternetAddress> recipientAddresses = new ArrayList<InternetAddress>();
 		if (type.getSendToRecipientList()) {
-			for (String recipient : recipientList.split(COMMA_SEPARATED_SPLIT_REGEXP)) {
-                                if (parameters != null)
-                                    recipient = parameters.substitute(build, recipient);
+			for (String recipient : env.expand(recipientList).split(COMMA_SEPARATED_SPLIT_REGEXP)) {
 				addAddress(recipientAddresses, recipient, listener);
 			}
 		}
@@ -306,7 +304,7 @@ public class ExtendedEmailPublisher extends Notifier {
 		}
 		//Get the list of recipients that are uniquely specified for this type of email
 		if (type.getRecipientList() != null && type.getRecipientList().trim().length() > 0) {
-			String[] typeRecipients = type.getRecipientList().split(COMMA_SEPARATED_SPLIT_REGEXP);
+			String[] typeRecipients = env.expand(type.getRecipientList()).split(COMMA_SEPARATED_SPLIT_REGEXP);
 			for (int i = 0; i < typeRecipients.length; i++) {
 				recipientAddresses.add(new InternetAddress(typeRecipients[i]));
 			}

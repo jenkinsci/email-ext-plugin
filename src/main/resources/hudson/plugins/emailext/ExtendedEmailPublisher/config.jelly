@@ -19,7 +19,7 @@
              help="/plugin/email-ext/help/projectConfig/globalRecipientList.html">
 	    <input class="setting-input validated" name="recipientlist_recipients"
             type="text" value="${instance.recipientList}"
-            checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encode(this.value)"/>
+            checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)"/>
     </f:entry>
     
 	<!-- This is the content type for the emails. -->
