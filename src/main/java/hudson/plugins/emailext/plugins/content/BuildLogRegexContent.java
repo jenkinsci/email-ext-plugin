@@ -30,6 +30,7 @@ import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.tasks.Mailer;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -51,7 +52,7 @@ import java.util.regex.Pattern;
  * @author krwalker@stellarscience.com
  */
 public class BuildLogRegexContent implements EmailContent {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(Mailer.class.getName());
 
 	private static final String TOKEN = "BUILD_LOG_REGEX";
@@ -68,7 +69,7 @@ public class BuildLogRegexContent implements EmailContent {
 	private static final boolean SHOW_TRUNCATED_LINES_DEFAULT_VALUE = true;
 	private static final String SUBST_TEXT_NAME = "substText";
 	private static final String SUBST_TEXT_DEFAULT_VALUE = null; /* insert entire line */
-	
+
 	public String getToken() {
 		return TOKEN;
 	}
@@ -82,7 +83,7 @@ public class BuildLogRegexContent implements EmailContent {
 			SHOW_TRUNCATED_LINES_ARG_NAME,
 			SUBST_TEXT_NAME);
 	}
-	
+
 	public String getHelpText() {
 		return "Displays lines from the build log that match the regular expression.\n" +
 			"<ul\n" +
@@ -108,7 +109,7 @@ public class BuildLogRegexContent implements EmailContent {
 			"<tt>[...truncated ### lines...]</tt> lines.<br>\n" +
 			"Defaults to " + SHOW_TRUNCATED_LINES_DEFAULT_VALUE + ".\n" +
 
-			"<li><i>" + SUBST_TEXT_NAME + "</i> - If present, insert this text into the email " +
+			"<li><i>" + SUBST_TEXT_NAME + "</i> - If non null, insert this text into the email " +
 			"rather than the entire line.<br>\n" +
 
 			"</ul>\n";
@@ -118,109 +119,123 @@ public class BuildLogRegexContent implements EmailContent {
 		buffer.append(line);
 		buffer.append('\n');
 	}
-	
+
 	private void appendLinesTruncated(StringBuffer buffer, int numLinesTruncated) {
 		// This format comes from hudson.model.Run.getLog(maxLines).
 		append(buffer, "[...truncated " + numLinesTruncated + " lines...]");
 	}
 
-	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
-	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
-			EmailType emailType, Map<String, ?> args) {
-		//LOGGER.log(Level.INFO, TOKEN + " getContent");
-		final String regex = Args.get(args, REGEX_ARG_NAME, REGEX_DEFAULT_VALUE);
-		final int contextLinesBefore = Args.get(args, LINES_BEFORE_ARG_NAME, LINES_BEFORE_DEFAULT_VALUE);
-		final int contextLinesAfter = Args.get(args, LINES_AFTER_ARG_NAME, LINES_AFTER_DEFAULT_VALUE);
-		final int maxMatches = Args.get(args, MAX_MATCHES_ARG_NAME, MAX_MATCHES_DEFAULT_VALUE);
-		final boolean showTruncatedLines = Args.get(args, SHOW_TRUNCATED_LINES_ARG_NAME, SHOW_TRUNCATED_LINES_DEFAULT_VALUE);
-		final String substText = Args.get(args,SUBST_TEXT_NAME, SUBST_TEXT_DEFAULT_VALUE);
+    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(
+        AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType emailType, Map<String, ?> args )
+    {
+        try
+        {
+            BufferedReader reader = new BufferedReader( new FileReader( build.getLogFile() ) );
+            String transformedContent = getContent( reader, args );
+            reader.close();
+            return transformedContent;
+        }
+        catch ( IOException ex )
+        {
+            LOGGER.log( Level.SEVERE, null, ex );
+            return ""; // TODO: Indicate there was an error instead?
+        }
+    }
+
+	String getContent(BufferedReader reader, Map<String, ?> args)
+			throws IOException {
+
+		final String regex = Args
+				.get(args, REGEX_ARG_NAME, REGEX_DEFAULT_VALUE);
+		final int contextLinesBefore = Args.get(args, LINES_BEFORE_ARG_NAME,
+				LINES_BEFORE_DEFAULT_VALUE);
+		final int contextLinesAfter = Args.get(args, LINES_AFTER_ARG_NAME,
+				LINES_AFTER_DEFAULT_VALUE);
+		final int maxMatches = Args.get(args, MAX_MATCHES_ARG_NAME,
+				MAX_MATCHES_DEFAULT_VALUE);
+		final boolean showTruncatedLines = Args.get(args,
+				SHOW_TRUNCATED_LINES_ARG_NAME,
+				SHOW_TRUNCATED_LINES_DEFAULT_VALUE);
+		final String substText = Args.get(args, SUBST_TEXT_NAME,
+				SUBST_TEXT_DEFAULT_VALUE);
+
 		final Pattern pattern = Pattern.compile(regex);
 		final StringBuffer buffer = new StringBuffer();
-		try {
-			final BufferedReader reader = new BufferedReader(new FileReader(build.getLogFile()));
-			try {
-				int numLinesTruncated = 0;
-				int numMatches = 0;
-				int numLinesStillNeeded = 0;
-				Queue<String> linesBefore = new LinkedList<String>();
-				String line = null;
-				while ((line = reader.readLine()) != null) {
-					// Remove any lines before that are no longer needed.
-					while (linesBefore.size() > contextLinesBefore) {
-						linesBefore.remove();
-						++numLinesTruncated;
-					}
-					final Matcher matcher = pattern.matcher(line);
-					final StringBuffer sb = new StringBuffer();
-					boolean bMatched = false;
-					while (matcher.find()) {
-						bMatched = true;
-						if (substText != null)
-							matcher.appendReplacement(sb, substText);
-						else
-							break;
-					}
-					if (bMatched) {
-						// The current line matches.
-						if (substText != null)
-							matcher.appendTail(sb);
-						if (showTruncatedLines == true && numLinesTruncated > 0) {
-							// Append information about truncated lines.
-							appendLinesTruncated(buffer, numLinesTruncated);
-							numLinesTruncated = 0;
-						}
-						// Append all the linesBefore.
-						while (linesBefore.size() > 0) {
-							append(buffer, linesBefore.remove());
-						}
-						// Append the (possibly transformed) current line.
-						if (substText != null)
-							append(buffer, sb.toString());
-						else
-							append(buffer, line);
-						++numMatches;
-						// Set up to add numLinesStillNeeded
-						numLinesStillNeeded = contextLinesAfter;
-					} else {
-						// The current line did not match.
-						if (numLinesStillNeeded > 0) {
-							// Append this line as a line after.
-							append(buffer, line);
-							--numLinesStillNeeded;
-						} else {
-							// Store this line as a possible line before.
-							linesBefore.offer(line);
-						}
-					}
-					if (maxMatches != 0 && numMatches >= maxMatches && numLinesStillNeeded == 0) {
-						break;
-					}
-				}
-				if (showTruncatedLines == true) {
-					// Count the rest of the lines.
-					// Include any lines in linesBefore.
-					while (linesBefore.size() > 0) {
-						linesBefore.remove();
-						++numLinesTruncated;
-					}
-					if (line != null) {
-						// Include the rest of the lines that haven't been read in.
-						while ((line = reader.readLine()) != null) {
-							++numLinesTruncated;
-						}
-					}
-					if (numLinesTruncated > 0) {
-						appendLinesTruncated(buffer, numLinesTruncated);
-					}
-				}
-			} finally {
-				reader.close();
+		int numLinesTruncated = 0;
+		int numMatches = 0;
+		int numLinesStillNeeded = 0;
+		Queue<String> linesBefore = new LinkedList<String>();
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			// Remove any lines before that are no longer needed.
+			while (linesBefore.size() > contextLinesBefore) {
+				linesBefore.remove();
+				++numLinesTruncated;
 			}
-		} catch (IOException ex) {
-			LOGGER.log(Level.SEVERE, null, ex);
+			final Matcher matcher = pattern.matcher(line);
+			final StringBuffer sb = new StringBuffer();
+			boolean bMatched = false;
+			while (matcher.find()) {
+				bMatched = true;
+				if (substText != null)
+					matcher.appendReplacement(sb, substText);
+				else
+					break;
+			}
+			if (bMatched) {
+				// The current line matches.
+				if (showTruncatedLines == true && numLinesTruncated > 0) {
+					// Append information about truncated lines.
+					appendLinesTruncated(buffer, numLinesTruncated);
+					numLinesTruncated = 0;
+				}
+				// Append all the linesBefore.
+				while (linesBefore.size() > 0) {
+					append(buffer, linesBefore.remove());
+				}
+				// Append the (possibly transformed) current line.
+				if (substText != null) {
+					matcher.appendTail(sb);
+					append(buffer, sb.toString());
+				} else {
+					append(buffer, line);
+				}
+				++numMatches;
+				// Set up to add numLinesStillNeeded
+				numLinesStillNeeded = contextLinesAfter;
+			} else {
+				// The current line did not match.
+				if (numLinesStillNeeded > 0) {
+					// Append this line as a line after.
+					append(buffer, line);
+					--numLinesStillNeeded;
+				} else {
+					// Store this line as a possible line before.
+					linesBefore.offer(line);
+				}
+			}
+			if (maxMatches != 0 && numMatches >= maxMatches && numLinesStillNeeded == 0) {
+				break;
+			}
 		}
-		
-		//LOGGER.log(Level.INFO, "${BUILD_LOG_REGEX,...}:\n" + buffer.toString());
+		if (showTruncatedLines == true) {
+			// Count the rest of the lines.
+			// Include any lines in linesBefore.
+			while (linesBefore.size() > 0) {
+				linesBefore.remove();
+				++numLinesTruncated;
+			}
+			if (line != null) {
+				// Include the rest of the lines that haven't been read in.
+				while ((line = reader.readLine()) != null) {
+					++numLinesTruncated;
+				}
+			}
+			if (numLinesTruncated > 0) {
+				appendLinesTruncated(buffer, numLinesTruncated);
+			}
+		}
+
 		return buffer.toString();
 	}
 
