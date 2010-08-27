@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -65,6 +66,8 @@ public class BuildLogRegexContent implements EmailContent {
 	private static final int MAX_MATCHES_DEFAULT_VALUE = 0;
 	private static final String SHOW_TRUNCATED_LINES_ARG_NAME = "showTruncatedLines";
 	private static final boolean SHOW_TRUNCATED_LINES_DEFAULT_VALUE = true;
+	private static final String SUBST_TEXT_NAME = "substText";
+	private static final String SUBST_TEXT_DEFAULT_VALUE = null; /* insert entire line */
 	
 	public String getToken() {
 		return TOKEN;
@@ -76,7 +79,8 @@ public class BuildLogRegexContent implements EmailContent {
 			LINES_BEFORE_ARG_NAME,
 			LINES_AFTER_ARG_NAME,
 			MAX_MATCHES_ARG_NAME,
-			SHOW_TRUNCATED_LINES_ARG_NAME);
+			SHOW_TRUNCATED_LINES_ARG_NAME,
+			SUBST_TEXT_NAME);
 	}
 	
 	public String getHelpText() {
@@ -104,6 +108,9 @@ public class BuildLogRegexContent implements EmailContent {
 			"<tt>[...truncated ### lines...]</tt> lines.<br>\n" +
 			"Defaults to " + SHOW_TRUNCATED_LINES_DEFAULT_VALUE + ".\n" +
 
+			"<li><i>" + SUBST_TEXT_NAME + "</i> - If present, insert this text into the email " +
+			"rather than the entire line.<br>\n" +
+
 			"</ul>\n";
 	}
 
@@ -126,6 +133,7 @@ public class BuildLogRegexContent implements EmailContent {
 		final int contextLinesAfter = Args.get(args, LINES_AFTER_ARG_NAME, LINES_AFTER_DEFAULT_VALUE);
 		final int maxMatches = Args.get(args, MAX_MATCHES_ARG_NAME, MAX_MATCHES_DEFAULT_VALUE);
 		final boolean showTruncatedLines = Args.get(args, SHOW_TRUNCATED_LINES_ARG_NAME, SHOW_TRUNCATED_LINES_DEFAULT_VALUE);
+		final String substText = Args.get(args,SUBST_TEXT_NAME, SUBST_TEXT_DEFAULT_VALUE);
 		final Pattern pattern = Pattern.compile(regex);
 		final StringBuffer buffer = new StringBuffer();
 		try {
@@ -142,8 +150,20 @@ public class BuildLogRegexContent implements EmailContent {
 						linesBefore.remove();
 						++numLinesTruncated;
 					}
-					if (pattern.matcher(line).find()) {
+					final Matcher matcher = pattern.matcher(line);
+					final StringBuffer sb = new StringBuffer();
+					boolean bMatched = false;
+					while (matcher.find()) {
+						bMatched = true;
+						if (substText != null)
+							matcher.appendReplacement(sb, substText);
+						else
+							break;
+					}
+					if (bMatched) {
 						// The current line matches.
+						if (substText != null)
+							matcher.appendTail(sb);
 						if (showTruncatedLines == true && numLinesTruncated > 0) {
 							// Append information about truncated lines.
 							appendLinesTruncated(buffer, numLinesTruncated);
@@ -153,8 +173,11 @@ public class BuildLogRegexContent implements EmailContent {
 						while (linesBefore.size() > 0) {
 							append(buffer, linesBefore.remove());
 						}
-						// Append the current line.
-						append(buffer, line);
+						// Append the (possibly transformed) current line.
+						if (substText != null)
+							append(buffer, sb.toString());
+						else
+							append(buffer, line);
 						++numMatches;
 						// Set up to add numLinesStillNeeded
 						numLinesStillNeeded = contextLinesAfter;
