@@ -58,8 +58,6 @@ public class ExtendedEmailPublisher extends Notifier {
 	
 	private static final Logger LOGGER = Logger.getLogger(Mailer.class.getName());
 
-	public static final String COMMA_SEPARATED_SPLIT_REGEXP = "[,\\s]+";
-
 	private static final Map<String,EmailTriggerDescriptor> EMAIL_TRIGGER_TYPE_MAP = new HashMap<String,EmailTriggerDescriptor>();
 	
 	public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
