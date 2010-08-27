@@ -48,15 +48,6 @@ public class ExtendedEmailPublisherTest
         Mailbox.clearAll();
     }
 
-    public void testSplitCommaSeparatedString()
-    {
-        String test = "asdf.fasdfd@fadsf.cadfad, asdfd, adsfadfaife, qwf.235f.adfd.#@adfe.cadfe";
-
-        String[] tests = test.split( ExtendedEmailPublisher.COMMA_SEPARATED_SPLIT_REGEXP );
-
-        assertEquals( 4, tests.length );
-    }
-
     public void testShouldNotSendEmailWhenNoTriggerEnabled()
         throws Exception
     {
