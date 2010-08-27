@@ -276,9 +276,7 @@ public class ExtendedEmailPublisher extends Notifier {
 		// Get the recipients from the global list of addresses
 		List<InternetAddress> recipientAddresses = new ArrayList<InternetAddress>();
 		if (type.getSendToRecipientList()) {
-			for (String recipient : env.expand(recipientList).split(COMMA_SEPARATED_SPLIT_REGEXP)) {
-				addAddress(recipientAddresses, recipient, listener);
-			}
+            addAddressesFromRecipientList(recipientAddresses, recipientList, env, listener);
 		}
 		// Get the list of developers who made changes between this build and the last
 		// if this mail type is configured that way
@@ -295,7 +293,7 @@ public class ExtendedEmailPublisher extends Notifier {
 			for (User user : users) {
 				String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
 				if (adrs != null)
-					addAddress(recipientAddresses, adrs, listener);
+					addAddressesFromRecipientList(recipientAddresses, adrs, env, listener);
 				else {
 					listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
 				}
@@ -303,10 +301,7 @@ public class ExtendedEmailPublisher extends Notifier {
 		}
 		//Get the list of recipients that are uniquely specified for this type of email
 		if (type.getRecipientList() != null && type.getRecipientList().trim().length() > 0) {
-			String[] typeRecipients = env.expand(type.getRecipientList()).split(COMMA_SEPARATED_SPLIT_REGEXP);
-			for (int i = 0; i < typeRecipients.length; i++) {
-				recipientAddresses.add(new InternetAddress(typeRecipients[i]));
-			}
+            addAddressesFromRecipientList( recipientAddresses, type.getRecipientList(), env, listener );
 		}
 		
 		msg.setRecipients(Message.RecipientType.TO, recipientAddresses.toArray(new InternetAddress[recipientAddresses.size()]));
@@ -351,12 +346,14 @@ public class ExtendedEmailPublisher extends Notifier {
         msg.setContent(text, messageContentType);
     }
 
-    private static void addAddress(List<InternetAddress> addresses, String address, BuildListener listener) {
-		try {
-			addresses.add(new InternetAddress(address));
+    private static void addAddressesFromRecipientList(List<InternetAddress> addresses, String recipientList,
+                                                      EnvVars envVars, BuildListener listener) {
+        try {
+            List<InternetAddress> internetAddresses = new EmailRecepientUtils().convertRecipientString( recipientList, envVars );
+			addresses.addAll(internetAddresses);
 		} catch(AddressException ae) {
 			LOGGER.log(Level.WARNING, "Could not create email address.", ae);
-			listener.getLogger().println("Failed to create e-mail address for " + address);
+			listener.getLogger().println("Failed to create e-mail address for " + ae.getRef());
 		}
 	}
 	
@@ -667,20 +664,7 @@ public class ExtendedEmailPublisher extends Notifier {
 		
 		public FormValidation doRecipientListRecipientsCheck(
 				@QueryParameter final String value) throws IOException, ServletException {
-			if(value != null && value.trim().length() > 0) {
-				String[] names = value.split(COMMA_SEPARATED_SPLIT_REGEXP);
-				try {
-					for(int i=0;i<names.length;i++) {
-						if(names[i].trim().length()>0) {
-							new InternetAddress(names[i]);
-						}
-					}
-				}
-				catch(AddressException e) {
-					return FormValidation.error(e.getMessage());
-				}
-			}
-			return FormValidation.ok();
+			return new EmailRecepientUtils().validateFormRecipientList( value );
 		}
 		
 	}
