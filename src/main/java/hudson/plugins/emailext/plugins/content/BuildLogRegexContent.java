@@ -24,6 +24,7 @@
 
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.console.ConsoleNote;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.plugins.emailext.EmailType;
@@ -167,6 +168,9 @@ public class BuildLogRegexContent implements EmailContent {
 		Queue<String> linesBefore = new LinkedList<String>();
 		String line = null;
 		while ((line = reader.readLine()) != null) {
+            // Remove console notes ( HUDSON-7402)
+            line = ConsoleNote.removeNotes(line);
+
 			// Remove any lines before that are no longer needed.
 			while (linesBefore.size() > contextLinesBefore) {
 				linesBefore.remove();

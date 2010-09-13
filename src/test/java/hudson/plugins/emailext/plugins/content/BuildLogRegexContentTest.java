@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.console.ConsoleNote;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -84,5 +85,20 @@ public class BuildLogRegexContentTest
         final String result = buildLogRegexContent.getContent( reader, args );
 
         assertEquals( "Yes\nNo\n", result );
+    }
+
+    @Test
+    public void testGetContent_shouldStripOutConsoleNotes()
+            throws Exception
+    {
+        // See HUDSON-7402
+        args.put( "regex", ".*");
+        args.put( "showTruncatedLines", false);
+        final BufferedReader reader = new BufferedReader(
+        		new StringReader( ConsoleNote.PREAMBLE_STR + "AAAAdB+LCAAAAAAAAABb85aBtbiIQSOjNKU4P0+vIKc0PTOvWK8kMze1uCQxtyC1SC8ExvbLL0llgABGJgZGLwaB3MycnMzi4My85FTXgvzkjIoiBimoScn5ecX5Oal6zhAaVS9DRQGQ1uaZsmc5AAaMIAyBAAAA" + ConsoleNote.POSTAMBLE_STR + "No emails were triggered." ) );
+
+        final String result = buildLogRegexContent.getContent( reader, args );
+
+        assertEquals( "No emails were triggered.\n", result);
     }
 }
