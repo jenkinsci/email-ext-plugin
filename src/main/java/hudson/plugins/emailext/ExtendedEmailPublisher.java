@@ -20,6 +20,7 @@ import hudson.tasks.Mailer;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -50,9 +51,6 @@ import java.util.logging.Logger;
 
 /**
  * {@link Publisher} that sends notification e-mail.
- *
- * @author kyle.sweeney@valtech.com
- *
  */
 public class ExtendedEmailPublisher extends Notifier {
 	
@@ -387,10 +385,12 @@ public class ExtendedEmailPublisher extends Notifier {
 		 */
 		private String hudsonUrl;
 
-		/**
-		 * If non-null, use SMTP-AUTH with these information.
-		 */
-		private String smtpAuthPassword,smtpAuthUsername;
+        /**
+                * If non-null, use SMTP-AUTH
+                */
+        private String smtpAuthUsername;
+
+        private Secret smtpAuthPassword;
 
 		/**
 		 * The e-mail address that Hudson puts to "From:" field in outgoing e-mails.
@@ -451,17 +451,6 @@ public class ExtendedEmailPublisher extends Notifier {
 		
 		/** JavaMail session. */
 		public Session createSession() {
-			/*
-			 * 				Mailer.DescriptorImpl desc = Mailer.descriptor();
-				smtpHost = nullify(desc.getSmtpServer());
-				adminAddress = desc.getAdminAddress();
-				defaultSuffix = nullify(desc.getDefaultSuffix());
-				hudsonUrl = desc.getUrl();
-				smtpAuthUsername = desc.getSmtpAuthUserName();
-				smtpAuthPassword = desc.getSmtpAuthPassword();
-				useSsl = desc.getUseSsl();
-				smtpPort = desc.getSmtpPort();
-			 */
 			Properties props = new Properties(System.getProperties());
 			if(smtpHost!=null)
 				props.put("mail.smtp.host",smtpHost);
@@ -517,7 +506,7 @@ public class ExtendedEmailPublisher extends Notifier {
 		}
 		
 		public String getSmtpAuthPassword() {
-			return smtpAuthPassword;
+            return Secret.toString(smtpAuthPassword);
 		}
 
 		public boolean getUseSsl() {
@@ -553,6 +542,7 @@ public class ExtendedEmailPublisher extends Notifier {
 			// Save the recipient lists
 			String listRecipients = formData.getString("recipientlist_recipients");
 			
+
 			// Save configuration for each trigger type
 			ExtendedEmailPublisher m = new ExtendedEmailPublisher();
 			m.recipientList = listRecipients;
@@ -616,9 +606,10 @@ public class ExtendedEmailPublisher extends Notifier {
 			// specify authentication information
 			if (req.getParameter("extmailer.useSMTPAuth") != null) {
 				smtpAuthUsername = nullify(req.getParameter("extmailer.SMTPAuth.userName"));
-				smtpAuthPassword = nullify(req.getParameter("extmailer.SMTPAuth.password"));
+				smtpAuthPassword = Secret.fromString(nullify(req.getParameter("extmailer.SMTPAuth.password")));
 			} else {
-				smtpAuthUsername = smtpAuthPassword = null;
+				smtpAuthUsername = null;
+                smtpAuthPassword = null;
 			}
 			
 			// specify if the mail server uses ssl for authentication
