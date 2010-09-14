@@ -22,10 +22,11 @@ public class BuildLogContent implements EmailContent {
 	
 	private static final Logger LOGGER = Logger.getLogger(Mailer.class.getName());
 
-	private static final String TOKEN = "BUILD_LOG";
+	public static final String TOKEN = "BUILD_LOG";
 	
-	private static final String MAX_LINES_ARG_NAME = "maxLines";
-	private static final int MAX_LINES_DEFAULT_VALUE = 250;
+	public static final String MAX_LINES_ARG_NAME = "maxLines";
+
+    public static final int MAX_LINES_DEFAULT_VALUE = 250;
 	
 	public String getToken() {
 		return TOKEN;
