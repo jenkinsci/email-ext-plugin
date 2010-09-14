@@ -3,6 +3,7 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Hudson;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailContent;
@@ -30,7 +31,13 @@ public class HudsonURLContent implements EmailContent {
 	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
 	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
 			EmailType emailType, Map<String, ?> args) {
-		String hudsonUrl = ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl();
+        // HUDSON-6193
+		String hudsonUrl = Hudson.getInstance().getRootUrl();
+        if (ExtendedEmailPublisher.DESCRIPTOR.getOverrideGlobalSettings())
+        {
+            hudsonUrl = ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl();
+        }
+
 		if(hudsonUrl==null) return "";
 		if(!hudsonUrl.endsWith("/"))
 			hudsonUrl += "/";

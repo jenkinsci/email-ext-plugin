@@ -491,9 +491,6 @@ public class ExtendedEmailPublisher extends Notifier {
 		}
 
 		public String getHudsonUrl() {
-			if (hudsonUrl == null) {
-				return Hudson.getInstance().getRootUrl();
-			}
 			return hudsonUrl;
 		}
 
