@@ -6,7 +6,10 @@ import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.tasks.Mailer;
+import org.apache.commons.lang.StringEscapeUtils;
+
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,16 +27,20 @@ public class BuildLogContent implements EmailContent {
 
 	public static final String TOKEN = "BUILD_LOG";
 	
-	public static final String MAX_LINES_ARG_NAME = "maxLines";
+    public static final String MAX_LINES_ARG_NAME = "maxLines";
+
+    public static final String ESCAPE_HTML_ARG_NAME = "escapeHtml";
 
     public static final int MAX_LINES_DEFAULT_VALUE = 250;
+
+    public static final boolean ESCAPE_HTML_DEFAULT_VALUE = false;
 	
 	public String getToken() {
 		return TOKEN;
 	}
 
 	public List<String> getArguments() {
-		return Collections.singletonList(MAX_LINES_ARG_NAME);
+        return Arrays.asList(MAX_LINES_ARG_NAME, ESCAPE_HTML_ARG_NAME);
 	}
 	
 	public String getHelpText() {
@@ -43,6 +50,9 @@ public class BuildLogContent implements EmailContent {
 		"<li><i>" + MAX_LINES_ARG_NAME + "</i> - display at most this many " +
 		"lines of the log.<br>\n" +
 		"Defaults to " + MAX_LINES_DEFAULT_VALUE + ".\n" +
+
+        "<li><i>" + ESCAPE_HTML_ARG_NAME + "</i> - If true, HTML is escaped.<br>\n" +
+        "Defaults to " + ESCAPE_HTML_DEFAULT_VALUE + ".\n" +
 		
 		"</ul>\n";
 	}
@@ -51,13 +61,17 @@ public class BuildLogContent implements EmailContent {
 	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
 			EmailType emailType, Map<String, ?> args) {
 		
-		StringBuffer buffer = new StringBuffer();
 		// getLog() chokes and dies if called with a number <= 0.
-		int maxLines = Math.max(Args.get(args, MAX_LINES_ARG_NAME, MAX_LINES_DEFAULT_VALUE), 1);
+		final int maxLines = Math.max(Args.get(args, MAX_LINES_ARG_NAME, MAX_LINES_DEFAULT_VALUE), 1);
+        final boolean escapeHtml = Args.get( args, ESCAPE_HTML_ARG_NAME, ESCAPE_HTML_DEFAULT_VALUE );
+
+        StringBuffer buffer = new StringBuffer();
 		try {
 			List<String> lines = build.getLog(maxLines);
 			for(String line: lines) {
-				//TODO: show file links the same way as MailSender
+                if (escapeHtml) {
+                    line = StringEscapeUtils.escapeHtml( line );
+                }
 				buffer.append(line);
 				buffer.append('\n');
 			}

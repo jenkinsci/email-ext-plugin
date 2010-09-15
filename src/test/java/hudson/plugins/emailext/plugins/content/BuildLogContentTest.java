@@ -38,12 +38,12 @@ public class BuildLogContentTest
         {{
                 add("line 1");
                 add("line 2");
-                add("<line>3</line>");
+                add("line 3");
             }});
 
         String content = buildLogContent.getContent(build, null, null, args);
 
-        assertEquals("line 1\nline 2\n<line>3</line>\n", content);
+        assertEquals("line 1\nline 2\nline 3\n", content);
     }
 
     @Test
@@ -64,5 +64,35 @@ public class BuildLogContentTest
         buildLogContent.getContent(build, null, null, args);
 
         verify(build).getLog(BuildLogContent.MAX_LINES_DEFAULT_VALUE);
+    }
+
+    @Test
+    public void testGetContent_shouldDefaultToNotEscapeHtml()
+            throws Exception
+    {
+        when(build.getLog(anyInt())).thenReturn(new LinkedList<String>()
+        {{
+                add("<b>bold</b>");
+            }});
+
+        String content = buildLogContent.getContent(build, null, null, args);
+
+        assertEquals("<b>bold</b>\n", content);
+    }
+    
+    @Test
+    public void testGetContent_shouldEscapeHtmlWhenArgumentEscapeHtmlSetToTrue()
+            throws Exception
+    {
+        args.put( BuildLogContent.ESCAPE_HTML_ARG_NAME, true );
+
+        when(build.getLog(anyInt())).thenReturn(new LinkedList<String>()
+        {{
+                add("<b>bold</b>");
+            }});
+
+        String content = buildLogContent.getContent(build, null, null, args);
+
+        assertEquals("&lt;b&gt;bold&lt;/b&gt;\n", content);
     }
 }
