@@ -1,0 +1,248 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define">
+
+<STYLE>
+BODY, TABLE, TD, TH, P {
+  font-family:Verdana,Helvetica,sans serif;
+  font-size:11px;
+  color:black;
+}
+h1 { color:black; }
+h2 { color:black; }
+h3 { color:black; }
+TD.bg1 { color:white; background-color:#0000C0; font-size:120% }
+TD.bg2 { color:white; background-color:#4040FF; font-size:110% }
+TD.bg3 { color:white; background-color:#8080FF; }
+TD.test_passed { color:blue; }
+TD.test_failed { color:red; }
+TD.console { font-family:Courier New; }
+</STYLE>
+<BODY>
+<j:set var="spc" value="&amp;nbsp;&amp;nbsp;" />
+
+
+<!-- GENERAL INFO -->
+
+<TABLE>
+  <TR><TD align="right">
+    <j:choose>
+      <j:when test="${build.result=='SUCCESS'}">
+        <IMG SRC="${rooturl}static/e59dfe28/images/32x32/blue.gif" />
+      </j:when>
+	  <j:when test="${build.result=='FAILURE'}">
+        <IMG SRC="${rooturl}static/e59dfe28/images/32x32/red.gif" />
+      </j:when>
+      <j:otherwise>
+        <IMG SRC="${rooturl}static/e59dfe28/images/32x32/yellow.gif" />
+      </j:otherwise>
+    </j:choose>
+  </TD><TD valign="center"><B style="font-size: 200%;">BUILD ${build.result}</B></TD></TR>
+  <TR><TD>Build URL</TD><TD><A href="${rooturl}${build.url}">${rooturl}${build.url}</A></TD></TR>
+  <TR><TD>Project:</TD><TD>${project.name}</TD></TR>
+  <TR><TD>Date of build:</TD><TD>${it.timestampString}</TD></TR>
+  <TR><TD>Build duration:</TD><TD>${build.durationString}</TD></TR>
+</TABLE>
+<BR/>
+
+
+<!-- CHANGE SET -->
+
+<j:set var="changeSet" value="${build.changeSet}" />
+<j:if test="${changeSet!=null}">
+  <j:set var="hadChanges" value="false" />
+  <TABLE width="100%">
+    <TR><TD class="bg1" colspan="2"><B>CHANGES</B></TD></TR>
+    <j:forEach var="cs" items="${changeSet.logs}" varStatus="loop">
+      <j:set var="hadChanges" value="true" />
+      <j:set var="aUser" value="${cs.hudsonUser}"/>
+      <TR>
+        <TD colspan="2" class="bg2">${spc}Revision <B>${cs.revision}</B> by
+          <B><j:choose>
+            <j:when test="${aUser!=null}">${aUser.displayName}: </j:when>
+            <j:otherwise>${cs.user}: </j:otherwise>
+          </j:choose></B>
+          <B>(${cs.msgAnnotated})</B>
+         </TD>
+      </TR>
+      <j:forEach var="p" items="${cs.paths}">
+        <TR>
+          <TD width="10%">${spc}${p.editType.name}</TD>
+          <TD>${p.value}</TD>
+        </TR>
+      </j:forEach>
+    </j:forEach>
+    <j:if test="${!hadChanges}">
+      <TR><TD colspan="2">No Changes</TD></TR>
+    </j:if>
+  </TABLE>
+<BR/>
+</j:if>
+
+
+<!-- ARTIFACTS -->
+
+<j:set var="artifacts" value="${build.artifacts}" />
+<j:if test="${artifacts!=null and artifacts.size()&gt;0}">
+  <TABLE width="100%">
+    <TR><TD class="bg1"><B>BUILD ATRIFACTS</B></TD></TR>
+    <TR>
+      <TD>
+        <j:forEach var="f" items="${artifacts}">
+      	  <li>
+      	    <a href="${rooturl}${build.url}artifact/${f}">${f}</a>
+      	  </li>
+      	</j:forEach>
+      </TD>
+    </TR>
+  </TABLE>
+<BR/>  
+</j:if>
+
+
+<!-- MAVEN ARTIFACTS -->
+
+<j:set var="mbuilds" value="${build.moduleBuilds}" />
+<j:if test="${mbuilds!=null}">
+  <TABLE width="100%">
+      <TR><TD class="bg1"><B>BUILD ATRIFACTS</B></TD></TR>
+      <j:forEach var="m" items="${mbuilds}">
+        <TR><TD class="bg2"><B>${m.key.displayName}</B></TD></TR>
+        <j:forEach var="mvnbld" items="${m.value}">
+        <j:set var="artifacts" value="${mvnbld.artifacts}" />
+        <j:if test="${artifacts!=null and artifacts.size()&gt;0}">
+      <TR>
+        <TD>
+      	  <j:forEach var="f" items="${artifacts}">
+      	    <li>
+      	      <a href="${rooturl}${mvnbld.url}artifact/${f}">${f}</a>
+      	    </li>
+      	  </j:forEach>
+      	</TD>
+      </TR>
+        </j:if>
+        </j:forEach>
+      </j:forEach>
+  </TABLE>
+<BR/>  
+</j:if>
+
+
+<!-- JUnit TEMPLATE -->
+
+<j:set var="junitResultList" value="${it.JUnitTestResult}" />
+<j:if test="${junitResultList.isEmpty()!=true}">
+  <TABLE width="100%">
+    <TR><TD class="bg1" colspan="2"><B>JUnit Tests</B></TD></TR>
+    <j:forEach var="junitResult" items="${it.JUnitTestResult}">
+      <j:forEach var="packageResult" items="${junitResult.getChildren()}">
+        <TR><TD class="bg2" colspan="2"> Name: ${packageResult.getName()} Failed: ${packageResult.getFailCount()} test(s), Passed: ${packageResult.getPassCount()} test(s), Skipped: ${packageResult.getSkipCount()} test(s), Total: ${packageResult.getPassCount()+packageResult.getFailCount()+packageResult.getSkipCount()} test(s)</TD></TR>
+        <j:forEach var="failed_test" items="${packageResult.getFailedTests()}">
+          <TR bgcolor="white"><TD class="test_failed" colspan="2"><B><li>Failed: ${failed_test.getFullName()} </li></B></TD></TR>
+        </j:forEach>
+      </j:forEach> 
+    </j:forEach>  
+  </TABLE>	
+<BR/>
+</j:if>
+
+
+<!-- COBERTURA TEMPLATE -->
+
+<j:set var="coberturaAction" value="${it.coberturaAction}" />
+<j:if test="${coberturaAction!=null}">
+  <j:set var="coberturaResult" value="${coberturaAction.result}" />
+  <j:if test="${coberturaResult!=null}">
+  	<table width="100%"><TD class="bg1" colspan="2"><B>Cobertura Report</B></TD></table>
+	<table width="100%"><TD class="bg2" colspan="2"><B>Project Coverage Summary</B></TD></table>
+            <table border="1px" class="pane">
+                <tr>
+                    <td>Name</td>
+                    <j:forEach var="metric" items="${coberturaResult.metrics}">
+                        <td>${metric.name}</td>
+                    </j:forEach>
+                </tr>
+                <tr>
+                    <td>${coberturaResult.name}</td>
+                    <j:forEach var="metric" items="${coberturaResult.metrics}">
+                        <td data="${coberturaResult.getCoverage(metric).percentageFloat}">${coberturaResult.getCoverage(metric).percentage}%
+                            (${coberturaResult.getCoverage(metric)})
+                        </td>
+                    </j:forEach>
+                </tr>
+            </table>
+
+            <j:if test="${coberturaResult.sourceCodeLevel}">
+                <h2>Source</h2>
+                <j:choose>
+                    <j:when test="${coberturaResult.sourceFileAvailable}">
+                        <div style="overflow-x:scroll;">
+                            <table class="source">
+                                <thead>
+                                    <tr>
+                                        <th colspan="3">${coberturaResult.relativeSourcePath}</th>
+                                    </tr>
+                                </thead>
+                                ${coberturaResult.sourceFileContent}
+
+                            </table>
+                        </div>
+                    </j:when>
+                    <j:otherwise>
+                        <p>
+                            <i>Source code is unavailable</i>
+                        </p>
+                    </j:otherwise>
+                </j:choose>
+            </j:if>
+
+            <j:forEach var="element" items="${coberturaResult.childElements}">
+                <j:set var="childMetrics" value="${coberturaResult.getChildMetrics(element)}"/>
+               <table width="100%"><TD class="bg2" colspan="2">Coverage Breakdown by ${element.displayName}</TD></table>
+                <table border="1px" class="pane sortable">
+                    <tr>
+                        <td>Name</td>
+                        <j:forEach var="metric" items="${childMetrics}">
+                            <td>${metric.name}</td>
+                        </j:forEach>
+                    </tr>
+                    <j:forEach var="c" items="${coberturaResult.children}">
+                        <j:set var="child" value="${coberturaResult.getChild(c)}"/>
+                        <tr>
+
+                            <td>
+                                ${child.xmlTransform(child.name)}
+                            </td>
+                            <j:forEach var="metric" items="${childMetrics}">
+                                <j:set var="childResult" value="${child.getCoverage(metric)}"/>
+                                <j:choose>
+                                    <j:when test="${childResult!=null}">
+                                        <td data="${childResult.percentageFloat}">${childResult.percentage}%
+                                            (${childResult})
+                                        </td>
+                                    </j:when>
+                                    <j:otherwise>
+                                        <td data="101">N/A</td>
+                                    </j:otherwise>
+                                </j:choose>
+                            </j:forEach>
+                        </tr>
+                    </j:forEach>
+                </table>
+            </j:forEach>
+  </j:if>
+<BR/>
+</j:if>
+
+
+<!-- CONSOLE OUTPUT -->
+
+<j:getStatic var="resultFailure" field="FAILURE" className="hudson.model.Result"/>
+<j:if test="${build.result==resultFailure}">
+<TABLE width="100%" cellpadding="0" cellspacing="0">
+<TR><TD class="bg1"><B>CONSOLE OUTPUT</B></TD></TR>
+<j:forEach var="line" items="${build.getLog(100)}"><TR><TD class="console">${line}</TD></TR></j:forEach>
+</TABLE>
+<BR/>
+</j:if>
+
+</BODY>
+</j:jelly>

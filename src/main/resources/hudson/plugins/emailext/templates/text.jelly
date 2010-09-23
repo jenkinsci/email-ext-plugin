@@ -1,0 +1,83 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define">
+GENERAL INFO
+
+BUILD ${build.result}
+Build URL: ${rooturl}${build.url}
+Project: ${project.name}
+Date of build: ${it.timestampString}
+Build duration: ${build.durationString}
+
+<j:set var="changeSet" value="${build.changeSet}" />
+<j:if test="${changeSet!=null}">
+CHANGE SET <j:set var="hadChanges" value="false" />
+      <j:forEach var="cs" items="${changeSet.logs}" varStatus="loop">
+        <j:set var="hadChanges" value="true" />
+        <j:set var="aUser" value="${cs.hudsonUser}"/>
+  &#10;Revision ${cs.revision} by <j:choose><j:when test="${aUser!=null}">${aUser.displayName}: </j:when><j:otherwise>${cs.user}: </j:otherwise></j:choose>(${cs.msgAnnotated})
+<j:forEach var="p" items="${cs.paths}">&#10;  change: ${p.editType.name}   ${p.value}</j:forEach>
+      </j:forEach>      
+      <j:if test="${!hadChanges}">
+No changes
+      </j:if>      
+</j:if>
+&#10;
+
+<j:set var="artifacts" value="${build.artifacts}" />
+<j:if test="${artifacts!=null and artifacts.size()&gt;0}">
+ARTIFACTS <j:forEach var="f" items="${artifacts}">
+*${f}</j:forEach>
+</j:if>
+
+<j:set var="mbuilds" value="${build.moduleBuilds}" />
+<j:if test="${mbuilds!=null}">
+MAVEN ARTIFACTS<j:forEach var="m" items="${mbuilds}">
+        ${m.key.displayName}
+        <j:forEach var="mvnbld" items="${m.value}">
+        <j:set var="artifacts" value="${mvnbld.artifacts}" />
+        <j:if test="${artifacts!=null and artifacts.size()&gt;0}">
+      	          <j:forEach var="f" items="${artifacts}">
+*${f} 
+      	          </j:forEach>
+        </j:if>
+        </j:forEach>
+      </j:forEach>
+</j:if>
+
+<!-- JUNIT TEMPLATE -->
+<j:set var="junitResultList" value="${it.JUnitTestResult}" />
+<j:if test="${junitResultList.isEmpty()!=true}">
+
+JUNIT RESULTS
+	<j:forEach var="junitResult" items="${it.JUnitTestResult}">
+		<j:forEach var="packageResult" items="${junitResult.getChildren()}">
+Name: ${packageResult.getName()} Failed: ${packageResult.getFailCount()} test(s), Passed: ${packageResult.getPassCount()} test(s), Skipped: ${packageResult.getSkipCount()} test(s), Total: ${packageResult.getPassCount()+packageResult.getFailCount()+packageResult.getSkipCount()} test(s)<j:forEach var="failed_test" items="${packageResult.getFailedTests()}">
+	Failed: ${failed_test.getFullName()}</j:forEach>
+		</j:forEach> 
+	</j:forEach>  	
+</j:if>
+
+
+<!-- COBERTURA TEMPLATE -->
+<j:set var="coberturaAction" value="${it.coberturaAction}" />
+<j:if test="${coberturaAction!=null}">
+  <j:set var="coberturaResult" value="${coberturaAction.result}" />
+  <j:if test="${coberturaResult!=null}">
+
+COBERTURA RESULTS
+
+${coberturaResult.getName()}
+  <j:forEach var="key" items="${coberturaResult.getResults().keySet()}">
+${key} ${coberturaResult.getResults().get(key)} (${coberturaResult.getResults().get(key).getPercentage()}%)
+  </j:forEach>
+
+By packages
+  <j:forEach var="child" items="${coberturaResult.getChildren()}">
+	${coberturaResult.getChild(child).getName()}
+		<j:forEach var="childkey" items="${coberturaResult.getChild(child).getResults().keySet()}">
+	${childkey} ${coberturaResult.getChild(child).getResults().get(childkey)} (${coberturaResult.getChild(child).getResults().get(childkey).getPercentage()}%)
+		 </j:forEach>
+  </j:forEach>
+  </j:if>
+</j:if>
+
+</j:jelly>

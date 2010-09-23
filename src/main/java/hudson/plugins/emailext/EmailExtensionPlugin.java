@@ -41,7 +41,7 @@ import hudson.plugins.emailext.plugins.trigger.*;
  * @author kyle.sweeney@valtech.com
  */
 public class EmailExtensionPlugin extends Plugin {
-	
+
 	@Override
 	public void start() throws Exception {
 		//We are adding different Content plugins to the list of content types.
@@ -60,7 +60,8 @@ public class EmailExtensionPlugin extends Plugin {
 		addEmailContentPlugin(new ProjectURLContent());
 		addEmailContentPlugin(new SVNRevisionContent());
         addEmailContentPlugin(new CauseContent());
-		
+        addEmailContentPlugin(new JellyScriptContent());
+
 		addEmailTriggerPlugin(PreBuildTrigger.DESCRIPTOR);
 		addEmailTriggerPlugin(FailureTrigger.DESCRIPTOR);
 		addEmailTriggerPlugin(StillFailingTrigger.DESCRIPTOR);
@@ -69,7 +70,7 @@ public class EmailExtensionPlugin extends Plugin {
 		addEmailTriggerPlugin(SuccessTrigger.DESCRIPTOR);
 		addEmailTriggerPlugin(FixedTrigger.DESCRIPTOR);
 	}
-	
+
 	private void addEmailContentPlugin(EmailContent content) {
 		try {
 			ContentBuilder.addEmailContentType(content);
@@ -77,7 +78,7 @@ public class EmailExtensionPlugin extends Plugin {
 			System.err.println(e.getMessage());
 		}
 	}
-	
+
 	private void addEmailTriggerPlugin(EmailTriggerDescriptor trigger) {
 		try {
 			ExtendedEmailPublisher.addEmailTriggerType(trigger);
@@ -85,5 +86,5 @@ public class EmailExtensionPlugin extends Plugin {
 			System.err.println(e.getMessage());
 		}
 	}
-	
+
 }

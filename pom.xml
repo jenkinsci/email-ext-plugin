@@ -13,6 +13,10 @@
   <name>Hudson Email Extension Plugin</name>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Email-ext+plugin</url>
 
+  <properties>
+      <powermock.version>1.4.5</powermock.version>
+  </properties>
+  
   <developers>
     <developer>
       <id>ashlux</id>
@@ -31,6 +35,11 @@
   </developers>
 
   <dependencies>
+    <dependency>
+      <groupId>org.jvnet.hudson.main</groupId>
+      <artifactId>maven-plugin</artifactId>
+    </dependency>
+    
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
@@ -59,8 +68,27 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
-      <version>1.8.2</version>
+      <version>1.8.5</version>
       <scope>test</scope>
     </dependency>
+     <dependency>
+        <groupId>org.powermock.modules</groupId>
+        <artifactId>powermock-module-junit4</artifactId>
+        <version>${powermock.version}</version>
+        <scope>test</scope>
+     </dependency>
+     <dependency>
+        <groupId>org.powermock.api</groupId>
+        <artifactId>powermock-api-mockito</artifactId>
+        <version>${powermock.version}</version>
+        <scope>test</scope>
+     </dependency>
   </dependencies>
+
+  <repositories>
+     <repository>
+        <id>powermock-repo</id>
+        <url>http://powermock.googlecode.com/svn/repo/</url>
+     </repository>
+  </repositories>
 </project>
