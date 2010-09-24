@@ -6,6 +6,7 @@ import hudson.model.Hudson;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailContent;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.jelly.JellyContext;
 import org.apache.commons.jelly.JellyException;
 import org.apache.commons.jelly.JellyTagException;
@@ -16,20 +17,27 @@ import org.xml.sax.InputSource;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JellyScriptContent
     implements EmailContent
 {
-    private static final String TEMPLATE_NAME_ARG = "template";
+    private static final Logger LOGGER = Logger.getLogger( JellyScriptContent.class.getName() );
+
+    public static final String TEMPLATE_NAME_ARG = "template";
 
     private static final String DEFAULT_HTML_TEMPLATE_NAME = "html";
 
     private static final String DEFAULT_TXT_TEMPLATE_NAME = "text";
+
+    private static final String EMAIL_TEMPLATES_DIRECTORY = "email-templates";
 
     public String getToken()
     {
@@ -58,45 +66,51 @@ public class JellyScriptContent
         AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType type, Map<String, ?> args )
         throws IOException, InterruptedException
     {
-        String templateName = Args.get( args, TEMPLATE_NAME_ARG, DEFAULT_HTML_TEMPLATE_NAME );
-        InputStream inputStream =
-            getClass().getClassLoader().getResourceAsStream( "hudson/plugins/emailext/templates/" + templateName + ".jelly" );
-        if (inputStream == null)
-        {
-            final File templatesFolder = new File(Hudson.getInstance().getRootDir(), "email-templates");
-            final File templateFile = new File(templatesFolder, templateName + ".jelly");
-            inputStream = new FileInputStream(templateFile);
-        }
-
-
-        // TODO: Close inputstream...
-        return getContentFromJelly( build, inputStream );
-    }
-
-    public boolean hasNestedContent()
-    {
-        return false;
-    }
-
-    private <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContentFromJelly(
-        AbstractBuild<P, B> build, InputStream inputStream )
-    {
+        InputStream inputStream = null;
         try
         {
-            return renderContent( new JellyScriptContentBuildWrapper( build ), build, inputStream );
+            String templateName = Args.get( args, TEMPLATE_NAME_ARG, DEFAULT_HTML_TEMPLATE_NAME );
+            inputStream = getTemplateInputStream( templateName );
+            return renderContent( build, inputStream );
         }
-        catch ( Exception e )
+        catch ( JellyException e )
         {
-            // TODO: Better error handling
-            e.printStackTrace();
-            return e.getMessage();
+            LOGGER.log( Level.SEVERE, null, e );
+            return "JellyException: " + e.getMessage();
+        }
+        finally
+        {
+            IOUtils.closeQuietly( inputStream );
         }
     }
 
-    private String renderContent( Object it, AbstractBuild<?, ?> build, InputStream inputStream )
+    /**
+     * Try to get the template from the classpath first before trying the file system.
+     *
+     * @param templateName
+     * @return
+     * @throws java.io.FileNotFoundException
+     */
+    private InputStream getTemplateInputStream( String templateName )
+        throws FileNotFoundException
+    {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(
+            "hudson/plugins/emailext/templates/" + templateName + ".jelly" );
+
+        if ( inputStream == null )
+        {
+            final File templatesFolder = new File( Hudson.getInstance().getRootDir(), EMAIL_TEMPLATES_DIRECTORY );
+            final File templateFile = new File( templatesFolder, templateName + ".jelly" );
+            inputStream = new FileInputStream( templateFile );
+        }
+
+        return inputStream;
+    }
+
+    private String renderContent( AbstractBuild<?, ?> build, InputStream inputStream )
         throws JellyException, IOException
     {
-        JellyContext context = createContext( it, build );
+        JellyContext context = createContext( new JellyScriptContentBuildWrapper( build ), build );
         Script script = context.compileScript( new InputSource( inputStream ) );
         if ( script != null )
         {
@@ -125,5 +139,10 @@ public class JellyScriptContent
         context.setVariable( "project", build.getParent() );
         context.setVariable( "rooturl", ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl() );
         return context;
+    }
+
+    public boolean hasNestedContent()
+    {
+        return false;
     }
 }
