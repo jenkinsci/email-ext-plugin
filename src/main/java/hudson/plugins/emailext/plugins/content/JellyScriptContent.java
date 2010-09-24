@@ -35,7 +35,9 @@ public class JellyScriptContent
 
     private static final String DEFAULT_HTML_TEMPLATE_NAME = "html";
 
-    private static final String DEFAULT_TXT_TEMPLATE_NAME = "text";
+    private static final String DEFAULT_TEXT_TEMPLATE_NAME = "text";
+
+    private static final String DEFAULT_TEMPLATE_NAME = DEFAULT_HTML_TEMPLATE_NAME;
 
     private static final String EMAIL_TEMPLATES_DIRECTORY = "email-templates";
 
@@ -46,16 +48,27 @@ public class JellyScriptContent
 
     public String getHelpText()
     {
-        return "Custom message content generated from a jelly template. " +
-            "If no template name is provided then the default \"" + DEFAULT_HTML_TEMPLATE_NAME +
-            "\" template is used. " + "Make sure that the message content type is set to HTML then. " +
-            "The other template that is available is \"" + DEFAULT_TXT_TEMPLATE_NAME +
-            "\" which should be used with Plain Text content type. " + "You can create your own message template " +
-            "- the best way to do it is to ask Hudson administrators for the default template, modify it, " +
-            "and send it back to the administrators who will place it in email templates folder in Hudson home directory.\n" +
-            "<ul>\n" + "<li><i>" + TEMPLATE_NAME_ARG + "</i> - the template name. <br>\n" + "Defaults to \"" +
-            DEFAULT_HTML_TEMPLATE_NAME + "\".\n" + "</ul>\n";
+        return "Custom message content generated from a Jelly script template. " +
+                "There are two templates provided: \"" + DEFAULT_HTML_TEMPLATE_NAME + "\" " +
+                "and \"" + DEFAULT_TEXT_TEMPLATE_NAME + "\". Custom Jelly templates should be placed in " +
+                "$HUDSON_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ". When using custom templates, " +
+                "the template filename without \".jelly\" should be used for " +
+                "the \"" + TEMPLATE_NAME_ARG + "\" argument.\n" +
+                "<ul>\n" +
+                "<li><i>" + TEMPLATE_NAME_ARG + "</i> - the template name.<br>\n" +
+                "Defaults to \"" + DEFAULT_TEMPLATE_NAME + "\".\n" +
+                "</ul>\n";
     }
+
+//    return "Displays an environment variable.\n" +
+//    "<ul>\n" +
+//
+//    "<li><i>" + VAR_ARG_NAME + "</i> - the name of the environment " +
+//            "variable to display.  If \"\", show all.<br>\n" +
+//    "Defaults to \"" + VAR_DEFAULT_VALUE + "\".\n" +
+//
+//    "</ul>\n";
+
 
     public List<String> getArguments()
     {
@@ -69,7 +82,7 @@ public class JellyScriptContent
         InputStream inputStream = null;
         try
         {
-            String templateName = Args.get( args, TEMPLATE_NAME_ARG, DEFAULT_HTML_TEMPLATE_NAME );
+            String templateName = Args.get( args, TEMPLATE_NAME_ARG, DEFAULT_TEMPLATE_NAME );
             inputStream = getTemplateInputStream( templateName );
             return renderContent( build, inputStream );
         }
