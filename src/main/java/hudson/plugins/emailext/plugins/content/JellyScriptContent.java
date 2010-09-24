@@ -1,16 +1,11 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.Functions;
-import hudson.maven.reporters.SurefireAggregatedReport;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Action;
+import hudson.model.Hudson;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailContent;
-import hudson.tasks.junit.TestResult;
-import hudson.tasks.junit.TestResultAction;
-import hudson.tasks.test.AggregatedTestResultAction.ChildReport;
 import org.apache.commons.jelly.JellyContext;
 import org.apache.commons.jelly.JellyException;
 import org.apache.commons.jelly.JellyTagException;
@@ -19,9 +14,10 @@ import org.apache.commons.jelly.XMLOutput;
 import org.xml.sax.InputSource;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +25,6 @@ import java.util.Map;
 public class JellyScriptContent
     implements EmailContent
 {
-
     private static final String TEMPLATE_NAME_ARG = "template";
 
     private static final String DEFAULT_HTML_TEMPLATE_NAME = "html";
@@ -64,10 +59,17 @@ public class JellyScriptContent
         throws IOException, InterruptedException
     {
         String templateName = Args.get( args, TEMPLATE_NAME_ARG, DEFAULT_HTML_TEMPLATE_NAME );
-        // TODO: Handle custom templates on disk
         InputStream inputStream =
             getClass().getClassLoader().getResourceAsStream( "hudson/plugins/emailext/templates/" + templateName + ".jelly" );
+        if (inputStream == null)
+        {
+            final File templatesFolder = new File(Hudson.getInstance().getRootDir(), "email-templates");
+            final File templateFile = new File(templatesFolder, templateName + ".jelly");
+            inputStream = new FileInputStream(templateFile);
+        }
 
+
+        // TODO: Close inputstream...
         return getContentFromJelly( build, inputStream );
     }
 
@@ -81,7 +83,7 @@ public class JellyScriptContent
     {
         try
         {
-            return renderContent( new BuildWrapper( build ), build, inputStream );
+            return renderContent( new JellyScriptContentBuildWrapper( build ), build, inputStream );
         }
         catch ( Exception e )
         {
@@ -123,69 +125,5 @@ public class JellyScriptContent
         context.setVariable( "project", build.getParent() );
         context.setVariable( "rooturl", ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl() );
         return context;
-    }
-
-    public static class BuildWrapper
-    {
-        private AbstractBuild<?, ?> build;
-
-        public BuildWrapper( AbstractBuild<?, ?> build )
-        {
-            this.build = build;
-        }
-
-        public String getTimestampString()
-        {
-            return Functions.rfc822Date( build.getTimestamp() );
-        }
-
-        public Action getAction( String className )
-        {
-            for ( Action a : build.getActions() )
-            {
-                if ( a.getClass().getName().equals( className ) )
-                {
-                    return a;
-                }
-            }
-            return null;
-        }
-
-        public Action getCoberturaAction()
-        {
-            return getAction( "hudson.plugins.cobertura.CoberturaBuildAction" );
-        }
-
-        public List<TestResult> getJUnitTestResult()
-        {
-            List<TestResult> result = new ArrayList<TestResult>();
-            List<Action> actions = build.getActions();
-            for ( Action action : actions )
-            {
-                if ( action instanceof hudson.maven.reporters.SurefireAggregatedReport )
-                {
-                    /* Maven Project */
-                    List<ChildReport> reportList = ( (SurefireAggregatedReport) action ).getChildReports();
-                    for ( ChildReport report : reportList )
-                    {
-                        if ( report.result instanceof hudson.tasks.junit.TestResult )
-                        {
-                            result.add( (TestResult) report.result );
-                        }
-                    }
-                }
-            }
-
-            if ( result.isEmpty() )
-            {
-                /*FreestyleProject*/
-                TestResultAction action = build.getAction( TestResultAction.class );
-                if ( action != null )
-                {
-                    result.add( action.getResult() );
-                }
-            }
-            return result;
-        }
     }
 }
