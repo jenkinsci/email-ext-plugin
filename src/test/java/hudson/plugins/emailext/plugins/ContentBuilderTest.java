@@ -2,6 +2,7 @@ package hudson.plugins.emailext.plugins;
 
 import hudson.model.AbstractBuild;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
+import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import org.jvnet.hudson.test.HudsonTestCase;
 
 import java.io.IOException;
@@ -21,10 +22,10 @@ public class ContentBuilderTest
         publisher = mock(ExtendedEmailPublisher.class);
         publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";
         publisher.defaultSubject = "How would you like your very own AWESOME-O 4000?";
-        Field f = ExtendedEmailPublisher.DescriptorImpl.class.getDeclaredField( "defaultBody" );
+        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultBody" );
         f.setAccessible( true );
         f.set( ExtendedEmailPublisher.DESCRIPTOR, "Give me $4000 and I'll mail you a check for $40,000!" );
-        f = ExtendedEmailPublisher.DescriptorImpl.class.getDeclaredField( "defaultSubject" );
+        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultSubject" );
         f.setAccessible( true );
         f.set( ExtendedEmailPublisher.DESCRIPTOR, "Nigerian needs your help!" );
     }
