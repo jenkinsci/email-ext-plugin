@@ -60,16 +60,6 @@ public class JellyScriptContent
                 "</ul>\n";
     }
 
-//    return "Displays an environment variable.\n" +
-//    "<ul>\n" +
-//
-//    "<li><i>" + VAR_ARG_NAME + "</i> - the name of the environment " +
-//            "variable to display.  If \"\", show all.<br>\n" +
-//    "Defaults to \"" + VAR_DEFAULT_VALUE + "\".\n" +
-//
-//    "</ul>\n";
-
-
     public List<String> getArguments()
     {
         return Collections.singletonList( TEMPLATE_NAME_ARG );
