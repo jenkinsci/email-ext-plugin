@@ -32,6 +32,8 @@ import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.tasks.Mailer;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -68,8 +70,12 @@ public class BuildLogRegexContent implements EmailContent {
 	private static final int MAX_MATCHES_DEFAULT_VALUE = 0;
 	private static final String SHOW_TRUNCATED_LINES_ARG_NAME = "showTruncatedLines";
 	private static final boolean SHOW_TRUNCATED_LINES_DEFAULT_VALUE = true;
-	private static final String SUBST_TEXT_NAME = "substText";
-	private static final String SUBST_TEXT_DEFAULT_VALUE = null; /* insert entire line */
+	private static final String SUBST_TEXT_ARG_NAME = "substText";
+	private static final String SUBST_TEXT_DEFAULT_VALUE = null; // insert entire line
+	private static final String ESCAPE_HTML_ARG_NAME = "escapeHtml";
+	private static final boolean ESCAPE_HTML_DEFAULT_VALUE = false;
+	private static final String MATCHED_LINE_HTML_STYLE_ARG_NAME = "matchedLineHtmlStyle";
+	private static final String MATCHED_LINE_HTML_STYLE_DEFAULT_VALUE = null;
 
 	public String getToken() {
 		return TOKEN;
@@ -82,7 +88,9 @@ public class BuildLogRegexContent implements EmailContent {
 			LINES_AFTER_ARG_NAME,
 			MAX_MATCHES_ARG_NAME,
 			SHOW_TRUNCATED_LINES_ARG_NAME,
-			SUBST_TEXT_NAME);
+			SUBST_TEXT_ARG_NAME,
+			ESCAPE_HTML_ARG_NAME,
+			MATCHED_LINE_HTML_STYLE_ARG_NAME);
 	}
 
 	public String getHelpText() {
@@ -110,66 +118,136 @@ public class BuildLogRegexContent implements EmailContent {
 			"<tt>[...truncated ### lines...]</tt> lines.<br>\n" +
 			"Defaults to " + SHOW_TRUNCATED_LINES_DEFAULT_VALUE + ".\n" +
 
-			"<li><i>" + SUBST_TEXT_NAME + "</i> - If non null, insert this text into the email " +
+			"<li><i>" + SUBST_TEXT_ARG_NAME + "</i> - If non-null, insert this text into the email " +
 			"rather than the entire line.<br>\n" +
+			"Defaults to null.\n" +
+
+			"<li><i>" + ESCAPE_HTML_ARG_NAME + "</i> - If true, escape HTML.<br>\n" +
+			"Defaults to " + ESCAPE_HTML_DEFAULT_VALUE + ".\n" +
+
+			"<li><i>" + MATCHED_LINE_HTML_STYLE_ARG_NAME + "</i> - If non-null, output HTML. " +
+			"matched lines will become <code>&lt;b style=\"your-style-value\"&gt;" +
+			"html escaped matched line&lt;/b&gt;</code>.<br>\n" +
+			"Defaults to null.\n" +
 
 			"</ul>\n";
 	}
 
-	private void append(StringBuffer buffer, String line) {
+	private boolean startPre(StringBuffer buffer, boolean insidePre) {
+		if (!insidePre) {
+			buffer.append("<pre>\n");
+			insidePre = true;
+		}
+		return insidePre;
+	}
+
+	private boolean stopPre(StringBuffer buffer, boolean insidePre) {
+		if (insidePre) {
+			buffer.append("</pre>\n");
+			insidePre = false;
+		}
+		return insidePre;
+	}
+
+	private void appendContextLine(StringBuffer buffer, String line, boolean escapeHtml) {
+		if (escapeHtml) {
+			line = StringEscapeUtils.escapeHtml(line);
+		}
 		buffer.append(line);
 		buffer.append('\n');
 	}
 
-	private void appendLinesTruncated(StringBuffer buffer, int numLinesTruncated) {
-		// This format comes from hudson.model.Run.getLog(maxLines).
-		append(buffer, "[...truncated " + numLinesTruncated + " lines...]");
+	private void appendMatchedLine(StringBuffer buffer, String line, boolean escapeHtml, String style) {
+		if (escapeHtml) {
+			line = StringEscapeUtils.escapeHtml(line);
+		}
+		if (style != null) {
+			buffer.append("<b");
+			if (!style.isEmpty()) {
+				buffer.append(" style=\"");
+				buffer.append(style);
+				buffer.append("\"");
+			}
+			buffer.append(">");
+		}
+		buffer.append(line);
+		if (style != null) {
+			buffer.append("</b>");
+		}
+		buffer.append('\n');
 	}
 
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(
-        AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType emailType, Map<String, ?> args )
-    {
-        try
-        {
-            BufferedReader reader = new BufferedReader( new FileReader( build.getLogFile() ) );
-            String transformedContent = getContent( reader, args );
-            reader.close();
-            return transformedContent;
-        }
-        catch ( IOException ex )
-        {
-            LOGGER.log( Level.SEVERE, null, ex );
-            return ""; // TODO: Indicate there was an error instead?
-        }
-    }
+	private void appendLinesTruncated(StringBuffer buffer, int numLinesTruncated, boolean asHtml) {
+		// This format comes from hudson.model.Run.getLog(maxLines).
+		if (asHtml) {
+			buffer.append("<p>");
+		}
+		buffer.append("[...truncated ");
+		buffer.append(numLinesTruncated);
+		buffer.append(" lines...]");
+		if (asHtml) {
+			buffer.append("</p>");
+		}
+		buffer.append('\n');
+	}
+
+	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(
+		AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType emailType, Map<String, ?> args )
+	{
+		try
+		{
+			BufferedReader reader = new BufferedReader( new FileReader( build.getLogFile() ) );
+			String transformedContent = getContent( reader, args );
+			reader.close();
+			return transformedContent;
+		}
+		catch ( IOException ex )
+		{
+			LOGGER.log( Level.SEVERE, null, ex );
+			return ""; // TODO: Indicate there was an error instead?
+		}
+	}
 
 	String getContent(BufferedReader reader, Map<String, ?> args)
 			throws IOException {
 
-		final String regex = Args
-				.get(args, REGEX_ARG_NAME, REGEX_DEFAULT_VALUE);
-		final int contextLinesBefore = Args.get(args, LINES_BEFORE_ARG_NAME,
+		final String regex = Args.get(args, 
+				REGEX_ARG_NAME,
+				REGEX_DEFAULT_VALUE);
+		final int contextLinesBefore = Args.get(args,
+				LINES_BEFORE_ARG_NAME,
 				LINES_BEFORE_DEFAULT_VALUE);
-		final int contextLinesAfter = Args.get(args, LINES_AFTER_ARG_NAME,
+		final int contextLinesAfter = Args.get(args,
+				LINES_AFTER_ARG_NAME,
 				LINES_AFTER_DEFAULT_VALUE);
-		final int maxMatches = Args.get(args, MAX_MATCHES_ARG_NAME,
+		final int maxMatches = Args.get(args,
+				MAX_MATCHES_ARG_NAME,
 				MAX_MATCHES_DEFAULT_VALUE);
 		final boolean showTruncatedLines = Args.get(args,
 				SHOW_TRUNCATED_LINES_ARG_NAME,
 				SHOW_TRUNCATED_LINES_DEFAULT_VALUE);
-		final String substText = Args.get(args, SUBST_TEXT_NAME,
+		final String substText = Args.get(args, SUBST_TEXT_ARG_NAME,
 				SUBST_TEXT_DEFAULT_VALUE);
+		final String matchedLineHtmlStyle = Args.get(args,
+				MATCHED_LINE_HTML_STYLE_ARG_NAME,
+				MATCHED_LINE_HTML_STYLE_DEFAULT_VALUE);
+		final boolean asHtml = matchedLineHtmlStyle != null;
+		final boolean escapeHtml = asHtml ||
+				Args.get(args,
+					ESCAPE_HTML_ARG_NAME,
+					ESCAPE_HTML_DEFAULT_VALUE);
 
 		final Pattern pattern = Pattern.compile(regex);
 		final StringBuffer buffer = new StringBuffer();
 		int numLinesTruncated = 0;
 		int numMatches = 0;
 		int numLinesStillNeeded = 0;
+		boolean insidePre = false;
 		Queue<String> linesBefore = new LinkedList<String>();
 		String line = null;
 		while ((line = reader.readLine()) != null) {
-            // Remove console notes ( HUDSON-7402)
-            line = ConsoleNote.removeNotes(line);
+			// Remove console notes (HUDSON-7402)
+			line = ConsoleNote.removeNotes(line);
 
 			// Remove any lines before that are no longer needed.
 			while (linesBefore.size() > contextLinesBefore) {
@@ -178,32 +256,35 @@ public class BuildLogRegexContent implements EmailContent {
 			}
 			final Matcher matcher = pattern.matcher(line);
 			final StringBuffer sb = new StringBuffer();
-			boolean bMatched = false;
+			boolean matched = false;
 			while (matcher.find()) {
-				bMatched = true;
-				if (substText != null)
+				matched = true;
+				if (substText != null) {
 					matcher.appendReplacement(sb, substText);
-				else
+				} else {
 					break;
+				}
 			}
-			if (bMatched) {
+			if (matched) {
 				// The current line matches.
 				if (showTruncatedLines == true && numLinesTruncated > 0) {
 					// Append information about truncated lines.
-					appendLinesTruncated(buffer, numLinesTruncated);
+					insidePre = stopPre(buffer, insidePre);
+					appendLinesTruncated(buffer, numLinesTruncated, asHtml);
 					numLinesTruncated = 0;
 				}
-				// Append all the linesBefore.
-				while (linesBefore.size() > 0) {
-					append(buffer, linesBefore.remove());
+				if (asHtml) {
+					insidePre = startPre(buffer, insidePre);
+				}
+				while (!linesBefore.isEmpty()) {
+					appendContextLine(buffer, linesBefore.remove(), escapeHtml);
 				}
 				// Append the (possibly transformed) current line.
 				if (substText != null) {
 					matcher.appendTail(sb);
-					append(buffer, sb.toString());
-				} else {
-					append(buffer, line);
+					line = sb.toString();
 				}
+				appendMatchedLine(buffer, line, escapeHtml, matchedLineHtmlStyle);
 				++numMatches;
 				// Set up to add numLinesStillNeeded
 				numLinesStillNeeded = contextLinesAfter;
@@ -211,7 +292,7 @@ public class BuildLogRegexContent implements EmailContent {
 				// The current line did not match.
 				if (numLinesStillNeeded > 0) {
 					// Append this line as a line after.
-					append(buffer, line);
+					appendContextLine(buffer, line, escapeHtml);
 					--numLinesStillNeeded;
 				} else {
 					// Store this line as a possible line before.
@@ -236,10 +317,11 @@ public class BuildLogRegexContent implements EmailContent {
 				}
 			}
 			if (numLinesTruncated > 0) {
-				appendLinesTruncated(buffer, numLinesTruncated);
+				insidePre = stopPre(buffer, insidePre);
+				appendLinesTruncated(buffer, numLinesTruncated, asHtml);
 			}
 		}
-
+		insidePre = stopPre(buffer, insidePre);
 		return buffer.toString();
 	}
 
