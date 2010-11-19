@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -258,7 +259,7 @@ public class ExtendedEmailPublisher extends Notifier {
         EnvVars env = build.getEnvironment(listener);
 
 		// Get the recipients from the global list of addresses
-		List<InternetAddress> recipientAddresses = new ArrayList<InternetAddress>();
+		Set<InternetAddress> recipientAddresses = new LinkedHashSet<InternetAddress>();
 		if (type.getSendToRecipientList()) {
             addAddressesFromRecipientList(recipientAddresses, recipientList, env, listener);
 		}
@@ -330,10 +331,10 @@ public class ExtendedEmailPublisher extends Notifier {
         msg.setContent(text, messageContentType);
     }
 
-    private static void addAddressesFromRecipientList(List<InternetAddress> addresses, String recipientList,
+    private static void addAddressesFromRecipientList(Set<InternetAddress> addresses, String recipientList,
                                                       EnvVars envVars, BuildListener listener) {
         try {
-            List<InternetAddress> internetAddresses = new EmailRecepientUtils().convertRecipientString( recipientList, envVars );
+            Set<InternetAddress> internetAddresses = new EmailRecepientUtils().convertRecipientString( recipientList, envVars );
 			addresses.addAll(internetAddresses);
 		} catch(AddressException ae) {
 			LOGGER.log(Level.WARNING, "Could not create email address.", ae);

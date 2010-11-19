@@ -6,17 +6,17 @@ import org.apache.commons.lang.StringUtils;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class EmailRecepientUtils
 {
     public static final String COMMA_SEPARATED_SPLIT_REGEXP = "[,\\s]+";
 
-    public List<InternetAddress> convertRecipientString( String recipientList, EnvVars envVars )
+    public Set<InternetAddress> convertRecipientString( String recipientList, EnvVars envVars )
         throws AddressException
     {
-        final List<InternetAddress> internetAddresses = new LinkedList<InternetAddress>();
+        final Set<InternetAddress> internetAddresses = new LinkedHashSet<InternetAddress>();
         if ( StringUtils.isBlank( recipientList ) )
         {
             return internetAddresses;

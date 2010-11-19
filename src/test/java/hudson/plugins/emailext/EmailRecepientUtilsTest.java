@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import java.util.List;
+import java.util.Set;
 
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -30,7 +30,7 @@ public class EmailRecepientUtilsTest
     public void testConvertRecipientList_emptyRecipientStringShouldResultInEmptyEmailList()
         throws AddressException
     {
-        List<InternetAddress> internetAddresses = emailRecepientUtils.convertRecipientString( "", envVars );
+        Set<InternetAddress> internetAddresses = emailRecepientUtils.convertRecipientString( "", envVars );
 
         assertTrue( internetAddresses.isEmpty() );
     }
@@ -39,7 +39,7 @@ public class EmailRecepientUtilsTest
     public void testConvertRecipientList_emptyRecipientStringWithWhitespaceShouldResultInEmptyEmailList()
         throws AddressException
     {
-        List<InternetAddress> internetAddresses = emailRecepientUtils.convertRecipientString( "   ", envVars );
+        Set<InternetAddress> internetAddresses = emailRecepientUtils.convertRecipientString( "   ", envVars );
 
         assertTrue( internetAddresses.isEmpty() );
     }
@@ -48,46 +48,58 @@ public class EmailRecepientUtilsTest
     public void testConvertRecipientList_singleRecipientShouldResultInOneEmailAddressInList()
         throws AddressException
     {
-        List<InternetAddress> internetAddresses =
+        Set<InternetAddress> internetAddresses =
             emailRecepientUtils.convertRecipientString( "ashlux@gmail.com", envVars );
 
         assertEquals( 1, internetAddresses.size() );
-        assertEquals( "ashlux@gmail.com", internetAddresses.get( 0 ).getAddress() );
+        assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
     }
 
     @Test
     public void testConvertRecipientList_singleRecipientWithWhitespaceShouldResultInOneEmailAddressInList()
         throws AddressException
     {
-        List<InternetAddress> internetAddresses =
+        Set<InternetAddress> internetAddresses =
             emailRecepientUtils.convertRecipientString( " ashlux@gmail.com ", envVars );
 
         assertEquals( 1, internetAddresses.size() );
-        assertEquals( "ashlux@gmail.com", internetAddresses.get( 0 ).getAddress() );
+        assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
     }
 
     @Test
     public void testConvertRecipientList_commaSeparatedRecipientStringShouldResultInMultipleEmailAddressesInList()
         throws AddressException
     {
-        List<InternetAddress> internetAddresses =
+        Set<InternetAddress> internetAddresses =
             emailRecepientUtils.convertRecipientString( "ashlux@gmail.com, mickeymouse@disney.com", envVars );
 
         assertEquals( 2, internetAddresses.size() );
-        assertEquals( "ashlux@gmail.com", internetAddresses.get( 0 ).getAddress() );
-        assertEquals( "mickeymouse@disney.com", internetAddresses.get( 1 ).getAddress() );
+        assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
+        assertTrue( internetAddresses.contains( new InternetAddress( "mickeymouse@disney.com" ) ) );
     }
 
     @Test
     public void testConvertRecipientList_spaceSeparatedRecipientStringShouldResultInMultipleEmailAddressesInList()
         throws AddressException
     {
-        List<InternetAddress> internetAddresses =
+        Set<InternetAddress> internetAddresses =
             emailRecepientUtils.convertRecipientString( "ashlux@gmail.com mickeymouse@disney.com", envVars );
 
         assertEquals( 2, internetAddresses.size() );
-        assertEquals( "ashlux@gmail.com", internetAddresses.get( 0 ).getAddress() );
-        assertEquals( "mickeymouse@disney.com", internetAddresses.get( 1 ).getAddress() );
+        assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
+        assertTrue( internetAddresses.contains( new InternetAddress( "mickeymouse@disney.com" ) ) );
+    }
+
+    @Test
+    public void testConvertRecipientList_emailAddressesShouldBeUnique()
+        throws AddressException
+    {
+        Set<InternetAddress> internetAddresses =
+            emailRecepientUtils.convertRecipientString( "ashlux@gmail.com, mickeymouse@disney.com, ashlux@gmail.com", envVars );
+
+        assertEquals( 2, internetAddresses.size() );
+        assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
+        assertTrue( internetAddresses.contains( new InternetAddress( "mickeymouse@disney.com" ) ) );
     }
 
     @Test
@@ -96,10 +108,10 @@ public class EmailRecepientUtilsTest
     {
         envVars.put( "EMAIL_LIST", "ashlux@gmail.com" );
 
-        List<InternetAddress> internetAddresses = emailRecepientUtils.convertRecipientString( "$EMAIL_LIST", envVars );
+        Set<InternetAddress> internetAddresses = emailRecepientUtils.convertRecipientString( "$EMAIL_LIST", envVars );
 
         assertEquals( 1, internetAddresses.size() );
-        assertEquals( "ashlux@gmail.com", internetAddresses.get( 0 ).getAddress() );
+        assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
     }
 
     @Test
