@@ -11,7 +11,7 @@ import hudson.plugins.emailext.ExtendedEmailPublisher;
 import java.io.IOException;
 
 /**
- * A macro that the user can use like "${FOOBAR,param=arg,param=arg,...}" in the template
+ * Content token, which is a macro that the user can use like "${FOOBAR,param=arg,param=arg,...}" in the template
  * that expands to a real content.
  */
 public interface EmailContent extends ExtensionPoint {
