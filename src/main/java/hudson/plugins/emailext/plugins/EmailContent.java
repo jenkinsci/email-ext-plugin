@@ -3,13 +3,18 @@ package hudson.plugins.emailext.plugins;
 import java.util.List;
 import java.util.Map;
 
+import hudson.ExtensionPoint;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import java.io.IOException;
 
-public interface EmailContent {
+/**
+ * A macro that the user can use like "${FOOBAR,param=arg,param=arg,...}" in the template
+ * that expands to a real content.
+ */
+public interface EmailContent extends ExtensionPoint {
 	
 	/**
 	 * This is the token that will be replaced by the content when the email is sent.
