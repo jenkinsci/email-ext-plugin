@@ -85,10 +85,33 @@
      </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <goals>deploy</goals>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  
   <repositories>
      <repository>
         <id>powermock-repo</id>
         <url>http://powermock.googlecode.com/svn/repo/</url>
      </repository>
   </repositories>
+  
+ <scm>
+   <connection>scm:svn:https://guest@svn.java.net/svn/hudson~svn/trunk/hudson/plugins/email-ext</connection>
+   <developerConnection>scm:svn:https://svn.java.net/svn/hudson~svn/trunk/hudson/plugins/email-ext</developerConnection>
+ </scm>
+
+  <distributionManagement>
+    <repository>
+      <id>java.net-m2-repository</id>
+      <url>http://maven.hudson-labs.org:8081/content/repositories/releases/</url>
+    </repository>
+  </distributionManagement>   
 </project>
