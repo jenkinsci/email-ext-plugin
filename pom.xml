@@ -9,7 +9,7 @@
 
   <artifactId>email-ext</artifactId>
   <packaging>hpi</packaging>
-  <version>2.10</version>
+  <version>2.11-SNAPSHOT</version>
   <name>Hudson Email Extension Plugin</name>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Email-ext+plugin</url>
 
@@ -104,9 +104,9 @@
   </repositories>
   
  <scm>
-   <connection>scm:svn:https://guest@svn.java.net/svn/hudson~svn/tags/email-ext-2.10</connection>
-   <developerConnection>scm:svn:https://svn.java.net/svn/hudson~svn/tags/email-ext-2.10</developerConnection>
-   <url>https://hudson.dev.java.net/source/browse/hudson/tags/email-ext-2.10</url>
+   <connection>scm:svn:https://guest@svn.java.net/svn/hudson~svn/trunk/hudson/plugins/email-ext</connection>
+   <developerConnection>scm:svn:https://svn.java.net/svn/hudson~svn/trunk/hudson/plugins/email-ext</developerConnection>
+   <url>https://hudson.dev.java.net/source/browse/hudson/trunk/hudson/plugins/email-ext</url>
   </scm>
 
   <distributionManagement>
