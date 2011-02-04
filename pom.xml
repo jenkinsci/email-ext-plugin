@@ -11,7 +11,7 @@
   <packaging>hpi</packaging>
   <version>2.11-SNAPSHOT</version>
   <name>Hudson Email Extension Plugin</name>
-  <url>http://wiki.hudson-ci.org/display/HUDSON/Email-ext+plugin</url>
+  <url>http://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin</url>
 
   <properties>
       <powermock.version>1.4.5</powermock.version>
@@ -104,9 +104,8 @@
   </repositories>
   
  <scm>
-   <connection>scm:svn:https://guest@svn.java.net/svn/hudson~svn/trunk/hudson/plugins/email-ext</connection>
-   <developerConnection>scm:svn:https://svn.java.net/svn/hudson~svn/trunk/hudson/plugins/email-ext</developerConnection>
-   <url>https://hudson.dev.java.net/source/browse/hudson/trunk/hudson/plugins/email-ext</url>
+   <connection>scm:git:https://github.com/jenkinsci/email-ext-plugin.git</connection>
+   <developerConnection>scm:git:git@github.com:jenkinsci/email-ext-plugin.git</developerConnection>
   </scm>
 
   <distributionManagement>
