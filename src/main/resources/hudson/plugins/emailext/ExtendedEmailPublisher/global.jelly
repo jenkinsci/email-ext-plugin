@@ -17,7 +17,7 @@
 	      <f:textbox name="ext_mailer_admin_address" value="${descriptor.adminAddress}"
 	          checkUrl="'${rootURL}/publisher/Mailer/addressCheck?value='+encode(this.value)"/>
 	    </f:entry>
-	    <f:entry title="Hudson URL"
+	    <f:entry title="Jenkins URL"
 	             help="/descriptor/hudson.tasks.Mailer/help/url">
 	      <input class="setting-input" name="ext_mailer_hudson_url"
 	        type="text" value="${h.ifThenElse(descriptor.hudsonUrl!=null,descriptor.hudsonUrl,h.inferHudsonURL(request))}"/>
