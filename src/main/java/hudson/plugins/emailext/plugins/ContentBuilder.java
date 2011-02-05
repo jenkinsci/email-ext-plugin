@@ -86,7 +86,8 @@ public class ContentBuilder {
 					LOGGER.log(Level.SEVERE,
 							"Exception thrown while replacing " + tokenizer.group(),
 							e);
-					replacement = "[[ Exception while replacing " + tokenName + ".  Please report this as a bug. ]]";
+					replacement = "[[ Exception while replacing " + tokenName + ". Please report this as a bug. ]]\n";
+                    replacement += "{{ " + e.toString() + " }}";
 				}
 				if (content.hasNestedContent()) {
 					replacement = replaceTokensWithContent(replacement, publisher, type, build);
