@@ -45,6 +45,9 @@ public class ExtendedEmailPublisher extends Notifier {
 
 	private static final Logger LOGGER = Logger.getLogger(Mailer.class.getName());
 
+    private static final String CONTENT_TRANSFER_ENCODING
+            = System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
+
 	public static final Map<String,EmailTriggerDescriptor> EMAIL_TRIGGER_TYPE_MAP = new HashMap<String,EmailTriggerDescriptor>();
 
 	public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
@@ -54,9 +57,7 @@ public class ExtendedEmailPublisher extends Notifier {
 	public static final String PROJECT_DEFAULT_SUBJECT_TEXT = "$PROJECT_DEFAULT_SUBJECT";
 	public static final String PROJECT_DEFAULT_BODY_TEXT = "$PROJECT_DEFAULT_CONTENT";
 
-    public static final String CHARSET = "utf-8";
-
-	public static void addEmailTriggerType(EmailTriggerDescriptor triggerType) throws EmailExtException {
+    public static void addEmailTriggerType(EmailTriggerDescriptor triggerType) throws EmailExtException {
 		if(EMAIL_TRIGGER_TYPE_MAP.containsKey(triggerType.getMailerId()))
 			throw new EmailExtException("An email trigger type with name " +
 					triggerType.getTriggerName() + " was already added.");
@@ -248,13 +249,21 @@ public class ExtendedEmailPublisher extends Notifier {
 			msg.setFrom(new InternetAddress(ExtendedEmailPublisher.DESCRIPTOR.getAdminAddress()));
 		}
 
+        String charset = Mailer.descriptor().getCharset();
+        if (overrideGlobalSettings) {
+            String overrideCharset = ExtendedEmailPublisher.DESCRIPTOR.getCharset();
+            if (overrideCharset != null) {
+                charset = overrideCharset;
+            }
+        } 
+
         // Set the contents of the email
 
         msg.setSentDate(new Date());
 
-        setSubject( type, build, msg );
+        setSubject( type, build, msg, charset );
 
-        setContent( type, build, msg );
+        setContent( type, build, msg, charset );
 
         EnvVars env = build.getEnvironment(listener);
 
@@ -301,17 +310,21 @@ public class ExtendedEmailPublisher extends Notifier {
 			}
 		}
 
+        if (CONTENT_TRANSFER_ENCODING != null) {
+            msg.setHeader("Content-Transfer-Encoding", CONTENT_TRANSFER_ENCODING);
+        }
+
 		return msg;
 	}
 
-    private void setSubject( final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg )
+    private void setSubject( final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset )
         throws MessagingException
     {
         String subject = new ContentBuilder().transformText(type.getSubject(), this, type, build);
-        msg.setSubject(subject, CHARSET);
+        msg.setSubject(subject, charset);
     }
 
-    private void setContent( final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg )
+    private void setContent( final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset )
         throws MessagingException
     {
         final String text = new ContentBuilder().transformText(type.getBody(), this, type, build);
@@ -326,7 +339,7 @@ public class ExtendedEmailPublisher extends Notifier {
                 messageContentType = "text/plain";
             }
         }
-        messageContentType += "; charset=" + CHARSET;
+        messageContentType += "; charset=" + charset;
 
         msg.setContent(text, messageContentType);
     }

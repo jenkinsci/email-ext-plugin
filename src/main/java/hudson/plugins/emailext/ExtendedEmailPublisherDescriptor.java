@@ -68,6 +68,8 @@ public class ExtendedEmailPublisherDescriptor
      */
     private String smtpPort;
 
+    private String charset;
+
     /**
      * This is a global default content type (mime type) for emails.
      */
@@ -194,6 +196,11 @@ public class ExtendedEmailPublisherDescriptor
         return smtpPort;
     }
 
+    public String getCharset()
+    {
+        return charset;
+    }
+
     public String getDefaultContentType()
     {
         return defaultContentType;
@@ -313,6 +320,8 @@ public class ExtendedEmailPublisherDescriptor
         // specify custom smtp port
         smtpPort = nullify( req.getParameter( "ext_mailer_smtp_port" ) );
 
+        charset = nullify(req.getParameter("ext_mailer_charset"));
+        
         defaultContentType = nullify( req.getParameter( "ext_mailer_default_content_type" ) );
 
         // Allow global defaults to be set for the subject and body of the email

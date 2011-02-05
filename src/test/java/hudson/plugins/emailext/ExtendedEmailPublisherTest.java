@@ -237,7 +237,7 @@ public class ExtendedEmailPublisherTest
         Mailbox mailbox = Mailbox.get( "ashlux@gmail.com" );
         assertEquals( "We should an email since the build failed.", 1, mailbox.size() );
         assertThat( "UTF-8 charset should be used.", mailbox.get( 0 ).getContentType(),
-                    containsString( "charset=utf-8" ) );
+                    containsString( "charset=UTF-8" ) );
     }
 
     public void testNewInstance_shouldGetBasicInformation()

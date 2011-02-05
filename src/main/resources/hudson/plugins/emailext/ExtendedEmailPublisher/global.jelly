@@ -43,6 +43,10 @@
 	        <input class="setting-input" name="ext_mailer_smtp_port"
 	          type="text" value="${descriptor.smtpPort}"/>
 	      </f:entry>
+              <f:entry title="${%Charset}">
+                <input class="setting-input" name="ext_mailer_charset"
+                       type="text" value="${descriptor.charset}"/>
+              </f:entry>
 		</f:advanced>
 	  </f:optionalBlock>
       <f:entry title="Default Content Type"
