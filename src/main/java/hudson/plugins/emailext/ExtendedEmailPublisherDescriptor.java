@@ -33,7 +33,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     private String defaultSuffix;
 
     /**
-     * Hudson's own URL, to put into the e-mail.
+     * Jenkins's own URL, to put into the e-mail.
      */
     private String hudsonUrl;
 
@@ -45,7 +45,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     private Secret smtpAuthPassword;
 
     /**
-     * The e-mail address that Hudson puts to "From:" field in outgoing e-mails.
+     * The e-mail address that Jenkins puts to "From:" field in outgoing e-mails.
      * Null if not configured.
      */
     private String adminAddress;

@@ -360,7 +360,7 @@ public class ExtendedEmailPublisher extends Notifier {
         // contentType is null if the project was not reconfigured after upgrading.
         if (messageContentType == null || "default".equals(messageContentType)) {
             messageContentType = DESCRIPTOR.getDefaultContentType();
-            // The defaultContentType is null if the main Hudson configuration
+            // The defaultContentType is null if the main Jenkins configuration
             // was not reconfigured after upgrading.
             if (messageContentType == null) {
                 messageContentType = "text/plain";

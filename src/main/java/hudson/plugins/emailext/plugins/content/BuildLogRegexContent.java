@@ -248,7 +248,7 @@ public class BuildLogRegexContent implements EmailContent {
         Queue<String> linesBefore = new LinkedList<String>();
         String line = null;
         while ((line = reader.readLine()) != null) {
-            // Remove console notes (HUDSON-7402)
+            // Remove console notes (JENKINS-7402)
             line = ConsoleNote.removeNotes(line);
 
             // Remove any lines before that are no longer needed.

@@ -25,7 +25,7 @@ public class HudsonURLContent implements EmailContent {
     }
 
     public String getHelpText() {
-        return "Displays the URL to the Hudson server. (You can change this on the system configuration page.)";
+        return "Displays the URL to the Jenkins server. (You can change this on the system configuration page.)";
     }
 
     public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
