@@ -43,9 +43,9 @@ public class EmailExtHelp {
         if (displayDefaultTokens) {
             sb.append(
                     "<li><b>${DEFAULT_SUBJECT} - </b> This is the default email subject that is "
-                    + "configured in Hudson's system configuration page. </li>\n"
+                    + "configured in Jenkins's system configuration page. </li>\n"
                     + "<li><b>${DEFAULT_CONTENT} - </b> This is the default email content that is "
-                    + "configured in Hudson's system configuration page. </li>\n"
+                    + "configured in Jenkins's system configuration page. </li>\n"
                     + "<li><b>${PROJECT_DEFAULT_SUBJECT} - </b> This is the default email subject for "
                     + "this project.  The result of using this token in the advanced configuration is "
                     + "what is in the Default Subject field above. WARNING: Do not use this token in the "
