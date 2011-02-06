@@ -27,6 +27,12 @@ public class EmailType {
 	 * who made changes.
 	 */
 	private boolean sendToDevelopers;
+
+	/**
+	 * Specifies whether or not we should send this email to the requester
+	 * who triggered build.
+	 */
+    private boolean sendToRequester;
 	
 	/**
 	 * Specifies whether or not we should send this email to all developers
@@ -47,6 +53,7 @@ public class EmailType {
 		sendToDevelopers = false;
 		includeCulprits = false;
 		sendToRecipientList = false;
+        sendToRequester = false;
 	}
 	
 	public String getSubject() {
@@ -72,7 +79,15 @@ public class EmailType {
 	public void setSendToDevelopers(boolean sendToDevelopers) {
 		this.sendToDevelopers = sendToDevelopers;
 	}
-	
+
+    public boolean isSendToRequester() {
+        return sendToRequester;
+    }
+
+    public void setSendToRequester(boolean sendToRequester) {
+        this.sendToRequester = sendToRequester;
+    }
+
 	public boolean getIncludeCulprits() {
 		return includeCulprits;
 	}

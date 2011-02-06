@@ -6,6 +6,7 @@
 	<%@attribute name="mailTypeObj" required="true" %>
 	<%@attribute name="sendToList" required="true" %>
 	<%@attribute name="sendToDevs" required="true" %>
+	<%@attribute name="sendToRequester" required="true" %>
 	<%@attribute name="includeCulps" required="true" %>
 	<%@attribute name="configured" required="true" %>
 	<%@attribute name="secId" required="true" %>
@@ -48,6 +49,11 @@
 				</td>
 				<td>
 					<f:checkbox
+						name="mailer_${mailType}_sendToRequester"
+						checked="${sendToRequester}" />
+				</td>
+				<td>
+					<f:checkbox
 						name="mailer_${mailType}_includeCulprits"
 						checked="${includeCulps}" />
 				</td>
@@ -62,6 +68,11 @@
 					<f:checkbox
 						name="mailer_${mailType}_sendToDevelopers"
 						checked="${mailTypeObj.sendToDevelopers}" />
+				</td>
+				<td>
+					<f:checkbox
+						name="mailer_${mailType}_sendToRequester"
+						checked="${mailTypeObj.sendToRequester}" />
 				</td>
 				<td>
 					<f:checkbox

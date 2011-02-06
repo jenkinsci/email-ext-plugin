@@ -110,6 +110,9 @@
    							<div style="font-weight:bold">Send To Committers</div>
    						</td>
    						<td>
+   							<div style="font-weight:bold">Send To Requester</div>
+   						</td>
+   						<td>
    							<div style="font-weight:bold">Include Culprits</div>
    						</td>
    						<td>
@@ -138,7 +141,8 @@
 										mailType="${trigger.descriptor.mailerId}"
 					     				mailTypeObj="${trigger.email}" 
 					     				sendToList="${trigger.defaultSendToList}" 
-					     				sendToDevs="${trigger.defaultSendToDevs}" 
+					     				sendToDevs="${trigger.defaultSendToDevs}"
+                                                                        sendToRequester="${trigger.defaultSendToRequester}"
 					     				includeCulps="${trigger.defaultIncludeCulps}"
 					     				trigger="${trigger}"
 					     				configured="${true}"
@@ -198,6 +202,7 @@
 						     				mailTypeObj="${trigger.email}" 
 						     				sendToList="${trigger.defaultSendToList}" 
 						     				sendToDevs="${trigger.defaultSendToDevs}" 
+                                                                                sendToRequester="${trigger.defaultSendToRequester}"
 						     				includeCulps="${trigger.defaultIncludeCulps}"
 						     				trigger="${trigger}"
 						     				configured="${false}"

@@ -5,6 +5,8 @@ import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.Cause;
+import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
@@ -293,6 +295,28 @@ public class ExtendedEmailPublisher extends Notifier {
 				}
 			}
 		}
+
+        if (type.isSendToRequester()) {
+            List<Cause> causes = build.getCauses();
+            Cause.UserCause uc = null;
+            for (Cause cause : causes) {
+                if (cause instanceof Cause.UserCause) {
+                    uc = (Cause.UserCause) cause;
+                    break;
+                 }
+            }
+            if (uc != null) {
+                User user = User.get(uc.getUserName());
+                if (user != null) {
+                    String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
+                    if (adrs != null)
+                		addAddressesFromRecipientList(recipientAddresses, adrs, env, listener);
+                    else
+                        listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
+                }
+            }
+        }
+
 		//Get the list of recipients that are uniquely specified for this type of email
 		if (type.getRecipientList() != null && type.getRecipientList().trim().length() > 0) {
             addAddressesFromRecipientList( recipientAddresses, type.getRecipientList(), env, listener );

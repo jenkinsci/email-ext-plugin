@@ -264,6 +264,7 @@ public class ExtendedEmailPublisherDescriptor
         m.setRecipientList( formData.getString( prefix + "recipientList" ) );
         m.setSendToRecipientList( formData.optBoolean( prefix + "sendToRecipientList" ) );
         m.setSendToDevelopers( formData.optBoolean( prefix + "sendToDevelopers" ) );
+        m.setSendToRequester( formData.optBoolean( prefix + "sendToRequester" ) );
         m.setIncludeCulprits( formData.optBoolean( prefix + "includeCulprits" ) );
         return m;
     }
