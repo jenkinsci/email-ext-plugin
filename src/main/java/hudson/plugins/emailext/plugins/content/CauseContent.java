@@ -16,6 +16,7 @@ import java.util.Map;
 
 public class CauseContent
         implements EmailContent {
+
     private static final String TOKEN = "CAUSE";
 
     public String getToken() {
@@ -30,9 +31,8 @@ public class CauseContent
         return "Displays the cause of the build.\n";
     }
 
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
-    String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
-                      EmailType emailType, Map<String, ?> args) {
+    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
+            EmailType emailType, Map<String, ?> args) {
         List<Cause> causes = new LinkedList<Cause>();
         CauseAction causeAction = build.getAction(CauseAction.class);
         if (causeAction != null) {
@@ -58,5 +58,4 @@ public class CauseContent
     public boolean hasNestedContent() {
         return false;
     }
-
 }

@@ -12,29 +12,27 @@ import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailContent;
 
 public class BuildURLContent implements EmailContent {
-	
-	private static final String TOKEN = "BUILD_URL";
 
-	public String getToken() {
-		return TOKEN;
-	}
+    private static final String TOKEN = "BUILD_URL";
 
-	public List<String> getArguments() {
-		return Collections.emptyList();
-	}
-	
-	public String getHelpText() {
-		return "Displays the URL to the current build.";
-	}
+    public String getToken() {
+        return TOKEN;
+    }
 
-	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
-	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
-			EmailType emailType, Map<String, ?> args) {
-		return "${HUDSON_URL}" + Util.encode(build.getUrl());
-	}
-	
-	public boolean hasNestedContent() {
-		return true;
-	}
+    public List<String> getArguments() {
+        return Collections.emptyList();
+    }
 
+    public String getHelpText() {
+        return "Displays the URL to the current build.";
+    }
+
+    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
+            EmailType emailType, Map<String, ?> args) {
+        return "${HUDSON_URL}" + Util.encode(build.getUrl());
+    }
+
+    public boolean hasNestedContent() {
+        return true;
+    }
 }

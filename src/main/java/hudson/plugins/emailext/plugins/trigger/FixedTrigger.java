@@ -7,61 +7,60 @@ import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 
 public class FixedTrigger extends EmailTrigger {
 
-	public static final String TRIGGER_NAME = "Fixed";
-	
-	@Override
-	public boolean trigger(AbstractBuild<?,?> build) {
-		
-		Result buildResult = build.getResult();
-		
-		if (buildResult == Result.SUCCESS) {
-			AbstractBuild<?,?> prevBuild = build.getPreviousBuild();
-			if (prevBuild != null && (prevBuild.getResult() == Result.UNSTABLE || prevBuild.getResult() == Result.FAILURE)) {
-				return true;
-			}
-		}
+    public static final String TRIGGER_NAME = "Fixed";
 
-		return false;
-	}
-	
-	@Override
-	public EmailTriggerDescriptor getDescriptor() {
-		return DESCRIPTOR;
-	}
-	
-	public static DescriptorImpl DESCRIPTOR = new DescriptorImpl();
-	
-	public static final class DescriptorImpl extends EmailTriggerDescriptor {
-		
-		public DescriptorImpl() {
-			addTriggerNameToReplace(SuccessTrigger.TRIGGER_NAME);
-		}
-		
-		@Override
-		public String getTriggerName() {
-			return TRIGGER_NAME;
-		}
+    @Override
+    public boolean trigger(AbstractBuild<?, ?> build) {
 
-		@Override
-		public EmailTrigger newInstance() {
-			return new FixedTrigger();
-		}
+        Result buildResult = build.getResult();
 
-		@Override
-		public String getHelpText() {
-			return "An email will be sent when the build status changes from \"Failure\" " +
-				   "or \"Unstable\" to \"Successful\".";
-		}
-		
-	}
-	
-	@Override
-	public boolean getDefaultSendToDevs() {
-		return true;
-	}
+        if (buildResult == Result.SUCCESS) {
+            AbstractBuild<?, ?> prevBuild = build.getPreviousBuild();
+            if (prevBuild != null && (prevBuild.getResult() == Result.UNSTABLE || prevBuild.getResult() == Result.FAILURE)) {
+                return true;
+            }
+        }
 
-	@Override
-	public boolean getDefaultSendToList() {
-		return true;
-	}
+        return false;
+    }
+
+    @Override
+    public EmailTriggerDescriptor getDescriptor() {
+        return DESCRIPTOR;
+    }
+
+    public static DescriptorImpl DESCRIPTOR = new DescriptorImpl();
+
+    public static final class DescriptorImpl extends EmailTriggerDescriptor {
+
+        public DescriptorImpl() {
+            addTriggerNameToReplace(SuccessTrigger.TRIGGER_NAME);
+        }
+
+        @Override
+        public String getTriggerName() {
+            return TRIGGER_NAME;
+        }
+
+        @Override
+        public EmailTrigger newInstance() {
+            return new FixedTrigger();
+        }
+
+        @Override
+        public String getHelpText() {
+            return "An email will be sent when the build status changes from \"Failure\" "
+                    + "or \"Unstable\" to \"Successful\".";
+        }
+    }
+
+    @Override
+    public boolean getDefaultSendToDevs() {
+        return true;
+    }
+
+    @Override
+    public boolean getDefaultSendToList() {
+        return true;
+    }
 }

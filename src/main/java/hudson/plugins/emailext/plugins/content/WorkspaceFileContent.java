@@ -17,6 +17,7 @@ import java.util.Map;
  * @author Kohsuke Kawaguchi
  */
 public class WorkspaceFileContent implements EmailContent {
+
     public String getToken() {
         return "FILE";
     }
@@ -26,16 +27,17 @@ public class WorkspaceFileContent implements EmailContent {
     }
 
     public String getHelpText() {
-        return "Includes the content of a specified file.\n" +
-        "<ul>\n" +
-        "<li><i>" + VAR_PATH_NAME + "</i> - The path to the file. Relative to the workspace root.\n" +
-        "</ul>\n";
+        return "Includes the content of a specified file.\n"
+                + "<ul>\n"
+                + "<li><i>" + VAR_PATH_NAME + "</i> - The path to the file. Relative to the workspace root.\n"
+                + "</ul>\n";
     }
 
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
-    String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType emailType, Map<String, ?> args) throws IOException, InterruptedException {
+    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType emailType, Map<String, ?> args) throws IOException, InterruptedException {
         String path = Args.get(args, VAR_PATH_NAME, null);
-        if (path==null) throw new IllegalArgumentException("FILE token requires the "+VAR_PATH_NAME+" parameter");
+        if (path == null) {
+            throw new IllegalArgumentException("FILE token requires the " + VAR_PATH_NAME + " parameter");
+        }
 
         try {
             return build.getWorkspace().child(path).readToString();

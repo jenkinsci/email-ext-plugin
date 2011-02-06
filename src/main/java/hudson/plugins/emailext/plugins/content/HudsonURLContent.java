@@ -13,39 +13,40 @@ import java.util.List;
 import java.util.Map;
 
 public class HudsonURLContent implements EmailContent {
-	
-	private static final String TOKEN = "HUDSON_URL";
 
-	public String getToken() {
-		return TOKEN;
-	}
-	
-	public List<String> getArguments() {
-		return Collections.emptyList();
-	}
-	
-	public String getHelpText() {
-		return "Displays the URL to the Hudson server. (You can change this on the system configuration page.)";
-	}
-	
-	public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>>
-	String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
-			EmailType emailType, Map<String, ?> args) {
+    private static final String TOKEN = "HUDSON_URL";
+
+    public String getToken() {
+        return TOKEN;
+    }
+
+    public List<String> getArguments() {
+        return Collections.emptyList();
+    }
+
+    public String getHelpText() {
+        return "Displays the URL to the Hudson server. (You can change this on the system configuration page.)";
+    }
+
+    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
+            EmailType emailType, Map<String, ?> args) {
         // HUDSON-6193
-		String hudsonUrl = Hudson.getInstance().getRootUrl();
-        if (ExtendedEmailPublisher.DESCRIPTOR.getOverrideGlobalSettings())
-        {
+        String hudsonUrl = Hudson.getInstance().getRootUrl();
+        if (ExtendedEmailPublisher.DESCRIPTOR.getOverrideGlobalSettings()) {
             hudsonUrl = ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl();
         }
 
-		if(hudsonUrl==null) return "";
-		if(!hudsonUrl.endsWith("/"))
-			hudsonUrl += "/";
-		
-		return Util.encode(hudsonUrl);
-	}
+        if (hudsonUrl == null) {
+            return "";
+        }
+        if (!hudsonUrl.endsWith("/")) {
+            hudsonUrl += "/";
+        }
 
-	public boolean hasNestedContent() {
-		return false;
-	}
+        return Util.encode(hudsonUrl);
+    }
+
+    public boolean hasNestedContent() {
+        return false;
+    }
 }
