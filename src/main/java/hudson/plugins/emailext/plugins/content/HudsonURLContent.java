@@ -1,18 +1,9 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.Util;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Hudson;
-import hudson.plugins.emailext.EmailType;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailContent;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-public class HudsonURLContent implements EmailContent {
+/**
+ * @deprecated Keeping this email content around for backwards compatibility afters the Jenkins/Hudson split.
+ */
+public class HudsonURLContent extends JenkinsURLContent {
 
     private static final String TOKEN = "HUDSON_URL";
 
@@ -20,33 +11,7 @@ public class HudsonURLContent implements EmailContent {
         return TOKEN;
     }
 
-    public List<String> getArguments() {
-        return Collections.emptyList();
-    }
-
     public String getHelpText() {
-        return "Displays the URL to the Jenkins server. (You can change this on the system configuration page.)";
-    }
-
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
-            EmailType emailType, Map<String, ?> args) {
-        // HUDSON-6193
-        String hudsonUrl = Hudson.getInstance().getRootUrl();
-        if (ExtendedEmailPublisher.DESCRIPTOR.getOverrideGlobalSettings()) {
-            hudsonUrl = ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl();
-        }
-
-        if (hudsonUrl == null) {
-            return "";
-        }
-        if (!hudsonUrl.endsWith("/")) {
-            hudsonUrl += "/";
-        }
-
-        return Util.encode(hudsonUrl);
-    }
-
-    public boolean hasNestedContent() {
-        return false;
+        return "<i><b>deprecated, please use $JENKINS_URL</b></i>";
     }
 }

@@ -29,7 +29,7 @@ public class BuildURLContent implements EmailContent {
 
     public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
             EmailType emailType, Map<String, ?> args) {
-        return "${HUDSON_URL}" + Util.encode(build.getUrl());
+        return "${JENKINS_URL}" + Util.encode(build.getUrl());
     }
 
     public boolean hasNestedContent() {
