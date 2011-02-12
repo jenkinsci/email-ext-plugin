@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
-    <groupId>org.jvnet.hudson.plugins</groupId>
+    <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.356</version>
-    <relativePath>../pom.xml</relativePath>
+    <version>1.396</version>
   </parent>
 
   <artifactId>email-ext</artifactId>
@@ -36,7 +36,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.jvnet.hudson.main</groupId>
+      <groupId>org.jenkins-ci.main</groupId>
       <artifactId>maven-plugin</artifactId>
     </dependency>
     
@@ -85,33 +85,27 @@
      </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <configuration>
-          <goals>deploy</goals>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-  
-  <repositories>
-     <repository>
-        <id>powermock-repo</id>
-        <url>http://powermock.googlecode.com/svn/repo/</url>
-     </repository>
-  </repositories>
-  
- <scm>
+  <scm>
    <connection>scm:git:https://github.com/jenkinsci/email-ext-plugin.git</connection>
    <developerConnection>scm:git:git@github.com:jenkinsci/email-ext-plugin.git</developerConnection>
   </scm>
 
-  <distributionManagement>
+  <repositories>
     <repository>
-      <id>java.net-m2-repository</id>
-      <url>http://maven.hudson-labs.org:8081/content/repositories/releases/</url>
+      <id>m.g.o-public</id>
+      <url>http://maven.glassfish.org/content/groups/public/</url>
     </repository>
-  </distributionManagement>   
+    <repository>
+       <id>powermock-repo</id>
+       <url>http://powermock.googlecode.com/svn/repo/</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>m.g.o-public</id>
+      <url>http://maven.glassfish.org/content/groups/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
+
 </project>
