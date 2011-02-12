@@ -48,7 +48,7 @@ public class JellyScriptContent implements EmailContent {
         return "Custom message content generated from a Jelly script template. "
                 + "There are two templates provided: \"" + DEFAULT_HTML_TEMPLATE_NAME + "\" "
                 + "and \"" + DEFAULT_TEXT_TEMPLATE_NAME + "\". Custom Jelly templates should be placed in "
-                + "$HUDSON_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ". When using custom templates, "
+                + "$JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ". When using custom templates, "
                 + "the template filename without \".jelly\" should be used for "
                 + "the \"" + TEMPLATE_NAME_ARG + "\" argument.\n"
                 + "<ul>\n"
