@@ -70,7 +70,7 @@ public class JellyScriptContentTest
 
         String content = jellyScriptContent.getContent(build, null, null, args);
 
-        assertEquals("Jelly script [template-does-not-exist] was not found.", content);
+        assertEquals("Jelly script [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.", content);
     }
 
     private void mockHudsonGetRootDir(File rootDir)
