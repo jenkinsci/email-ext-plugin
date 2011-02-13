@@ -65,16 +65,25 @@ public class JellyScriptContent implements EmailContent {
             AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType type, Map<String, ?> args)
             throws IOException, InterruptedException {
         InputStream inputStream = null;
+        String templateName = Args.get(args, TEMPLATE_NAME_ARG, DEFAULT_TEMPLATE_NAME);
         try {
-            String templateName = Args.get(args, TEMPLATE_NAME_ARG, DEFAULT_TEMPLATE_NAME);
             inputStream = getTemplateInputStream(templateName);
             return renderContent(build, inputStream);
         } catch (JellyException e) {
             LOGGER.log(Level.SEVERE, null, e);
             return "JellyException: " + e.getMessage();
+        } catch (FileNotFoundException e) {
+            String missingTemplateError = generateMissingTemplate(templateName);
+            LOGGER.log(Level.SEVERE, missingTemplateError);
+            return missingTemplateError;
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
+    }
+
+    private String generateMissingTemplate(String template)
+    {
+        return "Jelly script [" + template + "] was not found in $JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ".";
     }
 
     /**

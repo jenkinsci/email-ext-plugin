@@ -58,7 +58,7 @@ public class JellyScriptContentTest
         assertEquals("HELLO WORLD!", jellyScriptContent.getContent(build, null, null, args));
     }
 
-    @Test(expected = FileNotFoundException.class)
+    @Test
     public void testWhenTemplateNotFoundThrowFileNotFoundException()
             throws Exception
     {
@@ -68,7 +68,9 @@ public class JellyScriptContentTest
 
         AbstractBuild build = mock(AbstractBuild.class);
 
-        jellyScriptContent.getContent(build, null, null, args);
+        String content = jellyScriptContent.getContent(build, null, null, args);
+
+        assertEquals("Jelly script [template-does-not-exist] was not found.", content);
     }
 
     private void mockHudsonGetRootDir(File rootDir)
