@@ -12,8 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Displays the number of tests.
  *
- * @author sogabe
+ * @author Seiji Sogabe
  */
 public class TestCountsContent implements EmailContent {
 
