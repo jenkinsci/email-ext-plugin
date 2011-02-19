@@ -15,6 +15,7 @@
 
   <properties>
       <powermock.version>1.4.5</powermock.version>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   
   <developers>
@@ -31,6 +32,11 @@
       <id>krwalker</id>
       <name>K. R. Walker</name>
       <email>krwalker@stellarscience.com</email>
+    </developer>
+    <developer>
+      <id>ssogabe</id>
+      <name>Seiji Sogabe</name>
+      <email>s.sogabe@gmail.com</email>
     </developer>
   </developers>
 
