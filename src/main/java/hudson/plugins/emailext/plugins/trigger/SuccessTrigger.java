@@ -41,10 +41,7 @@ public class SuccessTrigger extends EmailTrigger {
 
         @Override
         public String getHelpText() {
-            return "An email will be sent if the build status is \"Successful\". "
-                    + "If the \"Fixed\" trigger is configured, and the previous build "
-                    + "status was \"Failure\" or \"Unstable\", then the \"Fixed\" trigger "
-                    + "will send an email instead.";
+            return Messages.SuccessTrigger_HelpText();
         }
     }
 

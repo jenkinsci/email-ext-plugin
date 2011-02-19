@@ -41,9 +41,7 @@ public class UnstableTrigger extends EmailTrigger {
 
         @Override
         public String getHelpText() {
-            return "An email will be sent any time the build is unstable.  If the \"Still Unstable\" "
-                    + "trigger is configured, and the previous build status was \"Unstable\", "
-                    + "then the \"Still Unstable\" trigger will send an email instead.";
+            return Messages.UnstableTrigger_HelpText();
         }
     }
 

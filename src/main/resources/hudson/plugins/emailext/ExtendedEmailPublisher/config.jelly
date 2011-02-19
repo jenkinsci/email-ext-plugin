@@ -14,8 +14,8 @@
     </st:once>
 
 	<!-- This is the global recipent list entry. -->
-	<f:entry title="Global Recipient List"
-     		 description="Comma-separated list of email address that should receive notifications."
+	<f:entry title="${%Global Recipient List}"
+     		 description="${%Comma-separated list of email address that should receive notifications.}"
              help="/plugin/email-ext/help/projectConfig/globalRecipientList.html">
 	    <input class="setting-input validated" name="recipientlist_recipients"
             type="text" value="${instance.recipientList}"
@@ -23,24 +23,24 @@
     </f:entry>
     
 	<!-- This is the content type for the emails. -->
-    <f:entry title="Content Type"
+    <f:entry title="${%Content Type}"
              help="/plugin/email-ext/help/projectConfig/contentType.html">
       <select class="setting-input"
               name="project_content_type">
         <f:option value="default"
                   selected="${'default'==instance.contentType}"
-          >Default Content Type</f:option>
+          >${%Default Content Type}</f:option>
         <f:option value="text/plain"
                   selected="${'text/plain'==instance.contentType}"
-          >Plain Text (text/plain)</f:option>
+          >${%projectContentType.plainText}</f:option>
         <f:option value="text/html"
                   selected="${'text/html'==instance.contentType}"
-          >HTML (text/html)</f:option>
+          >${%projectContentType.html}</f:option>
       </select>
     </f:entry>
 
 	<!-- This is the default subject line for the project. -->
-    <f:entry title="Default Subject"
+    <f:entry title="${%Default Subject}"
              help="/plugin/email-ext/help/projectConfig/defaultSubject.html">
      	<j:choose>
      		<j:when test="${instance.configured}">
@@ -55,7 +55,7 @@
     </f:entry>
 
 	<!-- This is the default content for the project. -->
-    <f:entry title="Default Content"
+    <f:entry title="${%Default Content}"
              help="/plugin/email-ext/help/projectConfig/defaultBody.html">
      	<j:choose>
      		<j:when test="${instance.configured}">
@@ -76,7 +76,7 @@
 	<!-- This is the help section.  It displays a bunch of dynamic help for all content tokens. -->
 	<tr>
 		<td></td>
-		<td colspan="2">Content Token Reference</td>
+		<td colspan="2">${%Content Token Reference}</td>
 		<td >
 			<j:invokeStatic var="contentTokenText" method="getContentTokenHelpText" className="hudson.plugins.emailext.EmailExtHelp"/>
 			<a href="#contentTokenHelpAnchor" name="contentTokenAnchor" onclick="toggleContentTokenHelp('${secId}');return false"><img src="${rootURL}/images/16x16/help.gif" alt="Help for feature: Content Token Reference" /></a>
@@ -101,31 +101,31 @@
      				<tr>
      					<td></td>
      					<td>
-     						<div style="font-weight:bold">Trigger</div>
+     						<div style="font-weight:bold">${%Trigger}</div>
      					</td>
      					<td>
-   							<div style="font-weight:bold">Send To Recipient List</div>
+   							<div style="font-weight:bold">${%Send To Recipient List}</div>
    						</td>
    						<td>
-   							<div style="font-weight:bold">Send To Committers</div>
+   							<div style="font-weight:bold">${%Send To Committers}</div>
    						</td>
    						<td>
-   							<div style="font-weight:bold">Send To Requester</div>
+   							<div style="font-weight:bold">${%Send To Requester}</div>
    						</td>
    						<td>
-   							<div style="font-weight:bold">Include Culprits</div>
+   							<div style="font-weight:bold">${%Include Culprits}</div>
    						</td>
    						<td>
-   							<div style="font-weight:bold">More Configuration</div>
+   							<div style="font-weight:bold">${%More Configuration}</div>
    						</td>
    						<td>
-   							<div style="font-weight:bold">Remove</div>
+   							<div style="font-weight:bold">${%Remove}</div>
    						</td>
    						<td>
 							<a href="#" class="help-button"
 								helpURL="${rootURL}/plugin/email-ext/help/projectConfig/advancedFeatures.html"
 								><img src="${imagesURL}/16x16/help.gif"
-									alt="Help for feature: Advanced Features" /></a>
+									alt="${%Help for feature: Advanced Features}" /></a>
    						</td>
    					</tr>
    					<tr class="help-area">
@@ -160,7 +160,7 @@
 					</j:choose>
 					<tr id="${secId}after-last-configured-row">
 						<td></td>
-						<td colspan="6"><span style="font-weight:bold">Add a Trigger: </span>
+						<td colspan="6"><span style="font-weight:bold">${%Add a Trigger:} </span>
 							<span style="font-weight:bold"> </span>
 							<select id="${secId}non-configured-options" onchange="selectTrigger(this,'${secId}')">
 							  <option value="select">select</option>
@@ -176,7 +176,7 @@
 							<a href="#" class="help-button"
 								helpURL="${rootURL}/plugin/email-ext/help/projectConfig/addATrigger.html"
 								><img src="${imagesURL}/16x16/help.gif"
-									alt="Help for feature: Add a Trigger" /></a>
+									alt="${%Help for feature: Add a Trigger}" /></a>
 						</td>
 						<td></td>
 					</tr>

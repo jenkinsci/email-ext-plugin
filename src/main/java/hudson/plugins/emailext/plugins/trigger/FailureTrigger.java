@@ -44,9 +44,7 @@ public class FailureTrigger extends EmailTrigger {
 
         @Override
         public String getHelpText() {
-            return "An email will be sent any time the build fails.  If the \"Still Failing\" "
-                    + "trigger is configured, and the previous build status was \"Failure\", "
-                    + "then the \"Still Failing\" trigger will send an email instead.";
+            return Messages.FailureTrigger_HelpText();
         }
     }
 

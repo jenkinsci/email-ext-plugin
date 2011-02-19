@@ -88,13 +88,13 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
 
     @Override
     public String getDisplayName() {
-        return "Editable Email Notification";
+        return Messages.ExtendedEmailPublisherDescriptor_DisplayName();
     }
 
     public String getAdminAddress() {
         String v = adminAddress;
         if (v == null) {
-            v = "address not configured yet <nobody>";
+            v = Messages.ExtendedEmailPublisherDescriptor_AdminAddress();
         }
         return v;
     }

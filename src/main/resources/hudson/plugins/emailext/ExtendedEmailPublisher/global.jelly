@@ -1,44 +1,44 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <f:section title="Extended E-mail Notification">
+  <f:section title="${%Extended E-mail Notification}">
     <script type="text/javascript" src="${rootURL}/plugin/email-ext/scripts/emailext-behavior.js"></script>
-    <f:optionalBlock name="ext_mailer_override_global_settings" checked="${descriptor.overrideGlobalSettings}" title="Override Global Settings" help="/plugin/email-ext/help/globalConfig/override-global-settings.html">
-	    <f:entry title="SMTP server"
+    <f:optionalBlock name="ext_mailer_override_global_settings" checked="${descriptor.overrideGlobalSettings}" title="${%Override Global Settings}" help="/plugin/email-ext/help/globalConfig/override-global-settings.html">
+	    <f:entry title="${%SMTP server}"
 	             help="/descriptor/hudson.tasks.Mailer/help/smtpServer">
 	      <input class="setting-input" name="ext_mailer_smtp_server"
 	        type="text" value="${descriptor.smtpServer}"/>
 	    </f:entry>
-	    <f:entry title="Default user E-mail suffix"
+	    <f:entry title="${%Default user E-mail suffix}"
 	             help="/descriptor/hudson.tasks.Mailer/help/defaultSuffix">
 	      <input class="setting-input" name="ext_mailer_default_suffix"
 	        type="text" value="${descriptor.defaultSuffix}"/>
 	    </f:entry>
-	    <f:entry title="System Admin E-mail Address"
+	    <f:entry title="${%System Admin E-mail Address}"
 	             help="/descriptor/hudson.tasks.Mailer/help/adminAddress">
 	      <f:textbox name="ext_mailer_admin_address" value="${descriptor.adminAddress}"
 	          checkUrl="'${rootURL}/publisher/Mailer/addressCheck?value='+encode(this.value)"/>
 	    </f:entry>
-	    <f:entry title="Jenkins URL"
+	    <f:entry title="${%Jenkins URL}"
 	             help="/descriptor/hudson.tasks.Mailer/help/url">
 	      <input class="setting-input" name="ext_mailer_hudson_url"
 	        type="text" value="${h.ifThenElse(descriptor.hudsonUrl!=null,descriptor.hudsonUrl,h.inferHudsonURL(request))}"/>
 	    </f:entry>
 	    <f:advanced>
-	      <f:optionalBlock name="extmailer.useSMTPAuth" title="Use SMTP Authentication" checked="${descriptor.smtpAuthUsername!=null}"
+	      <f:optionalBlock name="extmailer.useSMTPAuth" title="${%Use SMTP Authentication}" checked="${descriptor.smtpAuthUsername!=null}"
 	          help="/help/tasks/mailer/smtpAuth.html">
-	        <f:entry title="User Name">
+	        <f:entry title="${%User Name}">
 	          <input class="setting-input" name="extmailer.SMTPAuth.userName"
 	                 type="text" value="${descriptor.smtpAuthUsername}"/>
 	        </f:entry>
-	        <f:entry title="Password">
+	        <f:entry title="${%Password}">
 	          <input class="setting-input" name="extmailer.SMTPAuth.password"
 	                 type="password" value="${descriptor.smtpAuthPassword}"/>
 	        </f:entry>
 	      </f:optionalBlock>
-	      <f:entry title="Use SSL"
+	      <f:entry title="${%Use SSL}"
 	               help="/descriptor/hudson.tasks.Mailer/help/useSsl">
 	        <f:checkbox name="ext_mailer_smtp_use_ssl" checked="${descriptor.useSsl}" />
 	      </f:entry>
-	      <f:entry title="SMTP port"
+	      <f:entry title="${%SMTP port}"
 	               help="/descriptor/hudson.tasks.Mailer/help/smtpPort">
 	        <input class="setting-input" name="ext_mailer_smtp_port"
 	          type="text" value="${descriptor.smtpPort}"/>
@@ -49,24 +49,24 @@
               </f:entry>
 		</f:advanced>
 	  </f:optionalBlock>
-      <f:entry title="Default Content Type"
+      <f:entry title="${%Default Content Type}"
                       help="/plugin/email-ext/help/globalConfig/contentType.html">
         <select class="setting-input"
                 name="ext_mailer_default_content_type">
           <f:option value="text/plain"
                     selected="${'text/plain'==descriptor.defaultContentType}"
-            >Plain Text (text/plain)</f:option>
+            >${%contentType.plainText}</f:option>
           <f:option value="text/html"
                     selected="${'text/html'==descriptor.defaultContentType}"
-            >HTML (text/html)</f:option>
+            >${%contentType.html}</f:option>
         </select>
       </f:entry>
-      <f:entry title="Default Subject"
+      <f:entry title="${%Default Subject}"
                help="/plugin/email-ext/help/globalConfig/defaultSubject.html">
         <input class="setting-input" name="ext_mailer_default_subject"
                type="text" value="${descriptor.defaultSubject}"/>
       </f:entry>
-      <f:entry title="Default Content"
+      <f:entry title="${%Default Content}"
                help="/plugin/email-ext/help/globalConfig/defaultBody.html">
         <f:textarea class="setting-input"
                     name="ext_mailer_default_body"
@@ -75,10 +75,10 @@
       <!-- This is the help section.  It displays a bunch of dynamic help for all content tokens. -->
       <tr>
         <td></td>
-        <td colspan="2">Content Token Reference</td>
+        <td colspan="2">${%Content Token Reference}</td>
         <td>
           <j:invokeStatic var="contentTokenText" method="getGlobalContentTokenHelpText" className="hudson.plugins.emailext.EmailExtHelp"/>
-          <a href="#contentTokenHelpAnchor" name="contentTokenAnchor" onclick="toggleContentTokenHelp('');return false"><img src="${rootURL}/images/16x16/help.gif" alt="Help for feature: Content Token Reference" /></a>
+          <a href="#contentTokenHelpAnchor" name="contentTokenAnchor" onclick="toggleContentTokenHelp('');return false"><img src="${rootURL}/images/16x16/help.gif" alt="${%Help for feature: Content Token Reference}" /></a>
         </td>
       </tr>
       <tr>

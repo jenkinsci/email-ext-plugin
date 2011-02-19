@@ -31,7 +31,7 @@
 				${title}
 				<a href="#${mailType}hideAnchor" onclick="toggleMailHelp('${secId}${mailType}');return false">
 					<img src="${rootURL}/images/16x16/help.gif"
-						alt="Help for feature: Email Config" />
+						alt="${%Help for feature: Email Config}" />
 				</a>
 			</div>
 		</td>
@@ -86,19 +86,19 @@
 				href="#${mailType}hideAnchor"
 				onclick="javascript:swapEdit('${secId}${mailType}');return false">
 				<img src="${rootURL}/images/16x16/document_add.gif"
-					alt="View More Options" />
-				(expand)
+					alt="${%View More Options}" />
+				(${%expand})
 			</a>
 			<a id="${secId}${mailType}hide" name="${mailType}hideAnchor"
 				href="#${mailType}editAnchor" style="display:none"
 				onclick="javascript:swapEdit('${secId}${mailType}');return false">
 				<img src="${rootURL}/images/16x16/document_delete.gif"
-					alt="Hide Options" />
-				(collapse)
+					alt="${%Hide Options}" />
+				(${%collapse})
 			</a>
 		</td>
 		<td>
-			<input type="button" onclick="removeTrigger('${mailType}','${secId}')" value="Delete"/>
+			<input type="button" onclick="removeTrigger('${mailType}','${secId}')" value="${%Delete}"/>
 		</td>
 	</tr>
 	<tr id="${secId}${mailType}help" style="display:none">
@@ -113,21 +113,21 @@
 		<td colspan="5">
 			<table width="100%">
 				<f:entry
-					title="Recipient List"
+					title="${%Recipient List}"
 					help="/plugin/email-ext/help/projectConfig/mailType/recipientList.html">
 					<input class="setting-input"
 						name="mailer_${mailType}_recipientList" type="text"
 						value="${mailTypeObj.recipientList}" />
 				</f:entry>
 				<f:entry
-					title="Subject"
+					title="${%Subject}"
 					help="/plugin/email-ext/help/projectConfig/mailType/subject.html">
 					<input class="setting-input"
 						name="mailer_${mailType}_subject" type="text"
 						value="${mailTypeObj.subject}" />
 				</f:entry>
 				<f:entry
-					title="Content"
+					title="${%Content}"
 					help="/plugin/email-ext/help/projectConfig/mailType/body.html">
 					<f:textarea
 						class="setting-input"

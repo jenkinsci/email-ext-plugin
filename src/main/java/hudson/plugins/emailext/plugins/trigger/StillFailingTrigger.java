@@ -49,8 +49,7 @@ public class StillFailingTrigger extends EmailTrigger {
 
         @Override
         public String getHelpText() {
-            return "An email will be sent if the build status is \"Failure\" "
-                    + "for two or more builds in a row.";
+            return Messages.StillFailingTrigger_HelpText();
         }
     }
 

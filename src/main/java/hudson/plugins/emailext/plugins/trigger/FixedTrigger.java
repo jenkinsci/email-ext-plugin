@@ -49,8 +49,7 @@ public class FixedTrigger extends EmailTrigger {
 
         @Override
         public String getHelpText() {
-            return "An email will be sent when the build status changes from \"Failure\" "
-                    + "or \"Unstable\" to \"Successful\".";
+            return Messages.FixedTrigger_HelpText();
         }
     }
 

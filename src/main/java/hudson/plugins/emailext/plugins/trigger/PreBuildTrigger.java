@@ -39,7 +39,7 @@ public class PreBuildTrigger extends EmailTrigger {
 
         @Override
         public String getHelpText() {
-            return "An email will be sent when the build begins.";
+            return Messages.PreBuildTrigger_HelpText();
         }
     }
 
