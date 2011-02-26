@@ -257,7 +257,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         adminAddress = req.getParameter("ext_mailer_admin_address");
         defaultSuffix = nullify(req.getParameter("ext_mailer_default_suffix"));
 
-        // Specify the url to this hudson instance
+        // Specify the url to this Jenkins instance
         String url = nullify(req.getParameter("ext_mailer_hudson_url"));
         if (url != null && !url.endsWith("/")) {
             url += '/';
