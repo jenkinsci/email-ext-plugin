@@ -51,7 +51,7 @@ TD.console { font-family:Courier New; }
   <j:set var="hadChanges" value="false" />
   <TABLE width="100%">
     <TR><TD class="bg1" colspan="2"><B>CHANGES</B></TD></TR>
-    <j:forEach var="cs" items="${changeSet.logs}" varStatus="loop">
+    <j:forEach var="cs" items="${changeSet}" varStatus="loop">
       <j:set var="hadChanges" value="true" />
       <j:set var="aUser" value="${cs.hudsonUser}"/>
       <TR>

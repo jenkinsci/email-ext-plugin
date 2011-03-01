@@ -10,7 +10,7 @@ Build duration: ${build.durationString}
 <j:set var="changeSet" value="${build.changeSet}" />
 <j:if test="${changeSet!=null}">
 CHANGE SET <j:set var="hadChanges" value="false" />
-      <j:forEach var="cs" items="${changeSet.logs}" varStatus="loop">
+      <j:forEach var="cs" items="${changeSet}" varStatus="loop">
         <j:set var="hadChanges" value="true" />
         <j:set var="aUser" value="${cs.hudsonUser}"/>
   &#10;Revision ${cs.revision} by <j:choose><j:when test="${aUser!=null}">${aUser.displayName}: </j:when><j:otherwise>${cs.user}: </j:otherwise></j:choose>(${cs.msgAnnotated})
