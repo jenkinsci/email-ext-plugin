@@ -345,6 +345,11 @@ public class ExtendedEmailPublisher extends Notifier {
         if (CONTENT_TRANSFER_ENCODING != null) {
             msg.setHeader("Content-Transfer-Encoding", CONTENT_TRANSFER_ENCODING);
         }
+        
+        String listId = ExtendedEmailPublisher.DESCRIPTOR.getListId();
+        if (listId != null) {
+            msg.setHeader("List-ID", listId);
+        }
 
         return msg;
     }

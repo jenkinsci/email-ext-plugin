@@ -85,6 +85,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     private String defaultBody;
 
     private boolean overrideGlobalSettings;
+    
+    /**
+     * If non-null, set a List-ID email header.
+     */
+    private String listId;
 
     @Override
     public String getDisplayName() {
@@ -195,6 +200,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         return overrideGlobalSettings;
     }
 
+    public String getListId() {
+        return listId;
+    }
+
     public boolean isApplicable(Class<? extends AbstractProject> jobType) {
         return true;
     }
@@ -291,6 +300,13 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
 
         overrideGlobalSettings = req.getParameter("ext_mailer_override_global_settings") != null;
+
+        // specify List-ID information
+        if (req.getParameter("extmailer.useListID") != null) {
+            listId = nullify(req.getParameter("extmailer.ListID.id"));
+        } else {
+            listId = null;
+        }
 
         save();
         return super.configure(req, formData);

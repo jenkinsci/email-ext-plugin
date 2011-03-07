@@ -61,6 +61,13 @@
             >${%contentType.html}</f:option>
         </select>
       </f:entry>
+      <f:optionalBlock name="extmailer.useListID" title="${%Use List-ID Email Header}" checked="${descriptor.listId!=null}"
+          help="/plugin/email-ext/help/globalConfig/listId.html">
+        <f:entry title="${%List ID}">
+          <input class="setting-input" name="extmailer.ListID.id"
+                 type="text" value="${descriptor.listId}"/>
+        </f:entry>
+      </f:optionalBlock>
       <f:entry title="${%Default Subject}"
                help="/plugin/email-ext/help/globalConfig/defaultSubject.html">
         <input class="setting-input" name="ext_mailer_default_subject"
