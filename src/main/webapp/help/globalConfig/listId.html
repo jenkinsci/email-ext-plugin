@@ -3,8 +3,15 @@
 	Set a List-ID header on all emails.  This can help with filtering in
 	email clients.  It will also stop most auto-responders from sending
 	replies back to the sender (out-of-office, on-vacation, etc.)
+	</p>
 	
 	<p>
-	The format should be something like:<br/>
-	<pre>"Build Notifications" &lt;ci-notifications.company.org&gt;</pre>
+	You can use whatever name and id you want, but the format should be similar to one of the following (including the &lt; and &gt; signs around the actual id):
+	<ul>
+		<li><pre>&lt;ci-notifications.company.org&gt;</pre></li>
+		<li><pre>Build Notifications &lt;ci-notifications.company.org&gt;</pre></li>
+		<li><pre>"Build Notifications" &lt;ci-notifications.company.org&gt;</pre></li>
+	</ul>
+	For a full description of the List-ID specification see <a href="http://www.apps.ietf.org/rfc/rfc2919.html" target="_new">RFC-2919<a/>.
+	</p>
 </div>
