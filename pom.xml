@@ -9,7 +9,7 @@
 
   <artifactId>email-ext</artifactId>
   <packaging>hpi</packaging>
-  <version>2.13-SNAPSHOT</version>
+  <version>2.13</version>
   <name>Jenkins Email Extension Plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin</url>
 
