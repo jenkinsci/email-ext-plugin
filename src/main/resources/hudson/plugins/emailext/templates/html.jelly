@@ -60,10 +60,10 @@ TD.console { font-family:Courier New; }
           <B>(${cs.msgAnnotated})</B>
          </TD>
       </TR>
-      <j:forEach var="p" items="${cs.paths}">
+      <j:forEach var="p" items="${cs.affectedFiles}">
         <TR>
           <TD width="10%">${spc}${p.editType.name}</TD>
-          <TD>${p.value}</TD>
+          <TD>${p.path}</TD>
         </TR>
       </j:forEach>
     </j:forEach>
