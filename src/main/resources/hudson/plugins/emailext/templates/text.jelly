@@ -14,7 +14,7 @@ Build duration: ${build.durationString}
   <j:forEach var="cs" items="${changeSet}" varStatus="loop">
     <j:set var="hadChanges" value="true"/>
     <j:set var="aUser" value="${cs.hudsonUser}"/>
-    <j:whitespace>Revision ${cs.revision} by ${aUser!=null?aUser.displayName:cs.author.displayName}: (${cs.msgAnnotated})&#10;</j:whitespace>
+    <j:whitespace>Revision ${cs.commitId?:cs.revision?:cs.changeNumber} by ${aUser!=null?aUser.displayName:cs.author.displayName}: (${cs.msgAnnotated})&#10;</j:whitespace>
     <j:forEach var="p" items="${cs.affectedFiles}">
       <j:whitespace>  change: ${p.editType.name} ${p.path}&#10;</j:whitespace>
     </j:forEach>
