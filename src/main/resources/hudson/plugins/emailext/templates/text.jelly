@@ -13,7 +13,7 @@ CHANGE SET <j:set var="hadChanges" value="false" />
       <j:forEach var="cs" items="${changeSet}" varStatus="loop">
         <j:set var="hadChanges" value="true" />
         <j:set var="aUser" value="${cs.hudsonUser}"/>
-  &#10;Revision ${cs.revision} by <j:choose><j:when test="${aUser!=null}">${aUser.displayName}: </j:when><j:otherwise>${cs.user}: </j:otherwise></j:choose>(${cs.msgAnnotated})
+  &#10;Revision ${cs.revision} by ${aUser!=null?aUser.displayName:cs.author.displayName}: (${cs.msgAnnotated})
 <j:forEach var="p" items="${cs.paths}">&#10;  change: ${p.editType.name}   ${p.value}</j:forEach>
       </j:forEach>      
       <j:if test="${!hadChanges}">

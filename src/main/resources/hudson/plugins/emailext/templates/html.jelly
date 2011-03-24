@@ -56,10 +56,7 @@ TD.console { font-family:Courier New; }
       <j:set var="aUser" value="${cs.hudsonUser}"/>
       <TR>
         <TD colspan="2" class="bg2">${spc}Revision <B>${cs.revision}</B> by
-          <B><j:choose>
-            <j:when test="${aUser!=null}">${aUser.displayName}: </j:when>
-            <j:otherwise>${cs.user}: </j:otherwise>
-          </j:choose></B>
+          <B>${aUser!=null?aUser.displayName:cs.author.displayName}: </B>
           <B>(${cs.msgAnnotated})</B>
          </TD>
       </TR>
