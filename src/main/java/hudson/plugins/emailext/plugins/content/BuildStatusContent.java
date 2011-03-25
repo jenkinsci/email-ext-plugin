@@ -46,8 +46,29 @@ public class BuildStatusContent implements EmailContent {
             }
         } else if (buildResult == Result.UNSTABLE) {
             B prevBuild = build.getPreviousBuild();
-            if (prevBuild != null && (prevBuild.getResult() == Result.UNSTABLE)) {
-                return "Still Unstable";
+            if (prevBuild != null) {
+               if (prevBuild.getResult() == Result.UNSTABLE) {
+                  return "Still Unstable";
+               } else if (prevBuild.getResult() == Result.SUCCESS) {
+                  return "Unstable";
+               } else if (prevBuild.getResult() == Result.FAILURE ||
+                  prevBuild.getResult() == Result.ABORTED ||
+                  prevBuild.getResult() == Result.NOT_BUILT) {
+                  //iterate through previous builds
+                  //(fail_or_aborted)*--> unstable : return still unstable
+                  //(fail_or_aborted)*--> unstable : return unstable
+                  B previous = prevBuild.getPreviousBuild();
+                  while (previous != null) {
+                     if (previous.getResult() == Result.SUCCESS) {
+                        return "Unstable";
+                     }
+                     if (previous.getResult() == Result.UNSTABLE) {
+                        return "Still unstable";
+                     }
+                     previous = previous.getPreviousBuild();
+                  }
+                  return "Unstable";
+               }
             } else {
                 return "Unstable";
             }
