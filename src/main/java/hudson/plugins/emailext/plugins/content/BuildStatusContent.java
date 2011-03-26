@@ -55,8 +55,8 @@ public class BuildStatusContent implements EmailContent {
                   prevBuild.getResult() == Result.ABORTED ||
                   prevBuild.getResult() == Result.NOT_BUILT) {
                   //iterate through previous builds
-                  //(fail_or_aborted)*--> unstable : return still unstable
-                  //(fail_or_aborted)*--> unstable : return unstable
+                  //(fail_or_aborted)* and then an unstable : return still unstable
+                  //(fail_or_aborted)* and then successful : return unstable
                   B previous = prevBuild.getPreviousBuild();
                   while (previous != null) {
                      if (previous.getResult() == Result.SUCCESS) {
