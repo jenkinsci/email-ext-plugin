@@ -5,12 +5,16 @@ import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 
 import java.util.Set;
 
-public class ImprovementTrigger extends AbstractFailedTestTrigger {
+public class FewerFailuresTrigger extends AbstractFailedTestTrigger {
 	@Override
 	protected boolean trigger(Set<String> curFailedTests,
 			Set<String> prevFailedTests) {
+		// The first part of the condition avoids accidental triggering for
+		// builds that aggregate downstream test results before those test
+		// results are available...
 		return curFailedTests.size() > 0 &&
-			curFailedTests.size() < prevFailedTests.size();
+			prevFailedTests.containsAll(curFailedTests) &&
+			prevFailedTests.size() > curFailedTests.size();
 	}
 
 	@Override
@@ -22,19 +26,19 @@ public class ImprovementTrigger extends AbstractFailedTestTrigger {
 		
 		@Override
 		protected EmailTrigger newInstance() {
-			return new ImprovementTrigger();
+			return new FewerFailuresTrigger();
 		}
 		
 		@Override
 		public String getTriggerName() {
-			return "Test improvement";
+			return "Fewer failures";
 		}
 		
 		@Override
 		public String getHelpText() {
-			return "An email will be sent every time a build fewer failing tests than " +
-					"the previous build (regardless of whether some tests were broken), " +
-					"but still has at least one failing test.";
+			return "An email will be sent every time a build has strictly fewer failures " +
+					"than the previous build (i.e. all current failing tests also failed " +
+					"before, but some tests that failed before no longer fail).";
 		}
 	};
 }

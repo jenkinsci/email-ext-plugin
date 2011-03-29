@@ -5,11 +5,12 @@ import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 
 import java.util.Set;
 
-public class RegressionTrigger extends AbstractFailedTestTrigger {
+public class MoreFailuresTrigger extends AbstractFailedTestTrigger {
 	@Override
 	protected boolean trigger(Set<String> curFailedTests,
 			Set<String> prevFailedTests) {
-		return curFailedTests.size() > prevFailedTests.size();
+		return curFailedTests.containsAll(prevFailedTests) &&
+			curFailedTests.size() > prevFailedTests.size();
 	}
 
 	@Override
@@ -21,7 +22,7 @@ public class RegressionTrigger extends AbstractFailedTestTrigger {
 		
 		@Override
 		protected EmailTrigger newInstance() {
-			return new RegressionTrigger();
+			return new MoreFailuresTrigger();
 		}
 		
 		@Override
@@ -31,8 +32,10 @@ public class RegressionTrigger extends AbstractFailedTestTrigger {
 		
 		@Override
 		public String getHelpText() {
-			return "An email will be sent every time a build has more failing tests than " +
-					"the previous build (regardless of whether some tests were fixed).";
+			return "An email will be sent every time a build has strictly more failing " +
+					"tests than the previous build (i.e. all the tests that failed in " +
+					"the previous build still fail, and there are additional failing " +
+					"tests).";
 		}
 	};
 }
