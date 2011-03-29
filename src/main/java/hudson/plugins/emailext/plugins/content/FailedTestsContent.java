@@ -8,6 +8,7 @@ import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -21,16 +22,24 @@ public class FailedTestsContent implements EmailContent {
 
     private static final String TOKEN = "FAILED_TESTS";
 
+    private static final String SHOW_STACK_NAME = "showStack";
+    private static final boolean SHOW_STACK_DEFAULT = true;
+
     public String getToken() {
         return TOKEN;
     }
 
     public List<String> getArguments() {
-        return Collections.emptyList();
+        return Arrays.asList(SHOW_STACK_NAME);
     }
 
     public String getHelpText() {
-        return "Displays failing unit test information, if any tests have failed.";
+    	return "Displays failing unit test information, if any tests have failed." +
+	    	"<ul>\n" +
+	    	"<li><i>" + SHOW_STACK_NAME + "</i> - indicates that each failure should" +
+	    			"be accompanied by its stack trace.<br>\n" +
+	    	"Defaults to " + SHOW_STACK_DEFAULT + ".\n" +
+	    	"</ul>\n";
     }
 
     public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
@@ -44,6 +53,8 @@ public class FailedTestsContent implements EmailContent {
         }
 
         int failCount = testResult.getFailCount();
+        
+        boolean showStacks = Args.get(args, SHOW_STACK_NAME, SHOW_STACK_DEFAULT);
 
         if (failCount == 0) {
             buffer.append("All tests passed");
@@ -54,14 +65,14 @@ public class FailedTestsContent implements EmailContent {
 
             List<CaseResult> failedTests = testResult.getFailedTests();
             for (CaseResult failedTest : failedTests) {
-                outputTest(buffer, failedTest);
+                outputTest(buffer, failedTest, showStacks);
             }
         }
 
         return buffer.toString();
     }
 
-    private void outputTest(StringBuffer buffer, CaseResult failedTest) {
+    private void outputTest(StringBuffer buffer, CaseResult failedTest, boolean showStacks) {
         buffer.append(failedTest.getStatus().toString());
         buffer.append(":  ");
         buffer.append(failedTest.getClassName());
@@ -70,9 +81,11 @@ public class FailedTestsContent implements EmailContent {
         buffer.append("\n\n");
         buffer.append("Error Message:\n");
         buffer.append(failedTest.getErrorDetails());
-        buffer.append("\n\nStack Trace:\n");
-        buffer.append(failedTest.getErrorStackTrace());
-        buffer.append("\n\n");
+        if (showStacks) {
+	        buffer.append("\n\nStack Trace:\n");
+	        buffer.append(failedTest.getErrorStackTrace());
+	        buffer.append("\n\n");
+        }
     }
 
     public boolean hasNestedContent() {
