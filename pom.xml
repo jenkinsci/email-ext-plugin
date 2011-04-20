@@ -89,6 +89,24 @@
         <version>${powermock.version}</version>
         <scope>test</scope>
      </dependency>
+     <dependency>
+	<groupId>org.python</groupId>
+        <artifactId>jython-standalone</artifactId>
+	<version>2.5.2</version>
+	<scope>system</scope>
+	<systemPath>
+	    ${basedir}/src/main/webapp/WEB-INF/lib/jython-standalone-2.5.2.jar
+	</systemPath>
+     </dependency>
+     <dependency>
+	     <groupId>org.ruby</groupId>
+	     <artifactId>jruby-complete</artifactId>
+	     <version>1.6.0</version>
+	     <scope>system</scope>
+	     <systemPath>
+		     ${basedir}/src/main/webapp/WEB-INF/lib/jruby-complete-1.6.0.jar
+	     </systemPath>
+     </dependency>
   </dependencies>
 
   <scm>
@@ -104,6 +122,11 @@
     <repository>
        <id>powermock-repo</id>
        <url>http://powermock.googlecode.com/svn/repo/</url>
+    </repository>
+    <repository>
+       <id>maven2-repository.dev.java.net</id>
+       <name>Java.net repository for Maven2</name>
+       <url>http://download.java.net/maven/2/</url>
     </repository>
   </repositories>
 

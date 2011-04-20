@@ -1,0 +1,119 @@
+<STYLE>
+BODY, TABLE, TD, TH, P {
+  font-family:Verdana,Helvetica,sans serif;
+  font-size:11px;
+  color:black;
+}
+h1 { color:black; }
+h2 { color:black; }
+h3 { color:black; }
+TD.bg1 { color:white; background-color:#0000C0; font-size:120% }
+TD.bg2 { color:white; background-color:#4040FF; font-size:110% }
+TD.bg3 { color:white; background-color:#8080FF; }
+TD.test_passed { color:blue; }
+TD.test_failed { color:red; }
+TD.console { font-family:Courier New; }
+</STYLE>
+<BODY>
+
+<TABLE>
+  <TR><TD align="right"><IMG SRC="${rooturl}static/e59dfe28/images/32x32/<%= build.result == 'SUCCESS' ? "blue.gif" : build.result == 'FAILURE' ? 'red.gif' : 'yellow.gif' %>" />
+  </TD><TD valign="center"><B style="font-size: 200%;">BUILD ${build.result}</B></TD></TR>
+  <TR><TD>Build URL</TD><TD><A href="${rooturl}${build.url}">${rooturl}${build.url}</A></TD></TR>
+  <TR><TD>Project:</TD><TD>${project.name}</TD></TR>
+  <TR><TD>Date of build:</TD><TD>${it.timestampString}</TD></TR>
+  <TR><TD>Build duration:</TD><TD>${build.durationString}</TD></TR>
+</TABLE>
+<BR/>
+
+<!-- CHANGE SET -->
+<% def changeSet = build.changeSet
+if(changeSet != null) {
+	def hadChanges = false %>
+	<TABLE width="100%">
+    <TR><TD class="bg1" colspan="2"><B>CHANGES</B></TD></TR>
+<% 	changeSet.each() { cs ->
+		hadChanges = true
+		def aUser = cs.hudsonUser %>		
+      <TR>
+        <TD colspan="2" class="bg2">${spc}Revision <B><%= cs.metaClass.hasProperty('commitId') ? cs.commitId : cs.metaClass.hasProperty('revision') ? cs.revision : cs.changeNumber%></B> by
+          <B><%= aUser != null ? aUser.displayName : it.author.displayName%>: </B>
+          <B>(${it.msgAnnotated})</B>
+         </TD>
+      </TR>
+<%		cs.affectedFiles.each() { p -> %>
+        <TR>
+          <TD width="10%">${spc}${p.editType.name}</TD>
+          <TD>${p.path}</TD>
+        </TR>
+<%		}
+	}
+	
+	if(!hadChanges) { %>	
+        <TR><TD colspan="2">No Changes</TD></TR>
+<%	} %>
+  </TABLE>
+<BR/>
+<% } %>
+
+<!-- ARTIFACTS -->
+<% def artifacts = build.artifacts
+if(artifacts != null && artifacts.size() > 0) { %>
+  <TABLE width="100%">
+    <TR><TD class="bg1"><B>BUILD ATRIFACTS</B></TD></TR>
+    <TR>
+      <TD>
+<% 		artifacts.each() { f -> %>		
+      	  <li>
+      	    <a href="${rooturl}${build.url}artifact/${f}">${f}</a>
+      	  </li>
+<%		} %>
+      </TD>
+    </TR>
+  </TABLE>
+<BR/>  
+<% } %>
+
+<!-- MAVEN ARTIFACTS -->
+<% 
+try {
+  def mbuilds = build.moduleBuilds
+  if(mbuilds != null) { %>
+  <TABLE width="100%">
+      <TR><TD class="bg1"><B>BUILD ATRIFACTS</B></TD></TR>
+<% 	  mbuild.each() { m -> %>	  
+        <TR><TD class="bg2"><B>${m.key.displayName}</B></TD></TR>
+<%		m.value.each() { mvnbld ->
+			def artifactz = mvnbld.artifacts
+			if(artifactz != null && artifactz.size() > 0) { %>			
+      <TR>
+        <TD>
+<%				artifactz.each() { f -> %>			
+      	    <li>
+      	      <a href="${rooturl}${mvnbld.url}artifact/${f}">${f}</a>
+      	    </li>
+<%				} %>		
+      	</TD>
+      </TR>
+<%			} 
+		}
+     } %>      
+  </TABLE>
+<BR/>
+<% } 
+} catch(e) {
+	// we don't do anything
+} %>
+
+<!-- CONSOLE OUTPUT -->
+<% if(build.result==hudson.model.Result.FAILURE) { %>
+<TABLE width="100%" cellpadding="0" cellspacing="0">
+<TR><TD class="bg1"><B>CONSOLE OUTPUT</B></TD></TR>
+<% 	build.getLog(100).each() { line -> %>
+	<TR><TD class="console">${line}</TD></TR>
+<% 	} %>
+</TABLE>
+<BR/>
+<% } %>
+
+</BODY>

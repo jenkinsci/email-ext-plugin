@@ -51,6 +51,7 @@ public interface EmailContent extends ExtensionPoint {
     public abstract class Args {
 
         private Args() {
+        	
         }
 
         public static String get(Map<String, ?> args, String name, String defaultValue) {
