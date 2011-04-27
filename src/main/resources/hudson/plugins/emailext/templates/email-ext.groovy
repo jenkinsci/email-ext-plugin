@@ -1,12 +1,12 @@
 import groovy.text.Template
 import groovy.text.SimpleTemplateEngine
 
-// setup minimal binding
 def binding = [ "build" : build, 
-				"project" : project, 
-				"rooturl" : rooturl, 
-				"it" : it,
-				"spc" : "&nbsp;&nbsp;" ]
-				
+  "project" : project,
+  "rooturl" : rooturl,
+  "it" : it,
+  "spc" : "&nbsp;&nbsp;" ]
+
+
 def engine = new SimpleTemplateEngine()
 engine.createTemplate(host.readFile(template)).make(binding).toString()

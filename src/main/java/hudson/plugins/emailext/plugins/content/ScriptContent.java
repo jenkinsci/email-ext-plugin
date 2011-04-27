@@ -211,6 +211,8 @@ public class ScriptContent implements EmailContent {
 					}
 				} catch(ScriptException e) {
 					LOGGER.log(Level.SEVERE, "ScriptException on init file: " + e.toString());
+				} catch (FileNotFoundException e) {
+					LOGGER.log(Level.INFO, "No init file found to execute");
 				} catch(Exception e) {
 					LOGGER.log(Level.SEVERE, "Exception on init file: " + e.toString());
 				} finally {

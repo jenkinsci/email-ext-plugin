@@ -69,7 +69,7 @@ public class EmailExtensionPlugin extends Plugin {
         addEmailContentPlugin(new JellyScriptContent());
         addEmailContentPlugin(new WorkspaceFileContent());
         addEmailContentPlugin(new TestCountsContent());
-	addEmailContentPlugin(new ScriptContent());
+        addEmailContentPlugin(new ScriptContent());
 
         addEmailTriggerPlugin(PreBuildTrigger.DESCRIPTOR);
         addEmailTriggerPlugin(FailureTrigger.DESCRIPTOR);

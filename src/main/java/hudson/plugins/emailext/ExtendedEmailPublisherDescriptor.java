@@ -83,6 +83,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
      * This is a global default body for sending emails.
      */
     private String defaultBody;
+    
+    /**
+     * This is a global default recipient list for sending emails.
+     */
+    private String recipientList;
 
     private boolean overrideGlobalSettings;
     
@@ -195,6 +200,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     public String getDefaultBody() {
         return defaultBody;
     }
+    
+    public String getDefaultRecipients() {
+    	return recipientList;
+    }
 
     public boolean getOverrideGlobalSettings() {
         return overrideGlobalSettings;
@@ -211,12 +220,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     @Override
     public Publisher newInstance(StaplerRequest req, JSONObject formData)
             throws hudson.model.Descriptor.FormException {
-        // Save the recipient lists
-        String listRecipients = formData.getString("recipientlist_recipients");
-
+        
         // Save configuration for each trigger type
         ExtendedEmailPublisher m = new ExtendedEmailPublisher();
-        m.recipientList = listRecipients;
+        m.recipientList = formData.getString("recipientlist_recipients");
         m.contentType = formData.getString("project_content_type");
         m.defaultSubject = formData.getString("project_default_subject");
         m.defaultContent = formData.getString("project_default_content");
@@ -250,9 +257,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     public ExtendedEmailPublisherDescriptor() {
         super(ExtendedEmailPublisher.class);
         load();
-        if (defaultBody == null && defaultSubject == null) {
+        if (defaultBody == null && defaultSubject == null && recipientList == null) {
             defaultBody = ExtendedEmailPublisher.DEFAULT_BODY_TEXT;
             defaultSubject = ExtendedEmailPublisher.DEFAULT_SUBJECT_TEXT;
+            recipientList = ExtendedEmailPublisher.DEFAULT_RECIPIENTS_TEXT;
         }
     }
 
@@ -298,7 +306,8 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         // Allow global defaults to be set for the subject and body of the email
         defaultSubject = nullify(req.getParameter("ext_mailer_default_subject"));
         defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
-
+        recipientList = nullify(req.getParameter("ext_mailer_default_recipients"));
+        
         overrideGlobalSettings = req.getParameter("ext_mailer_override_global_settings") != null;
 
         // specify List-ID information
@@ -336,6 +345,6 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
 
     public FormValidation doRecipientListRecipientsCheck(@QueryParameter final String value)
             throws IOException, ServletException {
-        return new EmailRecepientUtils().validateFormRecipientList(value);
+    	return new EmailRecepientUtils().validateFormRecipientList(value);
     }
 }
