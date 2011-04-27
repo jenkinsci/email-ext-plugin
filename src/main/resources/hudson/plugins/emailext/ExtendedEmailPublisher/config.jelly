@@ -17,9 +17,19 @@
 	<f:entry title="${%Global Recipient List}"
      		 description="${%Comma-separated list of email address that should receive notifications.}"
              help="/plugin/email-ext/help/projectConfig/globalRecipientList.html">
-	    <input class="setting-input validated" name="recipientlist_recipients"
-            type="text" value="${instance.recipientList}"
-            checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)"/>
+             
+        <j:choose>
+     		<j:when test="${instance.configured}">
+	    		<input class="setting-input validated" name="recipientlist_recipients"
+            		type="text" value="${instance.recipientList}"
+            		checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)"/>
+            </j:when>
+            <j:otherwise>
+            	<input class="setting-input validated" name="recipientlist_recipients"
+            		type="text" value="$DEFAULT_RECIPIENTS"
+            		checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)"/>
+            </j:otherwise>
+        </j:choose>             
     </f:entry>
     
 	<!-- This is the content type for the emails. -->

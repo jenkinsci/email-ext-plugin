@@ -28,6 +28,8 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMessage.RecipientType;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,6 +53,8 @@ public class ExtendedEmailPublisher extends Notifier {
     private static final String CONTENT_TRANSFER_ENCODING = System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
 
     public static final Map<String, EmailTriggerDescriptor> EMAIL_TRIGGER_TYPE_MAP = new HashMap<String, EmailTriggerDescriptor>();
+    
+    public static final String DEFAULT_RECIPIENTS_TEXT = "";
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
@@ -60,6 +64,8 @@ public class ExtendedEmailPublisher extends Notifier {
     public static final String PROJECT_DEFAULT_SUBJECT_TEXT = "$PROJECT_DEFAULT_SUBJECT";
 
     public static final String PROJECT_DEFAULT_BODY_TEXT = "$PROJECT_DEFAULT_CONTENT";
+    
+    public static final String PROJECT_DEFAULT_RECIPIENTS_TEXT = "$PROJECT_DEFAULT_RECIPIENTS";
 
     public static void addEmailTriggerType(EmailTriggerDescriptor triggerType) throws EmailExtException {
         if (EMAIL_TRIGGER_TYPE_MAP.containsKey(triggerType.getMailerId())) {
@@ -278,7 +284,7 @@ public class ExtendedEmailPublisher extends Notifier {
         // Get the recipients from the global list of addresses
         Set<InternetAddress> recipientAddresses = new LinkedHashSet<InternetAddress>();
         if (type.getSendToRecipientList()) {
-            addAddressesFromRecipientList(recipientAddresses, recipientList, env, listener);
+            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, charset), env, listener);
         }
         // Get the list of developers who made changes between this build and the last
         // if this mail type is configured that way
@@ -327,7 +333,7 @@ public class ExtendedEmailPublisher extends Notifier {
 
         //Get the list of recipients that are uniquely specified for this type of email
         if (type.getRecipientList() != null && type.getRecipientList().trim().length() > 0) {
-            addAddressesFromRecipientList(recipientAddresses, type.getRecipientList(), env, listener);
+            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, charset), env, listener);
         }
 
         msg.setRecipients(Message.RecipientType.TO, recipientAddresses.toArray(new InternetAddress[recipientAddresses.size()]));
@@ -359,6 +365,12 @@ public class ExtendedEmailPublisher extends Notifier {
         String subject = new ContentBuilder().transformText(type.getSubject(), this, type, build);
         msg.setSubject(subject, charset);
     }
+    
+    private String getRecipientList(final EmailType type, final AbstractBuild<?, ?> build, String charset)
+			throws MessagingException {
+		final String recipients = new ContentBuilder().transformText(type.getRecipientList(), this, type, build);
+		return recipients;
+	}
 
     private void setContent(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset)
             throws MessagingException {
