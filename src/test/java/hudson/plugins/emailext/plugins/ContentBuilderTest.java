@@ -22,12 +22,18 @@ public class ContentBuilderTest
         publisher = mock(ExtendedEmailPublisher.class);
         publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";
         publisher.defaultSubject = "How would you like your very own AWESOME-O 4000?";
+	publisher.recipientList = "ashlux@gmail.com";
+
         Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultBody" );
         f.setAccessible( true );
         f.set( ExtendedEmailPublisher.DESCRIPTOR, "Give me $4000 and I'll mail you a check for $40,000!" );
         f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultSubject" );
         f.setAccessible( true );
         f.set( ExtendedEmailPublisher.DESCRIPTOR, "Nigerian needs your help!" );
+
+	f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "recipientList" );
+	f.setAccessible( true );
+	f.set( ExtendedEmailPublisher.DESCRIPTOR, "ashlux@gmail.com" );
     }
 
 	public void testTokenizer1() {
