@@ -87,7 +87,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     /**
      * This is a global default recipient list for sending emails.
      */
-    private String recipientList;
+    private String recipientList = "";
 
     private boolean overrideGlobalSettings;
     
@@ -201,7 +201,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         return defaultBody;
     }
     
-    public String getDefaultRecipients() {
+    public String getDefaultRecipients() {    	
     	return recipientList;
     }
 
@@ -306,7 +306,8 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         // Allow global defaults to be set for the subject and body of the email
         defaultSubject = nullify(req.getParameter("ext_mailer_default_subject"));
         defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
-        recipientList = nullify(req.getParameter("ext_mailer_default_recipients"));
+        recipientList = nullify(req.getParameter("ext_mailer_default_recipients")) != null ?
+        	req.getParameter("ext_mailer_default_recipients") : "";
         
         overrideGlobalSettings = req.getParameter("ext_mailer_override_global_settings") != null;
 
