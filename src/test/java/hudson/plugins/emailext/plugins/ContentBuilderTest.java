@@ -22,7 +22,7 @@ public class ContentBuilderTest
         publisher = mock(ExtendedEmailPublisher.class);
         publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";
         publisher.defaultSubject = "How would you like your very own AWESOME-O 4000?";
-	publisher.recipientList = "ashlux@gmail.com";
+        publisher.recipientList = "ashlux@gmail.com";
 
         Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultBody" );
         f.setAccessible( true );
@@ -31,9 +31,9 @@ public class ContentBuilderTest
         f.setAccessible( true );
         f.set( ExtendedEmailPublisher.DESCRIPTOR, "Nigerian needs your help!" );
 
-	f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "recipientList" );
-	f.setAccessible( true );
-	f.set( ExtendedEmailPublisher.DESCRIPTOR, "ashlux@gmail.com" );
+		f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "recipientList" );
+		f.setAccessible( true );
+		f.set( ExtendedEmailPublisher.DESCRIPTOR, "ashlux@gmail.com" );
     }
 
 	public void testTokenizer1() {
@@ -167,6 +167,16 @@ public class ContentBuilderTest
         assertEquals(publisher.defaultSubject, new ContentBuilder().transformText( "${PROJECT_DEFAULT_SUBJECT}", publisher, null,
                                                        mock( AbstractBuild.class ) ));
     }
+    
+    
+    public void testTransformText_shouldExpand_$PROJECT_DEFAULT_RECIPIENTS()
+    	throws IOException, InterruptedException
+    {
+    	assertEquals(publisher.recipientList, new ContentBuilder().transformText( "$PROJECT_DEFAULT_RECIPIENTS", publisher, null,
+    													mock( AbstractBuild.class ) ));
+    	assertEquals(publisher.recipientList, new ContentBuilder().transformText( "${PROJECT_DEFAULT_RECIPIENTS}", publisher, null,
+														mock( AbstractBuild.class ) ));
+    }
 
     public void testTransformText_shouldExpand_$DEFAULT_CONTENT()
         throws IOException, InterruptedException
@@ -189,4 +199,15 @@ public class ContentBuilderTest
                       new ContentBuilder().transformText( "${DEFAULT_SUBJECT}", publisher, null,
                                                           mock( AbstractBuild.class ) ) );
     }
+    
+    public void testTransformText_shouldExpand_$DEFAULT_RECIPIENT_LIST()
+    throws IOException, InterruptedException
+{
+    assertEquals( ExtendedEmailPublisher.DESCRIPTOR.getDefaultRecipients(),
+                  new ContentBuilder().transformText( "$DEFAULT_RECIPIENTS", publisher, null,
+                                                      mock( AbstractBuild.class ) ) );
+    assertEquals( ExtendedEmailPublisher.DESCRIPTOR.getDefaultRecipients(),
+                  new ContentBuilder().transformText( "${DEFAULT_RECIPIENTS}", publisher, null,
+                                                      mock( AbstractBuild.class ) ) );
+}
 }

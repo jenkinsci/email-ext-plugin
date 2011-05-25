@@ -104,7 +104,7 @@ public class ExtendedEmailPublisher extends Notifier {
     /**
      * A comma-separated list of email recipient that will be used for every trigger.
      */
-    public String recipientList;
+    public String recipientList = "";
 
     /** This is the list of email triggers that the project has configured */
     public List<EmailTrigger> configuredTriggers = new ArrayList<EmailTrigger>();
