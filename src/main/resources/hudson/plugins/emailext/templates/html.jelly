@@ -80,7 +80,7 @@ TD.console { font-family:Courier New; }
 <j:set var="artifacts" value="${build.artifacts}" />
 <j:if test="${artifacts!=null and artifacts.size()&gt;0}">
   <TABLE width="100%">
-    <TR><TD class="bg1"><B>BUILD ATRIFACTS</B></TD></TR>
+    <TR><TD class="bg1"><B>BUILD ARTIFACTS</B></TD></TR>
     <TR>
       <TD>
         <j:forEach var="f" items="${artifacts}">
@@ -100,7 +100,7 @@ TD.console { font-family:Courier New; }
 <j:set var="mbuilds" value="${build.moduleBuilds}" />
 <j:if test="${mbuilds!=null}">
   <TABLE width="100%">
-      <TR><TD class="bg1"><B>BUILD ATRIFACTS</B></TD></TR>
+      <TR><TD class="bg1"><B>BUILD ARTIFACTS</B></TD></TR>
       <j:forEach var="m" items="${mbuilds}">
         <TR><TD class="bg2"><B>${m.key.displayName}</B></TD></TR>
         <j:forEach var="mvnbld" items="${m.value}">
