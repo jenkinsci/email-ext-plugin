@@ -23,7 +23,8 @@ public class EmailRecepientUtils {
         final String expandedRecipientList = envVars.expand(recipientList);
         final String[] addresses = StringUtils.trim(expandedRecipientList).split(COMMA_SEPARATED_SPLIT_REGEXP);
         for (String address : addresses) {
-            internetAddresses.add(new InternetAddress(address));
+        	if(address.trim().length() > 0)
+        		internetAddresses.add(new InternetAddress(address));
         }
 
         return internetAddresses;
