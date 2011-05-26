@@ -141,7 +141,6 @@ public class ScriptContent implements EmailContent {
      */
     private InputStream getFileInputStream(String fileName)
             throws FileNotFoundException {				
-		LOGGER.log(Level.SEVERE, fileName);
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(
                 "hudson/plugins/emailext/templates/" + fileName);
         if (inputStream == null) {
@@ -173,10 +172,8 @@ public class ScriptContent implements EmailContent {
     public String readFile(String fileName)
 		throws FileNotFoundException, IOException, UnsupportedEncodingException {
 		String result = "";
-		LOGGER.log(Level.SEVERE, fileName);
 		InputStream inputStream = getFileInputStream(fileName);
 		if(inputStream != null) {
-			LOGGER.log(Level.SEVERE, "inputStream != null");
 			Writer writer = new StringWriter();
 			char[] buffer = new char[2048];
 			try {
