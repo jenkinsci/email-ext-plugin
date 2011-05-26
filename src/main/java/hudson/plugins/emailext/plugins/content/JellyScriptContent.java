@@ -109,7 +109,7 @@ public class JellyScriptContent implements EmailContent {
 
     private String renderContent(AbstractBuild<?, ?> build, InputStream inputStream)
             throws JellyException, IOException {
-        JellyContext context = createContext(new JellyScriptContentBuildWrapper(build), build);
+        JellyContext context = createContext(new ScriptContentBuildWrapper(build), build);
         Script script = context.compileScript(new InputSource(inputStream));
         if (script != null) {
             return convert(context, script);
