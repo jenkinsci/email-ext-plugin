@@ -12,12 +12,16 @@
   <version>2.15-SNAPSHOT</version>
   <name>Jenkins Email Extension Plugin</name>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin</url>
+  <issueManagement>
+    <system>JIRA</system>
+    <url>http://issues.jenkins-ci.org/secure/IssueNavigator.jspa?reset=true&amp;jqlQuery=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+%27email-ext%27</url>
+  </issueManagement>
 
   <properties>
       <powermock.version>1.4.5</powermock.version>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  
+
   <developers>
     <developer>
       <id>ashlux</id>
@@ -45,7 +49,7 @@
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>maven-plugin</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
