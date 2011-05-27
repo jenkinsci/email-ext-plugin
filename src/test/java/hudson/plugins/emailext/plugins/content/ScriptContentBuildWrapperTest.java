@@ -28,9 +28,9 @@ import static org.mockito.Mockito.when;
 
 @RunWith( PowerMockRunner.class )
 @PrepareForTest( value = { AggregatedTestResultAction.class, AggregatedTestResultAction.ChildReport.class } )
-public class JellyScriptContentBuildWrapperTest
+public class ScriptContentBuildWrapperTest
 {
-    private JellyScriptContentBuildWrapper buildWrapper;
+    private ScriptContentBuildWrapper buildWrapper;
 
     private AbstractBuild<?, ?> mockBuild;
 
@@ -39,7 +39,7 @@ public class JellyScriptContentBuildWrapperTest
     {
         mockBuild = mock( AbstractBuild.class );
 
-        buildWrapper = new JellyScriptContentBuildWrapper( mockBuild );
+        buildWrapper = new ScriptContentBuildWrapper( mockBuild );
     }
 
     @Test
