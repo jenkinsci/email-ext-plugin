@@ -1,13 +1,25 @@
 package hudson.plugins.emailext.plugins.content;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.plugins.emailext.plugins.content.ChangesSinceLastBuildContentTest.ChangeLogEntry;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.EditType;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,18 +27,6 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 @SuppressWarnings({"unchecked"})
 @RunWith(PowerMockRunner.class)
@@ -37,10 +37,16 @@ public class ScriptContentTest
 
     private Map<String, Object> args;
 
+    private final String osName = System.getProperty("os.name");
+
+    private final boolean osIsDarwin = osName.equals("Darwin");
+
     @Before
     public void setup()
             throws Exception
     {
+        assumeThat(osIsDarwin, is(false));
+
         scriptContent = new ScriptContent();
 
         args = new HashMap<String, Object>();
@@ -72,9 +78,9 @@ public class ScriptContentTest
         throws Exception
     {
         args.put(ScriptContent.SCRIPT_TEMPLATE_ARG, "empty-groovy-template-on-classpath.template");
-        
+
         AbstractBuild build = mock(AbstractBuild.class);
-        
+
         assertEquals("HELLO WORLD!", scriptContent.getContent(build, null, null, args));
     }
     */
@@ -93,7 +99,7 @@ public class ScriptContentTest
 
         assertEquals("Script [script-does-not-exist] or template [groovy-html.template] was not found in $JENKINS_HOME/email-templates.", content);
     }
-    
+
     @Test
     public void testWhenTemplateNotFoundThrowFileNotFoundException()
             throws Exception
