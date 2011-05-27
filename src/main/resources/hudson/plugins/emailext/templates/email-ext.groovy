@@ -10,3 +10,4 @@ def binding = [ "build" : build,
 
 def engine = new SimpleTemplateEngine()
 engine.createTemplate(host.readFile(template)).make(binding).toString()
+

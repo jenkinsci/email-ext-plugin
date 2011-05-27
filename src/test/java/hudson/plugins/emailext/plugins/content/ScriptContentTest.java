@@ -69,15 +69,15 @@ public class ScriptContentTest
     /*
     @Test
     public void testShouldFindTemplateOnClassPath()
-		throws Exception
-	{
-		args.put(ScriptContent.SCRIPT_TEMPLATE_ARG, "empty-groovy-template-on-classpath.template");
-		
-		AbstractBuild build = mock(AbstractBuild.class);
-		
-		assertEquals("HELLO WORLD!", scriptContent.getContent(build, null, null, args));
-	}
-	*/
+        throws Exception
+    {
+        args.put(ScriptContent.SCRIPT_TEMPLATE_ARG, "empty-groovy-template-on-classpath.template");
+        
+        AbstractBuild build = mock(AbstractBuild.class);
+        
+        assertEquals("HELLO WORLD!", scriptContent.getContent(build, null, null, args));
+    }
+    */
 
     @Test
     public void testWhenScriptNotFoundThrowFileNotFoundException()

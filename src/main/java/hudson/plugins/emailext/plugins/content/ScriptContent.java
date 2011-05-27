@@ -81,8 +81,8 @@ public class ScriptContent implements EmailContent {
                 + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Defaults to \"" + DEFAULT_TEMPLATE_NAME + "\"</li>\n"
                 + "<li><i>" + SCRIPT_INIT_ARG + "</i> - true to run the language's init script.<br>\n"
                 + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Defaults to " + DEFAULT_INIT_VALUE + "</li>\n"
-				+ "<li>Available Script Engines\n"
-				+ "<ul>\n");
+		        + "<li>Available Script Engines\n"
+		        + "<ul>\n");
 	
 		for (ScriptEngineFactory fact : scriptEngineManager.getEngineFactories()) {
 			String extensions = join(fact.getExtensions(), ",");
@@ -93,16 +93,16 @@ public class ScriptContent implements EmailContent {
     }
 
     public List<String> getArguments() {
-    	List<String> args = new ArrayList<String>();
-    	args.add(SCRIPT_NAME_ARG);
-    	args.add(SCRIPT_TEMPLATE_ARG);
-    	args.add(SCRIPT_INIT_ARG);
-    	return args;
+	    List<String> args = new ArrayList<String>();
+	    args.add(SCRIPT_NAME_ARG);
+	    args.add(SCRIPT_TEMPLATE_ARG);
+	    args.add(SCRIPT_INIT_ARG);
+	    return args;
     }
 
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(
-            AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType type, Map<String, ?> args)
+    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType type, Map<String, ?> args)
             throws IOException, InterruptedException {
+
         InputStream inputStream = null;        
         InputStream templateStream = null;
         String scriptName = Args.get(args, SCRIPT_NAME_ARG, DEFAULT_SCRIPT_NAME);
@@ -141,8 +141,7 @@ public class ScriptContent implements EmailContent {
      */
     private InputStream getFileInputStream(String fileName)
             throws FileNotFoundException {				
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(
-                "hudson/plugins/emailext/templates/" + fileName);
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("hudson/plugins/emailext/templates/" + fileName);
         if (inputStream == null) {
             final File scriptsFolder = new File(Hudson.getInstance().getRootDir(), EMAIL_TEMPLATES_DIRECTORY);
             final File scriptFile = new File(scriptsFolder, fileName);
@@ -152,7 +151,7 @@ public class ScriptContent implements EmailContent {
     }
 
     private String renderContent(AbstractBuild<?, ?> build, InputStream inputStream, 
-    		String scriptName, String templateName, boolean runInit)
+		String scriptName, String templateName, boolean runInit)
             throws ScriptException, IOException {
 		String rendered = "";
 		ScriptEngine engine = createEngine(scriptName, templateName, runInit, new ScriptContentBuildWrapper(build), build);
