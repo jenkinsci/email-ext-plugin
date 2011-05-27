@@ -11,11 +11,11 @@ import hudson.tasks.test.AggregatedTestResultAction;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JellyScriptContentBuildWrapper {
+public class ScriptContentBuildWrapper {
 
     private AbstractBuild<?, ?> build;
 
-    public JellyScriptContentBuildWrapper(AbstractBuild<?, ?> build) {
+    public ScriptContentBuildWrapper(AbstractBuild<?, ?> build) {
         this.build = build;
     }
 

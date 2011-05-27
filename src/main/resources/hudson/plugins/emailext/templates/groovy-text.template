@@ -1,0 +1,25 @@
+GENERAL INFO
+
+BUILD ${build.result}
+Build URL: ${rooturl}${build.url}
+Project: ${project.name}
+Date of build: ${it.timestampString}
+Build duration: ${build.durationString}
+
+<% 
+def changeSet = build.changeSet
+if(changeSet != null) {
+  def hadChanges = false %>
+CHANGE SET
+<% changeSet.each() { cs ->
+     hadChanges = true
+  	 def aUser = cs.hudsonUser %>
+  	 Revision <%= cs.metaClass.hasProperty('commitId') ? cs.commitId : cs.metaClass.hasProperty('revision') ? cs.revision : cs.changeNumber %> by <%= aUser != null ? aUser.displayName : cs.author.displayName %>: (<%= cs.msgAnnotated %>)
+<%	 cs.affectedFiles.each() { p -> %>
+	 change: <%= p.editType.name %> <%= p.path %>
+<%   }	 	    
+   }
+  if(!hadChanges) { %>
+  No changes
+<% }
+} %>
