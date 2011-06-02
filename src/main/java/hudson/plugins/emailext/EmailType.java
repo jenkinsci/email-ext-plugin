@@ -41,8 +41,7 @@ public class EmailType {
     private boolean includeCulprits;
 
     /**
-     * A comma-separated list of names of the recipientLists
-     * that we should send emails to.
+     * Specifies whether or not we should send this email to the recipient list
      */
     private boolean sendToRecipientList;
 
@@ -115,6 +114,13 @@ public class EmailType {
     }
 
     public void setRecipientList(String recipientList) {
-        this.recipientList = recipientList;
+        this.recipientList = recipientList.trim();
+    }
+
+    public Object readResolve() {
+        if(recipientList != null && recipientList.trim().length() == 0) {
+            this.recipientList = ExtendedEmailPublisher.PROJECT_DEFAULT_RECIPIENTS_TEXT;
+	}
+	return this;
     }
 }
