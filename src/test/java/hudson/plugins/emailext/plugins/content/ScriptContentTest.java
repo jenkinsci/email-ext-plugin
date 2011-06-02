@@ -39,7 +39,7 @@ public class ScriptContentTest
 
     private final String osName = System.getProperty("os.name");
 
-    private final boolean osIsDarwin = osName.equals("Darwin");
+    private final boolean osIsDarwin = osName.equals("Mac OS X") || osName.equals("Darwin");
 
     @Before
     public void setup()
