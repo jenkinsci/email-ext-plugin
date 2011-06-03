@@ -60,7 +60,7 @@ public class ScriptContent implements EmailContent {
     }
 
     public String getToken() {
-        return "SCRIPT_CONTENT";
+        return "SCRIPT";
     }
 
     public String getHelpText() {
