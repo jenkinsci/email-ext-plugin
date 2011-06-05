@@ -42,6 +42,10 @@
       <name>Seiji Sogabe</name>
       <email>s.sogabe@gmail.com</email>
     </developer>
+    <developer>
+      <id>slide</id>
+      <name>Alex Earl</name>
+      <email>slide.o.mix@gmail.com</email>
   </developers>
 
   <dependencies>
