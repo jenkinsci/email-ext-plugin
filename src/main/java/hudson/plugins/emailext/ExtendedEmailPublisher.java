@@ -357,6 +357,10 @@ public class ExtendedEmailPublisher extends Notifier {
             msg.setHeader("List-ID", listId);
         }
 
+        if (ExtendedEmailPublisher.DESCRIPTOR.getPrecedenceBulk()) {
+            msg.setHeader("Precedence", "bulk");
+        }
+
         return msg;
     }
 
