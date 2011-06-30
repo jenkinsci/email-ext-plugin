@@ -68,6 +68,8 @@
                  type="text" value="${descriptor.listId}"/>
         </f:entry>
       </f:optionalBlock>
+      <f:optionalBlock name="extmailer.addPrecedenceBulk" title="${%Add 'Precedence: bulk' Email Header}" checked="${descriptor.precedenceBulk}"
+          help="/plugin/email-ext/help/globalConfig/precedenceBulk.html"/>
       <f:entry title="${%Default Subject}"
                help="/plugin/email-ext/help/globalConfig/defaultSubject.html">
         <input class="setting-input" name="ext_mailer_default_subject"
