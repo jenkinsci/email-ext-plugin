@@ -96,6 +96,8 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
      */
     private String listId;
 
+    private boolean precedenceBulk;
+
     @Override
     public String getDisplayName() {
         return Messages.ExtendedEmailPublisherDescriptor_DisplayName();
@@ -201,7 +203,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         return defaultBody;
     }
     
-    public String getDefaultRecipients() {    	
+    public String getDefaultRecipients() {
     	return recipientList;
     }
 
@@ -211,6 +213,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
 
     public String getListId() {
         return listId;
+    }
+
+    public boolean getPrecedenceBulk() {
+        return precedenceBulk;
     }
 
     public boolean isApplicable(Class<? extends AbstractProject> jobType) {
@@ -308,8 +314,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
         recipientList = nullify(req.getParameter("ext_mailer_default_recipients")) != null ?
         	req.getParameter("ext_mailer_default_recipients") : "";
-        
+
         overrideGlobalSettings = req.getParameter("ext_mailer_override_global_settings") != null;
+
+        precedenceBulk = req.getParameter("extmailer.addPrecedenceBulk") != null;
 
         // specify List-ID information
         if (req.getParameter("extmailer.useListID") != null) {
