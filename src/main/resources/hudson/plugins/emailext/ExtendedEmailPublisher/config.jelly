@@ -83,6 +83,22 @@
 		</j:choose>
     </f:entry>
     
+    <!-- This is the default attachments set for the projcet. -->
+    <f:entry title="${%Attachments}"
+    		 help="/plugin/email-ext/help/projectConfig/attachments.html"
+    		 description="${%description('http://ant.apache.org/manual/Types/fileset.html')}">
+   		<j:choose>
+   			<j:when test="${instance.configured}">
+   			    <input class="setting-input" name="project_attachments"
+            		type="text" value="${instance.attachmentsPattern}"/>
+            </j:when>
+            <j:otherwise>
+            	<input class="setting-input" name="project_attachments"
+            		type="text" value=""/>
+            </j:otherwise>
+        </j:choose>
+    </f:entry>
+    
 	<!-- This is the help section.  It displays a bunch of dynamic help for all content tokens. -->
 	<tr>
 		<td></td>
