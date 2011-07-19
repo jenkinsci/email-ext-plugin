@@ -88,6 +88,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
      * This is a global default recipient list for sending emails.
      */
     private String recipientList = "";
+    
+    /**
+     * The maximum size of all the attachments (in MB)
+     */
+    private long maxAttachmentSize = -1;
 
     private boolean overrideGlobalSettings;
     
@@ -206,6 +211,14 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     public String getDefaultRecipients() {
     	return recipientList;
     }
+    
+    public long getMaxAttachmentSize() {
+    	return maxAttachmentSize;
+    }
+    
+    public long getMaxAttachmentSizeMb() {
+    	return maxAttachmentSize / (1024 * 1024);
+    }
 
     public boolean getOverrideGlobalSettings() {
         return overrideGlobalSettings;
@@ -233,6 +246,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         m.contentType = formData.getString("project_content_type");
         m.defaultSubject = formData.getString("project_default_subject");
         m.defaultContent = formData.getString("project_default_content");
+        m.attachmentsPattern = formData.getString("project_attachments");
         m.configuredTriggers = new ArrayList<EmailTrigger>();
 
         // Create a new email trigger for each one that is configured
@@ -257,6 +271,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         m.setSendToDevelopers(formData.optBoolean(prefix + "sendToDevelopers"));
         m.setSendToRequester(formData.optBoolean(prefix + "sendToRequester"));
         m.setIncludeCulprits(formData.optBoolean(prefix + "includeCulprits"));
+        //m.setAttachments(formData.getString(prefix + "attachments"));
         return m;
     }
 
@@ -314,7 +329,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
         recipientList = nullify(req.getParameter("ext_mailer_default_recipients")) != null ?
         	req.getParameter("ext_mailer_default_recipients") : "";
-
+        
+        // convert the value into megabytes (1024 * 1024 bytes)
+        maxAttachmentSize = nullify(req.getParameter("ext_mailer_max_attachment_size")) != null ?
+        	(Long.parseLong(req.getParameter("ext_mailer_max_attachment_size")) * 1024 * 1024) : -1;
+        
         overrideGlobalSettings = req.getParameter("ext_mailer_override_global_settings") != null;
 
         precedenceBulk = req.getParameter("extmailer.addPrecedenceBulk") != null;
@@ -355,5 +374,20 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     public FormValidation doRecipientListRecipientsCheck(@QueryParameter final String value)
             throws IOException, ServletException {
         return new EmailRecepientUtils().validateFormRecipientList(value);
+    }
+    
+    public FormValidation doMaxAttachmentSizeCheck(@QueryParameter final String value)
+    		throws IOException, ServletException {
+    	try {
+    		String testValue = value.trim();
+    		// we support an empty value (which means default)
+    		// or a number
+    		if(testValue.length() > 0) {
+    			Long.parseLong(testValue);
+    		}
+    		return FormValidation.ok();
+    	} catch (Exception e) {
+    		return FormValidation.error(e.getMessage());
+    	}
     }
 }
