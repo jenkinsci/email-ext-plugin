@@ -16,6 +16,11 @@ import org.jvnet.mock_javamail.Mailbox;
 
 import java.util.List;
 
+import javax.mail.Message;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.*;
@@ -35,6 +40,7 @@ public class ExtendedEmailPublisherTest
         publisher = new ExtendedEmailPublisher();
         publisher.defaultSubject = "%DEFAULT_SUBJECT";
         publisher.defaultContent = "%DEFAULT_CONTENT";
+        publisher.attachmentsPattern = "";
 
         project = createFreeStyleProject();
         project.getPublishersList().add( publisher );
@@ -236,8 +242,25 @@ public class ExtendedEmailPublisherTest
 
         Mailbox mailbox = Mailbox.get( "ashlux@gmail.com" );
         assertEquals( "We should an email since the build failed.", 1, mailbox.size() );
-        assertThat( "UTF-8 charset should be used.", mailbox.get( 0 ).getContentType(),
-                    containsString( "charset=UTF-8" ) );
+        Message msg = mailbox.get(0);
+        assertThat( "Message should be multipart", msg.getContentType(), 
+        		containsString("multipart/mixed"));
+        
+        // TODO: add more tests for getting the multipart information.
+        if(MimeMessage.class.isInstance(msg)) {
+        	MimeMessage mimeMsg = (MimeMessage)msg;
+        	assertEquals( "Message content should be a MimeMultipart instance",
+        			MimeMultipart.class, mimeMsg.getContent().getClass());
+        	MimeMultipart multipart = (MimeMultipart)mimeMsg.getContent();        	
+        	assertTrue( "There should be at least one part in the email", 
+        			multipart.getCount() >= 1);        	
+        	MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(0);        	     	
+        	assertThat( "UTF-8 charset should be used.", bodyPart.getContentType(),
+    			    containsString( "charset=UTF-8" ) );
+        } else {
+        	assertThat( "UTF-8 charset should be used.", mailbox.get( 0 ).getContentType(),
+        			    containsString( "charset=UTF-8" ) );
+        }
     }
 
     public void testNewInstance_shouldGetBasicInformation()
@@ -248,6 +271,7 @@ public class ExtendedEmailPublisherTest
         form.put( "recipientlist_recipients", "ashlux@gmail.com" );
         form.put( "project_default_subject", "Make millions in Nigeria" );
         form.put( "project_default_content", "Give me a $1000 check and I'll mail you back $5000!!!" );
+        form.put( "project_attachments", "");
 
         publisher = (ExtendedEmailPublisher) ExtendedEmailPublisher.DESCRIPTOR.newInstance( null, form );
 
@@ -255,6 +279,7 @@ public class ExtendedEmailPublisherTest
         assertEquals( "ashlux@gmail.com", publisher.recipientList );
         assertEquals( "Make millions in Nigeria", publisher.defaultSubject );
         assertEquals( "Give me a $1000 check and I'll mail you back $5000!!!", publisher.defaultContent );
+        assertEquals( "", publisher.attachmentsPattern);
     }
 
     private void addEmailType( EmailTrigger trigger )
