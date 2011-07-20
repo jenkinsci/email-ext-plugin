@@ -446,8 +446,7 @@ public class ExtendedEmailPublisher extends Notifier {
 	                	if(!file.isFile()) {
 	                		listener.getLogger().println("Skipping `" + file.getName() + "' - not a file");
 	                		continue;
-	                	}	                	
-	                	if(maxAttachmentSize > 0 && 
+	                	} else if(maxAttachmentSize > 0 && 
 	                			(totalAttachmentSize + file.length()) >= maxAttachmentSize) {
 	                		listener.getLogger().println("Skipping `" + file.getName() + "' ("+ file.length() + " bytes) - too large for maximum attachments size");
 	                		continue;
