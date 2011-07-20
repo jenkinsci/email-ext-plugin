@@ -426,31 +426,27 @@ public class ExtendedEmailPublisher extends Notifier {
         return msgPart;
     }
     
-    private List<MimeBodyPart> getAttachments(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset, final BuildListener listener)
+    @SuppressWarnings("serial")
+	private List<MimeBodyPart> getAttachments(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset, final BuildListener listener)
     		throws MessagingException, InterruptedException, IOException {
-    	List<MimeBodyPart> attachments = new ArrayList<MimeBodyPart>();
-    	final MimetypesFileTypeMap mimeTypeMap = new MimetypesFileTypeMap();
+    	List<MimeBodyPart> attachments = null;
     	FilePath ws = build.getWorkspace();
     	if(ws == null) {
-    		// log something here...this is bad!
-    		return attachments;
-    	}
-    	
-    	if(attachmentsPattern != null && attachmentsPattern.trim().length() > 0) {    		
-    		// do attachments stuff here...
-    		@SuppressWarnings("serial")
-			List<File> files = ws.act(new FileCallable<List<File>>() {
-				public List<File> invoke(File baseDir, VirtualChannel channel)
+    		listener.getLogger().println("Error: No workspace found!");
+    		attachments = new ArrayList<MimeBodyPart>();
+    	} else if(attachmentsPattern != null && attachmentsPattern.trim().length() > 0) {    		
+    		attachments = ws.act(new FileCallable<List<MimeBodyPart>>() {
+				public List<MimeBodyPart> invoke(File baseDir, VirtualChannel channel)
 						throws IOException {
 					long totalAttachmentSize = 0;
 					final long maxAttachmentSize = 
 							ExtendedEmailPublisher.DESCRIPTOR.getMaxAttachmentSize();
-							
-					List<File> results = new ArrayList<File>();					
+					final MimetypesFileTypeMap mimeTypeMap = new MimetypesFileTypeMap();
+					List<MimeBodyPart> results = new ArrayList<MimeBodyPart>();					
 					FileSet src = Util.createFileSet(baseDir,attachmentsPattern);
 	                DirectoryScanner ds = src.getDirectoryScanner();
 	                for( String f : ds.getIncludedFiles() ) {
-	                	File file = new File(baseDir, f);	                	
+	                	final File file = new File(baseDir, f);	                	
 	                	if(!file.isFile()) {
 	                		listener.getLogger().println("Skipping `" + file.getName() + "' - not a file");
 	                		continue;
@@ -459,26 +455,31 @@ public class ExtendedEmailPublisher extends Notifier {
 	                			(totalAttachmentSize + file.length()) >= maxAttachmentSize) {
 	                		listener.getLogger().println("Skipping `" + file.getName() + "' ("+ file.length() + " bytes) - too large for maximum attachments size");
 	                		continue;
-	                	}            	
-            			results.add(file);
-            			totalAttachmentSize += file.length();
+	                	}           
+	                	
+	                	MimeBodyPart attachmentPart = new MimeBodyPart();
+	        			FileDataSource fileDataSource = new FileDataSource(file.getPath()) {
+	        				@Override
+	        				public String getContentType() {
+	        					return mimeTypeMap.getContentType(file.getName());
+	        				}
+	        			};
+	        			
+	        			try {
+		        			attachmentPart.setDataHandler(new DataHandler(fileDataSource));
+		        			attachmentPart.setFileName(file.getName());
+		        			results.add(attachmentPart);	        			
+		                	
+	            			totalAttachmentSize += file.length();
+	        			} catch(MessagingException e) {
+	        				listener.getLogger().println("Error adding `" + 
+	        						file.getName() + "' as attachment - " + 
+	        						e.getMessage());
+	        			}
 	                }
 					return results;
 				}    			
-    		});
-    		
-    		for(final File f : files) {
-    			MimeBodyPart attachmentPart = new MimeBodyPart();
-    			FileDataSource fileDataSource = new FileDataSource(f.getPath()) {
-    				@Override
-    				public String getContentType() {
-    					return mimeTypeMap.getContentType(f.getName());
-    				}
-    			};
-    			attachmentPart.setDataHandler(new DataHandler(fileDataSource));
-    			attachmentPart.setFileName(f.getName());
-    			attachments.add(attachmentPart);
-    		}    		
+    		});    		 		
     	}
     	
     	return attachments;
