@@ -329,9 +329,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
         recipientList = nullify(req.getParameter("ext_mailer_default_recipients")) != null ?
         	req.getParameter("ext_mailer_default_recipients") : "";
+        
         // convert the value into megabytes (1024 * 1024 bytes)
         maxAttachmentSize = nullify(req.getParameter("ext_mailer_max_attachment_size")) != null ?
         	(Long.parseLong(req.getParameter("ext_mailer_max_attachment_size")) * 1024 * 1024) : -1;
+        
         overrideGlobalSettings = req.getParameter("ext_mailer_override_global_settings") != null;
 
         precedenceBulk = req.getParameter("extmailer.addPrecedenceBulk") != null;
