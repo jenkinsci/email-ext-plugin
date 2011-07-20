@@ -441,7 +441,6 @@ public class ExtendedEmailPublisher extends Notifier {
 					long totalAttachmentSize = 0;
 					final long maxAttachmentSize = 
 							ExtendedEmailPublisher.DESCRIPTOR.getMaxAttachmentSize();
-
 					final MimetypesFileTypeMap mimeTypeMap = new MimetypesFileTypeMap();
 					List<MimeBodyPart> results = new ArrayList<MimeBodyPart>();					
 					FileSet src = Util.createFileSet(baseDir,attachmentsPattern);
