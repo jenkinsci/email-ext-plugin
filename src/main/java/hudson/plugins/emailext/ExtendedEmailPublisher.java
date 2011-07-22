@@ -300,8 +300,10 @@ public class ExtendedEmailPublisher extends Notifier {
         Multipart multipart = new MimeMultipart();
         multipart.addBodyPart(getContent(type, build, msg, charset));
         List<MimeBodyPart> attachments = getAttachments(type, build, msg, charset, listener);
-        for(MimeBodyPart attachment : attachments) {
-        	multipart.addBodyPart(attachment);
+        if(attachments != null) {
+	        for(MimeBodyPart attachment : attachments) {
+	        	multipart.addBodyPart(attachment);	        
+	        }
         }
         
         msg.setContent(multipart);        
@@ -433,7 +435,6 @@ public class ExtendedEmailPublisher extends Notifier {
     	FilePath ws = build.getWorkspace();
     	if(ws == null) {
     		listener.getLogger().println("Error: No workspace found!");
-    		attachments = new ArrayList<MimeBodyPart>();
     	} else if(attachmentsPattern != null && attachmentsPattern.trim().length() > 0) {    		
     		attachments = ws.act(new FileCallable<List<MimeBodyPart>>() {
 				public List<MimeBodyPart> invoke(File baseDir, VirtualChannel channel)
