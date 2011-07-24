@@ -90,7 +90,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     private String recipientList = "";
     
     /**
-     * The maximum size of all the attachments (in MB)
+     * The maximum size of all the attachments (in bytes)
      */
     private long maxAttachmentSize = -1;
 
