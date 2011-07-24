@@ -2,7 +2,10 @@ package hudson.plugins.emailext;
 
 import hudson.EnvVars;
 import hudson.Extension;
+import hudson.FilePath;
+import hudson.FilePath.FileCallable;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -13,6 +16,7 @@ import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import hudson.remoting.VirtualChannel;
 import hudson.scm.ChangeLogSet.Entry;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -21,15 +25,26 @@ import hudson.tasks.Mailer;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
+import javax.activation.MimetypesFileTypeMap;
+
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage.RecipientType;
+import javax.mail.internet.MimeMultipart;
 
+import org.apache.tools.ant.DirectoryScanner;
+import org.apache.tools.ant.types.FileSet;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -123,6 +138,11 @@ public class ExtendedEmailPublisher extends Notifier {
      * The default body of the emails for this project.  ($PROJECT_DEFAULT_BODY)
      */
     public String defaultContent;
+    
+    /**
+     * The project wide set of attachments.
+     */
+    public String attachmentsPattern;
 
     /**
      * Get the list of configured email triggers for this project.
@@ -277,7 +297,16 @@ public class ExtendedEmailPublisher extends Notifier {
 
         setSubject(type, build, msg, charset);
 
-        setContent(type, build, msg, charset);
+        Multipart multipart = new MimeMultipart();
+        multipart.addBodyPart(getContent(type, build, msg, charset));
+        List<MimeBodyPart> attachments = getAttachments(type, build, msg, charset, listener);
+        if(attachments != null) {
+	        for(MimeBodyPart attachment : attachments) {
+	        	multipart.addBodyPart(attachment);	        
+	        }
+        }
+        
+        msg.setContent(multipart);        
 
         EnvVars env = build.getEnvironment(listener);
 
@@ -376,7 +405,7 @@ public class ExtendedEmailPublisher extends Notifier {
 		return recipients;
 	}
 
-    private void setContent(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset)
+    private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset)
             throws MessagingException {
         final String text = new ContentBuilder().transformText(type.getBody(), this, type, build);
 
@@ -392,7 +421,70 @@ public class ExtendedEmailPublisher extends Notifier {
         }
         messageContentType += "; charset=" + charset;
 
-        msg.setContent(text, messageContentType);
+        // set the email message text 
+        // (plain text or HTML depending on the content type)
+        MimeBodyPart msgPart = new MimeBodyPart();
+        msgPart.setContent(text, messageContentType);
+        return msgPart;
+    }
+    
+
+    @SuppressWarnings("serial")
+	private List<MimeBodyPart> getAttachments(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset, final BuildListener listener)
+    		throws MessagingException, InterruptedException, IOException {
+    	List<MimeBodyPart> attachments = null;
+    	FilePath ws = build.getWorkspace();
+    	if(ws == null) {
+    		listener.getLogger().println("Error: No workspace found!");
+    	} else if(attachmentsPattern != null && attachmentsPattern.trim().length() > 0) {    		
+    		attachments = ws.act(new FileCallable<List<MimeBodyPart>>() {
+				public List<MimeBodyPart> invoke(File baseDir, VirtualChannel channel)
+						throws IOException {
+					long totalAttachmentSize = 0;
+					final long maxAttachmentSize = 
+							ExtendedEmailPublisher.DESCRIPTOR.getMaxAttachmentSize();
+
+					final MimetypesFileTypeMap mimeTypeMap = new MimetypesFileTypeMap();
+					List<MimeBodyPart> results = new ArrayList<MimeBodyPart>();					
+					FileSet src = Util.createFileSet(baseDir,attachmentsPattern);
+	                DirectoryScanner ds = src.getDirectoryScanner();
+	                for( String f : ds.getIncludedFiles() ) {
+	                	final File file = new File(baseDir, f);	                	
+	                	if(!file.isFile()) {
+	                		listener.getLogger().println("Skipping `" + file.getName() + "' - not a file");
+	                		continue;
+	                	} else if(maxAttachmentSize > 0 && 
+	                			(totalAttachmentSize + file.length()) >= maxAttachmentSize) {
+	                		listener.getLogger().println("Skipping `" + file.getName() + "' ("+ file.length() + " bytes) - too large for maximum attachments size");
+	                		continue;
+	                	}           
+	                	
+	                	MimeBodyPart attachmentPart = new MimeBodyPart();
+	        			FileDataSource fileDataSource = new FileDataSource(file.getPath()) {
+	        				@Override
+	        				public String getContentType() {
+	        					return mimeTypeMap.getContentType(file.getName());
+	        				}
+	        			};
+	        			
+	        			try {
+		        			attachmentPart.setDataHandler(new DataHandler(fileDataSource));
+		        			attachmentPart.setFileName(file.getName());
+		        			results.add(attachmentPart);	        			
+		                	
+	            			totalAttachmentSize += file.length();
+	        			} catch(MessagingException e) {
+	        				listener.getLogger().println("Error adding `" + 
+	        						file.getName() + "' as attachment - " + 
+	        						e.getMessage());
+	        			}
+	                }
+					return results;
+				}    			
+    		});
+    	}
+    	
+    	return attachments;
     }
 
     private static void addAddressesFromRecipientList(Set<InternetAddress> addresses, String recipientList,
