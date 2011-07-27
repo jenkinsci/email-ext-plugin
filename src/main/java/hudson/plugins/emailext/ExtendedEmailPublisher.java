@@ -26,6 +26,7 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.activation.MimetypesFileTypeMap;
 
@@ -46,6 +47,8 @@ import org.apache.tools.ant.types.FileSet;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -428,60 +431,91 @@ public class ExtendedEmailPublisher extends Notifier {
         return msgPart;
     }
     
+    /**
+     * Provides a datasource wrapped around the FilePath class to
+     * allow access to remote files (on slaves).
+     * @author acearl
+     *
+     */
+    private static class FilePathDataSource implements DataSource {
+    	private FilePath file;
 
-    @SuppressWarnings("serial")
-	private List<MimeBodyPart> getAttachments(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset, final BuildListener listener)
+    	public FilePathDataSource(FilePath file) {
+    		this.file = file;
+    	}
+    	
+		public InputStream getInputStream() throws IOException {
+			return file.read();
+		}
+
+		public OutputStream getOutputStream() throws IOException {
+			throw new IOException("Unsupported");
+		}
+
+		public String getContentType() {
+			return MimetypesFileTypeMap.getDefaultFileTypeMap()
+					.getContentType(file.getName());
+		}
+
+		public String getName() {
+			return file.getName();
+		}    	
+    }
+    
+    private List<MimeBodyPart> getAttachments(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset, final BuildListener listener)
     		throws MessagingException, InterruptedException, IOException {
     	List<MimeBodyPart> attachments = null;
     	FilePath ws = build.getWorkspace();
+    	long totalAttachmentSize = 0;
+		long maxAttachmentSize = 
+				ExtendedEmailPublisher.DESCRIPTOR.getMaxAttachmentSize();
     	if(ws == null) {
     		listener.getLogger().println("Error: No workspace found!");
-    	} else if(attachmentsPattern != null && attachmentsPattern.trim().length() > 0) {    		
-    		attachments = ws.act(new FileCallable<List<MimeBodyPart>>() {
-				public List<MimeBodyPart> invoke(File baseDir, VirtualChannel channel)
+    	} else if(attachmentsPattern != null && attachmentsPattern.trim().length() > 0) {
+    		attachments = new ArrayList<MimeBodyPart>();
+    		List<FilePath> files = ws.act(new FileCallable<List<FilePath>>() {
+				public List<FilePath> invoke(File baseDir, VirtualChannel channel)
 						throws IOException {
-					long totalAttachmentSize = 0;
-					final long maxAttachmentSize = 
-							ExtendedEmailPublisher.DESCRIPTOR.getMaxAttachmentSize();
-
-					final MimetypesFileTypeMap mimeTypeMap = new MimetypesFileTypeMap();
-					List<MimeBodyPart> results = new ArrayList<MimeBodyPart>();					
-					FileSet src = Util.createFileSet(baseDir,attachmentsPattern);
+					List<FilePath> results = new ArrayList<FilePath>();
+					FileSet src = Util.createFileSet(baseDir, attachmentsPattern);
 	                DirectoryScanner ds = src.getDirectoryScanner();
 	                for( String f : ds.getIncludedFiles() ) {
-	                	final File file = new File(baseDir, f);	                	
-	                	if(!file.isFile()) {
-	                		listener.getLogger().println("Skipping `" + file.getName() + "' - not a file");
-	                		continue;
-	                	} else if(maxAttachmentSize > 0 && 
-	                			(totalAttachmentSize + file.length()) >= maxAttachmentSize) {
-	                		listener.getLogger().println("Skipping `" + file.getName() + "' ("+ file.length() + " bytes) - too large for maximum attachments size");
-	                		continue;
-	                	}           
-	                	
-	                	MimeBodyPart attachmentPart = new MimeBodyPart();
-	        			FileDataSource fileDataSource = new FileDataSource(file.getPath()) {
-	        				@Override
-	        				public String getContentType() {
-	        					return mimeTypeMap.getContentType(file.getName());
-	        				}
-	        			};
-	        			
-	        			try {
-		        			attachmentPart.setDataHandler(new DataHandler(fileDataSource));
-		        			attachmentPart.setFileName(file.getName());
-		        			results.add(attachmentPart);	        			
-		                	
-	            			totalAttachmentSize += file.length();
-	        			} catch(MessagingException e) {
-	        				listener.getLogger().println("Error adding `" + 
-	        						file.getName() + "' as attachment - " + 
-	        						e.getMessage());
-	        			}
-	                }
+	                	final File file = new File(baseDir, f);
+	                	if(file.isFile()) {
+	                		results.add(new FilePath(file));
+	                	} else {
+	                		listener.getLogger().println("Skipping `" 
+	                				+ file.getName() + "' - not a file");		
+	                	}
+	                }	                	
 					return results;
-				}    			
-    		});
+				}
+				private static final long serialVersionUID = 1L;
+    		});    		
+    	
+	    	for(FilePath file : files) {
+		    	if(maxAttachmentSize > 0 && 
+		    			(totalAttachmentSize + file.length()) >= maxAttachmentSize) {
+		    		listener.getLogger().println("Skipping `" + file.getName() 
+		    				+ "' ("+ file.length() + 
+		    				" bytes) - too large for maximum attachments size");
+		    		continue;
+		    	}           
+	    	
+		    	MimeBodyPart attachmentPart = new MimeBodyPart();
+		    	FilePathDataSource fileDataSource = new FilePathDataSource(file);
+			
+				try {
+					attachmentPart.setDataHandler(new DataHandler(fileDataSource));
+					attachmentPart.setFileName(file.getName());
+					attachments.add(attachmentPart);	        	
+					totalAttachmentSize += file.length();
+				} catch(MessagingException e) {
+					listener.getLogger().println("Error adding `" + 
+							file.getName() + "' as attachment - " + 
+							e.getMessage());
+				}
+	    	}
     	}
     	
     	return attachments;
