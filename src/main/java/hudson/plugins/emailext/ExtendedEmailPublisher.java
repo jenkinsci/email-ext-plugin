@@ -302,13 +302,8 @@ public class ExtendedEmailPublisher extends Notifier {
 
         Multipart multipart = new MimeMultipart();
         multipart.addBodyPart(getContent(type, build, msg, charset));
-        List<MimeBodyPart> attachments = getAttachments(type, build, msg, charset, listener);
-        if(attachments != null) {
-	        for(MimeBodyPart attachment : attachments) {
-	        	multipart.addBodyPart(attachment);	        
-	        }
-        }
-        
+        AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
+        attachments.attach(multipart, build, listener);
         msg.setContent(multipart);        
 
         EnvVars env = build.getEnvironment(listener);
@@ -429,97 +424,7 @@ public class ExtendedEmailPublisher extends Notifier {
         MimeBodyPart msgPart = new MimeBodyPart();
         msgPart.setContent(text, messageContentType);
         return msgPart;
-    }
-    
-    /**
-     * Provides a datasource wrapped around the FilePath class to
-     * allow access to remote files (on slaves).
-     * @author acearl
-     *
-     */
-    private static class FilePathDataSource implements DataSource {
-    	private FilePath file;
-
-    	public FilePathDataSource(FilePath file) {
-    		this.file = file;
-    	}
-    	
-		public InputStream getInputStream() throws IOException {
-			return file.read();
-		}
-
-		public OutputStream getOutputStream() throws IOException {
-			throw new IOException("Unsupported");
-		}
-
-		public String getContentType() {
-			return MimetypesFileTypeMap.getDefaultFileTypeMap()
-					.getContentType(file.getName());
-		}
-
-		public String getName() {
-			return file.getName();
-		}    	
-    }
-    
-    private List<MimeBodyPart> getAttachments(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset, final BuildListener listener)
-    		throws MessagingException, InterruptedException, IOException {
-    	List<MimeBodyPart> attachments = null;
-    	FilePath ws = build.getWorkspace();
-    	long totalAttachmentSize = 0;
-		long maxAttachmentSize = 
-				ExtendedEmailPublisher.DESCRIPTOR.getMaxAttachmentSize();
-    	if(ws == null) {
-    		listener.getLogger().println("Error: No workspace found!");
-    	} else if(attachmentsPattern != null && attachmentsPattern.trim().length() > 0) {
-    		attachments = new ArrayList<MimeBodyPart>();
-    		List<FilePath> files = ws.act(new FileCallable<List<FilePath>>() {
-				public List<FilePath> invoke(File baseDir, VirtualChannel channel)
-						throws IOException {
-					List<FilePath> results = new ArrayList<FilePath>();
-					FileSet src = Util.createFileSet(baseDir, attachmentsPattern);
-	                DirectoryScanner ds = src.getDirectoryScanner();
-	                for( String f : ds.getIncludedFiles() ) {
-	                	final File file = new File(baseDir, f);
-	                	if(file.isFile()) {
-	                		results.add(new FilePath(file));
-	                	} else {
-	                		listener.getLogger().println("Skipping `" 
-	                				+ file.getName() + "' - not a file");		
-	                	}
-	                }	                	
-					return results;
-				}
-				private static final long serialVersionUID = 1L;
-    		});    		
-    	
-	    	for(FilePath file : files) {
-		    	if(maxAttachmentSize > 0 && 
-		    			(totalAttachmentSize + file.length()) >= maxAttachmentSize) {
-		    		listener.getLogger().println("Skipping `" + file.getName() 
-		    				+ "' ("+ file.length() + 
-		    				" bytes) - too large for maximum attachments size");
-		    		continue;
-		    	}           
-	    	
-		    	MimeBodyPart attachmentPart = new MimeBodyPart();
-		    	FilePathDataSource fileDataSource = new FilePathDataSource(file);
-			
-				try {
-					attachmentPart.setDataHandler(new DataHandler(fileDataSource));
-					attachmentPart.setFileName(file.getName());
-					attachments.add(attachmentPart);	        	
-					totalAttachmentSize += file.length();
-				} catch(MessagingException e) {
-					listener.getLogger().println("Error adding `" + 
-							file.getName() + "' as attachment - " + 
-							e.getMessage());
-				}
-	    	}
-    	}
-    	
-    	return attachments;
-    }
+    }   
 
     private static void addAddressesFromRecipientList(Set<InternetAddress> addresses, String recipientList,
             EnvVars envVars, BuildListener listener) {
