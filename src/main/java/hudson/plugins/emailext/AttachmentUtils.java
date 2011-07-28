@@ -84,25 +84,7 @@ public class AttachmentUtils implements Serializable {
     		listener.error("Error: No workspace found!");
     	} else if(attachmentsPattern != null && attachmentsPattern.trim().length() > 0) {
     		attachments = new ArrayList<MimeBodyPart>();
-    		List<FilePath> files = ws.act(new FileCallable<List<FilePath>>() {
-				public List<FilePath> invoke(File baseDir, VirtualChannel channel)
-						throws IOException {
-					List<FilePath> results = new ArrayList<FilePath>();
-					FileSet src = Util.createFileSet(baseDir, attachmentsPattern);
-	                DirectoryScanner ds = src.getDirectoryScanner();
-	                for( String f : ds.getIncludedFiles() ) {
-	                	final File file = new File(baseDir, f);
-	                	if(file.isFile()) {
-	                		results.add(new FilePath(file));
-	                	} else {
-	                		listener.getLogger().println("Skipping `" 
-	                				+ file.getName() + "' - not a file");		
-	                	}
-	                }	                	
-					return results;
-				}
-				private static final long serialVersionUID = 1L;
-    		});    		
+    		FilePath[] files = ws.list(attachmentsPattern);    		
     	
 	    	for(FilePath file : files) {
 		    	if(maxAttachmentSize > 0 && 
