@@ -120,7 +120,7 @@ public class EmailType {
     public Object readResolve() {
         if(recipientList != null && recipientList.trim().length() == 0) {
             this.recipientList = ExtendedEmailPublisher.PROJECT_DEFAULT_RECIPIENTS_TEXT;
-	}
-	return this;
+        }
+        return this;
     }
 }
