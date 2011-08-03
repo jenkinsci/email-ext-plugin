@@ -80,6 +80,21 @@
         <input class="setting-input" name="ext_mailer_default_subject"
                type="text" value="${descriptor.defaultSubject}"/>
       </f:entry>
+      <f:entry title="${%Maximum Attachment Size}"
+      			help="/plugin/email-ext/help/globalConfig/maxAttachmentSize.html">
+      	<j:choose>
+      		<j:when test="${descriptor.maxAttachmentSize>0}">
+      			<input class="setting-input" name="ext_mailer_max_attachment_size"
+      		   		   type="text" value="${descriptor.maxAttachmentSizeMb}"
+      		           checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/maxAttachmentSizeCheck?value='+encodeURIComponent(this.value)"/>
+      		</j:when>
+      		<j:otherwise>
+      			<input class="setting-input" name="ext_mailer_max_attachment_size"
+      		   		   type="text" value=""
+      		           checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/maxAttachmentSizeCheck?value='+encodeURIComponent(this.value)"/>
+      		</j:otherwise>
+      	</j:choose>
+      </f:entry>
       <f:entry title="${%Default Content}"
                help="/plugin/email-ext/help/globalConfig/defaultBody.html">
         <f:textarea class="setting-input"
