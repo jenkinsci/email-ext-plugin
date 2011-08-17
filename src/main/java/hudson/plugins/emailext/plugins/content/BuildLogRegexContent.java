@@ -169,7 +169,7 @@ public class BuildLogRegexContent implements EmailContent {
         }
         if (style != null) {
             buffer.append("<b");
-            if (!style.isEmpty()) {
+            if ( style.length() > 0 ) {
                 buffer.append(" style=\"");
                 buffer.append(style);
                 buffer.append("\"");
