@@ -69,7 +69,11 @@ public class EmailExtensionPlugin extends Plugin {
         addEmailContentPlugin(new JellyScriptContent());
         addEmailContentPlugin(new WorkspaceFileContent());
         addEmailContentPlugin(new TestCountsContent());
-        addEmailContentPlugin(new ScriptContent());
+        try {
+            addEmailContentPlugin(new ScriptContent());
+        } catch (NoClassDefFoundError jvm15Error) {
+            System.err.println( "ScriptContent not available for JVM 1.5" );
+        }
 
         addEmailTriggerPlugin(PreBuildTrigger.DESCRIPTOR);
         addEmailTriggerPlugin(FailureTrigger.DESCRIPTOR);
