@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractBuild.DependencyChange;
 import hudson.model.AbstractProject;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class ChangesSinceLastBuildContent
         implements EmailContent {
@@ -23,6 +25,9 @@ public class ChangesSinceLastBuildContent
 
     public static final boolean SHOW_PATHS_DEFAULT_VALUE = false;
 
+    public static final String SHOW_DEPENDENCIES_NAME = "showDependencies";
+    public static final boolean SHOW_DEPENDENCIES_VALUE = false;
+    
     public static final String FORMAT_ARG_NAME = "format";
 
     public static final String FORMAT_DEFAULT_VALUE = "[%a] %m\\n";
@@ -38,13 +43,16 @@ public class ChangesSinceLastBuildContent
     }
 
     public List<String> getArguments() {
-        return Arrays.asList(SHOW_PATHS_ARG_NAME, FORMAT_ARG_NAME, PATH_FORMAT_ARG_NAME);
+        return Arrays.asList(SHOW_PATHS_ARG_NAME, SHOW_DEPENDENCIES_NAME, FORMAT_ARG_NAME, PATH_FORMAT_ARG_NAME);
     }
 
     public String getHelpText() {
         return "Displays the changes since the last build.\n" + "<ul>\n"
                 + "<li><i>" + SHOW_PATHS_ARG_NAME + "</i> - if true, the paths " + "modified by a commit are shown.<br>\n"
                 + "Defaults to " + SHOW_PATHS_DEFAULT_VALUE + ".\n"
+                + "<li><i>" + SHOW_DEPENDENCIES_NAME + "</i> - if true, changes " +
+                		"to projects that this build depends on are shown.<br/>\n" +
+                		"Defaults to " + SHOW_DEPENDENCIES_VALUE + ".\n"
                 + "<li><i>" + FORMAT_ARG_NAME + "</i> - for each commit listed, "
                 + "a string containing %X, where %X is one of %a for author, "
                 + "%d for date, %m for message, %p for paths, or %r for revision.  "
@@ -66,6 +74,18 @@ public class ChangesSinceLastBuildContent
         for (ChangeLogSet.Entry entry : build.getChangeSet()) {
             Util.printf(buf, formatString, new ChangesSincePrintfSpec(entry, pathFormatString));
         }
+		boolean showDependencies = Args.get(args, SHOW_DEPENDENCIES_NAME, SHOW_DEPENDENCIES_VALUE);
+		if (showDependencies && build.getPreviousBuild() != null)
+			for (Entry<AbstractProject, DependencyChange> e : 
+					build.getDependencyChanges(build.getPreviousBuild()).entrySet()) {
+				buf.append("\n=======================\n");
+				buf.append("\nChanges in ").append(e.getKey().getName()).append(":\n");
+				for (AbstractBuild<P, B> b : e.getValue().getBuilds()) {
+					for (ChangeLogSet.Entry entry : b.getChangeSet()) {
+						Util.printf(buf, formatString, new ChangesSincePrintfSpec(entry, pathFormatString));
+					}
+				}
+			}
 
         return buf.toString();
     }

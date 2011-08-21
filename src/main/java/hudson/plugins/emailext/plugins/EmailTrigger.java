@@ -3,6 +3,10 @@ package hudson.plugins.emailext.plugins;
 import hudson.model.AbstractBuild;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
+import hudson.tasks.test.AbstractTestResultAction;
+import hudson.tasks.test.AggregatedTestResultAction;
+import hudson.tasks.test.AggregatedTestResultAction.ChildReport;
+import hudson.tasks.test.TestResult;
 
 public abstract class EmailTrigger {
 
@@ -48,7 +52,32 @@ public abstract class EmailTrigger {
         return false;
     }
 
-    /**
+	/**
+	 * Determine the number of direct failures in the given build. If it aggregates
+	 * downstream results, ignore contributed failures. This is because at the time
+	 * this trigger runs, the current build's aggregated results aren't available
+	 * yet, but those of the previous build may be.
+	 */
+    protected int getNumFailures(AbstractBuild<?, ?> build) {
+    	AbstractTestResultAction<?> a = build.getTestResultAction();
+    	if (a instanceof AggregatedTestResultAction) {
+    		int result = 0;
+    		AggregatedTestResultAction action = 
+    			(AggregatedTestResultAction) a;
+    		for (ChildReport cr : action.getChildReports()) {
+    			if (cr.child.getParent().equals(build.getParent())) {
+    				if (cr.result instanceof TestResult) {
+    					TestResult tr = (TestResult) cr.result;
+    					result += tr.getFailCount();
+    				}
+    			}
+    		}
+    		return result;
+    	}
+    	return a.getFailCount();
+    }
+
+	/**
      * Should this trigger run before the build?  Defaults to false.
      */
     public boolean isPreBuild() {
