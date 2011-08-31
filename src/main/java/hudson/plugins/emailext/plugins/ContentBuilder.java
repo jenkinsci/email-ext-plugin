@@ -1,14 +1,17 @@
 package hudson.plugins.emailext.plugins;
 
+import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.plugins.emailext.EmailExtException;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.Util;
-import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
+import hudson.tasks.Mailer;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -17,6 +20,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
+import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
 /**
  * {@link Publisher} that sends notification e-mail.
@@ -31,13 +37,13 @@ public class ContentBuilder {
     private static final String DEFAULT_BODY = "\\$DEFAULT_CONTENT|\\$\\{DEFAULT_CONTENT\\}";
 
     private static final String DEFAULT_SUBJECT = "\\$DEFAULT_SUBJECT|\\$\\{DEFAULT_SUBJECT\\}";
-    
-    private static final String DEFAULT_RECIPIENTS = "\\$DEFAULT_RECIPIENTS|\\$\\{DEFAULT_RECIPIENTS\\}"; 
+
+    private static final String DEFAULT_RECIPIENTS = "\\$DEFAULT_RECIPIENTS|\\$\\{DEFAULT_RECIPIENTS\\}";
 
     private static final String PROJECT_DEFAULT_BODY = "\\$PROJECT_DEFAULT_CONTENT|\\$\\{PROJECT_DEFAULT_CONTENT\\}";
 
     private static final String PROJECT_DEFAULT_SUBJECT = "\\$PROJECT_DEFAULT_SUBJECT|\\$\\{PROJECT_DEFAULT_SUBJECT\\}";
-    
+
     private static final String PROJECT_DEFAULT_RECIPIENTS = "\\$PROJECT_DEFAULT_RECIPIENTS|\\$\\{PROJECT_DEFAULT_RECIPIENTS\\}";
 
     private static final Map<String, EmailContent> EMAIL_CONTENT_TYPE_MAP = new LinkedHashMap<String, EmailContent>();
@@ -65,13 +71,21 @@ public class ContentBuilder {
         return EMAIL_CONTENT_TYPE_MAP.values();
     }
 
-    public String transformText(String origText, ExtendedEmailPublisher publisher, EmailType type, AbstractBuild<?, ?> build) {
-    	String newText = origText.replaceAll(PROJECT_DEFAULT_BODY, Matcher.quoteReplacement(publisher.defaultContent)).replaceAll(PROJECT_DEFAULT_SUBJECT, Matcher.quoteReplacement(publisher.defaultSubject)).replaceAll(PROJECT_DEFAULT_RECIPIENTS, Matcher.quoteReplacement(publisher.recipientList)).replaceAll(DEFAULT_BODY, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultBody())).replaceAll(DEFAULT_SUBJECT, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultSubject())).replaceAll(DEFAULT_RECIPIENTS, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultRecipients()));
+    public String transformText(String origText, ExtendedEmailPublisher publisher, EmailType type, AbstractBuild<?, ?> build,
+            BuildListener listener) {
+        String newText = origText.replaceAll(PROJECT_DEFAULT_BODY, Matcher.quoteReplacement(publisher.defaultContent))
+                .replaceAll(PROJECT_DEFAULT_SUBJECT, Matcher.quoteReplacement(publisher.defaultSubject))
+                .replaceAll(PROJECT_DEFAULT_RECIPIENTS, Matcher.quoteReplacement(publisher.recipientList))
+                .replaceAll(DEFAULT_BODY, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultBody()))
+                .replaceAll(DEFAULT_SUBJECT, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultSubject()))
+                .replaceAll(DEFAULT_RECIPIENTS, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultRecipients()));
         newText = replaceTokensWithContent(newText, publisher, type, build);
+        newText = expandTokenMacros(build, listener, newText);
         return newText;
     }
 
-    private static <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String replaceTokensWithContent(String origText, ExtendedEmailPublisher publisher, EmailType type, AbstractBuild<P, B> build) {
+    private static <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String replaceTokensWithContent(
+            String origText, ExtendedEmailPublisher publisher, EmailType type, AbstractBuild<P, B> build) {
         StringBuffer sb = new StringBuffer();
         Tokenizer tokenizer = new Tokenizer(origText);
 
@@ -87,8 +101,8 @@ public class ContentBuilder {
                     LOGGER.log(Level.SEVERE,
                             "Exception thrown while replacing " + tokenizer.group(),
                             e);
-                    replacement = "[[ Exception while replacing " + tokenName + ". Please report this as a bug. ]]\n";
-                    replacement += "{{ " + e.toString() + " }}";
+                    replacement = "[[ Exception while replacing " + tokenName + ". Please report this as a bug. ]]\n"
+                            + "{{ " + e.toString() + " }}";
                 }
                 if (content.hasNestedContent()) {
                     replacement = replaceTokensWithContent(replacement, publisher, type, build);
@@ -101,6 +115,19 @@ public class ContentBuilder {
         tokenizer.appendTail(sb);
 
         return sb.toString();
+    }
+
+    private static String expandTokenMacros(AbstractBuild<?, ?> build, TaskListener listener, String text) {
+        try {
+            text = TokenMacro.expand(build, listener, text);
+        } catch (MacroEvaluationException e) {
+            LOGGER.log(Level.WARNING, "Exception thrown while replacing token macros: " + e.getMessage());
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "I/O error thrown while replacing token macros: " + e.getMessage());
+        } catch (InterruptedException e) {
+            LOGGER.log(Level.WARNING, "InterruptedException thrown while replacing token macros: " + e.getMessage());
+        }
+        return text;
     }
 
     static class Tokenizer {
@@ -163,9 +190,8 @@ public class ContentBuilder {
                     parseArgs(tokenMatcher.group(5), args);
                 }
                 return true;
-            } else {
-                return false;
             }
+            return false;
         }
 
         static void parseArgs(String argsString, Map<String, Object> args) {

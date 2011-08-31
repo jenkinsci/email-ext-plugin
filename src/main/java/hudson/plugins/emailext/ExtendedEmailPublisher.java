@@ -2,53 +2,26 @@ package hudson.plugins.emailext;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.FilePath;
-import hudson.FilePath.FileCallable;
 import hudson.Launcher;
-import hudson.Util;
+import hudson.model.BuildListener;
+import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
 import hudson.model.Cause;
 import hudson.model.Hudson;
-import hudson.model.Result;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import hudson.remoting.VirtualChannel;
 import hudson.scm.ChangeLogSet.Entry;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.MailMessageIdAction;
-import hudson.tasks.Mailer;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import hudson.tasks.Mailer;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-import javax.activation.MimetypesFileTypeMap;
-
-import javax.mail.Address;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage.RecipientType;
-import javax.mail.internet.MimeMultipart;
-
-import org.apache.tools.ant.DirectoryScanner;
-import org.apache.tools.ant.types.FileSet;
-
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -61,6 +34,17 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.mail.Address;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+
 /**
  * {@link Publisher} that sends notification e-mail.
  */
@@ -71,7 +55,7 @@ public class ExtendedEmailPublisher extends Notifier {
     private static final String CONTENT_TRANSFER_ENCODING = System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
 
     public static final Map<String, EmailTriggerDescriptor> EMAIL_TRIGGER_TYPE_MAP = new HashMap<String, EmailTriggerDescriptor>();
-    
+
     public static final String DEFAULT_RECIPIENTS_TEXT = "";
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
@@ -82,7 +66,7 @@ public class ExtendedEmailPublisher extends Notifier {
     public static final String PROJECT_DEFAULT_SUBJECT_TEXT = "$PROJECT_DEFAULT_SUBJECT";
 
     public static final String PROJECT_DEFAULT_BODY_TEXT = "$PROJECT_DEFAULT_CONTENT";
-    
+
     public static final String PROJECT_DEFAULT_RECIPIENTS_TEXT = "$PROJECT_DEFAULT_RECIPIENTS";
 
     public static void addEmailTriggerType(EmailTriggerDescriptor triggerType) throws EmailExtException {
@@ -141,7 +125,7 @@ public class ExtendedEmailPublisher extends Notifier {
      * The default body of the emails for this project.  ($PROJECT_DEFAULT_BODY)
      */
     public String defaultContent;
-    
+
     /**
      * The project wide set of attachments.
      */
@@ -259,10 +243,8 @@ public class ExtendedEmailPublisher extends Notifier {
                     build.addAction(new MailMessageIdAction(msg.getMessageID()));
                 }
                 return true;
-            } else {
-                listener.getLogger().println("An attempt to send an e-mail"
-                        + " to empty list of recipients, ignored.");
             }
+            listener.getLogger().println("An attempt to send an e-mail" + " to empty list of recipients, ignored.");
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Could not send email.", e);
             e.printStackTrace(listener.error("Could not send email as a part of the post-build publishers."));
@@ -271,7 +253,8 @@ public class ExtendedEmailPublisher extends Notifier {
         return false;
     }
 
-    private MimeMessage createMail(EmailType type, AbstractBuild<?, ?> build, BuildListener listener) throws MessagingException, IOException, InterruptedException {
+    private MimeMessage createMail(EmailType type, AbstractBuild<?, ?> build, BuildListener listener) throws MessagingException,
+            IOException, InterruptedException {
         boolean overrideGlobalSettings = ExtendedEmailPublisher.DESCRIPTOR.getOverrideGlobalSettings();
 
         MimeMessage msg;
@@ -298,20 +281,20 @@ public class ExtendedEmailPublisher extends Notifier {
 
         msg.setSentDate(new Date());
 
-        setSubject(type, build, msg, charset);
+        setSubject(type, build, listener, msg, charset);
 
         Multipart multipart = new MimeMultipart();
-        multipart.addBodyPart(getContent(type, build, msg, charset));
+        multipart.addBodyPart(getContent(type, build, listener, msg, charset));
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
         attachments.attach(multipart, build, listener);
-        msg.setContent(multipart);        
+        msg.setContent(multipart);
 
         EnvVars env = build.getEnvironment(listener);
 
         // Get the recipients from the global list of addresses
         Set<InternetAddress> recipientAddresses = new LinkedHashSet<InternetAddress>();
         if (type.getSendToRecipientList()) {
-            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, charset), env, listener);
+            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, listener, charset), env, listener);
         }
         // Get the list of developers who made changes between this build and the last
         // if this mail type is configured that way
@@ -360,7 +343,7 @@ public class ExtendedEmailPublisher extends Notifier {
 
         //Get the list of recipients that are uniquely specified for this type of email
         if (type.getRecipientList() != null && type.getRecipientList().trim().length() > 0) {
-            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, charset), env, listener);
+            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, listener, charset), env, listener);
         }
 
         msg.setRecipients(Message.RecipientType.TO, recipientAddresses.toArray(new InternetAddress[recipientAddresses.size()]));
@@ -378,7 +361,7 @@ public class ExtendedEmailPublisher extends Notifier {
         if (CONTENT_TRANSFER_ENCODING != null) {
             msg.setHeader("Content-Transfer-Encoding", CONTENT_TRANSFER_ENCODING);
         }
-        
+
         String listId = ExtendedEmailPublisher.DESCRIPTOR.getListId();
         if (listId != null) {
             msg.setHeader("List-ID", listId);
@@ -391,21 +374,20 @@ public class ExtendedEmailPublisher extends Notifier {
         return msg;
     }
 
-    private void setSubject(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset)
-            throws MessagingException {
-        String subject = new ContentBuilder().transformText(type.getSubject(), this, type, build);
+    private void setSubject(final EmailType type, final AbstractBuild<?, ?> build, BuildListener listener, MimeMessage msg,
+            String charset) throws MessagingException {
+        String subject = new ContentBuilder().transformText(type.getSubject(), this, type, build, listener);
         msg.setSubject(subject, charset);
     }
-    
-    private String getRecipientList(final EmailType type, final AbstractBuild<?, ?> build, String charset)
-			throws MessagingException {
-		final String recipients = new ContentBuilder().transformText(type.getRecipientList(), this, type, build);
+
+    private String getRecipientList(final EmailType type, final AbstractBuild<?, ?> build, BuildListener listener, String charset) {
+		final String recipients = new ContentBuilder().transformText(type.getRecipientList(), this, type, build, listener);
 		return recipients;
 	}
 
-    private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset)
-            throws MessagingException {
-        final String text = new ContentBuilder().transformText(type.getBody(), this, type, build);
+    private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, BuildListener listener, MimeMessage msg,
+            String charset) throws MessagingException {
+        final String text = new ContentBuilder().transformText(type.getBody(), this, type, build, listener);
 
         String messageContentType = contentType;
         // contentType is null if the project was not reconfigured after upgrading.
@@ -419,12 +401,12 @@ public class ExtendedEmailPublisher extends Notifier {
         }
         messageContentType += "; charset=" + charset;
 
-        // set the email message text 
+        // set the email message text
         // (plain text or HTML depending on the content type)
         MimeBodyPart msgPart = new MimeBodyPart();
         msgPart.setContent(text, messageContentType);
         return msgPart;
-    }   
+    }
 
     private static void addAddressesFromRecipientList(Set<InternetAddress> addresses, String recipientList,
             EnvVars envVars, BuildListener listener) {
