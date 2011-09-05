@@ -1,14 +1,17 @@
 package hudson.plugins.emailext;
 
+import hudson.model.Cause.UserIdCause;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
+import hudson.model.User;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
+import hudson.tasks.Mailer;
 import net.sf.json.JSONObject;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.HudsonTestCase;
@@ -24,6 +27,7 @@ import javax.mail.internet.MimeMultipart;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.*;
+import static org.mockito.Mockito.*;
 
 public class ExtendedEmailPublisherTest
     extends HudsonTestCase
@@ -260,6 +264,40 @@ public class ExtendedEmailPublisherTest
         } else {
         	assertThat( "UTF-8 charset should be used.", mailbox.get( 0 ).getContentType(),
         			    containsString( "charset=UTF-8" ) );
+        }
+    }
+    
+    public void testsSendToRequester()
+        throws Exception
+    {
+        SuccessTrigger successTrigger = new SuccessTrigger();
+        successTrigger.setEmail(new EmailType(){{
+            setSendToRequester(true);
+        }});
+        publisher.getConfiguredTriggers().add( successTrigger );
+
+        User u = User.get("ssogabe");
+        Mailer.UserProperty prop = new Mailer.UserProperty("ssogabe@xxx.com");
+        u.addProperty(prop);
+        
+        UserIdCause cause = new MockUserIdCause("ssogabe");
+                
+        FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
+        assertBuildStatusSuccess( build );
+
+        assertEquals( 1, Mailbox.get( "ssogabe@xxx.com" ).size() );
+    }    
+    
+    private static class MockUserIdCause extends UserIdCause {
+        private String userId;
+        
+        public MockUserIdCause(String userId) {
+            this.userId = userId;
+        }
+
+        @Override
+        public String getUserId() {
+            return userId;
         }
     }
 

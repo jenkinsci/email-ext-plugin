@@ -344,9 +344,9 @@ public class ExtendedEmailPublisher extends Notifier {
                 cur = p.getBuildByNumber(upc.getUpstreamBuild());
                 upc = cur.getCause(Cause.UpstreamCause.class);
             }
-            Cause.UserCause uc = cur.getCause(Cause.UserCause.class);
+            Cause.UserIdCause uc = cur.getCause(Cause.UserIdCause.class);
             if (uc != null) {
-                User user = User.get(uc.getUserName());
+                User user = User.get(uc.getUserId(), false);
                 if (user != null) {
                     String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
                     if (adrs != null) {
