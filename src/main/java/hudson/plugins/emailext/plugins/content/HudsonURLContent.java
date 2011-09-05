@@ -7,10 +7,12 @@ public class HudsonURLContent extends JenkinsURLContent {
 
     private static final String TOKEN = "HUDSON_URL";
 
+    @Override
     public String getToken() {
         return TOKEN;
     }
 
+    @Override
     public String getHelpText() {
         return "<i><b>deprecated, please use $JENKINS_URL</b></i>";
     }

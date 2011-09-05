@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
 
 public class BuildLogContentTest

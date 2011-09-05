@@ -15,6 +15,7 @@ public class ContentBuilderTest
 {
     private ExtendedEmailPublisher publisher;
 
+    @Override
     public void setUp()
         throws Exception
     {

@@ -27,7 +27,6 @@ import javax.mail.internet.MimeMultipart;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.*;
-import static org.mockito.Mockito.*;
 
 public class ExtendedEmailPublisherTest
     extends HudsonTestCase

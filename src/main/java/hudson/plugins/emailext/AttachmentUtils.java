@@ -4,13 +4,9 @@
 package hudson.plugins.emailext;
 
 import hudson.FilePath;
-import hudson.Util;
-import hudson.FilePath.FileCallable;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
-import hudson.remoting.VirtualChannel;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,8 +21,6 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
 
-import org.apache.tools.ant.DirectoryScanner;
-import org.apache.tools.ant.types.FileSet;
 
 /**
  * @author acearl
