@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2010, dvrzalik, Stellar Science Ltd Co, K. R. Walker
+ * Copyright (c) 20011, CloudBees, Inc., Nicolas De Loof
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.console.ConsoleNote;
@@ -39,6 +40,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * @author <a href="mailto:nicolas.deloof@cloudbees.com">Nicolas De loof</a>
@@ -64,14 +67,16 @@ public class BuildLogExcerptContent implements EmailContent {
     }
 
     public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType emailType, Map<String, ?> args) throws IOException, InterruptedException {
+        BufferedReader reader = null;
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(build.getLogFile()));
-            String transformedContent = getContent(reader, args);
-            reader.close();
-            return transformedContent;
+            reader = new BufferedReader(new FileReader(build.getLogFile()));
+            return getContent(reader, args);
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
             return ""; // TODO: Indicate there was an error instead?
+        }
+        finally {
+            IOUtils.closeQuietly(reader);
         }
     }
 
