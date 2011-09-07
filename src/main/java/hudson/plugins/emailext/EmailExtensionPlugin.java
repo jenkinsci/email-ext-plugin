@@ -52,6 +52,7 @@ public class EmailExtensionPlugin extends Plugin {
         //We are adding different Content plugins to the list of content types.
         addEmailContentPlugin(new BuildLogContent());
         addEmailContentPlugin(new BuildLogRegexContent());
+        addEmailContentPlugin(new BuildLogExcerptContent());
         addEmailContentPlugin(new BuildNumberContent());
         addEmailContentPlugin(new BuildStatusContent());
         addEmailContentPlugin(new BuildURLContent());
