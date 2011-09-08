@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 20011, CloudBees, Inc., Nicolas De Loof
+ * Copyright (c) 2011, CloudBees, Inc., Nicolas De Loof
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -67,16 +67,16 @@ public class BuildLogExcerptContent implements EmailContent {
     }
 
     public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType emailType, Map<String, ?> args) throws IOException, InterruptedException {
-        BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new FileReader(build.getLogFile()));
-            return getContent(reader, args);
+            BufferedReader reader = new BufferedReader(new FileReader(build.getLogFile()));
+            try {
+                return getContent(reader, args);
+            } finally {
+                reader.close();
+            }
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
             return ""; // TODO: Indicate there was an error instead?
-        }
-        finally {
-            IOUtils.closeQuietly(reader);
         }
     }
 
@@ -85,7 +85,7 @@ public class BuildLogExcerptContent implements EmailContent {
         Pattern start = Pattern.compile((String)args.get("start"));
         Pattern end = Pattern.compile((String)args.get("end"));
 
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         String line = null;
         boolean started = false;
         while ((line = reader.readLine()) != null) {
