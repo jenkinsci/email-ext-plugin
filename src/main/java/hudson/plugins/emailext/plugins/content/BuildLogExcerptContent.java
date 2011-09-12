@@ -41,8 +41,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
-
 /**
  * @author <a href="mailto:nicolas.deloof@cloudbees.com">Nicolas De loof</a>
  */
@@ -62,8 +60,10 @@ public class BuildLogExcerptContent implements EmailContent {
     public String getHelpText() {
         return "Displays an excerpt from the build log.\n"
                 + "<ul\n"
-                + "<li><i>start</i> - Regular expression to match the excerpt starting line to be included (exluded). See <i>java.util.regex.Pattern</i>"
-                + "<li><i>end</i> - Regular expression to match the excerpt ending line to be included (exluded)";
+                + "<li><i>start</i> - Regular expression to match the excerpt starting line to be included (exluded). "
+                + "See <a href='http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'><i>java.util.regex.Pattern</i></a></li>"
+                + "<li><i>end</i> - Regular expression to match the excerpt ending line to be included (exluded)</li>"
+                + "</ul>";
     }
 
     public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType emailType, Map<String, ?> args) throws IOException, InterruptedException {
