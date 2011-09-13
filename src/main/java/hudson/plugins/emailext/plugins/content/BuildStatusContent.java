@@ -79,6 +79,10 @@ public class BuildStatusContent implements EmailContent {
             } else {
                 return "Successful";
             }
+        } else if (buildResult == Result.NOT_BUILT) {
+            return "Not Built";
+        } else if (buildResult == Result.ABORTED) {
+            return "Aborted";
         }
 
         return "Unknown";
