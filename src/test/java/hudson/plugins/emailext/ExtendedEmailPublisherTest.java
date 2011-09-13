@@ -6,8 +6,10 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
+import hudson.plugins.emailext.plugins.trigger.NotBuiltTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
@@ -15,6 +17,7 @@ import hudson.tasks.Mailer;
 import net.sf.json.JSONObject;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.MockBuilder;
 import org.jvnet.mock_javamail.Mailbox;
 
 import java.util.List;
@@ -229,6 +232,75 @@ public class ExtendedEmailPublisherTest
                     hasItems( "Email was triggered for: " + StillFailingTrigger.TRIGGER_NAME ) );
         assertEquals( "We should only have one email since the first failure doesn't count as 'still failing'.", 1,
                       Mailbox.get( "ashlux@gmail.com" ).size() );
+    }
+
+    public void testAbortedTriggerShouldSendEmailWhenBuildAborts()
+        throws Exception
+    {
+        project.getBuildersList().add( new MockBuilder(Result.ABORTED) );
+
+        AbortedTrigger abortedTrigger = new AbortedTrigger();
+        addEmailType( abortedTrigger );
+        publisher.getConfiguredTriggers().add( abortedTrigger );
+
+        FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
+        assertBuildStatus( Result.ABORTED, build );
+
+        assertThat( "Email should have been triggered, so we should see it in the logs.", build.getLog( 100 ),
+                    hasItems( "Email was triggered for: " + AbortedTrigger.TRIGGER_NAME ) );
+        assertEquals( 1, Mailbox.get( "ashlux@gmail.com" ).size() );
+    }
+
+    public void testAbortedTriggerShouldNotSendEmailWhenBuildFails()
+        throws Exception
+    {
+        project.getBuildersList().add( new FailureBuilder() );
+
+        AbortedTrigger trigger = new AbortedTrigger();
+        addEmailType( trigger );
+        publisher.getConfiguredTriggers().add( trigger );
+
+        FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
+        assertBuildStatus( Result.FAILURE, build );
+
+        assertThat( "Email should not have been triggered, so we shouldn't see it in the logs.", build.getLog( 100 ),
+                    not( hasItems( "Email was triggered for: " + AbortedTrigger.TRIGGER_NAME ) ) );
+        assertEquals( 0, Mailbox.get( "ashlux@gmail.com" ).size() );
+    }
+
+
+    public void testNotBuiltTriggerShouldSendEmailWhenNotBuilt()
+        throws Exception
+    {
+        project.getBuildersList().add( new MockBuilder(Result.NOT_BUILT) );
+
+        NotBuiltTrigger notbuiltTrigger = new NotBuiltTrigger();
+        addEmailType( notbuiltTrigger );
+        publisher.getConfiguredTriggers().add( notbuiltTrigger );
+
+        FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
+        assertBuildStatus( Result.NOT_BUILT, build );
+
+        assertThat( "Email should have been triggered, so we should see it in the logs.", build.getLog( 100 ),
+                    hasItems( "Email was triggered for: " + NotBuiltTrigger.TRIGGER_NAME ) );
+        assertEquals( 1, Mailbox.get( "ashlux@gmail.com" ).size() );
+    }
+
+    public void testNotBuiltTriggerShouldNotSendEmailWhenBuildFails()
+        throws Exception
+    {
+        project.getBuildersList().add( new FailureBuilder() );
+
+        NotBuiltTrigger trigger = new NotBuiltTrigger();
+        addEmailType( trigger );
+        publisher.getConfiguredTriggers().add( trigger );
+
+        FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
+        assertBuildStatus( Result.FAILURE, build );
+
+        assertThat( "Email should not have been triggered, so we shouldn't see it in the logs.", build.getLog( 100 ),
+                    not( hasItems( "Email was triggered for: " + NotBuiltTrigger.TRIGGER_NAME ) ) );
+        assertEquals( 0, Mailbox.get( "ashlux@gmail.com" ).size() );
     }
 
     public void testShouldSendEmailUsingUtf8ByDefault()
