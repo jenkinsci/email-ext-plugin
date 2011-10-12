@@ -90,6 +90,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     private String recipientList = "";
     
     /**
+     * This is the global emergency email address
+     */
+    private String emergencyReroute;
+    
+    /**
      * The maximum size of all the attachments (in bytes)
      */
     private long maxAttachmentSize = -1;
@@ -212,6 +217,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     	return recipientList;
     }
     
+    public String getEmergencyReroute() {
+      return emergencyReroute;
+    }
+    
     public long getMaxAttachmentSize() {
     	return maxAttachmentSize;
     }
@@ -277,10 +286,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     public ExtendedEmailPublisherDescriptor() {
         super(ExtendedEmailPublisher.class);
         load();
-        if (defaultBody == null && defaultSubject == null && recipientList == "") {
+        if (defaultBody == null && defaultSubject == null && recipientList == "" && emergencyReroute == null) {
             defaultBody = ExtendedEmailPublisher.DEFAULT_BODY_TEXT;
             defaultSubject = ExtendedEmailPublisher.DEFAULT_SUBJECT_TEXT;
             recipientList = ExtendedEmailPublisher.DEFAULT_RECIPIENTS_TEXT;
+            emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
         }
     }
 
@@ -328,6 +338,9 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
         recipientList = nullify(req.getParameter("ext_mailer_default_recipients")) != null ?
         	req.getParameter("ext_mailer_default_recipients") : "";
+        	
+        emergencyReroute = nullify(req.getParameter("ext_mailer_emergency_reroute")) != null ?
+          req.getParameter("ext_mailer_emergency_reroute") : null;        	
         
         // convert the value into megabytes (1024 * 1024 bytes)
         maxAttachmentSize = nullify(req.getParameter("ext_mailer_max_attachment_size")) != null ?

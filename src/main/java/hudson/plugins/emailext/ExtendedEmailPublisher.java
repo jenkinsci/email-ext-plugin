@@ -59,6 +59,8 @@ public class ExtendedEmailPublisher extends Notifier {
     public static final Map<String, EmailTriggerDescriptor> EMAIL_TRIGGER_TYPE_MAP = new HashMap<String, EmailTriggerDescriptor>();
     
     public static final String DEFAULT_RECIPIENTS_TEXT = "";
+    
+    public static final String DEFAULT_EMERGENCY_REROUTE_TEXT = "";
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
@@ -349,6 +351,15 @@ public class ExtendedEmailPublisher extends Notifier {
             addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, charset), env, listener);
         }
 
+        String emergencyReroute = ExtendedEmailPublisher.DESCRIPTOR.getEmergencyReroute();
+        boolean isEmergencyReroute = emergencyReroute != null && emergencyReroute.trim().length() > 0;
+        
+        if (isEmergencyReroute) {
+          recipientAddresses.clear();
+          addAddressesFromRecipientList(recipientAddresses, emergencyReroute, env, listener);
+          listener.getLogger().println("Emergency reroute is set to: " + emergencyReroute);
+        }
+        
         msg.setRecipients(Message.RecipientType.TO, recipientAddresses.toArray(new InternetAddress[recipientAddresses.size()]));
 
         AbstractBuild<?, ?> pb = build.getPreviousBuild();
