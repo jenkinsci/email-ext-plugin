@@ -36,23 +36,23 @@ public class ChangesSinceLastBuildContent
 
     public static final String PATH_FORMAT_DEFAULT_VALUE = "\\t%p\\n";
 
-	public static final String SHOW_DEPENDENCIES_NAME = "showDependencies";
-	public static final boolean SHOW_DEPENDENCIES_VALUE = false;
+    public static final String SHOW_DEPENDENCIES_NAME = "showDependencies";
+    public static final boolean SHOW_DEPENDENCIES_VALUE = false;
 
     public String getToken() {
         return TOKEN;
     }
 
     public List<String> getArguments() {
-		return Arrays.asList(SHOW_PATHS_ARG_NAME, SHOW_DEPENDENCIES_NAME, FORMAT_ARG_NAME, PATH_FORMAT_ARG_NAME);
+        return Arrays.asList(SHOW_PATHS_ARG_NAME, SHOW_DEPENDENCIES_NAME, FORMAT_ARG_NAME, PATH_FORMAT_ARG_NAME);
     }
 
     public String getHelpText() {
-        return "Displays the changes since the last build.\n" + "<ul>\n"        		 
-        		+ "<li><i>" + SHOW_DEPENDENCIES_NAME + "</i> - if true, changes to "
-        		+ "projects this build depends on are shown.<br>\n"
-        		+ "Defaults to " + SHOW_DEPENDENCIES_VALUE + ".\n"
-        		+ "<li><i>" + SHOW_PATHS_ARG_NAME + "</i> - if true, the paths " + "modified by a commit are shown.<br>\n"
+        return "Displays the changes since the last build.\n" + "<ul>\n"                 
+                + "<li><i>" + SHOW_DEPENDENCIES_NAME + "</i> - if true, changes to "
+                + "projects this build depends on are shown.<br>\n"
+                + "Defaults to " + SHOW_DEPENDENCIES_VALUE + ".\n"
+                + "<li><i>" + SHOW_PATHS_ARG_NAME + "</i> - if true, the paths " + "modified by a commit are shown.<br>\n"
                 + "Defaults to " + SHOW_PATHS_DEFAULT_VALUE + ".\n"
                 + "<li><i>" + FORMAT_ARG_NAME + "</i> - for each commit listed, "
                 + "a string containing %X, where %X is one of %a for author, "
@@ -77,20 +77,20 @@ public class ChangesSinceLastBuildContent
         }
         
         boolean showDependencies = Args.get(args, SHOW_DEPENDENCIES_NAME, SHOW_DEPENDENCIES_VALUE);
-		if (showDependencies && build.getPreviousBuild() != null)
-			for (Entry<AbstractProject, DependencyChange> e : build
-					.getDependencyChanges(build.getPreviousBuild()).entrySet()) {
-				buf.append("\n=======================\n");
-				buf.append("\nChanges in ").append(e.getKey().getName())
-						.append(":\n");
-				for (AbstractBuild<P, B> b : e.getValue().getBuilds()) {
-					for (ChangeLogSet.Entry entry : b.getChangeSet()) {
-						Util.printf(buf, formatString,
-								new ChangesSincePrintfSpec(entry,
-										pathFormatString));
-					}
-				}
-			}
+        if (showDependencies && build.getPreviousBuild() != null)
+            for (Entry<AbstractProject, DependencyChange> e : build
+                    .getDependencyChanges(build.getPreviousBuild()).entrySet()) {
+                buf.append("\n=======================\n");
+                buf.append("\nChanges in ").append(e.getKey().getName())
+                        .append(":\n");
+                for (AbstractBuild<P, B> b : e.getValue().getBuilds()) {
+                    for (ChangeLogSet.Entry entry : b.getChangeSet()) {
+                        Util.printf(buf, formatString,
+                                new ChangesSincePrintfSpec(entry,
+                                        pathFormatString));
+                    }
+                }
+            }
 
         return buf.toString();
     }
