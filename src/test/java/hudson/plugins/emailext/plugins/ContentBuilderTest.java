@@ -31,10 +31,6 @@ public class ContentBuilderTest
         f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultSubject" );
         f.setAccessible( true );
         f.set( ExtendedEmailPublisher.DESCRIPTOR, "Nigerian needs your help!" );
-
-		f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "recipientList" );
-		f.setAccessible( true );
-		f.set( ExtendedEmailPublisher.DESCRIPTOR, "ashlux@gmail.com" );
     }
 
 	public void testTokenizer1() {
