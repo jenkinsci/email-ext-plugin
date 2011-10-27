@@ -85,11 +85,6 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     private String defaultBody;
     
     /**
-     * This is a global default recipient list for sending emails.
-     */
-    private String recipientList = "";
-    
-    /**
      * The maximum size of all the attachments (in bytes)
      */
     private long maxAttachmentSize = -1;
@@ -207,11 +202,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     public String getDefaultBody() {
         return defaultBody;
     }
-    
-    public String getDefaultRecipients() {
-    	return recipientList;
-    }
-    
+        
     public long getMaxAttachmentSize() {
     	return maxAttachmentSize;
     }
@@ -277,10 +268,9 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     public ExtendedEmailPublisherDescriptor() {
         super(ExtendedEmailPublisher.class);
         load();
-        if (defaultBody == null && defaultSubject == null && recipientList == "") {
+        if (defaultBody == null && defaultSubject == null) {
             defaultBody = ExtendedEmailPublisher.DEFAULT_BODY_TEXT;
             defaultSubject = ExtendedEmailPublisher.DEFAULT_SUBJECT_TEXT;
-            recipientList = ExtendedEmailPublisher.DEFAULT_RECIPIENTS_TEXT;
         }
     }
 
@@ -326,9 +316,6 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         // Allow global defaults to be set for the subject and body of the email
         defaultSubject = nullify(req.getParameter("ext_mailer_default_subject"));
         defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
-        recipientList = nullify(req.getParameter("ext_mailer_default_recipients")) != null ?
-        	req.getParameter("ext_mailer_default_recipients") : "";
-        
         // convert the value into megabytes (1024 * 1024 bytes)
         maxAttachmentSize = nullify(req.getParameter("ext_mailer_max_attachment_size")) != null ?
         	(Long.parseLong(req.getParameter("ext_mailer_max_attachment_size")) * 1024 * 1024) : -1;
