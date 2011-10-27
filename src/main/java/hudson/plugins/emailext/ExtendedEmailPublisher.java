@@ -21,7 +21,6 @@ import hudson.tasks.Mailer;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 
-
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -58,8 +57,6 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public static final Map<String, EmailTriggerDescriptor> EMAIL_TRIGGER_TYPE_MAP = new HashMap<String, EmailTriggerDescriptor>();
     
-    public static final String DEFAULT_RECIPIENTS_TEXT = "";
-
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
     public static final String DEFAULT_BODY_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:\n\n"
@@ -69,8 +66,6 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public static final String PROJECT_DEFAULT_BODY_TEXT = "$PROJECT_DEFAULT_CONTENT";
     
-    public static final String PROJECT_DEFAULT_RECIPIENTS_TEXT = "$PROJECT_DEFAULT_RECIPIENTS";
-
     public static void addEmailTriggerType(EmailTriggerDescriptor triggerType) throws EmailExtException {
         if (EMAIL_TRIGGER_TYPE_MAP.containsKey(triggerType.getMailerId())) {
             throw new EmailExtException("An email trigger type with name "
@@ -108,7 +103,7 @@ public class ExtendedEmailPublisher extends Notifier {
     /**
      * A comma-separated list of email recipient that will be used for every trigger.
      */
-    public String recipientList = "";
+    public String recipientList;
 
     /** This is the list of email triggers that the project has configured */
     public List<EmailTrigger> configuredTriggers = new ArrayList<EmailTrigger>();
@@ -297,7 +292,7 @@ public class ExtendedEmailPublisher extends Notifier {
         // Get the recipients from the global list of addresses
         Set<InternetAddress> recipientAddresses = new LinkedHashSet<InternetAddress>();
         if (type.getSendToRecipientList()) {
-            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, charset), env, listener);
+            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, recipientList, charset), env, listener);
         }
         // Get the list of developers who made changes between this build and the last
         // if this mail type is configured that way
@@ -346,7 +341,7 @@ public class ExtendedEmailPublisher extends Notifier {
 
         //Get the list of recipients that are uniquely specified for this type of email
         if (type.getRecipientList() != null && type.getRecipientList().trim().length() > 0) {
-            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, charset), env, listener);
+            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, type.getRecipientList().trim(), charset), env, listener);
         }
 
         msg.setRecipients(Message.RecipientType.TO, recipientAddresses.toArray(new InternetAddress[recipientAddresses.size()]));
@@ -383,10 +378,10 @@ public class ExtendedEmailPublisher extends Notifier {
         msg.setSubject(subject, charset);
     }
     
-    private String getRecipientList(final EmailType type, final AbstractBuild<?, ?> build, String charset)
+    private String getRecipientList(final EmailType type, final AbstractBuild<?, ?> build, String recipients, String charset)
 			throws MessagingException {
-		final String recipients = new ContentBuilder().transformText(type.getRecipientList(), this, type, build);
-		return recipients;
+		final String recipientsTransformed = new ContentBuilder().transformText(recipients, this, type, build);
+		return recipientsTransformed;
 	}
 
     private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset)
