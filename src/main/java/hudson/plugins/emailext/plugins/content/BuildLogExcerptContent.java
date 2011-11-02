@@ -97,7 +97,7 @@ public class BuildLogExcerptContent implements EmailContent {
             }
             if (end.matcher(line).matches()) break;
 
-            if (started) buffer.append(line);
+            if (started) buffer.append(line).append('\n');
         }
         return buffer.toString();
     }
