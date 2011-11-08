@@ -30,9 +30,10 @@ public class BuildStatusContent implements EmailContent {
     public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
             EmailType emailType, Map<String, ?> args) {
 
-        // Build can be "building" when the pre-build trigger is used.
+        // Build can be "building" when the pre-build trigger is used. (and in this case there is not result set yet for the build)
         // Reporting "success", "still failing", etc doesn't make sense in this case.
-        if (build.isBuilding()) {
+		// When using on matrix build, the build is still in building stage when matrix aggregator end build trigger is fired, though 
+        if ( (build.isBuilding()) && (null == build.getResult())) {
             return "Building";
         }
 

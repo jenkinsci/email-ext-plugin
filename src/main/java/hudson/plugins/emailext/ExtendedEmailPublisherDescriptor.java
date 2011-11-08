@@ -1,5 +1,6 @@
 package hudson.plugins.emailext;
 
+import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
 import hudson.model.Hudson;
 import hudson.plugins.emailext.plugins.EmailTrigger;
@@ -36,7 +37,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
      * Jenkins's own URL, to put into the e-mail.
      */
     private String hudsonUrl;
-
+ 
     /**
      * If non-null, use SMTP-AUTH
      */
@@ -249,6 +250,8 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
             }
         }
 
+        m.setMatrixTriggerMode(req.bindJSON(MatrixTriggerMode.class,MatrixTriggerMode.class,formData.opt("matrixTriggerMode")));
+
         return m;
     }
 
@@ -375,5 +378,9 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     	} catch (Exception e) {
     		return FormValidation.error(e.getMessage());
     	}
+    }
+
+    public boolean isMatrixProject(AbstractProject<?, ?> project) {
+        return project instanceof MatrixProject;
     }
 }

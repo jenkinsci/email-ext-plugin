@@ -3,6 +3,10 @@ package hudson.plugins.emailext;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.matrix.MatrixAggregatable;
+import hudson.matrix.MatrixAggregator;
+import hudson.matrix.MatrixBuild;
+import hudson.matrix.MatrixRun;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -49,7 +53,7 @@ import java.util.logging.Logger;
 /**
  * {@link Publisher} that sends notification e-mail.
  */
-public class ExtendedEmailPublisher extends Notifier {
+public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatable {
 
     private static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisher.class.getName());
 
@@ -128,6 +132,8 @@ public class ExtendedEmailPublisher extends Notifier {
      */
     public String attachmentsPattern;
 
+	private MatrixTriggerMode matrixTriggerMode;
+
     /**
      * Get the list of configured email triggers for this project.
      */
@@ -174,14 +180,29 @@ public class ExtendedEmailPublisher extends Notifier {
         return isConfigured();
     }
 
+    public MatrixTriggerMode getMatrixTriggerMode() {
+        if (matrixTriggerMode ==null)    return MatrixTriggerMode.BOTH;
+        return matrixTriggerMode;
+    }
+
+    public void setMatrixTriggerMode(MatrixTriggerMode matrixTriggerMode) {
+        this.matrixTriggerMode = matrixTriggerMode;
+    }
+
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
-        return _perform(build, listener, true);
+        if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
+            return _perform(build, listener, true);
+        }
+        return true;
     }
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        return _perform(build, listener, false);
+        if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
+            return _perform(build, listener, false);
+        }
+        return true;
     }
 
     private boolean _perform(AbstractBuild<?, ?> build, BuildListener listener, boolean forPreBuild) {
@@ -383,6 +404,12 @@ public class ExtendedEmailPublisher extends Notifier {
 		final String recipientsTransformed = new ContentBuilder().transformText(recipients, this, type, build);
 		return recipientsTransformed;
 	}
+	
+	public boolean isExecuteOnMatrixNodes() {
+        MatrixTriggerMode mtm = getMatrixTriggerMode();
+        return MatrixTriggerMode.BOTH == mtm
+            || MatrixTriggerMode.ONLY_CONFIGURATIONS == mtm;
+	}
 
     private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset)
             throws MessagingException {
@@ -440,4 +467,32 @@ public class ExtendedEmailPublisher extends Notifier {
     public static final class DescriptorImpl
             extends ExtendedEmailPublisherDescriptor {
     }
+
+	public MatrixAggregator createAggregator(MatrixBuild matrixbuild,
+			Launcher launcher, BuildListener buildlistener) {				
+		return new MatrixAggregator(matrixbuild, launcher, buildlistener) {
+			@Override
+            public boolean endBuild() throws InterruptedException, IOException {
+				LOGGER.log(Level.FINER,"end build of " + this.build.getDisplayName());
+
+                // Will be run by parent so we check if needed to be executed by parent
+                if (getMatrixTriggerMode().forParent) {
+                    return ExtendedEmailPublisher.this._perform(this.build, this.listener, false);
+                }
+                return true;
+            }
+						
+			
+			@Override		 
+			public boolean startBuild() throws InterruptedException,IOException {
+				LOGGER.log(Level.FINER,"end build of " + this.build.getDisplayName());            					
+				// Will be run by parent so we check if needed to be executed by parent 
+                if (getMatrixTriggerMode().forParent) {
+                    return ExtendedEmailPublisher.this._perform(this.build, this.listener, true);
+                }
+                return true;
+            }
+		
+        };
+	}
 }

@@ -19,8 +19,10 @@ import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.MockBuilder;
 import org.jvnet.mock_javamail.Mailbox;
+import org.kohsuke.stapler.Stapler;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.mail.Message;
 import javax.mail.internet.MimeBodyPart;
@@ -375,20 +377,26 @@ public class ExtendedEmailPublisherTest
     public void testNewInstance_shouldGetBasicInformation()
         throws Exception
     {
-        JSONObject form = new JSONObject();
-        form.put( "project_content_type", "default" );
-        form.put( "recipientlist_recipients", "ashlux@gmail.com" );
-        form.put( "project_default_subject", "Make millions in Nigeria" );
-        form.put( "project_default_content", "Give me a $1000 check and I'll mail you back $5000!!!" );
-        form.put( "project_attachments", "");
+        createWebClient().executeOnServer(new Callable<Object>() {
+            public Void call() throws Exception {
+                JSONObject form = new JSONObject();
+                form.put( "project_content_type", "default" );
+                form.put( "recipientlist_recipients", "ashlux@gmail.com" );
+                form.put( "project_default_subject", "Make millions in Nigeria" );
+                form.put( "project_default_content", "Give me a $1000 check and I'll mail you back $5000!!!" );
+                form.put( "project_attachments", "");
 
-        publisher = (ExtendedEmailPublisher) ExtendedEmailPublisher.DESCRIPTOR.newInstance( null, form );
+                publisher = (ExtendedEmailPublisher) ExtendedEmailPublisher.DESCRIPTOR.newInstance(Stapler.getCurrentRequest(), form );
 
-        assertEquals( "default", publisher.contentType );
-        assertEquals( "ashlux@gmail.com", publisher.recipientList );
-        assertEquals( "Make millions in Nigeria", publisher.defaultSubject );
-        assertEquals( "Give me a $1000 check and I'll mail you back $5000!!!", publisher.defaultContent );
-        assertEquals( "", publisher.attachmentsPattern);
+                assertEquals( "default", publisher.contentType );
+                assertEquals( "ashlux@gmail.com", publisher.recipientList );
+                assertEquals( "Make millions in Nigeria", publisher.defaultSubject );
+                assertEquals( "Give me a $1000 check and I'll mail you back $5000!!!", publisher.defaultContent );
+                assertEquals( "", publisher.attachmentsPattern);
+
+                return null;
+            }
+        });
     }
 
     private void addEmailType( EmailTrigger trigger )

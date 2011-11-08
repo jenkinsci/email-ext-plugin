@@ -113,10 +113,17 @@
 		<td colspan="2"><div id="${secId}contentTokenHelpConf" class="help" style="display:none">${contentTokenText}</div></td>
 		<td></td>
 	</tr>
-	
-	<!-- Configure advanced properties like per-build-result status email contents, 
-		 whether or not to send email to developers who made changes, and whether or
-		 not to send email to the global list of devs-->
+
+
+  <j:if test="${descriptor.isMatrixProject(it)}">
+    <f:entry title="${%Trigger for matrix projects}" field="matrixTriggerMode">
+      <f:enum>${it.description}</f:enum>
+    </f:entry>
+  </j:if>
+
+  <!-- Configure advanced properties like per-build-result status email contents,
+     whether or not to send email to developers who made changes, and whether or
+     not to send email to the global list of devs-->
 	<f:advanced> 
 		
 		<tr>
