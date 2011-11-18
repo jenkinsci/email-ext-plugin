@@ -5,14 +5,15 @@ import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
-import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixRun;
+import hudson.matrix.MatrixBuild;
+import hudson.model.BuildListener;
+import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
 import hudson.model.Cause;
+import hudson.model.Cause.UserCause;
 import hudson.model.Hudson;
-import hudson.model.Result;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.EmailTrigger;
@@ -21,9 +22,9 @@ import hudson.scm.ChangeLogSet.Entry;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.MailMessageIdAction;
-import hudson.tasks.Mailer;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import hudson.tasks.Mailer;
 
 import javax.mail.Address;
 import javax.mail.Message;
@@ -38,6 +39,7 @@ import javax.mail.internet.MimeMultipart;
 
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -346,18 +348,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 cur = p.getBuildByNumber(upc.getUpstreamBuild());
                 upc = cur.getCause(Cause.UpstreamCause.class);
             }
-            Cause.UserIdCause uc = cur.getCause(Cause.UserIdCause.class);
-            if (uc != null) {
-                User user = User.get(uc.getUserId(), false);
-                if (user != null) {
-                    String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
-                    if (adrs != null) {
-                        addAddressesFromRecipientList(recipientAddresses, adrs, env, listener);
-                    } else {
-                        listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
-                    }
-                }
-            }
+            addUserTriggeringTheBuild(cur, recipientAddresses, env, listener);
         }
 
         //Get the list of recipients that are uniquely specified for this type of email
@@ -391,6 +382,51 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         return msg;
+    }
+
+    private void addUserTriggeringTheBuild(AbstractBuild<?, ?> build, Set<InternetAddress> recipientAddresses,
+            EnvVars env, BuildListener listener) {
+        User user = getByUserIdCause(build);
+        if (user == null) {
+           getByLegacyUseCause(build);    
+        }
+        
+        if (user != null) {
+            String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
+            if (adrs != null) {
+                addAddressesFromRecipientList(recipientAddresses, adrs, env, listener);
+            } else {
+                listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
+            }
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private User getByUserIdCause(AbstractBuild<?, ?> build) {
+        try {
+            Class<? extends Cause> userIdCause = (Class<? extends Cause>) Class.forName("hudson.model.Cause.UserIdCause");
+            Method getUserId = userIdCause.getMethod("getUserId", new Class[0]);
+            
+            Cause cause = build.getCause(userIdCause);
+            if (cause != null) {
+                String id = (String) getUserId.invoke(cause, new Object[0]);
+                return User.get(id, false);
+            }
+            
+        } catch (Exception e) {
+            LOGGER.info(e.getMessage());
+        }
+        return null;
+    }
+    
+    private User getByLegacyUseCause(AbstractBuild<?, ?> build) {
+        UserCause userCause = build.getCause(Cause.UserCause.class);
+        if (userCause != null) {
+            // this may fail, as userCause.getUserName() *may* return the displayname instead of the unique name,
+            // but still the best we can do here
+            return User.get(userCause.getUserName(), false);
+        }
+        return null;
     }
 
     private void setSubject(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset)

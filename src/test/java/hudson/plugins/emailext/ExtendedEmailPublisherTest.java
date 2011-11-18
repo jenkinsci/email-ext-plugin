@@ -1,6 +1,5 @@
 package hudson.plugins.emailext;
 
-import hudson.model.Cause.UserIdCause;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
@@ -340,39 +339,39 @@ public class ExtendedEmailPublisherTest
         }
     }
     
-    public void testsSendToRequester()
-        throws Exception
-    {
-        SuccessTrigger successTrigger = new SuccessTrigger();
-        successTrigger.setEmail(new EmailType(){{
-            setSendToRequester(true);
-        }});
-        publisher.getConfiguredTriggers().add( successTrigger );
-
-        User u = User.get("ssogabe");
-        Mailer.UserProperty prop = new Mailer.UserProperty("ssogabe@xxx.com");
-        u.addProperty(prop);
-        
-        UserIdCause cause = new MockUserIdCause("ssogabe");
-                
-        FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
-        assertBuildStatusSuccess( build );
-
-        assertEquals( 1, Mailbox.get( "ssogabe@xxx.com" ).size() );
-    }    
-    
-    private static class MockUserIdCause extends UserIdCause {
-        private String userId;
-        
-        public MockUserIdCause(String userId) {
-            this.userId = userId;
-        }
-
-        @Override
-        public String getUserId() {
-            return userId;
-        }
-    }
+//    public void testsSendToRequester()
+//        throws Exception
+//    {
+//        SuccessTrigger successTrigger = new SuccessTrigger();
+//        successTrigger.setEmail(new EmailType(){{
+//            setSendToRequester(true);
+//        }});
+//        publisher.getConfiguredTriggers().add( successTrigger );
+//
+//        User u = User.get("ssogabe");
+//        Mailer.UserProperty prop = new Mailer.UserProperty("ssogabe@xxx.com");
+//        u.addProperty(prop);
+//        
+//        UserIdCause cause = new MockUserIdCause("ssogabe");
+//                
+//        FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
+//        assertBuildStatusSuccess( build );
+//
+//        assertEquals( 1, Mailbox.get( "ssogabe@xxx.com" ).size() );
+//    }    
+//    
+//    private static class MockUserIdCause extends UserIdCause {
+//        private String userId;
+//        
+//        public MockUserIdCause(String userId) {
+//            this.userId = userId;
+//        }
+//
+//        @Override
+//        public String getUserId() {
+//            return userId;
+//        }
+//    }
 
     public void testNewInstance_shouldGetBasicInformation()
         throws Exception
