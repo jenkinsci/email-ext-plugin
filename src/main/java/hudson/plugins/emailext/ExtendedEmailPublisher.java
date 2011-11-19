@@ -39,6 +39,7 @@ import javax.mail.internet.MimeMultipart;
 
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -388,7 +389,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             EnvVars env, BuildListener listener) {
         User user = getByUserIdCause(build);
         if (user == null) {
-           getByLegacyUseCause(build);    
+           user = getByLegacyUseCause(build);    
         }
         
         if (user != null) {
@@ -404,7 +405,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     @SuppressWarnings("unchecked")
     private User getByUserIdCause(AbstractBuild<?, ?> build) {
         try {
-            Class<? extends Cause> userIdCause = (Class<? extends Cause>) Class.forName("hudson.model.Cause.UserIdCause");
+            Class<? extends Cause> userIdCause = (Class<? extends Cause>)
+                    ExtendedEmailPublisher.class.getClassLoader().loadClass("hudson.model.Cause$UserIdCause");
             Method getUserId = userIdCause.getMethod("getUserId", new Class[0]);
             
             Cause cause = build.getCause(userIdCause);
@@ -420,11 +422,18 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
     
     private User getByLegacyUseCause(AbstractBuild<?, ?> build) {
-        UserCause userCause = build.getCause(Cause.UserCause.class);
-        if (userCause != null) {
-            // this may fail, as userCause.getUserName() *may* return the displayname instead of the unique name,
-            // but still the best we can do here
-            return User.get(userCause.getUserName(), false);
+        try {
+            UserCause userCause = build.getCause(Cause.UserCause.class);
+            // userCause.getUserName() returns displayName which may be different from authentication name
+            // Therefore use reflection to access the real authenticationName
+            if (userCause != null) {
+                Field authenticationName = UserCause.class.getDeclaredField("authenticationName");
+                authenticationName.setAccessible(true);
+                String name = (String) authenticationName.get(userCause);
+                return User.get(name, false);
+            }
+        } catch(Exception e) {
+            LOGGER.info(e.getMessage());
         }
         return null;
     }
