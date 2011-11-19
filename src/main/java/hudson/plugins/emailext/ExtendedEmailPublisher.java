@@ -389,7 +389,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             EnvVars env, BuildListener listener) {
         User user = getByUserIdCause(build);
         if (user == null) {
-           user = getByLegacyUseCause(build);    
+           user = getByLegacyUserCause(build);    
         }
         
         if (user != null) {
@@ -421,7 +421,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return null;
     }
     
-    private User getByLegacyUseCause(AbstractBuild<?, ?> build) {
+    private User getByLegacyUserCause(AbstractBuild<?, ?> build) {
         try {
             UserCause userCause = build.getCause(Cause.UserCause.class);
             // userCause.getUserName() returns displayName which may be different from authentication name
