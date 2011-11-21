@@ -37,7 +37,6 @@ public abstract class EmailTrigger {
             email = new EmailType();
             email.setBody(ExtendedEmailPublisher.PROJECT_DEFAULT_BODY_TEXT);
             email.setSubject(ExtendedEmailPublisher.PROJECT_DEFAULT_SUBJECT_TEXT);
-            email.setRecipientList(ExtendedEmailPublisher.PROJECT_DEFAULT_RECIPIENTS_TEXT);
         }
         this.email = email;
     }

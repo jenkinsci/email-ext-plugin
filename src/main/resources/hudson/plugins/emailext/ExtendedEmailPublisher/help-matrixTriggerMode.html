@@ -1,0 +1,12 @@
+<div>
+  Specifies when to trigger a downstream build for matrix jobs:
+  <ul>
+  	<li>ONLY_PARENT: trigger only once when parent finishes</li>
+  	<li>ONLY_CONFIGURATIONS: trigger for each configuration</li>
+  	<li>BOTH: combination of the 2 above options</li>
+  </ul>
+	
+	Note: that downstream jobs will only be triggered, if they are not already in the build queue.
+	So, if all your configurations finish within a short timeframe, only one downstream job
+	might be triggered, even if you have selected ONLY_CONFIGURATIONS or BOTH.
+</div>

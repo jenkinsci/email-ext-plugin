@@ -3,11 +3,16 @@ package hudson.plugins.emailext;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.matrix.MatrixAggregatable;
+import hudson.matrix.MatrixAggregator;
+import hudson.matrix.MatrixRun;
+import hudson.matrix.MatrixBuild;
 import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
+import hudson.model.Cause.UserCause;
 import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
@@ -22,6 +27,8 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Mailer;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -48,7 +55,7 @@ import javax.mail.internet.MimeMultipart;
 /**
  * {@link Publisher} that sends notification e-mail.
  */
-public class ExtendedEmailPublisher extends Notifier {
+public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatable {
 
     private static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisher.class.getName());
 
@@ -56,8 +63,6 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public static final Map<String, EmailTriggerDescriptor> EMAIL_TRIGGER_TYPE_MAP = new HashMap<String, EmailTriggerDescriptor>();
     
-    public static final String DEFAULT_RECIPIENTS_TEXT = "";
-
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
     public static final String DEFAULT_BODY_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:\n\n"
@@ -67,8 +72,6 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public static final String PROJECT_DEFAULT_BODY_TEXT = "$PROJECT_DEFAULT_CONTENT";
     
-    public static final String PROJECT_DEFAULT_RECIPIENTS_TEXT = "$PROJECT_DEFAULT_RECIPIENTS";
-
     public static void addEmailTriggerType(EmailTriggerDescriptor triggerType) throws EmailExtException {
         if (EMAIL_TRIGGER_TYPE_MAP.containsKey(triggerType.getMailerId())) {
             throw new EmailExtException("An email trigger type with name "
@@ -106,7 +109,7 @@ public class ExtendedEmailPublisher extends Notifier {
     /**
      * A comma-separated list of email recipient that will be used for every trigger.
      */
-    public String recipientList = "";
+    public String recipientList;
 
     /** This is the list of email triggers that the project has configured */
     public List<EmailTrigger> configuredTriggers = new ArrayList<EmailTrigger>();
@@ -130,6 +133,8 @@ public class ExtendedEmailPublisher extends Notifier {
      * The project wide set of attachments.
      */
     public String attachmentsPattern;
+
+	private MatrixTriggerMode matrixTriggerMode;
 
     /**
      * Get the list of configured email triggers for this project.
@@ -177,14 +182,29 @@ public class ExtendedEmailPublisher extends Notifier {
         return isConfigured();
     }
 
+    public MatrixTriggerMode getMatrixTriggerMode() {
+        if (matrixTriggerMode ==null)    return MatrixTriggerMode.BOTH;
+        return matrixTriggerMode;
+    }
+
+    public void setMatrixTriggerMode(MatrixTriggerMode matrixTriggerMode) {
+        this.matrixTriggerMode = matrixTriggerMode;
+    }
+
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
-        return _perform(build, listener, true);
+        if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
+            return _perform(build, listener, true);
+        }
+        return true;
     }
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        return _perform(build, listener, false);
+        if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
+            return _perform(build, listener, false);
+        }
+        return true;
     }
 
     private boolean _perform(AbstractBuild<?, ?> build, BuildListener listener, boolean forPreBuild) {
@@ -295,7 +315,7 @@ public class ExtendedEmailPublisher extends Notifier {
         // Get the recipients from the global list of addresses
         Set<InternetAddress> recipientAddresses = new LinkedHashSet<InternetAddress>();
         if (type.getSendToRecipientList()) {
-            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, charset), env, listener);
+            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, recipientList, charset), env, listener);
         }
         // Get the list of developers who made changes between this build and the last
         // if this mail type is configured that way
@@ -328,23 +348,12 @@ public class ExtendedEmailPublisher extends Notifier {
                 cur = p.getBuildByNumber(upc.getUpstreamBuild());
                 upc = cur.getCause(Cause.UpstreamCause.class);
             }
-            Cause.UserIdCause uc = cur.getCause(Cause.UserIdCause.class);
-            if (uc != null) {
-                User user = User.get(uc.getUserId(), false);
-                if (user != null) {
-                    String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
-                    if (adrs != null) {
-                        addAddressesFromRecipientList(recipientAddresses, adrs, env, listener);
-                    } else {
-                        listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
-                    }
-                }
-            }
+            addUserTriggeringTheBuild(cur, recipientAddresses, env, listener);
         }
 
         //Get the list of recipients that are uniquely specified for this type of email
         if (type.getRecipientList() != null && type.getRecipientList().trim().length() > 0) {
-            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, charset), env, listener);
+            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, type.getRecipientList().trim(), charset), env, listener);
         }
 
         msg.setRecipients(Message.RecipientType.TO, recipientAddresses.toArray(new InternetAddress[recipientAddresses.size()]));
@@ -375,16 +384,75 @@ public class ExtendedEmailPublisher extends Notifier {
         return msg;
     }
 
+    private void addUserTriggeringTheBuild(AbstractBuild<?, ?> build, Set<InternetAddress> recipientAddresses,
+            EnvVars env, BuildListener listener) {
+        User user = getByUserIdCause(build);
+        if (user == null) {
+           user = getByLegacyUserCause(build);    
+        }
+        
+        if (user != null) {
+            String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
+            if (adrs != null) {
+                addAddressesFromRecipientList(recipientAddresses, adrs, env, listener);
+            } else {
+                listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
+            }
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private User getByUserIdCause(AbstractBuild<?, ?> build) {
+        try {
+            Class<? extends Cause> userIdCause = (Class<? extends Cause>)
+                    ExtendedEmailPublisher.class.getClassLoader().loadClass("hudson.model.Cause$UserIdCause");
+            Method getUserId = userIdCause.getMethod("getUserId", new Class[0]);
+            
+            Cause cause = build.getCause(userIdCause);
+            if (cause != null) {
+                String id = (String) getUserId.invoke(cause, new Object[0]);
+                return User.get(id, false);
+            }
+            
+        } catch (Exception e) {
+            LOGGER.info(e.getMessage());
+        }
+        return null;
+    }
+    
+    private User getByLegacyUserCause(AbstractBuild<?, ?> build) {
+        try {
+            UserCause userCause = build.getCause(Cause.UserCause.class);
+            // userCause.getUserName() returns displayName which may be different from authentication name
+            // Therefore use reflection to access the real authenticationName
+            if (userCause != null) {
+                Field authenticationName = UserCause.class.getDeclaredField("authenticationName");
+                authenticationName.setAccessible(true);
+                String name = (String) authenticationName.get(userCause);
+                return User.get(name, false);
+            }
+        } catch(Exception e) {
+            LOGGER.info(e.getMessage());
+        }
+        return null;
+    }
+
     private void setSubject(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset)
             throws MessagingException {
         String subject = new ContentBuilder().transformText(type.getSubject(), this, type, build);
         msg.setSubject(subject, charset);
     }
     
-    private String getRecipientList(final EmailType type, final AbstractBuild<?, ?> build, String charset)
+    private String getRecipientList(final EmailType type, final AbstractBuild<?, ?> build, String recipients, String charset)
 			throws MessagingException {
-		final String recipients = new ContentBuilder().transformText(type.getRecipientList(), this, type, build);
-		return recipients;
+		final String recipientsTransformed = new ContentBuilder().transformText(recipients, this, type, build);
+		return recipientsTransformed;
+	}
+	
+	public boolean isExecuteOnMatrixNodes() {
+        MatrixTriggerMode mtm = getMatrixTriggerMode();
+        return MatrixTriggerMode.BOTH == mtm
+            || MatrixTriggerMode.ONLY_CONFIGURATIONS == mtm;
 	}
 
     private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset)
@@ -443,4 +511,32 @@ public class ExtendedEmailPublisher extends Notifier {
     public static final class DescriptorImpl
             extends ExtendedEmailPublisherDescriptor {
     }
+
+	public MatrixAggregator createAggregator(MatrixBuild matrixbuild,
+			Launcher launcher, BuildListener buildlistener) {				
+		return new MatrixAggregator(matrixbuild, launcher, buildlistener) {
+			@Override
+            public boolean endBuild() throws InterruptedException, IOException {
+				LOGGER.log(Level.FINER,"end build of " + this.build.getDisplayName());
+
+                // Will be run by parent so we check if needed to be executed by parent
+                if (getMatrixTriggerMode().forParent) {
+                    return ExtendedEmailPublisher.this._perform(this.build, this.listener, false);
+                }
+                return true;
+            }
+						
+			
+			@Override		 
+			public boolean startBuild() throws InterruptedException,IOException {
+				LOGGER.log(Level.FINER,"end build of " + this.build.getDisplayName());            					
+				// Will be run by parent so we check if needed to be executed by parent 
+                if (getMatrixTriggerMode().forParent) {
+                    return ExtendedEmailPublisher.this._perform(this.build, this.listener, true);
+                }
+                return true;
+            }
+		
+        };
+	}
 }

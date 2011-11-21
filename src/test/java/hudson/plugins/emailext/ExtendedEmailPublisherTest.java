@@ -1,9 +1,13 @@
 package hudson.plugins.emailext;
 
-import hudson.model.Cause.UserIdCause;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.containsString;
+import static org.junit.matchers.JUnitMatchers.hasItems;
 import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
 import hudson.model.Result;
+import hudson.model.Cause.UserCause;
+import hudson.model.FreeStyleProject;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
@@ -14,22 +18,23 @@ import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.tasks.Mailer;
-import net.sf.json.JSONObject;
-import org.jvnet.hudson.test.FailureBuilder;
-import org.jvnet.hudson.test.HudsonTestCase;
-import org.jvnet.hudson.test.MockBuilder;
-import org.jvnet.mock_javamail.Mailbox;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.mail.Message;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.*;
+import net.sf.json.JSONObject;
+
+import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.FailureBuilder;
+import org.jvnet.hudson.test.MockBuilder;
+import org.jvnet.mock_javamail.Mailbox;
+import org.kohsuke.stapler.Stapler;
 
 public class ExtendedEmailPublisherTest
     extends HudsonTestCase
@@ -338,57 +343,92 @@ public class ExtendedEmailPublisherTest
         }
     }
     
-    public void testsSendToRequester()
-        throws Exception
-    {
+//    public void testsSendToRequester()
+//        throws Exception
+//    {
+//        SuccessTrigger successTrigger = new SuccessTrigger();
+//        successTrigger.setEmail(new EmailType(){{
+//            setSendToRequester(true);
+//        }});
+//        publisher.getConfiguredTriggers().add( successTrigger );
+//
+//        User u = User.get("ssogabe");
+//        Mailer.UserProperty prop = new Mailer.UserProperty("ssogabe@xxx.com");
+//        u.addProperty(prop);
+//        
+//        UserIdCause cause = new MockUserIdCause("ssogabe");
+//                
+//        FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
+//        assertBuildStatusSuccess( build );
+//
+//        assertEquals( 1, Mailbox.get( "ssogabe@xxx.com" ).size() );
+//    }    
+//    
+//    private static class MockUserIdCause extends UserIdCause {
+//        private String userId;
+//        
+//        public MockUserIdCause(String userId) {
+//            this.userId = userId;
+//        }
+//
+//        @Override
+//        public String getUserId() {
+//            return userId;
+//        }
+//    }
+    
+    public void testSendToRequesterLegacy()  throws Exception {
         SuccessTrigger successTrigger = new SuccessTrigger();
         successTrigger.setEmail(new EmailType(){{
             setSendToRequester(true);
         }});
         publisher.getConfiguredTriggers().add( successTrigger );
 
-        User u = User.get("ssogabe");
-        Mailer.UserProperty prop = new Mailer.UserProperty("ssogabe@xxx.com");
+        User u = User.get("kutzi");
+        u.setFullName("Christoph Kutzinski");
+        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
         
-        UserIdCause cause = new MockUserIdCause("ssogabe");
+        UserCause cause = new MockUserCause("kutzi");
                 
         FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
         assertBuildStatusSuccess( build );
 
-        assertEquals( 1, Mailbox.get( "ssogabe@xxx.com" ).size() );
-    }    
+        assertEquals( 1, Mailbox.get( "kutzi@xxx.com" ).size() );
+    }
     
-    private static class MockUserIdCause extends UserIdCause {
-        private String userId;
-        
-        public MockUserIdCause(String userId) {
-            this.userId = userId;
-        }
-
-        @Override
-        public String getUserId() {
-            return userId;
+    private static class MockUserCause extends UserCause {
+        public MockUserCause(String userName) throws Exception {
+            super();
+            Field f = UserCause.class.getDeclaredField("authenticationName");
+            f.setAccessible(true);
+            f.set(this, userName);
         }
     }
 
     public void testNewInstance_shouldGetBasicInformation()
         throws Exception
     {
-        JSONObject form = new JSONObject();
-        form.put( "project_content_type", "default" );
-        form.put( "recipientlist_recipients", "ashlux@gmail.com" );
-        form.put( "project_default_subject", "Make millions in Nigeria" );
-        form.put( "project_default_content", "Give me a $1000 check and I'll mail you back $5000!!!" );
-        form.put( "project_attachments", "");
+        createWebClient().executeOnServer(new Callable<Object>() {
+            public Void call() throws Exception {
+                JSONObject form = new JSONObject();
+                form.put( "project_content_type", "default" );
+                form.put( "recipientlist_recipients", "ashlux@gmail.com" );
+                form.put( "project_default_subject", "Make millions in Nigeria" );
+                form.put( "project_default_content", "Give me a $1000 check and I'll mail you back $5000!!!" );
+                form.put( "project_attachments", "");
 
-        publisher = (ExtendedEmailPublisher) ExtendedEmailPublisher.DESCRIPTOR.newInstance( null, form );
+                publisher = (ExtendedEmailPublisher) ExtendedEmailPublisher.DESCRIPTOR.newInstance(Stapler.getCurrentRequest(), form );
 
-        assertEquals( "default", publisher.contentType );
-        assertEquals( "ashlux@gmail.com", publisher.recipientList );
-        assertEquals( "Make millions in Nigeria", publisher.defaultSubject );
-        assertEquals( "Give me a $1000 check and I'll mail you back $5000!!!", publisher.defaultContent );
-        assertEquals( "", publisher.attachmentsPattern);
+                assertEquals( "default", publisher.contentType );
+                assertEquals( "ashlux@gmail.com", publisher.recipientList );
+                assertEquals( "Make millions in Nigeria", publisher.defaultSubject );
+                assertEquals( "Give me a $1000 check and I'll mail you back $5000!!!", publisher.defaultContent );
+                assertEquals( "", publisher.attachmentsPattern);
+
+                return null;
+            }
+        });
     }
 
     private void addEmailType( EmailTrigger trigger )
