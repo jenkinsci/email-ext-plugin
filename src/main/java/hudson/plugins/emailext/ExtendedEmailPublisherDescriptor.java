@@ -334,8 +334,15 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         // Allow global defaults to be set for the subject and body of the email
         defaultSubject = nullify(req.getParameter("ext_mailer_default_subject"));
         defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
+<<<<<<< HEAD
 
         emergencyReroute = nullify(req.getParameter("ext_mailer_emergency_reroute"));
+=======
+        recipientList = nullify(req.getParameter("ext_mailer_default_recipients")) != null ?
+        	req.getParameter("ext_mailer_default_recipients") : "";
+        	
+        emergencyReroute = nullify(req.getParameter("ext_mailer_emergency_reroute"));        	
+>>>>>>> simplified code, clearer help message
         
         // convert the value into megabytes (1024 * 1024 bytes)
         maxAttachmentSize = nullify(req.getParameter("ext_mailer_max_attachment_size")) != null ?
