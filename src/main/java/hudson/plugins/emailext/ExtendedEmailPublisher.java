@@ -60,14 +60,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     private static final String CONTENT_TRANSFER_ENCODING = System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
 
     public static final Map<String, EmailTriggerDescriptor> EMAIL_TRIGGER_TYPE_MAP = new HashMap<String, EmailTriggerDescriptor>();
-    
-    public static final String DEFAULT_EMERGENCY_REROUTE_TEXT = "";
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
     public static final String DEFAULT_BODY_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:\n\n"
             + "Check console output at $BUILD_URL to view the results.";
 
+    public static final String DEFAULT_EMERGENCY_REROUTE_TEXT = "";
+	
     public static final String PROJECT_DEFAULT_SUBJECT_TEXT = "$PROJECT_DEFAULT_SUBJECT";
 
     public static final String PROJECT_DEFAULT_BODY_TEXT = "$PROJECT_DEFAULT_CONTENT";

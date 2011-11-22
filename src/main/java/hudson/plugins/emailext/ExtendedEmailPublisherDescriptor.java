@@ -86,11 +86,6 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     private String defaultBody;
     
     /**
-     * This is a global default recipient list for sending emails.
-     */
-    private String recipientList = "";
-    
-    /**
      * This is the global emergency email address
      */
     private String emergencyReroute;
@@ -217,11 +212,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     public String getEmergencyReroute() {
       return emergencyReroute;
     }
-    
-    public String getEmergencyReroute() {
-      return emergencyReroute;
-    }
-    
+
     public long getMaxAttachmentSize() {
     	return maxAttachmentSize;
     }
