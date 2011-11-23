@@ -21,16 +21,23 @@ public class FailedTestsContent implements EmailContent {
 
     private static final String TOKEN = "FAILED_TESTS";
 
+    public static final String MAX_TESTS_ARG_NAME = "maxTests";
+
     public String getToken() {
         return TOKEN;
     }
 
     public List<String> getArguments() {
-        return Collections.emptyList();
+        return Collections.singletonList(MAX_TESTS_ARG_NAME);
     }
 
     public String getHelpText() {
-        return "Displays failing unit test information, if any tests have failed.";
+        return "Displays failing unit test information, if any tests have failed.\n"
+                + "<ul>\n"
+                + "<li><i>" + MAX_TESTS_ARG_NAME + "</i> - display at most this many failing tests.<br>\n"
+                + "No limit is set by default.\n"
+                + "</ul>\n";
+
     }
 
     public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
@@ -52,9 +59,20 @@ public class FailedTestsContent implements EmailContent {
             buffer.append(" tests failed.");
             buffer.append('\n');
 
-            List<CaseResult> failedTests = testResult.getFailedTests();
-            for (CaseResult failedTest : failedTests) {
-                outputTest(buffer, failedTest);
+            int maxTests = Args.get(args, MAX_TESTS_ARG_NAME, Integer.MAX_VALUE);
+            if (maxTests > 0) {
+                int printedTests = 0;
+                for (CaseResult failedTest : testResult.getFailedTests()) {
+                    if (printedTests < maxTests) {
+                        outputTest(buffer, failedTest);
+                        printedTests++;
+                    }
+                }
+                if (failCount > printedTests) {
+                    buffer.append("... and ");
+                    buffer.append(failCount - printedTests);
+                    buffer.append(" other failed tests.\n\n");
+                }
             }
         }
 
