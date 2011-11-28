@@ -27,12 +27,33 @@ import hudson.Plugin;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import hudson.plugins.emailext.plugins.content.*;
+import hudson.plugins.emailext.plugins.content.BuildLogContent;
+import hudson.plugins.emailext.plugins.content.BuildLogRegexContent;
+import hudson.plugins.emailext.plugins.content.BuildNumberContent;
+import hudson.plugins.emailext.plugins.content.BuildStatusContent;
+import hudson.plugins.emailext.plugins.content.BuildURLContent;
+import hudson.plugins.emailext.plugins.content.CauseContent;
+import hudson.plugins.emailext.plugins.content.ChangesSinceLastBuildContent;
+import hudson.plugins.emailext.plugins.content.ChangesSinceLastSuccessfulBuildContent;
+import hudson.plugins.emailext.plugins.content.ChangesSinceLastUnstableBuildContent;
+import hudson.plugins.emailext.plugins.content.EnvContent;
+import hudson.plugins.emailext.plugins.content.FailedTestsContent;
+import hudson.plugins.emailext.plugins.content.HudsonURLContent;
+import hudson.plugins.emailext.plugins.content.JellyScriptContent;
+import hudson.plugins.emailext.plugins.content.JenkinsURLContent;
+import hudson.plugins.emailext.plugins.content.ProjectNameContent;
+import hudson.plugins.emailext.plugins.content.ProjectURLContent;
+import hudson.plugins.emailext.plugins.content.SVNRevisionContent;
+import hudson.plugins.emailext.plugins.content.ScriptContent;
+import hudson.plugins.emailext.plugins.content.TestCountsContent;
+import hudson.plugins.emailext.plugins.content.WorkspaceFileContent;
 import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
+import hudson.plugins.emailext.plugins.trigger.ImprovementTrigger;
 import hudson.plugins.emailext.plugins.trigger.NotBuiltTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
+import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillUnstableTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
@@ -86,6 +107,8 @@ public class EmailExtensionPlugin extends Plugin {
         addEmailTriggerPlugin(FixedTrigger.DESCRIPTOR);
         addEmailTriggerPlugin(AbortedTrigger.DESCRIPTOR);
         addEmailTriggerPlugin(NotBuiltTrigger.DESCRIPTOR);
+        addEmailTriggerPlugin(ImprovementTrigger.DESCRIPTOR);
+        addEmailTriggerPlugin(RegressionTrigger.DESCRIPTOR);
     }
 
     private void addEmailContentPlugin(EmailContent content) {
