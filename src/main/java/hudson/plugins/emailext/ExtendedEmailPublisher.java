@@ -63,6 +63,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     public static final Map<String, EmailTriggerDescriptor> EMAIL_TRIGGER_TYPE_MAP = new HashMap<String, EmailTriggerDescriptor>();
     
+    public static final String DEFAULT_RECIPIENTS_TEXT = "";
+
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
     public static final String DEFAULT_BODY_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:\n\n"
@@ -72,6 +74,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     public static final String PROJECT_DEFAULT_BODY_TEXT = "$PROJECT_DEFAULT_CONTENT";
     
+    public static final String PROJECT_DEFAULT_RECIPIENTS_TEXT = "$PROJECT_DEFAULT_RECIPIENTS";
+
     public static void addEmailTriggerType(EmailTriggerDescriptor triggerType) throws EmailExtException {
         if (EMAIL_TRIGGER_TYPE_MAP.containsKey(triggerType.getMailerId())) {
             throw new EmailExtException("An email trigger type with name "
@@ -109,7 +113,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     /**
      * A comma-separated list of email recipient that will be used for every trigger.
      */
-    public String recipientList;
+    public String recipientList = "";
 
     /** This is the list of email triggers that the project has configured */
     public List<EmailTrigger> configuredTriggers = new ArrayList<EmailTrigger>();
@@ -134,7 +138,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      */
     public String attachmentsPattern;
 
-	private MatrixTriggerMode matrixTriggerMode;
+    private MatrixTriggerMode matrixTriggerMode;
 
     /**
      * Get the list of configured email triggers for this project.
