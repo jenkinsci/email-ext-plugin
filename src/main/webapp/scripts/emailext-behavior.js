@@ -79,13 +79,11 @@ function addTrigger(mailerId,secId)
 	var triggerAdv = document.getElementById(mailerId+"elm");
 	nonConfigTriggers.removeChild(triggerAdv);
 	configTriggers.insertBefore(triggerAdv,afterThisElement);
-	
-	
+		
 	var nonConfigOptions = document.getElementById(secId+"non-configured-options");
 	var configOptions = document.getElementById(secId+"configured-options");
 	var option = document.getElementById(mailerId + "option");
 	switchElementContainer(nonConfigOptions,configOptions,option);
-	
 	
 	document.getElementById(configId).value = "true";
 }
