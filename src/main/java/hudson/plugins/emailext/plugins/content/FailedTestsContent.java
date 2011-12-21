@@ -57,9 +57,6 @@ public class FailedTestsContent implements EmailContent {
 
         int failCount = testResult.getFailCount();
 
-        boolean showStacks = args != null ? Args.get(args, SHOW_STACK_NAME,
-                SHOW_STACK_DEFAULT) : false;
-
         if (failCount == 0) {
             buffer.append("All tests passed");
         } else {
@@ -67,6 +64,7 @@ public class FailedTestsContent implements EmailContent {
             buffer.append(" tests failed.");
             buffer.append('\n');
 
+            boolean showStacks = Args.get(args, SHOW_STACK_NAME, SHOW_STACK_DEFAULT);
             int maxTests = Args.get(args, MAX_TESTS_ARG_NAME, Integer.MAX_VALUE);
             if (maxTests > 0) {
                 int printedTests = 0;
@@ -97,8 +95,6 @@ public class FailedTestsContent implements EmailContent {
         buffer.append("\n\n");
         buffer.append("Error Message:\n");
         buffer.append(failedTest.getErrorDetails());
-        buffer.append("\n\nStack Trace:\n");
-        buffer.append(failedTest.getErrorStackTrace());
         if (showStack) {
             buffer.append("\n\nStack Trace:\n");
             buffer.append(failedTest.getErrorStackTrace());
