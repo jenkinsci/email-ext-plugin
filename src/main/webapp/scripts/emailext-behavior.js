@@ -35,6 +35,8 @@ function swapEdit(swapName)
 
 function switchElementContainer(oldParent,newParent,child)
 {
+	if(!child)
+		return;
 	oldParent.removeChild(child);
 	newParent.appendChild(child);
 }
@@ -62,6 +64,10 @@ function addTrigger(mailerId,secId)
 	var triggerRow = document.getElementById(mailerId);
 	var configTriggers = document.getElementById(secId+"configured-email-triggers");
 	var afterThisElement = document.getElementById(secId+"after-last-configured-row");
+	
+	if(!triggerRow || !document.getElementById(configId))
+		return;
+	
 	nonConfigTriggers.removeChild(triggerRow);
 	configTriggers.insertBefore(triggerRow,afterThisElement);
 	triggerRow.style.display="";
