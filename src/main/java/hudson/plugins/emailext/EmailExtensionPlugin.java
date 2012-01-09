@@ -29,6 +29,7 @@ import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.content.BuildLogContent;
 import hudson.plugins.emailext.plugins.content.BuildLogRegexContent;
+import hudson.plugins.emailext.plugins.content.BuildLogExcerptContent;
 import hudson.plugins.emailext.plugins.content.BuildNumberContent;
 import hudson.plugins.emailext.plugins.content.BuildStatusContent;
 import hudson.plugins.emailext.plugins.content.BuildURLContent;
