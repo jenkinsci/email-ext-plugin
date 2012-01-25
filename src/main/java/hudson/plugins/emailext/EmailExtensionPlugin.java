@@ -69,7 +69,6 @@ import hudson.plugins.emailext.plugins.trigger.UnstableTrigger;
  * @author kyle.sweeney@valtech.com
  */
 public class EmailExtensionPlugin extends Plugin {
-
     @Override
     public void start() throws Exception {
         //We are adding different Content plugins to the list of content types.

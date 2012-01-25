@@ -26,6 +26,8 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.tasks.Mailer;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -448,16 +450,16 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
     
     private String getRecipientList(final EmailType type, final AbstractBuild<?, ?> build, String recipients, String charset)
-			throws MessagingException {
-		final String recipientsTransformed = new ContentBuilder().transformText(recipients, this, type, build);
-		return recipientsTransformed;
-	}
-	
-	public boolean isExecuteOnMatrixNodes() {
+        throws MessagingException {
+        final String recipientsTransformed = StringUtils.isBlank(recipients) ? "" : new ContentBuilder().transformText(recipients, this, type, build);
+        return recipientsTransformed;
+    }
+
+    public boolean isExecuteOnMatrixNodes() {
         MatrixTriggerMode mtm = getMatrixTriggerMode();
         return MatrixTriggerMode.BOTH == mtm
             || MatrixTriggerMode.ONLY_CONFIGURATIONS == mtm;
-	}
+    }
 
     private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset)
             throws MessagingException {

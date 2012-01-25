@@ -66,7 +66,8 @@ public class ContentBuilder {
     }
 
     public String transformText(String origText, ExtendedEmailPublisher publisher, EmailType type, AbstractBuild<?, ?> build) {
-        String newText = origText.replaceAll(PROJECT_DEFAULT_BODY, Matcher.quoteReplacement(publisher.defaultContent)).replaceAll(PROJECT_DEFAULT_SUBJECT, Matcher.quoteReplacement(publisher.defaultSubject)).replaceAll(PROJECT_DEFAULT_RECIPIENTS, Matcher.quoteReplacement(publisher.recipientList)).replaceAll(DEFAULT_BODY, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultBody())).replaceAll(DEFAULT_SUBJECT, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultSubject())).replaceAll(DEFAULT_RECIPIENTS, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultRecipients()));
+	String recipientList = publisher.recipientList == null ? "" : publisher.recipientList;
+        String newText = origText.replaceAll(PROJECT_DEFAULT_BODY, Matcher.quoteReplacement(publisher.defaultContent)).replaceAll(PROJECT_DEFAULT_SUBJECT, Matcher.quoteReplacement(publisher.defaultSubject)).replaceAll(PROJECT_DEFAULT_RECIPIENTS, Matcher.quoteReplacement(recipientList)).replaceAll(DEFAULT_BODY, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultBody())).replaceAll(DEFAULT_SUBJECT, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultSubject())).replaceAll(DEFAULT_RECIPIENTS, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultRecipients()));
         newText = replaceTokensWithContent(newText, publisher, type, build);
         return newText;
     }
