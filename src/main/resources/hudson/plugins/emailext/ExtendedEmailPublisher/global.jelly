@@ -76,6 +76,11 @@
         <input class="setting-input" name="ext_mailer_default_recipients"
         	   type="text" value="${descriptor.defaultRecipients}"/>
       </f:entry>
+      <f:entry title="${%Emergency reroute}"
+             help="/plugin/email-ext/help/globalConfig/emergencyReroute.html">
+        <input class="setting-input" name="ext_mailer_emergency_reroute"
+             type="text" value="${descriptor.emergencyReroute}"/>
+      </f:entry>      
       <f:entry title="${%Default Subject}"
                help="/plugin/email-ext/help/globalConfig/defaultSubject.html">
         <input class="setting-input" name="ext_mailer_default_subject"
