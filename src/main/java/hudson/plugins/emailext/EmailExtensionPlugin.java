@@ -29,6 +29,7 @@ import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.content.BuildLogContent;
 import hudson.plugins.emailext.plugins.content.BuildLogRegexContent;
+import hudson.plugins.emailext.plugins.content.BuildLogExcerptContent;
 import hudson.plugins.emailext.plugins.content.BuildNumberContent;
 import hudson.plugins.emailext.plugins.content.BuildStatusContent;
 import hudson.plugins.emailext.plugins.content.BuildURLContent;
@@ -74,6 +75,7 @@ public class EmailExtensionPlugin extends Plugin {
         //We are adding different Content plugins to the list of content types.
         addEmailContentPlugin(new BuildLogContent());
         addEmailContentPlugin(new BuildLogRegexContent());
+        addEmailContentPlugin(new BuildLogExcerptContent());
         addEmailContentPlugin(new BuildNumberContent());
         addEmailContentPlugin(new BuildStatusContent());
         addEmailContentPlugin(new BuildURLContent());

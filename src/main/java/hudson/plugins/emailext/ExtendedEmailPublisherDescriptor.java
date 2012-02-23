@@ -293,7 +293,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
             defaultBody = ExtendedEmailPublisher.DEFAULT_BODY_TEXT;
             defaultSubject = ExtendedEmailPublisher.DEFAULT_SUBJECT_TEXT;
             recipientList = ExtendedEmailPublisher.DEFAULT_RECIPIENTS_TEXT;
-			emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
+            emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
         }
     }
 

@@ -1,6 +1,7 @@
 package hudson.plugins.emailext;
 
 import hudson.EnvVars;
+import hudson.tasks.Mailer;
 import hudson.util.FormValidation;
 import org.apache.commons.lang.StringUtils;
 
@@ -22,9 +23,15 @@ public class EmailRecepientUtils {
 
         final String expandedRecipientList = envVars.expand(recipientList);
         final String[] addresses = StringUtils.trim(expandedRecipientList).split(COMMA_SEPARATED_SPLIT_REGEXP);
+        final String defaultSuffix = Mailer.descriptor().getDefaultSuffix();
         for (String address : addresses) {
-            if(!StringUtils.isBlank(address.trim()))
+            if(!StringUtils.isBlank(address.trim())) {
+                // if not a valid address, check if there is a default suffix (@something.com) provided
+                if (!address.contains("@") && defaultSuffix != null && defaultSuffix.contains("@")) {
+                    address += defaultSuffix;
+                }                
                 internetAddresses.add(new InternetAddress(address));
+            }
         }
 
         return internetAddresses;
