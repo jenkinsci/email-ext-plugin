@@ -72,12 +72,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     public static final String DEFAULT_BODY_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:\n\n"
             + "Check console output at $BUILD_URL to view the results.";
 
+    public static final String DEFAULT_EMERGENCY_REROUTE_TEXT = "";
+	
     public static final String PROJECT_DEFAULT_SUBJECT_TEXT = "$PROJECT_DEFAULT_SUBJECT";
 
     public static final String PROJECT_DEFAULT_BODY_TEXT = "$PROJECT_DEFAULT_CONTENT";
     
-    public static final String PROJECT_DEFAULT_RECIPIENTS_TEXT = "$PROJECT_DEFAULT_RECIPIENTS";
-
     public static void addEmailTriggerType(EmailTriggerDescriptor triggerType) throws EmailExtException {
         if (EMAIL_TRIGGER_TYPE_MAP.containsKey(triggerType.getMailerId())) {
             throw new EmailExtException("An email trigger type with name "
@@ -362,6 +362,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, type.getRecipientList().trim(), charset), env, listener);
         }
 
+        String emergencyReroute = ExtendedEmailPublisher.DESCRIPTOR.getEmergencyReroute();
+        boolean isEmergencyReroute = emergencyReroute != null && emergencyReroute.trim().length() > 0;
+        
+        if (isEmergencyReroute) {
+          recipientAddresses.clear();
+          addAddressesFromRecipientList(recipientAddresses, emergencyReroute, env, listener);
+          listener.getLogger().println("Emergency reroute is set to: " + emergencyReroute);
+        }
+        
         msg.setRecipients(Message.RecipientType.TO, recipientAddresses.toArray(new InternetAddress[recipientAddresses.size()]));
 
         AbstractBuild<?, ?> pb = build.getPreviousBuild();
