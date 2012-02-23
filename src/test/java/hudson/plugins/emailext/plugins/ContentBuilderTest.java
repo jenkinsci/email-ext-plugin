@@ -170,15 +170,6 @@ public class ContentBuilderTest
     }
     
     
-    public void testTransformText_shouldExpand_$PROJECT_DEFAULT_RECIPIENTS()
-        throws IOException, InterruptedException
-    {
-        assertEquals(publisher.recipientList, new ContentBuilder().transformText( "$PROJECT_DEFAULT_RECIPIENTS", publisher, null, 
-                                                       mock( AbstractBuild.class ) ));
-        assertEquals(publisher.recipientList, new ContentBuilder().transformText( "${PROJECT_DEFAULT_RECIPIENTS}", publisher, null, 
-                                                       mock( AbstractBuild.class ) ));
-    }
-
     public void testTransformText_shouldExpand_$DEFAULT_CONTENT()
         throws IOException, InterruptedException
     {
