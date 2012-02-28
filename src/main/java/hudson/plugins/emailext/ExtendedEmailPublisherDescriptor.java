@@ -289,10 +289,9 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     public ExtendedEmailPublisherDescriptor() {
         super(ExtendedEmailPublisher.class);
         load();
-        if (defaultBody == null && defaultSubject == null && emergencyReroute == null && recipientList == "") {
+        if (defaultBody == null && defaultSubject == null && emergencyReroute == null) {
             defaultBody = ExtendedEmailPublisher.DEFAULT_BODY_TEXT;
             defaultSubject = ExtendedEmailPublisher.DEFAULT_SUBJECT_TEXT;
-            recipientList = ExtendedEmailPublisher.DEFAULT_RECIPIENTS_TEXT;
             emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
         }
     }

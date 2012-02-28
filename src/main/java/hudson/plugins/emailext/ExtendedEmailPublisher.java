@@ -358,12 +358,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         //Get the list of recipients that are uniquely specified for this type of email
-        if (type.getRecipientList() != null && type.getRecipientList().trim().length() > 0) {
-            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, type.getRecipientList().trim(), charset), env, listener);
+        if (!StringUtils.isBlank(type.getRecipientList())) {
+            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, type.getRecipientList(), charset), env, listener);
         }
 
         String emergencyReroute = ExtendedEmailPublisher.DESCRIPTOR.getEmergencyReroute();
-        boolean isEmergencyReroute = emergencyReroute != null && emergencyReroute.trim().length() > 0;
+        boolean isEmergencyReroute = !StringUtils.isBlank(emergencyReroute);
         
         if (isEmergencyReroute) {
           recipientAddresses.clear();
