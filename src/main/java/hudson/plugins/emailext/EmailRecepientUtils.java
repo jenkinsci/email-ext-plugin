@@ -25,7 +25,7 @@ public class EmailRecepientUtils {
         final String[] addresses = StringUtils.trim(expandedRecipientList).split(COMMA_SEPARATED_SPLIT_REGEXP);
         final String defaultSuffix = Mailer.descriptor().getDefaultSuffix();
         for (String address : addresses) {
-            if (address.trim().length() > 0) {
+            if(!StringUtils.isBlank(address.trim())) {
                 // if not a valid address, check if there is a default suffix (@something.com) provided
                 if (!address.contains("@") && defaultSuffix != null && defaultSuffix.contains("@")) {
                     address += defaultSuffix;

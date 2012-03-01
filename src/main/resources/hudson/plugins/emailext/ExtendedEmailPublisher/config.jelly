@@ -13,14 +13,14 @@
       <script type="text/javascript">var emailExtInit = new Array();</script>
     </st:once>
 
-	<!-- This is the global recipent list entry. -->
-	<f:entry title="${%Global Recipient List}"
-     		 description="${%Comma-separated list of email address that should receive notifications.}"
+	<!-- This is the project recipent list entry. -->
+	<f:entry title="${%Project Recipient List}"
+     		 description="${%Comma-separated list of email address that should receive notifications for this project.}"
              help="/plugin/email-ext/help/projectConfig/globalRecipientList.html">
              
         <j:choose>
-     		<j:when test="${instance.configured}">
-	    		<input class="setting-input validated" name="recipientlist_recipients"
+     	    <j:when test="${instance.configured}">
+	    	<input class="setting-input validated" name="recipientlist_recipients"
             		type="text" value="${instance.recipientList}"
             		checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)"/>
             </j:when>

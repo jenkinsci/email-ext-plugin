@@ -110,10 +110,18 @@ public class EmailType {
     }
 
     public String getRecipientList() {
-        return recipientList;
+        return recipientList != null ? recipientList.trim() : recipientList;
     }
 
     public void setRecipientList(String recipientList) {
         this.recipientList = recipientList.trim();
+    }
+
+    public Object readResolve() {
+        if(this.recipientList != null) {
+            // get rid of PROJECT_DEFAULT_RECIPIENTS stuff
+            this.recipientList = this.recipientList.replaceAll("\\$\\{?PROJECT_DEFAULT_RECIPIENTS\\}?", ""); 
+        }
+        return this;
     }
 }
