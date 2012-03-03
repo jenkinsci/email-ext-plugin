@@ -31,6 +31,10 @@ public class ContentBuilderTest
         f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultSubject" );
         f.setAccessible( true );
         f.set( ExtendedEmailPublisher.DESCRIPTOR, "Nigerian needs your help!" );
+
+        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "recipientList" );
+        f.setAccessible( true );
+        f.set( ExtendedEmailPublisher.DESCRIPTOR, "ashlux@gmail.com" );
     }
 
 	public void testTokenizer1() {
@@ -161,10 +165,11 @@ public class ContentBuilderTest
     {
         assertEquals(publisher.defaultSubject, new ContentBuilder().transformText( "$PROJECT_DEFAULT_SUBJECT", publisher, null,
                                                        mock( AbstractBuild.class ) ));
-        assertEquals(publisher.defaultSubject, new ContentBuilder().transformText( "${PROJECT_DEFAULT_SUBJECT}", publisher, null,
+         assertEquals(publisher.defaultSubject, new ContentBuilder().transformText( "${PROJECT_DEFAULT_SUBJECT}", publisher, null,
                                                        mock( AbstractBuild.class ) ));
-    }    
-
+    }
+    
+    
     public void testTransformText_shouldExpand_$DEFAULT_CONTENT()
         throws IOException, InterruptedException
     {
@@ -186,4 +191,15 @@ public class ContentBuilderTest
                       new ContentBuilder().transformText( "${DEFAULT_SUBJECT}", publisher, null,
                                                           mock( AbstractBuild.class ) ) );
     }
+    
+    public void testTransformText_shouldExpand_$DEFAULT_RECIPIENT_LIST()
+    throws IOException, InterruptedException
+{
+    assertEquals( ExtendedEmailPublisher.DESCRIPTOR.getDefaultRecipients(),
+                  new ContentBuilder().transformText( "$DEFAULT_RECIPIENTS", publisher, null,
+                                                      mock( AbstractBuild.class ) ) );
+    assertEquals( ExtendedEmailPublisher.DESCRIPTOR.getDefaultRecipients(),
+                  new ContentBuilder().transformText( "${DEFAULT_RECIPIENTS}", publisher, null,
+                                                      mock( AbstractBuild.class ) ) );
+}
 }

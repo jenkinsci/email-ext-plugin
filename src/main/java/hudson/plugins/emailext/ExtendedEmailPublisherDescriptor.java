@@ -95,6 +95,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
      */
     private long maxAttachmentSize = -1;
 
+    /*
+     * This is a global default recipient list for sending emails.
+     */
+    private String recipientList = "";
+
     private boolean overrideGlobalSettings;
     
     /**
@@ -218,7 +223,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     }
     
     public long getMaxAttachmentSizeMb() {
-    	return maxAttachmentSize / (1024 * 1024);
+        return maxAttachmentSize / (1024 * 1024);
+    }
+    
+    public String getDefaultRecipients() {
+        return recipientList;
     }
 
     public boolean getOverrideGlobalSettings() {
@@ -280,11 +289,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     public ExtendedEmailPublisherDescriptor() {
         super(ExtendedEmailPublisher.class);
         load();
-
         if (defaultBody == null && defaultSubject == null && emergencyReroute == null) {
             defaultBody = ExtendedEmailPublisher.DEFAULT_BODY_TEXT;
             defaultSubject = ExtendedEmailPublisher.DEFAULT_SUBJECT_TEXT;
-			emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
+            emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
         }
     }
 
@@ -335,7 +343,9 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
 
         // convert the value into megabytes (1024 * 1024 bytes)
         maxAttachmentSize = nullify(req.getParameter("ext_mailer_max_attachment_size")) != null ?
-        	(Long.parseLong(req.getParameter("ext_mailer_max_attachment_size")) * 1024 * 1024) : -1;
+            (Long.parseLong(req.getParameter("ext_mailer_max_attachment_size")) * 1024 * 1024) : -1;
+        recipientList = nullify(req.getParameter("ext_mailer_default_recipients")) != null ?
+            req.getParameter("ext_mailer_default_recipients") : "";
         
         overrideGlobalSettings = req.getParameter("ext_mailer_override_global_settings") != null;
 

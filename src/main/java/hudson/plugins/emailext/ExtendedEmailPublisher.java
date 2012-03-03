@@ -26,6 +26,8 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.tasks.Mailer;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -62,6 +64,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     private static final String CONTENT_TRANSFER_ENCODING = System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
 
     public static final Map<String, EmailTriggerDescriptor> EMAIL_TRIGGER_TYPE_MAP = new HashMap<String, EmailTriggerDescriptor>();
+    
+    public static final String DEFAULT_RECIPIENTS_TEXT = "";
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
@@ -111,7 +115,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     /**
      * A comma-separated list of email recipient that will be used for every trigger.
      */
-    public String recipientList;
+    public String recipientList = "";
 
     /** This is the list of email triggers that the project has configured */
     public List<EmailTrigger> configuredTriggers = new ArrayList<EmailTrigger>();
@@ -136,7 +140,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      */
     public String attachmentsPattern;
 
-	private MatrixTriggerMode matrixTriggerMode;
+    private MatrixTriggerMode matrixTriggerMode;
 
     /**
      * Get the list of configured email triggers for this project.
@@ -354,12 +358,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         //Get the list of recipients that are uniquely specified for this type of email
-        if (type.getRecipientList() != null && type.getRecipientList().trim().length() > 0) {
-            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, type.getRecipientList().trim(), charset), env, listener);
+        if (!StringUtils.isBlank(type.getRecipientList())) {
+            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, type.getRecipientList(), charset), env, listener);
         }
 
         String emergencyReroute = ExtendedEmailPublisher.DESCRIPTOR.getEmergencyReroute();
-        boolean isEmergencyReroute = emergencyReroute != null && emergencyReroute.trim().length() > 0;
+        boolean isEmergencyReroute = !StringUtils.isBlank(emergencyReroute);
         
         if (isEmergencyReroute) {
           recipientAddresses.clear();
@@ -455,16 +459,16 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
     
     private String getRecipientList(final EmailType type, final AbstractBuild<?, ?> build, String recipients, String charset)
-			throws MessagingException {
-		final String recipientsTransformed = new ContentBuilder().transformText(recipients, this, type, build);
-		return recipientsTransformed;
-	}
-	
-	public boolean isExecuteOnMatrixNodes() {
+        throws MessagingException {
+        final String recipientsTransformed = StringUtils.isBlank(recipients) ? "" : new ContentBuilder().transformText(recipients, this, type, build);
+        return recipientsTransformed;
+    }
+
+    public boolean isExecuteOnMatrixNodes() {
         MatrixTriggerMode mtm = getMatrixTriggerMode();
         return MatrixTriggerMode.BOTH == mtm
             || MatrixTriggerMode.ONLY_CONFIGURATIONS == mtm;
-	}
+    }
 
     private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset)
             throws MessagingException {

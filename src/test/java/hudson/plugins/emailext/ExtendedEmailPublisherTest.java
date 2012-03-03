@@ -52,6 +52,7 @@ public class ExtendedEmailPublisherTest
         publisher.defaultSubject = "%DEFAULT_SUBJECT";
         publisher.defaultContent = "%DEFAULT_CONTENT";
         publisher.attachmentsPattern = "";
+        publisher.recipientList = "%DEFAULT_RECIPIENTS";
 
         project = createFreeStyleProject();
         project.getPublishersList().add( publisher );
