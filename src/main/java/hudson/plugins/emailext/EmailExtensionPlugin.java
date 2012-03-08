@@ -27,6 +27,7 @@ import hudson.Plugin;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import hudson.plugins.emailext.plugins.content.BuildIdContent;
 import hudson.plugins.emailext.plugins.content.BuildLogContent;
 import hudson.plugins.emailext.plugins.content.BuildLogRegexContent;
 import hudson.plugins.emailext.plugins.content.BuildLogExcerptContent;
@@ -42,6 +43,7 @@ import hudson.plugins.emailext.plugins.content.FailedTestsContent;
 import hudson.plugins.emailext.plugins.content.HudsonURLContent;
 import hudson.plugins.emailext.plugins.content.JellyScriptContent;
 import hudson.plugins.emailext.plugins.content.JenkinsURLContent;
+import hudson.plugins.emailext.plugins.content.JobDescriptionContent;
 import hudson.plugins.emailext.plugins.content.ProjectNameContent;
 import hudson.plugins.emailext.plugins.content.ProjectURLContent;
 import hudson.plugins.emailext.plugins.content.SVNRevisionContent;
@@ -73,6 +75,7 @@ public class EmailExtensionPlugin extends Plugin {
     @Override
     public void start() throws Exception {
         //We are adding different Content plugins to the list of content types.
+        addEmailContentPlugin(new BuildIdContent());
         addEmailContentPlugin(new BuildLogContent());
         addEmailContentPlugin(new BuildLogRegexContent());
         addEmailContentPlugin(new BuildLogExcerptContent());
@@ -93,6 +96,7 @@ public class EmailExtensionPlugin extends Plugin {
         addEmailContentPlugin(new JellyScriptContent());
         addEmailContentPlugin(new WorkspaceFileContent());
         addEmailContentPlugin(new TestCountsContent());
+        addEmailContentPlugin(new JobDescriptionContent());
         try {
             addEmailContentPlugin(new ScriptContent());
         } catch (NoClassDefFoundError jvm15Error) {
