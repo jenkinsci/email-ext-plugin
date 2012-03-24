@@ -315,8 +315,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
         attachments.attach(multipart, build, listener);
         msg.setContent(multipart);        
-
-        EnvVars env = build.getEnvironment(listener);
+        EnvVars env = null;
+        try {
+            env = build.getEnvironment(listener);
+        } catch(Exception e) {
+            listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());    
+            // create an empty set of env vars
+            env = new EnvVars(); 
+        }
 
         // Get the recipients from the global list of addresses
         Set<InternetAddress> recipientAddresses = new LinkedHashSet<InternetAddress>();
