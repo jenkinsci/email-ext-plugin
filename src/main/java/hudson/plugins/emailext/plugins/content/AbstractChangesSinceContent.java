@@ -114,7 +114,7 @@ abstract public class AbstractChangesSinceContent
     }
 
     public boolean hasNestedContent() {
-        return false;
+        return true;
     }
 
     public abstract String getDefaultFormatValue();

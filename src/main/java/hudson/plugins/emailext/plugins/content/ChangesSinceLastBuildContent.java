@@ -96,7 +96,7 @@ public class ChangesSinceLastBuildContent
     }
 
     public boolean hasNestedContent() {
-        return false;
+        return true;
     }
 
     public class ChangesSincePrintfSpec
