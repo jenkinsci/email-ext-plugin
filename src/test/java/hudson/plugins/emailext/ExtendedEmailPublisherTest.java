@@ -325,22 +325,22 @@ public class ExtendedEmailPublisherTest
         assertEquals( "We should an email since the build failed.", 1, mailbox.size() );
         Message msg = mailbox.get(0);
         assertThat( "Message should be multipart", msg.getContentType(), 
-        		containsString("multipart/mixed"));
+                containsString("multipart/mixed"));
         
         // TODO: add more tests for getting the multipart information.
         if(MimeMessage.class.isInstance(msg)) {
-        	MimeMessage mimeMsg = (MimeMessage)msg;
-        	assertEquals( "Message content should be a MimeMultipart instance",
-        			MimeMultipart.class, mimeMsg.getContent().getClass());
-        	MimeMultipart multipart = (MimeMultipart)mimeMsg.getContent();        	
-        	assertTrue( "There should be at least one part in the email", 
-        			multipart.getCount() >= 1);        	
-        	MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(0);        	     	
-        	assertThat( "UTF-8 charset should be used.", bodyPart.getContentType(),
-    			    containsString( "charset=UTF-8" ) );
+            MimeMessage mimeMsg = (MimeMessage)msg;
+            assertEquals( "Message content should be a MimeMultipart instance",
+                    MimeMultipart.class, mimeMsg.getContent().getClass());
+            MimeMultipart multipart = (MimeMultipart)mimeMsg.getContent();            
+            assertTrue( "There should be at least one part in the email", 
+                    multipart.getCount() >= 1);            
+            MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(0);                     
+            assertThat( "UTF-8 charset should be used.", bodyPart.getContentType(),
+                    containsString( "charset=UTF-8" ) );
         } else {
-        	assertThat( "UTF-8 charset should be used.", mailbox.get( 0 ).getContentType(),
-        			    containsString( "charset=UTF-8" ) );
+            assertThat( "UTF-8 charset should be used.", mailbox.get( 0 ).getContentType(),
+                        containsString( "charset=UTF-8" ) );
         }
     }
     

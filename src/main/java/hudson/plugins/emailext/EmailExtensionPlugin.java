@@ -62,6 +62,8 @@ import hudson.plugins.emailext.plugins.trigger.StillUnstableTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.plugins.emailext.plugins.trigger.UnstableTrigger;
 
+import java.util.Arrays;
+
 /**
  * Entry point of a plugin.
  *
@@ -129,6 +131,20 @@ public class EmailExtensionPlugin extends Plugin {
             ExtendedEmailPublisher.addEmailTriggerType(trigger);
         } catch (EmailExtException e) {
             System.err.println(e.getMessage());
+        }
+    }
+
+    static {
+        // Fix JENKINS-9006
+        // When sending to multiple recipients, send to valid recipients even if some are
+        // invalid, unless we have explicitly said otherwise.
+
+        // we need this here as well as in the MailerTask because its possible we never actually
+        // use the MailerTask, which would mean it's static would never be called.
+        for (String property: Arrays.asList("mail.smtp.sendpartial", "mail.smtps.sendpartial")) {
+            if (System.getProperty(property) == null) {
+                System.setProperty(property, "true");
+            }
         }
     }
 }
