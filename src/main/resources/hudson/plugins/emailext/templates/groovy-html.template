@@ -17,7 +17,7 @@ TD.console { font-family:Courier New; }
 <BODY>
 
 <TABLE>
-  <TR><TD align="right"><IMG SRC="${rooturl}static/e59dfe28/images/32x32/<%= build.result == 'SUCCESS' ? "blue.gif" : build.result == 'FAILURE' ? 'red.gif' : 'yellow.gif' %>" />
+  <TR><TD align="right"><IMG SRC="${rooturl}static/e59dfe28/images/32x32/<%= build.result.toString() == 'SUCCESS' ? "blue.gif" : build.result.toString() == 'FAILURE' ? 'red.gif' : 'yellow.gif' %>" />
   </TD><TD valign="center"><B style="font-size: 200%;">BUILD ${build.result}</B></TD></TR>
   <TR><TD>Build URL</TD><TD><A href="${rooturl}${build.url}">${rooturl}${build.url}</A></TD></TR>
   <TR><TD>Project:</TD><TD>${project.name}</TD></TR>
