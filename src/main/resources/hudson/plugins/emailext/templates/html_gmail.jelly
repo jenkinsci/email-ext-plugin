@@ -68,44 +68,37 @@
    <j:set var="hadChanges" value="false" />
    <table width="100%" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black">
     <tr>
-     <td class="bg1" colspan="2" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black; color: white; background-color: #0000C0; font-size: 120%">
+     <td class="bg1" colspan="2" style="font-family: Verdana, Helvetica, sans serif; font-size: 120%; color: white; background-color: #0000C0">
       <b>
        CHANGES
       </b>
      </td>
     </tr>
-    <j:forEach var="cs" items="${changeSet.logs}" varStatus="loop">
+    <j:forEach var="cs" items="${changeSet}" varStatus="loop">
      <j:set var="hadChanges" value="true" />
      <j:set var="aUser" value="${cs.hudsonUser}" />
      <tr>
-      <td colspan="2" class="bg2" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black; color: white; background-color: #4040FF; font-size: 110%">
+      <td colspan="2" class="bg2" style="font-family: Verdana, Helvetica, sans serif; font-size: 110%; color: white; background-color: #4040FF">
        ${spc}Revision
        <b>
-        ${cs.revision}
+        ${cs.commitId?:cs.revision?:cs.changeNumber}
        </b>
        by
        <b>
-        <j:choose>
-         <j:when test="${aUser!=null}">
-          ${aUser.displayName}:
-         </j:when>
-         <j:otherwise>
-          ${cs.user}:
-         </j:otherwise>
-        </j:choose>
+        ${aUser!=null?aUser.displayName:cs.author.displayName}:
        </b>
        <b>
         (${cs.msgAnnotated})
        </b>
       </td>
      </tr>
-     <j:forEach var="p" items="${cs.paths}">
+     <j:forEach var="p" items="${cs.affectedFiles}">
       <tr>
        <td width="10%" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black">
         ${spc}${p.editType.name}
        </td>
        <td style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black">
-        ${p.value}
+        ${p.path}
        </td>
       </tr>
      </j:forEach>
@@ -125,9 +118,9 @@
   <j:if test="${artifacts!=null and artifacts.size()&gt;0}">
    <table width="100%" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black">
     <tr>
-     <td class="bg1" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black; color: white; background-color: #0000C0; font-size: 120%">
+     <td class="bg1" style="font-family: Verdana, Helvetica, sans serif; font-size: 120%; color: white; background-color: #0000C0">
       <b>
-       BUILD ATRIFACTS
+       BUILD ARTIFACTS
       </b>
      </td>
     </tr>
@@ -150,15 +143,15 @@
   <j:if test="${mbuilds!=null}">
    <table width="100%" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black">
     <tr>
-     <td class="bg1" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black; color: white; background-color: #0000C0; font-size: 120%">
+     <td class="bg1" style="font-family: Verdana, Helvetica, sans serif; font-size: 120%; color: white; background-color: #0000C0">
       <b>
-       BUILD ATRIFACTS
+       BUILD ARTIFACTS
       </b>
      </td>
     </tr>
     <j:forEach var="m" items="${mbuilds}">
      <tr>
-      <td class="bg2" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black; color: white; background-color: #4040FF; font-size: 110%">
+      <td class="bg2" style="font-family: Verdana, Helvetica, sans serif; font-size: 110%; color: white; background-color: #4040FF">
        <b>
         ${m.key.displayName}
        </b>
@@ -189,7 +182,7 @@
   <j:if test="${junitResultList.isEmpty()!=true}">
    <table width="100%" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black">
     <tr>
-     <td class="bg1" colspan="2" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black; color: white; background-color: #0000C0; font-size: 120%">
+     <td class="bg1" colspan="2" style="font-family: Verdana, Helvetica, sans serif; font-size: 120%; color: white; background-color: #0000C0">
       <b>
        JUnit Tests
       </b>
@@ -198,13 +191,13 @@
     <j:forEach var="junitResult" items="${it.JUnitTestResult}">
      <j:forEach var="packageResult" items="${junitResult.getChildren()}">
       <tr>
-       <td class="bg2" colspan="2" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black; color: white; background-color: #4040FF; font-size: 110%">
+       <td class="bg2" colspan="2" style="font-family: Verdana, Helvetica, sans serif; font-size: 110%; color: white; background-color: #4040FF">
         Name: ${packageResult.getName()} Failed: ${packageResult.getFailCount()} test(s), Passed: ${packageResult.getPassCount()} test(s), Skipped: ${packageResult.getSkipCount()} test(s), Total: ${packageResult.getPassCount()+packageResult.getFailCount()+packageResult.getSkipCount()} test(s)
        </td>
       </tr>
       <j:forEach var="failed_test" items="${packageResult.getFailedTests()}">
        <tr bgcolor="white">
-        <td class="test_failed" colspan="2" style="color: red; font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black">
+        <td class="test_failed" colspan="2" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: red">
          <b>
           <li>
            Failed: ${failed_test.getFullName()}
@@ -224,14 +217,14 @@
    <j:set var="coberturaResult" value="${coberturaAction.result}" />
    <j:if test="${coberturaResult!=null}">
     <table width="100%" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black">
-     <td class="bg1" colspan="2" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black; color: white; background-color: #0000C0; font-size: 120%">
+     <td class="bg1" colspan="2" style="font-family: Verdana, Helvetica, sans serif; font-size: 120%; color: white; background-color: #0000C0">
       <b>
        Cobertura Report
       </b>
      </td>
     </table>
     <table width="100%" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black">
-     <td class="bg2" colspan="2" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black; color: white; background-color: #4040FF; font-size: 110%">
+     <td class="bg2" colspan="2" style="font-family: Verdana, Helvetica, sans serif; font-size: 110%; color: white; background-color: #4040FF">
       <b>
        Project Coverage Summary
       </b>
@@ -291,7 +284,7 @@
     <j:forEach var="element" items="${coberturaResult.childElements}">
      <j:set var="childMetrics" value="${coberturaResult.getChildMetrics(element)}" />
      <table width="100%" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black">
-      <td class="bg2" colspan="2" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black; color: white; background-color: #4040FF; font-size: 110%">
+      <td class="bg2" colspan="2" style="font-family: Verdana, Helvetica, sans serif; font-size: 110%; color: white; background-color: #4040FF">
        Coverage Breakdown by ${element.displayName}
       </td>
      </table>
@@ -336,11 +329,11 @@
    <br />
   </j:if>
   <!-- CONSOLE OUTPUT -->
-  <j:getStatic var="resultFailure" field="FAILURE" className="hudson.model.Result" />
+  <j:getStatic var="resultFailure" field="FAILURE" classname="hudson.model.Result" />
   <j:if test="${build.result==resultFailure}">
    <table width="100%" cellpadding="0" cellspacing="0" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black">
     <tr>
-     <td class="bg1" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black; color: white; background-color: #0000C0; font-size: 120%">
+     <td class="bg1" style="font-family: Verdana, Helvetica, sans serif; font-size: 120%; color: white; background-color: #0000C0">
       <b>
        CONSOLE OUTPUT
       </b>
@@ -348,7 +341,7 @@
     </tr>
     <j:forEach var="line" items="${build.getLog(100)}">
      <tr>
-      <td class="console" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black; font-family: Courier New">
+      <td class="console" style="font-family: Courier New; font-size: 11px; color: black">
        ${line}
       </td>
      </tr>
