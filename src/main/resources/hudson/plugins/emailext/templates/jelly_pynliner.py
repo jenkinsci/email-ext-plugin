@@ -27,6 +27,7 @@ if __name__ == "__main__":
     subs = (('j:foreach', 'j:forEach'),
             ('j:getstatic', 'j:getStatic'),
             ('varstatus', 'varStatus'),
+            ('classname', 'className'),
             ('&nbsp;', '&amp;nbsp;'))  # BeautifulSoup converts back to &nbsp;
 
     # The Hudson html.jelly file does not auto-escape ampersand's, which means
