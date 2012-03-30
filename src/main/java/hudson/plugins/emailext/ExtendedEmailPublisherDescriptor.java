@@ -301,6 +301,8 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
             throws FormException {
         // Most of this stuff is the same as the built-in email publisher
 
+        overrideGlobalSettings = req.getParameter("ext_mailer_override_global_settings") != null;
+
         // Configure the smtp server
         smtpHost = nullify(req.getParameter("ext_mailer_smtp_server"));
         adminAddress = req.getParameter("ext_mailer_admin_address");
@@ -311,7 +313,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         if (url != null && !url.endsWith("/")) {
             url += '/';
         }
-        if (url == null) {
+        if (!overrideGlobalSettings || url == null) {
             url = Hudson.getInstance().getRootUrl();
         }
         hudsonUrl = url;
@@ -346,8 +348,6 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
             (Long.parseLong(req.getParameter("ext_mailer_max_attachment_size")) * 1024 * 1024) : -1;
         recipientList = nullify(req.getParameter("ext_mailer_default_recipients")) != null ?
             req.getParameter("ext_mailer_default_recipients") : "";
-        
-        overrideGlobalSettings = req.getParameter("ext_mailer_override_global_settings") != null;
 
         precedenceBulk = req.getParameter("extmailer.addPrecedenceBulk") != null;
 
