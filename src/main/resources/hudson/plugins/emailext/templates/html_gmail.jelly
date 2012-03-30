@@ -329,7 +329,7 @@
    <br />
   </j:if>
   <!-- CONSOLE OUTPUT -->
-  <j:getStatic var="resultFailure" field="FAILURE" classname="hudson.model.Result" />
+  <j:getStatic var="resultFailure" field="FAILURE" className="hudson.model.Result" />
   <j:if test="${build.result==resultFailure}">
    <table width="100%" cellpadding="0" cellspacing="0" style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black">
     <tr>
