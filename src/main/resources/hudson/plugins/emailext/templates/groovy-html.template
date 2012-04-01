@@ -33,12 +33,12 @@ if(changeSet != null) {
 	<TABLE width="100%">
     <TR><TD class="bg1" colspan="2"><B>CHANGES</B></TD></TR>
 <% 	changeSet.each() { cs ->
-		hadChanges = true
-		def aUser = cs.hudsonUser %>		
+		hadChanges = true %>		
       <TR>
-        <TD colspan="2" class="bg2">${spc}Revision <B><%= cs.metaClass.hasProperty('commitId') ? cs.commitId : cs.metaClass.hasProperty('revision') ? cs.revision : cs.changeNumber%></B> by
-          <B><%= aUser != null ? aUser.displayName : it.author.displayName%>: </B>
-          <B>(${it.msgAnnotated})</B>
+        <TD colspan="2" class="bg2">${spc}Revision <B><%= cs.metaClass.hasProperty('commitId') ? cs.commitId : cs.metaClass.hasProperty('revision') ? cs.revision : 
+        cs.metaClass.hasProperty('changeNumber') ? cs.changeNumber : "" %></B> by
+          <B><%= cs.author %>: </B>
+          <B>(${cs.msgAnnotated})</B>
          </TD>
       </TR>
 <%		cs.affectedFiles.each() { p -> %>
