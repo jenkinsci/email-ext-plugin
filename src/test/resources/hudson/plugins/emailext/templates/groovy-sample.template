@@ -1,0 +1,16 @@
+build result is ${build.result}
+build url is ${rooturl}${build.url}
+<% def changeSet = build.changeSet
+if(changeSet != null) {
+	def hadChanges = false 
+    changeSet.each() { cs ->
+		hadChanges = true
+		def aUser = cs.author %>Revision: (${aUser.displayName}) ${cs.msgAnnotated}
+<%		cs.affectedFiles.each() { p -> %>${p.editType.name},${p.path}
+<%  	}
+	}
+	if(!hadChanges) { %>	
+        No Changes
+<%	}
+}
+%>

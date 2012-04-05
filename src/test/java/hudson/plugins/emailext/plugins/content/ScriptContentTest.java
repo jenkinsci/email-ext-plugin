@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
+import hudson.model.Result;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
@@ -114,7 +115,33 @@ public class ScriptContentTest
 
         assertEquals("Script [email-ext.groovy] or template [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.", content);
     }
+    /**
+	 * this is for groovy template testing 
+	 * @throws Exception
+	 */
+	@Test
+	public void testWithGroovyTemplate() throws Exception {
+		args.put(ScriptContent.SCRIPT_TEMPLATE_ARG, "groovy-sample.template");
+		args.put(ScriptContent.SCRIPT_INIT_ARG, false);
 
+		AbstractBuild build = mock(AbstractBuild.class);
+		when(build.getResult()).thenReturn(Result.SUCCESS);
+		when(build.getUrl()).thenReturn("email-test/34");
+		ExtendedEmailPublisher emailPublisher = new ExtendedEmailPublisher();
+		when(emailPublisher.DESCRIPTOR.getHudsonUrl()).thenReturn("http://localhost/");	
+		
+		mockChangeSet(build);
+		String content = scriptContent.getContent(build, emailPublisher, null, args);
+
+		String expected = 
+			"build result is SUCCESS" +
+			"build url is http://localhost/email-test/34" +
+			"Revision: (Kohsuke Kawaguchi) COMMIT MESSAGE" +
+			"edit,path1" +
+			"add,path2";
+		
+		assertEquals(expected, content.replace("\r\n", "").replace("\n",""));
+	}
     private void mockHudsonGetRootDir(File rootDir)
     {
         PowerMockito.mockStatic(Hudson.class);
