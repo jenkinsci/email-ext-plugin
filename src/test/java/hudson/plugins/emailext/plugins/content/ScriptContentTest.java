@@ -15,11 +15,13 @@ import hudson.scm.ChangeLogSet;
 import hudson.scm.EditType;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Scanner;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -124,23 +126,26 @@ public class ScriptContentTest
 		args.put(ScriptContent.SCRIPT_TEMPLATE_ARG, "groovy-sample.template");
 		args.put(ScriptContent.SCRIPT_INIT_ARG, false);
 
+		// mock the build 
 		AbstractBuild build = mock(AbstractBuild.class);
 		when(build.getResult()).thenReturn(Result.SUCCESS);
 		when(build.getUrl()).thenReturn("email-test/34");
 		ExtendedEmailPublisher emailPublisher = new ExtendedEmailPublisher();
 		when(emailPublisher.DESCRIPTOR.getHudsonUrl()).thenReturn("http://localhost/");	
 		
+		// mock changeSet
 		mockChangeSet(build);
+		
+		// generate result from groovy template
 		String content = scriptContent.getContent(build, emailPublisher, null, args);
 
-		String expected = 
-			"build result is SUCCESS" +
-			"build url is http://localhost/email-test/34" +
-			"Revision: (Kohsuke Kawaguchi) COMMIT MESSAGE" +
-			"edit,path1" +
-			"add,path2";
+		// read expected file in resource to easy compare
+		String expectedFile = "hudson/plugins/emailext/templates/" + "/groovy-sample.result";
+		InputStream in = getClass().getClassLoader().getResourceAsStream(expectedFile);
+		String expected = new Scanner(in).useDelimiter("\\Z").next();
 		
-		assertEquals(expected, content.replace("\r\n", "").replace("\n",""));
+		// remove end space before compare
+		assertEquals(expected.trim(), content.trim());
 	}
     private void mockHudsonGetRootDir(File rootDir)
     {
