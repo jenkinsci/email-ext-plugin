@@ -202,4 +202,15 @@ public class ContentBuilderTest
                   new ContentBuilder().transformText( "${DEFAULT_RECIPIENTS}", publisher, null,
                                                       mock( AbstractBuild.class ) ) );
 }
+    public void testTransformText_noNPEWithNullDefaultSubjectBody() throws NoSuchFieldException, IllegalAccessException
+    {
+        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultBody" );
+        f.setAccessible( true );
+        f.set( ExtendedEmailPublisher.DESCRIPTOR, null );
+        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultSubject" );
+        f.setAccessible( true );
+        f.set( ExtendedEmailPublisher.DESCRIPTOR, null );
+        assertEquals( "", new ContentBuilder().transformText( "$DEFAULT_SUBJECT", publisher, null, mock (AbstractBuild.class )));
+        assertEquals( "", new ContentBuilder().transformText( "$DEFAULT_CONTENT", publisher, null, mock (AbstractBuild.class )));
+    }
 }

@@ -63,14 +63,28 @@ public class ContentBuilder {
         return EMAIL_CONTENT_TYPE_MAP.values();
     }
 
+    private String noNull(String string) {
+        return string == null ? "" : string;
+    }
+
     public String transformText(String origText, ExtendedEmailPublisher publisher, EmailType type, AbstractBuild<?, ?> build) {
-	String recipientList = publisher.recipientList == null ? "" : publisher.recipientList;
-        String newText = origText.replaceAll(PROJECT_DEFAULT_BODY, Matcher.quoteReplacement(publisher.defaultContent)).replaceAll(PROJECT_DEFAULT_SUBJECT, Matcher.quoteReplacement(publisher.defaultSubject)).replaceAll(DEFAULT_BODY, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultBody())).replaceAll(DEFAULT_SUBJECT, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultSubject())).replaceAll(DEFAULT_RECIPIENTS, Matcher.quoteReplacement(ExtendedEmailPublisher.DESCRIPTOR.getDefaultRecipients()));
+        String defaultContent = Matcher.quoteReplacement(noNull(publisher.defaultContent));
+        String defaultSubject = Matcher.quoteReplacement(noNull(publisher.defaultSubject));
+        String defaultBody = Matcher.quoteReplacement(noNull(ExtendedEmailPublisher.DESCRIPTOR.getDefaultBody()));
+        String defaultExtSubject = Matcher.quoteReplacement(noNull(ExtendedEmailPublisher.DESCRIPTOR.getDefaultSubject()));
+        String defaultRecipients = Matcher.quoteReplacement(noNull(ExtendedEmailPublisher.DESCRIPTOR.getDefaultRecipients()));
+        String newText = origText.replaceAll(
+                PROJECT_DEFAULT_BODY, defaultContent).replaceAll(
+                PROJECT_DEFAULT_SUBJECT, defaultSubject).replaceAll(
+                DEFAULT_BODY, defaultBody).replaceAll(
+                DEFAULT_SUBJECT, defaultExtSubject).replaceAll(
+                DEFAULT_RECIPIENTS, defaultRecipients);
         newText = replaceTokensWithContent(newText, publisher, type, build);
         return newText;
     }
 
-    private static <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String replaceTokensWithContent(String origText, ExtendedEmailPublisher publisher, EmailType type, AbstractBuild<P, B> build) {
+    private static <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String replaceTokensWithContent(
+            String origText, ExtendedEmailPublisher publisher, EmailType type, AbstractBuild<P, B> build) {
         StringBuffer sb = new StringBuffer();
         Tokenizer tokenizer = new Tokenizer(origText);
 
