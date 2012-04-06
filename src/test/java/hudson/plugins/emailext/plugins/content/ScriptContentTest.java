@@ -140,7 +140,7 @@ public class ScriptContentTest
 		String content = scriptContent.getContent(build, emailPublisher, null, args);
 
 		// read expected file in resource to easy compare
-		String expectedFile = "hudson/plugins/emailext/templates/" + "/groovy-sample.result";
+		String expectedFile = "hudson/plugins/emailext/templates/" + "groovy-sample.result";
 		InputStream in = getClass().getClassLoader().getResourceAsStream(expectedFile);
 		String expected = new Scanner(in).useDelimiter("\\Z").next();
 		
