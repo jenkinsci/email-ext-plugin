@@ -356,7 +356,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             AbstractBuild<?, ?> cur = build;
             Cause.UpstreamCause upc = build.getCause(Cause.UpstreamCause.class);
             while (upc != null) {
-                AbstractProject<?, ?> p = (AbstractProject<?, ?>) Hudson.getInstance().getItem(upc.getUpstreamProject());
+                // UpstreamCause.getUpStreamProject() returns the full name, so use getItemByFullName
+                AbstractProject<?, ?> p = (AbstractProject<?, ?>) Hudson.getInstance().getItemByFullName(upc.getUpstreamProject());
                 cur = p.getBuildByNumber(upc.getUpstreamBuild());
                 upc = cur.getCause(Cause.UpstreamCause.class);
             }
