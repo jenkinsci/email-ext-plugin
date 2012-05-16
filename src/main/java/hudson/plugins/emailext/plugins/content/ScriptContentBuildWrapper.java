@@ -2,13 +2,15 @@ package hudson.plugins.emailext.plugins.content;
 
 import hudson.Functions;
 import hudson.maven.reporters.SurefireAggregatedReport;
-import hudson.model.AbstractBuild;
 import hudson.model.Action;
+import hudson.model.AbstractBuild;
+import hudson.model.Hudson;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ScriptContentBuildWrapper {
@@ -30,6 +32,39 @@ public class ScriptContentBuildWrapper {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns all build actions that derive from
+     * <code>AbstractResultAction</code>. Every action represents a single
+     * analysis result.
+     * 
+     * @return The static analysis actions for the current build. The returned
+     *         list might be empty if there are no such actions.
+     */
+    public List<Action> getStaticAnalysisActions() {
+        if (isPluginInstalled("analysis-core")) {
+            return new StaticAnalysisUtilities().getActions(build);
+        }
+        else {
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Returns whether the specified plug-in is installed.
+     *
+     * @param shortName
+     *            the plug-in to check
+     * @return <code>true</code> if the specified plug-in is installed,
+     *         <code>false</code> if not.
+     */
+    public static boolean isPluginInstalled(final String shortName) {
+        Hudson instance = Hudson.getInstance();
+        if (instance != null) {
+            return instance.getPlugin(shortName) != null;
+        }
+        return true;
     }
 
     public Action getCoberturaAction() {

@@ -98,6 +98,12 @@
         <version>${powermock.version}</version>
         <scope>test</scope>
      </dependency>
+      <dependency>
+        <groupId>org.jvnet.hudson.plugins</groupId>
+        <artifactId>analysis-core</artifactId>
+        <version>1.41</version>
+        <optional>true</optional>
+      </dependency>
   </dependencies>
   
   <build>
