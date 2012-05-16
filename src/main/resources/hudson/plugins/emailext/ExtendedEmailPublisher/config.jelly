@@ -10,7 +10,7 @@
     <j:set var="secId" value="emailext-${h.generateId()}-"/>
     <st:once>
       <script type="text/javascript" src="${rootURL}/plugin/email-ext/scripts/emailext-behavior.js"></script>
-      <script type="text/javascript">var emailExtInit = new Array();</script>
+      <script type="text/javascript">window.emailExtInit = new Array();</script>
     </st:once>
 
 	<!-- This is the project recipent list entry. -->
@@ -262,8 +262,8 @@
 
 	<j:if test="${!instance.configured}">
 		<script type="text/javascript">
-			if (!emailExtInit['${secId}']) addTrigger('Failure','${secId}');
-			emailExtInit['${secId}'] = 1;
+			if (!window.emailExtInit['${secId}']) addTrigger('Failure','${secId}');
+			window.emailExtInit['${secId}'] = 1;
 		</script>
 	</j:if>
 </j:jelly>
