@@ -450,6 +450,7 @@ public class ExtendedEmailPublisherTest
                 form.put( "project_default_subject", "Make millions in Nigeria" );
                 form.put( "project_default_content", "Give me a $1000 check and I'll mail you back $5000!!!" );
                 form.put( "project_attachments", "");
+                form.put( "project_presend_script", "");
 
                 publisher = (ExtendedEmailPublisher) ExtendedEmailPublisher.DESCRIPTOR.newInstance(Stapler.getCurrentRequest(), form );
 
