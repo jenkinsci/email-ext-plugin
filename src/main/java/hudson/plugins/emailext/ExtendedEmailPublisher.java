@@ -26,9 +26,18 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.tasks.Mailer;
 
+import jenkins.model.Jenkins;
+
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -139,6 +148,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * The project wide set of attachments.
      */
     public String attachmentsPattern;
+    
+    /**
+     * The project's pre-send script.
+     */
+    public String presendScript;
 
     private MatrixTriggerMode matrixTriggerMode;
 
@@ -264,9 +278,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     buf.append(' ').append(a);
                 }
                 listener.getLogger().println(buf);
-                Transport.send(msg);
-                if (build.getAction(MailMessageIdAction.class) == null) {
-                    build.addAction(new MailMessageIdAction(msg.getMessageID()));
+                if(executePresendScript(build, listener, msg)) {
+                    Transport.send(msg);
+                    if (build.getAction(MailMessageIdAction.class) == null) {
+                        build.addAction(new MailMessageIdAction(msg.getMessageID()));
+                    }
+                } else {
+                    listener.getLogger().println("Email sending was cancelled" 
+                        + " by user script.");                        
                 }
                 return true;
             } else {
@@ -280,6 +299,38 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         return false;
     }
+    
+    private boolean executePresendScript(AbstractBuild<?, ?> build, BuildListener listener, MimeMessage msg) 
+        throws RuntimeException {
+        boolean cancel = false;
+        if(StringUtils.isNotBlank(presendScript)) {
+            CompilerConfiguration cc = new CompilerConfiguration();
+            cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
+                    "jenkins",
+                    "jenkins.model",
+                    "hudson",
+                    "hudson.model"));
+            ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
+            GroovyShell shell = new GroovyShell(cl,new Binding(),cc);
+            StringWriter out = new StringWriter();
+            PrintWriter pw = new PrintWriter(out);
+            shell.setVariable("build", build);
+            shell.setVariable("msg", msg);
+            shell.setVariable("logger", listener.getLogger());
+            shell.setVariable("cancel", cancel);
+            try {
+                Object output = shell.evaluate(presendScript);
+                if(output!=null) {
+                    pw.println("Result: "+output);
+                    cancel = ((Boolean)shell.getVariable("cancel")).booleanValue();
+                }
+            } catch (Throwable t) {
+                t.printStackTrace(pw);
+                listener.getLogger().println(out.toString());
+            }
+        }            
+        return !cancel;
+    }    
 
     private MimeMessage createMail(EmailType type, AbstractBuild<?, ?> build, BuildListener listener) throws MessagingException, IOException, InterruptedException {
         boolean overrideGlobalSettings = ExtendedEmailPublisher.DESCRIPTOR.getOverrideGlobalSettings();

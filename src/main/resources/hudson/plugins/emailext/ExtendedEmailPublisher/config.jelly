@@ -4,7 +4,7 @@
          xmlns:m="/hudson/plugins/emailext/tags">
     <!--
         This script defines the view for the extended email plugin.
-    -->
+    -->    
 
     <!-- In case form is repeated, uniquify ids with a prefix -->
     <j:set var="secId" value="emailext-${h.generateId()}-"/>
@@ -83,7 +83,7 @@
 		</j:choose>
     </f:entry>
     
-    <!-- This is the default attachments set for the projcet. -->
+    <!-- This is the default attachments set for the project. -->
     <f:entry title="${%Attachments}"
     		 help="/plugin/email-ext/help/projectConfig/attachments.html"
     		 description="${%description('http://ant.apache.org/manual/Types/fileset.html')}">
@@ -98,6 +98,8 @@
             </j:otherwise>
         </j:choose>
     </f:entry>
+    
+    
     
 	<!-- This is the help section.  It displays a bunch of dynamic help for all content tokens. -->
 	<tr>
@@ -125,7 +127,19 @@
      whether or not to send email to developers who made changes, and whether or
      not to send email to the global list of devs-->
 	<f:advanced> 
-		
+		<tr>
+            <td colspan="4">
+                <!-- This is the pre-send script area -->
+                <f:entry title="${%Pre-send Script}"
+                         help="/plugin/email-ext/help/projectConfig/presendScript.html">
+                    <f:textarea
+                        class="setting-input"
+                        name="project_presend_script"
+                        id="project_presend_script"
+                        value="${instance.presendScript}"/>
+                </f:entry>
+            </td>
+        </tr>
 		<tr>
 			<td></td>
 			<td colspan="3" style="margin-left:10px">
@@ -265,5 +279,5 @@
 			if (!window.emailExtInit['${secId}']) addTrigger('Failure','${secId}');
 			window.emailExtInit['${secId}'] = 1;
 		</script>
-	</j:if>
+	</j:if>    
 </j:jelly>

@@ -257,6 +257,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         m.defaultSubject = formData.getString("project_default_subject");
         m.defaultContent = formData.getString("project_default_content");
         m.attachmentsPattern = formData.getString("project_attachments");
+        m.presendScript = formData.getString("project_presend_script");
         m.configuredTriggers = new ArrayList<EmailTrigger>();
 
         // Create a new email trigger for each one that is configured

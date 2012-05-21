@@ -53,6 +53,7 @@ public class ExtendedEmailPublisherTest
         publisher.defaultContent = "%DEFAULT_CONTENT";
         publisher.attachmentsPattern = "";
         publisher.recipientList = "%DEFAULT_RECIPIENTS";
+        publisher.presendScript = "";
 
         project = createFreeStyleProject();
         project.getPublishersList().add( publisher );
@@ -344,39 +345,70 @@ public class ExtendedEmailPublisherTest
         }
     }
     
-//    public void testsSendToRequester()
-//        throws Exception
-//    {
-//        SuccessTrigger successTrigger = new SuccessTrigger();
-//        successTrigger.setEmail(new EmailType(){{
-//            setSendToRequester(true);
-//        }});
-//        publisher.getConfiguredTriggers().add( successTrigger );
-//
-//        User u = User.get("ssogabe");
-//        Mailer.UserProperty prop = new Mailer.UserProperty("ssogabe@xxx.com");
-//        u.addProperty(prop);
-//        
-//        UserIdCause cause = new MockUserIdCause("ssogabe");
-//                
-//        FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
-//        assertBuildStatusSuccess( build );
-//
-//        assertEquals( 1, Mailbox.get( "ssogabe@xxx.com" ).size() );
-//    }    
-//    
-//    private static class MockUserIdCause extends UserIdCause {
-//        private String userId;
-//        
-//        public MockUserIdCause(String userId) {
-//            this.userId = userId;
-//        }
-//
-//        @Override
-//        public String getUserId() {
-//            return userId;
-//        }
-//    }
+    public void testCancelFromPresendScriptCausesNoEmail() throws Exception {
+        publisher.presendScript = "cancel = true";
+        SuccessTrigger successTrigger = new SuccessTrigger();
+        successTrigger.setEmail(new EmailType(){{
+            setSendToRequester(true);
+        }});
+        publisher.getConfiguredTriggers().add( successTrigger );
+
+        User u = User.get("kutzi");
+        u.setFullName("Christoph Kutzinski");
+        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
+        u.addProperty(prop);
+        
+        UserCause cause = new MockUserCause("kutzi");
+                
+        FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
+        assertBuildStatusSuccess( build );
+
+        assertEquals( 0, Mailbox.get( "kutzi@xxx.com" ).size() );
+    }
+    
+    public void testNoCancelFromPresendScriptCausesEmail() throws Exception {
+        publisher.presendScript = "def hello = 'world'\n";
+        SuccessTrigger successTrigger = new SuccessTrigger();
+        successTrigger.setEmail(new EmailType(){{
+            setSendToRequester(true);
+        }});
+        publisher.getConfiguredTriggers().add( successTrigger );
+
+        User u = User.get("kutzi");
+        u.setFullName("Christoph Kutzinski");
+        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
+        u.addProperty(prop);
+        
+        UserCause cause = new MockUserCause("kutzi");
+                
+        FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
+        assertBuildStatusSuccess( build );
+
+        assertEquals( 1, Mailbox.get( "kutzi@xxx.com" ).size() );
+    }
+    
+    public void testPresendScriptModifiesTo() throws Exception {
+        publisher.presendScript = "import javax.mail.Message.RecipientType\n" 
+            + "msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')";
+        SuccessTrigger successTrigger = new SuccessTrigger();
+        successTrigger.setEmail(new EmailType(){{
+            setSendToRequester(true);
+        }});
+        publisher.getConfiguredTriggers().add( successTrigger );
+
+        User u = User.get("kutzi");
+        u.setFullName("Christoph Kutzinski");
+        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
+        u.addProperty(prop);
+        
+        UserCause cause = new MockUserCause("kutzi");
+                
+        FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
+        assertBuildStatusSuccess( build );
+
+        assertEquals( 0, Mailbox.get( "kutzi@xxx.com" ).size() );
+        assertEquals( 1, Mailbox.get( "slide.o.mix@xxx.com" ).size() );
+    }
     
     public void testSendToRequesterLegacy()  throws Exception {
         SuccessTrigger successTrigger = new SuccessTrigger();
