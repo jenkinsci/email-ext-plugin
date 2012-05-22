@@ -356,9 +356,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         // Set the contents of the email
-
         msg.setSentDate(new Date());
-
         setSubject(type, build, msg, listener, charset);
 
         Multipart multipart = new MimeMultipart();
@@ -393,11 +391,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 }
             }
             for (User user : users) {
-                String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
-                if (adrs != null) {
-                    addAddressesFromRecipientList(recipientAddresses, adrs, env, listener);
-                } else {
-                    listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
+                try {
+                    String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
+                    if (adrs != null) {
+                        addAddressesFromRecipientList(recipientAddresses, adrs, env, listener);
+                    } else {
+                        listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
+                    }
+                } catch(Exception e) {
+                    listener.getLogger().println("Failed resolving e-mail address for " + user.getFullName() + " because of an exception in the resolving process (" + e.getMessage() + ")");
                 }
             }
         }
