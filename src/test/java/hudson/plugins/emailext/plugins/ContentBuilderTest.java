@@ -224,13 +224,13 @@ public class ContentBuilderTest
         assertEquals( "", new ContentBuilder().transformText( "$DEFAULT_CONTENT", publisher, null, mock (AbstractBuild.class ), listener));
     }
     
-    public void testTransformText_noTokenMacroPlugin() 
-        throws IOException, InterruptedException {
-        // just a simple test to verify that if the token-macro plugin is not available
-        // we don't throw an error
-        assertEquals("$BUILD_NUMBER", new ContentBuilder().transformText( "$BUILD_NUMBER", publisher, null,
-            mock( AbstractBuild.class ), listener ));
-    }
+//    public void testTransformText_noTokenMacroPlugin() 
+//        throws IOException, InterruptedException {
+//        // just a simple test to verify that if the token-macro plugin is not available
+//        // we don't throw an error
+//        assertEquals("$BUILD_NUMBER", new ContentBuilder().transformText( "$BUILD_NUMBER", publisher, null,
+//            mock( AbstractBuild.class ), listener ));
+//    }
     
 // TODO: the WithPlugin is not currently working...need to debug so these tests can be added
 //    @WithPlugin("token-macro.hpi")
