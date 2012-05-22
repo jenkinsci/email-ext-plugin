@@ -1,13 +1,17 @@
 package hudson.plugins.emailext.plugins;
 
+import hudson.Plugin;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.TaskListener;
 import hudson.plugins.emailext.EmailExtException;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.Util;
 import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
+
+import jenkins.model.Jenkins;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,6 +21,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import java.io.IOException;
 
 /**
  * {@link Publisher} that sends notification e-mail.
@@ -67,7 +73,7 @@ public class ContentBuilder {
         return string == null ? "" : string;
     }
 
-    public String transformText(String origText, ExtendedEmailPublisher publisher, EmailType type, AbstractBuild<?, ?> build) {
+    public String transformText(String origText, ExtendedEmailPublisher publisher, EmailType type, AbstractBuild<?, ?> build, TaskListener listener) {
         String defaultContent = Matcher.quoteReplacement(noNull(publisher.defaultContent));
         String defaultSubject = Matcher.quoteReplacement(noNull(publisher.defaultSubject));
         String defaultBody = Matcher.quoteReplacement(noNull(ExtendedEmailPublisher.DESCRIPTOR.getDefaultBody()));
@@ -80,6 +86,15 @@ public class ContentBuilder {
                 DEFAULT_SUBJECT, defaultExtSubject).replaceAll(
                 DEFAULT_RECIPIENTS, defaultRecipients);
         newText = replaceTokensWithContent(newText, publisher, type, build);
+        
+        Plugin tokenMacroPlugin = Jenkins.getInstance().getPlugin("token-macro");
+        if(tokenMacroPlugin != null) {
+            try {
+                newText = org.jenkinsci.plugins.tokenmacro.TokenMacro.expandAll(build, listener, newText);
+            } catch(Exception e) {
+                listener.getLogger().println("Error substituting macro: " + e.getMessage());
+            }
+        }        
         return newText;
     }
 
@@ -102,7 +117,7 @@ public class ContentBuilder {
                             e);
                     replacement = "[[ Exception while replacing " + tokenName + ". Please report this as a bug. ]]\n";
                     replacement += "{{ " + e.toString() + " }}";
-                }
+                }                
                 if (content.hasNestedContent()) {
                     replacement = replaceTokensWithContent(replacement, publisher, type, build);
                 }

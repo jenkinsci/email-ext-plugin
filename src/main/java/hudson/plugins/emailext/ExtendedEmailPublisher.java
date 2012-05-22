@@ -359,10 +359,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         msg.setSentDate(new Date());
 
-        setSubject(type, build, msg, charset);
+        setSubject(type, build, msg, listener, charset);
 
         Multipart multipart = new MimeMultipart();
-        multipart.addBodyPart(getContent(type, build, msg, charset));
+        multipart.addBodyPart(getContent(type, build, msg, listener, charset));
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
         attachments.attach(multipart, build, listener);
         msg.setContent(multipart);        
@@ -378,7 +378,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         // Get the recipients from the global list of addresses
         Set<InternetAddress> recipientAddresses = new LinkedHashSet<InternetAddress>();
         if (type.getSendToRecipientList()) {
-            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, recipientList, charset), env, listener);
+            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, recipientList, listener, charset), env, listener);
         }
         // Get the list of developers who made changes between this build and the last
         // if this mail type is configured that way
@@ -417,7 +417,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         //Get the list of recipients that are uniquely specified for this type of email
         if (!StringUtils.isBlank(type.getRecipientList())) {
-            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, type.getRecipientList(), charset), env, listener);
+            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, type.getRecipientList(), listener, charset), env, listener);
         }
 
         String emergencyReroute = ExtendedEmailPublisher.DESCRIPTOR.getEmergencyReroute();
@@ -510,15 +510,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return null;
     }
 
-    private void setSubject(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset)
+    private void setSubject(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, BuildListener listener, String charset)
             throws MessagingException {
-        String subject = new ContentBuilder().transformText(type.getSubject(), this, type, build);
+        String subject = new ContentBuilder().transformText(type.getSubject(), this, type, build, listener);
         msg.setSubject(subject, charset);
     }
     
-    private String getRecipientList(final EmailType type, final AbstractBuild<?, ?> build, String recipients, String charset)
+    private String getRecipientList(final EmailType type, final AbstractBuild<?, ?> build, String recipients, BuildListener listener, String charset)
         throws MessagingException {
-        final String recipientsTransformed = StringUtils.isBlank(recipients) ? "" : new ContentBuilder().transformText(recipients, this, type, build);
+        final String recipientsTransformed = StringUtils.isBlank(recipients) ? "" : new ContentBuilder().transformText(recipients, this, type, build, listener);
         return recipientsTransformed;
     }
 
@@ -528,9 +528,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             || MatrixTriggerMode.ONLY_CONFIGURATIONS == mtm;
     }
 
-    private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, String charset)
+    private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, BuildListener listener, String charset)
             throws MessagingException {
-        final String text = new ContentBuilder().transformText(type.getBody(), this, type, build);
+        final String text = new ContentBuilder().transformText(type.getBody(), this, type, build, listener);
 
         String messageContentType = contentType;
         // contentType is null if the project was not reconfigured after upgrading.
