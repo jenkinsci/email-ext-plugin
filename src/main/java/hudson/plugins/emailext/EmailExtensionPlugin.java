@@ -24,6 +24,7 @@
 package hudson.plugins.emailext;
 
 import hudson.Plugin;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
@@ -81,13 +82,17 @@ public class EmailExtensionPlugin extends Plugin {
         addEmailContentPlugin(new BuildLogContent());
         addEmailContentPlugin(new BuildLogRegexContent());
         addEmailContentPlugin(new BuildLogExcerptContent());
-        addEmailContentPlugin(new BuildNumberContent());
+        if(!ExtendedEmailPublisher.DESCRIPTOR.isTokenMacroAvailable()) {
+            addEmailContentPlugin(new BuildNumberContent());
+        }
         addEmailContentPlugin(new BuildStatusContent());
         addEmailContentPlugin(new BuildURLContent());
         addEmailContentPlugin(new ChangesSinceLastBuildContent());
         addEmailContentPlugin(new ChangesSinceLastSuccessfulBuildContent());
         addEmailContentPlugin(new ChangesSinceLastUnstableBuildContent());
-        addEmailContentPlugin(new EnvContent());
+        if(!ExtendedEmailPublisher.DESCRIPTOR.isTokenMacroAvailable()) {            
+            addEmailContentPlugin(new EnvContent());
+        }
         addEmailContentPlugin(new FailedTestsContent());
         addEmailContentPlugin(new JenkinsURLContent());
         addEmailContentPlugin(new HudsonURLContent());

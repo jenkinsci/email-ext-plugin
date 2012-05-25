@@ -37,38 +37,38 @@ public class EmailExtHelp {
                 + "form <i>name=\"value\"</i> for strings and in the form <i>name=value</i> for booleans and numbers.  "
                 + "The {'s and }'s may be omitted if there are no arguments.</p>"
                 + "<p>Examples: $TOKEN, ${TOKEN}, ${TOKEN, count=100}, ${ENV, var=\"PATH\"}</p>\n"
-                + "<b>Available Tokens</b>\n"
-                + "<ul>\n");
+                + "<b>Available email-ext Tokens</b>\n"
+                + "<dl>\n");
 
         if (displayDefaultTokens) {
             sb.append(
-                    "<li><b>${DEFAULT_SUBJECT} - </b> This is the default email subject that is "
-                    + "configured in Jenkins's system configuration page. </li>\n"
-                    + "<li><b>${DEFAULT_CONTENT} - </b> This is the default email content that is "
-                    + "configured in Jenkins's system configuration page. </li>\n"
-                    + "<li><b>${PROJECT_DEFAULT_SUBJECT} - </b> This is the default email subject for "
+                    "<dt>${DEFAULT_SUBJECT}</dt><dd>This is the default email subject that is "
+                    + "configured in Jenkins's system configuration page. </dd>\n"
+                    + "<dt>${DEFAULT_CONTENT}</dt><dd>This is the default email content that is "
+                    + "configured in Jenkins's system configuration page. </dd>\n"
+                    + "<dt>${PROJECT_DEFAULT_SUBJECT}</dt><dd>This is the default email subject for "
                     + "this project.  The result of using this token in the advanced configuration is "
                     + "what is in the Default Subject field above. WARNING: Do not use this token in the "
-                    + "Default Subject or Content fields.  Doing this has an undefined result. </li>\n"
-                    + "<li><b>${PROJECT_DEFAULT_CONTENT} - </b> This is the default email content for "
+                    + "Default Subject or Content fields.  Doing this has an undefined result. </dd>\n"
+                    + "<dt>${PROJECT_DEFAULT_CONTENT}</dt><dd>This is the default email content for "
                     + "this project.  The result of using this token in the advanced configuration is "
                     + "what is in the Default Content field above. WARNING: Do not use this token in the "
-                    + "Default Subject or Content fields.  Doing this has an undefined result. </li>\n");
+                    + "Default Subject or Content fields.  Doing this has an undefined result. </dd>\n");
         }
 
         for (EmailContent content : ContentBuilder.getEmailContentTypes()) {
-            sb.append("<li><b>${");
+            sb.append("<dt>${");
             sb.append(content.getToken());
             for (String arg : content.getArguments()) {
                 sb.append(", <i>");
                 sb.append(arg);
                 sb.append("</i>");
             }
-            sb.append("} - </b>");
+            sb.append("}</dt><dd>");
             sb.append(content.getHelpText());
-            sb.append("</li>\n");
+            sb.append("</dd>\n");
         }
-        sb.append("</ul>\n");
+        sb.append("</dl>\n");
 
         return sb.toString();
     }

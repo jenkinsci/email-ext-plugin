@@ -112,7 +112,17 @@
 	</tr>
 	<tr>
 		<td></td>
-		<td colspan="2"><div id="${secId}contentTokenHelpConf" class="help" style="display:none">${contentTokenText}</div></td>
+		<td colspan="2">
+          <div id="${secId}contentTokenHelpConf" class="help" style="display:none">
+            ${contentTokenText}
+            <j:if test="${descriptor.isTokenMacroAvailable()}">
+              <br/>
+              <b>Token Macro Plugin Tokens</b>
+              <br/><br/>
+              <help xmlns="/lib/token-macro" />
+            </j:if>
+          </div>
+        </td>
 		<td></td>
 	</tr>
 

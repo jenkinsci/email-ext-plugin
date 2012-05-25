@@ -109,7 +109,7 @@ public class BuildLogRegexContent implements EmailContent {
 
     public String getHelpText() {
         return "Displays lines from the build log that match the regular expression.\n"
-                + "<ul\n"
+                + "<ul>\n"
                 + "<li><i>" + REGEX_ARG_NAME + "</i> - Lines that match this regular expression "
                 + "are included. See also <i>java.util.regex.Pattern</i><br>\n"
                 + "Defaults to \"" + REGEX_DEFAULT_VALUE + "\".\n"

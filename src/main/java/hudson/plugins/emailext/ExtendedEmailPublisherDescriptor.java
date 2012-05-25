@@ -245,6 +245,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     public boolean isApplicable(Class<? extends AbstractProject> jobType) {
         return true;
     }
+    
+    public boolean isTokenMacroAvailable() {
+        return Hudson.getInstance().getPlugin("token-macro") != null;
+    }
 
     @Override
     public Publisher newInstance(StaplerRequest req, JSONObject formData)
