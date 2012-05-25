@@ -390,6 +390,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     users.add(change.getAuthor());
                 }
             }
+            
             for (User user : users) {
                 try {
                     String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
@@ -463,9 +464,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             EnvVars env, BuildListener listener) {
         User user = getByUserIdCause(build);
         if (user == null) {
-           user = getByLegacyUserCause(build);    
+           user = getByLegacyUserCause(build);
         }
-        
+                
         if (user != null) {
             String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
             if (adrs != null) {

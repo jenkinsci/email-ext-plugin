@@ -3,9 +3,13 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Hudson;
+import hudson.PluginManager.UberClassLoader;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailContent;
+
+import jenkins.model.Jenkins;
+
 import org.apache.commons.io.IOUtils;
 
 import javax.script.ScriptEngine;
@@ -53,7 +57,9 @@ public class ScriptContent implements EmailContent {
     private ScriptEngineManager scriptEngineManager = null;
 
     public ScriptContent() {
-    	scriptEngineManager = new ScriptEngineManager();
+        ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
+        if (cl == null) cl = Thread.currentThread().getContextClassLoader();
+    	scriptEngineManager = new ScriptEngineManager(cl);
     }
 
     public String getToken() {
@@ -162,6 +168,7 @@ public class ScriptContent implements EmailContent {
 				IOUtils.closeQuietly(inputStream);
 			}
 		}
+        engine = null;
         return rendered;
     }
     

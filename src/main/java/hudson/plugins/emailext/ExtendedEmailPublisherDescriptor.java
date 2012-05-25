@@ -94,7 +94,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
      * The maximum size of all the attachments (in bytes)
      */
     private long maxAttachmentSize = -1;
-
+    
     /*
      * This is a global default recipient list for sending emails.
      */
@@ -215,9 +215,9 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     }
     
     public String getEmergencyReroute() {
-      return emergencyReroute;
+        return emergencyReroute;
     }
-
+    
     public long getMaxAttachmentSize() {
     	return maxAttachmentSize;
     }
@@ -308,7 +308,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         smtpHost = nullify(req.getParameter("ext_mailer_smtp_server"));
         adminAddress = req.getParameter("ext_mailer_admin_address");
         defaultSuffix = nullify(req.getParameter("ext_mailer_default_suffix"));
-
+        
         // Specify the url to this Jenkins instance
         String url = nullify(req.getParameter("ext_mailer_hudson_url"));
         if (url != null && !url.endsWith("/")) {
@@ -341,8 +341,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         // Allow global defaults to be set for the subject and body of the email
         defaultSubject = nullify(req.getParameter("ext_mailer_default_subject"));
         defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
-
-        emergencyReroute = nullify(req.getParameter("ext_mailer_emergency_reroute"));       	
+        emergencyReroute = nullify(req.getParameter("ext_mailer_emergency_reroute"));
 
         // convert the value into megabytes (1024 * 1024 bytes)
         maxAttachmentSize = nullify(req.getParameter("ext_mailer_max_attachment_size")) != null ?
