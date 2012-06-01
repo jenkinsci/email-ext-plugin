@@ -7,6 +7,10 @@ import hudson.FilePath;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 
+import hudson.plugins.emailext.plugins.ContentBuilder;
+
+import org.apache.commons.lang.StringUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -67,7 +71,7 @@ public class AttachmentUtils implements Serializable {
 		}    	
     }
     
-    private List<MimeBodyPart> getAttachments(final AbstractBuild<?, ?> build, final BuildListener listener)
+    private List<MimeBodyPart> getAttachments(ExtendedEmailPublisher publisher, final AbstractBuild<?, ?> build, final BuildListener listener)
     		throws MessagingException, InterruptedException, IOException {
     	List<MimeBodyPart> attachments = null;
     	FilePath ws = build.getWorkspace();
@@ -76,9 +80,10 @@ public class AttachmentUtils implements Serializable {
 				ExtendedEmailPublisher.DESCRIPTOR.getMaxAttachmentSize();
     	if(ws == null) {
     		listener.error("Error: No workspace found!");
-    	} else if(attachmentsPattern != null && attachmentsPattern.trim().length() > 0) {
+    	} else if(!StringUtils.isBlank(attachmentsPattern)) {
     		attachments = new ArrayList<MimeBodyPart>();
-    		FilePath[] files = ws.list(attachmentsPattern);    		
+
+    		FilePath[] files = ws.list(new ContentBuilder().transformText(attachmentsPattern, publisher, null, build, listener));
     	
 	    	for(FilePath file : files) {
 		    	if(maxAttachmentSize > 0 && 
@@ -107,9 +112,9 @@ public class AttachmentUtils implements Serializable {
     	return attachments;
     }
     
-    public void attach(Multipart multipart, AbstractBuild<?,?> build, BuildListener listener) {  
+    public void attach(Multipart multipart, ExtendedEmailPublisher publisher, AbstractBuild<?,?> build, BuildListener listener) {  
     	try {
-	    	List<MimeBodyPart> attachments = getAttachments(build, listener);
+	    	List<MimeBodyPart> attachments = getAttachments(publisher, build, listener);
 	        if(attachments != null) {
 		        for(MimeBodyPart attachment : attachments) {
 		        	multipart.addBodyPart(attachment);	        

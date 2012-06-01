@@ -362,8 +362,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         Multipart multipart = new MimeMultipart();
         multipart.addBodyPart(getContent(type, build, msg, listener, charset));
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
-        attachments.attach(multipart, build, listener);
-        msg.setContent(multipart);        
+        attachments.attach(multipart, this, build, listener);
+        msg.setContent(multipart);
         EnvVars env = null;
         try {
             env = build.getEnvironment(listener);
