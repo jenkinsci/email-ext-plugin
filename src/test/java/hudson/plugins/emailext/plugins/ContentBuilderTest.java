@@ -160,7 +160,22 @@ public class ContentBuilderTest
 		assertFalse(tokenizer.find());
 	}
 
-    public void testTransformText_shouldExpand_$PROJECT_DEFAULT_CONTENT()
+  public void testMultilineStringArgs() {
+    ContentBuilder.Tokenizer tokenizer;
+    tokenizer = new ContentBuilder.Tokenizer( "${TEST, arg = \"a \\\n b  \\\r\n c\"}\n");
+    assertTrue(tokenizer.find());
+    assertEquals("TEST", tokenizer.getTokenName());
+    assertEquals(1, tokenizer.getArgs().size());
+    assertEquals("a \n b  \r\n c", tokenizer.getArgs().get("arg"));
+    assertFalse(tokenizer.find());
+
+    tokenizer = new ContentBuilder.Tokenizer( "${TEST, arg = \"a \n b  \r\n c\"}\n");
+    assertFalse("Unescaped string argument newlines should prevent token recognition",
+                tokenizer.find());
+  }
+
+
+  public void testTransformText_shouldExpand_$PROJECT_DEFAULT_CONTENT()
         throws IOException, InterruptedException
     {
         assertEquals(publisher.defaultContent, new ContentBuilder().transformText( "$PROJECT_DEFAULT_CONTENT", publisher, null,
