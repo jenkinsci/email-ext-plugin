@@ -138,9 +138,9 @@ public class ContentBuilder {
         private static final String numberRegex = "-?[0-9]+(\\.[0-9]*)?";
 
         private static final String boolRegex = "(true)|(false)";
-        // Sequence of (1) not \ " CR LF and (2) \ followed by non line terminator
 
-        private static final String stringRegex = "\"([^\\\\\"\\r\\n]|(\\\\.))*\"";
+        // Sequence of (1) not \ " CR LF and (2) \ followed by (CR)LF, or not CR LF
+        private static final String stringRegex = "\"([^\\\\\"\\r\\n]|(\\\\(?:\r?\n|.)))*\"";
 
         private static final String valueRegex = "(" + numberRegex + ")|(" + boolRegex + ")|(" + stringRegex + ")";
 
