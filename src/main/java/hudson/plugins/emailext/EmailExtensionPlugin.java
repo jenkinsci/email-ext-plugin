@@ -84,7 +84,7 @@ public class EmailExtensionPlugin extends Plugin {
         addEmailContentPlugin(new BuildLogRegexContent());
         addEmailContentPlugin(new BuildLogExcerptContent());
         addEmailContentPlugin(new BuildLogMultilineRegexContent());
-      if(!ExtendedEmailPublisher.DESCRIPTOR.isTokenMacroAvailable()) {
+        if(!ExtendedEmailPublisher.DESCRIPTOR.isTokenMacroAvailable()) {
             addEmailContentPlugin(new BuildNumberContent());
         }
         addEmailContentPlugin(new BuildStatusContent());
