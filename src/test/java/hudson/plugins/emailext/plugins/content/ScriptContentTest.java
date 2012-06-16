@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import hudson.Functions;
 import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
 import hudson.model.Result;
@@ -42,7 +43,7 @@ public class ScriptContentTest
     private final String osName = System.getProperty("os.name");
 
     private final boolean osIsDarwin = osName.equals("Mac OS X") || osName.equals("Darwin");
-    
+
     private ExtendedEmailPublisher publisher;
     
 
@@ -133,6 +134,10 @@ public class ScriptContentTest
         InputStream in = getClass().getClassLoader().getResourceAsStream(expectedFile);
         String expected = new Scanner(in).useDelimiter("\\Z").next();
         
+        // windows has a \r in each line, so make sure the comparison works correctly
+        if(Functions.isWindows()) { 
+            expected = expected.replace("\r", "");
+        }
         // remove end space before compare
         assertEquals(expected.trim(), content.trim());
     }
