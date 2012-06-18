@@ -160,6 +160,19 @@ public class ContentBuilderTest
 		assertFalse(tokenizer.find());
 	}
 
+  public void testTokenizer_veryLongStringArg() {
+    ContentBuilder.Tokenizer tokenizer;
+    StringBuilder veryLongStringParam = new StringBuilder();
+    for (int i = 0 ; i < 500 ; ++i) {
+      veryLongStringParam.append("abc123 %_= ~");
+    }
+    tokenizer = new ContentBuilder.Tokenizer("${TEST, arg = \"" + veryLongStringParam.toString() + "\"}");
+    assertTrue(tokenizer.find());
+    assertEquals("TEST", tokenizer.getTokenName());
+    assertEquals(1, tokenizer.getArgs().size());
+    assertNotNull(tokenizer.getArgs().get("arg"));
+  }
+
   public void testMultilineStringArgs() {
     ContentBuilder.Tokenizer tokenizer;
     tokenizer = new ContentBuilder.Tokenizer( "${TEST, arg = \"a \\\n b  \\\r\n c\"}\n");
