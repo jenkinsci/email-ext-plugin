@@ -140,7 +140,8 @@ public class ContentBuilder {
         private static final String boolRegex = "(true)|(false)";
 
         // Sequence of (1) not \ " CR LF and (2) \ followed by (CR)LF, or not CR LF
-        private static final String stringRegex = "\"([^\\\\\"\\r\\n]|(\\\\(?:\r?\n|.)))*\"";
+        // Use possessive quantifier to prevent stack overflow (see JENKINS-14132)
+        private static final String stringRegex = "\"([^\\\\\"\\r\\n]|(\\\\(?:\r?\n|.)))*+\"";
 
         private static final String valueRegex = "(" + numberRegex + ")|(" + boolRegex + ")|(" + stringRegex + ")";
 
