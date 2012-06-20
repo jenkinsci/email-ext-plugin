@@ -38,6 +38,7 @@ public class TestCountsContent implements EmailContent {
                 + "<li><i>" + VAR_ARG_NAME + "</i> - Defaults to \"" + VAR_DEFAULT_VALUE + "\".\n"
                 + "  <ul>\n"
                 + "    <li>total - the number of all tests. </li>\n"
+                + "    <li>pass - the number of passed tests. </li>\n"
                 + "    <li>fail - the number of failed tests.</li>\n"
                 + "    <li>skip - the number of skipped tests.</li> \n"
                 + "  </ul>\n"
@@ -61,6 +62,8 @@ public class TestCountsContent implements EmailContent {
         
         if ("total".equals(arg)) {
             return String.valueOf(action.getTotalCount());
+        } else if ("pass".equals(arg)) {
+            return String.valueOf(action.getTotalCount()-action.getFailCount()-action.getSkipCount());
         } else if ("fail".equals(arg)) {
             return String.valueOf(action.getFailCount());
         } else if ("skip".equals(arg)) {
