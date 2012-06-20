@@ -42,12 +42,14 @@ public class TestCountsContentTest {
     public void testGetContent() throws IOException, InterruptedException {
         AbstractTestResultAction<?> results = mock(AbstractTestResultAction.class);
         when(results.getTotalCount()).thenReturn(5);
+        when(results.getTotalCount() - results.getFailCount() - results.getSkipCount()).thenReturn(2);
         when(results.getFailCount()).thenReturn(2);
         when(results.getSkipCount()).thenReturn(1);
         when(build.getTestResultAction()).thenReturn(results);
 
         assertEquals("5", target.getContent(build, null, null, Collections.EMPTY_MAP));
         assertEquals("5", target.getContent(build, null, null, Collections.singletonMap("var", "total")));
+        assertEquals("2", target.getContent(build, null, null, Collections.singletonMap("var", "pass")));
         assertEquals("2", target.getContent(build, null, null, Collections.singletonMap("var", "fail")));
         assertEquals("1", target.getContent(build, null, null, Collections.singletonMap("var", "skip")));
 
