@@ -7,6 +7,8 @@ import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.EditType;
+import hudson.tasks.Mailer;
+import org.jvnet.hudson.test.HudsonTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +18,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.GregorianCalendar;
@@ -26,34 +29,44 @@ import java.util.Map;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings({"unchecked"})
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(value = {ExtendedEmailPublisherDescriptor.class, ExtendedEmailPublisher.class, Hudson.class})
-public class JellyScriptContentTest
+public class JellyScriptContentTest 
+    extends HudsonTestCase
 {
     private JellyScriptContent jellyScriptContent;
 
     private Map<String, Object> args;
 
-    @Before
-    public void setup()
+    private ExtendedEmailPublisher publisher;
+
+    public void setUp()
             throws Exception
     {
-        jellyScriptContent = new JellyScriptContent();
+        super.setUp();
 
+        jellyScriptContent = new JellyScriptContent();
         args = new HashMap<String, Object>();
 
-        mockDescriptorConstructor();
+        publisher = new ExtendedEmailPublisher();
+        publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";
+        publisher.defaultSubject = "How would you like your very own AWESOME-O 4000?";
+        publisher.recipientList = "ashlux@gmail.com";
+        
+        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultBody" );
+        f.setAccessible( true );
+        f.set( ExtendedEmailPublisher.DESCRIPTOR, "Give me $4000 and I'll mail you a check for $40,000!" );
+        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultSubject" );
+        f.setAccessible( true );
+        f.set( ExtendedEmailPublisher.DESCRIPTOR, "Nigerian needs your help!" );
+
+        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "recipientList" );
+        f.setAccessible( true );
+        f.set( ExtendedEmailPublisher.DESCRIPTOR, "ashlux@gmail.com" );
+        
+        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "hudsonUrl" );;;;
+        f.setAccessible( true );
+        f.set( ExtendedEmailPublisher.DESCRIPTOR, "http://localhost/" );
     }
 
-    private void mockDescriptorConstructor()
-            throws Exception
-    {
-        ExtendedEmailPublisherDescriptor descriptor = PowerMockito.mock(ExtendedEmailPublisherDescriptor.class);
-        PowerMockito.whenNew(ExtendedEmailPublisherDescriptor.class).withNoArguments().thenReturn(descriptor);
-    }
-
-    @Test
     public void testShouldFindTemplateOnClassPath()
             throws Exception
     {
@@ -64,12 +77,9 @@ public class JellyScriptContentTest
         assertEquals("HELLO WORLD!", jellyScriptContent.getContent(build, null, null, args));
     }
 
-    @Test
     public void testWhenTemplateNotFoundThrowFileNotFoundException()
             throws Exception
     {
-        mockHudsonGetRootDir(new File("."));
-
         args.put(JellyScriptContent.TEMPLATE_NAME_ARG, "template-does-not-exist");
 
         AbstractBuild build = mock(AbstractBuild.class);
@@ -77,14 +87,6 @@ public class JellyScriptContentTest
         String content = jellyScriptContent.getContent(build, null, null, args);
 
         assertEquals("Jelly script [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.", content);
-    }
-
-    private void mockHudsonGetRootDir(File rootDir)
-    {
-        PowerMockito.mockStatic(Hudson.class);
-        final Hudson hudson = PowerMockito.mock(Hudson.class);
-        Mockito.when(Hudson.getInstance()).thenReturn(hudson);
-        PowerMockito.when(hudson.getRootDir()).thenReturn(rootDir);
     }
 
     /**

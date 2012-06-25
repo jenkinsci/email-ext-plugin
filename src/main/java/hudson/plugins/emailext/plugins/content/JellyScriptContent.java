@@ -6,6 +6,7 @@ import hudson.model.Hudson;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailContent;
+import hudson.tasks.Mailer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.jelly.JellyContext;
 import org.apache.commons.jelly.JellyException;
@@ -66,6 +67,7 @@ public class JellyScriptContent implements EmailContent {
             throws IOException, InterruptedException {
         InputStream inputStream = null;
         String templateName = Args.get(args, TEMPLATE_NAME_ARG, DEFAULT_TEMPLATE_NAME);
+       
         try {
             inputStream = getTemplateInputStream(templateName);
             return renderContent(build, inputStream);
@@ -125,7 +127,7 @@ public class JellyScriptContent implements EmailContent {
         xmlOutput.flush();
         xmlOutput.close();
         output.close();
-        return output.toString();
+        return output.toString(getCharset());
     }
 
     private JellyContext createContext(Object it, AbstractBuild<?, ?> build) {
@@ -139,5 +141,14 @@ public class JellyScriptContent implements EmailContent {
 
     public boolean hasNestedContent() {
         return false;
+    }
+
+    private String getCharset() {
+        String charset = Mailer.descriptor().getCharset();
+        String overrideCharset = ExtendedEmailPublisher.DESCRIPTOR.getCharset();
+        if(overrideCharset != null) {
+            charset = overrideCharset;
+        }
+        return charset;
     }
 }
