@@ -17,6 +17,7 @@ import java.util.Map;
  * @author Kohsuke Kawaguchi
  */
 public class WorkspaceFileContent implements EmailContent {
+    
 
     public String getToken() {
         return "FILE";
@@ -47,7 +48,7 @@ public class WorkspaceFileContent implements EmailContent {
     }
 
     public boolean hasNestedContent() {
-        return false;
+        return true;
     }
 
     public static final String VAR_PATH_NAME = "path";
