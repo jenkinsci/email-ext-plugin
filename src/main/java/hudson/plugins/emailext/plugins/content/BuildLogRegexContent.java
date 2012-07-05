@@ -91,6 +91,10 @@ public class BuildLogRegexContent implements EmailContent {
 
     private static final String MATCHED_LINE_HTML_STYLE_DEFAULT_VALUE = null;
 
+    private static final String ADD_NEWLINE_ARG_NAME = "addNewline";
+
+    private static final boolean ADD_NEWLINE_DEFAULT_VALUE = true;
+
     public String getToken() {
         return TOKEN;
     }
@@ -104,7 +108,8 @@ public class BuildLogRegexContent implements EmailContent {
                 SHOW_TRUNCATED_LINES_ARG_NAME,
                 SUBST_TEXT_ARG_NAME,
                 ESCAPE_HTML_ARG_NAME,
-                MATCHED_LINE_HTML_STYLE_ARG_NAME);
+                MATCHED_LINE_HTML_STYLE_ARG_NAME,
+                ADD_NEWLINE_ARG_NAME);
     }
 
     public String getHelpText() {
@@ -112,30 +117,33 @@ public class BuildLogRegexContent implements EmailContent {
                 + "<ul>\n"
                 + "<li><i>" + REGEX_ARG_NAME + "</i> - Lines that match this regular expression "
                 + "are included. See also <i>java.util.regex.Pattern</i><br>\n"
-                + "Defaults to \"" + REGEX_DEFAULT_VALUE + "\".\n"
+                + "Defaults to \"" + REGEX_DEFAULT_VALUE + "\"</li>.\n"
                 + "<li><i>" + LINES_BEFORE_ARG_NAME + "</i> - The number of lines to include "
                 + "before the matching line. Lines that overlap with another "
                 + "match or <i>linesAfter</i> are only included once.<br>\n"
-                + "Defaults to " + LINES_BEFORE_DEFAULT_VALUE + ".\n"
+                + "Defaults to " + LINES_BEFORE_DEFAULT_VALUE + ".</li>\n"
                 + "<li><i>" + LINES_AFTER_ARG_NAME + "</i> - The number of lines to include "
                 + "after the matching line. Lines that overlap with another "
                 + "match or <i>linesBefore</i> are only included once.<br>\n"
-                + "Defaults to " + LINES_AFTER_DEFAULT_VALUE + ".\n"
+                + "Defaults to " + LINES_AFTER_DEFAULT_VALUE + ".</li>\n"
                 + "<li><i>" + MAX_MATCHES_ARG_NAME + "</i> - The maximum number of matches "
                 + "to include. If 0, all matches will be included.<br>\n"
-                + "Defaults to " + MAX_MATCHES_DEFAULT_VALUE + ".\n"
+                + "Defaults to " + MAX_MATCHES_DEFAULT_VALUE + ".</li>\n"
                 + "<li><i>" + SHOW_TRUNCATED_LINES_ARG_NAME + "</i> - If <i>true</i>, include "
                 + "<tt>[...truncated ### lines...]</tt> lines.<br>\n"
-                + "Defaults to " + SHOW_TRUNCATED_LINES_DEFAULT_VALUE + ".\n"
+                + "Defaults to " + SHOW_TRUNCATED_LINES_DEFAULT_VALUE + ".</li>\n"
                 + "<li><i>" + SUBST_TEXT_ARG_NAME + "</i> - If non-null, insert this text into the email "
                 + "rather than the entire line.<br>\n"
-                + "Defaults to null.\n"
+                + "Defaults to null.</li>\n"
                 + "<li><i>" + ESCAPE_HTML_ARG_NAME + "</i> - If true, escape HTML.<br>\n"
-                + "Defaults to " + ESCAPE_HTML_DEFAULT_VALUE + ".\n"
+                + "Defaults to " + ESCAPE_HTML_DEFAULT_VALUE + ".</li>\n"
                 + "<li><i>" + MATCHED_LINE_HTML_STYLE_ARG_NAME + "</i> - If non-null, output HTML. "
                 + "matched lines will become <code>&lt;b style=\"your-style-value\"&gt;"
                 + "html escaped matched line&lt;/b&gt;</code>.<br>\n"
-                + "Defaults to null.\n"
+                + "Defaults to null.</li>\n"
+                + "<li><i>" + ADD_NEWLINE_ARG_NAME + "</i> - If true, adds a newline after "
+                + "subsText.<br>\n"
+                + "Defaults to true.</li>\n"
                 + "</ul>\n";
     }
 
@@ -163,7 +171,7 @@ public class BuildLogRegexContent implements EmailContent {
         buffer.append('\n');
     }
 
-    private void appendMatchedLine(StringBuffer buffer, String line, boolean escapeHtml, String style) {
+    private void appendMatchedLine(StringBuffer buffer, String line, boolean escapeHtml, String style, boolean addNewline) {
         if (escapeHtml) {
             line = StringEscapeUtils.escapeHtml(line);
         }
@@ -180,7 +188,10 @@ public class BuildLogRegexContent implements EmailContent {
         if (style != null) {
             buffer.append("</b>");
         }
-        buffer.append('\n');
+
+        if(addNewline) {
+            buffer.append('\n');
+        }
     }
 
     private void appendLinesTruncated(StringBuffer buffer, int numLinesTruncated, boolean asHtml) {
@@ -238,6 +249,9 @@ public class BuildLogRegexContent implements EmailContent {
                 || Args.get(args,
                 ESCAPE_HTML_ARG_NAME,
                 ESCAPE_HTML_DEFAULT_VALUE);
+        final boolean addNewline = Args.get(args, 
+                ADD_NEWLINE_ARG_NAME, 
+                ADD_NEWLINE_DEFAULT_VALUE);
 
         final Pattern pattern = Pattern.compile(regex);
         final StringBuffer buffer = new StringBuffer();
@@ -286,7 +300,7 @@ public class BuildLogRegexContent implements EmailContent {
                     matcher.appendTail(sb);
                     line = sb.toString();
                 }
-                appendMatchedLine(buffer, line, escapeHtml, matchedLineHtmlStyle);
+                appendMatchedLine(buffer, line, escapeHtml, matchedLineHtmlStyle, addNewline);
                 ++numMatches;
                 // Set up to add numLinesStillNeeded
                 numLinesStillNeeded = contextLinesAfter;
