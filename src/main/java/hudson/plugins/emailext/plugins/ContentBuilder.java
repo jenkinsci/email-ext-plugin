@@ -92,7 +92,7 @@ public class ContentBuilder {
             try {
                 newText = org.jenkinsci.plugins.tokenmacro.TokenMacro.expandAll(build, listener, newText);
             } catch(Exception e) {
-                listener.getLogger().println("Error substituting with token-macro plugin: " + e);
+                // we don't do anything here...
             }
         }        
         return newText;
