@@ -1,5 +1,7 @@
 package hudson.plugins.emailext;
 
+import hudson.Plugin;
+import hudson.PluginWrapper;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
 import hudson.model.Hudson;
@@ -8,6 +10,8 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
+import hudson.util.VersionNumber;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -247,7 +251,12 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     }
     
     public boolean isTokenMacroAvailable() {
-        return Hudson.getInstance().getPlugin("token-macro") != null;
+        boolean result = false;
+        Plugin tokenMacroPlugin = Jenkins.getInstance().getPlugin("token-macro");
+        if(tokenMacroPlugin != null) {
+            result = !tokenMacroPlugin.getWrapper().getVersionNumber().isOlderThan(new VersionNumber("1.5.1"));
+        }
+        return result;
     }
 
     @Override
@@ -319,7 +328,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
             url += '/';
         }
         if (!overrideGlobalSettings || url == null) {
-            url = Hudson.getInstance().getRootUrl();
+            url = Jenkins.getInstance().getRootUrl();
         }
         hudsonUrl = url;
 
@@ -394,18 +403,18 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     }
     
     public FormValidation doMaxAttachmentSizeCheck(@QueryParameter final String value)
-    		throws IOException, ServletException {
-    	try {
-    		String testValue = value.trim();
-    		// we support an empty value (which means default)
-    		// or a number
-    		if(testValue.length() > 0) {
-    			Long.parseLong(testValue);
-    		}
-    		return FormValidation.ok();
-    	} catch (Exception e) {
-    		return FormValidation.error(e.getMessage());
-    	}
+            throws IOException, ServletException {
+        try {
+            String testValue = value.trim();
+            // we support an empty value (which means default)
+            // or a number
+            if(testValue.length() > 0) {
+                Long.parseLong(testValue);
+            }
+            return FormValidation.ok();
+        } catch (Exception e) {
+            return FormValidation.error(e.getMessage());
+        }
     }
 
     public boolean isMatrixProject(AbstractProject<?, ?> project) {

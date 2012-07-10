@@ -91,8 +91,10 @@ public class ContentBuilder {
         if(tokenMacroPlugin != null) {
             try {
                 newText = org.jenkinsci.plugins.tokenmacro.TokenMacro.expandAll(build, listener, newText);
+            } catch(NoSuchMethodError e) {
+                // this will happen if the wrong version of token macro is loaded
             } catch(Exception e) {
-                // we don't do anything here...
+                // we don't do anything here
             }
         }        
         return newText;
