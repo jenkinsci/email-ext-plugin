@@ -84,17 +84,13 @@ public class EmailExtensionPlugin extends Plugin {
         addEmailContentPlugin(new BuildLogRegexContent());
         addEmailContentPlugin(new BuildLogExcerptContent());
         addEmailContentPlugin(new BuildLogMultilineRegexContent());
-        if(!ExtendedEmailPublisher.DESCRIPTOR.isTokenMacroAvailable()) {
-            addEmailContentPlugin(new BuildNumberContent());
-        }
+        addEmailContentPlugin(new BuildNumberContent());
         addEmailContentPlugin(new BuildStatusContent());
         addEmailContentPlugin(new BuildURLContent());
         addEmailContentPlugin(new ChangesSinceLastBuildContent());
         addEmailContentPlugin(new ChangesSinceLastSuccessfulBuildContent());
         addEmailContentPlugin(new ChangesSinceLastUnstableBuildContent());
-        if(!ExtendedEmailPublisher.DESCRIPTOR.isTokenMacroAvailable()) {            
-            addEmailContentPlugin(new EnvContent());
-        }
+        addEmailContentPlugin(new EnvContent());
         addEmailContentPlugin(new FailedTestsContent());
         addEmailContentPlugin(new JenkinsURLContent());
         addEmailContentPlugin(new HudsonURLContent());
