@@ -12,6 +12,7 @@ import hudson.model.User;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
+import hudson.plugins.emailext.plugins.trigger.FirstFailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
 import hudson.plugins.emailext.plugins.trigger.NotBuiltTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
@@ -124,6 +125,29 @@ public class ExtendedEmailPublisherTest
         assertThat( "Email should not have been triggered, so we shouldn't see it in the logs.", build.getLog( 100 ),
                     not( hasItems( "Email was triggered for: " + SuccessTrigger.TRIGGER_NAME ) ) );
         assertEquals( 0, Mailbox.get( "ashlux@gmail.com" ).size() );
+    }
+
+    public void testFirstFailureTriggerShouldNotSendEmailOnSecondFail()
+        throws Exception
+    {
+            project.getBuildersList().add( new FailureBuilder() );
+
+        FirstFailureTrigger trigger = new FirstFailureTrigger();
+        addEmailType( trigger );
+        publisher.getConfiguredTriggers().add( trigger );
+
+        FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
+        assertBuildStatus( Result.FAILURE, build );
+
+        FreeStyleBuild build2 = project.scheduleBuild2( 1 ).get();
+        assertBuildStatus( Result.FAILURE, build2 );
+
+        assertThat( "Email should have been triggered for build 0, so we should see it in the logs.", build.getLog( 100 ),
+                    hasItems( "Email was triggered for: " + FirstFailureTrigger.TRIGGER_NAME ) );
+
+        assertThat( "Email should NOT have been triggered for build 1, so we shouldn't see it in the logs.", build2.getLog( 100 ),
+                    not( hasItems( "Email was triggered for: " + FailureTrigger.TRIGGER_NAME ) ) );
+        assertEquals( 1, Mailbox.get( "ashlux@gmail.com" ).size() );
     }
 
     public void testFixedTriggerShouldNotSendEmailWhenBuildFirstFails()
