@@ -12,9 +12,9 @@ if(changeSet != null) {
   def hadChanges = false %>
 CHANGE SET
 <% changeSet.each() { cs ->
-     hadChanges = true
-  	 def aUser = cs.hudsonUser %>
-  	 Revision <%= cs.metaClass.hasProperty('commitId') ? cs.commitId : cs.metaClass.hasProperty('revision') ? cs.revision : cs.changeNumber %> by <%= aUser != null ? aUser.displayName : cs.author.displayName %>: (<%= cs.msgAnnotated %>)
+     hadChanges = true %>
+  	 Revision <%= cs.metaClass.hasProperty('commitId') ? cs.commitId : cs.metaClass.hasProperty('revision') ? cs.revision : 
+        cs.metaClass.hasProperty('changeNumber') ? cs.changeNumber : "" %> by <%= cs.author %>: (<%= cs.msgAnnotated %>)
 <%	 cs.affectedFiles.each() { p -> %>
 	 change: <%= p.editType.name %> <%= p.path %>
 <%   }	 	    
@@ -23,3 +23,11 @@ CHANGE SET
   No changes
 <% }
 } %>
+
+
+<% if(build.result==hudson.model.Result.FAILURE) { %>
+CONSOLE OUTPUT
+<% 	build.getLog(100).each() { line -> %>
+	${line}
+<% 	}
+   } %>
