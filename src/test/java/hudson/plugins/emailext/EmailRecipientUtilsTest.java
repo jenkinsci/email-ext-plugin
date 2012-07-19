@@ -13,9 +13,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.jvnet.hudson.test.HudsonTestCase;
 
-public class EmailRecepientUtilsTest extends HudsonTestCase
+public class EmailRecipientUtilsTest extends HudsonTestCase
 {
-    private EmailRecepientUtils emailRecepientUtils;
+    private EmailRecipientUtils emailRecipientUtils;
 
     private EnvVars envVars;
 
@@ -24,14 +24,14 @@ public class EmailRecepientUtilsTest extends HudsonTestCase
         throws Exception
     {
         super.setUp();
-        emailRecepientUtils = new EmailRecepientUtils();
+        emailRecipientUtils = new EmailRecipientUtils();
         envVars = new EnvVars();
     }
 
     public void testConvertRecipientList_emptyRecipientStringShouldResultInEmptyEmailList()
         throws AddressException
     {
-        Set<InternetAddress> internetAddresses = emailRecepientUtils.convertRecipientString( "", envVars );
+        Set<InternetAddress> internetAddresses = emailRecipientUtils.convertRecipientString( "", envVars );
 
         assertTrue( internetAddresses.isEmpty() );
     }
@@ -39,7 +39,7 @@ public class EmailRecepientUtilsTest extends HudsonTestCase
     public void testConvertRecipientList_emptyRecipientStringWithWhitespaceShouldResultInEmptyEmailList()
         throws AddressException
     {
-        Set<InternetAddress> internetAddresses = emailRecepientUtils.convertRecipientString( "   ", envVars );
+        Set<InternetAddress> internetAddresses = emailRecipientUtils.convertRecipientString( "   ", envVars );
 
         assertTrue( internetAddresses.isEmpty() );
     }
@@ -48,7 +48,7 @@ public class EmailRecepientUtilsTest extends HudsonTestCase
         throws AddressException
     {
         Set<InternetAddress> internetAddresses =
-            emailRecepientUtils.convertRecipientString( "ashlux@gmail.com", envVars );
+            emailRecipientUtils.convertRecipientString( "ashlux@gmail.com", envVars );
 
         assertEquals( 1, internetAddresses.size() );
         assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
@@ -58,7 +58,7 @@ public class EmailRecepientUtilsTest extends HudsonTestCase
         throws AddressException
     {
         Set<InternetAddress> internetAddresses =
-            emailRecepientUtils.convertRecipientString( " ashlux@gmail.com ", envVars );
+            emailRecipientUtils.convertRecipientString( " ashlux@gmail.com ", envVars );
 
         assertEquals( 1, internetAddresses.size() );
         assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
@@ -68,7 +68,7 @@ public class EmailRecepientUtilsTest extends HudsonTestCase
         throws AddressException
     {
         Set<InternetAddress> internetAddresses =
-            emailRecepientUtils.convertRecipientString( "ashlux@gmail.com, mickeymouse@disney.com", envVars );
+            emailRecipientUtils.convertRecipientString( "ashlux@gmail.com, mickeymouse@disney.com", envVars );
 
         assertEquals( 2, internetAddresses.size() );
         assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
@@ -79,7 +79,7 @@ public class EmailRecepientUtilsTest extends HudsonTestCase
         throws AddressException
     {
         Set<InternetAddress> internetAddresses =
-            emailRecepientUtils.convertRecipientString( "ashlux@gmail.com mickeymouse@disney.com", envVars );
+            emailRecipientUtils.convertRecipientString( "ashlux@gmail.com mickeymouse@disney.com", envVars );
 
         assertEquals( 2, internetAddresses.size() );
         assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
@@ -90,7 +90,7 @@ public class EmailRecepientUtilsTest extends HudsonTestCase
         throws AddressException
     {
         Set<InternetAddress> internetAddresses =
-            emailRecepientUtils.convertRecipientString( "ashlux@gmail.com, mickeymouse@disney.com, ashlux@gmail.com", envVars );
+            emailRecipientUtils.convertRecipientString( "ashlux@gmail.com, mickeymouse@disney.com, ashlux@gmail.com", envVars );
 
         assertEquals( 2, internetAddresses.size() );
         assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
@@ -102,7 +102,7 @@ public class EmailRecepientUtilsTest extends HudsonTestCase
     {
         envVars.put( "EMAIL_LIST", "ashlux@gmail.com" );
 
-        Set<InternetAddress> internetAddresses = emailRecepientUtils.convertRecipientString( "$EMAIL_LIST", envVars );
+        Set<InternetAddress> internetAddresses = emailRecipientUtils.convertRecipientString( "$EMAIL_LIST", envVars );
 
         assertEquals( 1, internetAddresses.size() );
         assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
@@ -111,7 +111,7 @@ public class EmailRecepientUtilsTest extends HudsonTestCase
     public void testValidateFormRecipientList_validationShouldPassAListOfGoodEmailAddresses()
     {
         FormValidation formValidation =
-            emailRecepientUtils.validateFormRecipientList( "ashlux@gmail.com internal somewhere@domain" );
+            emailRecipientUtils.validateFormRecipientList( "ashlux@gmail.com internal somewhere@domain" );
 
         assertEquals( FormValidation.Kind.OK, formValidation.kind );
     }
@@ -119,7 +119,7 @@ public class EmailRecepientUtilsTest extends HudsonTestCase
     public void testValidateFormRecipientList_validationShouldFailWithBadEmailAddress()
     {
         FormValidation formValidation =
-            emailRecepientUtils.validateFormRecipientList( "@@@" );
+            emailRecipientUtils.validateFormRecipientList( "@@@" );
 
         assertEquals( FormValidation.Kind.ERROR, formValidation.kind );
     }
@@ -128,9 +128,26 @@ public class EmailRecepientUtilsTest extends HudsonTestCase
         throws AddressException
     {
         Mailer.descriptor().setDefaultSuffix("@gmail.com");
-        Set<InternetAddress> internetAddresses = emailRecepientUtils.convertRecipientString( "ashlux", envVars );
+        Set<InternetAddress> internetAddresses = emailRecipientUtils.convertRecipientString( "ashlux", envVars );
 
         assertEquals( 1, internetAddresses.size() );
         assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
+    }
+
+    public void testCC()
+        throws Exception
+    {
+        envVars.put( "EMAIL_LIST", "ashlux@gmail.com, cc:slide.o.mix@gmail.com, another@gmail.com" );
+
+        Set<InternetAddress> internetAddresses = emailRecipientUtils.convertRecipientString( "$EMAIL_LIST", envVars );
+
+        assertEquals( 2, internetAddresses.size() );
+        assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
+        assertTrue( internetAddresses.contains( new InternetAddress( "another@gmail.com" ) ) );
+
+        internetAddresses = emailRecipientUtils.convertRecipientString( "$EMAIL_LIST", envVars, EmailRecipientUtils.CC);
+        
+        assertEquals( 1, internetAddresses.size() );
+        assertTrue ( internetAddresses.contains( new InternetAddress( "slide.o.mix@gmail.com" ) ) );
     }
 }

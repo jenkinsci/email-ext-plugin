@@ -375,8 +375,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         // Get the recipients from the global list of addresses
         Set<InternetAddress> recipientAddresses = new LinkedHashSet<InternetAddress>();
+        Set<InternetAddress> ccAddresses = new LinkedHashSet<InternetAddress>();
         if (type.getSendToRecipientList()) {
-            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, recipientList, listener, charset), env, listener);
+            addAddressesFromRecipientList(recipientAddresses, ccAddresses, getRecipientList(type, build, recipientList, listener, charset), env, listener);
         }
         // Get the list of developers who made changes between this build and the last
         // if this mail type is configured that way
@@ -395,7 +396,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 try {
                     String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
                     if (adrs != null) {
-                        addAddressesFromRecipientList(recipientAddresses, adrs, env, listener);
+                        addAddressesFromRecipientList(recipientAddresses, ccAddresses, adrs, env, listener);
                     } else {
                         listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
                     }
@@ -415,12 +416,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 cur = p.getBuildByNumber(upc.getUpstreamBuild());
                 upc = cur.getCause(Cause.UpstreamCause.class);
             }
-            addUserTriggeringTheBuild(cur, recipientAddresses, env, listener);
+            addUserTriggeringTheBuild(cur, recipientAddresses, ccAddresses, env, listener);
         }
 
         //Get the list of recipients that are uniquely specified for this type of email
         if (!StringUtils.isBlank(type.getRecipientList())) {
-            addAddressesFromRecipientList(recipientAddresses, getRecipientList(type, build, type.getRecipientList(), listener, charset), env, listener);
+            addAddressesFromRecipientList(recipientAddresses, ccAddresses, getRecipientList(type, build, type.getRecipientList(), listener, charset), env, listener);
         }
 
         String emergencyReroute = ExtendedEmailPublisher.DESCRIPTOR.getEmergencyReroute();
@@ -428,11 +429,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         
         if (isEmergencyReroute) {
           recipientAddresses.clear();
-          addAddressesFromRecipientList(recipientAddresses, emergencyReroute, env, listener);
+          addAddressesFromRecipientList(recipientAddresses, ccAddresses, emergencyReroute, env, listener);
           listener.getLogger().println("Emergency reroute is set to: " + emergencyReroute);
         }
         
         msg.setRecipients(Message.RecipientType.TO, recipientAddresses.toArray(new InternetAddress[recipientAddresses.size()]));
+        if(ccAddresses.size() > 0) {
+            msg.setRecipients(Message.RecipientType.CC, ccAddresses.toArray(new InternetAddress[ccAddresses.size()]));
+        }
 
         AbstractBuild<?, ?> pb = build.getPreviousBuild();
         if (pb != null) {
@@ -460,7 +464,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return msg;
     }
 
-    private void addUserTriggeringTheBuild(AbstractBuild<?, ?> build, Set<InternetAddress> recipientAddresses,
+    private void addUserTriggeringTheBuild(AbstractBuild<?, ?> build, Set<InternetAddress> recipientAddresses, Set<InternetAddress> ccAddresses,
             EnvVars env, BuildListener listener) {
         User user = getByUserIdCause(build);
         if (user == null) {
@@ -470,7 +474,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         if (user != null) {
             String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
             if (adrs != null) {
-                addAddressesFromRecipientList(recipientAddresses, adrs, env, listener);
+                addAddressesFromRecipientList(recipientAddresses, ccAddresses, adrs, env, listener);
             } else {
                 listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
             }
@@ -554,11 +558,13 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return msgPart;
     }   
 
-    private static void addAddressesFromRecipientList(Set<InternetAddress> addresses, String recipientList,
+    private static void addAddressesFromRecipientList(Set<InternetAddress> addresses, Set<InternetAddress> ccAddresses, String recipientList,
             EnvVars envVars, BuildListener listener) {
         try {
-            Set<InternetAddress> internetAddresses = new EmailRecepientUtils().convertRecipientString(recipientList, envVars);
+            Set<InternetAddress> internetAddresses = new EmailRecipientUtils().convertRecipientString(recipientList, envVars, EmailRecipientUtils.TO);
             addresses.addAll(internetAddresses);
+            Set<InternetAddress> ccInternetAddresses = new EmailRecipientUtils().convertRecipientString(recipientList, envVars, EmailRecipientUtils.CC);
+            ccAddresses.addAll(ccInternetAddresses);
         } catch (AddressException ae) {
             LOGGER.log(Level.WARNING, "Could not create email address.", ae);
             listener.getLogger().println("Failed to create e-mail address for " + ae.getRef());

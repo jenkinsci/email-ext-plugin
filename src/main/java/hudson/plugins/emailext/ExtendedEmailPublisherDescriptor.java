@@ -399,7 +399,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
 
     public FormValidation doRecipientListRecipientsCheck(@QueryParameter final String value)
             throws IOException, ServletException {
-        return new EmailRecepientUtils().validateFormRecipientList(value);
+        return new EmailRecipientUtils().validateFormRecipientList(value);
     }
     
     public FormValidation doMaxAttachmentSizeCheck(@QueryParameter final String value)
