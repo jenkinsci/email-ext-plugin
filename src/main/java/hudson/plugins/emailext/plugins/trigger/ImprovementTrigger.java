@@ -17,12 +17,14 @@ public class ImprovementTrigger extends EmailTrigger {
         if (build.getPreviousBuild().getTestResultAction() == null)
             return false;
         
+        int numCurrFailures = getNumFailures(build);
+        
         // The first part of the condition avoids accidental triggering for
         // builds that aggregate downstream test results before those test
         // results are available...
         return build.getTestResultAction().getTotalCount() > 0 &&
-            getNumFailures(build) < 
-                getNumFailures(build.getPreviousBuild());
+            numCurrFailures < getNumFailures(build.getPreviousBuild()) &&
+            numCurrFailures > 0;            
     }
 
     @Override
