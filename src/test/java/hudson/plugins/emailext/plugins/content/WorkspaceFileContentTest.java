@@ -28,6 +28,6 @@ public class WorkspaceFileContentTest extends HudsonTestCase {
 
         WorkspaceFileContent content = new WorkspaceFileContent();
         assertEquals("Hello, world!", content.getContent(build, null, null, Collections.singletonMap("path", "foo")));
-        assertNull(content.getContent(build, null, null, Collections.singletonMap("path", "no-such-file")));
+	assertEquals("ERROR: File 'no-such-file' does not exist", content.getContent(build, null, null, Collections.singletonMap("path", "no-such-file")));
     }
 }

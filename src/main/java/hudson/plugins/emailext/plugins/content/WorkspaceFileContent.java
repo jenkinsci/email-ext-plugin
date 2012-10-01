@@ -38,6 +38,8 @@ public class WorkspaceFileContent implements EmailContent {
         String path = Args.get(args, VAR_PATH_NAME, null);
         if (path == null) {
             throw new IllegalArgumentException("FILE token requires the " + VAR_PATH_NAME + " parameter");
+        } else if(!build.getWorkspace().child(path).exists()) {
+            return "ERROR: File '" + path + "' does not exist";
         }
 
         try {
