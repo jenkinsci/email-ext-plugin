@@ -7,16 +7,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import hudson.Functions;
 import hudson.model.AbstractBuild;
-import hudson.model.Hudson;
 import hudson.model.Result;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.EditType;
-import org.jvnet.hudson.test.HudsonTestCase;
 
-import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -27,14 +24,13 @@ import java.util.Map;
 import java.util.Scanner;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-public class ScriptContentTest 
-    extends HudsonTestCase 
+public class ScriptContentTest
+
 {
     private ScriptContent scriptContent;
 
@@ -45,14 +41,21 @@ public class ScriptContentTest
     private final boolean osIsDarwin = osName.equals("Mac OS X") || osName.equals("Darwin");
 
     private ExtendedEmailPublisher publisher;
+
+    @Rule
+    public JenkinsRule rule = new JenkinsRule() {
+        @Override
+        protected void before() throws Throwable {
+            assumeThat(osIsDarwin, is(false));
+            super.before();
+        }
+    };
     
 
-    @Override
-    public void setUp()
-            throws Exception
+    @Before
+    public void setup()
+            throws Throwable
     {
-        super.setUp();        
-        
         assumeThat(osIsDarwin, is(false));
         
         scriptContent = new ScriptContent();
@@ -77,8 +80,10 @@ public class ScriptContentTest
         f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "hudsonUrl" );;;;
         f.setAccessible( true );
         f.set( ExtendedEmailPublisher.DESCRIPTOR, "http://localhost/" );
-    }    
+    }
 
+
+    @Test
     public void testShouldFindScriptOnClassPath()
             throws Exception
     {
@@ -86,14 +91,16 @@ public class ScriptContentTest
         assertEquals("HELLO WORLD!", scriptContent.getContent(mock( AbstractBuild.class ), publisher, null, args));
     }
 
+    @Test
     public void testShouldFindTemplateOnClassPath()
         throws Exception
-    {        
+    {
         args.put(ScriptContent.SCRIPT_TEMPLATE_ARG, "empty-groovy-template-on-classpath.template");
         // the template adds a newline
         assertEquals("HELLO WORLD!\n", scriptContent.getContent(mock(AbstractBuild.class), publisher, null, args));
     }
 
+    @Test
     public void testWhenScriptNotFoundThrowFileNotFoundException()
             throws Exception
     {
@@ -102,6 +109,7 @@ public class ScriptContentTest
             scriptContent.getContent(mock(AbstractBuild.class), publisher, null, args));
     }
 
+    @Test
     public void testWhenTemplateNotFoundThrowFileNotFoundException()
             throws Exception
     {
@@ -114,6 +122,7 @@ public class ScriptContentTest
      * this is for groovy template testing 
      * @throws Exception
      */
+    @Test
     public void testWithGroovyTemplate() throws Exception {
         args.put(ScriptContent.SCRIPT_TEMPLATE_ARG, "groovy-sample.template");
         args.put(ScriptContent.SCRIPT_INIT_ARG, false);
