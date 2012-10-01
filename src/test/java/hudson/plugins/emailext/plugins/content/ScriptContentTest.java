@@ -45,8 +45,9 @@ public class ScriptContentTest
     @Rule
     public JenkinsRule rule = new JenkinsRule() {
         @Override
-        protected void before() {
+        protected void before() throws Throwable {
             assumeThat(osIsDarwin, is(false));
+            super.before();
         }
     };
     
