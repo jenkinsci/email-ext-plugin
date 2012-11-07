@@ -1,11 +1,13 @@
 package hudson.plugins.emailext;
 
 import hudson.EnvVars;
+import hudson.model.User;
 import hudson.util.FormValidation;
 import hudson.tasks.Mailer;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import java.io.IOException;
 import java.util.Set;
 
 import static junit.framework.Assert.assertTrue;
@@ -131,7 +133,21 @@ public class EmailRecipientUtilsTest extends HudsonTestCase
         Set<InternetAddress> internetAddresses = emailRecipientUtils.convertRecipientString( "ashlux", envVars );
 
         assertEquals( 1, internetAddresses.size() );
-        assertTrue( internetAddresses.contains( new InternetAddress( "ashlux@gmail.com" ) ) );
+        assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
+    }
+
+    public void testConvertRecipientList_userName()
+            throws AddressException, IOException {
+        Mailer.descriptor().setDefaultSuffix("@gmail.com");
+        User u = User.get("advantiss");
+        u.setFullName("Peter Samoshkin");
+        Mailer.UserProperty prop = new Mailer.UserProperty("advantiss@xxx.com");
+        u.addProperty(prop);
+
+        Set<InternetAddress> internetAddresses = emailRecipientUtils.convertRecipientString( "advantiss", envVars );
+
+        assertEquals( 1, internetAddresses.size() );
+        assertTrue( internetAddresses.contains( new InternetAddress( "advantiss@xxx.com" ) ) );
     }
 
     public void testCC()
