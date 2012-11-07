@@ -1,6 +1,7 @@
 package hudson.plugins.emailext;
 
 import hudson.EnvVars;
+import hudson.model.User;
 import hudson.tasks.Mailer;
 import hudson.util.FormValidation;
 import org.apache.commons.lang.StringUtils;
@@ -36,10 +37,21 @@ public class EmailRecipientUtils {
     
                     isCc = address.startsWith("cc:");
                     // if not a valid address, check if there is a default suffix (@something.com) provided
+                    if (!address.contains("@")){
+                        User u = User.get(address, false);
+                        String userEmail = null;
+                        if(u != null) {
+                            userEmail = GetUserConfiguredEmail(u);
+                            if(userEmail != null){
+                                //if configured user email does not have @domain prefix, then default prefix will be added on next step
+                                address = userEmail;
+                            }
+                        }
+                    }
                     if (!address.contains("@") && defaultSuffix != null && defaultSuffix.contains("@")) {
                         address += defaultSuffix;
                     }
-    
+
                     if(isCc) {
                         address = address.substring(3);
                     }
@@ -51,6 +63,17 @@ public class EmailRecipientUtils {
             }
         }
         return internetAddresses;
+    }
+
+    public static String GetUserConfiguredEmail(User user) {
+        String addr = null;
+        if(user != null) {
+            Mailer.UserProperty mailProperty = user.getProperty(Mailer.UserProperty.class);
+            if (mailProperty != null) {
+                addr = mailProperty.getAddress();
+            }
+        }
+        return addr;
     }
 
     public FormValidation validateFormRecipientList(String recipientList) {
