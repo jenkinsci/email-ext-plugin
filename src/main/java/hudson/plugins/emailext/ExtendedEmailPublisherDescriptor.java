@@ -23,6 +23,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -113,6 +114,8 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
 
     private boolean precedenceBulk;
 
+    private boolean debugMode;
+
     @Override
     public String getDisplayName() {
         return Messages.ExtendedEmailPublisherDescriptor_DisplayName();
@@ -128,7 +131,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
 
     public String getDefaultSuffix() {
         return defaultSuffix;
-    }
+    }    
 
     /**
      * JavaMail session.
@@ -356,6 +359,8 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
         emergencyReroute = nullify(req.getParameter("ext_mailer_emergency_reroute"));
 
+        debugMode = req.getParameter("ext_mailer_debug_mode") != null;
+
         // convert the value into megabytes (1024 * 1024 bytes)
         maxAttachmentSize = nullify(req.getParameter("ext_mailer_max_attachment_size")) != null ?
             (Long.parseLong(req.getParameter("ext_mailer_max_attachment_size")) * 1024 * 1024) : -1;
@@ -419,5 +424,16 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
 
     public boolean isMatrixProject(AbstractProject<?, ?> project) {
         return project instanceof MatrixProject;
+    }
+
+    public boolean isDebugMode() {
+        return debugMode;
+    }
+
+    public void debug(PrintStream logger, String format, Object... args) {
+        if(debugMode) {
+            logger.format(format, args);
+            logger.println();
+        }
     }
 }

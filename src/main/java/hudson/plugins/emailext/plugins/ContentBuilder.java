@@ -92,9 +92,9 @@ public class ContentBuilder {
             try {
                 newText = org.jenkinsci.plugins.tokenmacro.TokenMacro.expandAll(build, listener, newText);
             } catch(NoSuchMethodError e) {
-                // this will happen if the wrong version of token macro is loaded
+                publisher.debug(listener.getLogger(), "Old version of token-macro loaded");
             } catch(Exception e) {
-                // we don't do anything here
+                publisher.debug(listener.getLogger(), "Exception occured trying to use the token-macro plugin: %s", e.getMessage());
             }
         }        
         return newText;

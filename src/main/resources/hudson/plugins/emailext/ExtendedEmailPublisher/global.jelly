@@ -72,9 +72,10 @@
           help="/plugin/email-ext/help/globalConfig/precedenceBulk.html">
       </f:optionalBlock >        
       <f:entry title="${%Default Recipients}"
-      		   help="/plugin/email-ext/help/globalConfig/defaultRecipients.html">
+      		   help="/plugin/email-ext/help/globalConfig/defaultRecipients.html"
+             field="recipients">
         <input class="setting-input" name="ext_mailer_default_recipients"
-        	   type="text" value="${descriptor.defaultRecipients}"/>
+        	   type="text" value="${descriptor.defaultRecipients}" />
       </f:entry>
       <f:entry title="${%Emergency reroute}"
              help="/plugin/email-ext/help/globalConfig/emergencyReroute.html">
@@ -107,6 +108,9 @@
                     name="ext_mailer_default_body"
                     value="${descriptor.defaultBody}"/>
       </f:entry>
+      <f:optionalBlock name="ext_mailer_debug_mode" title="${%Enable Debug Mode}" checked="${descriptor.isDebugMode()}"
+          help="/plugin/email-ext/help/globalConfig/debugMode.html">
+      </f:optionalBlock > 
       <!-- This is the help section.  It displays a bunch of dynamic help for all content tokens. -->
       <tr>
         <td></td>

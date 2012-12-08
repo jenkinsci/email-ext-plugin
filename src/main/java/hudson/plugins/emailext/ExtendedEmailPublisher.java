@@ -37,6 +37,7 @@ import org.codehaus.groovy.control.customizers.ImportCustomizer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -211,9 +212,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.matrixTriggerMode = matrixTriggerMode;
     }
 
+    public void debug(PrintStream p, String format, Object... args) {
+        ExtendedEmailPublisher.DESCRIPTOR.debug(p, format, args);
+    }
+
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
+        debug(listener.getLogger(), "Checking for pre-build");
         if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
+            debug(listener.getLogger(), "Executing pre-build step");
             return _perform(build, listener, true);
         }
         return true;
@@ -221,7 +228,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+        debug(listener.getLogger(), "Checking for post-build");
         if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
+            debug(listener.getLogger(), "Performing post-build step");
             return _perform(build, listener, false);
         }
         return true;
@@ -229,7 +238,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     private boolean _perform(AbstractBuild<?, ?> build, BuildListener listener, boolean forPreBuild) {
         boolean emailTriggered = false;
-
+        debug(listener.getLogger(), "Checking if email needs to be generated");
         Map<String, EmailTrigger> triggered = new HashMap<String, EmailTrigger>();
 
         for (EmailTrigger trigger : configuredTriggers) {
@@ -271,6 +280,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     private boolean sendMail(EmailType mailType, AbstractBuild<?, ?> build, BuildListener listener) {
         try {
             MimeMessage msg = createMail(mailType, build, listener);
+            debug(listener.getLogger(), "Successfully created MimeMessage");
             Address[] allRecipients = msg.getAllRecipients();
             if (allRecipients != null) {
                 StringBuilder buf = new StringBuilder("Sending email to:");
@@ -294,9 +304,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Could not send email.", e);
+            debug(listener.getLogger(), "Could not send email...%s", e);
             e.printStackTrace(listener.error("Could not send email as a part of the post-build publishers."));
         }
 
+        debug(listener.getLogger(), "Some error occured trying to send the email...check the Jenkins log");
         return false;
     }
     
@@ -304,6 +316,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         throws RuntimeException {
         boolean cancel = false;
         if(StringUtils.isNotBlank(presendScript)) {
+            listener.getLogger().println("Executing pre-send script");
             CompilerConfiguration cc = new CompilerConfiguration();
             cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
                     "jenkins",
@@ -323,11 +336,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 if(output!=null) {
                     pw.println("Result: "+output);
                     cancel = ((Boolean)shell.getVariable("cancel")).booleanValue();
+                    debug(listener.getLogger(), "Pre-send script set cancel to %b", cancel);
                 }
             } catch (Throwable t) {
                 t.printStackTrace(pw);
                 listener.getLogger().println(out.toString());
+                // should we cancel the sending of the email???
             }
+            debug(listener.getLogger(), out.toString());
         }            
         return !cancel;
     }    
@@ -340,9 +356,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         // If not overriding global settings, use the Mailer class to create a session and set the from address
         // Else we'll do it ourselves
         if (!overrideGlobalSettings) {
+            debug(listener.getLogger(), "NOT overriding default server settings, using Mailer to create session");
             msg = new MimeMessage(Mailer.descriptor().createSession());
             msg.setFrom(new InternetAddress(Mailer.descriptor().getAdminAddress()));
         } else {
+            debug(listener.getLogger(), "Overriding default server settings, creating our own session");
             msg = new MimeMessage(ExtendedEmailPublisher.DESCRIPTOR.createSession());
             msg.setFrom(new InternetAddress(ExtendedEmailPublisher.DESCRIPTOR.getAdminAddress()));
         }
@@ -350,7 +368,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         String charset = Mailer.descriptor().getCharset();
         if (overrideGlobalSettings) {
             String overrideCharset = ExtendedEmailPublisher.DESCRIPTOR.getCharset();
-            if (overrideCharset != null) {
+            if (StringUtils.isNotBlank(overrideCharset)) {
+                debug(listener.getLogger(), "Overriding charset %s", overrideCharset);
                 charset = overrideCharset;
             }
         }
@@ -377,11 +396,13 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         Set<InternetAddress> recipientAddresses = new LinkedHashSet<InternetAddress>();
         Set<InternetAddress> ccAddresses = new LinkedHashSet<InternetAddress>();
         if (type.getSendToRecipientList()) {
+            debug(listener.getLogger(), "Adding recipients from recipient list");
             addAddressesFromRecipientList(recipientAddresses, ccAddresses, getRecipientList(type, build, recipientList, listener, charset), env, listener);
         }
         // Get the list of developers who made changes between this build and the last
         // if this mail type is configured that way
         if (type.getSendToDevelopers()) {
+            debug(listener.getLogger(), "Adding developers");
             Set<User> users;
             if (type.getIncludeCulprits()) {
                 users = build.getCulprits();
@@ -403,6 +424,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         if (type.isSendToRequester()) {
+            debug(listener.getLogger(), "Sending to requester");
             // looking for Upstream build.
             AbstractBuild<?, ?> cur = build;
             Cause.UpstreamCause upc = build.getCause(Cause.UpstreamCause.class);
@@ -416,14 +438,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         //Get the list of recipients that are uniquely specified for this type of email
-        if (!StringUtils.isBlank(type.getRecipientList())) {
+        if (StringUtils.isNotBlank(type.getRecipientList())) {
             addAddressesFromRecipientList(recipientAddresses, ccAddresses, getRecipientList(type, build, type.getRecipientList(), listener, charset), env, listener);
         }
 
         String emergencyReroute = ExtendedEmailPublisher.DESCRIPTOR.getEmergencyReroute();
-        boolean isEmergencyReroute = !StringUtils.isBlank(emergencyReroute);
+        boolean isEmergencyReroute = StringUtils.isNotBlank(emergencyReroute);
         
         if (isEmergencyReroute) {
+          debug(listener.getLogger(), "Emergency reroute turned on");
           recipientAddresses.clear();
           addAddressesFromRecipientList(recipientAddresses, ccAddresses, emergencyReroute, env, listener);
           listener.getLogger().println("Emergency reroute is set to: " + emergencyReroute);
@@ -439,6 +462,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             // Send mails as replies until next successful build
             MailMessageIdAction b = pb.getAction(MailMessageIdAction.class);
             if (b != null && pb.getResult() != Result.SUCCESS) {
+                debug(listener.getLogger(), "Setting In-Reply-To since last build was not successful");
                 msg.setHeader("In-Reply-To", b.messageId);
                 msg.setHeader("References", b.messageId);
             }
