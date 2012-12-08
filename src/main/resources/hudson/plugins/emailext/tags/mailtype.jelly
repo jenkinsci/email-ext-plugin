@@ -134,6 +134,18 @@
 						name="mailer_${mailType}_body"
 						value="${mailTypeObj.body}"/>
 				</f:entry>
+				<f:entry
+					title="${%Attachments}"
+					help="/plugin/email-ext/help/projectConfig/attachments.html"
+					description="${%description('http://ant.apache.org/manual/Types/fileset.html')}">
+					<input class="setting-input"
+						name="mailer_${mailType}_attachmentsPattern" type="text"
+						value="${mailTypeObj.attachmentsPattern}" />
+				</f:entry>
+				<f:entry title="${%Attach Build Log}"
+	               help="/plugin/email-ext/help/projectConfig/attachBuildLog.html">
+	        		<f:checkbox name="mailer_${mailType}_attachmentBuildLog" checked="${mailTypeObj.attachBuildLog}" />
+	      		</f:entry>
 			</table>
 		</td>
 	</tr>

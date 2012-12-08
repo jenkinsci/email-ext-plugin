@@ -11,6 +11,7 @@ import hudson.plugins.emailext.plugins.ContentBuilder;
 
 import org.apache.commons.lang.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.activation.MimetypesFileTypeMap;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -71,7 +73,7 @@ public class AttachmentUtils implements Serializable {
 		}    	
     }
     
-    private List<MimeBodyPart> getAttachments(ExtendedEmailPublisher publisher, final AbstractBuild<?, ?> build, final BuildListener listener)
+    private List<MimeBodyPart> getAttachments(final AbstractBuild<?, ?> build, final BuildListener listener)
     		throws MessagingException, InterruptedException, IOException {
     	List<MimeBodyPart> attachments = null;
     	FilePath ws = build.getWorkspace();
@@ -83,7 +85,7 @@ public class AttachmentUtils implements Serializable {
     	} else if(!StringUtils.isBlank(attachmentsPattern)) {
     		attachments = new ArrayList<MimeBodyPart>();
 
-    		FilePath[] files = ws.list(new ContentBuilder().transformText(attachmentsPattern, publisher, null, build, listener));
+    		FilePath[] files = ws.list(attachmentsPattern);
     	
 	    	for(FilePath file : files) {
 		    	if(maxAttachmentSize > 0 && 
@@ -100,7 +102,7 @@ public class AttachmentUtils implements Serializable {
 				try {
 					attachmentPart.setDataHandler(new DataHandler(fileDataSource));
 					attachmentPart.setFileName(file.getName());
-					attachments.add(attachmentPart);	        	
+					attachments.add(attachmentPart);
 					totalAttachmentSize += file.length();
 				} catch(MessagingException e) {
 					listener.getLogger().println("Error adding `" + 
@@ -112,12 +114,12 @@ public class AttachmentUtils implements Serializable {
     	return attachments;
     }
     
-    public void attach(Multipart multipart, ExtendedEmailPublisher publisher, AbstractBuild<?,?> build, BuildListener listener) {  
+    public void attach(Multipart multipart, AbstractBuild<?,?> build, BuildListener listener) {  
     	try {
-	    	List<MimeBodyPart> attachments = getAttachments(publisher, build, listener);
+	    	List<MimeBodyPart> attachments = getAttachments(build, listener);
 	        if(attachments != null) {
-		        for(MimeBodyPart attachment : attachments) {
-		        	multipart.addBodyPart(attachment);	        
+                for(MimeBodyPart attachment : attachments) {
+		        	multipart.addBodyPart(attachment);
 		        }
 	        }
     	} catch (IOException e) {
@@ -127,5 +129,30 @@ public class AttachmentUtils implements Serializable {
     	} catch (InterruptedException e) {
 			listener.error("Interrupted in processing attachments: " + e.getMessage());
 		}
+    }
+
+    /**
+     * Attaches the build log to the multipart item.
+     */
+    public static void attachBuildLog(Multipart multipart, AbstractBuild<?, ?> build, BuildListener listener) {
+        try {
+            File logFile = build.getLogFile();
+            long maxAttachmentSize =
+                    ExtendedEmailPublisher.DESCRIPTOR.getMaxAttachmentSize();
+
+            if(maxAttachmentSize > 0 && logFile.length() >= maxAttachmentSize) {
+                listener.getLogger().println("Skipping build log attachment - " 
+                        + " too large for maximum attachments size");
+                return;
+            }
+
+            FileDataSource fileSource = new FileDataSource(logFile);
+            MimeBodyPart attachment = new MimeBodyPart();
+            attachment.setDataHandler(new DataHandler(fileSource));
+            attachment.setFileName("build.log");
+            multipart.addBodyPart(attachment);
+        } catch (MessagingException e) {
+            listener.error("Error attaching build log to message: " + e.getMessage());
+        }
     }
 }

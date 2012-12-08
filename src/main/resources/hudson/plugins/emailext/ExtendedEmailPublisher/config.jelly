@@ -98,8 +98,11 @@
             </j:otherwise>
         </j:choose>
     </f:entry>
-    
-    
+
+    <f:entry title="${%Attach Build Log}"
+            help="/plugin/email-ext/help/projectConfig/attachBuildLog.html">
+        <f:checkbox name="project_attach_buildlog" checked="${instance.attachBuildLog}" />
+    </f:entry>
     
 	<!-- This is the help section.  It displays a bunch of dynamic help for all content tokens. -->
 	<tr>
@@ -125,7 +128,6 @@
         </td>
 		<td></td>
 	</tr>
-
 
   <j:if test="${descriptor.isMatrixProject(it)}">
     <f:entry title="${%Trigger for matrix projects}" field="matrixTriggerMode">
@@ -199,11 +201,11 @@
 					     				mailTypeObj="${trigger.email}" 
 					     				sendToList="${trigger.defaultSendToList}" 
 					     				sendToDevs="${trigger.defaultSendToDevs}"
-                                                                        sendToRequester="${trigger.defaultSendToRequester}"
+                                        sendToRequester="${trigger.defaultSendToRequester}"
 					     				includeCulps="${trigger.defaultIncludeCulps}"
 					     				trigger="${trigger}"
 					     				configured="${true}"
-					     				secId="${secId}">
+					     				secId="${secId}" >
 					    </m:mailtype>
 					</j:forEach>
 					
@@ -259,7 +261,7 @@
 						     				mailTypeObj="${trigger.email}" 
 						     				sendToList="${trigger.defaultSendToList}" 
 						     				sendToDevs="${trigger.defaultSendToDevs}" 
-                                                                                sendToRequester="${trigger.defaultSendToRequester}"
+                                            sendToRequester="${trigger.defaultSendToRequester}"
 						     				includeCulps="${trigger.defaultIncludeCulps}"
 						     				trigger="${trigger}"
 						     				configured="${false}"

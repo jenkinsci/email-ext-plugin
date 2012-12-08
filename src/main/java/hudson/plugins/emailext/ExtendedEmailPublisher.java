@@ -155,6 +155,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      */
     public String presendScript;
 
+    /**
+     * True to attach the log from the build to the email.
+     */
+    public boolean attachBuildLog;
+
     private MatrixTriggerMode matrixTriggerMode;
 
     /**
@@ -375,14 +380,36 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         // Set the contents of the email
+        msg.addHeader("X-Jenkins-Job", build.getProject().getDisplayName());
+        msg.addHeader("X-Jenkins-Result", build.getResult().toString());
         msg.setSentDate(new Date());
         setSubject(type, build, msg, listener, charset);
 
         Multipart multipart = new MimeMultipart();
-        multipart.addBodyPart(getContent(type, build, msg, listener, charset));
+        MimeBodyPart msgBody = getContent(type, build, msg, listener, charset);
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
-        attachments.attach(multipart, this, build, listener);
-        msg.setContent(multipart);
+        attachments.attach(multipart, build, listener);
+
+        // add attachments from the email type if they are setup
+        if(StringUtils.isNotBlank(type.getAttachmentsPattern())) {
+            AttachmentUtils typeAttachments = new AttachmentUtils(type.getAttachmentsPattern());
+            typeAttachments.attach(multipart, build, listener);
+        }
+
+        if(attachBuildLog || type.getAttachBuildLog()) {
+            debug(listener.getLogger(), "Request made to attach build log");
+            AttachmentUtils.attachBuildLog(multipart, build, listener);
+        }
+
+        if(multipart.getCount() > 0) {
+            debug(listener.getLogger(), "There are attachments, so setting up as a multipart message");
+            multipart.addBodyPart(msgBody);
+            msg.setContent(multipart);    
+        } else {
+            debug(listener.getLogger(), "No attachments, setting content directly (non-MIME message)");
+            msg.setContent(msgBody.getContent(), msgBody.getContentType());
+        }
+        
         EnvVars env = null;
         try {
             env = build.getEnvironment(listener);

@@ -45,6 +45,16 @@ public class EmailType {
      */
     private boolean sendToRecipientList;
 
+    /**
+     * Pattern for attachments to be sent as part of this email type.
+     */
+    private String attachmentsPattern;
+
+    /**
+     * True to attach the build log to the email
+     */
+    private boolean attachBuildLog;
+
     public EmailType() {
         subject = "";
         body = "";
@@ -53,6 +63,8 @@ public class EmailType {
         includeCulprits = false;
         sendToRecipientList = false;
         sendToRequester = false;
+        attachmentsPattern = "";
+        attachBuildLog = false;
     }
 
     public String getSubject() {
@@ -115,6 +127,22 @@ public class EmailType {
 
     public void setRecipientList(String recipientList) {
         this.recipientList = recipientList.trim();
+    }
+
+    public String getAttachmentsPattern() {
+        return attachmentsPattern != null ? attachmentsPattern.trim() : attachmentsPattern;
+    }
+
+    public void setAttachmentsPattern(String attachmentsPattern) {
+        this.attachmentsPattern = attachmentsPattern;
+    }
+
+    public boolean getAttachBuildLog() {
+        return attachBuildLog;
+    }
+
+    public void setAttachBuildLog(boolean attachBuildLog) {
+        this.attachBuildLog = attachBuildLog;
     }
 
     public Object readResolve() {
