@@ -57,6 +57,7 @@ import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.SendFailedException;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -294,7 +295,34 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 }
                 listener.getLogger().println(buf);
                 if(executePresendScript(build, listener, msg)) {
-                    Transport.send(msg);
+                    try {
+                        Transport.send(msg);
+                    } catch (SendFailedException e) {
+                        Address[] addresses = e.getValidSentAddresses();
+                        if(addresses.length > 0) {
+                            buf = new StringBuilder("Successfully sent to the following addresses:");
+                            for (Address a : addresses) {
+                                buf.append(' ').append(a);
+                            }
+                            listener.getLogger().println(buf);
+                        }
+                        addresses = e.getValidUnsentAddresses();
+                        if(addresses.length > 0) {
+                            buf = new StringBuilder("Error sending to the following VALID addresses:");
+                            for (Address a : addresses) {
+                                buf.append(' ').append(a);
+                            }
+                            listener.getLogger().println(buf);
+                        }
+                        addresses = e.getInvalidAddresses();
+                        if(addresses.length > 0) {
+                            buf = new StringBuilder("Error sending to the following INVALID addresses:");
+                            for (Address a : addresses) {
+                                buf.append(' ').append(a);
+                            }
+                            listener.getLogger().println(buf);
+                        }
+                    }
                     if (build.getAction(MailMessageIdAction.class) == null) {
                         build.addAction(new MailMessageIdAction(msg.getMessageID()));
                     }
@@ -309,7 +337,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Could not send email.", e);
-            debug(listener.getLogger(), "Could not send email...%s", e);
             e.printStackTrace(listener.error("Could not send email as a part of the post-build publishers."));
         }
 
@@ -381,7 +408,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         // Set the contents of the email
         msg.addHeader("X-Jenkins-Job", build.getProject().getDisplayName());
-        msg.addHeader("X-Jenkins-Result", build.getResult().toString());
+        if(build.getResult() != null) {
+            msg.addHeader("X-Jenkins-Result", build.getResult().toString());
+        }
         msg.setSentDate(new Date());
         setSubject(type, build, msg, listener, charset);
 
@@ -401,20 +430,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             AttachmentUtils.attachBuildLog(multipart, build, listener);
         }
 
-        if(multipart.getCount() > 0) {
-            debug(listener.getLogger(), "There are attachments, so setting up as a multipart message");
-            multipart.addBodyPart(msgBody);
-            msg.setContent(multipart);    
-        } else {
-            debug(listener.getLogger(), "No attachments, setting content directly (non-MIME message)");
-            msg.setContent(msgBody.getContent(), msgBody.getContentType());
-        }
+        multipart.addBodyPart(msgBody);
+        msg.setContent(multipart);
         
         EnvVars env = null;
         try {
             env = build.getEnvironment(listener);
         } catch(Exception e) {
-            listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());    
+            listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());
             // create an empty set of env vars
             env = new EnvVars(); 
         }
@@ -601,6 +624,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         // set the email message text 
         // (plain text or HTML depending on the content type)
         MimeBodyPart msgPart = new MimeBodyPart();
+        debug(listener.getLogger(), "messageContentType = %s", messageContentType);
         msgPart.setContent(text, messageContentType);
         return msgPart;
     }   

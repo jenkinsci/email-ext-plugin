@@ -100,7 +100,7 @@ public class ContentBuilder {
         return newText;
     }
 
-    private static <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String replaceTokensWithContent(
+    private <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String replaceTokensWithContent(
             String origText, ExtendedEmailPublisher publisher, EmailType type, AbstractBuild<P, B> build) {
         StringBuffer sb = new StringBuffer();
         Tokenizer tokenizer = new Tokenizer(origText);
