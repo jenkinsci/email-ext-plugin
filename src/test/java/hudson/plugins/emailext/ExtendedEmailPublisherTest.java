@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.junit.matchers.JUnitMatchers.hasItems;
+import static org.junit.matchers.JUnitMatchers.hasItem;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
 import hudson.model.Cause.UserCause;
@@ -131,7 +132,7 @@ public class ExtendedEmailPublisherTest
     public void testFirstFailureTriggerShouldNotSendEmailOnSecondFail()
         throws Exception
     {
-            project.getBuildersList().add( new FailureBuilder() );
+        project.getBuildersList().add( new FailureBuilder() );
 
         FirstFailureTrigger trigger = new FirstFailureTrigger();
         addEmailType( trigger );
@@ -434,6 +435,62 @@ public class ExtendedEmailPublisherTest
 
         assertEquals( 0, Mailbox.get( "kutzi@xxx.com" ).size() );
         assertEquals( 1, Mailbox.get( "slide.o.mix@xxx.com" ).size() );
+    }
+
+    public void testPresendScriptNoSecurity() throws Exception {
+        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "enableSecurity" );
+        f.setAccessible( true );
+        f.set( ExtendedEmailPublisher.DESCRIPTOR, false );
+
+        publisher.presendScript = "for(it in Jenkins.instance.items) {\n\tSystem.out.println(it.name)\n}\n";
+        SuccessTrigger successTrigger = new SuccessTrigger();
+        successTrigger.setEmail(new EmailType(){{
+            setSendToRequester(true);
+        }});
+        publisher.getConfiguredTriggers().add( successTrigger );
+
+        User u = User.get("kutzi");
+        u.setFullName("Christoph Kutzinski");
+        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
+        u.addProperty(prop);
+        
+        UserCause cause = new MockUserCause("kutzi");
+        FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
+        assertBuildStatusSuccess( build );
+
+        assertEquals( 1, Mailbox.get( "kutzi@xxx.com" ).size() );
+
+        assertThat( "Access was done to Jenkins instance with security enabled, so we should see an error", build.getLog( 100 ),
+                   not( hasItem( "Pre-send script tried to access secured objects: Use of 'jenkins' is disallowed by security policy" ) ) );
+    }
+
+    public void testPresendScriptSecurity() throws Exception {
+        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "enableSecurity" );
+        f.setAccessible( true );
+        f.set( ExtendedEmailPublisher.DESCRIPTOR, true );
+
+        boolean exceptionOccured = false;
+        publisher.presendScript = "for(it in Jenkins.instance.items) {\n\tSystem.out.println(it.name)\n}\n";
+        SuccessTrigger successTrigger = new SuccessTrigger();
+        successTrigger.setEmail(new EmailType(){{
+            setSendToRequester(true);
+        }});
+        publisher.getConfiguredTriggers().add( successTrigger );
+
+        User u = User.get("kutzi");
+        u.setFullName("Christoph Kutzinski");
+        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
+        u.addProperty(prop);
+        
+        UserCause cause = new MockUserCause("kutzi");
+        FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
+        
+        assertBuildStatusSuccess( build );
+
+        assertEquals( 1, Mailbox.get( "kutzi@xxx.com" ).size() );
+
+        assertThat( "Access was done to Jenkins instance with security enabled, so we should see an error", build.getLog( 100 ),
+                   hasItem( "Pre-send script tried to access secured objects: Use of 'jenkins' is disallowed by security policy" ) );
     }
     
     public void testSendToRequesterLegacy()  throws Exception {
