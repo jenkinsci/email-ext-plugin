@@ -121,6 +121,8 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
 
     private boolean debugMode;
 
+    private boolean enableSecurity;
+
     @Override
     public String getDisplayName() {
         return Messages.ExtendedEmailPublisherDescriptor_DisplayName();
@@ -258,6 +260,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         return defaultReplyTo;
     }
 
+    public boolean isSecurityEnabled() {
+        return enableSecurity;
+    }
+
     public boolean isApplicable(Class<? extends AbstractProject> jobType) {
         return true;
     }
@@ -384,6 +390,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
             req.getParameter("ext_mailer_default_recipients") : "";
 
         precedenceBulk = req.getParameter("extmailer.addPrecedenceBulk") != null;
+        enableSecurity = req.getParameter("extmailer.enableSecurity") != null;
 
         // specify List-ID information
         if (req.getParameter("extmailer.useListID") != null) {
@@ -444,6 +451,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
 
     public boolean isDebugMode() {
         return debugMode;
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
     }
 
     public void debug(PrintStream logger, String format, Object... args) {

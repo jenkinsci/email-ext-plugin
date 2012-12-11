@@ -117,6 +117,9 @@
       <f:optionalBlock name="ext_mailer_debug_mode" title="${%Enable Debug Mode}" checked="${descriptor.isDebugMode()}"
           help="/plugin/email-ext/help/globalConfig/debugMode.html">
       </f:optionalBlock > 
+      <f:optionalBlock name="ext_mailer_security_enabled" title="${%Enable Security}" checked="${descriptor.isSecurityEnabled()}"
+          help="/plugin/email-ext/help/globalConfig/security.html">
+      </f:optionalBlock>
       <!-- This is the help section.  It displays a bunch of dynamic help for all content tokens. -->
       <tr>
         <td></td>

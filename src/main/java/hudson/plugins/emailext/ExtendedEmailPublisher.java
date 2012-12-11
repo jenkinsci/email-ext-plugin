@@ -348,23 +348,49 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         debug(listener.getLogger(), "Some error occured trying to send the email...check the Jenkins log");
         return false;
     }
+
+    private class PresendScriptManager {
+        private AbstractBuild<?, ?> build;
+        private boolean enableSecurity;
+
+        public PresendScriptManager(AbstractBuild<?, ?> build, boolean enableSecurity) {
+            this.build = build;
+            this.enableSecurity = enableSecurity;
+        }
+
+        public Jenkins getJenkins() {
+            if (enableSecurity) {
+                throw new SecurityException("access to 'jenkins' is denied by global config");
+            }
+            return Jenkins.getInstance();
+        }
+
+        public Hudson getHudson() {
+            if (enableSecurity) {
+                throw new SecurityException("access to 'hudson' is denied by global config");
+            }
+            return Hudson.getInstance();
+        }
+
+        public AbstractBuild<?, ?> getBuild() {
+            if (enableSecurity) {
+                throw new SecurityException("access to 'build' is denied by global config");
+            }
+            return build;
+        }
+    }
     
     private boolean executePresendScript(AbstractBuild<?, ?> build, BuildListener listener, MimeMessage msg) 
         throws RuntimeException {
         boolean cancel = false;
         if(StringUtils.isNotBlank(presendScript)) {
             listener.getLogger().println("Executing pre-send script");
-            CompilerConfiguration cc = new CompilerConfiguration();
-            cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
-                    "jenkins",
-                    "jenkins.model",
-                    "hudson",
-                    "hudson.model"));
             ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
-            GroovyShell shell = new GroovyShell(cl,new Binding(),cc);
+            GroovyShell shell = new GroovyShell(cl);
             StringWriter out = new StringWriter();
             PrintWriter pw = new PrintWriter(out);
-            shell.setVariable("build", build);
+            PresendScriptManager manager = new PresendScriptManager(build, ExtendedEmailPublisher.DESCRIPTOR.isSecurityEnabled());
+            shell.setVariable("manager", manager);
             shell.setVariable("msg", msg);
             shell.setVariable("logger", listener.getLogger());
             shell.setVariable("cancel", cancel);
@@ -375,6 +401,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     cancel = ((Boolean)shell.getVariable("cancel")).booleanValue();
                     debug(listener.getLogger(), "Pre-send script set cancel to %b", cancel);
                 }
+            } catch (SecurityException e) {
+                listener.getLogger().println("Pre-send script tried to access secured objects: " + e.getMessage());
             } catch (Throwable t) {
                 t.printStackTrace(pw);
                 listener.getLogger().println(out.toString());
@@ -515,7 +543,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         Set<InternetAddress> replyToAddresses = new LinkedHashSet<InternetAddress>();
         if (StringUtils.isNotBlank(replyTo)) {
             addAddressesFromRecipientList(replyToAddresses, null, getRecipientList(type, build, replyTo, listener, charset), env, listener);
-            
         }
 
         if (StringUtils.isNotBlank(type.getReplyTo())) {
@@ -523,7 +550,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         if(replyToAddresses.size() > 0) {
-            debug(listener.getLogger(), "replyToAddresses.size() = " + replyToAddresses.size());
             msg.setReplyTo(replyToAddresses.toArray(new InternetAddress[replyToAddresses.size()]));
         }
 
