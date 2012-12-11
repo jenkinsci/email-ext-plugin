@@ -474,7 +474,7 @@ public class ExtendedEmailPublisherTest
         FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
         assertBuildStatusSuccess( build );
 
-        Mailbox mailbox = Mailbox.get( "ashlux@gmail.com" );
+        Mailbox mailbox = Mailbox.get( "kutzi@xxx.com" );
         assertEquals( 1, mailbox.size() );
 
         Message msg = mailbox.get(0);
@@ -501,14 +501,14 @@ public class ExtendedEmailPublisherTest
         FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
         assertBuildStatusSuccess( build );
 
-        Mailbox mailbox = Mailbox.get( "ashlux@gmail.com" );
+        Mailbox mailbox = Mailbox.get( "kutzi@xxx.com" );
         assertEquals( 1, mailbox.size() );
 
         Message msg = mailbox.get(0);
         Address[] replyTo = msg.getReplyTo();
         assertEquals( 1, replyTo.length );
 
-        assertEquals( "kutzi@xxx.com", replyTo[0].toString() );
+        assertEquals( "address not configured yet <nobody@nowhere>", replyTo[0].toString() );
     }
     
     private static class MockUserCause extends UserCause {
