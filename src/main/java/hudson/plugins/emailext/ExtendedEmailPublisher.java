@@ -512,12 +512,19 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             msg.setRecipients(Message.RecipientType.CC, ccAddresses.toArray(new InternetAddress[ccAddresses.size()]));
         }
 
+        Set<InternetAddress> replyToAddresses = new LinkedHashSet<InternetAddress>();
+        if (StringUtils.isNotBlank(replyTo)) {
+            addAddressesFromRecipientList(replyToAddresses, null, getRecipientList(type, build, replyTo, listener, charset), env, listener);
+            
+        }
+
         if (StringUtils.isNotBlank(type.getReplyTo())) {
-            Set<InternetAddress> replyToAddresses = new LinkedHashSet<InternetAddress>();
             addAddressesFromRecipientList(replyToAddresses, null, getRecipientList(type, build, type.getReplyTo(), listener, charset), env, listener);
-            if(replyToAddresses.size() > 0) {
-                msg.setReplyTo(replyToAddresses.toArray(new InternetAddress[replyToAddresses.size()]));
-            }
+        }
+
+        if(replyToAddresses.size() > 0) {
+            debug(listener.getLogger(), "replyToAddresses.size() = " + replyToAddresses.size());
+            msg.setReplyTo(replyToAddresses.toArray(new InternetAddress[replyToAddresses.size()]));
         }
 
         AbstractBuild<?, ?> pb = build.getPreviousBuild();
