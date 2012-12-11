@@ -25,6 +25,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -454,6 +455,61 @@ public class ExtendedEmailPublisherTest
 
         assertEquals( 1, Mailbox.get( "kutzi@xxx.com" ).size() );
     }
+
+    public void testReplyTo() throws Exception {
+        SuccessTrigger successTrigger = new SuccessTrigger();
+        successTrigger.setEmail(new EmailType(){{
+            setSendToRequester(true);
+        }});
+        publisher.getConfiguredTriggers().add( successTrigger );
+        publisher.replyTo = "ashlux@gmail.com";
+
+        User u = User.get("kutzi");
+        u.setFullName("Christoph Kutzinski");
+        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
+        u.addProperty(prop);
+        
+        UserCause cause = new MockUserCause("kutzi");
+                
+        FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
+        assertBuildStatusSuccess( build );
+
+        Mailbox mailbox = Mailbox.get( "ashlux@gmail.com" );
+        assertEquals( 1, mailbox.size() );
+
+        Message msg = mailbox.get(0);
+        Address[] replyTo = msg.getReplyTo();
+        assertEquals( 1, replyTo.length );
+
+        assertEquals( "ashlux@gmail.com", replyTo[0].toString() );
+    }
+
+    public void testNoReplyTo() throws Exception {
+        SuccessTrigger successTrigger = new SuccessTrigger();
+        successTrigger.setEmail(new EmailType(){{
+            setSendToRequester(true);
+        }});
+        publisher.getConfiguredTriggers().add( successTrigger );
+        
+        User u = User.get("kutzi");
+        u.setFullName("Christoph Kutzinski");
+        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
+        u.addProperty(prop);
+        
+        UserCause cause = new MockUserCause("kutzi");
+                
+        FreeStyleBuild build = project.scheduleBuild2( 0, cause ).get();
+        assertBuildStatusSuccess( build );
+
+        Mailbox mailbox = Mailbox.get( "ashlux@gmail.com" );
+        assertEquals( 1, mailbox.size() );
+
+        Message msg = mailbox.get(0);
+        Address[] replyTo = msg.getReplyTo();
+        assertEquals( 1, replyTo.length );
+
+        assertEquals( "kutzi@xxx.com", replyTo[0].toString() );
+    }
     
     private static class MockUserCause extends UserCause {
         public MockUserCause(String userName) throws Exception {
@@ -476,6 +532,7 @@ public class ExtendedEmailPublisherTest
                 form.put( "project_default_content", "Give me a $1000 check and I'll mail you back $5000!!!" );
                 form.put( "project_attachments", "");
                 form.put( "project_presend_script", "");
+                form.put( "project_replyto", "");
 
                 publisher = (ExtendedEmailPublisher) ExtendedEmailPublisher.DESCRIPTOR.newInstance(Stapler.getCurrentRequest(), form );
 
@@ -484,6 +541,7 @@ public class ExtendedEmailPublisherTest
                 assertEquals( "Make millions in Nigeria", publisher.defaultSubject );
                 assertEquals( "Give me a $1000 check and I'll mail you back $5000!!!", publisher.defaultContent );
                 assertEquals( "", publisher.attachmentsPattern);
+                assertEquals( "", publisher.replyTo);
 
                 return null;
             }

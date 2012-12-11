@@ -161,6 +161,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      */
     public boolean attachBuildLog;
 
+    /**
+     * Reply-To value for the e-mail
+     */
+    public String replyTo;
+
     private MatrixTriggerMode matrixTriggerMode;
 
     /**
@@ -507,6 +512,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             msg.setRecipients(Message.RecipientType.CC, ccAddresses.toArray(new InternetAddress[ccAddresses.size()]));
         }
 
+        if (StringUtils.isNotBlank(type.getReplyTo())) {
+            Set<InternetAddress> replyToAddresses = new LinkedHashSet<InternetAddress>();
+            addAddressesFromRecipientList(replyToAddresses, null, getRecipientList(type, build, type.getReplyTo(), listener, charset), env, listener);
+            if(replyToAddresses.size() > 0) {
+                msg.setReplyTo(replyToAddresses.toArray(new InternetAddress[replyToAddresses.size()]));
+            }
+        }
+
         AbstractBuild<?, ?> pb = build.getPreviousBuild();
         if (pb != null) {
             // Send mails as replies until next successful build
@@ -634,8 +647,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         try {
             Set<InternetAddress> internetAddresses = new EmailRecipientUtils().convertRecipientString(recipientList, envVars, EmailRecipientUtils.TO);
             addresses.addAll(internetAddresses);
-            Set<InternetAddress> ccInternetAddresses = new EmailRecipientUtils().convertRecipientString(recipientList, envVars, EmailRecipientUtils.CC);
-            ccAddresses.addAll(ccInternetAddresses);
+            if(ccAddresses != null) {
+                Set<InternetAddress> ccInternetAddresses = new EmailRecipientUtils().convertRecipientString(recipientList, envVars, EmailRecipientUtils.CC);
+                ccAddresses.addAll(ccInternetAddresses);
+            }
         } catch (AddressException ae) {
             LOGGER.log(Level.WARNING, "Could not create email address.", ae);
             listener.getLogger().println("Failed to create e-mail address for " + ae.getRef());

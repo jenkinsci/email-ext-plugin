@@ -16,11 +16,10 @@
 	<!-- This is the project recipent list entry. -->
 	<f:entry title="${%Project Recipient List}"
      		 description="${%Comma-separated list of email address that should receive notifications for this project.}"
-             help="/plugin/email-ext/help/projectConfig/globalRecipientList.html">
-             
+             help="/plugin/email-ext/help/projectConfig/globalRecipientList.html">             
         <j:choose>
      	    <j:when test="${instance.configured}">
-	    	<input class="setting-input validated" name="recipientlist_recipients"
+	    	  <input class="setting-input validated" name="recipientlist_recipients"
             		type="text" value="${instance.recipientList}"
             		checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)"/>
             </j:when>
@@ -29,7 +28,25 @@
             		type="text" value="$DEFAULT_RECIPIENTS"
             		checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)"/>
             </j:otherwise>
-        </j:choose>             
+        </j:choose>
+    </f:entry>
+
+    <!-- This is the Reply-To header for the email. -->
+    <f:entry title="${%Project Reply-To List}"
+            description="${%Command-separated list of email address that should be in the Reply-To header for this project.}"
+            help="/plugin/email-ext/help/projectConfig/replyToList.html">
+        <j:choose>
+            <j:when test="${instance.configured}">
+                <input class="setting-input validated" name="project_replyto"
+                    type="text" value="${instance.replyTo}"
+                    checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)"/>
+            </j:when>
+            <j:otherwise>
+                <input class="setting-input validated" name="project_replyto"
+                    type="text" value="$DEFAULT_RECIPIENTS"
+                    checkUrl="'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)"/>
+            </j:otherwise>
+        </j:choose>
     </f:entry>
     
 	<!-- This is the content type for the emails. -->

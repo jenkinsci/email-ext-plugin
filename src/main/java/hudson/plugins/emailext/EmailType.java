@@ -55,6 +55,11 @@ public class EmailType {
      */
     private boolean attachBuildLog;
 
+    /**
+     * List of email addresses to put into the Reply-To header
+     */
+    private String replyTo;
+
     public EmailType() {
         subject = "";
         body = "";
@@ -65,6 +70,7 @@ public class EmailType {
         sendToRequester = false;
         attachmentsPattern = "";
         attachBuildLog = false;
+        replyTo = "";
     }
 
     public String getSubject() {
@@ -127,6 +133,14 @@ public class EmailType {
 
     public void setRecipientList(String recipientList) {
         this.recipientList = recipientList.trim();
+    }
+
+    public String getReplyTo() {
+        return replyTo != null ? replyTo.trim() : replyTo;
+    }
+
+    public void setReplyTo(String replyTo) {
+        this.replyTo = replyTo.trim();
     }
 
     public String getAttachmentsPattern() {

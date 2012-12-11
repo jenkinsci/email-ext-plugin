@@ -105,6 +105,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
      */
     private String recipientList = "";
 
+    /*
+     * The default Reply-To header value
+     */
+    private String defaultReplyTo = "";
+
     private boolean overrideGlobalSettings;
     
     /**
@@ -249,6 +254,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         return precedenceBulk;
     }
 
+    public String getDefaultReplyTo() {
+        return defaultReplyTo;
+    }
+
     public boolean isApplicable(Class<? extends AbstractProject> jobType) {
         return true;
     }
@@ -275,6 +284,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         m.attachmentsPattern = formData.getString("project_attachments");
         m.presendScript = formData.getString("project_presend_script");
         m.attachBuildLog = "true".equalsIgnoreCase(formData.optString("project_attach_buildlog"));
+        m.replyTo = formData.getString("project_replyto");
         m.configuredTriggers = new ArrayList<EmailTrigger>();
 
         // Create a new email trigger for each one that is configured
@@ -303,6 +313,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         m.setIncludeCulprits(formData.optBoolean(prefix + "includeCulprits"));
         m.setAttachmentsPattern(formData.getString(prefix + "attachmentsPattern"));
         m.setAttachBuildLog(formData.optBoolean(prefix + "attachBuildLog"));
+        m.setReplyTo(formData.getString(prefix + "replyTo"));
         return m;
     }
 
@@ -361,6 +372,8 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         defaultSubject = nullify(req.getParameter("ext_mailer_default_subject"));
         defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
         emergencyReroute = nullify(req.getParameter("ext_mailer_emergency_reroute"));
+        defaultReplyTo = nullify(req.getParameter("ext_mailer_default_replyto")) != null ?
+            req.getParameter("ext_mailer_default_replyto") : "";
 
         debugMode = req.getParameter("ext_mailer_debug_mode") != null;
 

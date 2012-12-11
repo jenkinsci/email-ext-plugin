@@ -120,6 +120,13 @@
 						value="${mailTypeObj.recipientList}" />
 				</f:entry>
 				<f:entry
+					title="${%Reply-To List}"
+					help="/plugin/email-ext/help/projectConfig/mailType/replyToList.html">
+					<input class="setting-input"
+						name="mailer_${mailType}_replyTo" type="text"
+						value="${mailTypeObj.replyTo}" />
+				</f:entry>
+				<f:entry
 					title="${%Subject}"
 					help="/plugin/email-ext/help/projectConfig/mailType/subject.html">
 					<input class="setting-input"
