@@ -353,25 +353,17 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return false;
     }
 
+    /**
+     * Provides a sandbox for groovy scripts that disallows access to the Jenkins instance.
+     */
     private class PresendScriptSandbox extends GroovyValueFilter {
         @Override
         public Object filter(Object o) {
-            System.out.println(o.getClass().getSimpleName());
             if(o instanceof Jenkins || o instanceof Hudson) {
                 throw new SecurityException("Use of 'jenkins' is disallowed by security policy");
             }
             return o;
         }
-
-        // @Override
-        // public Object onMethodCall(GroovyInterceptor.Invoker invoker, Object receiver, String method, Object... args) {
-
-        // }
-
-        // @Override
-        // public Object onStaticCall(GroovyInterceptor.Invoker invoker, Class receiver, String method, Object... args) {
-
-        // }
     }
     
     private boolean executePresendScript(AbstractBuild<?, ?> build, BuildListener listener, MimeMessage msg) 
@@ -382,6 +374,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
             PresendScriptSandbox sandbox = null;
             CompilerConfiguration cc = new CompilerConfiguration();
+            cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
+                    "jenkins",
+                    "jenkins.model",
+                    "hudson",
+                    "hudson.model"));
+
             if(ExtendedEmailPublisher.DESCRIPTOR.isSecurityEnabled()) {
                 debug(listener.getLogger(), "Setting up sandbox for pre-send script");
                 cc.addCompilationCustomizers(new SandboxTransformer());
