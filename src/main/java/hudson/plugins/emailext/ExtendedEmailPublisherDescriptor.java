@@ -390,7 +390,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
             req.getParameter("ext_mailer_default_recipients") : "";
 
         precedenceBulk = req.getParameter("extmailer.addPrecedenceBulk") != null;
-        enableSecurity = req.getParameter("extmailer.enableSecurity") != null;
+        enableSecurity = req.getParameter("ext_mailer_security_enabled") != null;
 
         // specify List-ID information
         if (req.getParameter("extmailer.useListID") != null) {

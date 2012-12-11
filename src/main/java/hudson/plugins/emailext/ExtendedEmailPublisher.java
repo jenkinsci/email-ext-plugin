@@ -35,12 +35,16 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 
+import org.kohsuke.groovy.sandbox.GroovyValueFilter;
+import org.kohsuke.groovy.sandbox.SandboxTransformer;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.SecurityException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -349,35 +353,25 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return false;
     }
 
-    private class PresendScriptManager {
-        private AbstractBuild<?, ?> build;
-        private boolean enableSecurity;
-
-        public PresendScriptManager(AbstractBuild<?, ?> build, boolean enableSecurity) {
-            this.build = build;
-            this.enableSecurity = enableSecurity;
-        }
-
-        public Jenkins getJenkins() {
-            if (enableSecurity) {
-                throw new SecurityException("access to 'jenkins' is denied by global config");
+    private class PresendScriptSandbox extends GroovyValueFilter {
+        @Override
+        public Object filter(Object o) {
+            System.out.println(o.getClass().getSimpleName());
+            if(o instanceof Jenkins || o instanceof Hudson) {
+                throw new SecurityException("Use of 'jenkins' is disallowed by security policy");
             }
-            return Jenkins.getInstance();
+            return o;
         }
 
-        public Hudson getHudson() {
-            if (enableSecurity) {
-                throw new SecurityException("access to 'hudson' is denied by global config");
-            }
-            return Hudson.getInstance();
-        }
+        // @Override
+        // public Object onMethodCall(GroovyInterceptor.Invoker invoker, Object receiver, String method, Object... args) {
 
-        public AbstractBuild<?, ?> getBuild() {
-            if (enableSecurity) {
-                throw new SecurityException("access to 'build' is denied by global config");
-            }
-            return build;
-        }
+        // }
+
+        // @Override
+        // public Object onStaticCall(GroovyInterceptor.Invoker invoker, Class receiver, String method, Object... args) {
+
+        // }
     }
     
     private boolean executePresendScript(AbstractBuild<?, ?> build, BuildListener listener, MimeMessage msg) 
@@ -386,14 +380,28 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         if(StringUtils.isNotBlank(presendScript)) {
             listener.getLogger().println("Executing pre-send script");
             ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
-            GroovyShell shell = new GroovyShell(cl);
+            PresendScriptSandbox sandbox = null;
+            CompilerConfiguration cc = new CompilerConfiguration();
+            if(ExtendedEmailPublisher.DESCRIPTOR.isSecurityEnabled()) {
+                debug(listener.getLogger(), "Setting up sandbox for pre-send script");
+                cc.addCompilationCustomizers(new SandboxTransformer());
+                sandbox = new PresendScriptSandbox();
+            }
+
+            Binding binding = new Binding();
+            binding.setVariable("build", build);
+            binding.setVariable("msg", msg);
+            binding.setVariable("logger", listener.getLogger());
+            binding.setVariable("cancel", cancel);
+
+            GroovyShell shell = new GroovyShell(cl, binding, cc);
             StringWriter out = new StringWriter();
             PrintWriter pw = new PrintWriter(out);
-            PresendScriptManager manager = new PresendScriptManager(build, ExtendedEmailPublisher.DESCRIPTOR.isSecurityEnabled());
-            shell.setVariable("manager", manager);
-            shell.setVariable("msg", msg);
-            shell.setVariable("logger", listener.getLogger());
-            shell.setVariable("cancel", cancel);
+
+            if(sandbox != null) {
+                sandbox.register();
+            }
+
             try {
                 Object output = shell.evaluate(presendScript);
                 if(output!=null) {
