@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * An EmailContent for failing tests. Only shows tests that have failed.
  * 
@@ -24,8 +26,9 @@ public class FailedTestsContent implements EmailContent {
     private static final String SHOW_STACK_NAME = "showStack";
     private static final boolean SHOW_STACK_DEFAULT = true;
     public static final String MAX_TESTS_ARG_NAME = "maxTests";
-    static final String ONLY_REGRESSIONS_NAME = "onlyRegressions";
+    private static final String ONLY_REGRESSIONS_NAME = "onlyRegressions";
     private static final boolean ONLY_REGRESSIONS_DEFAULT = false;
+    public static final String MAX_LENGTH_ARG_NAME = "maxLength";
 
     public String getToken() {
         return TOKEN;
@@ -45,7 +48,9 @@ public class FailedTestsContent implements EmailContent {
                 + "only regressions compared to the previous builds should be shown.<br>\n"
                 + "Defaults to " + SHOW_STACK_DEFAULT + ".\n"
                 + "<li><i>" + MAX_TESTS_ARG_NAME + "</i> - display at most this many failing tests.<br>\n"
-                + "No limit is set by default.\n"
+                + "No limit is set by default.</li>\n"
+                + "<li><i>" + MAX_LENGTH_ARG_NAME + "</i> - display at most this much KB of failing test data.<br/>\n"
+                + "No limit is set by default. Setting \"50\" for the argument value would mean 50KB of data would be the max</li>\n"
                 + "</ul>\n";
     }
 
@@ -71,13 +76,19 @@ public class FailedTestsContent implements EmailContent {
 
             boolean showStacks = Args.get(args, SHOW_STACK_NAME, SHOW_STACK_DEFAULT);
             int maxTests = Args.get(args, MAX_TESTS_ARG_NAME, Integer.MAX_VALUE);
+            int maxLength = Args.get(args, MAX_LENGTH_ARG_NAME, Integer.MAX_VALUE);
             boolean showOldFailures = !Args.get(args, ONLY_REGRESSIONS_NAME, ONLY_REGRESSIONS_DEFAULT);
+            if(maxLength < Integer.MAX_VALUE) {
+                maxLength *= 1024;
+            }
+
             if (maxTests > 0) {
                 int printedTests = 0;
+                int printedLength = 0;
                 for (CaseResult failedTest : testResult.getFailedTests()) {
                     if (showOldFailures || failedTest.getAge() == 1) {
-                        if (printedTests < maxTests) {
-                            outputTest(buffer, failedTest, showStacks);
+                        if (printedTests < maxTests && printedLength <= maxLength) {
+                            printedLength += outputTest(buffer, failedTest, showStacks, maxLength-printedLength);
                             printedTests++;
                         }
                     }
@@ -87,27 +98,46 @@ public class FailedTestsContent implements EmailContent {
                     buffer.append(failCount - printedTests);
                     buffer.append(" other failed tests.\n\n");
                 }
+                if (printedLength >= maxLength) {
+                    buffer.append("\n\n... output truncated.\n\n");
+                }
             }
         }
 
         return buffer.toString();
     }
 
-    private void outputTest(StringBuffer buffer, CaseResult failedTest,
-            boolean showStack) {
-        buffer.append(failedTest.getStatus().toString());
-        buffer.append(":  ");
-        buffer.append(failedTest.getClassName());
-        buffer.append(".");
-        buffer.append(failedTest.getDisplayName());
-        buffer.append("\n\n");
-        buffer.append("Error Message:\n");
-        buffer.append(failedTest.getErrorDetails());
+    private int outputTest(StringBuffer buffer, CaseResult failedTest,
+            boolean showStack, int lengthLeft) {
+        StringBuffer local = new StringBuffer();
+        int currLength = buffer.length();
+
+        local.append(failedTest.getStatus().toString());
+        local.append(":  ");
+        
+        local.append(failedTest.getClassName());
+        local.append(".");
+
+        local.append(failedTest.getDisplayName());
+        local.append("\n\n");
+
+        local.append("Error Message:\n");
+        local.append(failedTest.getErrorDetails());
+
         if (showStack) {
-            buffer.append("\n\nStack Trace:\n");
-            buffer.append(failedTest.getErrorStackTrace());
+            local.append("\n\n");
+            local.append("Stack Trace:\n");
+            local.append(failedTest.getErrorStackTrace());
         }
-        buffer.append("\n\n");
+
+        local.append("\n\n");
+
+        if(local.length() > lengthLeft) {
+            local.setLength(lengthLeft);
+        }
+
+        buffer.append(local.toString());
+        return local.length();
     }
 
     public boolean hasNestedContent() {
