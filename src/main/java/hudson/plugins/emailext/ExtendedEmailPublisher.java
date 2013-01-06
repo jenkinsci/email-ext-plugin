@@ -456,12 +456,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         Multipart multipart = new MimeMultipart();
         MimeBodyPart msgBody = getContent(type, build, msg, listener, charset);
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
-        attachments.attach(multipart, build, listener);
+        attachments.attach(multipart, this, build, listener);
 
         // add attachments from the email type if they are setup
         if(StringUtils.isNotBlank(type.getAttachmentsPattern())) {
             AttachmentUtils typeAttachments = new AttachmentUtils(type.getAttachmentsPattern());
-            typeAttachments.attach(multipart, build, listener);
+            typeAttachments.attach(multipart, this, build, listener);
         }
 
         if(attachBuildLog || type.getAttachBuildLog()) {

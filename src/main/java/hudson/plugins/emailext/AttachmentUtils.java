@@ -73,7 +73,7 @@ public class AttachmentUtils implements Serializable {
 		}    	
     }
     
-    private List<MimeBodyPart> getAttachments(final AbstractBuild<?, ?> build, final BuildListener listener)
+    private List<MimeBodyPart> getAttachments(final ExtendedEmailPublisher publisher, final AbstractBuild<?, ?> build, final BuildListener listener)
     		throws MessagingException, InterruptedException, IOException {
     	List<MimeBodyPart> attachments = null;
     	FilePath ws = build.getWorkspace();
@@ -85,7 +85,7 @@ public class AttachmentUtils implements Serializable {
     	} else if(!StringUtils.isBlank(attachmentsPattern)) {
     		attachments = new ArrayList<MimeBodyPart>();
 
-    		FilePath[] files = ws.list(attachmentsPattern);
+    		FilePath[] files = ws.list(new ContentBuilder().transformText(attachmentsPattern, publisher, null, build, listener));
     	
 	    	for(FilePath file : files) {
 		    	if(maxAttachmentSize > 0 && 
@@ -114,9 +114,9 @@ public class AttachmentUtils implements Serializable {
     	return attachments;
     }
     
-    public void attach(Multipart multipart, AbstractBuild<?,?> build, BuildListener listener) {  
+    public void attach(Multipart multipart, ExtendedEmailPublisher publisher, AbstractBuild<?,?> build, BuildListener listener) {  
     	try {
-	    	List<MimeBodyPart> attachments = getAttachments(build, listener);
+	    	List<MimeBodyPart> attachments = getAttachments(publisher, build, listener);
 	        if(attachments != null) {
                 for(MimeBodyPart attachment : attachments) {
 		        	multipart.addBodyPart(attachment);
