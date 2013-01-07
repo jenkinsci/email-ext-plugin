@@ -95,6 +95,10 @@ public class BuildLogRegexContent implements EmailContent {
 
     private static final boolean ADD_NEWLINE_DEFAULT_VALUE = true;
 
+    private static final String NO_MATCH_DEFAULT_ARG_NAME = "defaultValue";
+
+    private static final String NO_MATCH_DEFAULT_VALUE = "";
+
     public String getToken() {
         return TOKEN;
     }
@@ -252,6 +256,9 @@ public class BuildLogRegexContent implements EmailContent {
         final boolean addNewline = Args.get(args, 
                 ADD_NEWLINE_ARG_NAME, 
                 ADD_NEWLINE_DEFAULT_VALUE);
+        final String defaultValue = Args.get(args,
+                NO_MATCH_DEFAULT_ARG_NAME,
+                NO_MATCH_DEFAULT_VALUE);
 
         final Pattern pattern = Pattern.compile(regex);
         final StringBuffer buffer = new StringBuffer();
@@ -338,6 +345,8 @@ public class BuildLogRegexContent implements EmailContent {
             }
         }
         insidePre = stopPre(buffer, insidePre);
+        if(buffer.length() == 0)
+            return defaultValue;
         return buffer.toString();
     }
 

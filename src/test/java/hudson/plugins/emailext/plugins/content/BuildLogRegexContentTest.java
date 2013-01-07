@@ -241,4 +241,21 @@ public class BuildLogRegexContentTest
 
         assertEquals( "Firefox 15.0a2", result);
     }
+
+    @Test
+    public void testGetContent_defaultValue()
+            throws Exception
+    {
+        // See JENKINS-16269
+        args.put( "defaultValue", "JENKINS" );
+        args.put( "regex", "^\\*{3} Blah Blah: (.*)$" );
+        args.put( "maxMatches", 1);
+        args.put( "showTruncatedLines", false );
+        args.put( "substText", "$1" );
+        final BufferedReader reader = new BufferedReader(
+                new StringReader( "*** Application: Firefox 15.0a2\n*** Platform: Mac OS X 10.7.4 64bit" ));
+        final String result = buildLogRegexContent.getContent( reader, args );
+
+        assertEquals( "JENKINS", result );   
+    }
 }
