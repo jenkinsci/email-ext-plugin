@@ -703,7 +703,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
-        return BuildStepMonitor.BUILD;
+        return BuildStepMonitor.NONE;
     }
 
     @Override
