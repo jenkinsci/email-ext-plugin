@@ -64,7 +64,7 @@ public abstract class EmailTrigger {
     protected int getNumFailures(AbstractBuild<?, ?> build) {
         AbstractTestResultAction a = build.getTestResultAction();
         if (a instanceof AggregatedTestResultAction) {
-            int result = 0;
+            int result = 0; 
             AggregatedTestResultAction action = (AggregatedTestResultAction) a;
             for (ChildReport cr : action.getChildReports()) {
                 if (cr.child.getParent().equals(build.getParent())) {
@@ -73,6 +73,10 @@ public abstract class EmailTrigger {
                         result += tr.getFailCount();
                     }
                 }
+            }
+
+            if(result == 0 && action.getFailCount() > 0) {
+                result = action.getFailCount();
             }
             return result;
         }
