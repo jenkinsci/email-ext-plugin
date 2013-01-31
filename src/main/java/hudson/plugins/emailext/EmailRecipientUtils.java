@@ -17,7 +17,25 @@ public class EmailRecipientUtils {
 
     public static final int TO = 0;
     public static final int CC = 1;
-    
+	
+    /**
+    * 格式化 Name 的地址
+    * @param name 名字
+    * @param email Email地址
+    * @return 格式化的地址
+    */
+    public static String formatAddress(String name, String email) {
+	    if (name.equalsIgnoreCase("")) {
+		    return email;
+	    }
+	    try {
+		    return String.format("%1$s <%2$s>", MimeUtility.encodeText(name, "UTF-8", "B"), email);
+		} catch (UnsupportedEncodingException e) {
+		    e.printStackTrace();
+	    }
+	    return email;
+    }
+	
     public Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars)
             throws AddressException {
         return convertRecipientString(recipientList, envVars, TO);
@@ -51,7 +69,16 @@ public class EmailRecipientUtils {
                     if (!address.contains("@") && defaultSuffix != null && defaultSuffix.contains("@")) {
                         address += defaultSuffix;
                     }
-
+	
+					String[] arr = address.split("<");
+					if(address.endsWith(">")&&(arr.length>1)){
+						
+						String name = arr[0];
+						String mail = arr[1].substring(0, arr[1].length()-1);
+						address = formatAddress(name,mail);
+						
+					}
+					
                     if(isCc) {
                         address = address.substring(3);
                     }
