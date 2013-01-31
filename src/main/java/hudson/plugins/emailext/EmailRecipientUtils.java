@@ -19,10 +19,10 @@ public class EmailRecipientUtils {
     public static final int CC = 1;
 	
     /**
-    * 格式化 Name 的地址
-    * @param name 名字
-    * @param email Email地址
-    * @return 格式化的地址
+    * format Name address  
+    * @param name 
+    * @param email Email address
+    * @return the formatted address
     */
     public static String formatAddress(String name, String email) {
 	    if (name.equalsIgnoreCase("")) {
@@ -70,14 +70,14 @@ public class EmailRecipientUtils {
                         address += defaultSuffix;
                     }
 	 
-					String[] arr = address.split("<");
-					if(address.endsWith(">")&&(arr.length>1)){
-						
-						String name = arr[0];
-						String mail = arr[1].substring(0, arr[1].length()-1);
-						address = formatAddress(name,mail);
-						
-					}
+                    String[] arr = address.split("<");
+                    if(address.endsWith(">")&&(arr.length>1)){
+	
+	                   String name = arr[0];
+	                   String mail = arr[1].substring(0, arr[1].length()-1);
+	                   address = formatAddress(name,mail);
+	
+                    }
 					
                     if(isCc) {
                         address = address.substring(3);
