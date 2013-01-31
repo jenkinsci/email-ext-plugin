@@ -15,13 +15,28 @@ public class FixedTrigger extends EmailTrigger {
         Result buildResult = build.getResult();
 
         if (buildResult == Result.SUCCESS) {
-            AbstractBuild<?, ?> prevBuild = build.getPreviousBuild();
+            AbstractBuild<?, ?> prevBuild = getPreviousBuild(build);
             if (prevBuild != null && (prevBuild.getResult() == Result.UNSTABLE || prevBuild.getResult() == Result.FAILURE)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Find most recent previous build matching certain criteria.
+     */
+    private AbstractBuild<?, ?> getPreviousBuild(AbstractBuild<?, ?> build) {
+
+        AbstractBuild<?, ?> prevBuild = build.getPreviousBuild();
+
+        // Skip ABORTED builds
+        if (prevBuild != null && (prevBuild.getResult() == Result.ABORTED)) {
+            return getPreviousBuild(prevBuild);
+        }
+
+        return prevBuild;
     }
 
     @Override
