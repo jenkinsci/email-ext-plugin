@@ -45,6 +45,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.SecurityException;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -297,6 +298,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             MimeMessage msg = createMail(mailType, build, listener);
             debug(listener.getLogger(), "Successfully created MimeMessage");
             Address[] allRecipients = msg.getAllRecipients();
+            int retries = 0;
             if (allRecipients != null) {
                 StringBuilder buf = new StringBuilder("Sending email to:");
                 for (Address a : allRecipients) {
@@ -304,32 +306,46 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 }
                 listener.getLogger().println(buf);
                 if(executePresendScript(build, listener, msg)) {
-                    try {
-                        Transport.send(msg);
-                    } catch (SendFailedException e) {
-                        Address[] addresses = e.getValidSentAddresses();
-                        if(addresses.length > 0) {
-                            buf = new StringBuilder("Successfully sent to the following addresses:");
-                            for (Address a : addresses) {
-                                buf.append(' ').append(a);
+                    while(true) {
+                        try {
+                            Transport.send(msg);
+                            break;
+                        } catch (SendFailedException e) {
+                            if(e.getNextException() != null && e.getNextException() instanceof SocketException) {
+                                listener.getLogger().println("Socket error sending email, retrying once more in 10 seconds...");
+                                Thread.sleep(10000);
+                            } else {
+                                Address[] addresses = e.getValidSentAddresses();
+                                if(addresses.length > 0) {
+                                    buf = new StringBuilder("Successfully sent to the following addresses:");
+                                    for (Address a : addresses) {
+                                        buf.append(' ').append(a);
+                                    }
+                                    listener.getLogger().println(buf);
+                                }
+                                addresses = e.getValidUnsentAddresses();
+                                if(addresses.length > 0) {
+                                    buf = new StringBuilder("Error sending to the following VALID addresses:");
+                                    for (Address a : addresses) {
+                                        buf.append(' ').append(a);
+                                    }
+                                    listener.getLogger().println(buf);
+                                }
+                                addresses = e.getInvalidAddresses();
+                                if(addresses.length > 0) {
+                                    buf = new StringBuilder("Error sending to the following INVALID addresses:");
+                                    for (Address a : addresses) {
+                                        buf.append(' ').append(a);
+                                    }
+                                    listener.getLogger().println(buf);
+                                }
+                                break;
                             }
-                            listener.getLogger().println(buf);
-                        }
-                        addresses = e.getValidUnsentAddresses();
-                        if(addresses.length > 0) {
-                            buf = new StringBuilder("Error sending to the following VALID addresses:");
-                            for (Address a : addresses) {
-                                buf.append(' ').append(a);
-                            }
-                            listener.getLogger().println(buf);
-                        }
-                        addresses = e.getInvalidAddresses();
-                        if(addresses.length > 0) {
-                            buf = new StringBuilder("Error sending to the following INVALID addresses:");
-                            for (Address a : addresses) {
-                                buf.append(' ').append(a);
-                            }
-                            listener.getLogger().println(buf);
+                        } 
+                        retries++;
+                        if(retries > 1) {
+                            listener.getLogger().println("Failed after second try sending email");
+                            break;
                         }
                     }
                     if (build.getAction(MailMessageIdAction.class) == null) {
