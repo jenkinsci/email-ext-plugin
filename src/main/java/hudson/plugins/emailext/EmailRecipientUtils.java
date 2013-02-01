@@ -8,6 +8,9 @@ import org.apache.commons.lang.StringUtils;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeUtility;
+
+import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
