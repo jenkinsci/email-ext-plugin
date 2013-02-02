@@ -59,6 +59,6 @@ public class StillUnstableTrigger extends EmailTrigger {
 
     @Override
     public boolean getDefaultSendToList() {
-        return false;
+        return true;
     }
 }

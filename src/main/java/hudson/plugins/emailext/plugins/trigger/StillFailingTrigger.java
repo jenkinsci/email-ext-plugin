@@ -60,6 +60,6 @@ public class StillFailingTrigger extends EmailTrigger {
 
     @Override
     public boolean getDefaultSendToList() {
-        return false;
+        return true;
     }
 }
