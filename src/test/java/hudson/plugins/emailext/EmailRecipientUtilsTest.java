@@ -166,4 +166,20 @@ public class EmailRecipientUtilsTest extends HudsonTestCase
         assertEquals( 1, internetAddresses.size() );
         assertTrue ( internetAddresses.contains( new InternetAddress( "slide.o.mix@gmail.com" ) ) );
     }
+    public void testUTF8()
+    	throws Exception
+    {
+	    envVars.put( "EMAIL_LIST", "张宙<joe955@gmail.com>, cc:张宙<zhang.zhou1@zte.com.cn>, another@gmail.com" );
+	
+	    Set<InternetAddress> internetAddresses = emailRecipientUtils.convertRecipientString( "$EMAIL_LIST", envVars );
+	
+	    assertEquals( 2, internetAddresses.size() );
+	    assertTrue( internetAddresses.contains( new InternetAddress( "张宙<joe955@gmail.com>" ) ) );
+	    assertTrue( internetAddresses.contains( new InternetAddress( "another@gmail.com" ) ) );
+	
+	    internetAddresses = emailRecipientUtils.convertRecipientString( "$EMAIL_LIST", envVars, EmailRecipientUtils.CC);
+	    
+	    assertEquals( 1, internetAddresses.size() );
+	    assertTrue ( internetAddresses.contains( new InternetAddress( "张宙<zhang.zhou1@zte.com.cn>" ) ) );
+	}
 }

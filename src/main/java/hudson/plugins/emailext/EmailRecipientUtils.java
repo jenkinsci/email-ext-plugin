@@ -8,6 +8,9 @@ import org.apache.commons.lang.StringUtils;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeUtility;
+
+import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -18,6 +21,25 @@ public class EmailRecipientUtils {
     public static final int TO = 0;
     public static final int CC = 1;
     
+	
+    /**
+    * format Name address  
+    * @param name 
+    * @param email Email address
+    * @return the formatted address
+    */
+    public static String formatAddress(String name, String email) {
+	    if (name.equalsIgnoreCase("")) {
+		    return email;
+	    }
+	    try {
+		    return String.format("%1$s <%2$s>", MimeUtility.encodeText(name, "UTF-8", "B"), email);
+		} catch (UnsupportedEncodingException e) {
+		    e.printStackTrace();
+	    }
+	    return email;
+    }
+	
     public Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars)
             throws AddressException {
         return convertRecipientString(recipientList, envVars, TO);
@@ -52,6 +74,16 @@ public class EmailRecipientUtils {
                         address += defaultSuffix;
                     }
 
+    
+                    String[] arr = address.split("<");
+                    if(address.endsWith(">")&&(arr.length>1)){
+	
+	                   String name = arr[0];
+	                   String mail = arr[1].substring(0, arr[1].length()-1);
+	                   address = formatAddress(name,mail);
+	
+                    }
+					
                     if(isCc) {
                         address = address.substring(3);
                     }
