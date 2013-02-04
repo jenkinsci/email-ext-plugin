@@ -73,8 +73,8 @@ public class EmailRecipientUtils {
                     if (!address.contains("@") && defaultSuffix != null && defaultSuffix.contains("@")) {
                         address += defaultSuffix;
                     }
+
     
-					
                     String[] arr = address.split("<");
                     if(address.endsWith(">")&&(arr.length>1)){
 	
