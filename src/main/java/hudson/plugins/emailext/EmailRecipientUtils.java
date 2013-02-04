@@ -20,7 +20,7 @@ public class EmailRecipientUtils {
 
     public static final int TO = 0;
     public static final int CC = 1;
-
+    
 	
     /**
     * format Name address  
@@ -73,7 +73,7 @@ public class EmailRecipientUtils {
                     if (!address.contains("@") && defaultSuffix != null && defaultSuffix.contains("@")) {
                         address += defaultSuffix;
                     }
-    
+
 					
                     String[] arr = address.split("<");
                     if(address.endsWith(">")&&(arr.length>1)){
