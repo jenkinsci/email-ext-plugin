@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.SecurityException;
@@ -520,7 +521,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
             
             for (User user : users) {
-                String userAddress = EmailRecipientUtils.GetUserConfiguredEmail(user);
+                String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
                 if(userAddress != null){
                     addAddressesFromRecipientList(recipientAddresses, ccAddresses, userAddress, env, listener);
                 } else {
@@ -710,6 +711,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         } catch (AddressException ae) {
             LOGGER.log(Level.WARNING, "Could not create email address.", ae);
             listener.getLogger().println("Failed to create e-mail address for " + ae.getRef());
+        } catch(UnsupportedEncodingException e) {
+            LOGGER.log(Level.WARNING, "Could not create email address.", e);
+            listener.getLogger().println("Failed to create e-mail address because of invalid encoding");
         }
     }
 

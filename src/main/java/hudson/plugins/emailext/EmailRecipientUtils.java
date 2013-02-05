@@ -8,6 +8,8 @@ import org.apache.commons.lang.StringUtils;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeUtility;
+import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -19,53 +21,68 @@ public class EmailRecipientUtils {
     public static final int CC = 1;
     
     public Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars)
-            throws AddressException {
+            throws AddressException, UnsupportedEncodingException {
         return convertRecipientString(recipientList, envVars, TO);
     }
     
     public Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars, int type)
-        throws AddressException{
+        throws AddressException, UnsupportedEncodingException {
         final Set<InternetAddress> internetAddresses = new LinkedHashSet<InternetAddress>();
         if (!StringUtils.isBlank(recipientList)) {
-            final String expandedRecipientList = envVars.expand(recipientList);
-            final String[] addresses = StringUtils.trim(expandedRecipientList).split(COMMA_SEPARATED_SPLIT_REGEXP);
+            final String expandedRecipientList = fixupSpaces(envVars.expand(recipientList));
+            InternetAddress[] all = InternetAddress.parse(expandedRecipientList.replace("cc:", ""));
+            final Set<InternetAddress> to = new LinkedHashSet<InternetAddress>();
+            final Set<InternetAddress> cc = new LinkedHashSet<InternetAddress>();
             final String defaultSuffix = Mailer.descriptor().getDefaultSuffix();
-            for (String address : addresses) {
-                if(!StringUtils.isBlank(address)) {
-                    boolean isCc = false;
-                    address = address.trim();
-    
-                    isCc = address.startsWith("cc:");
-                    // if not a valid address, check if there is a default suffix (@something.com) provided
-                    if (!address.contains("@")){
-                        User u = User.get(address, false);
-                        String userEmail = null;
-                        if(u != null) {
-                            userEmail = GetUserConfiguredEmail(u);
-                            if(userEmail != null){
-                                //if configured user email does not have @domain prefix, then default prefix will be added on next step
-                                address = userEmail;
-                            }
+
+            for(InternetAddress address : all) {
+                if(address.getPersonal() != null) {
+                    if(expandedRecipientList.contains("cc:" + address.getPersonal()) || expandedRecipientList.contains("cc:\"" + address.toString() + "\"")) {
+                        cc.add(address);
+                    } else {
+                        to.add(address);
+                    }
+                } else {
+                    if(expandedRecipientList.contains("cc:" + address.toString())) {
+                        cc.add(address);
+                    } else {
+                        to.add(address);
+                    }
+                }
+            }
+
+            if(type == CC) {
+                internetAddresses.addAll(cc);
+            } else {
+                internetAddresses.addAll(to);
+            }
+
+            for(InternetAddress address : internetAddresses) {
+                if(!address.getAddress().contains("@")) {
+                    User u = User.get(address.getAddress(), false);
+                    String userEmail = null;
+                    if(u != null) {
+                        userEmail = getUserConfiguredEmail(u);
+                        if(userEmail != null){
+                            //if configured user email does not have @domain prefix, then default prefix will be added on next step
+                            address.setAddress(userEmail);
                         }
                     }
-                    if (!address.contains("@") && defaultSuffix != null && defaultSuffix.contains("@")) {
-                        address += defaultSuffix;
-                    }
+                }
 
-                    if(isCc) {
-                        address = address.substring(3);
-                    }
-    
-                    if((type == TO && !isCc) || (type == CC && isCc)) {
-                        internetAddresses.add(new InternetAddress(address));
-                    }
+                if(!address.getAddress().contains("@") && defaultSuffix != null && defaultSuffix.contains("@")) {
+                    address.setAddress(address.getAddress() + defaultSuffix);
+                }
+
+                if(address.getPersonal() != null) {
+                    address.setPersonal(MimeUtility.encodeWord(address.getPersonal(), "UTF-8", "B"));
                 }
             }
         }
         return internetAddresses;
     }
 
-    public static String GetUserConfiguredEmail(User user) {
+    public static String getUserConfiguredEmail(User user) {
         String addr = null;
         if(user != null) {
             Mailer.UserProperty mailProperty = user.getProperty(Mailer.UserProperty.class);
@@ -84,6 +101,16 @@ public class EmailRecipientUtils {
             return FormValidation.ok();
         } catch (AddressException e) {
             return FormValidation.error(e.getMessage() + ": \"" + e.getRef() + "\"");
+        } catch(UnsupportedEncodingException e) {
+            return FormValidation.error(e.getMessage());
         }
+    }
+
+    private String fixupSpaces(String input) {
+        input = input.replaceAll("\\s+", " ");
+        if(input.contains(" ") && !input.contains(",")) {
+            input = input.replace(" ", ",");
+        }
+        return input;
     }
 }
