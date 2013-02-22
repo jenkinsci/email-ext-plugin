@@ -317,7 +317,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                 Thread.sleep(10000);
                             } else {
                                 Address[] addresses = e.getValidSentAddresses();
-                                if(addresses.length > 0) {
+                                if(addresses != null && addresses.length > 0) {
                                     buf = new StringBuilder("Successfully sent to the following addresses:");
                                     for (Address a : addresses) {
                                         buf.append(' ').append(a);
@@ -325,7 +325,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                     listener.getLogger().println(buf);
                                 }
                                 addresses = e.getValidUnsentAddresses();
-                                if(addresses.length > 0) {
+                                if(addresses != null && addresses.length > 0) {
                                     buf = new StringBuilder("Error sending to the following VALID addresses:");
                                     for (Address a : addresses) {
                                         buf.append(' ').append(a);
@@ -333,13 +333,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                     listener.getLogger().println(buf);
                                 }
                                 addresses = e.getInvalidAddresses();
-                                if(addresses.length > 0) {
+                                if(addresses != null && addresses.length > 0) {
                                     buf = new StringBuilder("Error sending to the following INVALID addresses:");
                                     for (Address a : addresses) {
                                         buf.append(' ').append(a);
                                     }
                                     listener.getLogger().println(buf);
                                 }
+
+                                debug(listener.getLogger(), "SendFailedException message: " + e.getMessage());
                                 break;
                             }
                         } 
