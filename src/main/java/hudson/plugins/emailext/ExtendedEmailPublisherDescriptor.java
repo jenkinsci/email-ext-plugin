@@ -290,6 +290,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         m.attachmentsPattern = formData.getString("project_attachments");
         m.presendScript = formData.getString("project_presend_script");
         m.attachBuildLog = "true".equalsIgnoreCase(formData.optString("project_attach_buildlog"));
+        m.compressBuildLog = "true".equalsIgnoreCase(formData.optString("project_compress_buildlog"));
         m.replyTo = formData.getString("project_replyto");
         m.configuredTriggers = new ArrayList<EmailTrigger>();
 
@@ -319,6 +320,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         m.setIncludeCulprits(formData.optBoolean(prefix + "includeCulprits"));
         m.setAttachmentsPattern(formData.getString(prefix + "attachmentsPattern"));
         m.setAttachBuildLog(formData.optBoolean(prefix + "attachBuildLog"));
+        m.setCompressBuildLog(formData.optBoolean(prefix + "compressBuildLog"));
         m.setReplyTo(formData.getString(prefix + "replyTo"));
         return m;
     }

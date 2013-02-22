@@ -8,6 +8,7 @@ import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 
 import hudson.plugins.emailext.plugins.ContentBuilder;
+import hudson.plugins.emailext.plugins.ZipDataSource;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -134,7 +135,7 @@ public class AttachmentUtils implements Serializable {
     /**
      * Attaches the build log to the multipart item.
      */
-    public static void attachBuildLog(Multipart multipart, AbstractBuild<?, ?> build, BuildListener listener) {
+    public static void attachBuildLog(Multipart multipart, AbstractBuild<?, ?> build, BuildListener listener, boolean compress) {
         try {
             File logFile = build.getLogFile();
             long maxAttachmentSize =
@@ -146,13 +147,22 @@ public class AttachmentUtils implements Serializable {
                 return;
             }
 
-            FileDataSource fileSource = new FileDataSource(logFile);
+            DataSource fileSource;
             MimeBodyPart attachment = new MimeBodyPart();
+            if(compress) {
+				listener.getLogger().println("Request made to compress build log" );
+				fileSource = new ZipDataSource(logFile);
+				attachment.setFileName("build.zip");
+            } else {
+				fileSource = new FileDataSource(logFile);
+				attachment.setFileName("build.log");
+            }
             attachment.setDataHandler(new DataHandler(fileSource));
-            attachment.setFileName("build.log");
             multipart.addBodyPart(attachment);
         } catch (MessagingException e) {
-            listener.error("Error attaching build log to message: " + e.getMessage());
-        }
+			listener.error("Error attaching build log to message: " + e.getMessage());
+        } catch (IOException e) {
+			listener.error("Error attaching build log to message: " + e.getMessage());
+		}
     }
 }
