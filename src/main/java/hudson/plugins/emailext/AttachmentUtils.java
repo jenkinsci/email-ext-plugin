@@ -150,19 +150,19 @@ public class AttachmentUtils implements Serializable {
             DataSource fileSource;
             MimeBodyPart attachment = new MimeBodyPart();
             if(compress) {
-				listener.getLogger().println("Request made to compress build log" );
-				fileSource = new ZipDataSource(logFile);
-				attachment.setFileName("build.zip");
+                listener.getLogger().println("Request made to compress build log" );
+                fileSource = new ZipDataSource(logFile);
+                attachment.setFileName("build.zip");
             } else {
-				fileSource = new FileDataSource(logFile);
-				attachment.setFileName("build.log");
+                fileSource = new FileDataSource(logFile);
+                attachment.setFileName("build.log");
             }
             attachment.setDataHandler(new DataHandler(fileSource));
             multipart.addBodyPart(attachment);
         } catch (MessagingException e) {
-			listener.error("Error attaching build log to message: " + e.getMessage());
+            listener.error("Error attaching build log to message: " + e.getMessage());
         } catch (IOException e) {
-			listener.error("Error attaching build log to message: " + e.getMessage());
-		}
+            listener.error("Error attaching build log to message: " + e.getMessage());
+        }
     }
 }

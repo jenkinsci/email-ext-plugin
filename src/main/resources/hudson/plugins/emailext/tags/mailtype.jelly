@@ -151,9 +151,9 @@
 				</f:entry>
 				<f:entry title="${%Attach Build Log}"
 				help="/plugin/email-ext/help/projectConfig/attachBuildLog.html">
-	        		<f:checkbox name="mailer_${mailType}_attachBuildLog" 
-	        					checked="${mailTypeObj.attachBuildLog}" />
-	      		</f:entry>
+					<f:checkbox name="mailer_${mailType}_attachBuildLog" 
+					checked="${mailTypeObj.attachBuildLog}" />
+				</f:entry>
 				<f:entry title="${%Compress Build Log}"
 				help="/plugin/email-ext/help/projectConfig/compressBuildLog.html">
 					<f:checkbox name="mailer_${mailType}_compressBuildLog"

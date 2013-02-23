@@ -162,7 +162,7 @@ public class EmailType {
     }
 
     public boolean getCompressBuildLog() {
-		return compressBuildLog;
+        return compressBuildLog;
     }
 
     public void setAttachBuildLog(boolean attachBuildLog) {
@@ -170,7 +170,7 @@ public class EmailType {
     }
 
     public void setCompressBuildLog(boolean compressBuildLog) {
-		this.compressBuildLog = compressBuildLog;
+        this.compressBuildLog = compressBuildLog;
     }
 
     public Object readResolve() {
