@@ -40,6 +40,17 @@ public class EmailTypeTest extends TestCase {
 		assertTrue(t.getHasRecipients());
 	}
 
+	public void testCompressBuildAttachment(){
+		EmailType t = new EmailType();
+		t.setCompressBuildLog(true);
 
+		assertTrue(t.getCompressBuildLog());
+	}
+
+	public void testDefaultCompressBuildAttachment(){
+		EmailType t = new EmailType();
+
+		assertFalse(t.getCompressBuildLog());
+	}
 
 }

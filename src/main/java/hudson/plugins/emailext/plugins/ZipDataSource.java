@@ -23,22 +23,24 @@ public class ZipDataSource implements DataSource {
     private byte[] contents;
 
     public ZipDataSource(File f) throws IOException {
-        name = f.getName() + FILE_EXTENSION;
+        this(f.getName(), new FileInputStream(f));
+    }
 
-        InputStream fin = new FileInputStream(f);
+    ZipDataSource(String name, InputStream in) throws IOException {
+        this.name = name + FILE_EXTENSION;
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ZipOutputStream zos = new ZipOutputStream(baos);
-        zos.putNextEntry(new ZipEntry(f.getName()));
+        zos.putNextEntry(new ZipEntry(name));
 
         int size;
         byte[] buffer = new byte[BUFFER_SIZE];
-        while ((size = fin.read(buffer, 0, buffer.length)) > 0) {
+        while ((size = in.read(buffer, 0, buffer.length)) > 0) {
             zos.write(buffer, 0, size);
         }
         zos.closeEntry();
         zos.close();
-        fin.close();
-
+        in.close();
         contents = baos.toByteArray();
     }
 
