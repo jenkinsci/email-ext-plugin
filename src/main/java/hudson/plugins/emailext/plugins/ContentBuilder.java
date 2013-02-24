@@ -10,9 +10,6 @@ import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.Util;
 import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
-
-import jenkins.model.Jenkins;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -21,8 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import java.io.IOException;
+import jenkins.model.Jenkins;
 
 /**
  * {@link Publisher} that sends notification e-mail.

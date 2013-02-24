@@ -67,6 +67,7 @@ public abstract class EmailTrigger {
             int result = 0; 
             AggregatedTestResultAction action = (AggregatedTestResultAction) a;
             for (ChildReport cr : action.getChildReports()) {
+                if(cr == null || cr.child == null || cr.child.getParent() == null) continue;
                 if (cr.child.getParent().equals(build.getParent())) {
                     if (cr.result instanceof TestResult) {
                         TestResult tr = (TestResult) cr.result;

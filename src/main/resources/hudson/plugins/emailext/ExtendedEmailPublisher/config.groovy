@@ -57,7 +57,7 @@ f.entry(title: _("Default Content"), help: "/plugin/email-ext/help/projectConfig
     f.textarea(name: "project_default_content", value: "\$DEFAULT_CONTENT", class: "setting-input") 
   }
 }
-f.entry(title: _("Attachments"), help: "/plugin/email-ext/help/projectConfig/attachments.html", description: _("description('http://ant.apache.org/manual/Types/fileset.html')")) {
+f.entry(title: _("Attachments"), help: "/plugin/email-ext/help/projectConfig/attachments.html", description: _("description", "http://ant.apache.org/manual/Types/fileset.html")) {
   if(instance?.configured) {
     input(name: "project_attachments", value: instance.attachmentsPattern, class: "setting-input", type: "text") 
   }
@@ -156,7 +156,7 @@ f.advanced() {
           tr(id: "${secId}after-last-configured-row") {
             td() 
             td(colspan: "6") {
-              span(style: "font-weight:bold", _("Add a Trigger:}")) 
+              span(style: "font-weight:bold", _("Add a Trigger:")) 
               span(style: "font-weight:bold") 
               select(id: "${secId}non-configured-options", onchange: "selectTrigger(this,'${secId}')") {
                 option(value: "select", "select") 

@@ -280,7 +280,6 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     @Override
     public Publisher newInstance(StaplerRequest req, JSONObject formData)
             throws hudson.model.Descriptor.FormException {
-        
         // Save configuration for each trigger type
         ExtendedEmailPublisher m = new ExtendedEmailPublisher();
         m.recipientList = formData.getString("recipientlist_recipients");
