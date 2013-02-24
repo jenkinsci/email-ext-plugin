@@ -168,6 +168,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     public boolean attachBuildLog;
 
     /**
+     * True to compress the log from the build before attaching to the email
+     */
+    public boolean compressBuildLog;
+
+    /**
      * Reply-To value for the e-mail
      */
     public String replyTo;
@@ -474,7 +479,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         if(attachBuildLog || type.getAttachBuildLog()) {
             debug(listener.getLogger(), "Request made to attach build log");
-            AttachmentUtils.attachBuildLog(multipart, build, listener);
+            AttachmentUtils.attachBuildLog(multipart, build, listener, compressBuildLog || type.getCompressBuildLog());
         }
 
         msg.setContent(multipart);
