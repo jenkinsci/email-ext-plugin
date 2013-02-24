@@ -65,9 +65,12 @@ f.entry(title: _("Attachments"), help: "/plugin/email-ext/help/projectConfig/att
     input(name: "project_attachments", value: "", class: "setting-input", type: "text") 
   }
 }
-f.entry(title: _("Attach Build Log"), help: "/plugin/email-ext/help/projectConfig/attachBuildLog.html") {
-  f.checkbox(name: "project_attach_buildlog", checked: instance?.attachBuildLog) 
+f.optionalBlock(title: _("Attach Build Log"), help: "/plugin/email-ext/help/projectConfig/attachBuildLog.html", checked: instance?.attachBuildLog) {
+  f.entry(title: _("Compress Build Log before sending"), help: "/plugin/email-ext/help/projectConfig/compressBuildLog.html") {
+  f.checkbox(name: "project_compress_buildlog", checked: instance?.compressBuildLog)
 }
+}
+
 def contentTokenText = hudson.plugins.emailext.EmailExtHelp.getContentTokenHelpText()
 tr() {
   td() 
@@ -156,7 +159,7 @@ f.advanced() {
           tr(id: "${secId}after-last-configured-row") {
             td() 
             td(colspan: "6") {
-              span(style: "font-weight:bold", _("Add a Trigger:}")) 
+              span(style: "font-weight:bold", _("Add a Trigger:"))
               span(style: "font-weight:bold") 
               select(id: "${secId}non-configured-options", onchange: "selectTrigger(this,'${secId}')") {
                 option(value: "select", "select") 
