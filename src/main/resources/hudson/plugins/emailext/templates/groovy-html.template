@@ -60,7 +60,7 @@ if(changeSet != null) {
 <% def artifacts = build.artifacts
 if(artifacts != null && artifacts.size() > 0) { %>
   <TABLE width="100%">
-    <TR><TD class="bg1"><B>BUILD ATRIFACTS</B></TD></TR>
+    <TR><TD class="bg1"><B>BUILD ARTIFACTS</B></TD></TR>
     <TR>
       <TD>
 <% 		artifacts.each() { f -> %>		
@@ -80,7 +80,7 @@ try {
   def mbuilds = build.moduleBuilds
   if(mbuilds != null) { %>
   <TABLE width="100%">
-      <TR><TD class="bg1"><B>BUILD ATRIFACTS</B></TD></TR>
+      <TR><TD class="bg1"><B>BUILD ARTIFACTS</B></TD></TR>
 <% 	  mbuild.each() { m -> %>	  
         <TR><TD class="bg2"><B>${m.key.displayName}</B></TD></TR>
 <%		m.value.each() { mvnbld ->
