@@ -187,44 +187,6 @@
       </j:if>
     </div>
 
-    <!-- ARTIFACTS -->
-    <j:set var="artifacts" value="${build.artifacts}" />
-    <j:if test="${artifacts!=null and artifacts.size()&gt;0}">
-      <div class="content">
-        <h1>Build Artifacts</h1>
-        <ul>
-          <j:forEach var="f" items="${artifacts}">
-            <li>
-              <a href="${rooturl}${build.url}artifact/${f}">${f}</a>
-            </li>
-          </j:forEach>
-        </ul>
-      </div>
-    </j:if>
-
-    <!-- MAVEN ARTIFACTS -->
-    <j:set var="mbuilds" value="${build.moduleBuilds}" />
-    <j:if test="${mbuilds!=null}">
-      <div class="content">
-        <h1>Build Artifacts</h1>
-        <j:forEach var="m" items="${mbuilds}">
-          <h2>${m.key.displayName}</h2>
-          <j:forEach var="mvnbld" items="${m.value}">
-            <j:set var="artifacts" value="${mvnbld.artifacts}" />
-            <j:if test="${artifacts!=null and artifacts.size()&gt;0}">
-              <ul>
-                <j:forEach var="f" items="${artifacts}">
-                  <li>
-                    <a href="${rooturl}${mvnbld.url}artifact/${f}">${f}</a>
-                  </li>
-                </j:forEach>
-              </ul>
-            </j:if>
-          </j:forEach>
-        </j:forEach>
-        <br />
-      </div>
-    </j:if>
     <!-- JUnit TEMPLATE -->
     <j:set var="junitResultList" value="${it.JUnitTestResult}" />
     <j:if test="${junitResultList.isEmpty()!=true}">
@@ -398,6 +360,45 @@
                 </tr>
             </table>
         </j:if>
+    </j:if>
+
+    <!-- ARTIFACTS -->
+    <j:set var="artifacts" value="${build.artifacts}" />
+    <j:if test="${artifacts!=null and artifacts.size()&gt;0}">
+      <div class="content">
+        <h1>Build Artifacts</h1>
+        <ul>
+          <j:forEach var="f" items="${artifacts}">
+            <li>
+              <a href="${rooturl}${build.url}artifact/${f}">${f}</a>
+            </li>
+          </j:forEach>
+        </ul>
+      </div>
+    </j:if>
+
+    <!-- MAVEN ARTIFACTS -->
+    <j:set var="mbuilds" value="${build.moduleBuilds}" />
+    <j:if test="${mbuilds!=null}">
+      <div class="content">
+        <h1>Build Artifacts</h1>
+        <j:forEach var="m" items="${mbuilds}">
+          <h2>${m.key.displayName}</h2>
+          <j:forEach var="mvnbld" items="${m.value}">
+            <j:set var="artifacts" value="${mvnbld.artifacts}" />
+            <j:if test="${artifacts!=null and artifacts.size()&gt;0}">
+              <ul>
+                <j:forEach var="f" items="${artifacts}">
+                  <li>
+                    <a href="${rooturl}${mvnbld.url}artifact/${f}">${f}</a>
+                  </li>
+                </j:forEach>
+              </ul>
+            </j:if>
+          </j:forEach>
+        </j:forEach>
+        <br />
+      </div>
     </j:if>
 
     <div class="content">
