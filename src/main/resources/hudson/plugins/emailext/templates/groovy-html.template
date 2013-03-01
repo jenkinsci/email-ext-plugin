@@ -80,8 +80,10 @@ try {
   def mbuilds = build.moduleBuilds
   if(mbuilds != null) { %>
   <TABLE width="100%">
-      <TR><TD class="bg1"><B>BUILD ARTIFACTS</B></TD></TR>
-<% 	  mbuild.each() { m -> %>	  
+      <TR><TD class="bg1"><B>BUILD ATRIFACTS</B></TD></TR>
+<% 
+    try {  
+        mbuild.each() { m -> %>	  
         <TR><TD class="bg2"><B>${m.key.displayName}</B></TD></TR>
 <%		m.value.each() { mvnbld ->
 			def artifactz = mvnbld.artifacts
@@ -97,13 +99,14 @@ try {
       </TR>
 <%			} 
 		}
+       }
+    } catch(e) {
+	// we don't do anything
      } %>      
   </TABLE>
 <BR/>
 <% } 
-} catch(e) {
-	// we don't do anything
-} %>
+%>
 
 <!-- CONSOLE OUTPUT -->
 <% if(build.result==hudson.model.Result.FAILURE) { %>
