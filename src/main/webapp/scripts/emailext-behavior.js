@@ -107,7 +107,18 @@ function removeTrigger(mailerId,secId)
 	var nonConfigOptions = document.getElementById(secId+"non-configured-options");
 	var configOptions = document.getElementById(secId+"configured-options");
 	var option = document.getElementById(mailerId + "option");
-	switchElementContainer(configOptions,nonConfigOptions,option);
+	configOptions.removeChild(option);
+
+	// Reinsert in alphabetical order (skipping the generic 'select' option at the top).
+	var before = null;
+	for (var i = 1; i < nonConfigOptions.options.length; i++) {
+		var curOption = nonConfigOptions.options[i];
+		if (curOption.id && curOption.value > option.value) {
+			before = nonConfigOptions.options[i];
+			break;
+		}
+	}
+	nonConfigOptions.insertBefore(option, before);
 	
 	if(triggerAdv.style.display != "none")
 		swapEdit(mailerId);
