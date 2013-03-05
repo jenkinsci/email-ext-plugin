@@ -58,7 +58,8 @@ public abstract class NthFailureTrigger extends EmailTrigger {
 	public abstract static class DescriptorImpl extends EmailTriggerDescriptor {
 
 		public DescriptorImpl() {
-			addTriggerNameToReplace(SuccessTrigger.TRIGGER_NAME);
+			addTriggerNameToReplace(FailureTrigger.TRIGGER_NAME);
+			addTriggerNameToReplace(StillFailingTrigger.TRIGGER_NAME);
 		}
 	}
 }
