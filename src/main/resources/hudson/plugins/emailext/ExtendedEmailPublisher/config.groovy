@@ -106,9 +106,11 @@ tr() {
   }
   td() 
 }
-if(descriptor.isMatrixProject(it)) {
+if(descriptor.isMatrixProject(my)) {
   f.entry(field: "matrixTriggerMode", title: _("Trigger for matrix projects")) {
-    f.enum(it.description) 
+    f.enum { 
+      raw(my.description)
+    }
   }
 }
 f.advanced() {
