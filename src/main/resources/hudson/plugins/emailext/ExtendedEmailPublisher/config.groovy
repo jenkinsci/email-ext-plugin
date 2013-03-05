@@ -1,3 +1,5 @@
+import hudson.plugins.emailext.plugins.EmailTrigger
+
 // Namespaces
 m = namespace("/hudson/plugins/emailext/tags")
 l = namespace("/lib/layout")
@@ -13,6 +15,14 @@ def nonConfigTriggers = hudson.plugins.emailext.ExtendedEmailPublisher.getTrigge
 if(instance!=null) {
   nonConfigTriggers = instance.nonConfiguredTriggers
 }
+
+// Sort the triggers by name.
+nonConfigTriggers.sort(new Comparator<EmailTrigger>() {
+    @Override
+    int compare(EmailTrigger left, EmailTrigger right) {
+        return left.getDescriptor().getTriggerName().compareTo(right.getDescriptor().getTriggerName());
+    }
+})
 
 st.once() {
   script(src: "${rootURL}/plugin/email-ext/scripts/emailext-behavior.js", type: "text/javascript") 

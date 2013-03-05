@@ -60,6 +60,7 @@ import hudson.plugins.emailext.plugins.trigger.ImprovementTrigger;
 import hudson.plugins.emailext.plugins.trigger.NotBuiltTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
+import hudson.plugins.emailext.plugins.trigger.SecondFailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillUnstableTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
@@ -121,6 +122,7 @@ public class EmailExtensionPlugin extends Plugin {
         addEmailTriggerPlugin(ImprovementTrigger.DESCRIPTOR);
         addEmailTriggerPlugin(RegressionTrigger.DESCRIPTOR);
         addEmailTriggerPlugin(FirstFailureTrigger.DESCRIPTOR);
+        addEmailTriggerPlugin(SecondFailureTrigger.DESCRIPTOR);
     }
 
     private void addEmailContentPlugin(EmailContent content) {
