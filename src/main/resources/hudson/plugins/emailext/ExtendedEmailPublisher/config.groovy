@@ -100,7 +100,7 @@ tr() {
         b("Token Macro Plugin Tokens") 
         br() 
         br() 
-        help() 
+        namespace("/lib/token-macro").help() 
       }
     }
   }
