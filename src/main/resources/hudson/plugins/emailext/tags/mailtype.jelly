@@ -112,6 +112,7 @@
 		<td></td>
 		<td colspan="5">
 			<table width="100%">
+				<st:include it="${trigger}" page="local-config" optional="true"/>
 				<f:entry
 					title="${%Recipient List}"
 					help="/plugin/email-ext/help/projectConfig/mailType/recipientList.html">
@@ -162,6 +163,5 @@
 			</table>
 		</td>
 	</tr>
-
 	<d:invokeBody />
 </j:jelly>

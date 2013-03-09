@@ -11,7 +11,7 @@ public class SecondFailureTriggerTest extends NthFailureTriggerTestBase {
 
 	@Override
 	EmailTrigger newInstance() {
-		return SecondFailureTrigger.DESCRIPTOR.newInstance();
+		return new SecondFailureTrigger();
 	}
 
 	@Test

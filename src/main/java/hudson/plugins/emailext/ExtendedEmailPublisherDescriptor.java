@@ -297,7 +297,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         for (String mailerId : ExtendedEmailPublisher.EMAIL_TRIGGER_TYPE_MAP.keySet()) {
             if ("true".equalsIgnoreCase(formData.optString("mailer_" + mailerId + "_configured"))) {
                 EmailType type = createMailType(formData, mailerId);
-                EmailTrigger trigger = ExtendedEmailPublisher.EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(type);
+                EmailTrigger trigger = ExtendedEmailPublisher.EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(type, req, formData);
                 m.configuredTriggers.add(trigger);
             }
         }

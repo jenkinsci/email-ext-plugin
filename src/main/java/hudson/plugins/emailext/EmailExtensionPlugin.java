@@ -24,7 +24,6 @@
 package hudson.plugins.emailext;
 
 import hudson.Plugin;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
@@ -58,8 +57,10 @@ import hudson.plugins.emailext.plugins.trigger.FirstFailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
 import hudson.plugins.emailext.plugins.trigger.ImprovementTrigger;
 import hudson.plugins.emailext.plugins.trigger.NotBuiltTrigger;
+import hudson.plugins.emailext.plugins.trigger.PreBuildScriptTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
+import hudson.plugins.emailext.plugins.trigger.ScriptTrigger;
 import hudson.plugins.emailext.plugins.trigger.SecondFailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillUnstableTrigger;
@@ -104,11 +105,7 @@ public class EmailExtensionPlugin extends Plugin {
         addEmailContentPlugin(new WorkspaceFileContent());
         addEmailContentPlugin(new TestCountsContent());
         addEmailContentPlugin(new JobDescriptionContent());
-        try {
-            addEmailContentPlugin(new ScriptContent());
-        } catch (NoClassDefFoundError jvm15Error) {
-            System.err.println( "ScriptContent not available for JVM 1.5" );
-        }
+        addEmailContentPlugin(new ScriptContent());
 
         addEmailTriggerPlugin(PreBuildTrigger.DESCRIPTOR);
         addEmailTriggerPlugin(FailureTrigger.DESCRIPTOR);
@@ -123,6 +120,8 @@ public class EmailExtensionPlugin extends Plugin {
         addEmailTriggerPlugin(RegressionTrigger.DESCRIPTOR);
         addEmailTriggerPlugin(FirstFailureTrigger.DESCRIPTOR);
         addEmailTriggerPlugin(SecondFailureTrigger.DESCRIPTOR);
+        addEmailTriggerPlugin(ScriptTrigger.DESCRIPTOR);
+        addEmailTriggerPlugin(PreBuildScriptTrigger.DESCRIPTOR);
     }
 
     private void addEmailContentPlugin(EmailContent content) {

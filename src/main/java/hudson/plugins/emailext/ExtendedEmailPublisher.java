@@ -124,7 +124,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     public static List<EmailTrigger> getTriggersForNonConfiguredInstance() {
         List<EmailTrigger> retList = new ArrayList<EmailTrigger>();
         for (String mailerId : EMAIL_TRIGGER_TYPE_MAP.keySet()) {
-            retList.add(EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(null));
+            retList.add(EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(null, null, null));
         }
         return retList;
     }
@@ -205,7 +205,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 }
             }
             if (!contains) {
-                retList.add(EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(null));
+                retList.add(EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(null, null, null));
             }
         }
         return retList;
