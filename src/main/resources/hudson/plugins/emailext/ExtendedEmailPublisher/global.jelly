@@ -87,6 +87,11 @@
              help="/plugin/email-ext/help/globalConfig/emergencyReroute.html">
         <input class="setting-input" name="ext_mailer_emergency_reroute"
              type="text" value="${descriptor.emergencyReroute}"/>
+      </f:entry>    
+      <f:entry title="${%Eye in the Sky}"
+             help="/plugin/email-ext/help/globalConfig/systemAdministrator.html">
+        <input class="setting-input" name="ext_mailer_system_administrator"
+             type="text" value="${descriptor.systemAdministrator}"/>
       </f:entry>      
       <f:entry title="${%Default Subject}"
                help="/plugin/email-ext/help/globalConfig/defaultSubject.html">

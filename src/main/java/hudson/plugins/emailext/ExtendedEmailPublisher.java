@@ -88,6 +88,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             + "Check console output at $BUILD_URL to view the results.";
 
     public static final String DEFAULT_EMERGENCY_REROUTE_TEXT = "";
+    
+    public static final String DEFAULT_SYSTEM_ADMINISTRATOR_TEXT = "";
 	
     public static final String PROJECT_DEFAULT_SUBJECT_TEXT = "$PROJECT_DEFAULT_SUBJECT";
 
@@ -539,6 +541,19 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
           recipientAddresses.clear();
           addAddressesFromRecipientList(recipientAddresses, ccAddresses, emergencyReroute, env, listener);
           listener.getLogger().println("Emergency reroute is set to: " + emergencyReroute);
+        }
+        
+        //Adding sys admin below emergency reroute so that it ALWAYS gets email.
+        String sysAdmin = ExtendedEmailPublisher.DESCRIPTOR.getSystemAdministrator();
+        boolean isSysAdmin = StringUtils.isNotBlank(sysAdmin);
+        
+        //Not using getAdminAddress so that we can configure emails, and send-to-all email.
+        //If we want less flexibility, use this.
+        //String sysAdmin = ExtendedEmailPublisher.DESCRIPTOR.getAdminAddress();
+        if (isSysAdmin) {
+          debug(listener.getLogger(), "Sending to System Administrator");
+          addAddressesFromRecipientList(recipientAddresses, ccAddresses, sysAdmin, env, listener);
+          listener.getLogger().println("System Admin email is set to: " + sysAdmin);
         }
         
         msg.setRecipients(Message.RecipientType.TO, recipientAddresses.toArray(new InternetAddress[recipientAddresses.size()]));
