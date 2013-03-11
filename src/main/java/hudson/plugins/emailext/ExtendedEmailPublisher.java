@@ -553,7 +553,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         if (isSysAdmin) {
           debug(listener.getLogger(), "Sending to System Administrator");
           addAddressesFromRecipientList(recipientAddresses, ccAddresses, sysAdmin, env, listener);
-          listener.getLogger().println("System Admin email is set to: " + sysAdmin);
+          debug(listener.getLogger(), "System Admin email is set to: " + sysAdmin);
         }
         
         msg.setRecipients(Message.RecipientType.TO, recipientAddresses.toArray(new InternetAddress[recipientAddresses.size()]));
