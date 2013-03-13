@@ -1,0 +1,12 @@
+<div>
+  設定何時觸發矩陣作業的下游建置:
+  <ul>
+  	<li>ONLY_PARENT: 只在上層完成時觸發一次</li>
+  	<li>ONLY_CONFIGURATIONS: 每一組設定都觸發</li>
+  	<li>BOTH: 上面兩項的組合</li>
+  </ul>
+	
+	注意: 只有在下游專案不在建置佇列時才會觸發。
+	所以，即使您選擇 <code>ONLY_CONFIGURATIONS</code> 或
+	<code>BOTH</code>，如果您每一組設定都在很短的時間內完成，還是可能只有一個下游作業會被觸發到。
+</div>
