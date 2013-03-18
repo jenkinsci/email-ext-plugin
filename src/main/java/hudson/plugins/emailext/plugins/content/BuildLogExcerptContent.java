@@ -60,9 +60,9 @@ public class BuildLogExcerptContent implements EmailContent {
     public String getHelpText() {
         return "Displays an excerpt from the build log.\n"
                 + "<ul>\n"
-                + "<li><i>start</i> - Regular expression to match the excerpt starting line to be included (exluded). "
+                + "<li><i>start</i> - Regular expression to match the excerpt starting line (matching line is excluded). "
                 + "See <a href='http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'><i>java.util.regex.Pattern</i></a></li>"
-                + "<li><i>end</i> - Regular expression to match the excerpt ending line to be included (exluded)</li>"
+                + "<li><i>end</i> - Regular expression to match the excerpt ending line (matching line is excluded)</li>"
                 + "</ul>";
     }
 
