@@ -690,7 +690,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         // (plain text or HTML depending on the content type)
         MimeBodyPart msgPart = new MimeBodyPart();
         debug(listener.getLogger(), "messageContentType = %s", messageContentType);
-        if (messageContentType.equals("text/html")) {
+        if (messageContentType.startsWith("text/html")) {
             String inlinedCssHtml = new CssInliner().process(text);
             msgPart.setContent(inlinedCssHtml, messageContentType);
         } else {
