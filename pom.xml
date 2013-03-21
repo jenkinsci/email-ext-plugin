@@ -115,7 +115,12 @@
         <artifactId>groovy-sandbox</artifactId>
         <version>1.0</version>
       </dependency>
-  </dependencies>  
+      <dependency>
+        <groupId>org.jsoup</groupId>
+        <artifactId>jsoup</artifactId>
+        <version>1.7.2</version>
+      </dependency>
+  </dependencies>
 
   <scm>
    <connection>scm:git:https://github.com/jenkinsci/email-ext-plugin.git</connection>
