@@ -19,6 +19,12 @@ public class FirstFailureTriggerTest extends NthFailureTriggerTestBase {
 			throws IOException, InterruptedException {
 		assertNotTriggered(Result.SUCCESS);
 	}
+        
+        @Test
+	public void testTrigger_multipleSuccess()
+			throws IOException, InterruptedException {
+		assertNotTriggered(Result.SUCCESS, Result.SUCCESS, Result.SUCCESS);
+	}
 
 	@Test
 	public void testTrigger_firstFailureAfterSuccess()

@@ -47,6 +47,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.SecurityException;
+import java.net.ConnectException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -318,7 +319,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                             Transport.send(msg);
                             break;
                         } catch (SendFailedException e) {
-                            if(e.getNextException() != null && e.getNextException() instanceof SocketException) {
+                            if(e.getNextException() != null && 
+                                    ((e.getNextException() instanceof SocketException) || 
+                                    (e.getNextException() instanceof ConnectException))) {
                                 listener.getLogger().println("Socket error sending email, retrying once more in 10 seconds...");
                                 Thread.sleep(10000);
                             } else {
