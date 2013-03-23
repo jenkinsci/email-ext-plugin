@@ -106,6 +106,10 @@ try {
   </TABLE>
 <BR/>
 <% } 
+
+}catch(e) {
+	// we don't do anything
+     }
 %>
 
 <!-- CONSOLE OUTPUT -->
