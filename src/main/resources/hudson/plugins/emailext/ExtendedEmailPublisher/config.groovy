@@ -75,10 +75,10 @@ f.entry(title: _("Attachments"), help: "/plugin/email-ext/help/projectConfig/att
     input(name: "project_attachments", value: "", class: "setting-input", type: "text") 
   }
 }
-f.optionalBlock(title: _("Attach Build Log"), help: "/plugin/email-ext/help/projectConfig/attachBuildLog.html", checked: instance?.attachBuildLog) {
+f.optionalBlock(title: _("Attach Build Log"), name: "project_attach_buildlog", inline: true, help: "/plugin/email-ext/help/projectConfig/attachBuildLog.html", checked: instance?.attachBuildLog) {
   f.entry(title: _("Compress Build Log before sending"), help: "/plugin/email-ext/help/projectConfig/compressBuildLog.html") {
-  f.checkbox(name: "project_compress_buildlog", checked: instance?.compressBuildLog)
-}
+    f.checkbox(name: "project_compress_buildlog", checked: instance?.compressBuildLog)
+  }
 }
 
 def contentTokenText = hudson.plugins.emailext.EmailExtHelp.getContentTokenHelpText()
@@ -94,7 +94,8 @@ tr() {
 tr() {
   td() 
   td(colspan: "2") {
-    div(id: "${secId}contentTokenHelpConf", style: "display:none", class: "help", "${contentTokenText}") {
+    div(id: "${secId}contentTokenHelpConf", style: "display:none", class: "help") {
+      raw(contentTokenText)
       if(descriptor.isTokenMacroAvailable()) {
         br() 
         b("Token Macro Plugin Tokens") 
