@@ -2,10 +2,13 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.util.XStream2;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 public class FirstFailureTriggerTest extends NthFailureTriggerTestBase {
 
@@ -50,4 +53,14 @@ public class FirstFailureTriggerTest extends NthFailureTriggerTestBase {
 			throws IOException, InterruptedException {
 		assertNotTriggered(Result.FAILURE, Result.FAILURE);
 	}
+        
+        @Test
+        public void testUpgrade() 
+                        throws IOException, InterruptedException {
+            
+            XStream2 xs = new XStream2();
+            InputStream is = FirstFailureTriggerTest.class.getResourceAsStream("oldformat.xml");
+            FirstFailureTrigger t = (FirstFailureTrigger)xs.fromXML(is);
+            assertEquals(t.failureCount, 1);
+        }
 }

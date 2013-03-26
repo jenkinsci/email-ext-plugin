@@ -36,7 +36,17 @@ public class FirstFailureTrigger extends NthFailureTrigger {
 		public String getHelpText() {
 			return "An email will be sent when the build status changes from \"Success\" " +
 				   "to \"Failure\"";
-		}
-		
+		}		
 	}
+        
+        /**
+         * Maintaining backward compatibility
+         * @return this after checking for failureCount setting
+         */
+        public Object readResolve() {
+            if(this.failureCount == 0) {
+                this.failureCount = 1;
+            }
+            return this;
+        }
 }

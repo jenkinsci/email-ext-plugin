@@ -11,8 +11,8 @@ import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
  */
 public abstract class NthFailureTrigger extends EmailTrigger {
 
-    private final int failureCount;
-
+    protected int failureCount;
+    
     public NthFailureTrigger(int failureCount) {
         this.failureCount = failureCount;
     }
@@ -41,7 +41,6 @@ public abstract class NthFailureTrigger extends EmailTrigger {
         if (build == null || build.getResult() == Result.SUCCESS) {
             return true;
         }
-
         return false;
     }
 
