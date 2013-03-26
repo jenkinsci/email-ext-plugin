@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins.content;
 
 import groovy.lang.Binding;
+import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -35,7 +36,6 @@ import java.util.logging.Logger;
 import javax.script.ScriptException;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
-import org.codehaus.groovy.runtime.MethodClosure;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 
 public class ScriptContent implements EmailContent {
@@ -105,6 +105,8 @@ public class ScriptContent implements EmailContent {
         } catch (ScriptException e) {
             LOGGER.log(Level.SEVERE, null, e);
             return "Exception: " + e.getMessage();
+        } catch(GroovyRuntimeException e) {
+            return "Error in script or template: " + e.toString();
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
