@@ -102,9 +102,6 @@ public class ScriptContent implements EmailContent {
             String missingScriptError = generateMissingFile(scriptName, templateName);
             LOGGER.log(Level.SEVERE, missingScriptError);
             return missingScriptError;
-        } catch (ScriptException e) {
-            LOGGER.log(Level.SEVERE, null, e);
-            return "Exception: " + e.getMessage();
         } catch(GroovyRuntimeException e) {
             return "Error in script or template: " + e.toString();
         } finally {
@@ -137,7 +134,7 @@ public class ScriptContent implements EmailContent {
 
     private String renderContent(AbstractBuild<?, ?> build, ExtendedEmailPublisher publisher,
             InputStream inputStream, String scriptName, String templateName, boolean runInit)
-            throws ScriptException, IOException {
+            throws IOException {
         String rendered = "";
         GroovyShell engine = createEngine(scriptName, templateName, runInit,
                 new ScriptContentBuildWrapper(build), build, publisher);
