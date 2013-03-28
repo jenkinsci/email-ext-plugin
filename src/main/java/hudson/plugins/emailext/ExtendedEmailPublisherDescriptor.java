@@ -446,7 +446,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         }
     }
 
-    public boolean isMatrixProject(AbstractProject<?, ?> project) {
+    public boolean isMatrixProject(Object project) {
         return project instanceof MatrixProject;
     }
 
