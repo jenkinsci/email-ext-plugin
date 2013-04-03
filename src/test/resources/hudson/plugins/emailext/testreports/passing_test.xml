@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites errors="1" failures="1" tests="3" time="45">
+    <testsuite errors="0" failures="0" hostname="localhost" id="0" name="base_test_1" package="testdb" tests="3" timestamp="2012-11-15T01:02:29">
+        <properties>
+            <property name="assert-passed" value="1"/>
+        </properties>
+        <testcase classname="testdb.directory" name="001-passed-test" time="10"/>
+        <testcase classname="testdb.directory" name="002-passed-test" time="20"/>
+        <testcase classname="package.directory" name="003-passed-test" time="15"/>
+    </testsuite>
+</testsuites>

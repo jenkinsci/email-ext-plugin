@@ -199,6 +199,7 @@ public class ScriptContent implements EmailContent {
         binding.setVariable("host", this);
         binding.setVariable("publisher", publisher);
         binding.setVariable("template", templateName);
+        binding.setVariable("cl", cl);
 
         GroovyShell shell = new GroovyShell(cl, binding, cc);
         StringWriter out = new StringWriter();

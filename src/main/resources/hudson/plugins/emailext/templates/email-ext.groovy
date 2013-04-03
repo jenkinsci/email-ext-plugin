@@ -15,5 +15,5 @@ ContentBuilder.emailContentTypes.each { content ->
     })
 }
 
-def engine = new SimpleTemplateEngine()
+def engine = new SimpleTemplateEngine(cl)
 engine.createTemplate(host.readFile(template)).make(binding).toString()
