@@ -105,7 +105,7 @@ public class ScriptContentTest
             throws Exception
     {
         args.put(ScriptContent.SCRIPT_NAME_ARG, "script-does-not-exist");
-        assertEquals("Script [script-does-not-exist] or template [groovy-html.template] was not found in $JENKINS_HOME/email-templates.", 
+        assertEquals("Script [script-does-not-exist] was not found in $JENKINS_HOME/email-templates.", 
             scriptContent.getContent(mock(AbstractBuild.class), publisher, null, args));
     }
 
@@ -114,8 +114,39 @@ public class ScriptContentTest
             throws Exception
     {
         args.put(ScriptContent.SCRIPT_TEMPLATE_ARG, "template-does-not-exist");
-        assertEquals("Script [email-ext.groovy] or template [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.", 
+        assertEquals("Template [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.", 
             scriptContent.getContent(mock(AbstractBuild.class), publisher, null, args));
+    }
+    
+    @Test
+    public void testGroovyTemplateWithContentToken()
+            throws Exception
+    {
+        args.put(ScriptContent.SCRIPT_TEMPLATE_ARG, "content-token.template");
+        
+        // mock the build 
+        AbstractBuild build = mock(AbstractBuild.class);
+        when(build.getResult()).thenReturn(Result.SUCCESS);
+        when(build.getUrl()).thenReturn("email-test/34");
+        when(build.getId()).thenReturn("34");
+        
+        // mock changeSet
+        mockChangeSet(build);
+        
+        // generate result from groovy template
+        String content = scriptContent.getContent(build, publisher, null, args);
+
+        // read expected file in resource to easy compare
+        String expectedFile = "hudson/plugins/emailext/templates/" + "content-token.result";
+        InputStream in = getClass().getClassLoader().getResourceAsStream(expectedFile);
+        String expected = new Scanner(in).useDelimiter("\\Z").next();
+        
+        // windows has a \r in each line, so make sure the comparison works correctly
+        if(Functions.isWindows()) { 
+            expected = expected.replace("\r", "");
+        }
+        // remove end space before compare
+        assertEquals(expected.trim(), content.trim());
     }
     
     /**
@@ -125,12 +156,12 @@ public class ScriptContentTest
     @Test
     public void testWithGroovyTemplate() throws Exception {
         args.put(ScriptContent.SCRIPT_TEMPLATE_ARG, "groovy-sample.template");
-        args.put(ScriptContent.SCRIPT_INIT_ARG, false);
 
         // mock the build 
         AbstractBuild build = mock(AbstractBuild.class);
         when(build.getResult()).thenReturn(Result.SUCCESS);
         when(build.getUrl()).thenReturn("email-test/34");
+        when(build.getId()).thenReturn("34");
         
         // mock changeSet
         mockChangeSet(build);

@@ -1,14 +1,18 @@
 package hudson.plugins.emailext.plugins.content;
 
 import groovy.lang.Binding;
+import groovy.lang.Closure;
 import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
+import groovy.lang.Writable;
+import groovy.text.SimpleTemplateEngine;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Hudson;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ScriptSandbox;
+import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.EmailContent;
 
 import jenkins.model.Jenkins;
@@ -21,21 +25,18 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Writer;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.script.ScriptException;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.codehaus.groovy.runtime.MethodClosure;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 
 public class ScriptContent implements EmailContent {
@@ -43,10 +44,8 @@ public class ScriptContent implements EmailContent {
     private static final Logger LOGGER = Logger.getLogger(ScriptContent.class.getName());
     public static final String SCRIPT_NAME_ARG = "script";
     public static final String SCRIPT_TEMPLATE_ARG = "template";
-    public static final String SCRIPT_INIT_ARG = "init";
     private static final String DEFAULT_SCRIPT_NAME = "email-ext.groovy";
     private static final String DEFAULT_TEMPLATE_NAME = "groovy-html.template";
-    private static final boolean DEFAULT_INIT_VALUE = true;
     private static final String EMAIL_TEMPLATES_DIRECTORY = "email-templates";
 
     public String getToken() {
@@ -69,8 +68,6 @@ public class ScriptContent implements EmailContent {
                 + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Defaults to \"" + DEFAULT_SCRIPT_NAME + "\".</li>\n"
                 + "<li><i>" + SCRIPT_TEMPLATE_ARG + "</i> - the template filename.<br>\n"
                 + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Defaults to \"" + DEFAULT_TEMPLATE_NAME + "\"</li>\n"
-                + "<li><i>" + SCRIPT_INIT_ARG + "</i> - true to run the language's init script.<br>\n"
-                + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Defaults to " + DEFAULT_INIT_VALUE + "</li>\n"
                 + "</ul>\n");
         return helpText.toString();
     }
@@ -79,7 +76,6 @@ public class ScriptContent implements EmailContent {
         List<String> args = new ArrayList<String>();
         args.add(SCRIPT_NAME_ARG);
         args.add(SCRIPT_TEMPLATE_ARG);
-        args.add(SCRIPT_INIT_ARG);
         return args;
     }
 
@@ -87,30 +83,42 @@ public class ScriptContent implements EmailContent {
             throws IOException, InterruptedException {
 
         InputStream inputStream = null;
-        InputStream templateStream = null;
-        String scriptName = Args.get(args, SCRIPT_NAME_ARG, DEFAULT_SCRIPT_NAME);
+        String result = "";
+        String scriptName = Args.get(args, SCRIPT_NAME_ARG, "");
         String templateName = Args.get(args, SCRIPT_TEMPLATE_ARG, DEFAULT_TEMPLATE_NAME);
-        boolean runInit = Args.get(args, SCRIPT_INIT_ARG, DEFAULT_INIT_VALUE);
 
         try {
-            inputStream = getFileInputStream(scriptName);
-            // sanity check on template as well
-            templateStream = getFileInputStream(templateName);
-            IOUtils.closeQuietly(templateStream);
-            return renderContent(build, publisher, inputStream, scriptName, templateName, runInit);
+            if (!StringUtils.isEmpty(scriptName)) {
+                inputStream = getFileInputStream(scriptName);
+                result = executeScript(build, inputStream);
+            } else {
+                inputStream = getFileInputStream(templateName);
+                result = renderTemplate(build, inputStream);
+            }
         } catch (FileNotFoundException e) {
             String missingScriptError = generateMissingFile(scriptName, templateName);
             LOGGER.log(Level.SEVERE, missingScriptError);
-            return missingScriptError;
-        } catch(GroovyRuntimeException e) {
-            return "Error in script or template: " + e.toString();
+            result = missingScriptError;
+        } catch (GroovyRuntimeException e) {
+            result = "Error in script or template: " + e.toString();
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
+        return result;
     }
 
+    /**
+     * Generates a missing file error message
+     *
+     * @param script name of the script requested
+     * @param template name of the template requested
+     * @return a message about the missing file
+     */
     private String generateMissingFile(String script, String template) {
-        return "Script [" + script + "] or template [" + template + "] was not found in $JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ".";
+        if (!StringUtils.isEmpty(script)) {
+            return "Script [" + script + "] was not found in $JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ".";
+        }
+        return "Template [" + template + "] was not found in $JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ".";
     }
 
     /**
@@ -131,50 +139,80 @@ public class ScriptContent implements EmailContent {
         }
         return inputStream;
     }
+    
+    /**
+     * Closure class so that content tokens will work as functions
+     * in the templates.
+     */
+    private class ContentClosure extends Closure {
+        private EmailContent content;
+        private AbstractBuild<?, ?> build;
+        
+        public ContentClosure(EmailContent content, AbstractBuild<?,?> build) {
+            super(content);
+            this.content = content;
+            this.build = build;
+        }
+        
+        /**
+         * This method will be called from Groovy when a content token is used.
+         * @param params the arguments for the content token.
+         * @return the rendered content token
+         */
+        public Object doCall(Object params) {            
+            String result;
+            try {
+                Map args = (Map)params;
+                result = content.getContent(build, null, null, args);
+            } catch(Exception e) {
+                result = "[Error processing token: " + content.getToken() + "]";
+            }
+            return result;
+        }
+    }
 
-    private String renderContent(AbstractBuild<?, ?> build, ExtendedEmailPublisher publisher,
-            InputStream inputStream, String scriptName, String templateName, boolean runInit)
+    /**
+     * Renders the template using a SimpleTemplateEngine
+     *
+     * @param build the build to act on
+     * @param templateStream the template file stream
+     * @return the rendered template content
+     * @throws IOException
+     */
+    private String renderTemplate(AbstractBuild<?, ?> build, InputStream templateStream)
             throws IOException {
-        String rendered = "";
-        GroovyShell engine = createEngine(scriptName, templateName, runInit,
-                new ScriptContentBuildWrapper(build), build, publisher);
-        if (engine != null) {
-            try {
-                Object res = engine.evaluate(new InputStreamReader(inputStream));
-                if (res != null) {
-                    rendered = res.toString();
-                } 
-            } finally {
-                IOUtils.closeQuietly(inputStream);
-            }
+        Map binding = new HashMap<String, Object>();
+
+        binding.put("build", build);
+        binding.put("it", new ScriptContentBuildWrapper(build));
+        binding.put("project", build.getParent());
+        binding.put("rooturl", ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl());
+        
+        // add the content tokens as closures
+        for(EmailContent content : ContentBuilder.getEmailContentTypes()) {
+            binding.put(content.getToken(), new ContentClosure(content, build));
         }
-        return rendered;
+        
+        // we add the binding to the SimpleTemplateEngine instead of the shell
+        GroovyShell shell = createEngine(Collections.EMPTY_MAP);
+        SimpleTemplateEngine engine = new SimpleTemplateEngine(shell);
+
+        Writable w = engine.createTemplate(new InputStreamReader(templateStream)).make(binding);
+        StringWriter content = new StringWriter();
+        w.writeTo(content);
+
+        return content.toString();
     }
 
-    public String readFile(String fileName)
-            throws FileNotFoundException, IOException, UnsupportedEncodingException {
-        String result = "";
-        InputStream inputStream = getFileInputStream(fileName);
-        if (inputStream != null) {
-            Writer writer = new StringWriter();
-            char[] buffer = new char[2048];
-            try {
-                Reader reader = new BufferedReader(
-                        new InputStreamReader(inputStream, "UTF-8"));
-                int n;
-                while ((n = reader.read(buffer)) != -1) {
-                    writer.write(buffer, 0, n);
-                }
-                result = writer.toString();
-            } finally {
-                IOUtils.closeQuietly(inputStream);
-            }
-        }
-        return result;
-    }
-
-    private GroovyShell createEngine(String scriptName, String templateName, boolean runInit,
-            Object it, AbstractBuild<?, ?> build, ExtendedEmailPublisher publisher)
+    /**
+     * Creates an engine (GroovyShell) to be used to execute Groovy code
+     *
+     * @param variables user variables to be added to the Groovy context
+     * @return a GroovyShell instance
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    private GroovyShell createEngine(Map<String, Object> variables)
             throws FileNotFoundException, IOException {
 
         ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
@@ -192,54 +230,43 @@ public class ScriptContent implements EmailContent {
         }
 
         Binding binding = new Binding();
-        binding.setVariable("build", build);
-        binding.setVariable("it", it);
-        binding.setVariable("project", build.getParent());
-        binding.setVariable("rooturl", ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl());
-        binding.setVariable("host", this);
-        binding.setVariable("publisher", publisher);
-        binding.setVariable("template", templateName);
-        binding.setVariable("cl", cl);
+        for (Map.Entry<String, Object> e : variables.entrySet()) {
+            binding.setVariable(e.getKey(), e.getValue());
+        }
 
         GroovyShell shell = new GroovyShell(cl, binding, cc);
-        StringWriter out = new StringWriter();
-        PrintWriter pw = new PrintWriter(out);
-
         if (sandbox != null) {
             sandbox.register();
         }
-
-        if (runInit) {
-            InputStream initFile = null;
-            try {
-                initFile = getFileInputStream("groovy/init.groovy");
-                if (initFile != null) {
-                    shell.evaluate(new InputStreamReader(initFile));
-                }
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Exception on init file: {0}", e.toString());
-            } finally {
-                IOUtils.closeQuietly(initFile);
-            }
-        }
-
         return shell;
+    }
+
+    /**
+     * Executes a script and returns the last value as a String
+     *
+     * @param build the build to act on
+     * @param scriptStream the script input stream
+     * @return a String containing the toString of the last item in the script
+     * @throws IOException
+     */
+    private String executeScript(AbstractBuild<?, ?> build, InputStream scriptStream)
+            throws IOException {
+        String result = "";
+        Map binding = new HashMap<String, Object>();
+        binding.put("build", build);
+        binding.put("it", new ScriptContentBuildWrapper(build));
+        binding.put("project", build.getParent());
+        binding.put("rooturl", ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl());
+
+        GroovyShell shell = createEngine(binding);
+        Object res = shell.evaluate(new InputStreamReader(scriptStream));
+        if (res != null) {
+            result = res.toString();
+        }
+        return result;
     }
 
     public boolean hasNestedContent() {
         return false;
-    }
-
-    private String join(List<String> s, String delimiter) {
-        if (s.isEmpty()) {
-            return "";
-        }
-        Iterator<String> iter = s.iterator();
-        StringBuilder builder = new StringBuilder(iter.next());
-        while (iter.hasNext()) {
-            builder.append(delimiter);
-            builder.append(iter.next());
-        }
-        return builder.toString();
     }
 }
