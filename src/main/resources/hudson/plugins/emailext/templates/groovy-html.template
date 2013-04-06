@@ -80,7 +80,7 @@ try {
   def mbuilds = build.moduleBuilds
   if(mbuilds != null) { %>
   <TABLE width="100%">
-      <TR><TD class="bg1"><B>BUILD ATRIFACTS</B></TD></TR>
+      <TR><TD class="bg1"><B>BUILD ARTIFACTS</B></TD></TR>
 <% 
     try {  
         mbuild.each() { m -> %>	  
