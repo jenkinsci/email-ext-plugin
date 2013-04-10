@@ -56,6 +56,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -518,7 +519,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             
             for (User user : users) {
                 String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
-                if(userAddress != null){
+                if (userAddress != null && !isExcludedCommitter(user.getFullName())) {
                     addAddressesFromRecipientList(recipientAddresses, ccAddresses, userAddress, env, listener);
                 } else {
                     listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
@@ -598,6 +599,16 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         return msg;
+    }
+
+    private boolean isExcludedCommitter(String userName) {
+        StringTokenizer tokens = new StringTokenizer(DESCRIPTOR.getExcludedCommitters(), ",");
+        while (tokens.hasMoreTokens()) {
+            if (tokens.nextToken().trim().equalsIgnoreCase(userName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void addUserTriggeringTheBuild(AbstractBuild<?, ?> build, Set<InternetAddress> recipientAddresses, Set<InternetAddress> ccAddresses,
