@@ -1,7 +1,9 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.TaskListener;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailContent;
@@ -38,7 +40,17 @@ public class WorkspaceFileContent implements EmailContent {
         String path = Args.get(args, VAR_PATH_NAME, null);
         if (path == null) {
             throw new IllegalArgumentException("FILE token requires the " + VAR_PATH_NAME + " parameter");
-        } else if(!build.getWorkspace().child(path).exists()) {
+        } 
+        
+        EnvVars env;
+        try {
+            env = build.getEnvironment(TaskListener.NULL);
+        } catch(Exception e) {
+            env = new EnvVars();
+        }
+        
+        path = env.expand(path);        
+        if(!build.getWorkspace().child(path).exists()) {
             return "ERROR: File '" + path + "' does not exist";
         }
 
