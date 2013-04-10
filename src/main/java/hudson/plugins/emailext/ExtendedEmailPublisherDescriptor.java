@@ -110,6 +110,12 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
      */
     private String defaultReplyTo = "";
 
+    /*
+     * This is a global excluded committers list for not sending commit emails.
+     */
+    private String excludedCommitters = "";
+
+
     private boolean overrideGlobalSettings;
     
     /**
@@ -242,6 +248,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     
     public String getDefaultRecipients() {
         return recipientList;
+    }
+
+    public String getExcludedCommitters() {
+        return excludedCommitters;
     }
 
     public boolean getOverrideGlobalSettings() {
@@ -392,6 +402,8 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
 
         precedenceBulk = req.getParameter("extmailer.addPrecedenceBulk") != null;
         enableSecurity = req.getParameter("ext_mailer_security_enabled") != null;
+
+        excludedCommitters = req.getParameter("ext_mailer_excluded_committers");
 
         // specify List-ID information
         if (req.getParameter("extmailer.useListID") != null) {
