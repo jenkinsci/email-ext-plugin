@@ -1,64 +1,41 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.plugins.emailext.EmailType;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailContent;
-import hudson.tasks.Mailer;
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.EmailToken;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 /**
  * An EmailContent for build log. Shows last 250 lines of the build log file.
  * 
  * @author dvrzalik
  */
-public class BuildLogContent implements EmailContent {
+@EmailToken
+public class BuildLogContent extends DataBoundTokenMacro {
 
-    private static final Logger LOGGER = Logger.getLogger(Mailer.class.getName());
-
-    public static final String TOKEN = "BUILD_LOG";
-
-    public static final String MAX_LINES_ARG_NAME = "maxLines";
-
-    public static final String ESCAPE_HTML_ARG_NAME = "escapeHtml";
-
+    public static final String MACRO_NAME = "BUILD_LOG";
+    
     public static final int MAX_LINES_DEFAULT_VALUE = 250;
 
-    public static final boolean ESCAPE_HTML_DEFAULT_VALUE = false;
+    @Parameter
+    public int maxLines = MAX_LINES_DEFAULT_VALUE;
 
-    public String getToken() {
-        return TOKEN;
+    @Parameter
+    public boolean escapeHtml = false;
+
+    @Override
+    public boolean acceptsMacroName(String macroName) {
+        return macroName.equals(MACRO_NAME);
     }
 
-    public List<String> getArguments() {
-        return Arrays.asList(MAX_LINES_ARG_NAME, ESCAPE_HTML_ARG_NAME);
-    }
-
-    public String getHelpText() {
-        return "Displays the end of the build log.\n"
-                + "<ul>\n"
-                + "<li><i>" + MAX_LINES_ARG_NAME + "</i> - display at most this many "
-                + "lines of the log.<br>\n"
-                + "Defaults to " + MAX_LINES_DEFAULT_VALUE + ".\n"
-                + "<li><i>" + ESCAPE_HTML_ARG_NAME + "</i> - If true, HTML is escaped.<br>\n"
-                + "Defaults to " + ESCAPE_HTML_DEFAULT_VALUE + ".\n"
-                + "</ul>\n";
-    }
-
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
-            EmailType emailType, Map<String, ?> args) {
-
-        // getLog() chokes and dies if called with a number <= 0.
-        final int maxLines = Math.max(Args.get(args, MAX_LINES_ARG_NAME, MAX_LINES_DEFAULT_VALUE), 1);
-        final boolean escapeHtml = Args.get(args, ESCAPE_HTML_ARG_NAME, ESCAPE_HTML_DEFAULT_VALUE);
+    @Override
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
 
         StringBuilder buffer = new StringBuilder();
         try {
@@ -70,14 +47,10 @@ public class BuildLogContent implements EmailContent {
                 buffer.append(line);
                 buffer.append('\n');
             }
-        } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+        } catch (IOException e) {
+            listener.getLogger().append("Error getting build log data: " + e.getMessage());
         }
 
         return buffer.toString();
-    }
-
-    public boolean hasNestedContent() {
-        return false;
     }
 }

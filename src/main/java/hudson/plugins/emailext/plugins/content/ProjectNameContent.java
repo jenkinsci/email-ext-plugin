@@ -1,37 +1,30 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.plugins.emailext.EmailType;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailContent;
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.EmailToken;
+import java.io.IOException;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
-public class ProjectNameContent implements EmailContent {
+@EmailToken
+public class ProjectNameContent extends DataBoundTokenMacro {
 
-    private static final String TOKEN = "PROJECT_NAME";
+    public static final String MACRO_NAME = "PROJECT_NAME";
+    public static final String MACRO_NAME2 = "PROJECT_DISPLAY_NAME";
 
-    public String getToken() {
-        return TOKEN;
+    @Override
+    public boolean acceptsMacroName(String macroName) {
+        return macroName.equals(MACRO_NAME) || macroName.equals(MACRO_NAME2);
     }
 
-    public List<String> getArguments() {
-        return Collections.emptyList();
-    }
-
-    public String getHelpText() {
-        return "Displays the project's name.";
-    }
-
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
-            EmailType emailType, Map<String, ?> args) {
+    @Override
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
+        if(macroName.equals(MACRO_NAME2)) {
+            return build.getProject().getDisplayName();
+        } 
         return build.getProject().getFullDisplayName();
-    }
-
-    public boolean hasNestedContent() {
-        return false;
     }
 }

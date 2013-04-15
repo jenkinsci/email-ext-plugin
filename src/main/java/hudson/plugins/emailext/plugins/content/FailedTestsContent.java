@@ -1,64 +1,46 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.plugins.emailext.EmailType;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailContent;
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.EmailToken;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
+import java.io.IOException;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 /**
  * An EmailContent for failing tests. Only shows tests that have failed.
  * 
  * @author markltbaker
  */
-public class FailedTestsContent implements EmailContent {
+@EmailToken
+public class FailedTestsContent extends DataBoundTokenMacro {
 
-    private static final String TOKEN = "FAILED_TESTS";
+    @Parameter
+    public boolean showStack = true;
 
-    private static final String SHOW_STACK_NAME = "showStack";
-    private static final boolean SHOW_STACK_DEFAULT = true;
-    public static final String MAX_TESTS_ARG_NAME = "maxTests";
-    private static final String ONLY_REGRESSIONS_NAME = "onlyRegressions";
-    private static final boolean ONLY_REGRESSIONS_DEFAULT = false;
-    public static final String MAX_LENGTH_ARG_NAME = "maxLength";
+    @Parameter
+    public int maxTests = Integer.MAX_VALUE;
 
-    public String getToken() {
-        return TOKEN;
+    @Parameter
+    public boolean onlyRegressions = false;
+
+    @Parameter
+    public int maxLength = Integer.MAX_VALUE;
+
+    public static final String MACRO_NAME = "FAILED_TESTS";
+
+    @Override
+    public boolean acceptsMacroName(String macroName) {
+        return macroName.equals(MACRO_NAME);
     }
 
-    public List<String> getArguments() {
-        return Arrays.asList(SHOW_STACK_NAME, MAX_TESTS_ARG_NAME, ONLY_REGRESSIONS_NAME);
-    }
+    @Override
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
 
-    public String getHelpText() {
-        return "Displays failing unit test information, if any tests have failed.\n"
-                + "<ul>\n"
-                + "<li><i>" + SHOW_STACK_NAME + "</i> - indicates that "
-                + "most recent builds should be at the top.<br>\n"
-                + "Defaults to " + SHOW_STACK_DEFAULT + ".\n"
-                + "<li><i>" + ONLY_REGRESSIONS_NAME + "</i> - indicates that "
-                + "only regressions compared to the previous builds should be shown.<br>\n"
-                + "Defaults to " + SHOW_STACK_DEFAULT + ".\n"
-                + "<li><i>" + MAX_TESTS_ARG_NAME + "</i> - display at most this many failing tests.<br>\n"
-                + "No limit is set by default.</li>\n"
-                + "<li><i>" + MAX_LENGTH_ARG_NAME + "</i> - display at most this much KB of failing test data.<br/>\n"
-                + "No limit is set by default. Setting \"50\" for the argument value would mean 50KB of data would be the max</li>\n"
-                + "</ul>\n";
-    }
-
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(
-            AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
-            EmailType emailType, Map<String, ?> args) {
-
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         AbstractTestResultAction<?> testResult = build.getTestResultAction();
 
         if (null == testResult) {
@@ -74,10 +56,7 @@ public class FailedTestsContent implements EmailContent {
             buffer.append(" tests failed.");
             buffer.append('\n');
 
-            boolean showStacks = Args.get(args, SHOW_STACK_NAME, SHOW_STACK_DEFAULT);
-            int maxTests = Args.get(args, MAX_TESTS_ARG_NAME, Integer.MAX_VALUE);
-            int maxLength = Args.get(args, MAX_LENGTH_ARG_NAME, Integer.MAX_VALUE);
-            boolean showOldFailures = !Args.get(args, ONLY_REGRESSIONS_NAME, ONLY_REGRESSIONS_DEFAULT);
+            boolean showOldFailures = !onlyRegressions;
             if(maxLength < Integer.MAX_VALUE) {
                 maxLength *= 1024;
             }
@@ -88,7 +67,7 @@ public class FailedTestsContent implements EmailContent {
                 for (CaseResult failedTest : testResult.getFailedTests()) {
                     if (showOldFailures || failedTest.getAge() == 1) {
                         if (printedTests < maxTests && printedLength <= maxLength) {
-                            printedLength += outputTest(buffer, failedTest, showStacks, maxLength-printedLength);
+                            printedLength += outputTest(buffer, failedTest, showStack, maxLength-printedLength);
                             printedTests++;
                         }
                     }
@@ -107,9 +86,9 @@ public class FailedTestsContent implements EmailContent {
         return buffer.toString();
     }
 
-    private int outputTest(StringBuffer buffer, CaseResult failedTest,
+    private int outputTest(StringBuilder buffer, CaseResult failedTest,
             boolean showStack, int lengthLeft) {
-        StringBuffer local = new StringBuffer();
+        StringBuilder local = new StringBuilder();
         int currLength = buffer.length();
 
         local.append(failedTest.getStatus().toString());
@@ -138,9 +117,5 @@ public class FailedTestsContent implements EmailContent {
 
         buffer.append(local.toString());
         return local.length();
-    }
-
-    public boolean hasNestedContent() {
-        return false;
     }
 }

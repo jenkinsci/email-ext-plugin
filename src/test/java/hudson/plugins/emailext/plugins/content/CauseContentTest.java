@@ -3,6 +3,8 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.model.Build;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
+import hudson.model.TaskListener;
+import hudson.util.StreamTaskListener;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,39 +19,45 @@ public class CauseContentTest {
     private CauseContent causeContent;
 
     private Build build;
+    
+    private TaskListener listener;
 
     @Before
     public void setUp() {
         causeContent = new CauseContent();
-
         build = mock(Build.class);
+        listener = new StreamTaskListener(System.out);
     }
 
     @Test
-    public void shouldReturnNA_whenNoCauseActionIsFound() {
+    public void shouldReturnNA_whenNoCauseActionIsFound() 
+        throws Exception {
         when(build.getAction(CauseAction.class)).thenReturn(null);
 
-        assertEquals("N/A", causeContent.getContent(build, null, null, null));
+        assertEquals("N/A", causeContent.evaluate(build, listener, CauseContent.MACRO_NAME));
     }
 
     @Test
-    public void shouldReturnNA_whenThereIsNoCause() {
+    public void shouldReturnNA_whenThereIsNoCause() 
+        throws Exception {
         CauseAction causeAction = mock(CauseAction.class);
         when(build.getAction(CauseAction.class)).thenReturn(causeAction);
 
-        assertEquals("N/A", causeContent.getContent(build, null, null, null));
+        assertEquals("N/A", causeContent.evaluate(build, listener, CauseContent.MACRO_NAME));
     }
 
     @Test
-    public void shouldReturnSingleCause() {
+    public void shouldReturnSingleCause() 
+        throws Exception {
         CauseAction causeAction = new CauseAction(new CauseStub("Cause1"));
         when(build.getAction(CauseAction.class)).thenReturn(causeAction);
 
-        assertEquals("Cause1", causeContent.getContent(build, null, null, null));
+        assertEquals("Cause1", causeContent.evaluate(build, listener, CauseContent.MACRO_NAME));
     }
 
     @Test
-    public void shouldReturnMultipleCausesSeperatedByCommas() {
+    public void shouldReturnMultipleCausesSeperatedByCommas() 
+        throws Exception {
         CauseAction causeAction = mock(CauseAction.class);
         when(causeAction.getCauses()).thenReturn(new LinkedList<Cause>() {{
             add(new CauseStub("Cause1"));
@@ -58,7 +66,7 @@ public class CauseContentTest {
         }});
         when(build.getAction(CauseAction.class)).thenReturn(causeAction);
 
-        assertEquals("Cause1, Cause2, Cause3", causeContent.getContent(build, null, null, null));
+        assertEquals("Cause1, Cause2, Cause3", causeContent.evaluate(build, listener, CauseContent.MACRO_NAME));
     }
 
     private class CauseStub extends Cause {

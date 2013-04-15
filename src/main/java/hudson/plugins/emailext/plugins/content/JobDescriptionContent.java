@@ -1,37 +1,26 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.plugins.emailext.EmailType;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailContent;
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.EmailToken;
+import java.io.IOException;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
-public class JobDescriptionContent implements EmailContent {
+@EmailToken
+public class JobDescriptionContent extends DataBoundTokenMacro {
 
-    private static final String TOKEN = "JOB_DESCRIPTION";
+    public static final String MACRO_NAME = "JOB_DESCRIPTION";
 
-    public String getToken() {
-        return TOKEN;
+    @Override
+    public boolean acceptsMacroName(String macroName) {
+        return macroName.equals(MACRO_NAME);
     }
 
-    public List<String> getArguments() {
-        return Collections.emptyList();
-    }
-
-    public String getHelpText() {
-        return "Displays the description of the job.";
-    }
-
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
-            EmailType emailType, Map<String, ?> args) {
+    @Override
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
         return build.getParent().getDescription();
-    }
-
-    public boolean hasNestedContent() {
-        return false;
     }
 }

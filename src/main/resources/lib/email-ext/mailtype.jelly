@@ -14,7 +14,7 @@
 
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
 	xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
-	xmlns:f="/lib/form" xmlns:m="/hudson/plugins/emailext/tags">
+	xmlns:f="/lib/form" xmlns:m="/lib/email-ext">
 
 	<j:set var="rowShown" value="" />
 	<j:if test="${configured != true}">

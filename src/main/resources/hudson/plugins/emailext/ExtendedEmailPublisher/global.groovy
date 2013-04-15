@@ -5,6 +5,7 @@ j = namespace("jelly:core")
 l = namespace("/lib/layout")
 st = namespace("jelly:stapler")
 t = namespace("/lib/hudson")
+m = namespace("/lib/email-ext")
 
 f.section(title: _("Extended E-mail Notification")) {
   script(src: "${rootURL}/plugin/email-ext/scripts/emailext-behavior.js", type: "text/javascript") 
@@ -91,17 +92,9 @@ f.section(title: _("Extended E-mail Notification")) {
   }
   tr() {
     td() 
-    td(colspan: "2") {
-      def contentTokenText = hudson.plugins.emailext.EmailExtHelp.getGlobalContentTokenHelpText()
+    td(colspan: "2") {      
       div(style: "display:none", id: "contentTokenHelpConf", class: "help") {
-        raw(contentTokenText)
-        if(descriptor.isTokenMacroAvailable()){
-          br() 
-          b("Token Macro Plugin Tokens") 
-          br() 
-          br() 
-          namespace("/lib/token-macro").help() 
-        }
+        m.tokenhelp(displayDefaultTokens: false)
       }
     }
     td() 

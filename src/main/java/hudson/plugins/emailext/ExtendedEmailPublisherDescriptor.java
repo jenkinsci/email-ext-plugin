@@ -1,10 +1,8 @@
 package hudson.plugins.emailext;
 
 import hudson.Plugin;
-import hudson.PluginWrapper;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
-import hudson.model.Hudson;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
@@ -144,7 +142,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
 
     public String getDefaultSuffix() {
         return defaultSuffix;
-    }    
+    }
 
     /**
      * JavaMail session.

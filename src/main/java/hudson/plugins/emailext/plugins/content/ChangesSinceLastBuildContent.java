@@ -2,92 +2,76 @@ package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
 import hudson.model.AbstractBuild.DependencyChange;
-import hudson.plugins.emailext.EmailType;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.EmailToken;
 import hudson.plugins.emailext.Util;
-import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.scm.ChangeLogSet;
+import java.io.IOException;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
+import org.sonatype.aether.util.StringUtils;
 
-public class ChangesSinceLastBuildContent
-        implements EmailContent {
-
-    public static final String TOKEN = "CHANGES";
-
-    public static final String SHOW_PATHS_ARG_NAME = "showPaths";
-
-    public static final boolean SHOW_PATHS_DEFAULT_VALUE = false;
-
-    public static final String FORMAT_ARG_NAME = "format";
-
+@EmailToken
+public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
+    
     public static final String FORMAT_DEFAULT_VALUE = "[%a] %m\\n";
-
+    public static final String PATH_FORMAT_DEFAULT_VALUE = "\\t%p\\n";
     public static final String FORMAT_DEFAULT_VALUE_WITH_PATHS = "[%a] %m%p\\n";
 
-    public static final String PATH_FORMAT_ARG_NAME = "pathFormat";
+    public static final String MACRO_NAME = "CHANGES";
 
-    public static final String PATH_FORMAT_DEFAULT_VALUE = "\\t%p\\n";
-
-    public static final String SHOW_DEPENDENCIES_NAME = "showDependencies";
-    public static final boolean SHOW_DEPENDENCIES_VALUE = false;
-
-    public String getToken() {
-        return TOKEN;
+    @Parameter
+    public boolean showPaths = false;
+    @Parameter
+    public String format;
+    @Parameter 
+    public String pathFormat = PATH_FORMAT_DEFAULT_VALUE;
+    @Parameter
+    public boolean showDependencies = false;    
+    
+    public ChangesSinceLastBuildContent() {
+        
+    }
+    
+    public ChangesSinceLastBuildContent(String format, String pathFormat, boolean showPaths) {
+        this.format = format;
+        this.pathFormat = pathFormat;
+        this.showPaths = showPaths;
     }
 
-    public List<String> getArguments() {
-        return Arrays.asList(SHOW_PATHS_ARG_NAME, SHOW_DEPENDENCIES_NAME, FORMAT_ARG_NAME, PATH_FORMAT_ARG_NAME);
+    @Override
+    public boolean acceptsMacroName(String macroName) {
+        return macroName.equals(MACRO_NAME);
     }
 
-    public String getHelpText() {
-        return "Displays the changes since the last build.\n" + "<ul>\n"                 
-                + "<li><i>" + SHOW_DEPENDENCIES_NAME + "</i> - if true, changes to "
-                + "projects this build depends on are shown.<br>\n"
-                + "Defaults to " + SHOW_DEPENDENCIES_VALUE + ".\n"
-                + "<li><i>" + SHOW_PATHS_ARG_NAME + "</i> - if true, the paths " + "modified by a commit are shown.<br>\n"
-                + "Defaults to " + SHOW_PATHS_DEFAULT_VALUE + ".\n"
-                + "<li><i>" + FORMAT_ARG_NAME + "</i> - for each commit listed, "
-                + "a string containing %X, where %X is one of %a for author, "
-                + "%d for date, %m for message, %p for paths, or %r for revision.  "
-                + "Not all revision systems support %d and %r.  If specified, " + "<i>" + SHOW_PATHS_ARG_NAME
-                + "</i> is ignored.<br>\n" + "Defaults to \"" + FORMAT_DEFAULT_VALUE + "\".\n"
-                + "<li><i>" + PATH_FORMAT_ARG_NAME + "</i> - a string containing "
-                + "%p to indicate how to print paths.<br>\n" + "Defaults to \"" + PATH_FORMAT_DEFAULT_VALUE + "\".\n"
-                + "</ul>\n";
-    }
+    @Override
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
 
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(
-            AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType emailType, Map<String, ?> args) {
-        boolean showPaths = Args.get(args, SHOW_PATHS_ARG_NAME, SHOW_PATHS_DEFAULT_VALUE);
-        String formatStringDefault = showPaths ? FORMAT_DEFAULT_VALUE_WITH_PATHS : FORMAT_DEFAULT_VALUE;
-        String formatString = Args.get(args, FORMAT_ARG_NAME, formatStringDefault);
-        String pathFormatString = Args.get(args, PATH_FORMAT_ARG_NAME, PATH_FORMAT_DEFAULT_VALUE);
-
+        if(StringUtils.isEmpty(format)) {
+            format = showPaths ? FORMAT_DEFAULT_VALUE_WITH_PATHS : FORMAT_DEFAULT_VALUE;
+        }
         StringBuffer buf = new StringBuffer();
         for (ChangeLogSet.Entry entry : build.getChangeSet()) {
-            Util.printf(buf, formatString, new ChangesSincePrintfSpec(entry, pathFormatString));
+            Util.printf(buf, format, new ChangesSincePrintfSpec(entry, pathFormat));
         }
         
-        boolean showDependencies = Args.get(args, SHOW_DEPENDENCIES_NAME, SHOW_DEPENDENCIES_VALUE);
         if (showDependencies && build.getPreviousBuild() != null)
             for (Entry<AbstractProject, DependencyChange> e : build
                     .getDependencyChanges(build.getPreviousBuild()).entrySet()) {
                 buf.append("\n=======================\n");
                 buf.append("\nChanges in ").append(e.getKey().getName())
                         .append(":\n");
-                for (AbstractBuild<P, B> b : e.getValue().getBuilds()) {
+                for (AbstractBuild<?, ?> b : e.getValue().getBuilds()) {
                     for (ChangeLogSet.Entry entry : b.getChangeSet()) {
-                        Util.printf(buf, formatString,
+                        Util.printf(buf, format,
                                 new ChangesSincePrintfSpec(entry,
-                                        pathFormatString));
+                                        pathFormat));
                     }
                 }
             }
@@ -95,6 +79,7 @@ public class ChangesSinceLastBuildContent
         return buf.toString();
     }
 
+    @Override
     public boolean hasNestedContent() {
         return true;
     }
@@ -137,7 +122,6 @@ public class ChangesSinceLastBuildContent
                     Collection<String> affectedPaths = entry.getAffectedPaths();
                     for (final String affectedPath : affectedPaths) {
                         Util.printf(buf, pathFormatString, new Util.PrintfSpec() {
-
                             public boolean printSpec(StringBuffer buf, char formatChar) {
                                 if (formatChar == 'p') {
                                     buf.append(affectedPath);

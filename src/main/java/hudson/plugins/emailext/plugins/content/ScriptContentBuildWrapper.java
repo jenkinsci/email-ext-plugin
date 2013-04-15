@@ -4,7 +4,6 @@ import hudson.Functions;
 import hudson.maven.reporters.SurefireAggregatedReport;
 import hudson.model.Action;
 import hudson.model.AbstractBuild;
-import hudson.model.Hudson;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction;
@@ -12,6 +11,7 @@ import hudson.tasks.test.AggregatedTestResultAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import jenkins.model.Jenkins;
 
 public class ScriptContentBuildWrapper {
 
@@ -60,7 +60,7 @@ public class ScriptContentBuildWrapper {
      *         <code>false</code> if not.
      */
     public static boolean isPluginInstalled(final String shortName) {
-        Hudson instance = Hudson.getInstance();
+        Jenkins instance = Jenkins.getInstance();
         if (instance != null) {
             return instance.getPlugin(shortName) != null;
         }

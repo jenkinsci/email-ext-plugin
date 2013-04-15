@@ -24,33 +24,7 @@
 package hudson.plugins.emailext;
 
 import hudson.Plugin;
-import hudson.plugins.emailext.plugins.ContentBuilder;
-import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import hudson.plugins.emailext.plugins.content.BuildIdContent;
-import hudson.plugins.emailext.plugins.content.BuildLogContent;
-import hudson.plugins.emailext.plugins.content.BuildLogRegexContent;
-import hudson.plugins.emailext.plugins.content.BuildLogMultilineRegexContent;
-import hudson.plugins.emailext.plugins.content.BuildLogExcerptContent;
-import hudson.plugins.emailext.plugins.content.BuildNumberContent;
-import hudson.plugins.emailext.plugins.content.BuildStatusContent;
-import hudson.plugins.emailext.plugins.content.BuildURLContent;
-import hudson.plugins.emailext.plugins.content.CauseContent;
-import hudson.plugins.emailext.plugins.content.ChangesSinceLastBuildContent;
-import hudson.plugins.emailext.plugins.content.ChangesSinceLastSuccessfulBuildContent;
-import hudson.plugins.emailext.plugins.content.ChangesSinceLastUnstableBuildContent;
-import hudson.plugins.emailext.plugins.content.EnvContent;
-import hudson.plugins.emailext.plugins.content.FailedTestsContent;
-import hudson.plugins.emailext.plugins.content.HudsonURLContent;
-import hudson.plugins.emailext.plugins.content.JellyScriptContent;
-import hudson.plugins.emailext.plugins.content.JenkinsURLContent;
-import hudson.plugins.emailext.plugins.content.JobDescriptionContent;
-import hudson.plugins.emailext.plugins.content.ProjectNameContent;
-import hudson.plugins.emailext.plugins.content.ProjectURLContent;
-import hudson.plugins.emailext.plugins.content.SVNRevisionContent;
-import hudson.plugins.emailext.plugins.content.ScriptContent;
-import hudson.plugins.emailext.plugins.content.TestCountsContent;
-import hudson.plugins.emailext.plugins.content.WorkspaceFileContent;
 import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.FirstFailureTrigger;
@@ -81,32 +55,6 @@ import java.util.Arrays;
 public class EmailExtensionPlugin extends Plugin {
     @Override
     public void start() throws Exception {
-        //We are adding different Content plugins to the list of content types.
-        addEmailContentPlugin(new BuildIdContent());
-        addEmailContentPlugin(new BuildLogContent());
-        addEmailContentPlugin(new BuildLogRegexContent());
-        addEmailContentPlugin(new BuildLogExcerptContent());
-        addEmailContentPlugin(new BuildLogMultilineRegexContent());
-        addEmailContentPlugin(new BuildNumberContent());
-        addEmailContentPlugin(new BuildStatusContent());
-        addEmailContentPlugin(new BuildURLContent());
-        addEmailContentPlugin(new ChangesSinceLastBuildContent());
-        addEmailContentPlugin(new ChangesSinceLastSuccessfulBuildContent());
-        addEmailContentPlugin(new ChangesSinceLastUnstableBuildContent());
-        addEmailContentPlugin(new EnvContent());
-        addEmailContentPlugin(new FailedTestsContent());
-        addEmailContentPlugin(new JenkinsURLContent());
-        addEmailContentPlugin(new HudsonURLContent());
-        addEmailContentPlugin(new ProjectNameContent());
-        addEmailContentPlugin(new ProjectURLContent());
-        addEmailContentPlugin(new SVNRevisionContent());
-        addEmailContentPlugin(new CauseContent());
-        addEmailContentPlugin(new JellyScriptContent());
-        addEmailContentPlugin(new WorkspaceFileContent());
-        addEmailContentPlugin(new TestCountsContent());
-        addEmailContentPlugin(new JobDescriptionContent());
-        addEmailContentPlugin(new ScriptContent());
-
         addEmailTriggerPlugin(PreBuildTrigger.DESCRIPTOR);
         addEmailTriggerPlugin(FailureTrigger.DESCRIPTOR);
         addEmailTriggerPlugin(StillFailingTrigger.DESCRIPTOR);
@@ -122,14 +70,6 @@ public class EmailExtensionPlugin extends Plugin {
         addEmailTriggerPlugin(SecondFailureTrigger.DESCRIPTOR);
         addEmailTriggerPlugin(ScriptTrigger.DESCRIPTOR);
         addEmailTriggerPlugin(PreBuildScriptTrigger.DESCRIPTOR);
-    }
-
-    private void addEmailContentPlugin(EmailContent content) {
-        try {
-            ContentBuilder.addEmailContentType(content);
-        } catch (EmailExtException e) {
-            System.err.println(e.getMessage());
-        }
     }
 
     private void addEmailTriggerPlugin(EmailTriggerDescriptor trigger) {

@@ -1,38 +1,31 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
-import hudson.plugins.emailext.EmailType;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailContent;
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.EmailToken;
+import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
-public class CauseContent
-        implements EmailContent {
+@EmailToken
+public class CauseContent extends DataBoundTokenMacro {
 
-    private static final String TOKEN = "CAUSE";
-
-    public String getToken() {
-        return TOKEN;
+    public static final String MACRO_NAME = "CAUSE";
+    
+    @Override
+    public boolean acceptsMacroName(String macroName) {
+        return macroName.equals(MACRO_NAME);
     }
-
-    public List<String> getArguments() {
-        return Collections.emptyList();
-    }
-
-    public String getHelpText() {
-        return "Displays the cause of the build.\n";
-    }
-
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
-            EmailType emailType, Map<String, ?> args) {
+    
+    @Override
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
         List<Cause> causes = new LinkedList<Cause>();
         CauseAction causeAction = build.getAction(CauseAction.class);
         if (causeAction != null) {
@@ -53,9 +46,5 @@ public class CauseContent
         }
 
         return StringUtils.join(causeNames, ", ");
-    }
-
-    public boolean hasNestedContent() {
-        return false;
     }
 }

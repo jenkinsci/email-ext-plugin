@@ -1,9 +1,9 @@
 package hudson.plugins.emailext.plugins.content;
 
-import java.util.Collections;
 import hudson.tasks.test.AbstractTestResultAction;
-import java.io.IOException;
 import hudson.model.AbstractBuild;
+import hudson.model.TaskListener;
+import hudson.util.StreamTaskListener;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,13 +18,14 @@ import static org.mockito.Mockito.*;
 public class TestCountsContentTest {
 
     private TestCountsContent target;
-
     private AbstractBuild<?, ?> build;
+    private TaskListener listener;
 
     @Before
     public void setUp() {
         target = new TestCountsContent();
         build = mock(AbstractBuild.class);
+        listener = new StreamTaskListener(System.out);
     }
 
     @After
@@ -33,13 +34,14 @@ public class TestCountsContentTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testGetContent_NoTestResults() throws IOException, InterruptedException {
-        assertEquals("", target.getContent(build, null, null, Collections.singletonMap("var", "total")));
+    public void testGetContent_NoTestResults() throws Exception {
+        target.var = "total";
+        assertEquals("", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testGetContent() throws IOException, InterruptedException {
+    public void testGetContent() throws Exception {
         AbstractTestResultAction<?> results = mock(AbstractTestResultAction.class);
         when(results.getTotalCount()).thenReturn(5);
         when(results.getTotalCount() - results.getFailCount() - results.getSkipCount()).thenReturn(2);
@@ -47,14 +49,18 @@ public class TestCountsContentTest {
         when(results.getSkipCount()).thenReturn(1);
         when(build.getTestResultAction()).thenReturn(results);
 
-        assertEquals("5", target.getContent(build, null, null, Collections.EMPTY_MAP));
-        assertEquals("5", target.getContent(build, null, null, Collections.singletonMap("var", "total")));
-        assertEquals("2", target.getContent(build, null, null, Collections.singletonMap("var", "pass")));
-        assertEquals("2", target.getContent(build, null, null, Collections.singletonMap("var", "fail")));
-        assertEquals("1", target.getContent(build, null, null, Collections.singletonMap("var", "skip")));
-
-        assertEquals("1", target.getContent(build, null, null, Collections.singletonMap("var", "SKIP")));
-
-        assertEquals("", target.getContent(build, null, null, Collections.singletonMap("var", "wrongvar")));
+        assertEquals("5", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+        target.var = "total";
+        assertEquals("5", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+        target.var = "pass";
+        assertEquals("2", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+        target.var = "fail";
+        assertEquals("2", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+        target.var = "skip";
+        assertEquals("1", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+        target.var = "SKIP";
+        assertEquals("1", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+        target.var = "wrongvar";
+        assertEquals("", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
     }
 }

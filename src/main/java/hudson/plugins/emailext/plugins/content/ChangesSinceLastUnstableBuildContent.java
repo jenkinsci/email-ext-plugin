@@ -3,16 +3,18 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
+import hudson.plugins.emailext.EmailToken;
 
+@EmailToken
 public class ChangesSinceLastUnstableBuildContent
         extends AbstractChangesSinceContent {
 
-    private static final String TOKEN = "CHANGES_SINCE_LAST_UNSTABLE";
-
+    public static final String MACRO_NAME = "CHANGES_SINCE_LAST_UNSTABLE";
     private static final String FORMAT_DEFAULT_VALUE = "Changes for Build #%n\\n%c\\n";
 
-    public String getToken() {
-        return TOKEN;
+    @Override
+    public boolean acceptsMacroName(String macroName) {
+        return macroName.equals(MACRO_NAME);
     }
 
     @Override
@@ -22,7 +24,7 @@ public class ChangesSinceLastUnstableBuildContent
 
     @Override
     public String getShortHelpDescription() {
-        return "Displays the changes since the last unstable or successful build.";
+        return "Expands to the changes since the last unstable or successful build. ";
     }
 
     @Override

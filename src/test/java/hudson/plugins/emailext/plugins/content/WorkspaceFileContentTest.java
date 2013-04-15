@@ -5,11 +5,12 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.model.TaskListener;
+import hudson.util.StreamTaskListener;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
-import java.util.Collections;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -17,6 +18,7 @@ import java.util.Collections;
 public class WorkspaceFileContentTest extends HudsonTestCase {
     public void test1() throws Exception {
         FreeStyleProject project = createFreeStyleProject();
+        TaskListener listener = new StreamTaskListener(System.out);
         project.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
@@ -27,7 +29,9 @@ public class WorkspaceFileContentTest extends HudsonTestCase {
         FreeStyleBuild build = project.scheduleBuild2(0).get();
 
         WorkspaceFileContent content = new WorkspaceFileContent();
-        assertEquals("Hello, world!", content.getContent(build, null, null, Collections.singletonMap("path", "foo")));
-	assertEquals("ERROR: File 'no-such-file' does not exist", content.getContent(build, null, null, Collections.singletonMap("path", "no-such-file")));
+        content.path = "foo";
+        assertEquals("Hello, world!", content.evaluate(build, listener, WorkspaceFileContent.MACRO_NAME));
+        content.path = "no-such-file";
+		assertEquals("ERROR: File 'no-such-file' does not exist", content.evaluate(build, listener, WorkspaceFileContent.MACRO_NAME));
     }
 }

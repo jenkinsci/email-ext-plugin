@@ -1,7 +1,7 @@
 import hudson.plugins.emailext.plugins.EmailTrigger
 
 // Namespaces
-m = namespace("/hudson/plugins/emailext/tags")
+m = namespace("/lib/email-ext")
 l = namespace("/lib/layout")
 st = namespace("jelly:stapler")
 j = namespace("jelly:core")
@@ -81,7 +81,6 @@ f.optionalBlock(title: _("Attach Build Log"), name: "project_attach_buildlog", i
   }
 }
 
-def contentTokenText = hudson.plugins.emailext.EmailExtHelp.getContentTokenHelpText()
 tr() {
   td() 
   td(colspan: "2", _("Content Token Reference")) 
@@ -95,14 +94,7 @@ tr() {
   td() 
   td(colspan: "2") {
     div(id: "${secId}contentTokenHelpConf", style: "display:none", class: "help") {
-      raw(contentTokenText)
-      if(descriptor.isTokenMacroAvailable()) {
-        br() 
-        b("Token Macro Plugin Tokens") 
-        br() 
-        br() 
-        namespace("/lib/token-macro").help() 
-      }
+      m.tokenhelp(displayDefaultTokens: true)
     }
   }
   td() 

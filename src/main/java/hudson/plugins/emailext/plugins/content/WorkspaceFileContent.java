@@ -2,68 +2,54 @@ package hudson.plugins.emailext.plugins.content;
 
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.EmailType;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailContent;
-
+import hudson.plugins.emailext.EmailToken;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
+
 
 /**
  * Content token that includes a file in the workspace.
  *
  * @author Kohsuke Kawaguchi
  */
-public class WorkspaceFileContent implements EmailContent {
-    
+@EmailToken
+public class WorkspaceFileContent extends DataBoundTokenMacro  {
+    @Parameter(required=true)
+    public String path = "";
 
-    public String getToken() {
-        return "FILE";
+    public static final String MACRO_NAME = "FILE";
+
+    @Override
+    public boolean acceptsMacroName(String macroName) {
+        return macroName.equals(MACRO_NAME);
     }
 
-    public List<String> getArguments() {
-        return Collections.singletonList(VAR_PATH_NAME);
-    }
-
-    public String getHelpText() {
-        return "Includes the content of a specified file.\n"
-                + "<ul>\n"
-                + "<li><i>" + VAR_PATH_NAME + "</i> - The path to the file. Relative to the workspace root.\n"
-                + "</ul>\n";
-    }
-
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType emailType, Map<String, ?> args) throws IOException, InterruptedException {
-        String path = Args.get(args, VAR_PATH_NAME, null);
-        if (path == null) {
-            throw new IllegalArgumentException("FILE token requires the " + VAR_PATH_NAME + " parameter");
-        } 
-        
-        EnvVars env;
-        try {
-            env = build.getEnvironment(TaskListener.NULL);
-        } catch(Exception e) {
-            env = new EnvVars();
-        }
-        
-        path = env.expand(path);        
-        if(!build.getWorkspace().child(path).exists()) {
+    @Override
+    public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
+        if(!context.getWorkspace().child(path).exists()) {
             return "ERROR: File '" + path + "' does not exist";
         }
+        
+        // do some environment variable substitution
+        try {
+            EnvVars env = context.getEnvironment(listener);
+            path = env.expand(path);
+        } catch(Exception e) {
+            listener.error("Error retrieving environment");
+        }
 
         try {
-            return build.getWorkspace().child(path).readToString();
+            return context.getWorkspace().child(path).readToString();
         } catch (IOException e) {
-            return null;    // this includes non-existent file, among others
+            return "ERROR: File '" + path + "' could not be read";
         }
     }
 
+    @Override
     public boolean hasNestedContent() {
         return true;
     }
-
-    public static final String VAR_PATH_NAME = "path";
 }
