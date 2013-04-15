@@ -49,6 +49,7 @@ import java.net.ConnectException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -294,13 +295,13 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         for (String triggerName : triggered.keySet()) {
             listener.getLogger().println("Sending email for trigger: " + triggerName);
-            sendMail(triggered.get(triggerName).getEmail(), build, listener);
+            sendMail(triggered.get(triggerName).getEmail(), build, listener, triggered.get(triggerName), triggered);
         }
 
         return true;
     }
 
-    private boolean sendMail(EmailType mailType, AbstractBuild<?, ?> build, BuildListener listener) {
+    private boolean sendMail(EmailType mailType, AbstractBuild<?, ?> build, BuildListener listener, EmailTrigger trigger, Map<String, EmailTrigger> triggered) {
         try {
             MimeMessage msg = createMail(mailType, build, listener);
             debug(listener.getLogger(), "Successfully created MimeMessage");
@@ -312,7 +313,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     buf.append(' ').append(a);
                 }
                 listener.getLogger().println(buf);
-                if(executePresendScript(build, listener, msg)) {
+                if(executePresendScript(build, listener, msg, trigger, triggered)) {
                     while(true) {
                         try {
                             Transport.send(msg);
@@ -380,7 +381,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return false;
     }
 
-    private boolean executePresendScript(AbstractBuild<?, ?> build, BuildListener listener, MimeMessage msg) 
+    private boolean executePresendScript(AbstractBuild<?, ?> build, BuildListener listener, MimeMessage msg, EmailTrigger trigger, Map<String, EmailTrigger> triggered) 
         throws RuntimeException {
         boolean cancel = false;
         if(StringUtils.isNotBlank(presendScript)) {
@@ -405,6 +406,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             binding.setVariable("msg", msg);
             binding.setVariable("logger", listener.getLogger());
             binding.setVariable("cancel", cancel);
+            binding.setVariable("trigger", trigger);
+            binding.setVariable("triggered", Collections.unmodifiableMap(triggered));
 
             GroovyShell shell = new GroovyShell(cl, binding, cc);
             StringWriter out = new StringWriter();

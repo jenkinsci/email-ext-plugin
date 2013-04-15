@@ -144,8 +144,6 @@ public class ScriptContentTest {
             expected = expected.replace("\r", "");
         }
         
-        System.out.println(content);
-        
         // remove end space before compare
         assertEquals(expected.trim(), content.trim());
     }

@@ -110,7 +110,6 @@ public class JellyScriptContentTest
         mockChangeSet(build);
 
         String output = content.evaluate(build, listener, JellyScriptContent.MACRO_NAME);
-        System.out.println(output);
 
         assertTrue(output.contains("COMMIT MESSAGE"));
         assertTrue(output.contains("Kohsuke Kawaguchi"));
