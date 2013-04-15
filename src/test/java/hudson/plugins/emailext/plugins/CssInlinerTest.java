@@ -104,7 +104,7 @@ public class CssInlinerTest {
         "YWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAAB\n" +
         "ACwAAAAAFAAWAAACE4yPqcvtD6OctNqLs968+w+GSQEAOw==\n" +
         "\" data-inline=\"true\" /></body></html>";
-    assertEquals(unprocessedExpect.replaceAll("[\r\n]", ""), output.replaceAll("\r", "\n"));
+    assertEquals(unprocessedExpect.replaceAll("[\r\n]", ""), output.replaceAll("[\r\n]", ""));
 
   }
 
