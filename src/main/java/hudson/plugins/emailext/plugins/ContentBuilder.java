@@ -5,7 +5,6 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.EmailToken;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,6 @@ import org.jenkinsci.plugins.tokenmacro.TokenMacro;
  */
 public class ContentBuilder {
 
-    private static final Logger LOGGER = Logger.getLogger(Mailer.class.getName());
     private static final String DEFAULT_BODY = "\\$DEFAULT_CONTENT|\\$\\{DEFAULT_CONTENT\\}";
     private static final String DEFAULT_SUBJECT = "\\$DEFAULT_SUBJECT|\\$\\{DEFAULT_SUBJECT\\}";
     private static final String DEFAULT_RECIPIENTS = "\\$DEFAULT_RECIPIENTS|\\$\\{DEFAULT_RECIPIENTS\\}";

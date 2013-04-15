@@ -99,11 +99,12 @@ public class CssInlinerTest {
         "</html>";
 
     String output = process(input);
-    assertEquals("<html><head></head><body><img src=\"data:image/gif;base64," +
+    String unprocessedExpect = "<html><head></head><body><img src=\"data:image/gif;base64," +
         "R0lGODlhFAAWAKEAAP///8z//wAAAAAAACH+TlRoaXMgYXJ0IGlzIGluIHRoZSBwdWJsaWMgZG9t\n" +
         "YWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAAB\n" +
         "ACwAAAAAFAAWAAACE4yPqcvtD6OctNqLs968+w+GSQEAOw==\n" +
-        "\" data-inline=\"true\" /></body></html>", output.replaceAll("\r", "\n"));
+        "\" data-inline=\"true\" /></body></html>";
+    assertEquals(unprocessedExpect.replaceAll("[\r\n]", ""), output.replaceAll("[\r\n]", ""));
 
   }
 
