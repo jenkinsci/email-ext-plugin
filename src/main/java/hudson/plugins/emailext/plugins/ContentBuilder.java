@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import net.java.sezpoz.Index;
 import net.java.sezpoz.IndexItem;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
@@ -38,6 +39,8 @@ public class ContentBuilder {
     }
 
     public String transformText(String origText, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, TaskListener listener) {
+        if(StringUtils.isBlank(origText)) return "";
+        
         String defaultContent = Matcher.quoteReplacement(noNull(publisher.defaultContent));
         String defaultSubject = Matcher.quoteReplacement(noNull(publisher.defaultSubject));
         String defaultReplyTo = Matcher.quoteReplacement(noNull(publisher.replyTo));
