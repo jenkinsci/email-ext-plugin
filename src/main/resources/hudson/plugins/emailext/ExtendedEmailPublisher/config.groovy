@@ -110,7 +110,11 @@ f.advanced() {
   tr() {
     td(colspan: "4") {
       f.entry(title: _("Pre-send Script"), help: "/plugin/email-ext/help/projectConfig/presendScript.html") {
-        f.textarea(id: "project_presend_script", name: "project_presend_script", value: instance?.presendScript, class: "setting-input") 
+        if(instance?.configured) {
+          f.textarea(id: "project_presend_script", name: "project_presend_script", value: instance.presendScript, class: "setting-input") 
+        } else {
+          f.textarea(id: "project_presend_script", name: "project_presend_script", value: "\$DEFAULT_PRESEND_SCRIPT", class: "setting-input") 
+        }
       }
     }
   }

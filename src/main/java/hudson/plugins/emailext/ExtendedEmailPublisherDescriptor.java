@@ -89,6 +89,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     private String defaultBody;
     
     /**
+     * This is the global default pre-send script.
+     */
+    private String defaultPresendScript = "";
+    
+    /**
      * This is the global emergency email address
      */
     private String emergencyReroute;
@@ -276,15 +281,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         return true;
     }
     
-    public boolean isTokenMacroAvailable() {
-        boolean result = false;
-        Plugin tokenMacroPlugin = Jenkins.getInstance().getPlugin("token-macro");
-        if(tokenMacroPlugin != null) {
-            result = !tokenMacroPlugin.getWrapper().getVersionNumber().isOlderThan(new VersionNumber("1.5.1"));
-        }
-        return result;
+    public String getDefaultPresendScript() {
+        return defaultPresendScript;
     }
-
+    
     @Override
     public Publisher newInstance(StaplerRequest req, JSONObject formData)
             throws hudson.model.Descriptor.FormException {
@@ -389,6 +389,8 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         emergencyReroute = nullify(req.getParameter("ext_mailer_emergency_reroute"));
         defaultReplyTo = nullify(req.getParameter("ext_mailer_default_replyto")) != null ?
             req.getParameter("ext_mailer_default_replyto") : "";
+        defaultPresendScript = nullify(req.getParameter("ext_mailer_default_presend_script")) != null ?
+            req.getParameter("ext_mailer_default_presend_script") : "";
 
         debugMode = req.getParameter("ext_mailer_debug_mode") != null;
 

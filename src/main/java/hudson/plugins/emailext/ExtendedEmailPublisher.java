@@ -31,6 +31,7 @@ import jenkins.model.Jenkins;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import hudson.model.TaskListener;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -381,10 +382,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return false;
     }
 
-    private boolean executePresendScript(AbstractBuild<?, ?> build, BuildListener listener, MimeMessage msg, EmailTrigger trigger, Map<String, EmailTrigger> triggered) 
-        throws RuntimeException {
+    private boolean executePresendScript(AbstractBuild<?, ?> build, BuildListener listener, MimeMessage msg, EmailTrigger trigger, Map<String, EmailTrigger> triggered)
+            throws RuntimeException {
         boolean cancel = false;
-        if(StringUtils.isNotBlank(presendScript)) {
+        presendScript = new ContentBuilder().transformText(presendScript, this, build, listener);
+        if (StringUtils.isNotBlank(presendScript)) {
             listener.getLogger().println("Executing pre-send script");
             ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
             ScriptSandbox sandbox = null;
@@ -472,7 +474,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         Multipart multipart = new MimeMultipart();
         
-        multipart.addBodyPart(getContent(type, build, msg, listener, charset));
+        multipart.addBodyPart(getContent(type, build, listener, charset));
 
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
         attachments.attach(multipart, this, build, listener);
@@ -669,13 +671,13 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     private void setSubject(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, BuildListener listener, String charset)
             throws MessagingException {
-        String subject = new ContentBuilder().transformText(type.getSubject(), this, type, build, listener);
+        String subject = new ContentBuilder().transformText(type.getSubject(), this, build, listener);
         msg.setSubject(subject, charset);
     }
     
     private String getRecipientList(final EmailType type, final AbstractBuild<?, ?> build, String recipients, BuildListener listener, String charset)
         throws MessagingException {
-        final String recipientsTransformed = StringUtils.isBlank(recipients) ? "" : new ContentBuilder().transformText(recipients, this, type, build, listener);
+        final String recipientsTransformed = StringUtils.isBlank(recipients) ? "" : new ContentBuilder().transformText(recipients, this, build, listener);
         return recipientsTransformed;
     }
 
@@ -685,9 +687,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             || MatrixTriggerMode.ONLY_CONFIGURATIONS == mtm;
     }
 
-    private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, BuildListener listener, String charset)
+    private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, BuildListener listener, String charset)
             throws MessagingException {
-        final String text = new ContentBuilder().transformText(type.getBody(), this, type, build, listener);
+        final String text = new ContentBuilder().transformText(type.getBody(), this, build, listener);
 
         String messageContentType = contentType;
         // contentType is null if the project was not reconfigured after upgrading.

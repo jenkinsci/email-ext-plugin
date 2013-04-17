@@ -9,7 +9,7 @@ import groovy.text.SimpleTemplateEngine;
 import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.EmailToken;
+import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ScriptSandbox;
 import hudson.plugins.emailext.plugins.ContentBuilder;

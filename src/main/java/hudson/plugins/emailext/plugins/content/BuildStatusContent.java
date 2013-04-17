@@ -4,7 +4,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.EmailToken;
+import hudson.plugins.emailext.plugins.EmailToken;
 import java.io.IOException;
 
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;

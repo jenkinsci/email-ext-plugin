@@ -18,7 +18,7 @@
     <dl>
       <dt>$${DEFAULT_SUBJECT}</dt>
       <dd>
-        This is the default email subject that is "configured in Jenkins's 
+        This is the default email subject that is configured in Jenkins's 
         system configuration page.
       </dd>
       
@@ -26,6 +26,13 @@
       <dd>
         This is the default email content that is configured in Jenkins's 
         system configuration page.
+      </dd>
+      
+      <dt>$${DEFAULT_PRESEND_SCRIPT}</dt>
+      <dd>
+        This is the default pre-send script content that is configured in
+        Jenkins's system configuration. This is the only token supported
+        in the pre-send script entry field.
       </dd>
       
       <dt>$${PROJECT_DEFAULT_SUBJECT}</dt>

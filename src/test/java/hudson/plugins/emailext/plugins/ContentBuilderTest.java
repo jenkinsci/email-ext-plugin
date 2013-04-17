@@ -9,6 +9,7 @@ import org.jvnet.hudson.test.HudsonTestCase;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import static junit.framework.Assert.assertEquals;
 
 
 import static org.mockito.Mockito.*;
@@ -51,18 +52,18 @@ public class ContentBuilderTest
     public void testTransformText_shouldExpand_$PROJECT_DEFAULT_CONTENT()
         throws IOException, InterruptedException
     {
-        assertEquals(publisher.defaultContent, new ContentBuilder().transformText( "$PROJECT_DEFAULT_CONTENT", publisher, null,
+        assertEquals(publisher.defaultContent, new ContentBuilder().transformText( "$PROJECT_DEFAULT_CONTENT", publisher, 
                                                          build, listener ));
-        assertEquals(publisher.defaultContent, new ContentBuilder().transformText( "${PROJECT_DEFAULT_CONTENT}", publisher, null,
+        assertEquals(publisher.defaultContent, new ContentBuilder().transformText( "${PROJECT_DEFAULT_CONTENT}", publisher, 
                                                          build, listener ));
     }
 
     public void testTransformText_shouldExpand_$PROJECT_DEFAULT_SUBJECT()
         throws IOException, InterruptedException
     {
-        assertEquals(publisher.defaultSubject, new ContentBuilder().transformText( "$PROJECT_DEFAULT_SUBJECT", publisher, null,
+        assertEquals(publisher.defaultSubject, new ContentBuilder().transformText( "$PROJECT_DEFAULT_SUBJECT", publisher, 
                                                          build, listener ));
-        assertEquals(publisher.defaultSubject, new ContentBuilder().transformText( "${PROJECT_DEFAULT_SUBJECT}", publisher, null,
+        assertEquals(publisher.defaultSubject, new ContentBuilder().transformText( "${PROJECT_DEFAULT_SUBJECT}", publisher, 
                                                          build, listener ));
     }
     
@@ -71,10 +72,10 @@ public class ContentBuilderTest
         throws IOException, InterruptedException
     {
         assertEquals( ExtendedEmailPublisher.DESCRIPTOR.getDefaultBody(),
-                        new ContentBuilder().transformText( "$DEFAULT_CONTENT", publisher, null,
+                        new ContentBuilder().transformText( "$DEFAULT_CONTENT", publisher, 
                                                             build, listener ) );
         assertEquals( ExtendedEmailPublisher.DESCRIPTOR.getDefaultBody(),
-                        new ContentBuilder().transformText( "${DEFAULT_CONTENT}", publisher, null,
+                        new ContentBuilder().transformText( "${DEFAULT_CONTENT}", publisher, 
                                                             build, listener ) );
     }
 
@@ -82,10 +83,10 @@ public class ContentBuilderTest
         throws IOException, InterruptedException
     {
         assertEquals( ExtendedEmailPublisher.DESCRIPTOR.getDefaultSubject(),
-                        new ContentBuilder().transformText( "$DEFAULT_SUBJECT", publisher, null,
+                        new ContentBuilder().transformText( "$DEFAULT_SUBJECT", publisher, 
                                                             build, listener ) );
         assertEquals( ExtendedEmailPublisher.DESCRIPTOR.getDefaultSubject(),
-                        new ContentBuilder().transformText( "${DEFAULT_SUBJECT}", publisher, null,
+                        new ContentBuilder().transformText( "${DEFAULT_SUBJECT}", publisher, 
                                                             build, listener ) );
     }
     
@@ -93,12 +94,23 @@ public class ContentBuilderTest
         throws IOException, InterruptedException
     {
         assertEquals( ExtendedEmailPublisher.DESCRIPTOR.getDefaultRecipients(),
-                        new ContentBuilder().transformText( "$DEFAULT_RECIPIENTS", publisher, null,
+                        new ContentBuilder().transformText( "$DEFAULT_RECIPIENTS", publisher, 
                                                         build, listener ) );
         assertEquals( ExtendedEmailPublisher.DESCRIPTOR.getDefaultRecipients(),
-                        new ContentBuilder().transformText( "${DEFAULT_RECIPIENTS}", publisher, null,
+                        new ContentBuilder().transformText( "${DEFAULT_RECIPIENTS}", publisher, 
                                                         build, listener ) );
     }
+    
+    public void testTransformText_shouldExpand_$DEFAULT_PRESEND_SCRIPT()
+        throws IOException, InterruptedException
+    {
+        assertEquals( ExtendedEmailPublisher.DESCRIPTOR.getDefaultPresendScript(),
+                        new ContentBuilder().transformText( "$DEFAULT_PRESEND_SCRIPT", publisher, 
+                                                        build, listener ) );
+        assertEquals( ExtendedEmailPublisher.DESCRIPTOR.getDefaultPresendScript(),
+                        new ContentBuilder().transformText( "${DEFAULT_PRESEND_SCRIPT}", publisher, 
+                                                        build, listener ) );
+    }    
     
     public void testTransformText_noNPEWithNullDefaultSubjectBody() throws NoSuchFieldException, IllegalAccessException
     {
@@ -108,7 +120,7 @@ public class ContentBuilderTest
         f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultSubject" );
         f.setAccessible( true );
         f.set( ExtendedEmailPublisher.DESCRIPTOR, null );
-        assertEquals( "", new ContentBuilder().transformText( "$DEFAULT_SUBJECT", publisher, null, build, listener));
-        assertEquals( "", new ContentBuilder().transformText( "$DEFAULT_CONTENT", publisher, null, build, listener));
+        assertEquals( "", new ContentBuilder().transformText( "$DEFAULT_SUBJECT", publisher, build, listener));
+        assertEquals( "", new ContentBuilder().transformText( "$DEFAULT_CONTENT", publisher, build, listener));
     }
 }

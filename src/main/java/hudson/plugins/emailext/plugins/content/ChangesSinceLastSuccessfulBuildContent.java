@@ -3,7 +3,7 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
-import hudson.plugins.emailext.EmailToken;
+import hudson.plugins.emailext.plugins.EmailToken;
 
 @EmailToken
 public class ChangesSinceLastSuccessfulBuildContent

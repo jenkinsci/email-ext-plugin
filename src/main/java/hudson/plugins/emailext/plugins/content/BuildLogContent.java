@@ -2,7 +2,7 @@ package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.EmailToken;
+import hudson.plugins.emailext.plugins.EmailToken;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.io.IOException;

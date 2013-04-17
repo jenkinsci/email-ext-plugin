@@ -79,6 +79,9 @@ f.section(title: _("Extended E-mail Notification")) {
   f.entry(help: "/plugin/email-ext/help/globalConfig/defaultBody.html", title: _("Default Content")) {
     f.textarea(class: "setting-input", value: descriptor.defaultBody, name: "ext_mailer_default_body") 
   }
+  f.entry(help: "/plugin/email-ext/help/globalConfig/defaultPresendScript.html", title: _("Default Pre-send Script")) {
+    f.textarea(class: "setting-input", value: descriptor.defaultPresendScript, name: "ext_mailer_default_presend_script")
+  }
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/debugMode.html", checked: descriptor.isDebugMode(), name: "ext_mailer_debug_mode", title: _("Enable Debug Mode")) 
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/security.html", checked: descriptor.isSecurityEnabled(), name: "ext_mailer_security_enabled", title: _("Enable Security")) 
   tr() {

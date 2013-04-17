@@ -4,7 +4,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.EmailToken;
+import hudson.plugins.emailext.plugins.EmailToken;
 import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
 

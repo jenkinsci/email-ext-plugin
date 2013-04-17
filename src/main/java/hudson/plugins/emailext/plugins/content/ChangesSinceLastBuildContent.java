@@ -4,7 +4,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.AbstractBuild.DependencyChange;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.EmailToken;
+import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.plugins.emailext.Util;
 import hudson.scm.ChangeLogSet;
 import java.io.IOException;

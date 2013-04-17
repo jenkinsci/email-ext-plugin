@@ -2,7 +2,6 @@ package hudson.plugins.emailext.plugins;
 
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.EmailToken;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.tasks.Publisher;
@@ -29,6 +28,7 @@ public class ContentBuilder {
     private static final String DEFAULT_SUBJECT = "\\$DEFAULT_SUBJECT|\\$\\{DEFAULT_SUBJECT\\}";
     private static final String DEFAULT_RECIPIENTS = "\\$DEFAULT_RECIPIENTS|\\$\\{DEFAULT_RECIPIENTS\\}";
     private static final String DEFAULT_REPLYTO = "\\$DEFAULT_REPLYTO|\\$\\{DEFAULT_REPLYTO\\}";
+    private static final String DEFAULT_PRESEND_SCRIPT = "\\$DEFAULT_PRESEND_SCRIPT|\\$\\{DEFAULT_PRESEND_SCRIPT\\}";
     private static final String PROJECT_DEFAULT_BODY = "\\$PROJECT_DEFAULT_CONTENT|\\$\\{PROJECT_DEFAULT_CONTENT\\}";
     private static final String PROJECT_DEFAULT_SUBJECT = "\\$PROJECT_DEFAULT_SUBJECT|\\$\\{PROJECT_DEFAULT_SUBJECT\\}";
     private static final String PROJECT_DEFAULT_REPLYTO = "\\$PROJECT_DEFAULT_REPLYTO|\\$\\{PROJECT_DEFAULT_REPLYTO\\}";
@@ -37,7 +37,7 @@ public class ContentBuilder {
         return string == null ? "" : string;
     }
 
-    public String transformText(String origText, ExtendedEmailPublisher publisher, EmailType type, AbstractBuild<?, ?> build, TaskListener listener) {
+    public String transformText(String origText, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, TaskListener listener) {
         String defaultContent = Matcher.quoteReplacement(noNull(publisher.defaultContent));
         String defaultSubject = Matcher.quoteReplacement(noNull(publisher.defaultSubject));
         String defaultReplyTo = Matcher.quoteReplacement(noNull(publisher.replyTo));
@@ -45,6 +45,7 @@ public class ContentBuilder {
         String defaultExtSubject = Matcher.quoteReplacement(noNull(ExtendedEmailPublisher.DESCRIPTOR.getDefaultSubject()));
         String defaultRecipients = Matcher.quoteReplacement(noNull(ExtendedEmailPublisher.DESCRIPTOR.getDefaultRecipients()));
         String defaultExtReplyTo = Matcher.quoteReplacement(noNull(ExtendedEmailPublisher.DESCRIPTOR.getDefaultReplyTo()));
+        String defaultPresendScript = Matcher.quoteReplacement(noNull(ExtendedEmailPublisher.DESCRIPTOR.getDefaultPresendScript()));
         String newText = origText.replaceAll(
                 PROJECT_DEFAULT_BODY, defaultContent).replaceAll(
                 PROJECT_DEFAULT_SUBJECT, defaultSubject).replaceAll(
@@ -52,7 +53,8 @@ public class ContentBuilder {
                 DEFAULT_BODY, defaultBody).replaceAll(
                 DEFAULT_SUBJECT, defaultExtSubject).replaceAll(
                 DEFAULT_RECIPIENTS, defaultRecipients).replaceAll(
-                DEFAULT_REPLYTO, defaultExtReplyTo);
+                DEFAULT_REPLYTO, defaultExtReplyTo).replaceAll(
+                DEFAULT_PRESEND_SCRIPT, defaultPresendScript);
         
         try {
             newText = TokenMacro.expandAll(build, listener, newText, false, getPrivateMacros());

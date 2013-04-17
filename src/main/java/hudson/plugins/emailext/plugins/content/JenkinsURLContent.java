@@ -3,7 +3,7 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.EmailToken;
+import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import java.io.IOException;
 import jenkins.model.Jenkins;
