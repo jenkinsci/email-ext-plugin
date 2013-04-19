@@ -31,6 +31,7 @@ import jenkins.model.Jenkins;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import hudson.FilePath;
 import hudson.model.TaskListener;
 
 import org.apache.commons.lang.StringUtils;
@@ -57,6 +58,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -179,6 +181,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * Reply-To value for the e-mail
      */
     public String replyTo;
+    
+    /**
+     * If true, save the generated email content to email-ext-message.[txt|html]
+     */
+    public boolean saveOutput = false;
 
     private MatrixTriggerMode matrixTriggerMode;
 
@@ -304,7 +311,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     private boolean sendMail(EmailType mailType, AbstractBuild<?, ?> build, BuildListener listener, EmailTrigger trigger, Map<String, EmailTrigger> triggered) {
         try {
-            MimeMessage msg = createMail(mailType, build, listener);
+            MimeMessage msg = createMail(mailType, build, listener, trigger);
             debug(listener.getLogger(), "Successfully created MimeMessage");
             Address[] allRecipients = msg.getAllRecipients();
             int retries = 0;
@@ -438,7 +445,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return !cancel;
     }    
 
-    private MimeMessage createMail(EmailType type, AbstractBuild<?, ?> build, BuildListener listener) throws MessagingException, IOException, InterruptedException {
+    private MimeMessage createMail(EmailType type, AbstractBuild<?, ?> build, BuildListener listener, EmailTrigger trigger) throws MessagingException, IOException, InterruptedException {
         boolean overrideGlobalSettings = ExtendedEmailPublisher.DESCRIPTOR.getOverrideGlobalSettings();
 
         MimeMessage msg;
@@ -473,8 +480,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         setSubject(type, build, msg, listener, charset);
 
         Multipart multipart = new MimeMultipart();
-        
-        multipart.addBodyPart(getContent(type, build, listener, charset));
+        multipart.addBodyPart(getContent(type, build, listener, charset, trigger));
 
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
         attachments.attach(multipart, this, build, listener);
@@ -687,10 +693,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             || MatrixTriggerMode.ONLY_CONFIGURATIONS == mtm;
     }
 
-    private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, BuildListener listener, String charset)
+    private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, BuildListener listener, String charset, EmailTrigger trigger)
             throws MessagingException {
         final String text = new ContentBuilder().transformText(type.getBody(), this, build, listener);
-
+        
         String messageContentType = contentType;
         // contentType is null if the project was not reconfigured after upgrading.
         if (messageContentType == null || "default".equals(messageContentType)) {
@@ -702,6 +708,24 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
         }
         messageContentType += "; charset=" + charset;
+        
+        try {
+            if(saveOutput) {
+                Random random = new Random();
+                String extension = ".html";
+                if(messageContentType.startsWith("text/plain")) {
+                    extension = ".txt";
+                }
+
+                FilePath savedOutput = new FilePath(build.getWorkspace(), 
+                        String.format("%s-%s%d%s", trigger.getDescriptor().getTriggerName(), build.getId(), random.nextInt(), extension));
+                savedOutput.write(text, charset);
+            }
+        } catch(IOException e) {
+            listener.getLogger().println("Error trying to save email output to file. " + e.getMessage());
+        } catch(InterruptedException e) {
+            listener.getLogger().println("Error trying to save email output to file. " + e.getMessage());
+        }
 
         // set the email message text 
         // (plain text or HTML depending on the content type)

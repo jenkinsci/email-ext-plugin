@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
+import jenkins.model.Jenkins;
 import net.java.sezpoz.Index;
 import net.java.sezpoz.IndexItem;
 import org.apache.commons.lang.StringUtils;
@@ -72,7 +73,8 @@ public class ContentBuilder {
     
     public static List<TokenMacro> getPrivateMacros() {
         List<TokenMacro> macros = new ArrayList<TokenMacro>();
-        for (final IndexItem<EmailToken, TokenMacro> item : Index.load(EmailToken.class, TokenMacro.class)) {
+        ClassLoader cl = Jenkins.getInstance().pluginManager.uberClassLoader;
+        for (final IndexItem<EmailToken, TokenMacro> item : Index.load(EmailToken.class, TokenMacro.class, cl)) {
             try {
                 macros.add(item.instance());
             } catch (Exception e) {

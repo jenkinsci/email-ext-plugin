@@ -119,6 +119,13 @@ f.advanced() {
     }
   }
   tr() {
+    td(colspan: "4") {
+      f.entry(title: _("Save Generated E-mail to Workspace"), help: "/plugin/email-ext/help/projectConfig/saveOutput.html") {
+        f.checkbox(name: "project_save_output", checked: instance?.saveOutput)
+      }
+    }
+  }
+  tr() {
     td() 
     td(colspan: "3", style: "margin-left:10px") {
       table(width: "100%", cell_padding: "0", cell_spacing: "0") {

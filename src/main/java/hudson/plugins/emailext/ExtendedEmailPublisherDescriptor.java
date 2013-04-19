@@ -299,6 +299,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         m.attachBuildLog = "true".equalsIgnoreCase(formData.optString("project_attach_buildlog"));
         m.compressBuildLog = "true".equalsIgnoreCase(formData.optString("project_compress_buildlog"));
         m.replyTo = formData.getString("project_replyto");
+        m.saveOutput = "true".equalsIgnoreCase(formData.optString("project_save_output"));
         m.configuredTriggers = new ArrayList<EmailTrigger>();
 
         // Create a new email trigger for each one that is configured
