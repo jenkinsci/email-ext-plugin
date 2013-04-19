@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-public class SecondFailureTriggerTest extends NthFailureTriggerTestBase {
+public class SecondFailureTriggerTest extends TriggerTestBase {
 
 	@Override
 	EmailTrigger newInstance() {

@@ -15,7 +15,7 @@ import static org.mockito.Mockito.when;
 /**
  * Base class for testing
  */
-public abstract class NthFailureTriggerTestBase {
+public abstract class TriggerTestBase {
 
 	abstract EmailTrigger newInstance();
 

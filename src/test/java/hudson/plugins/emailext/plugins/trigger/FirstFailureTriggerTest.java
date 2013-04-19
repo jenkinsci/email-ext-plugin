@@ -10,7 +10,7 @@ import java.io.InputStream;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
-public class FirstFailureTriggerTest extends NthFailureTriggerTestBase {
+public class FirstFailureTriggerTest extends TriggerTestBase {
 
 	@Override
 	EmailTrigger newInstance() {
