@@ -529,11 +529,13 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
             
             for (User user : users) {
-                String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
-                if (userAddress != null && !isExcludedCommitter(user.getFullName())) {
-                    addAddressesFromRecipientList(recipientAddresses, ccAddresses, userAddress, env, listener);
-                } else {
-                    listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
+                if (!isExcludedCommitter(user.getFullName())) {
+                    String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
+                    if (userAddress != null && !isExcludedCommitter(user.getFullName())) {
+                        addAddressesFromRecipientList(recipientAddresses, ccAddresses, userAddress, env, listener);
+                    } else {
+                        listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
+                    }
                 }
             }
         }
