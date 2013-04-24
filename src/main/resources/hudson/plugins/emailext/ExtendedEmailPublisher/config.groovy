@@ -41,7 +41,7 @@ f.entry(title: _("Project Reply-To List"), help: "/plugin/email-ext/help/project
     input(name: "project_replyto", value: instance.replyTo, class: "setting-input validated", checkUrl: "'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)", type: "text") 
   }
   else{
-    input(name: "project_replyto", value: "\$DEFAULT_RECIPIENTS", class: "setting-input validated", checkUrl: "'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)", type: "text") 
+    input(name: "project_replyto", value: "\$DEFAULT_REPLYTO", class: "setting-input validated", checkUrl: "'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)", type: "text") 
   }
 }
 f.entry(title: _("Content Type"), help: "/plugin/email-ext/help/projectConfig/contentType.html") {
