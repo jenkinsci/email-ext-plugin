@@ -106,6 +106,25 @@ public class CssInlinerTest {
         "\" data-inline=\"true\" /></body></html>", output.replaceAll("\r", "\n"));
 
   }
+  
+  @Test
+  public void testNoPrettify() {
+      String input = "<html><head></head>\n" +
+              "<body>\n" +
+              "<table border=\"1\">\n" +
+              "<tbody>\n" +
+              "<tr>\n" +
+              "<td> <b>TEXT</b> </td>\n" +
+              "<td> <b>TEXT</b><pre>\n" +
+              "line\n" +
+              "line<v1 />line\n" +
+              "line<v1 />line\n" +
+              "</pre>\n" +
+              "</td>\n" +
+              "</tr></tbody></table></body></html>";
+      String output = new CssInliner().process(input);
+      assertEquals(input, output);
+  }
 
   private String process(String input) {
     return new CssInliner().process(input).replaceAll(" +", " ").replaceAll("\n", "").replaceAll("> *<", "><");

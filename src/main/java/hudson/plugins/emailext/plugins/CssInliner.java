@@ -69,12 +69,13 @@ public class CssInliner {
   public String process(String input) {
 
     Document doc = Jsoup.parse(input);
-
+    
     extractStyles(doc);
     applyStyles(doc);
     inlineImages(doc);
 
-    String output = doc.toString();
+    doc.outputSettings(doc.outputSettings().prettyPrint(false));
+    String output = doc.outerHtml();
     return output;
   }
 
