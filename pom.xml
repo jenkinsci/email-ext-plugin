@@ -146,6 +146,16 @@
             <url>http://download.java.net/maven/2/</url>
         </repository>
     </repositories>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jenkins-ci.tools</groupId>
+                <artifactId>maven-hpi-plugin</artifactId>
+                <version>1.95</version>
+            </plugin>                     
+        </plugins>
+    </build>
 
     <pluginRepositories>
         <pluginRepository>
