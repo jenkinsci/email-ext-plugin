@@ -1,19 +1,23 @@
 package hudson.plugins.emailext;
 
+import java.io.UnsupportedEncodingException;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeUtility;
+
 import hudson.EnvVars;
 import hudson.model.User;
 import hudson.tasks.Mailer;
 import hudson.util.FormValidation;
 import org.apache.commons.lang.StringUtils;
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeUtility;
-import java.io.UnsupportedEncodingException;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 public class EmailRecipientUtils {
+
+    private static final Logger LOGGER = Logger.getLogger(EmailRecipientUtils.class.getName());
 
     public static final String COMMA_SEPARATED_SPLIT_REGEXP = "[,\\s]+";
 
@@ -88,6 +92,8 @@ public class EmailRecipientUtils {
             Mailer.UserProperty mailProperty = user.getProperty(Mailer.UserProperty.class);
             if (mailProperty != null) {
                 addr = mailProperty.getAddress();
+                String message = String.format("Resolved %s to %s", user.getId(), addr);
+                LOGGER.fine(message);
             }
         }
         return addr;
