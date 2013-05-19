@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins;
 
 import hudson.model.AbstractBuild;
+import hudson.model.TaskListener;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.tasks.junit.TestResult;
@@ -21,7 +22,7 @@ public abstract class EmailTrigger {
      * @return true if the conditions have been met to trigger a build of this
      *         type
      */
-    public abstract boolean trigger(AbstractBuild<?, ?> build);
+    public abstract boolean trigger(AbstractBuild<?, ?> build, TaskListener listener);
 
     /**
      * Get the email that is with this trigger.

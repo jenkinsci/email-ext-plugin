@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.AbstractBuild;
+import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import net.sf.json.JSONObject;
@@ -11,7 +12,7 @@ public class ImprovementTrigger extends EmailTrigger {
     public static final String TRIGGER_NAME = "Improvement";
     
      @Override
-    public boolean trigger(AbstractBuild<?, ?> build) {
+    public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
 
         if (build.getPreviousBuild() == null)
             return false;

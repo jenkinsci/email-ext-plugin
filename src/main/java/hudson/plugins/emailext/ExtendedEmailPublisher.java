@@ -32,6 +32,7 @@ import jenkins.model.Jenkins;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import hudson.FilePath;
+import hudson.model.Action;
 import hudson.model.TaskListener;
 
 import org.apache.commons.lang.StringUtils;
@@ -247,6 +248,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     public void debug(PrintStream p, String format, Object... args) {
         ExtendedEmailPublisher.DESCRIPTOR.debug(p, format, args);
     }
+    
+//    @Override
+//    public Collection<? extends Action> getProjectActions(AbstractProject<?,?> project) {
+//        return Collections.singletonList(new EmailExtTemplateAction(project));
+//    }
 
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
@@ -274,7 +280,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         Map<String, EmailTrigger> triggered = new HashMap<String, EmailTrigger>();
 
         for (EmailTrigger trigger : configuredTriggers) {
-            if (trigger.isPreBuild() == forPreBuild && trigger.trigger(build)) {
+            if (trigger.isPreBuild() == forPreBuild && trigger.trigger(build, listener)) {
                 String tName = trigger.getDescriptor().getTriggerName();
                 triggered.put(tName, trigger);
                 listener.getLogger().println("Email was triggered for: " + tName);
