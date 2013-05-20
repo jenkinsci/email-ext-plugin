@@ -249,10 +249,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         ExtendedEmailPublisher.DESCRIPTOR.debug(p, format, args);
     }
     
-//    @Override
-//    public Collection<? extends Action> getProjectActions(AbstractProject<?,?> project) {
-//        return Collections.singletonList(new EmailExtTemplateAction(project));
-//    }
+    @Override
+    public Collection<? extends Action> getProjectActions(AbstractProject<?,?> project) {
+        return Collections.singletonList(new EmailExtTemplateAction(project));
+    }
 
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {

@@ -23,7 +23,9 @@
  */
 package hudson.plugins.emailext;
 
+import hudson.FilePath;
 import hudson.Plugin;
+import hudson.model.Hudson;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
@@ -40,8 +42,13 @@ import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillUnstableTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.plugins.emailext.plugins.trigger.UnstableTrigger;
+import hudson.util.FormValidation;
+import java.io.File;
+import java.io.FileInputStream;
 
 import java.util.Arrays;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.QueryParameter;
 
 /**
  * Entry point of a plugin.
@@ -78,6 +85,17 @@ public class EmailExtensionPlugin extends Plugin {
         } catch (EmailExtException e) {
             System.err.println(e.getMessage());
         }
+    }
+    
+    public FormValidation doTemplateFileCheck(@QueryParameter final String value) {
+        if(!StringUtils.isEmpty(value)) {
+            final File scriptsFolder = new File(Hudson.getInstance().getRootDir(), "email-templates");
+            final File scriptFile = new File(scriptsFolder, value);
+            if(!scriptFile.exists()) {
+                return FormValidation.error("The file '" + value + "' does not exist");
+            }
+        }
+        return FormValidation.ok();
     }
 
     static {
