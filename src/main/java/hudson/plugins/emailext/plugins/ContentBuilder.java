@@ -2,7 +2,6 @@ package hudson.plugins.emailext.plugins;
 
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.tasks.Publisher;
 import java.util.ArrayList;

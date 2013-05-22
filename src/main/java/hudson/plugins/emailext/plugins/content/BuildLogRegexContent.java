@@ -250,8 +250,4 @@ public class BuildLogRegexContent extends DataBoundTokenMacro {
         }
         return buffer.toString();
     }
-
-    public boolean hasNestedContent() {
-        return false;
-    }
 }

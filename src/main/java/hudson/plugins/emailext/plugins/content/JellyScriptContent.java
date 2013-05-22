@@ -130,10 +130,6 @@ public class JellyScriptContent extends DataBoundTokenMacro {
         return context;
     }
 
-    public boolean hasNestedContent() {
-        return false;
-    }
-
     private String getCharset() {
         String charset = Mailer.descriptor().getCharset();
         String overrideCharset = ExtendedEmailPublisher.DESCRIPTOR.getCharset();

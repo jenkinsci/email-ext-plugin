@@ -4,28 +4,9 @@
  */
 package hudson.plugins.emailext.plugins.trigger;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-import hudson.model.AbstractBuild;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.ScriptSandbox;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import hudson.plugins.emailext.plugins.content.ScriptContentBuildWrapper;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.logging.Level;
-import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
-import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.kohsuke.stapler.StaplerRequest;
 
 /**
