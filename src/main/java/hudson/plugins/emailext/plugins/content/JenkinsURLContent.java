@@ -2,51 +2,45 @@ package hudson.plugins.emailext.plugins.content;
 
 import hudson.Util;
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Hudson;
-import hudson.plugins.emailext.EmailType;
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailContent;
+import java.io.IOException;
+import jenkins.model.Jenkins;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
-public class JenkinsURLContent implements EmailContent {
+@EmailToken
+public class JenkinsURLContent extends DataBoundTokenMacro {
 
-    private static final String TOKEN = "JENKINS_URL";
+    private static final String MACRO_NAME = "JENKINS_URL";
 
-    public String getToken() {
-        return TOKEN;
-    }
-
-    public List<String> getArguments() {
-        return Collections.emptyList();
+    @Override
+    public boolean acceptsMacroName(String macroName) {
+        return macroName.equals(MACRO_NAME) || macroName.equals("HUDSON_URL");
     }
 
     public String getHelpText() {
         return "Displays the URL to the Jenkins server. (You can change this on the system configuration page.)";
     }
 
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
-            EmailType emailType, Map<String, ?> args) {
+    @Override
+    public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
         // JENKINS-6193 - Only override the global URL if we should override global settings
-        String hudsonUrl = Hudson.getInstance().getRootUrl();
+        String jenkinsUrl = Jenkins.getInstance().getRootUrl();
         if (ExtendedEmailPublisher.DESCRIPTOR.getOverrideGlobalSettings()) {
-            hudsonUrl = ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl();
+            jenkinsUrl = ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl();
         }
 
-        if (hudsonUrl == null) {
+        if (jenkinsUrl == null) {
             return "";
         }
-        if (!hudsonUrl.endsWith("/")) {
-            hudsonUrl += "/";
+        if (!jenkinsUrl.endsWith("/")) {
+            jenkinsUrl += "/";
         }
 
-        return Util.encode(hudsonUrl);
-    }
-
-    public boolean hasNestedContent() {
-        return false;
+        return Util.encode(jenkinsUrl);
     }
 }

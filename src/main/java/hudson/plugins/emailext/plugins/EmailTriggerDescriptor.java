@@ -4,6 +4,8 @@ import hudson.plugins.emailext.EmailType;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.sf.json.JSONObject;
+import org.kohsuke.stapler.StaplerRequest;
 
 public abstract class EmailTriggerDescriptor {
 
@@ -42,10 +44,10 @@ public abstract class EmailTriggerDescriptor {
         return replacesList;
     }
 
-    protected abstract EmailTrigger newInstance();
+    protected abstract EmailTrigger newInstance(StaplerRequest req, JSONObject formData);
 
-    public EmailTrigger getNewInstance(EmailType type) {
-        EmailTrigger trigger = newInstance();
+    public EmailTrigger getNewInstance(EmailType type, StaplerRequest req, JSONObject formData) {
+        EmailTrigger trigger = newInstance(req, formData);
         trigger.setEmail(type);
         return trigger;
     }

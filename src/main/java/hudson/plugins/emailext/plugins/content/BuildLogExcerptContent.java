@@ -26,83 +26,71 @@ package hudson.plugins.emailext.plugins.content;
 
 import hudson.console.ConsoleNote;
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.plugins.emailext.EmailType;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailContent;
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.plugins.EmailToken;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import org.apache.commons.io.IOUtils;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro.Parameter;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 /**
  * @author <a href="mailto:nicolas.deloof@cloudbees.com">Nicolas De loof</a>
  */
-public class BuildLogExcerptContent implements EmailContent {
+@EmailToken
+public class BuildLogExcerptContent extends DataBoundTokenMacro {
 
-    private static final Logger LOGGER = Logger.getLogger(BuildLogExcerptContent.class.getName());
-
-    public String getToken() {
-        return "BUILD_LOG_EXCERPT";
+    public static final String MACRO_NAME = "BUILD_LOG_EXCERPT";
+    
+    @Parameter(required=true)
+    public String start;
+    
+    @Parameter(required=true)
+    public String end;
+    
+    @Override
+    public boolean acceptsMacroName(String macroName) {
+        return macroName.equals(MACRO_NAME);
     }
 
-    public List<String> getArguments() {
-        return Arrays.asList(
-                "start", "end");
-    }
-
-    public String getHelpText() {
-        return "Displays an excerpt from the build log.\n"
-                + "<ul>\n"
-                + "<li><i>start</i> - Regular expression to match the excerpt starting line to be included (exluded). "
-                + "See <a href='http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'><i>java.util.regex.Pattern</i></a></li>"
-                + "<li><i>end</i> - Regular expression to match the excerpt ending line to be included (exluded)</li>"
-                + "</ul>";
-    }
-
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType emailType, Map<String, ?> args) throws IOException, InterruptedException {
+    @Override
+    public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(build.getLogFile()));
+            BufferedReader reader = new BufferedReader(context.getLogReader());
             try {
-                return getContent(reader, args);
+                return getContent(reader);
             } finally {
-                reader.close();
+                IOUtils.closeQuietly(reader);
             }
-        } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
+        } catch (IOException e) {
+            listener.getLogger().println("Error getting BUILD_LOG_EXCERPT - " + e.getMessage());
             return ""; // TODO: Indicate there was an error instead?
         }
     }
 
-    String getContent(BufferedReader reader, Map<String, ?> args) throws IOException {
+    String getContent(BufferedReader reader) throws IOException {
 
-        Pattern start = Pattern.compile((String)args.get("start"));
-        Pattern end = Pattern.compile((String)args.get("end"));
+        Pattern startPattern = Pattern.compile(start);
+        Pattern endPattern = Pattern.compile(end);
 
         StringBuilder buffer = new StringBuilder();
-        String line = null;
+        String line;
         boolean started = false;
         while ((line = reader.readLine()) != null) {
             line = ConsoleNote.removeNotes(line);
 
-            if (start.matcher(line).matches()) {
+            if (startPattern.matcher(line).matches()) {
                 started = true;
                 continue;
             }
-            if (end.matcher(line).matches()) break;
+            if (endPattern.matcher(line).matches()) break;
 
             if (started) buffer.append(line).append('\n');
         }
         return buffer.toString();
-    }
-
-    public boolean hasNestedContent() {
-        return false;
     }
 }

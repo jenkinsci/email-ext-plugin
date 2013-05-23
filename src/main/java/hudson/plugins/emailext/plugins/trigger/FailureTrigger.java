@@ -4,6 +4,8 @@ import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import net.sf.json.JSONObject;
+import org.kohsuke.stapler.StaplerRequest;
 
 public class FailureTrigger extends EmailTrigger {
 
@@ -38,7 +40,7 @@ public class FailureTrigger extends EmailTrigger {
         }
 
         @Override
-        public EmailTrigger newInstance() {
+        public EmailTrigger newInstance(StaplerRequest req, JSONObject formData) {
             return new FailureTrigger();
         }
 
@@ -55,6 +57,6 @@ public class FailureTrigger extends EmailTrigger {
 
     @Override
     public boolean getDefaultSendToList() {
-        return true;
+        return false;
     }
 }

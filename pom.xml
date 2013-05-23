@@ -1,148 +1,167 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.jenkins-ci.plugins</groupId>
-    <artifactId>plugin</artifactId>
-    <version>1.480</version>
-  </parent>
-
-  <artifactId>email-ext</artifactId>
-  <packaging>hpi</packaging>
-  <version>2.25-with-eye-in-sky</version>
-  <name>Jenkins Email Extension Plugin</name>
-  <url>http://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin</url>
-  <issueManagement>
-    <system>JIRA</system>
-    <url>http://issues.jenkins-ci.org/secure/IssueNavigator.jspa?reset=true&amp;jqlQuery=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+%27email-ext%27</url>
-  </issueManagement>
-
-  <properties>
-      <powermock.version>1.4.12</powermock.version>
-      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
-  <developers>
-    <developer>
-      <id>ashlux</id>
-      <name>Ash Lux</name>
-      <email>ashlux@gmail.com</email>
-    </developer>
-    <developer>
-      <id>kdsweeney</id>
-      <name>Kyle Sweeney</name>
-    </developer>
-    <developer>
-      <id>krwalker</id>
-      <name>K. R. Walker</name>
-      <email>krwalker@stellarscience.com</email>
-    </developer>
-    <developer>
-      <id>ssogabe</id>
-      <name>Seiji Sogabe</name>
-      <email>s.sogabe@gmail.com</email>
-    </developer>
-    <developer>
-      <id>slide</id>
-      <name>Alex Earl</name>
-      <email>slide.o.mix@gmail.com</email>
-    </developer>
-  </developers>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.jenkins-ci.main</groupId>
-      <artifactId>maven-plugin</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.4</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.mail</groupId>
-      <artifactId>mail</artifactId>
-      <version>1.4</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jvnet.mock-javamail</groupId>
-      <artifactId>mock-javamail</artifactId>
-      <version>1.9</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.10</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>1.8.5</version>
-      <scope>test</scope>
-    </dependency>
-     <dependency>
-        <groupId>org.powermock</groupId>
-        <artifactId>powermock-module-junit4</artifactId>
-        <version>${powermock.version}</version>
-        <scope>test</scope>
-     </dependency>
-     <dependency>
-        <groupId>org.powermock</groupId>
-        <artifactId>powermock-api-mockito</artifactId>
-        <version>${powermock.version}</version>
-        <scope>test</scope>
-     </dependency>
-      <dependency>
-        <groupId>org.jvnet.hudson.plugins</groupId>
-        <artifactId>analysis-core</artifactId>
-        <version>1.41</version>
-        <optional>true</optional>
-      </dependency>
-      <dependency>
+    <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>token-macro</artifactId>
-        <version>1.5.1</version>
-        <optional>true</optional>
-      </dependency>
-      <dependency>
-        <groupId>org.kohsuke</groupId>
-        <artifactId>groovy-sandbox</artifactId>
-        <version>1.0</version>
-      </dependency>
-  </dependencies>  
+        <artifactId>plugin</artifactId>
+        <version>1.509.1</version>
+    </parent>
 
-  <scm>
-   <connection>scm:git:https://github.com/jenkinsci/email-ext-plugin.git</connection>
-   <developerConnection>scm:git:git@github.com:jenkinsci/email-ext-plugin.git</developerConnection>
-  </scm>
+    <artifactId>email-ext</artifactId>
+    <packaging>hpi</packaging>
+    <version>2.29</version>
+    <name>Jenkins Email Extension Plugin</name>
+    <url>http://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin</url>
+    <issueManagement>
+        <system>JIRA</system>
+        <url>http://issues.jenkins-ci.org/secure/IssueNavigator.jspa?reset=true&amp;jqlQuery=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+%27email-ext%27</url>
+    </issueManagement>
 
-  <repositories>
-    <repository>
-      <id>repo.jenkins-ci.org</id>
-      <url>http://repo.jenkins-ci.org/public/</url>
-    </repository>
-    <repository>
-       <id>powermock-repo</id>
-       <url>http://powermock.googlecode.com/svn/repo/</url>
-    </repository>
-    <repository>
-       <id>maven2-repository.dev.java.net</id>
-       <name>Java.net repository for Maven2</name>
-       <url>http://download.java.net/maven/2/</url>
-    </repository>
-  </repositories>
+    <properties>
+        <powermock.version>1.4.12</powermock.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>repo.jenkins-ci.org</id>
-      <url>http://repo.jenkins-ci.org/public/</url>
-    </pluginRepository>
-  </pluginRepositories>
+    <developers>
+        <developer>
+            <id>ashlux</id>
+            <name>Ash Lux</name>
+            <email>ashlux@gmail.com</email>
+        </developer>
+        <developer>
+            <id>kdsweeney</id>
+            <name>Kyle Sweeney</name>
+        </developer>
+        <developer>
+            <id>krwalker</id>
+            <name>K. R. Walker</name>
+            <email>krwalker@stellarscience.com</email>
+        </developer>
+        <developer>
+            <id>ssogabe</id>
+            <name>Seiji Sogabe</name>
+            <email>s.sogabe@gmail.com</email>
+        </developer>
+        <developer>
+            <id>slide</id>
+            <name>Alex Earl</name>
+            <email>slide.o.mix@gmail.com</email>
+        </developer>
+    </developers>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jenkins-ci.main</groupId>
+            <artifactId>maven-plugin</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.4</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jvnet.mock-javamail</groupId>
+            <artifactId>mock-javamail</artifactId>
+            <version>1.9</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.10</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.8.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jvnet.hudson.plugins</groupId>
+            <artifactId>analysis-core</artifactId>
+            <version>1.41</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>token-macro</artifactId>
+            <version>1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>groovy-sandbox</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.7.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>1.8.5</version>
+        </dependency>
+    </dependencies>
+
+    <scm>
+        <connection>scm:git:https://github.com/jenkinsci/email-ext-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:jenkinsci/email-ext-plugin.git</developerConnection>
+    </scm>
+
+    <repositories>
+        <repository>
+            <id>repo.jenkins-ci.org</id>
+            <url>http://repo.jenkins-ci.org/public/</url>
+        </repository>
+        <repository>
+            <id>powermock-repo</id>
+            <url>http://powermock.googlecode.com/svn/repo/</url>
+        </repository>
+        <repository>
+            <id>maven2-repository.dev.java.net</id>
+            <name>Java.net repository for Maven2</name>
+            <url>http://download.java.net/maven/2/</url>
+        </repository>
+    </repositories>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jenkins-ci.tools</groupId>
+                <artifactId>maven-hpi-plugin</artifactId>
+                <version>1.95</version>
+            </plugin>                     
+        </plugins>
+    </build>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>repo.jenkins-ci.org</id>
+            <url>http://repo.jenkins-ci.org/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
 </project>

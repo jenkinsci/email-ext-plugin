@@ -1,37 +1,24 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.plugins.emailext.EmailType;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailContent;
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.plugins.EmailToken;
+import java.io.IOException;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-public class BuildIdContent implements EmailContent {
-
-    private static final String TOKEN = "BUILD_ID";
-
-    public String getToken() {
-        return TOKEN;
+@EmailToken
+public class BuildIdContent extends DataBoundTokenMacro {
+    private static final String MACRO_NAME = "BUILD_ID";
+    
+    @Override
+    public boolean acceptsMacroName(String macroName) {
+        return macroName.equals(MACRO_NAME);
     }
 
-    public List<String> getArguments() {
-        return Collections.emptyList();
-    }
-
-    public String getHelpText() {
-        return "Displays the build ID of the current build.";
-    }
-
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher,
-            EmailType emailType, Map<String, ?> args) {
+    @Override
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
         return build.getId();
-    }
-
-    public boolean hasNestedContent() {
-        return false;
     }
 }

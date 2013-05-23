@@ -3,6 +3,8 @@ package hudson.plugins.emailext.plugins.trigger;
 import hudson.model.AbstractBuild;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import net.sf.json.JSONObject;
+import org.kohsuke.stapler.StaplerRequest;
 
 public class ImprovementTrigger extends EmailTrigger {
     
@@ -42,7 +44,7 @@ public class ImprovementTrigger extends EmailTrigger {
         }
 
         @Override
-        public EmailTrigger newInstance() {
+        public EmailTrigger newInstance(StaplerRequest req, JSONObject formData) {
             return new ImprovementTrigger();
         }
 

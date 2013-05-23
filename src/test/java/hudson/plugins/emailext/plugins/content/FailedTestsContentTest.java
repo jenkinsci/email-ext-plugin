@@ -1,20 +1,18 @@
 package hudson.plugins.emailext.plugins.content;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import hudson.model.AbstractBuild;
+import hudson.model.TaskListener;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
+import hudson.util.StreamTaskListener;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -29,54 +27,56 @@ public class FailedTestsContentTest
     private FailedTestsContent failedTestContent;
 
     private AbstractBuild build;
+    
+    private TaskListener listener;
 
     @Before
     public void setUp()
     {
         failedTestContent = new FailedTestsContent();
+        listener = new StreamTaskListener(System.out);
 
         build = mock( AbstractBuild.class );
     }
 
     @Test
     public void testGetContent_noTestsRanShouldGiveAMeaningfulMessage()
-    {
-        String content = failedTestContent.getContent( build, null, null, null );
+            throws Exception {
+        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
 
         assertEquals( "No tests ran.", content );
     }
 
     @Test
     public void testGetContent_whenAllTestsPassedShouldGiveMeaningfulMessage()
-    {
+            throws Exception {
         AbstractTestResultAction testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 0 );
 
         when( build.getTestResultAction() ).thenReturn( testResults );
 
-        String content = failedTestContent.getContent( build, null, null, null );
+        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
 
         assertEquals( "All tests passed", content );
     }
 
     @Test
     public void testGetContent_whenSomeTestsFailedShouldGiveMeaningfulMessage()
-    {
+            throws Exception {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 123 );
 
         when( build.getTestResultAction() ).thenReturn( testResults );
 
-        Map<String, Integer> args = Collections.singletonMap(
-                FailedTestsContent.MAX_TESTS_ARG_NAME, 0 );
-        String content = failedTestContent.getContent( build, null, null, args );
+        failedTestContent.maxTests = 0;
+        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
 
         assertEquals( "123 tests failed.\n", content );
     }
 
     @Test
     public void testGetContent_whenContentLargerThanMaxLengthShouldTruncate()
-    {
+            throws Exception {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 5 );
 
@@ -93,14 +93,13 @@ public class FailedTestsContentTest
         when( testResults.getFailedTests() ).thenReturn( failedTests );
         when( build.getTestResultAction() ).thenReturn( testResults );
 
-        Map<String, Integer> args = Collections.singletonMap(
-                FailedTestsContent.MAX_LENGTH_ARG_NAME, 10 );
-        String content = failedTestContent.getContent( build, null, null, args );
+        failedTestContent.maxLength = 10;
+        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
         assertTrue( content.length() < (3 * 1024 * 5) );
 
-        Map<String, Boolean> args2 = Collections.singletonMap(
-            "showStack", true);
-        content = failedTestContent.getContent( build, null, null, args2 );
+        failedTestContent = new FailedTestsContent();
+        failedTestContent.showStack = true;
+        content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
         assertTrue( content.length() >= (3 * 1024 * 5) );
     }
 }

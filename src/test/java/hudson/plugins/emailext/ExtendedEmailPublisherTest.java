@@ -191,6 +191,35 @@ public class ExtendedEmailPublisherTest
         assertEquals( 1, Mailbox.get( "ashlux@gmail.com" ).size() );
     }
 
+    public void testFixedTriggerShouldNotSendEmailWhenBuildSucceedsAfterAbortedBuild()
+        throws Exception
+    {
+        // fail
+        project.getBuildersList().add( new FailureBuilder() );
+        FreeStyleBuild build1 = project.scheduleBuild2( 0 ).get();
+        assertBuildStatus( Result.FAILURE, build1 );
+
+        // abort
+        project.getBuildersList().clear();
+        project.getBuildersList().add( new MockBuilder(Result.ABORTED) );
+        FreeStyleBuild build2 = project.scheduleBuild2( 0 ).get();
+        assertBuildStatus( Result.ABORTED, build2 );
+
+        FixedTrigger trigger = new FixedTrigger();
+        addEmailType( trigger );
+        publisher.getConfiguredTriggers().add( trigger );
+
+        // succeed
+        project.getBuildersList().clear();
+        FreeStyleBuild build3 = project.scheduleBuild2( 0 ).get();
+        assertBuildStatusSuccess( build3 );
+
+        assertThat( "Email should not have been triggered, so we shouldn't see it in the logs.", build3.getLog( 100 ),
+                    not( hasItems( "Email was triggered for: " + SuccessTrigger.TRIGGER_NAME ) ) );
+        assertEquals( "No email should have been sent out since the prior build was aborted.", 0,
+                      Mailbox.get( "ashlux@gmail.com" ).size() );
+    }
+
     public void testStillFailingTriggerShouldNotSendEmailWhenBuildSucceeds()
         throws Exception
     {

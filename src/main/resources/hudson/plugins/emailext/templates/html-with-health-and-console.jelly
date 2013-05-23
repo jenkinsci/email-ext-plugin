@@ -63,6 +63,9 @@
           border: 1px solid black;
           border-collapse:collapse;
           }
+          td.right {
+          text-align:right;
+          }
       </style>
   </head>
   <body>
@@ -349,6 +352,93 @@
         <br />
       </div>
     </j:if>
+    
+    <!-- JACOCO TEMPLATE -->
+    <j:set var="jacocoAction" value="${it.getAction('hudson.plugins.jacoco.JacocoBuildAction')}" />
+    <j:if test="${jacocoAction!=null}">
+        <j:set var="jacocoResult" value="${jacocoAction.result}" />
+        <j:if test="${jacocoResult!=null}">
+            <a href="${rooturl}${build.url}jacoco/">
+                <h1>Jacoco Results</h1>
+            </a>
+            <table class="border">
+                <tr>
+                    <th class="border">Package</th>
+                    <th class="border">Branches</th>
+                    <th class="border">Complexity</th>
+                    <th class="border">Instructions</th>
+                    <th class="border">Methods</th>
+                    <th class="border">Lines</th>
+                    <th class="border">Classes</th>
+                </tr>
+                <j:forEach var="child" items="${jacocoResult.getChildren().entrySet()}">
+                    <j:set var="cResult" value="${child.value}"/>
+                    <tr>
+                        <td class="border">
+                            <a href="${rooturl}${build.url}jacoco/${child.key}/"><tt>${child.key}</tt></a>
+                        </td>
+                        <td class="border right">${cResult.branchCoverage.percentage}%</td>
+                        <td class="border right">${cResult.complexityScore.percentage}%</td>
+                        <td class="border right">${cResult.instructionCoverage.percentage}%</td>
+                        <td class="border right">${cResult.methodCoverage.percentage}%</td>
+                        <td class="border right">${cResult.lineCoverage.percentage}%</td>
+                        <td class="border right">${cResult.classCoverage.percentage}%</td>
+                    </tr>
+                </j:forEach>
+                <tr>
+                    <td class="border">
+                        <a href="${rooturl}${build.url}jacoco/"><tt>OVERALL</tt></a>
+                    </td>
+                    <td class="border right">${jacocoResult.branchCoverage.percentage}%</td>
+                    <td class="border right">${jacocoResult.complexityScore.percentage}%</td>
+                    <td class="border right">${jacocoResult.instructionCoverage.percentage}%</td>
+                    <td class="border right">${jacocoResult.methodCoverage.percentage}%</td>
+                    <td class="border right">${jacocoResult.lineCoverage.percentage}%</td>
+                    <td class="border right">${jacocoResult.classCoverage.percentage}%</td>
+                </tr>
+            </table>
+        </j:if>
+    </j:if>
+
+    <!-- ARTIFACTS -->
+    <j:set var="artifacts" value="${build.artifacts}" />
+    <j:if test="${artifacts!=null and artifacts.size()&gt;0}">
+      <div class="content">
+        <h1>Build Artifacts</h1>
+        <ul>
+          <j:forEach var="f" items="${artifacts}">
+            <li>
+              <a href="${rooturl}${build.url}artifact/${f}">${f}</a>
+            </li>
+          </j:forEach>
+        </ul>
+      </div>
+    </j:if>
+
+    <!-- MAVEN ARTIFACTS -->
+    <j:set var="mbuilds" value="${build.moduleBuilds}" />
+    <j:if test="${mbuilds!=null}">
+      <div class="content">
+        <h1>Build Artifacts</h1>
+        <j:forEach var="m" items="${mbuilds}">
+          <h2>${m.key.displayName}</h2>
+          <j:forEach var="mvnbld" items="${m.value}">
+            <j:set var="artifacts" value="${mvnbld.artifacts}" />
+            <j:if test="${artifacts!=null and artifacts.size()&gt;0}">
+              <ul>
+                <j:forEach var="f" items="${artifacts}">
+                  <li>
+                    <a href="${rooturl}${mvnbld.url}artifact/${f}">${f}</a>
+                  </li>
+                </j:forEach>
+              </ul>
+            </j:if>
+          </j:forEach>
+        </j:forEach>
+        <br />
+      </div>
+    </j:if>
+
     <div class="content">
       <!-- CONSOLE OUTPUT -->
       <a href="${rooturl}${build.url}/console">

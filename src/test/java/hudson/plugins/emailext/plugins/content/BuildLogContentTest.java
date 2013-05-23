@@ -1,32 +1,31 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
+import hudson.model.TaskListener;
+import hudson.util.StreamTaskListener;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class BuildLogContentTest
 {
-    private BuildLogContent buildLogContent;
-
-    private Map<String, Object> args;
 
     private AbstractBuild build;
+
+    private TaskListener listener;
+    
+    private BuildLogContent buildLogContent;
 
     @Before
     public void setup()
     {
-        buildLogContent = new BuildLogContent();
-
-        args = new HashMap<String, Object>();
-
         build = mock(AbstractBuild.class);
+        listener = new StreamTaskListener(System.out);
+        buildLogContent = new BuildLogContent();
     }
 
     @Test
@@ -40,7 +39,7 @@ public class BuildLogContentTest
                 add("line 3");
             }});
 
-        String content = buildLogContent.getContent(build, null, null, args);
+        String content = buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);
 
         assertEquals("line 1\nline 2\nline 3\n", content);
     }
@@ -49,9 +48,8 @@ public class BuildLogContentTest
     public void testGetContent_shouldTruncateWhenLineLimitIsHit()
             throws Exception
     {
-        args.put(BuildLogContent.MAX_LINES_ARG_NAME, 2);
-
-        buildLogContent.getContent(build, null, null, args);
+        buildLogContent.maxLines = 2;
+        buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);
 
         verify(build).getLog(2);
     }
@@ -60,7 +58,7 @@ public class BuildLogContentTest
     public void testGetContent_shouldDefaultToMaxLines()
             throws Exception
     {
-        buildLogContent.getContent(build, null, null, args);
+        buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);
 
         verify(build).getLog(BuildLogContent.MAX_LINES_DEFAULT_VALUE);
     }
@@ -74,7 +72,7 @@ public class BuildLogContentTest
                 add("<b>bold</b>");
             }});
 
-        String content = buildLogContent.getContent(build, null, null, args);
+        String content = buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);
 
         assertEquals("<b>bold</b>\n", content);
     }
@@ -83,14 +81,13 @@ public class BuildLogContentTest
     public void testGetContent_shouldEscapeHtmlWhenArgumentEscapeHtmlSetToTrue()
             throws Exception
     {
-        args.put( BuildLogContent.ESCAPE_HTML_ARG_NAME, true );
-
         when(build.getLog(anyInt())).thenReturn(new LinkedList<String>()
         {{
                 add("<b>bold</b>");
             }});
 
-        String content = buildLogContent.getContent(build, null, null, args);
+        buildLogContent.escapeHtml = true;
+        String content = buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);
 
         assertEquals("&lt;b&gt;bold&lt;/b&gt;\n", content);
     }

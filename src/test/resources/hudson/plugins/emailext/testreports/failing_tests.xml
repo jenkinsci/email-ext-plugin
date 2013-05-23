@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite errors="0" failures="10" hostname="test" name="hudson.plugins.emailext.test.FailedTest" tests="1" time="1" timestamp="2012-07-05T21:08:10">
+    <properties/>
+    <testcase classname="hudson.plugins.emailext.test.FailedTest" name="failed0" time="1">
+        <failure message="test failed" type="junit.framework.AssertionFailedError">test failed
+        </failure>
+    </testcase>
+    <testcase classname="hudson.plugins.emailext.test.FailedTest" name="failed1" time="1">
+        <failure message="test failed" type="junit.framework.AssertionFailedError">test failed
+        </failure>
+    </testcase>
+    <testcase classname="hudson.plugins.emailext.test.FailedTest" name="failed2" time="1">
+        <failure message="test failed" type="junit.framework.AssertionFailedError">test failed
+        </failure>
+    </testcase>
+    <testcase classname="hudson.plugins.emailext.test.FailedTest" name="failed3" time="1">
+        <failure message="test failed" type="junit.framework.AssertionFailedError">test failed
+        </failure>
+    </testcase>
+    <testcase classname="hudson.plugins.emailext.test.FailedTest" name="failed4" time="1">
+        <failure message="test failed" type="junit.framework.AssertionFailedError">test failed
+        </failure>
+    </testcase>
+    <testcase classname="hudson.plugins.emailext.test.FailedTest" name="failed5" time="1">
+        <failure message="test failed" type="junit.framework.AssertionFailedError">test failed
+        </failure>
+    </testcase>
+    <testcase classname="hudson.plugins.emailext.test.FailedTest" name="failed6" time="1">
+        <failure message="test failed" type="junit.framework.AssertionFailedError">test failed
+        </failure>
+    </testcase>
+    <testcase classname="hudson.plugins.emailext.test.FailedTest" name="failed7" time="1">
+        <failure message="test failed" type="junit.framework.AssertionFailedError">test failed
+        </failure>
+    </testcase>
+    <testcase classname="hudson.plugins.emailext.test.FailedTest" name="failed8" time="1">
+        <failure message="test failed" type="junit.framework.AssertionFailedError">test failed
+        </failure>
+    </testcase>
+    <testcase classname="hudson.plugins.emailext.test.FailedTest" name="failed9" time="1">
+        <failure message="test failed" type="junit.framework.AssertionFailedError">test failed
+        </failure>
+    </testcase>
+    <system-out><![CDATA[]]></system-out>
+    <system-err><![CDATA[]]></system-err>
+</testsuite>

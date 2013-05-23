@@ -1,29 +1,16 @@
 package hudson.plugins.emailext.plugins.trigger;
 
-import hudson.model.AbstractBuild;
-import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import net.sf.json.JSONObject;
+import org.kohsuke.stapler.StaplerRequest;
 
-public class FirstFailureTrigger extends EmailTrigger {
+public class FirstFailureTrigger extends NthFailureTrigger {
 
-	public static final String TRIGGER_NAME = "First Failure";
-	
-	@Override
-	public boolean trigger(AbstractBuild<?,?> build) {
-		
-		Result buildResult = build.getResult();
-		
-		if (buildResult == Result.FAILURE) {
-			AbstractBuild<?,?> prevBuild = build.getPreviousBuild();
-            // if there is no previous build, this is a first failure
-            // if there is a previous build and it's result was success, this is first failure
-			if (prevBuild == null || (prevBuild.getResult() == Result.SUCCESS)) {
-				return true;
-			}
-		}
+	public static final String TRIGGER_NAME = "1st Failure";
 
-		return false;
+	public FirstFailureTrigger() {
+		super(1);
 	}
 	
 	@Override
@@ -32,20 +19,16 @@ public class FirstFailureTrigger extends EmailTrigger {
 	}
 	
 	public static DescriptorImpl DESCRIPTOR = new DescriptorImpl();
-	
-	public static final class DescriptorImpl extends EmailTriggerDescriptor {
-		
-		public DescriptorImpl() {
-			addTriggerNameToReplace(SuccessTrigger.TRIGGER_NAME);
-		}
-		
+
+	public static final class DescriptorImpl extends NthFailureTrigger.DescriptorImpl {
+
 		@Override
 		public String getTriggerName() {
 			return TRIGGER_NAME;
 		}
 
 		@Override
-		public EmailTrigger newInstance() {
+		public EmailTrigger newInstance(StaplerRequest req, JSONObject formData) {
 			return new FirstFailureTrigger();
 		}
 
@@ -53,17 +36,17 @@ public class FirstFailureTrigger extends EmailTrigger {
 		public String getHelpText() {
 			return "An email will be sent when the build status changes from \"Success\" " +
 				   "to \"Failure\"";
-		}
-		
+		}		
 	}
-	
-	@Override
-	public boolean getDefaultSendToDevs() {
-		return true;
-	}
-
-	@Override
-	public boolean getDefaultSendToList() {
-		return true;
-	}
+        
+        /**
+         * Maintaining backward compatibility
+         * @return this after checking for failureCount setting
+         */
+        public Object readResolve() {
+            if(this.failureCount == 0) {
+                this.failureCount = 1;
+            }
+            return this;
+        }
 }

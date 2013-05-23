@@ -64,15 +64,20 @@ public abstract class EmailTrigger {
     protected int getNumFailures(AbstractBuild<?, ?> build) {
         AbstractTestResultAction a = build.getTestResultAction();
         if (a instanceof AggregatedTestResultAction) {
-            int result = 0;
+            int result = 0; 
             AggregatedTestResultAction action = (AggregatedTestResultAction) a;
             for (ChildReport cr : action.getChildReports()) {
+                if(cr == null || cr.child == null || cr.child.getParent() == null) continue;
                 if (cr.child.getParent().equals(build.getParent())) {
                     if (cr.result instanceof TestResult) {
                         TestResult tr = (TestResult) cr.result;
                         result += tr.getFailCount();
                     }
                 }
+            }
+
+            if(result == 0 && action.getFailCount() > 0) {
+                result = action.getFailCount();
             }
             return result;
         }

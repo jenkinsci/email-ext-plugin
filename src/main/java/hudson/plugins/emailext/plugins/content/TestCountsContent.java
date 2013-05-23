@@ -1,37 +1,33 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.plugins.emailext.EmailType;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailContent;
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.tasks.test.AbstractTestResultAction;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 /**
  * Displays the number of tests.
  *
  * @author Seiji Sogabe
  */
-public class TestCountsContent implements EmailContent {
+@EmailToken
+public class TestCountsContent extends DataBoundTokenMacro {
 
-    private static final String TOKEN = "TEST_COUNTS";
-
-    private static final String VAR_ARG_NAME = "var";
-
+    public static final String MACRO_NAME = "TEST_COUNTS";
     private static final String VAR_DEFAULT_VALUE = "total";
 
-    public String getToken() {
-        return TOKEN;
+    @Parameter
+    public String var = VAR_DEFAULT_VALUE;
+    
+    @Override
+    public boolean acceptsMacroName(String macroName) {
+        return macroName.equals(MACRO_NAME);
     }
 
-    public List<String> getArguments() {
-        return Collections.singletonList(VAR_ARG_NAME);
-    }
-
+ /*
     public String getHelpText() {
         return "Displays the number of tests.\n"
                 + "<ul>\n"
@@ -45,28 +41,26 @@ public class TestCountsContent implements EmailContent {
                 + "</li>\n"
                 + "</ul>\n";
     }
-
-    public boolean hasNestedContent() {
-        return false;
-    }
-
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType emailType, Map<String, ?> args)
-            throws IOException, InterruptedException {
+*/
+    
+    @Override
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
 
         AbstractTestResultAction<?> action = build.getTestResultAction();
         if (action == null) {
             return "";
         }
 
-        String arg = Args.get(args, VAR_ARG_NAME, VAR_DEFAULT_VALUE).toLowerCase();
+        var = var.toLowerCase();
         
-        if ("total".equals(arg)) {
+        if ("total".equals(var)) {
             return String.valueOf(action.getTotalCount());
-        } else if ("pass".equals(arg)) {
+        } else if ("pass".equals(var)) {
             return String.valueOf(action.getTotalCount()-action.getFailCount()-action.getSkipCount());
-        } else if ("fail".equals(arg)) {
+        } else if ("fail".equals(var)) {
             return String.valueOf(action.getFailCount());
-        } else if ("skip".equals(arg)) {
+        } else if ("skip".equals(var)) {
             return String.valueOf(action.getSkipCount());
         }
 

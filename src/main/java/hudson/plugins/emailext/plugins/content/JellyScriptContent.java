@@ -1,11 +1,10 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Hudson;
-import hudson.plugins.emailext.EmailType;
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailContent;
 import hudson.tasks.Mailer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.jelly.JellyContext;
@@ -21,75 +20,67 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
-public class JellyScriptContent implements EmailContent {
+@EmailToken
+public class JellyScriptContent extends DataBoundTokenMacro {
 
-    private static final Logger LOGGER = Logger.getLogger(JellyScriptContent.class.getName());
-
-    public static final String TEMPLATE_NAME_ARG = "template";
-
+    public static final String MACRO_NAME = "JELLY_SCRIPT";
     private static final String DEFAULT_HTML_TEMPLATE_NAME = "html";
-
     private static final String DEFAULT_TEXT_TEMPLATE_NAME = "text";
-
     private static final String DEFAULT_TEMPLATE_NAME = DEFAULT_HTML_TEMPLATE_NAME;
-
     private static final String EMAIL_TEMPLATES_DIRECTORY = "email-templates";
+    
+    @Parameter
+    public String template = DEFAULT_TEMPLATE_NAME;
 
-    public String getToken() {
-        return "JELLY_SCRIPT";
+    @Override
+    public boolean acceptsMacroName(String macroName) {
+        return macroName.equals(MACRO_NAME);
     }
+    /*
+     public String getHelpText() {
+     return "Custom message content generated from a Jelly script template. "
+     + "There are two templates provided: \"" + DEFAULT_HTML_TEMPLATE_NAME + "\" "
+     + "and \"" + DEFAULT_TEXT_TEMPLATE_NAME + "\". Custom Jelly templates should be placed in "
+     + "$JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ". When using custom templates, "
+     + "the template filename without \".jelly\" should be used for "
+     + "the \"" + TEMPLATE_NAME_ARG + "\" argument.\n"
+     + "<ul>\n"
+     + "<li><i>" + TEMPLATE_NAME_ARG + "</i> - the template name.<br>\n"
+     + "Defaults to \"" + DEFAULT_TEMPLATE_NAME + "\".\n"
+     + "</ul>\n";
+     }
+     */
 
-    public String getHelpText() {
-        return "Custom message content generated from a Jelly script template. "
-                + "There are two templates provided: \"" + DEFAULT_HTML_TEMPLATE_NAME + "\" "
-                + "and \"" + DEFAULT_TEXT_TEMPLATE_NAME + "\". Custom Jelly templates should be placed in "
-                + "$JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ". When using custom templates, "
-                + "the template filename without \".jelly\" should be used for "
-                + "the \"" + TEMPLATE_NAME_ARG + "\" argument.\n"
-                + "<ul>\n"
-                + "<li><i>" + TEMPLATE_NAME_ARG + "</i> - the template name.<br>\n"
-                + "Defaults to \"" + DEFAULT_TEMPLATE_NAME + "\".\n"
-                + "</ul>\n";
-    }
-
-    public List<String> getArguments() {
-        return Collections.singletonList(TEMPLATE_NAME_ARG);
-    }
-
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(
-            AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType type, Map<String, ?> args)
-            throws IOException, InterruptedException {
+    @Override
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
         InputStream inputStream = null;
-        String templateName = Args.get(args, TEMPLATE_NAME_ARG, DEFAULT_TEMPLATE_NAME);
-       
+
         try {
-            inputStream = getTemplateInputStream(templateName);
+            inputStream = getTemplateInputStream(template);
             return renderContent(build, inputStream);
         } catch (JellyException e) {
-            LOGGER.log(Level.SEVERE, null, e);
+            //LOGGER.log(Level.SEVERE, null, e);
             return "JellyException: " + e.getMessage();
         } catch (FileNotFoundException e) {
-            String missingTemplateError = generateMissingTemplate(templateName);
-            LOGGER.log(Level.SEVERE, missingTemplateError);
+            String missingTemplateError = generateMissingTemplate(template);
+            //LOGGER.log(Level.SEVERE, missingTemplateError);
             return missingTemplateError;
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
     }
 
-    private String generateMissingTemplate(String template)
-    {
+    private String generateMissingTemplate(String template) {
         return "Jelly script [" + template + "] was not found in $JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ".";
     }
 
     /**
-     * Try to get the template from the classpath first before trying the file system.
+     * Try to get the template from the classpath first before trying the file
+     * system.
      *
      * @param templateName
      * @return
@@ -146,7 +137,7 @@ public class JellyScriptContent implements EmailContent {
     private String getCharset() {
         String charset = Mailer.descriptor().getCharset();
         String overrideCharset = ExtendedEmailPublisher.DESCRIPTOR.getCharset();
-        if(overrideCharset != null) {
+        if (overrideCharset != null) {
             charset = overrideCharset;
         }
         return charset;

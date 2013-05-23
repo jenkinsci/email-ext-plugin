@@ -1,0 +1,15 @@
+<hudson.plugins.emailext.plugins.trigger.FirstFailureTrigger>
+  <email>
+    <recipientList/>
+    <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+    <body>$PROJECT_DEFAULT_CONTENT</body>
+    <sendToDevelopers>true</sendToDevelopers>
+    <sendToRequester>false</sendToRequester>
+    <includeCulprits>true</includeCulprits>
+    <sendToRecipientList>true</sendToRecipientList>
+    <attachmentsPattern/>
+    <attachBuildLog>false</attachBuildLog>
+    <compressBuildLog>false</compressBuildLog>
+    <replyTo/>
+  </email>
+</hudson.plugins.emailext.plugins.trigger.FirstFailureTrigger>

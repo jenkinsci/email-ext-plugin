@@ -1,10 +1,8 @@
 package hudson.plugins.emailext;
 
 import hudson.Plugin;
-import hudson.PluginWrapper;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
-import hudson.model.Hudson;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
@@ -91,6 +89,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     private String defaultBody;
     
     /**
+     * This is the global default pre-send script.
+     */
+    private String defaultPresendScript = "";
+    
+    /**
      * This is the global emergency email address
      */
     private String emergencyReroute;
@@ -114,6 +117,12 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
      * The default Reply-To header value
      */
     private String defaultReplyTo = "";
+
+    /*
+     * This is a global excluded committers list for not sending commit emails.
+     */
+    private String excludedCommitters = "";
+
 
     private boolean overrideGlobalSettings;
     
@@ -143,7 +152,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
 
     public String getDefaultSuffix() {
         return defaultSuffix;
-    }    
+    }
 
     /**
      * JavaMail session.
@@ -253,6 +262,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         return recipientList;
     }
 
+    public String getExcludedCommitters() {
+        return excludedCommitters;
+    }
+
     public boolean getOverrideGlobalSettings() {
         return overrideGlobalSettings;
     }
@@ -277,19 +290,13 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         return true;
     }
     
-    public boolean isTokenMacroAvailable() {
-        boolean result = false;
-        Plugin tokenMacroPlugin = Jenkins.getInstance().getPlugin("token-macro");
-        if(tokenMacroPlugin != null) {
-            result = !tokenMacroPlugin.getWrapper().getVersionNumber().isOlderThan(new VersionNumber("1.5.1"));
-        }
-        return result;
+    public String getDefaultPresendScript() {
+        return defaultPresendScript;
     }
-
+    
     @Override
     public Publisher newInstance(StaplerRequest req, JSONObject formData)
             throws hudson.model.Descriptor.FormException {
-        
         // Save configuration for each trigger type
         ExtendedEmailPublisher m = new ExtendedEmailPublisher();
         m.recipientList = formData.getString("recipientlist_recipients");
@@ -299,14 +306,16 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         m.attachmentsPattern = formData.getString("project_attachments");
         m.presendScript = formData.getString("project_presend_script");
         m.attachBuildLog = "true".equalsIgnoreCase(formData.optString("project_attach_buildlog"));
+        m.compressBuildLog = "true".equalsIgnoreCase(formData.optString("project_compress_buildlog"));
         m.replyTo = formData.getString("project_replyto");
+        m.saveOutput = "true".equalsIgnoreCase(formData.optString("project_save_output"));
         m.configuredTriggers = new ArrayList<EmailTrigger>();
 
         // Create a new email trigger for each one that is configured
         for (String mailerId : ExtendedEmailPublisher.EMAIL_TRIGGER_TYPE_MAP.keySet()) {
             if ("true".equalsIgnoreCase(formData.optString("mailer_" + mailerId + "_configured"))) {
                 EmailType type = createMailType(formData, mailerId);
-                EmailTrigger trigger = ExtendedEmailPublisher.EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(type);
+                EmailTrigger trigger = ExtendedEmailPublisher.EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(type, req, formData);
                 m.configuredTriggers.add(trigger);
             }
         }
@@ -328,6 +337,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         m.setIncludeCulprits(formData.optBoolean(prefix + "includeCulprits"));
         m.setAttachmentsPattern(formData.getString(prefix + "attachmentsPattern"));
         m.setAttachBuildLog(formData.optBoolean(prefix + "attachBuildLog"));
+        m.setCompressBuildLog(formData.optBoolean(prefix + "compressBuildLog"));
         m.setReplyTo(formData.getString(prefix + "replyTo"));
         return m;
     }
@@ -391,6 +401,8 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         systemAdministrator = nullify(req.getParameter("ext_mailer_system_administrator"));
         defaultReplyTo = nullify(req.getParameter("ext_mailer_default_replyto")) != null ?
             req.getParameter("ext_mailer_default_replyto") : "";
+        defaultPresendScript = nullify(req.getParameter("ext_mailer_default_presend_script")) != null ?
+            req.getParameter("ext_mailer_default_presend_script") : "";
 
         debugMode = req.getParameter("ext_mailer_debug_mode") != null;
 
@@ -402,6 +414,8 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
 
         precedenceBulk = req.getParameter("extmailer.addPrecedenceBulk") != null;
         enableSecurity = req.getParameter("ext_mailer_security_enabled") != null;
+
+        excludedCommitters = req.getParameter("ext_mailer_excluded_committers");
 
         // specify List-ID information
         if (req.getParameter("extmailer.useListID") != null) {
@@ -456,7 +470,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         }
     }
 
-    public boolean isMatrixProject(AbstractProject<?, ?> project) {
+    public boolean isMatrixProject(Object project) {
         return project instanceof MatrixProject;
     }
 

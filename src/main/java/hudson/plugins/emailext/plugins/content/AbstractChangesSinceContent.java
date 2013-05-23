@@ -1,107 +1,108 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2011, CloudBees, Inc., Nicolas De Loof
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.plugins.emailext.EmailType;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
+import hudson.model.TaskListener;
 import hudson.plugins.emailext.Util;
-import hudson.plugins.emailext.plugins.EmailContent;
+import java.io.IOException;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 abstract public class AbstractChangesSinceContent
-        implements EmailContent {
+        extends DataBoundTokenMacro {
 
-    public static final String REVERSE_ARG_NAME = "reverse";
+    @Parameter
+    public boolean reverse = false;
+    @Parameter
+    public String format;
+    @Parameter
+    public boolean showPaths = false;
+    @Parameter
+    public String changesFormat;
+    @Parameter
+    public String pathFormat = "\\t%p\\n";
 
-    public static final boolean REVERSE_DEFAULT_VALUE = false;
-
-    public static final String FORMAT_ARG_NAME = "format";
-
-    public static final String SHOW_PATHS_ARG_NAME = "showPaths";
-
-    public static final String CHANGES_FORMAT_ARG_NAME = "changesFormat";
-
-    public static final String PATH_FORMAT_ARG_NAME = "pathFormat";
-
-    public List<String> getArguments() {
-        return Arrays.asList(REVERSE_ARG_NAME, FORMAT_ARG_NAME, SHOW_PATHS_ARG_NAME, CHANGES_FORMAT_ARG_NAME,
-                PATH_FORMAT_ARG_NAME);
-    }
-
-    public String getHelpText() {
-        return getShortHelpDescription() + "\n" + "<ul>\n"
-                + "<li><i>" + REVERSE_ARG_NAME + "</i> - indicates that " + "most recent builds should be at the top.<br>\n"
-                + "Defaults to " + REVERSE_DEFAULT_VALUE + ".\n"
-                + "<li><i>" + FORMAT_ARG_NAME + "</i> - for each build listed, "
-                + "a string containing %X, where %X is one of %c for changes, " + "or %n for build number.<br>\n"
-                + "Defaults to \"" + getDefaultFormatValue() + "\".\n"
-                + "<li><i>" + SHOW_PATHS_ARG_NAME + "</i>, <i>" + CHANGES_FORMAT_ARG_NAME + "</i>, <i>"
-                + PATH_FORMAT_ARG_NAME + "</i> - " + "defined as <i>showPaths</i>, <i>format</i>, and <i>pathFormat</i> "
-                + "from ${CHANGES}, respectively.\n"
-                + "</ul>\n";
-    }
-
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getContent(
-            AbstractBuild<P, B> build, ExtendedEmailPublisher publisher, EmailType emailType, Map<String, ?> args) {
+    @Override
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
         // No previous build so bail
         if (build.getPreviousBuild() == null) {
             return "";
         }
 
-        String formatString = Args.get(args, FORMAT_ARG_NAME, getDefaultFormatValue());
-        boolean reverseOrder = Args.get(args, REVERSE_ARG_NAME, REVERSE_DEFAULT_VALUE);
-
-        Map<String, Object> childArgs = new HashMap<String, Object>();
-        childArgs.put(FORMAT_ARG_NAME, args.get(CHANGES_FORMAT_ARG_NAME));
-        childArgs.put(PATH_FORMAT_ARG_NAME, args.get(PATH_FORMAT_ARG_NAME));
-        childArgs.put(SHOW_PATHS_ARG_NAME, args.get(SHOW_PATHS_ARG_NAME));
+        if (StringUtils.isEmpty(format)) {
+            format = getDefaultFormatValue();
+        }
 
         StringBuffer sb = new StringBuffer();
-        final AbstractBuild<P, B> startBuild;
-        final AbstractBuild<P, B> endBuild;
-        if (reverseOrder) {
+        final AbstractBuild startBuild;
+        final AbstractBuild endBuild;
+        if (reverse) {
             startBuild = build;
             endBuild = getFirstIncludedBuild(build);
         } else {
             startBuild = getFirstIncludedBuild(build);
             endBuild = build;
         }
-        AbstractBuild<P, B> currentBuild = null;
+        AbstractBuild<?, ?> currentBuild = null;
         while (currentBuild != endBuild) {
             if (currentBuild == null) {
                 currentBuild = startBuild;
             } else {
-                if (reverseOrder) {
+                if (reverse) {
                     currentBuild = currentBuild.getPreviousBuild();
                 } else {
                     currentBuild = currentBuild.getNextBuild();
                 }
             }
-            appendBuild(sb, formatString, publisher, emailType, currentBuild, childArgs);
+            appendBuild(sb, listener, currentBuild);
         }
 
         return sb.toString();
     }
 
     private <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> void appendBuild(StringBuffer buf,
-            String formatString,
-            final ExtendedEmailPublisher publisher,
-            final EmailType emailType,
-            final AbstractBuild<P, B> currentBuild,
-            final Map<String, Object> childArgs) {
+            final TaskListener listener,
+            final AbstractBuild<P, B> currentBuild)
+            throws MacroEvaluationException {
         // Use this object since it already formats the changes per build
-        final ChangesSinceLastBuildContent changes = new ChangesSinceLastBuildContent();
+        final ChangesSinceLastBuildContent changes = new ChangesSinceLastBuildContent(changesFormat, pathFormat, showPaths);
 
-        Util.printf(buf, formatString, new Util.PrintfSpec() {
-
+        Util.printf(buf, format, new Util.PrintfSpec() {
             public boolean printSpec(StringBuffer buf, char formatChar) {
                 switch (formatChar) {
                     case 'c':
-                        buf.append(changes.getContent(currentBuild, publisher, emailType, childArgs));
+                        try {
+                            buf.append(changes.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME));
+                        } catch(Exception e) {
+                            // do nothing
+                        }
                         return true;
                     case 'n':
                         buf.append(currentBuild.getNumber());
@@ -113,6 +114,7 @@ abstract public class AbstractChangesSinceContent
         });
     }
 
+    @Override
     public boolean hasNestedContent() {
         return true;
     }

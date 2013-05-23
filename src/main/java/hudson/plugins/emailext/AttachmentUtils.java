@@ -8,6 +8,7 @@ import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 
 import hudson.plugins.emailext.plugins.ContentBuilder;
+import hudson.plugins.emailext.plugins.ZipDataSource;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -73,7 +74,7 @@ public class AttachmentUtils implements Serializable {
 		}    	
     }
     
-    private List<MimeBodyPart> getAttachments(final AbstractBuild<?, ?> build, final BuildListener listener)
+    private List<MimeBodyPart> getAttachments(final ExtendedEmailPublisher publisher, final AbstractBuild<?, ?> build, final BuildListener listener)
     		throws MessagingException, InterruptedException, IOException {
     	List<MimeBodyPart> attachments = null;
     	FilePath ws = build.getWorkspace();
@@ -85,7 +86,7 @@ public class AttachmentUtils implements Serializable {
     	} else if(!StringUtils.isBlank(attachmentsPattern)) {
     		attachments = new ArrayList<MimeBodyPart>();
 
-    		FilePath[] files = ws.list(attachmentsPattern);
+    		FilePath[] files = ws.list(new ContentBuilder().transformText(attachmentsPattern, publisher, build, listener));
     	
 	    	for(FilePath file : files) {
 		    	if(maxAttachmentSize > 0 && 
@@ -114,9 +115,9 @@ public class AttachmentUtils implements Serializable {
     	return attachments;
     }
     
-    public void attach(Multipart multipart, AbstractBuild<?,?> build, BuildListener listener) {  
+    public void attach(Multipart multipart, ExtendedEmailPublisher publisher, AbstractBuild<?,?> build, BuildListener listener) {  
     	try {
-	    	List<MimeBodyPart> attachments = getAttachments(build, listener);
+	    	List<MimeBodyPart> attachments = getAttachments(publisher, build, listener);
 	        if(attachments != null) {
                 for(MimeBodyPart attachment : attachments) {
 		        	multipart.addBodyPart(attachment);
@@ -134,7 +135,7 @@ public class AttachmentUtils implements Serializable {
     /**
      * Attaches the build log to the multipart item.
      */
-    public static void attachBuildLog(Multipart multipart, AbstractBuild<?, ?> build, BuildListener listener) {
+    public static void attachBuildLog(Multipart multipart, AbstractBuild<?, ?> build, BuildListener listener, boolean compress) {
         try {
             File logFile = build.getLogFile();
             long maxAttachmentSize =
@@ -146,12 +147,21 @@ public class AttachmentUtils implements Serializable {
                 return;
             }
 
-            FileDataSource fileSource = new FileDataSource(logFile);
+            DataSource fileSource;
             MimeBodyPart attachment = new MimeBodyPart();
+            if(compress) {
+                listener.getLogger().println("Request made to compress build log" );
+                fileSource = new ZipDataSource(logFile);
+                attachment.setFileName("build.zip");
+            } else {
+                fileSource = new FileDataSource(logFile);
+                attachment.setFileName("build.log");
+            }
             attachment.setDataHandler(new DataHandler(fileSource));
-            attachment.setFileName("build.log");
             multipart.addBodyPart(attachment);
         } catch (MessagingException e) {
+            listener.error("Error attaching build log to message: " + e.getMessage());
+        } catch (IOException e) {
             listener.error("Error attaching build log to message: " + e.getMessage());
         }
     }

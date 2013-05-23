@@ -56,6 +56,11 @@ public class EmailType {
     private boolean attachBuildLog;
 
     /**
+     * True to compress the build log before attaching it to the email
+     */
+    private boolean compressBuildLog;
+
+    /**
      * List of email addresses to put into the Reply-To header
      */
     private String replyTo;
@@ -70,6 +75,7 @@ public class EmailType {
         sendToRequester = false;
         attachmentsPattern = "";
         attachBuildLog = false;
+        compressBuildLog = false;
         replyTo = "";
     }
 
@@ -155,8 +161,16 @@ public class EmailType {
         return attachBuildLog;
     }
 
+    public boolean getCompressBuildLog() {
+        return compressBuildLog;
+    }
+
     public void setAttachBuildLog(boolean attachBuildLog) {
         this.attachBuildLog = attachBuildLog;
+    }
+
+    public void setCompressBuildLog(boolean compressBuildLog) {
+        this.compressBuildLog = compressBuildLog;
     }
 
     public Object readResolve() {

@@ -3,16 +3,18 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
+import hudson.plugins.emailext.plugins.EmailToken;
 
+@EmailToken
 public class ChangesSinceLastSuccessfulBuildContent
         extends AbstractChangesSinceContent {
 
-    private static final String TOKEN = "CHANGES_SINCE_LAST_SUCCESS";
-
+    public static final String MACRO_NAME = "CHANGES_SINCE_LAST_SUCCESS";
     private static final String FORMAT_DEFAULT_VALUE = "Changes for Build #%n\\n%c\\n";
 
-    public String getToken() {
-        return TOKEN;
+    @Override
+    public boolean acceptsMacroName(String macroName) {
+        return macroName.equals(MACRO_NAME);
     }
 
     @Override

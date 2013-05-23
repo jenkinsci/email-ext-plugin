@@ -16,6 +16,7 @@ import hudson.model.Cause.UserCause;
 import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
+import hudson.plugins.emailext.plugins.CssInliner;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.scm.ChangeLogSet.Entry;
@@ -30,30 +31,36 @@ import jenkins.model.Jenkins;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import hudson.FilePath;
+import hudson.model.TaskListener;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 
-import org.kohsuke.groovy.sandbox.GroovyValueFilter;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.SecurityException;
+import java.net.ConnectException;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -124,7 +131,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     public static List<EmailTrigger> getTriggersForNonConfiguredInstance() {
         List<EmailTrigger> retList = new ArrayList<EmailTrigger>();
         for (String mailerId : EMAIL_TRIGGER_TYPE_MAP.keySet()) {
-            retList.add(EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(null));
+            retList.add(EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(null, null, null));
         }
         return retList;
     }
@@ -168,9 +175,19 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     public boolean attachBuildLog;
 
     /**
+     * True to compress the log from the build before attaching to the email
+     */
+    public boolean compressBuildLog;
+
+    /**
      * Reply-To value for the e-mail
      */
     public String replyTo;
+    
+    /**
+     * If true, save the generated email content to email-ext-message.[txt|html]
+     */
+    public boolean saveOutput = false;
 
     private MatrixTriggerMode matrixTriggerMode;
 
@@ -200,7 +217,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 }
             }
             if (!contains) {
-                retList.add(EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(null));
+                retList.add(EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(null, null, null));
             }
         }
         return retList;
@@ -288,50 +305,69 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         for (String triggerName : triggered.keySet()) {
             listener.getLogger().println("Sending email for trigger: " + triggerName);
-            sendMail(triggered.get(triggerName).getEmail(), build, listener);
+            sendMail(triggered.get(triggerName).getEmail(), build, listener, triggered.get(triggerName), triggered);
         }
 
         return true;
     }
 
-    private boolean sendMail(EmailType mailType, AbstractBuild<?, ?> build, BuildListener listener) {
+    private boolean sendMail(EmailType mailType, AbstractBuild<?, ?> build, BuildListener listener, EmailTrigger trigger, Map<String, EmailTrigger> triggered) {
         try {
-            MimeMessage msg = createMail(mailType, build, listener);
+            MimeMessage msg = createMail(mailType, build, listener, trigger);
             debug(listener.getLogger(), "Successfully created MimeMessage");
             Address[] allRecipients = msg.getAllRecipients();
+            int retries = 0;
             if (allRecipients != null) {
                 StringBuilder buf = new StringBuilder("Sending email to:");
                 for (Address a : allRecipients) {
                     buf.append(' ').append(a);
                 }
                 listener.getLogger().println(buf);
-                if(executePresendScript(build, listener, msg)) {
-                    try {
-                        Transport.send(msg);
-                    } catch (SendFailedException e) {
-                        Address[] addresses = e.getValidSentAddresses();
-                        if(addresses.length > 0) {
-                            buf = new StringBuilder("Successfully sent to the following addresses:");
-                            for (Address a : addresses) {
-                                buf.append(' ').append(a);
+                if(executePresendScript(build, listener, msg, trigger, triggered)) {
+                    while(true) {
+                        try {
+                            Transport.send(msg);
+                            break;
+                        } catch (SendFailedException e) {
+                            if(e.getNextException() != null && 
+                                    ((e.getNextException() instanceof SocketException) || 
+                                    (e.getNextException() instanceof ConnectException))) {
+                                listener.getLogger().println("Socket error sending email, retrying once more in 10 seconds...");
+                                Thread.sleep(10000);
+                            } else {
+                                Address[] addresses = e.getValidSentAddresses();
+                                if(addresses != null && addresses.length > 0) {
+                                    buf = new StringBuilder("Successfully sent to the following addresses:");
+                                    for (Address a : addresses) {
+                                        buf.append(' ').append(a);
+                                    }
+                                    listener.getLogger().println(buf);
+                                }
+                                addresses = e.getValidUnsentAddresses();
+                                if(addresses != null && addresses.length > 0) {
+                                    buf = new StringBuilder("Error sending to the following VALID addresses:");
+                                    for (Address a : addresses) {
+                                        buf.append(' ').append(a);
+                                    }
+                                    listener.getLogger().println(buf);
+                                }
+                                addresses = e.getInvalidAddresses();
+                                if(addresses != null && addresses.length > 0) {
+                                    buf = new StringBuilder("Error sending to the following INVALID addresses:");
+                                    for (Address a : addresses) {
+                                        buf.append(' ').append(a);
+                                    }
+                                    listener.getLogger().println(buf);
+                                }
+
+                                debug(listener.getLogger(), "SendFailedException message: " + e.getMessage());
+                                break;
                             }
-                            listener.getLogger().println(buf);
-                        }
-                        addresses = e.getValidUnsentAddresses();
-                        if(addresses.length > 0) {
-                            buf = new StringBuilder("Error sending to the following VALID addresses:");
-                            for (Address a : addresses) {
-                                buf.append(' ').append(a);
-                            }
-                            listener.getLogger().println(buf);
-                        }
-                        addresses = e.getInvalidAddresses();
-                        if(addresses.length > 0) {
-                            buf = new StringBuilder("Error sending to the following INVALID addresses:");
-                            for (Address a : addresses) {
-                                buf.append(' ').append(a);
-                            }
-                            listener.getLogger().println(buf);
+                        } 
+                        retries++;
+                        if(retries > 1) {
+                            listener.getLogger().println("Failed after second try sending email");
+                            break;
                         }
                     }
                     if (build.getAction(MailMessageIdAction.class) == null) {
@@ -355,26 +391,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return false;
     }
 
-    /**
-     * Provides a sandbox for groovy scripts that disallows access to the Jenkins instance.
-     */
-    private class PresendScriptSandbox extends GroovyValueFilter {
-        @Override
-        public Object filter(Object o) {
-            if(o instanceof Jenkins || o instanceof Hudson) {
-                throw new SecurityException("Use of 'jenkins' is disallowed by security policy");
-            }
-            return o;
-        }
-    }
-    
-    private boolean executePresendScript(AbstractBuild<?, ?> build, BuildListener listener, MimeMessage msg) 
-        throws RuntimeException {
+    private boolean executePresendScript(AbstractBuild<?, ?> build, BuildListener listener, MimeMessage msg, EmailTrigger trigger, Map<String, EmailTrigger> triggered)
+            throws RuntimeException {
         boolean cancel = false;
-        if(StringUtils.isNotBlank(presendScript)) {
+        presendScript = new ContentBuilder().transformText(presendScript, this, build, listener);
+        if (StringUtils.isNotBlank(presendScript)) {
             listener.getLogger().println("Executing pre-send script");
             ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
-            PresendScriptSandbox sandbox = null;
+            ScriptSandbox sandbox = null;
             CompilerConfiguration cc = new CompilerConfiguration();
             cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
                     "jenkins",
@@ -385,7 +409,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             if(ExtendedEmailPublisher.DESCRIPTOR.isSecurityEnabled()) {
                 debug(listener.getLogger(), "Setting up sandbox for pre-send script");
                 cc.addCompilationCustomizers(new SandboxTransformer());
-                sandbox = new PresendScriptSandbox();
+                sandbox = new ScriptSandbox();
             }
 
             Binding binding = new Binding();
@@ -393,6 +417,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             binding.setVariable("msg", msg);
             binding.setVariable("logger", listener.getLogger());
             binding.setVariable("cancel", cancel);
+            binding.setVariable("trigger", trigger);
+            binding.setVariable("triggered", Collections.unmodifiableMap(triggered));
 
             GroovyShell shell = new GroovyShell(cl, binding, cc);
             StringWriter out = new StringWriter();
@@ -421,7 +447,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return !cancel;
     }    
 
-    private MimeMessage createMail(EmailType type, AbstractBuild<?, ?> build, BuildListener listener) throws MessagingException, IOException, InterruptedException {
+    private MimeMessage createMail(EmailType type, AbstractBuild<?, ?> build, BuildListener listener, EmailTrigger trigger) throws MessagingException, IOException, InterruptedException {
         boolean overrideGlobalSettings = ExtendedEmailPublisher.DESCRIPTOR.getOverrideGlobalSettings();
 
         MimeMessage msg;
@@ -456,22 +482,22 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         setSubject(type, build, msg, listener, charset);
 
         Multipart multipart = new MimeMultipart();
-        MimeBodyPart msgBody = getContent(type, build, msg, listener, charset);
+        multipart.addBodyPart(getContent(type, build, listener, charset, trigger));
+
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
-        attachments.attach(multipart, build, listener);
+        attachments.attach(multipart, this, build, listener);
 
         // add attachments from the email type if they are setup
         if(StringUtils.isNotBlank(type.getAttachmentsPattern())) {
             AttachmentUtils typeAttachments = new AttachmentUtils(type.getAttachmentsPattern());
-            typeAttachments.attach(multipart, build, listener);
+            typeAttachments.attach(multipart, this, build, listener);
         }
 
         if(attachBuildLog || type.getAttachBuildLog()) {
             debug(listener.getLogger(), "Request made to attach build log");
-            AttachmentUtils.attachBuildLog(multipart, build, listener);
+            AttachmentUtils.attachBuildLog(multipart, build, listener, compressBuildLog || type.getCompressBuildLog());
         }
 
-        multipart.addBodyPart(msgBody);
         msg.setContent(multipart);
         
         EnvVars env = null;
@@ -505,11 +531,13 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
             
             for (User user : users) {
-                String userAddress = EmailRecipientUtils.GetUserConfiguredEmail(user);
-                if(userAddress != null){
-                    addAddressesFromRecipientList(recipientAddresses, ccAddresses, userAddress, env, listener);
-                } else {
-                    listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
+                if (!isExcludedCommitter(user.getFullName())) {
+                    String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
+                    if (userAddress != null) {
+                        addAddressesFromRecipientList(recipientAddresses, ccAddresses, userAddress, env, listener);
+                    } else {
+                        listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
+                    }
                 }
             }
         }
@@ -601,6 +629,16 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return msg;
     }
 
+    private boolean isExcludedCommitter(String userName) {
+        StringTokenizer tokens = new StringTokenizer(DESCRIPTOR.getExcludedCommitters(), ",");
+        while (tokens.hasMoreTokens()) {
+            if (tokens.nextToken().trim().equalsIgnoreCase(userName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void addUserTriggeringTheBuild(AbstractBuild<?, ?> build, Set<InternetAddress> recipientAddresses, Set<InternetAddress> ccAddresses,
             EnvVars env, BuildListener listener) {
         User user = getByUserIdCause(build);
@@ -656,13 +694,13 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     private void setSubject(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, BuildListener listener, String charset)
             throws MessagingException {
-        String subject = new ContentBuilder().transformText(type.getSubject(), this, type, build, listener);
+        String subject = new ContentBuilder().transformText(type.getSubject(), this, build, listener);
         msg.setSubject(subject, charset);
     }
     
     private String getRecipientList(final EmailType type, final AbstractBuild<?, ?> build, String recipients, BuildListener listener, String charset)
         throws MessagingException {
-        final String recipientsTransformed = StringUtils.isBlank(recipients) ? "" : new ContentBuilder().transformText(recipients, this, type, build, listener);
+        final String recipientsTransformed = StringUtils.isBlank(recipients) ? "" : new ContentBuilder().transformText(recipients, this, build, listener);
         return recipientsTransformed;
     }
 
@@ -672,10 +710,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             || MatrixTriggerMode.ONLY_CONFIGURATIONS == mtm;
     }
 
-    private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, MimeMessage msg, BuildListener listener, String charset)
+    private MimeBodyPart getContent(final EmailType type, final AbstractBuild<?, ?> build, BuildListener listener, String charset, EmailTrigger trigger)
             throws MessagingException {
-        final String text = new ContentBuilder().transformText(type.getBody(), this, type, build, listener);
-
+        final String text = new ContentBuilder().transformText(type.getBody(), this, build, listener);
+        
         String messageContentType = contentType;
         // contentType is null if the project was not reconfigured after upgrading.
         if (messageContentType == null || "default".equals(messageContentType)) {
@@ -687,12 +725,35 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
         }
         messageContentType += "; charset=" + charset;
+        
+        try {
+            if(saveOutput) {
+                Random random = new Random();
+                String extension = ".html";
+                if(messageContentType.startsWith("text/plain")) {
+                    extension = ".txt";
+                }
+
+                FilePath savedOutput = new FilePath(build.getWorkspace(), 
+                        String.format("%s-%s%d%s", trigger.getDescriptor().getTriggerName(), build.getId(), random.nextInt(), extension));
+                savedOutput.write(text, charset);
+            }
+        } catch(IOException e) {
+            listener.getLogger().println("Error trying to save email output to file. " + e.getMessage());
+        } catch(InterruptedException e) {
+            listener.getLogger().println("Error trying to save email output to file. " + e.getMessage());
+        }
 
         // set the email message text 
         // (plain text or HTML depending on the content type)
         MimeBodyPart msgPart = new MimeBodyPart();
         debug(listener.getLogger(), "messageContentType = %s", messageContentType);
-        msgPart.setContent(text, messageContentType);
+        if (messageContentType.startsWith("text/html")) {
+            String inlinedCssHtml = new CssInliner().process(text);
+            msgPart.setContent(inlinedCssHtml, messageContentType);
+        } else {
+            msgPart.setContent(text, messageContentType);
+        }
         return msgPart;
     }   
 
@@ -708,6 +769,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         } catch (AddressException ae) {
             LOGGER.log(Level.WARNING, "Could not create email address.", ae);
             listener.getLogger().println("Failed to create e-mail address for " + ae.getRef());
+        } catch(UnsupportedEncodingException e) {
+            LOGGER.log(Level.WARNING, "Could not create email address.", e);
+            listener.getLogger().println("Failed to create e-mail address because of invalid encoding");
         }
     }
 
@@ -735,7 +799,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
 	public MatrixAggregator createAggregator(MatrixBuild matrixbuild,
-			Launcher launcher, BuildListener buildlistener) {				
+			Launcher launcher, BuildListener buildlistener) {
 		return new MatrixAggregator(matrixbuild, launcher, buildlistener) {
 			@Override
             public boolean endBuild() throws InterruptedException, IOException {
@@ -751,14 +815,13 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 			
 			@Override		 
 			public boolean startBuild() throws InterruptedException,IOException {
-				LOGGER.log(Level.FINER,"end build of " + this.build.getDisplayName());            					
+				LOGGER.log(Level.FINER,"end build of " + this.build.getDisplayName());
 				// Will be run by parent so we check if needed to be executed by parent 
                 if (getMatrixTriggerMode().forParent) {
                     return ExtendedEmailPublisher.this._perform(this.build, this.listener, true);
                 }
                 return true;
             }
-		
         };
-	}
+    }
 }

@@ -1,0 +1,4 @@
+${BUILD_ID()}
+build result is ${build.result}
+build url is ${rooturl}${build.url}
+${CHANGES(showPaths: true, showDependencies: true)}
