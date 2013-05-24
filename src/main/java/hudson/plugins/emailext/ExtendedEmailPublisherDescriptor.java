@@ -97,6 +97,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     private String emergencyReroute;
     
     /**
+     * This is the system administrator's email address.  All emails will be sent here if configured.
+     */
+    private String systemAdministrator;
+    
+    /**
      * The maximum size of all the attachments (in bytes)
      */
     private long maxAttachmentSize = -1;
@@ -239,6 +244,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         return emergencyReroute;
     }
     
+    public String getSystemAdministrator() {
+        return systemAdministrator;
+    }
+    
     public long getMaxAttachmentSize() {
     	return maxAttachmentSize;
     }
@@ -334,10 +343,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     public ExtendedEmailPublisherDescriptor() {
         super(ExtendedEmailPublisher.class);
         load();
-        if (defaultBody == null && defaultSubject == null && emergencyReroute == null) {
+        if (defaultBody == null && defaultSubject == null && emergencyReroute == null && systemAdministrator == null) {
             defaultBody = ExtendedEmailPublisher.DEFAULT_BODY_TEXT;
             defaultSubject = ExtendedEmailPublisher.DEFAULT_SUBJECT_TEXT;
             emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
+            systemAdministrator = ExtendedEmailPublisher.DEFAULT_SYSTEM_ADMINISTRATOR_TEXT;
         }
     }
 
@@ -386,6 +396,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         defaultSubject = nullify(req.getParameter("ext_mailer_default_subject"));
         defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
         emergencyReroute = nullify(req.getParameter("ext_mailer_emergency_reroute"));
+        systemAdministrator = nullify(req.getParameter("ext_mailer_system_administrator"));
         defaultReplyTo = nullify(req.getParameter("ext_mailer_default_replyto")) != null ?
             req.getParameter("ext_mailer_default_replyto") : "";
         defaultPresendScript = nullify(req.getParameter("ext_mailer_default_presend_script")) != null ?

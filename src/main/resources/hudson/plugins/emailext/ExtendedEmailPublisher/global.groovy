@@ -63,6 +63,9 @@ f.section(title: _("Extended E-mail Notification")) {
   f.entry(help: "/plugin/email-ext/help/globalConfig/emergencyReroute.html", title: _("Emergency reroute")) {
     input(type: "text", class: "setting-input", value: descriptor.emergencyReroute, name: "ext_mailer_emergency_reroute") 
   }
+  f.entry(help: "/plugin/email-ext/help/globalConfig/systemAdministrator.html", title: _("Eye in the sky")) {
+    input(type: "text", class: "setting-input", value: descriptor.systemAdministrator, name: "ext_mailer_system_administrator") 
+  }
   f.entry(help: "/plugin/email-ext/help/globalConfig/excludedCommitters.html", title: _("Excluded Committers")) {
     input(type: "text", class: "setting-input", value: descriptor.excludedCommitters, name: "ext_mailer_excluded_committers")
   }
