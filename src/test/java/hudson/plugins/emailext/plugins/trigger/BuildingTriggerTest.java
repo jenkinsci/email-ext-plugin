@@ -1,9 +1,7 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.Result;
-import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.util.StreamTaskListener;
 
 import java.io.IOException;
 
@@ -17,7 +15,7 @@ public class BuildingTriggerTest extends TriggerTestBase {
 
     @Override
     EmailTrigger newInstance() {
-        return new BuildingTrigger();
+        return new BuildingTrigger(true, true, true, "", "", "", "", "", 0);
     }
     
     @Test

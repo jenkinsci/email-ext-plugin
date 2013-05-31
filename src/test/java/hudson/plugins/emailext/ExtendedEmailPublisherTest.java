@@ -85,7 +85,8 @@ public class ExtendedEmailPublisherTest
     public void testPreBuildTriggerShouldAlwaysSendEmail()
         throws Exception
     {
-        PreBuildTrigger trigger = new PreBuildTrigger();
+        PreBuildTrigger trigger = new PreBuildTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
@@ -100,7 +101,8 @@ public class ExtendedEmailPublisherTest
     public void testSuccessTriggerShouldSendEmailWhenBuildSucceeds()
         throws Exception
     {
-        SuccessTrigger successTrigger = new SuccessTrigger();
+        SuccessTrigger successTrigger = new SuccessTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( successTrigger );
         publisher.getConfiguredTriggers().add( successTrigger );
 
@@ -117,7 +119,8 @@ public class ExtendedEmailPublisherTest
     {
         project.getBuildersList().add( new FailureBuilder() );
 
-        SuccessTrigger trigger = new SuccessTrigger();
+        SuccessTrigger trigger = new SuccessTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
@@ -134,7 +137,8 @@ public class ExtendedEmailPublisherTest
     {
         project.getBuildersList().add( new FailureBuilder() );
 
-        FirstFailureTrigger trigger = new FirstFailureTrigger();
+        FirstFailureTrigger trigger = new FirstFailureTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
@@ -157,7 +161,8 @@ public class ExtendedEmailPublisherTest
     {
         project.getBuildersList().add( new FailureBuilder() );
 
-        FixedTrigger trigger = new FixedTrigger();
+        FixedTrigger trigger = new FixedTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
@@ -175,7 +180,8 @@ public class ExtendedEmailPublisherTest
     {
         project.getBuildersList().add( new FailureBuilder() );
 
-        FixedTrigger trigger = new FixedTrigger();
+        FixedTrigger trigger = new FixedTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
@@ -205,7 +211,8 @@ public class ExtendedEmailPublisherTest
         FreeStyleBuild build2 = project.scheduleBuild2( 0 ).get();
         assertBuildStatus( Result.ABORTED, build2 );
 
-        FixedTrigger trigger = new FixedTrigger();
+        FixedTrigger trigger = new FixedTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
@@ -223,7 +230,8 @@ public class ExtendedEmailPublisherTest
     public void testStillFailingTriggerShouldNotSendEmailWhenBuildSucceeds()
         throws Exception
     {
-        StillFailingTrigger trigger = new StillFailingTrigger();
+        StillFailingTrigger trigger = new StillFailingTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
@@ -240,7 +248,8 @@ public class ExtendedEmailPublisherTest
     {
         project.getBuildersList().add( new FailureBuilder() );
 
-        StillFailingTrigger trigger = new StillFailingTrigger();
+        StillFailingTrigger trigger = new StillFailingTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
@@ -258,7 +267,8 @@ public class ExtendedEmailPublisherTest
     {
         project.getBuildersList().add( new FailureBuilder() );
 
-        StillFailingTrigger trigger = new StillFailingTrigger();
+        StillFailingTrigger trigger = new StillFailingTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
@@ -280,7 +290,8 @@ public class ExtendedEmailPublisherTest
     {
         project.getBuildersList().add( new FailureBuilder() );
 
-        StillFailingTrigger trigger = new StillFailingTrigger();
+        StillFailingTrigger trigger = new StillFailingTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
@@ -302,7 +313,8 @@ public class ExtendedEmailPublisherTest
     {
         project.getBuildersList().add( new MockBuilder(Result.ABORTED) );
 
-        AbortedTrigger abortedTrigger = new AbortedTrigger();
+        AbortedTrigger abortedTrigger = new AbortedTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( abortedTrigger );
         publisher.getConfiguredTriggers().add( abortedTrigger );
 
@@ -319,7 +331,8 @@ public class ExtendedEmailPublisherTest
     {
         project.getBuildersList().add( new FailureBuilder() );
 
-        AbortedTrigger trigger = new AbortedTrigger();
+        AbortedTrigger trigger = new AbortedTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
@@ -337,7 +350,8 @@ public class ExtendedEmailPublisherTest
     {
         project.getBuildersList().add( new MockBuilder(Result.NOT_BUILT) );
 
-        NotBuiltTrigger notbuiltTrigger = new NotBuiltTrigger();
+        NotBuiltTrigger notbuiltTrigger = new NotBuiltTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( notbuiltTrigger );
         publisher.getConfiguredTriggers().add( notbuiltTrigger );
 
@@ -354,7 +368,8 @@ public class ExtendedEmailPublisherTest
     {
         project.getBuildersList().add( new FailureBuilder() );
 
-        NotBuiltTrigger trigger = new NotBuiltTrigger();
+        NotBuiltTrigger trigger = new NotBuiltTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
@@ -371,7 +386,8 @@ public class ExtendedEmailPublisherTest
     {
         project.getBuildersList().add( new FailureBuilder() );
 
-        FailureTrigger trigger = new FailureTrigger();
+        FailureTrigger trigger = new FailureTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
 
@@ -403,7 +419,8 @@ public class ExtendedEmailPublisherTest
     
     public void testCancelFromPresendScriptCausesNoEmail() throws Exception {
         publisher.presendScript = "cancel = true";
-        SuccessTrigger successTrigger = new SuccessTrigger();
+        SuccessTrigger successTrigger = new SuccessTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         successTrigger.setEmail(new EmailType(){{
             setSendToRequester(true);
         }});
@@ -424,7 +441,8 @@ public class ExtendedEmailPublisherTest
     
     public void testNoCancelFromPresendScriptCausesEmail() throws Exception {
         publisher.presendScript = "def hello = 'world'\n";
-        SuccessTrigger successTrigger = new SuccessTrigger();
+        SuccessTrigger successTrigger = new SuccessTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         successTrigger.setEmail(new EmailType(){{
             setSendToRequester(true);
         }});
@@ -446,7 +464,8 @@ public class ExtendedEmailPublisherTest
     public void testPresendScriptModifiesTo() throws Exception {
         publisher.presendScript = "import javax.mail.Message.RecipientType\n" 
             + "msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')";
-        SuccessTrigger successTrigger = new SuccessTrigger();
+        SuccessTrigger successTrigger = new SuccessTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         successTrigger.setEmail(new EmailType(){{
             setSendToRequester(true);
         }});
@@ -472,7 +491,8 @@ public class ExtendedEmailPublisherTest
         f.set( ExtendedEmailPublisher.DESCRIPTOR, false );
 
         publisher.presendScript = "for(it in Jenkins.instance.items) {\n\tSystem.out.println(it.name)\n}\n";
-        SuccessTrigger successTrigger = new SuccessTrigger();
+        SuccessTrigger successTrigger = new SuccessTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         successTrigger.setEmail(new EmailType(){{
             setSendToRequester(true);
         }});
@@ -500,7 +520,8 @@ public class ExtendedEmailPublisherTest
 
         boolean exceptionOccured = false;
         publisher.presendScript = "for(it in Jenkins.instance.items) {\n\tSystem.out.println(it.name)\n}\n";
-        SuccessTrigger successTrigger = new SuccessTrigger();
+        SuccessTrigger successTrigger = new SuccessTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         successTrigger.setEmail(new EmailType(){{
             setSendToRequester(true);
         }});
@@ -523,7 +544,8 @@ public class ExtendedEmailPublisherTest
     }
     
     public void testSendToRequesterLegacy()  throws Exception {
-        SuccessTrigger successTrigger = new SuccessTrigger();
+        SuccessTrigger successTrigger = new SuccessTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         successTrigger.setEmail(new EmailType(){{
             setSendToRequester(true);
         }});
@@ -543,7 +565,8 @@ public class ExtendedEmailPublisherTest
     }
 
     public void testReplyTo() throws Exception {
-        SuccessTrigger successTrigger = new SuccessTrigger();
+        SuccessTrigger successTrigger = new SuccessTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         successTrigger.setEmail(new EmailType(){{
             setSendToRequester(true);
         }});
@@ -571,7 +594,8 @@ public class ExtendedEmailPublisherTest
     }
 
     public void testNoReplyTo() throws Exception {
-        SuccessTrigger successTrigger = new SuccessTrigger();
+        SuccessTrigger successTrigger = new SuccessTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
         successTrigger.setEmail(new EmailType(){{
             setSendToRequester(true);
         }});
@@ -613,7 +637,7 @@ public class ExtendedEmailPublisherTest
             public Void call() throws Exception {
                 JSONObject form = new JSONObject();
                 form.put( "project_content_type", "default" );
-                form.put( "recipientlist_recipients", "ashlux@gmail.com" );
+                form.put( "project_recipient_list", "ashlux@gmail.com" );
                 form.put( "project_default_subject", "Make millions in Nigeria" );
                 form.put( "project_default_content", "Give me a $1000 check and I'll mail you back $5000!!!" );
                 form.put( "project_attachments", "");
