@@ -1,52 +1,55 @@
 package hudson.plugins.emailext.plugins.trigger;
 
-import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.Extension;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import net.sf.json.JSONObject;
+
+import java.io.IOException;
+import javax.servlet.ServletException;
+import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
 public class FirstFailureTrigger extends NthFailureTrigger {
 
-	public static final String TRIGGER_NAME = "1st Failure";
+    public static final String TRIGGER_NAME = "1st Failure";
 
-	public FirstFailureTrigger() {
-		super(1);
-	}
-	
-	@Override
-	public EmailTriggerDescriptor getDescriptor() {
-		return DESCRIPTOR;
-	}
-	
-	public static DescriptorImpl DESCRIPTOR = new DescriptorImpl();
+    @DataBoundConstructor
+    public FirstFailureTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, String recipientList,
+            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog) {
+        super(1, sendToList, sendToDevs, sendToRequestor, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog);
+    }
 
-	public static final class DescriptorImpl extends NthFailureTrigger.DescriptorImpl {
+    @Override
+    public EmailTriggerDescriptor getDescriptor() {
+        return DESCRIPTOR;
+    }
+    
+    @Extension
+    public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
-		@Override
-		public String getTriggerName() {
-			return TRIGGER_NAME;
-		}
+    public static final class DescriptorImpl extends NthFailureTrigger.DescriptorImpl {
 
-		@Override
-		public EmailTrigger newInstance(StaplerRequest req, JSONObject formData) {
-			return new FirstFailureTrigger();
-		}
-
-		@Override
-		public String getHelpText() {
-			return "An email will be sent when the build status changes from \"Success\" " +
-				   "to \"Failure\"";
-		}		
-	}
-        
-        /**
-         * Maintaining backward compatibility
-         * @return this after checking for failureCount setting
-         */
-        public Object readResolve() {
-            if(this.failureCount == 0) {
-                this.failureCount = 1;
-            }
-            return this;
+        @Override
+        public String getDisplayName() {
+            return TRIGGER_NAME;
         }
+
+        @Override
+        public void doHelp(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+            rsp.getWriter().println("An email will be sent when the build status changes from \"Success\" "
+                    + "to \"Failure\"");
+        }
+    }
+
+    /**
+     * Maintaining backward compatibility
+     *
+     * @return this after checking for failureCount setting
+     */
+    public Object readResolve() {
+        if (this.failureCount == 0) {
+            this.failureCount = 1;
+        }
+        return this;
+    }
 }

@@ -33,11 +33,13 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import hudson.FilePath;
 import hudson.model.Action;
+import hudson.security.Permission;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 
+import org.kohsuke.groovy.sandbox.GroovyValueFilter;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 
 import java.io.IOException;
@@ -85,8 +87,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     private static final String CONTENT_TRANSFER_ENCODING = System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
 
-    public static final Map<String, EmailTriggerDescriptor> EMAIL_TRIGGER_TYPE_MAP = new HashMap<String, EmailTriggerDescriptor>();
-    
     public static final String DEFAULT_RECIPIENTS_TEXT = "";
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
@@ -99,40 +99,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     public static final String PROJECT_DEFAULT_SUBJECT_TEXT = "$PROJECT_DEFAULT_SUBJECT";
 
     public static final String PROJECT_DEFAULT_BODY_TEXT = "$PROJECT_DEFAULT_CONTENT";
-    
-    public static void addEmailTriggerType(EmailTriggerDescriptor triggerType) throws EmailExtException {
-        if (EMAIL_TRIGGER_TYPE_MAP.containsKey(triggerType.getMailerId())) {
-            throw new EmailExtException("An email trigger type with name "
-                    + triggerType.getTriggerName() + " was already added.");
-        }
-        EMAIL_TRIGGER_TYPE_MAP.put(triggerType.getMailerId(), triggerType);
-    }
-
-    public static void removeEmailTriggerType(EmailTriggerDescriptor triggerType) {
-        if (EMAIL_TRIGGER_TYPE_MAP.containsKey(triggerType.getMailerId())) {
-            EMAIL_TRIGGER_TYPE_MAP.remove(triggerType.getMailerId());
-        }
-    }
-
-    public static EmailTriggerDescriptor getEmailTriggerType(String mailerId) {
-        return EMAIL_TRIGGER_TYPE_MAP.get(mailerId);
-    }
-
-    public static Collection<EmailTriggerDescriptor> getEmailTriggers() {
-        return EMAIL_TRIGGER_TYPE_MAP.values();
-    }
-
-    public static Collection<String> getEmailTriggerNames() {
-        return EMAIL_TRIGGER_TYPE_MAP.keySet();
-    }
-
-    public static List<EmailTrigger> getTriggersForNonConfiguredInstance() {
-        List<EmailTrigger> retList = new ArrayList<EmailTrigger>();
-        for (String mailerId : EMAIL_TRIGGER_TYPE_MAP.keySet()) {
-            retList.add(EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(null, null, null));
-        }
-        return retList;
-    }
 
     /**
      * A comma-separated list of email recipient that will be used for every trigger.
@@ -200,28 +166,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     /**
-     * Get the list of non-configured email triggers for this project.
-     */
-    public List<EmailTrigger> getNonConfiguredTriggers() {
-        List<EmailTrigger> confTriggers = getConfiguredTriggers();
-
-        List<EmailTrigger> retList = new ArrayList<EmailTrigger>();
-        for (String mailerId : EMAIL_TRIGGER_TYPE_MAP.keySet()) {
-            boolean contains = false;
-            for (EmailTrigger trigger : confTriggers) {
-                if (trigger.getDescriptor().getMailerId().equals(mailerId)) {
-                    contains = true;
-                    break;
-                }
-            }
-            if (!contains) {
-                retList.add(EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(null, null, null));
-            }
-        }
-        return retList;
-    }
-
-    /**
      * Return true if the project has been configured, otherwise returns false
      */
     public boolean isConfigured() {
@@ -250,7 +194,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     
     @Override
     public Collection<? extends Action> getProjectActions(AbstractProject<?,?> project) {
-        return Collections.singletonList(new EmailExtTemplateAction(project));
+        // only allow the user to see the email template testing action if they can
+        // configure the project itself.        
+        if(project.hasPermission(Permission.CONFIGURE)) {
+            return Collections.singletonList(new EmailExtTemplateAction(project));
+        }
+        return Collections.EMPTY_LIST;
     }
 
     @Override
@@ -280,7 +229,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         for (EmailTrigger trigger : configuredTriggers) {
             if (trigger.isPreBuild() == forPreBuild && trigger.trigger(build, listener)) {
-                String tName = trigger.getDescriptor().getTriggerName();
+                String tName = trigger.getDescriptor().getDisplayName();
                 triggered.put(tName, trigger);
                 listener.getLogger().println("Email was triggered for: " + tName);
                 emailTriggered = true;
@@ -725,7 +674,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 }
 
                 FilePath savedOutput = new FilePath(build.getWorkspace(), 
-                        String.format("%s-%s%d%s", trigger.getDescriptor().getTriggerName(), build.getId(), random.nextInt(), extension));
+                        String.format("%s-%s%d%s", trigger.getDescriptor().getDisplayName(), build.getId(), random.nextInt(), extension));
                 savedOutput.write(text, charset);
             }
         } catch(IOException e) {

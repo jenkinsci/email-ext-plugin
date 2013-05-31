@@ -1,6 +1,9 @@
 package hudson.plugins.emailext.plugins;
 
+import hudson.ExtensionPoint;
+import hudson.DescriptorExtensionList;
 import hudson.model.AbstractBuild;
+import hudson.model.Describable;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
@@ -9,24 +12,51 @@ import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction.ChildReport;
 
-public abstract class EmailTrigger {
+import jenkins.model.Jenkins;
+
+import net.sf.json.JSONObject;
+import org.kohsuke.stapler.StaplerRequest;
+
+public abstract class EmailTrigger implements Describable<EmailTrigger>, ExtensionPoint {
 
     private EmailType email;
+
+    public static DescriptorExtensionList<EmailTrigger, EmailTriggerDescriptor> all() {
+        return Jenkins.getInstance().<EmailTrigger, EmailTriggerDescriptor>getDescriptorList(EmailTrigger.class);
+    }
+
+    protected EmailTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, String recipientList,
+            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog) {
+        email = new EmailType();
+        email.setSendToRecipientList(sendToList);
+        email.setSendToDevelopers(sendToDevs);
+        email.setSendToRequester(sendToRequestor);
+        email.setRecipientList(recipientList);
+        email.setReplyTo(replyTo);
+        email.setSubject(subject);
+        email.setBody(body);
+        email.setAttachmentsPattern(attachmentsPattern);
+        email.setAttachBuildLog(attachBuildLog > 0);
+        email.setCompressBuildLog(attachBuildLog > 1);
+    }
+    
+    protected EmailTrigger(JSONObject formData) {
+        
+    }
 
     /**
      * Implementors of this method need to return true if the conditions to
      * trigger an email have been met.
-     * 
-     * @param build
-     *            The Build object after the project has been built
+     *
+     * @param build The Build object after the project has been built
      * @return true if the conditions have been met to trigger a build of this
-     *         type
+     * type
      */
     public abstract boolean trigger(AbstractBuild<?, ?> build, TaskListener listener);
 
     /**
      * Get the email that is with this trigger.
-     * 
+     *
      * @return the email
      */
     public EmailType getEmail() {
@@ -42,18 +72,13 @@ public abstract class EmailTrigger {
         this.email = email;
     }
 
-    public abstract EmailTriggerDescriptor getDescriptor();
-
-    public boolean getDefaultSendToList() {
-        return false;
+    public EmailTriggerDescriptor getDescriptor() {
+        return (EmailTriggerDescriptor) Jenkins.getInstance().getDescriptor(getClass());
     }
 
-    public boolean getDefaultSendToDevs() {
-        return false;
-    }
-
-    public boolean getDefaultSendToRequester() {
-        return false;
+    public boolean configure(StaplerRequest req, JSONObject formData) {
+        setEmail(createMailType(formData));
+        return true;
     }
 
     /**
@@ -65,10 +90,12 @@ public abstract class EmailTrigger {
     protected int getNumFailures(AbstractBuild<?, ?> build) {
         AbstractTestResultAction a = build.getTestResultAction();
         if (a instanceof AggregatedTestResultAction) {
-            int result = 0; 
+            int result = 0;
             AggregatedTestResultAction action = (AggregatedTestResultAction) a;
             for (ChildReport cr : action.getChildReports()) {
-                if(cr == null || cr.child == null || cr.child.getParent() == null) continue;
+                if (cr == null || cr.child == null || cr.child.getParent() == null) {
+                    continue;
+                }
                 if (cr.child.getParent().equals(build.getParent())) {
                     if (cr.result instanceof TestResult) {
                         TestResult tr = (TestResult) cr.result;
@@ -77,7 +104,7 @@ public abstract class EmailTrigger {
                 }
             }
 
-            if(result == 0 && action.getFailCount() > 0) {
+            if (result == 0 && action.getFailCount() > 0) {
                 result = action.getFailCount();
             }
             return result;
@@ -90,5 +117,21 @@ public abstract class EmailTrigger {
      */
     public boolean isPreBuild() {
         return false;
+    }
+
+    protected EmailType createMailType(JSONObject formData) {
+        EmailType m = new EmailType();
+        String prefix = "mailer_" + getDescriptor().getJsonSafeClassName() + '_';
+        m.setSubject(formData.getString(prefix + "subject"));
+        m.setBody(formData.getString(prefix + "body"));
+        m.setRecipientList(formData.getString(prefix + "recipientList"));
+        m.setSendToRecipientList(formData.optBoolean(prefix + "sendToRecipientList"));
+        m.setSendToDevelopers(formData.optBoolean(prefix + "sendToDevelopers"));
+        m.setSendToRequester(formData.optBoolean(prefix + "sendToRequester"));
+        m.setIncludeCulprits(formData.optBoolean(prefix + "includeCulprits"));
+        m.setAttachmentsPattern(formData.getString(prefix + "attachmentsPattern"));
+        m.setAttachBuildLog(formData.optBoolean(prefix + "attachBuildLog"));
+        m.setReplyTo(formData.getString(prefix + "replyTo"));
+        return m;
     }
 }

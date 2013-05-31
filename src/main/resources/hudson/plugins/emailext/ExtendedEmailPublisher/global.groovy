@@ -5,7 +5,6 @@ j = namespace("jelly:core")
 l = namespace("/lib/layout")
 st = namespace("jelly:stapler")
 t = namespace("/lib/hudson")
-m = namespace("/lib/email-ext")
 
 f.section(title: _("Extended E-mail Notification")) {
   script(src: "${rootURL}/plugin/email-ext/scripts/emailext-behavior.js", type: "text/javascript") 
@@ -84,22 +83,6 @@ f.section(title: _("Extended E-mail Notification")) {
   }
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/debugMode.html", checked: descriptor.isDebugMode(), name: "ext_mailer_debug_mode", title: _("Enable Debug Mode")) 
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/security.html", checked: descriptor.isSecurityEnabled(), name: "ext_mailer_security_enabled", title: _("Enable Security")) 
-  tr() {
-    td() 
-    td(colspan: "2", _("Content Token Reference")) 
-    td() {      
-      a(href: "#contentTokenHelpAnchor", name: "contentTokenAnchor", onclick: "toggleContentTokenHelp('');return false") {
-        img(src: "${rootURL}/images/16x16/help.gif", alt: _("Help for feature: Content Token Reference")) 
-      }
-    }
-  }
-  tr() {
-    td() 
-    td(colspan: "2") {      
-      div(style: "display:none", id: "contentTokenHelpConf", class: "help") {
-        m.tokenhelp(displayDefaultTokens: false)
-      }
-    }
-    td() 
-  }
+  
+  f.entry(title: _("Content Token Reference"), field:"tokens")
 }

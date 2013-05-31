@@ -13,20 +13,35 @@ import hudson.plugins.emailext.ScriptSandbox;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import jenkins.model.Jenkins;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.StaplerRequest;
 
-/**
- *
- * @author acearl
- */
 public abstract class AbstractScriptTrigger extends EmailTrigger {
     protected String triggerScript;
     
+    @DataBoundConstructor
+    public AbstractScriptTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, String recipientList,
+            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String triggerScript) {
+        super(sendToList, sendToDevs, sendToRequestor, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog);
+        this.triggerScript = triggerScript;
+    }
+    
     public String getTriggerScript() {
         return triggerScript;
+    }
+    
+    @Override
+    public boolean configure(StaplerRequest req, JSONObject formData) {
+        super.configure(req, formData);
+        if(formData.containsKey("triggerScript")) {
+            this.triggerScript = formData.optString("triggerScript", "");
+        }
+        return true;
     }
 
     @Override
@@ -80,20 +95,15 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
         return shell;
     }
 
-    @Override
-    public abstract EmailTriggerDescriptor getDescriptor();
-
     public abstract static class DescriptorImpl extends EmailTriggerDescriptor {
-        
-    }
+        @Override
+        public boolean getDefaultSendToDevs() {
+            return false;
+        }
 
-    @Override
-    public boolean getDefaultSendToDevs() {
-        return false;
+        @Override
+        public boolean getDefaultSendToList() {
+            return true;
+        }
     }
-
-    @Override
-    public boolean getDefaultSendToList() {
-        return true;
-    }    
 }

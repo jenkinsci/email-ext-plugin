@@ -1,8 +1,14 @@
 package hudson.plugins.emailext;
 
 import hudson.matrix.MatrixProject;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import hudson.plugins.emailext.plugins.content.JellyScriptContent;
+import hudson.plugins.emailext.plugins.content.ScriptContent;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
@@ -20,8 +26,19 @@ import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Properties;
+import net.sf.json.JSONArray;
+import org.apache.commons.jelly.JellyContext;
+import org.apache.commons.jelly.JellyException;
+import org.apache.commons.jelly.Script;
+import org.apache.commons.jelly.XMLOutput;
+import org.kohsuke.stapler.MetaClass;
+import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.WebApp;
+import org.kohsuke.stapler.bind.JavaScriptMethod;
+import org.kohsuke.stapler.jelly.JellyClassTearOff;
 
 /**
  * These settings are global configurations
@@ -286,48 +303,25 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     @Override
     public Publisher newInstance(StaplerRequest req, JSONObject formData)
             throws hudson.model.Descriptor.FormException {
+
         // Save configuration for each trigger type
         ExtendedEmailPublisher m = new ExtendedEmailPublisher();
-        m.recipientList = formData.getString("recipientlist_recipients");
+        m.recipientList = formData.getString("project_recipient_list");
         m.contentType = formData.getString("project_content_type");
         m.defaultSubject = formData.getString("project_default_subject");
         m.defaultContent = formData.getString("project_default_content");
         m.attachmentsPattern = formData.getString("project_attachments");
         m.presendScript = formData.getString("project_presend_script");
-        m.attachBuildLog = "true".equalsIgnoreCase(formData.optString("project_attach_buildlog"));
-        m.compressBuildLog = "true".equalsIgnoreCase(formData.optString("project_compress_buildlog"));
+        int attachBuildLogLevel = formData.optInt("project_attach_buildlog", 0);
+        m.attachBuildLog = attachBuildLogLevel > 0;
+        m.compressBuildLog = attachBuildLogLevel > 1;
         m.replyTo = formData.getString("project_replyto");
         m.saveOutput = "true".equalsIgnoreCase(formData.optString("project_save_output"));
-        m.configuredTriggers = new ArrayList<EmailTrigger>();
+                
+        m.configuredTriggers = req.bindJSONToList(EmailTrigger.class, formData.get("project_triggers"));
+        
+        m.setMatrixTriggerMode(req.bindJSON(MatrixTriggerMode.class, MatrixTriggerMode.class, formData.opt("project_matrix_trigger_mode")));
 
-        // Create a new email trigger for each one that is configured
-        for (String mailerId : ExtendedEmailPublisher.EMAIL_TRIGGER_TYPE_MAP.keySet()) {
-            if ("true".equalsIgnoreCase(formData.optString("mailer_" + mailerId + "_configured"))) {
-                EmailType type = createMailType(formData, mailerId);
-                EmailTrigger trigger = ExtendedEmailPublisher.EMAIL_TRIGGER_TYPE_MAP.get(mailerId).getNewInstance(type, req, formData);
-                m.configuredTriggers.add(trigger);
-            }
-        }
-
-        m.setMatrixTriggerMode(req.bindJSON(MatrixTriggerMode.class,MatrixTriggerMode.class,formData.opt("matrixTriggerMode")));
-
-        return m;
-    }
-
-    private EmailType createMailType(JSONObject formData, String mailType) {
-        EmailType m = new EmailType();
-        String prefix = "mailer_" + mailType + '_';
-        m.setSubject(formData.getString(prefix + "subject"));
-        m.setBody(formData.getString(prefix + "body"));
-        m.setRecipientList(formData.getString(prefix + "recipientList"));
-        m.setSendToRecipientList(formData.optBoolean(prefix + "sendToRecipientList"));
-        m.setSendToDevelopers(formData.optBoolean(prefix + "sendToDevelopers"));
-        m.setSendToRequester(formData.optBoolean(prefix + "sendToRequester"));
-        m.setIncludeCulprits(formData.optBoolean(prefix + "includeCulprits"));
-        m.setAttachmentsPattern(formData.getString(prefix + "attachmentsPattern"));
-        m.setAttachBuildLog(formData.optBoolean(prefix + "attachBuildLog"));
-        m.setCompressBuildLog(formData.optBoolean(prefix + "compressBuildLog"));
-        m.setReplyTo(formData.getString(prefix + "replyTo"));
         return m;
     }
 
@@ -425,6 +419,48 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     @Override
     public String getHelpFile() {
         return "/plugin/email-ext/help/main.html";
+    }
+    
+    @JavaScriptMethod
+    public String renderHelp(boolean showDefaultMacros, StaplerRequest req, StaplerResponse rsp) {
+        String result;
+        
+        MetaClass c = WebApp.getCurrent().getMetaClass(ExtendedEmailPublisher.class);
+        try {
+            JellyClassTearOff tearOff = c.loadTearOff(JellyClassTearOff.class);
+            Script script = tearOff.findScript("token-help.jelly");
+            StringWriter writer = new StringWriter();
+            XMLOutput output = XMLOutput.createXMLOutput(writer);
+            JellyContext context = new JellyContext();
+            context.setClassLoader(getClass().getClassLoader());
+            context.setVariable("displayDefaultTokens", showDefaultMacros);
+            context.setVariable("privateMacros", ContentBuilder.getPrivateMacros());
+            script.run(context, output);
+            result = writer.toString();
+        } catch(JellyException e) {
+            result = "<strong>Unable to render the content token help</strong>";
+        }
+        
+//        try {
+//            AbstractBuild<?,?> build = project.getBuild(buildId);
+//            if(templateFile.endsWith(".jelly")) {
+//                JellyScriptContent jellyContent = new JellyScriptContent();
+//                jellyContent.template = templateFile;
+//                result = jellyContent.evaluate(build, TaskListener.NULL, "JELLY_SCRIPT");
+//            } else {
+//                ScriptContent scriptContent = new ScriptContent();
+//                scriptContent.template = templateFile;                
+//                result = scriptContent.evaluate(build, TaskListener.NULL, "SCRIPT");
+//            }
+//        } catch (Exception ex) {
+//            result = renderError(ex);
+//        } 
+        
+        return result;
+    }
+    
+    public void doTokenHelp(@QueryParameter final String value) {
+        System.out.println("hello, world");
     }
 
     public FormValidation doAddressCheck(@QueryParameter final String value)

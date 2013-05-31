@@ -14,7 +14,9 @@ public abstract class NthFailureTrigger extends EmailTrigger {
 
     protected int failureCount;
     
-    public NthFailureTrigger(int failureCount) {
+    public NthFailureTrigger(int failureCount, boolean sendToList, boolean sendToDevs, boolean sendToRequestor, String recipientList,
+            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog) {
+        super(sendToList, sendToDevs, sendToRequestor, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog);
         this.failureCount = failureCount;
     }
 
@@ -42,17 +44,8 @@ public abstract class NthFailureTrigger extends EmailTrigger {
         if (build == null || build.getResult() == Result.SUCCESS) {
             return true;
         }
+
         return false;
-    }
-
-    @Override
-    public boolean getDefaultSendToDevs() {
-        return true;
-    }
-
-    @Override
-    public boolean getDefaultSendToList() {
-        return true;
     }
 
     public abstract static class DescriptorImpl extends EmailTriggerDescriptor {
@@ -60,6 +53,16 @@ public abstract class NthFailureTrigger extends EmailTrigger {
         public DescriptorImpl() {
             addTriggerNameToReplace(FailureTrigger.TRIGGER_NAME);
             addTriggerNameToReplace(StillFailingTrigger.TRIGGER_NAME);
+        }
+        
+        @Override
+        public boolean getDefaultSendToDevs() {
+            return true;
+        }
+
+        @Override
+        public boolean getDefaultSendToList() {
+            return true;
         }
     }
 }
