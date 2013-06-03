@@ -6,9 +6,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.util.StreamTaskListener;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.StringReader;
 
 import org.junit.Before;

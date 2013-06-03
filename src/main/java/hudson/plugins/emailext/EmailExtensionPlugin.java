@@ -24,7 +24,6 @@
 package hudson.plugins.emailext;
 
 import hudson.Plugin;
-import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 
 import java.util.Arrays;
 

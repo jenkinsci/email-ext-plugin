@@ -31,7 +31,6 @@ public class JellyScriptContent extends DataBoundTokenMacro {
     private static final String DEFAULT_TEXT_TEMPLATE_NAME = "text";
     private static final String DEFAULT_TEMPLATE_NAME = DEFAULT_HTML_TEMPLATE_NAME;
     private static final String EMAIL_TEMPLATES_DIRECTORY = "email-templates";
-    
     @Parameter
     public String template = DEFAULT_TEMPLATE_NAME;
 
@@ -63,11 +62,9 @@ public class JellyScriptContent extends DataBoundTokenMacro {
             inputStream = getTemplateInputStream(template);
             return renderContent(build, inputStream);
         } catch (JellyException e) {
-            //LOGGER.log(Level.SEVERE, null, e);
             return "JellyException: " + e.getMessage();
         } catch (FileNotFoundException e) {
             String missingTemplateError = generateMissingTemplate(template);
-            //LOGGER.log(Level.SEVERE, missingTemplateError);
             return missingTemplateError;
         } finally {
             IOUtils.closeQuietly(inputStream);
@@ -89,7 +86,7 @@ public class JellyScriptContent extends DataBoundTokenMacro {
     private InputStream getTemplateInputStream(String templateName)
             throws FileNotFoundException {
         // add .jelly if needed
-        if(!templateName.endsWith(".jelly")) {
+        if (!templateName.endsWith(".jelly")) {
             templateName += ".jelly";
         }
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(

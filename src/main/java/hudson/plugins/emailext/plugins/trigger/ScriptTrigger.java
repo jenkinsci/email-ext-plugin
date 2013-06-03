@@ -1,7 +1,6 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
-import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -55,12 +54,4 @@ public class ScriptTrigger extends AbstractScriptTrigger {
             return true;
         }
     }    
-
-    @Override
-    public boolean configure(StaplerRequest req, JSONObject formData) {
-        boolean result = super.configure(req, formData);
-        String prefix = "mailer_" + getDescriptor().getJsonSafeClassName() + '_';
-        triggerScript = formData.getString(prefix + "triggerScript");
-        return result;
-    }
 }

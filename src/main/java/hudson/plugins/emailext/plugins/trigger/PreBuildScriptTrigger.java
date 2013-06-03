@@ -1,7 +1,6 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
-import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 
 
@@ -9,7 +8,6 @@ import java.io.IOException;
 
 import javax.servlet.ServletException;
 
-import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
