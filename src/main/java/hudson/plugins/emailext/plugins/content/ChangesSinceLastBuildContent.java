@@ -113,7 +113,7 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
                 case 'm': {
                     String m = entry.getMsg();
                     buf.append(m);
-                    if (!m.endsWith("\n")) {
+                    if (m == null || !m.endsWith("\n")) {
                         buf.append('\n');
                     }
                     return true;
