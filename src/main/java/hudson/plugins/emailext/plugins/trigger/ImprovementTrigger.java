@@ -51,7 +51,12 @@ public class ImprovementTrigger extends EmailTrigger {
     }
 
     public static final class DescriptorImpl extends EmailTriggerDescriptor {
-
+        
+        public DescriptorImpl() {
+            addTriggerNameToReplace(UnstableTrigger.TRIGGER_NAME);
+            addTriggerNameToReplace(StillUnstableTrigger.TRIGGER_NAME);
+        }
+        
         @Override
         public String getDisplayName() {
             return TRIGGER_NAME;
