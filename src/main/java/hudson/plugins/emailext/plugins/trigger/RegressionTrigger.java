@@ -48,6 +48,7 @@ public class RegressionTrigger extends EmailTrigger {
 
         public DescriptorImpl() {
             addTriggerNameToReplace(UnstableTrigger.TRIGGER_NAME);
+            addTriggerNameToReplace(StillUnstableTrigger.TRIGGER_NAME);
         }
         
         @Override
