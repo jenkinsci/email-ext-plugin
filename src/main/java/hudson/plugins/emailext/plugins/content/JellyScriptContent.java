@@ -31,6 +31,7 @@ public class JellyScriptContent extends DataBoundTokenMacro {
     private static final String DEFAULT_TEXT_TEMPLATE_NAME = "text";
     private static final String DEFAULT_TEMPLATE_NAME = DEFAULT_HTML_TEMPLATE_NAME;
     private static final String EMAIL_TEMPLATES_DIRECTORY = "email-templates";
+    
     @Parameter
     public String template = DEFAULT_TEMPLATE_NAME;
 

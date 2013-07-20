@@ -114,4 +114,13 @@ public class ContentBuilderTest
         assertEquals("", new ContentBuilder().transformText("$DEFAULT_SUBJECT", publisher, build, listener));
         assertEquals("", new ContentBuilder().transformText("$DEFAULT_CONTENT", publisher, build, listener));
     }
+    
+    public void testEscapedToken() throws IOException, InterruptedException {
+        build = mock(AbstractBuild.class);
+        EnvVars testVars = new EnvVars();
+        testVars.put("FOO", "BAR");
+        when(build.getEnvironment(listener)).thenReturn(testVars);
+        
+        assertEquals("\\BAR", new ContentBuilder().transformText("\\${ENV, var=\"FOO\"}", publisher, build, listener));
+    }
 }

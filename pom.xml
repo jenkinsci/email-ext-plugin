@@ -91,7 +91,15 @@
             <artifactId>powermock-module-junit4</artifactId>
             <version>${powermock.version}</version>
             <scope>test</scope>
-        </dependency>
+        </dependency>        
+        <!--
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>2.33.0</version>
+            <scope>test</scope>
+        </dependency> 
+        -->
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
@@ -107,7 +115,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>token-macro</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>org.kohsuke</groupId>
@@ -124,6 +132,13 @@
             <artifactId>groovy-all</artifactId>
             <version>1.8.5</version>
         </dependency>
+        <!--
+        <dependency>
+            <groupId>org.jenkins-ci.lib</groupId>
+            <artifactId>config-provider-model</artifactId>
+            <version>1.2</version>
+        </dependency>
+        -->
     </dependencies>
 
     <scm>

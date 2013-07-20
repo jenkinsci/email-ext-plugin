@@ -2,7 +2,6 @@ package hudson.plugins.emailext;
 
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
-import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
@@ -21,17 +20,7 @@ import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.StringWriter;
 import java.util.Properties;
-import org.apache.commons.jelly.JellyContext;
-import org.apache.commons.jelly.JellyException;
-import org.apache.commons.jelly.Script;
-import org.apache.commons.jelly.XMLOutput;
-import org.kohsuke.stapler.MetaClass;
-import org.kohsuke.stapler.StaplerResponse;
-import org.kohsuke.stapler.WebApp;
-import org.kohsuke.stapler.bind.JavaScriptMethod;
-import org.kohsuke.stapler.jelly.JellyClassTearOff;
 
 /**
  * These settings are global configurations
@@ -139,6 +128,11 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     private boolean debugMode;
 
     private boolean enableSecurity;
+    
+    /**
+     * Enables the "Watch This Job" feature
+     */
+    private boolean enableWatching;
 
     @Override
     public String getDisplayName() {
@@ -284,6 +278,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     public boolean isSecurityEnabled() {
         return enableSecurity;
     }
+    
+    public boolean isWatchingEnabled() {
+        return enableWatching;
+    }
 
     public boolean isApplicable(Class<? extends AbstractProject> jobType) {
         return true;
@@ -379,6 +377,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
             req.getParameter("ext_mailer_default_presend_script") : "";
 
         debugMode = req.getParameter("ext_mailer_debug_mode") != null;
+        //enableWatching = req.getParameter("ext_mailer_enable_watching") != null;
 
         // convert the value into megabytes (1024 * 1024 bytes)
         maxAttachmentSize = nullify(req.getParameter("ext_mailer_max_attachment_size")) != null ?
@@ -414,48 +413,6 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         return "/plugin/email-ext/help/main.html";
     }
     
-    @JavaScriptMethod
-    public String renderHelp(boolean showDefaultMacros, StaplerRequest req, StaplerResponse rsp) {
-        String result;
-        
-        MetaClass c = WebApp.getCurrent().getMetaClass(ExtendedEmailPublisher.class);
-        try {
-            JellyClassTearOff tearOff = c.loadTearOff(JellyClassTearOff.class);
-            Script script = tearOff.findScript("token-help.jelly");
-            StringWriter writer = new StringWriter();
-            XMLOutput output = XMLOutput.createXMLOutput(writer);
-            JellyContext context = new JellyContext();
-            context.setClassLoader(getClass().getClassLoader());
-            context.setVariable("displayDefaultTokens", showDefaultMacros);
-            context.setVariable("privateMacros", ContentBuilder.getPrivateMacros());
-            script.run(context, output);
-            result = writer.toString();
-        } catch(JellyException e) {
-            result = "<strong>Unable to render the content token help</strong>";
-        }
-        
-//        try {
-//            AbstractBuild<?,?> build = project.getBuild(buildId);
-//            if(templateFile.endsWith(".jelly")) {
-//                JellyScriptContent jellyContent = new JellyScriptContent();
-//                jellyContent.template = templateFile;
-//                result = jellyContent.evaluate(build, TaskListener.NULL, "JELLY_SCRIPT");
-//            } else {
-//                ScriptContent scriptContent = new ScriptContent();
-//                scriptContent.template = templateFile;                
-//                result = scriptContent.evaluate(build, TaskListener.NULL, "SCRIPT");
-//            }
-//        } catch (Exception ex) {
-//            result = renderError(ex);
-//        } 
-        
-        return result;
-    }
-    
-    public void doTokenHelp(@QueryParameter final String value) {
-        System.out.println("hello, world");
-    }
-
     public FormValidation doAddressCheck(@QueryParameter final String value)
             throws IOException, ServletException {
         try {
