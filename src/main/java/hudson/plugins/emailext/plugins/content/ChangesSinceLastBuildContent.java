@@ -12,13 +12,14 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map.Entry;
+
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
-import org.sonatype.aether.util.StringUtils;
 
 @EmailToken
 public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
-    
+
     public static final String FORMAT_DEFAULT_VALUE = "[%a] %m\\n";
     public static final String PATH_FORMAT_DEFAULT_VALUE = "\\t%p\\n";
     public static final String FORMAT_DEFAULT_VALUE_WITH_PATHS = "[%a] %m%p\\n";
@@ -29,15 +30,15 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
     public boolean showPaths = false;
     @Parameter
     public String format;
-    @Parameter 
+    @Parameter
     public String pathFormat = PATH_FORMAT_DEFAULT_VALUE;
     @Parameter
-    public boolean showDependencies = false;    
-    
+    public boolean showDependencies = false;
+
     public ChangesSinceLastBuildContent() {
-        
+
     }
-    
+
     public ChangesSinceLastBuildContent(String format, String pathFormat, boolean showPaths) {
         this.format = format;
         this.pathFormat = pathFormat;
@@ -60,7 +61,7 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
         for (ChangeLogSet.Entry entry : build.getChangeSet()) {
             Util.printf(buf, format, new ChangesSincePrintfSpec(entry, pathFormat));
         }
-        
+
         if (showDependencies && build.getPreviousBuild() != null)
             for (Entry<AbstractProject, DependencyChange> e : build
                     .getDependencyChanges(build.getPreviousBuild()).entrySet()) {
