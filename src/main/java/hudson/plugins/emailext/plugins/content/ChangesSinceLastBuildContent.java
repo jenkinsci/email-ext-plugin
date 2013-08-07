@@ -12,9 +12,9 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map.Entry;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
-import org.sonatype.aether.util.StringUtils;
 
 @EmailToken
 public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
