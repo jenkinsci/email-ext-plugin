@@ -31,7 +31,7 @@ public class FixedTrigger extends EmailTrigger {
 
         if (buildResult == Result.SUCCESS) {
             AbstractBuild<?, ?> prevBuild = build.getPreviousBuild();
-            if (prevBuild != null && (prevBuild.getResult() == Result.UNSTABLE || prevBuild.getResult() == Result.FAILURE)) {
+            if (prevBuild != null && prevBuild.getResult().isWorseOrEqualTo(Result.UNSTABLE)) {
                 return true;
             }
         }
