@@ -4,7 +4,8 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.509.1</version>
+        <version>1.509.2</version>
+        <!--<version>1.526</version>-->
     </parent>
 
     <artifactId>email-ext</artifactId>
