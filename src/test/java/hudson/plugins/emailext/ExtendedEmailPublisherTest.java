@@ -15,6 +15,7 @@ import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.FirstFailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
+import hudson.plugins.emailext.plugins.trigger.FixedUnhealthyTrigger;
 import hudson.plugins.emailext.plugins.trigger.NotBuiltTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
@@ -225,6 +226,76 @@ public class ExtendedEmailPublisherTest
         assertEquals( "No email should have been sent out since the prior build was aborted.", 0,
                       Mailbox.get( "ashlux@gmail.com" ).size() );
     }
+    
+    public void testFixedUnhealthyTriggerShouldNotSendEmailWhenBuildFirstFails()
+            throws Exception
+        {
+            project.getBuildersList().add( new FailureBuilder() );
+
+            FixedUnhealthyTrigger trigger = new FixedUnhealthyTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+                    "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
+            addEmailType( trigger );
+            publisher.getConfiguredTriggers().add( trigger );
+
+            FreeStyleBuild build = project.scheduleBuild2( 0 ).get();
+            assertBuildStatus( Result.FAILURE, build );
+
+            assertThat( "Email should not have been triggered, so we shouldn't see it in the logs.", build.getLog( 100 ),
+                        not( hasItems( "Email was triggered for: " + SuccessTrigger.TRIGGER_NAME ) ) );
+            assertEquals( "No email should have been sent out since the build failed only once.", 0,
+                          Mailbox.get( "ashlux@gmail.com" ).size() );
+        }
+
+        public void testFixedUnhealthyTriggerShouldSendEmailWhenBuildIsFixed()
+            throws Exception
+        {
+            project.getBuildersList().add( new FailureBuilder() );
+
+            FixedUnhealthyTrigger trigger = new FixedUnhealthyTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+                    "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
+            addEmailType( trigger );
+            publisher.getConfiguredTriggers().add( trigger );
+
+            FreeStyleBuild build1 = project.scheduleBuild2( 0 ).get();
+            assertBuildStatus( Result.FAILURE, build1 );
+
+            project.getBuildersList().clear();
+            FreeStyleBuild build2 = project.scheduleBuild2( 0 ).get();
+            assertBuildStatusSuccess( build2 );
+
+            assertThat( "Email should have been triggered, so we should see it in the logs.", build2.getLog( 100 ),
+                        hasItems( "Email was triggered for: " + FixedUnhealthyTrigger.TRIGGER_NAME ) );
+            assertEquals( 1, Mailbox.get( "ashlux@gmail.com" ).size() );
+        }
+
+        public void testFixedUnhealthyTriggerShouldSendEmailWhenBuildSucceedsAfterAbortedBuild()
+            throws Exception
+        {
+            // fail
+            project.getBuildersList().add( new FailureBuilder() );
+            FreeStyleBuild build1 = project.scheduleBuild2( 0 ).get();
+            assertBuildStatus( Result.FAILURE, build1 );
+
+            // abort
+            project.getBuildersList().clear();
+            project.getBuildersList().add( new MockBuilder(Result.ABORTED) );
+            FreeStyleBuild build2 = project.scheduleBuild2( 0 ).get();
+            assertBuildStatus( Result.ABORTED, build2 );
+
+            FixedUnhealthyTrigger trigger = new FixedUnhealthyTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
+                    "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
+            addEmailType( trigger );
+            publisher.getConfiguredTriggers().add( trigger );
+
+            // succeed
+            project.getBuildersList().clear();
+            FreeStyleBuild build3 = project.scheduleBuild2( 0 ).get();
+            assertBuildStatusSuccess( build3 );
+
+            assertThat( "Email should have been triggered, so we should see it in the logs.", build3.getLog( 100 ),
+                    hasItems( "Email was triggered for: " + FixedUnhealthyTrigger.TRIGGER_NAME ) );
+            assertEquals( 1, Mailbox.get( "ashlux@gmail.com" ).size() );
+        }
 
     public void testStillFailingTriggerShouldNotSendEmailWhenBuildSucceeds()
         throws Exception
