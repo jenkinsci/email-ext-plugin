@@ -30,7 +30,7 @@ public class FixedUnhealthyTrigger extends EmailTrigger {
         Result buildResult = build.getResult();
 
         if (buildResult == Result.SUCCESS) {
-        	AbstractBuild<?, ?> prevBuild = getPreviousBuild(build);
+            AbstractBuild<?, ?> prevBuild = getPreviousBuild(build);
             if (prevBuild != null && (prevBuild.getResult() == Result.UNSTABLE || prevBuild.getResult() == Result.FAILURE)) {
                 return true;
             }
@@ -52,8 +52,8 @@ public class FixedUnhealthyTrigger extends EmailTrigger {
         }
 
         return prevBuild;
-    }    
-    
+    }
+
     @Override
     public EmailTriggerDescriptor getDescriptor() {
         return DESCRIPTOR;
@@ -76,7 +76,7 @@ public class FixedUnhealthyTrigger extends EmailTrigger {
         public void doHelp(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
             rsp.getWriter().println(Messages.FixedTrigger_HelpText());
         }
-        
+
         @Override
         public boolean getDefaultSendToDevs() {
             return true;

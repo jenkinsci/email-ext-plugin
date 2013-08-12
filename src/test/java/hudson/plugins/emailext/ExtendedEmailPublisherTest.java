@@ -226,7 +226,7 @@ public class ExtendedEmailPublisherTest
         assertEquals( "No email should have been sent out since the prior build was aborted.", 0,
                       Mailbox.get( "ashlux@gmail.com" ).size() );
     }
-    
+
     public void testFixedUnhealthyTriggerShouldNotSendEmailWhenBuildFirstFails()
             throws Exception
         {
