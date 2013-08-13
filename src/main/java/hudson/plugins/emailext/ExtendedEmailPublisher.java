@@ -151,7 +151,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      */
     public boolean saveOutput = false;
 
-    private MatrixTriggerMode matrixTriggerMode;
+    /**
+     * How to trigger the email if the project is a matrix project.
+     */
+    public MatrixTriggerMode matrixTriggerMode;
 
     /**
      * Get the list of configured email triggers for this project.

@@ -45,12 +45,13 @@ f.entry(title: _("Attach Build Log"), help: "/plugin/email-ext/help/projectConfi
 f.entry(title: _("Content Token Reference"), field: "tokens")
 
 if(descriptor.isMatrixProject(my)) {
-  f.entry(field: "project_matrix_trigger_mode", title: _("Trigger for matrix projects")) {
+  f.entry(field: "matrixTriggerMode", title: _("Trigger for matrix projects")) {
     f.enum { 
       raw(my.description)
     }
   }
 }
+
 f.advanced() {
   f.entry(title: _("Pre-send Script"), help: "/plugin/email-ext/help/projectConfig/presendScript.html") {
     f.textarea(id: "project_presend_script", name: "project_presend_script", value: configured ? instance.presendScript : "\$DEFAULT_PRESEND_SCRIPT", class: "setting-input") 
