@@ -311,7 +311,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
                 
         m.configuredTriggers = req.bindJSONToList(EmailTrigger.class, formData.get("project_triggers"));
         
-        m.setMatrixTriggerMode(req.bindJSON(MatrixTriggerMode.class, MatrixTriggerMode.class, formData.opt("project_matrix_trigger_mode")));
+        m.setMatrixTriggerMode(req.bindJSON(MatrixTriggerMode.class, MatrixTriggerMode.class, formData.opt("matrixTriggerMode")));
 
         return m;
     }
