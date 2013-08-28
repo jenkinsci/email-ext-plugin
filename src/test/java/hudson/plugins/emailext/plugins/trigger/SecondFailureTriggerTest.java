@@ -11,7 +11,7 @@ public class SecondFailureTriggerTest extends TriggerTestBase {
 
     @Override
     EmailTrigger newInstance() {
-        return new SecondFailureTrigger(true, true, true, "", "", "", "", "", 0);
+        return new SecondFailureTrigger(true, true, true, "", "", "", "", "", 0, "project");
     }
 
     @Test

@@ -26,8 +26,8 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
     
     @DataBoundConstructor
     public AbstractScriptTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, String recipientList,
-            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String triggerScript) {
-        super(sendToList, sendToDevs, sendToRequestor, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog);
+            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
+        super(sendToList, sendToDevs, sendToRequestor, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
         this.triggerScript = triggerScript;
     }
     

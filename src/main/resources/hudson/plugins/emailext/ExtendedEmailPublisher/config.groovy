@@ -52,12 +52,12 @@ if(descriptor.isMatrixProject(my)) {
   }
 }
 
-f.advanced() {
+f.advanced(title: _("Advanced Settings")) {
   f.entry(title: _("Pre-send Script"), help: "/plugin/email-ext/help/projectConfig/presendScript.html") {
     f.textarea(id: "project_presend_script", name: "project_presend_script", value: configured ? instance.presendScript : "\$DEFAULT_PRESEND_SCRIPT", class: "setting-input") 
   }
 
-  f.entry(title: _("Save Generated E-mail to Workspace"), help: "/plugin/email-ext/help/projectConfig/saveOutput.html") {
+  f.entry(title: _("Save to Workspace"), help: "/plugin/email-ext/help/projectConfig/saveOutput.html") {
     f.checkbox(name: "project_save_output", checked: instance?.saveOutput)
   }
   
@@ -65,5 +65,3 @@ f.advanced() {
     f.hetero_list(name: "project_triggers", hasHeader: true, descriptors: triggers, items: instance?.configuredTriggers, addCaption:_("Add Trigger"), deleteCaption: _("Remove Trigger"))
   }
 }
-
-

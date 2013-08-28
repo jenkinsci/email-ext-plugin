@@ -15,8 +15,8 @@ public class ScriptTrigger extends AbstractScriptTrigger {
     
     @DataBoundConstructor
     public ScriptTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, String recipientList,
-            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String triggerScript) {
-        super(sendToList, sendToDevs, sendToRequestor, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, triggerScript);
+            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
+        super(sendToList, sendToDevs, sendToRequestor, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, triggerScript);
     }
 
     @Override

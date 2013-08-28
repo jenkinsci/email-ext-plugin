@@ -26,6 +26,22 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     }
 
     protected EmailTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, String recipientList,
+            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        email = new EmailType();
+        email.setSendToRecipientList(sendToList);
+        email.setSendToDevelopers(sendToDevs);
+        email.setSendToRequester(sendToRequestor);
+        email.setRecipientList(recipientList);
+        email.setReplyTo(replyTo);
+        email.setSubject(subject);
+        email.setBody(body);
+        email.setAttachmentsPattern(attachmentsPattern);
+        email.setAttachBuildLog(attachBuildLog > 0);
+        email.setCompressBuildLog(attachBuildLog > 1);
+        email.setContentType(contentType);
+    }
+    
+    protected EmailTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, String recipientList,
             String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog) {
         email = new EmailType();
         email.setSendToRecipientList(sendToList);
@@ -132,6 +148,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         m.setAttachmentsPattern(formData.getString(prefix + "attachmentsPattern"));
         m.setAttachBuildLog(formData.optBoolean(prefix + "attachBuildLog"));
         m.setReplyTo(formData.getString(prefix + "replyTo"));
+        m.setContentType(formData.getString(prefix + "contentType"));
         return m;
     }
 }

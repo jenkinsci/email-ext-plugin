@@ -16,7 +16,7 @@ public class ScriptSandbox extends GroovyValueFilter {
     @Override
     public Object filter(Object o) {
         if (o instanceof Jenkins || o instanceof Hudson) {
-            throw new SecurityException("Use of 'jenkins' is disallowed by security policy");
+            throw new SecurityException("Use of 'Jenkins' and 'Hudson' are disallowed by security policy");
         }
         return o;
     }

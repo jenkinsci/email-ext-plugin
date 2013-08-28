@@ -21,6 +21,13 @@ f.entry(title: _("Send To"), help:"help") {
     f.entry(title: _("Reply-To List"), help: "/plugin/email-ext/help/projectConfig/mailType/replyToList.html") {
       f.textbox(name: "replyTo", value: instance != null ? instance.email.replyTo : "\$PROJECT_DEFAULT_REPLYTO")
     }
+    f.entry(title: _("Content Type"), help: "/plugin/email-ext/help/projectConfig/contentType.html") {
+      select(name: "contentType", class: "setting-input") {
+        f.option(selected: 'project'==instance?.email.contentType, value: "project", _("Project Content Type")) 
+        f.option(selected: 'text/plain'==instance?.email.contentType, value: "text/plain", _("projectContentType.plainText")) 
+        f.option(selected: 'text/html'==instance?.email.contentType, value: "text/html", _("projectContentType.html")) 
+      }
+    }
     f.entry(title: _("Subject"), help: "/plugin/email-ext/help/projectConfig/mailType/subject.html") {
       f.textbox(name: "subject", value: instance != null ? instance.email.subject : "\$PROJECT_DEFAULT_SUBJECT")
     }

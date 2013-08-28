@@ -64,6 +64,11 @@ public class EmailType {
      * List of email addresses to put into the Reply-To header
      */
     private String replyTo;
+    
+    /**
+     * Content type to send the email as (HTML or Plaintext)
+     */
+    private String contentType;
 
     public EmailType() {
         subject = "";
@@ -77,6 +82,7 @@ public class EmailType {
         attachBuildLog = false;
         compressBuildLog = false;
         replyTo = "";
+        contentType = "project";
     }
 
     public String getSubject() {
@@ -171,6 +177,14 @@ public class EmailType {
 
     public void setCompressBuildLog(boolean compressBuildLog) {
         this.compressBuildLog = compressBuildLog;
+    }
+    
+    public String getContentType() {
+        return contentType;
+    }
+    
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     public Object readResolve() {

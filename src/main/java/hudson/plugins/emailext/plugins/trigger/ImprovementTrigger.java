@@ -19,8 +19,8 @@ public class ImprovementTrigger extends EmailTrigger {
     
     @DataBoundConstructor
     public ImprovementTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, String recipientList,
-            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog) {
-        super(sendToList, sendToDevs, sendToRequestor, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog);
+            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        super(sendToList, sendToDevs, sendToRequestor, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
 
     @Override

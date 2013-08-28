@@ -49,7 +49,7 @@ public class ExtendedEmailPublisherMatrixTest extends HudsonTestCase {
     public void testPreBuildMatrixBuildSendParentOnly() throws Exception {
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_PARENT);
         PreBuildTrigger trigger = new PreBuildTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
-            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
         MatrixBuild build = project.scheduleBuild2(0).get();
@@ -66,7 +66,7 @@ public class ExtendedEmailPublisherMatrixTest extends HudsonTestCase {
     
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_CONFIGURATIONS);
         PreBuildTrigger trigger = new PreBuildTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
-            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
        
@@ -81,7 +81,7 @@ public class ExtendedEmailPublisherMatrixTest extends HudsonTestCase {
     
         publisher.setMatrixTriggerMode(MatrixTriggerMode.BOTH);
         PreBuildTrigger trigger = new PreBuildTrigger(true, true, true, "$DEFAULT_RECIPIENTS",
-            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0);
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
        
