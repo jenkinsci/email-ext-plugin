@@ -4,7 +4,6 @@ import hudson.Extension;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import java.io.IOException;
 import javax.servlet.ServletException;
-import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -14,9 +13,9 @@ public class ScriptTrigger extends AbstractScriptTrigger {
     public static final String TRIGGER_NAME = "Script";
     
     @DataBoundConstructor
-    public ScriptTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, String recipientList,
+    public ScriptTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList,
             String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
-        super(sendToList, sendToDevs, sendToRequestor, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, triggerScript);
+        super(sendToList, sendToDevs, sendToRequestor, sendToCulprits, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, triggerScript);
     }
 
     @Override

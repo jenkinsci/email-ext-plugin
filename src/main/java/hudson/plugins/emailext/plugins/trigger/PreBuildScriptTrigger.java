@@ -17,9 +17,9 @@ public class PreBuildScriptTrigger extends AbstractScriptTrigger {
     public static final String TRIGGER_NAME = "Pre-Build Script";
     
     @DataBoundConstructor
-    public PreBuildScriptTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, String recipientList,
+    public PreBuildScriptTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList,
             String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
-        super(sendToList, sendToDevs, sendToRequestor, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, triggerScript);
+        super(sendToList, sendToDevs, sendToRequestor, sendToCulprits, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, triggerScript);
     }
     
     @Override

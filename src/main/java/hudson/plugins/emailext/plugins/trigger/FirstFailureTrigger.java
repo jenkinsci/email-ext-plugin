@@ -14,9 +14,9 @@ public class FirstFailureTrigger extends NthFailureTrigger {
     public static final String TRIGGER_NAME = "1st Failure";
 
     @DataBoundConstructor
-    public FirstFailureTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, String recipientList,
+    public FirstFailureTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList,
             String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(1, sendToList, sendToDevs, sendToRequestor, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+        super(1, sendToList, sendToDevs, sendToRequestor, sendToCulprits, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
 
     @Override

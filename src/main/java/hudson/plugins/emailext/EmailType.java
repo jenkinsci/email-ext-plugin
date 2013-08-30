@@ -38,7 +38,7 @@ public class EmailType {
      * Specifies whether or not we should send this email to all developers
      * since the last success.
      */
-    private boolean includeCulprits;
+    private boolean sendToCulprits;
 
     /**
      * Specifies whether or not we should send this email to the recipient list
@@ -75,7 +75,7 @@ public class EmailType {
         body = "";
         recipientList = "";
         sendToDevelopers = false;
-        includeCulprits = false;
+        sendToCulprits = false;
         sendToRecipientList = false;
         sendToRequester = false;
         attachmentsPattern = "";
@@ -109,7 +109,7 @@ public class EmailType {
         this.sendToDevelopers = sendToDevelopers;
     }
 
-    public boolean isSendToRequester() {
+    public boolean getSendToRequester() {
         return sendToRequester;
     }
 
@@ -117,12 +117,12 @@ public class EmailType {
         this.sendToRequester = sendToRequester;
     }
 
-    public boolean getIncludeCulprits() {
-        return includeCulprits;
+    public boolean getSendToCulprits() {
+        return sendToCulprits;
     }
 
-    public void setIncludeCulprits(boolean includeCulprits) {
-        this.includeCulprits = includeCulprits;
+    public void setSendToCulprits(boolean sendToCulprits) {
+        this.sendToCulprits = sendToCulprits;
     }
 
     public boolean getSendToRecipientList() {

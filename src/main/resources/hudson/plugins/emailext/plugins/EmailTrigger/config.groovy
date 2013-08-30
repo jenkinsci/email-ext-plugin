@@ -9,9 +9,10 @@ d = namespace("jelly:define")
 
 f.entry(title: _("Send To"), help:"help") {
   br()
-  f.checkbox(name: "sendToList", title: _("Recipient List"), checked: instance != null ? instance.email.sendToRecipientList : descriptor.defaultSendToList)
+  f.checkbox(name: "sendToList", title: _("Recipients"), checked: instance != null ? instance.email.sendToRecipientList : descriptor.defaultSendToList)
   f.checkbox(name: "sendToDevs", title: _("Developers"), checked: instance != null ? instance.email.sendToDevelopers : descriptor.defaultSendToDevs)  
   f.checkbox(name: "sendToRequestor", title: _("Requestor"), checked: instance != null ? instance.email.sendToRequester : descriptor.defaultSendToRequester)
+  f.checkbox(name: "sendToCulprits", title: _("Culprits"), checked: instance != null ? instance.email.sendToCulprits : descriptor.defaultSendToCulprits)
   /*f.checkbox(name: "send_to_culprits", title: _("Culprits"), checked: instance != null ? instance.email.includeCulprits : false)  */
   f.advanced() {
     st.include(it: instance, class: descriptor.clazz, page: "local-config", optional: true)

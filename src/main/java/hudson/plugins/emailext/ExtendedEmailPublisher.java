@@ -474,7 +474,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         if (type.getSendToDevelopers()) {
             debug(listener.getLogger(), "Adding developers");
             Set<User> users;
-            if (type.getIncludeCulprits()) {
+            if (type.getSendToCulprits()) {
                 users = build.getCulprits();
             } else {
                 users = new HashSet<User>();
@@ -495,7 +495,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
         }
 
-        if (type.isSendToRequester()) {
+        if (type.getSendToRequester()) {
             debug(listener.getLogger(), "Sending to requester");
             // looking for Upstream build.
             AbstractBuild<?, ?> cur = build;

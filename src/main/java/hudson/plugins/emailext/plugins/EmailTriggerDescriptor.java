@@ -40,6 +40,10 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
     public boolean getDefaultSendToRequester() {
         return false;
     }
+    
+    public boolean getDefaultSendToCulprits() {
+        return false;
+    }
 
     /**
      * Default implementation just creates a new instance of the 
