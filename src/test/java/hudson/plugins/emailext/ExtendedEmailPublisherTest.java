@@ -70,6 +70,17 @@ public class ExtendedEmailPublisherTest
 
         Mailbox.clearAll();
     }
+    
+//    public void testExcludedCommitters() 
+//        throws Exception
+//    {
+//        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("excludedCommitters");
+//        f.setAccessible(true);
+//        f.set(ExtendedEmailPublisher.DESCRIPTOR, "mickeymouse@disney.com");
+//        
+//        
+//        
+//    }
 
     public void testShouldNotSendEmailWhenNoTriggerEnabled()
         throws Exception
@@ -661,7 +672,7 @@ public class ExtendedEmailPublisherTest
 
         assertEquals( "ashlux@gmail.com", replyTo[0].toString() );
     }
-
+    
     public void testNoReplyTo() throws Exception {
         SuccessTrigger successTrigger = new SuccessTrigger(true, true, true, false, "$DEFAULT_RECIPIENTS",
             "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
