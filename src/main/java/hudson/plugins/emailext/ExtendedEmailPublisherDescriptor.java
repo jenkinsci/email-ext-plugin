@@ -151,10 +151,6 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
         return defaultSuffix;
     }
     
-    public boolean isDebugMode() {
-        return debugMode;
-    }
-
     /**
      * JavaMail session.
      */
