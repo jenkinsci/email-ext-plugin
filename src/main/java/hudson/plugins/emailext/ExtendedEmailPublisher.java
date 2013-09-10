@@ -69,6 +69,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.SendFailedException;
+import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -407,16 +408,23 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         // If not overriding global settings, use the Mailer class to create a session and set the from address
         // Else we'll do it ourselves
+        Session session;
         if (!overrideGlobalSettings) {
             debug(listener.getLogger(), "NOT overriding default server settings, using Mailer to create session");
-            msg = new MimeMessage(Mailer.descriptor().createSession());
+            session = Mailer.descriptor().createSession();
+            msg = new MimeMessage(session);
             msg.setFrom(new InternetAddress(Mailer.descriptor().getAdminAddress()));
         } else {
             debug(listener.getLogger(), "Overriding default server settings, creating our own session");
-            msg = new MimeMessage(ExtendedEmailPublisher.DESCRIPTOR.createSession());
+            session = ExtendedEmailPublisher.DESCRIPTOR.createSession();
+            msg = new MimeMessage(session);
             msg.setFrom(new InternetAddress(ExtendedEmailPublisher.DESCRIPTOR.getAdminAddress()));
         }
-
+        
+        if(ExtendedEmailPublisher.DESCRIPTOR.isDebugMode()) {
+            session.setDebugOut(listener.getLogger());
+        }
+        
         String charset = Mailer.descriptor().getCharset();
         if (overrideGlobalSettings) {
             String overrideCharset = ExtendedEmailPublisher.DESCRIPTOR.getCharset();

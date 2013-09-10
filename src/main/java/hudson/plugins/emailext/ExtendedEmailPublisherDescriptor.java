@@ -150,6 +150,10 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
     public String getDefaultSuffix() {
         return defaultSuffix;
     }
+    
+    public boolean isDebugMode() {
+        return debugMode;
+    }
 
     /**
      * JavaMail session.
@@ -377,6 +381,7 @@ public class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publis
             req.getParameter("ext_mailer_default_presend_script") : "";
 
         debugMode = req.getParameter("ext_mailer_debug_mode") != null;
+        
         //enableWatching = req.getParameter("ext_mailer_enable_watching") != null;
 
         // convert the value into megabytes (1024 * 1024 bytes)
