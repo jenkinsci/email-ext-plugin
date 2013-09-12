@@ -180,6 +180,8 @@ public class EmailType {
     }
     
     public String getContentType() {
+        if(contentType == null)
+            contentType = "project";
         return contentType;
     }
     
