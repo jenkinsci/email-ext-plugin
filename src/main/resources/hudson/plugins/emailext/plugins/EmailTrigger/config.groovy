@@ -13,11 +13,10 @@ f.entry(title: _("Send To"), help:"help") {
   f.checkbox(name: "sendToDevs", title: _("Developers"), checked: instance != null ? instance.email.sendToDevelopers : descriptor.defaultSendToDevs)  
   f.checkbox(name: "sendToRequestor", title: _("Requestor"), checked: instance != null ? instance.email.sendToRequester : descriptor.defaultSendToRequester)
   f.checkbox(name: "sendToCulprits", title: _("Culprits"), checked: instance != null ? instance.email.sendToCulprits : descriptor.defaultSendToCulprits)
-  /*f.checkbox(name: "send_to_culprits", title: _("Culprits"), checked: instance != null ? instance.email.includeCulprits : false)  */
   f.advanced() {
     st.include(it: instance, class: descriptor.clazz, page: "local-config", optional: true)
     f.entry(title: _("Recipient List"), help: "/plugin/email-ext/help/projectConfig/mailType/recipientList.html") {
-      f.textbox(name: "recipientList", value: instance != null ? instance.email.recipientList : "\$PROJECT_DEFAULT_RECIPIENTS")
+      f.textbox(name: "recipientList", value: instance != null ? instance.email.recipientList : "")
     }
     f.entry(title: _("Reply-To List"), help: "/plugin/email-ext/help/projectConfig/mailType/replyToList.html") {
       f.textbox(name: "replyTo", value: instance != null ? instance.email.replyTo : "\$PROJECT_DEFAULT_REPLYTO")
