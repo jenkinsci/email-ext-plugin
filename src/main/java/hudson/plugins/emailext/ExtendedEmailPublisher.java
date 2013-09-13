@@ -492,9 +492,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
             
             for (User user : users) {
-                if (!isExcludedCommitter(user.getFullName()) && !isExcludedCommitter(user.getId())) {
+                if (!isExcludedCommitter(user.getFullName(), listener) && !isExcludedCommitter(user.getId(), listener)) {
                     String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
                     if (userAddress != null) {
+                        debug(listener.getLogger(), "Adding user address %s, they were not considered an excluded committer", userAddress);
                         addAddressesFromRecipientList(recipientAddresses, ccAddresses, userAddress, env, listener);
                     } else {
                         listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
@@ -577,9 +578,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return msg;
     }
 
-    private boolean isExcludedCommitter(String userName) {
+    private boolean isExcludedCommitter(String userName, BuildListener listener) {
         StringTokenizer tokens = new StringTokenizer(DESCRIPTOR.getExcludedCommitters(), ",");
         while (tokens.hasMoreTokens()) {
+            debug(listener.getLogger(), "Checking '%s' against '%s' to see if they are excluded", userName, tokens.nextToken().trim());
             if (tokens.nextToken().trim().equalsIgnoreCase(userName)) {
                 return true;
             }
