@@ -47,6 +47,7 @@ public class ExtendedEmailPublisherTest
 
     private FreeStyleProject project;
 
+    @Override
     public void setUp()
         throws Exception
     {
