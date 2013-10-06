@@ -76,6 +76,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * {@link Publisher} that sends notification e-mail.
@@ -156,6 +157,29 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * How to trigger the email if the project is a matrix project.
      */
     public MatrixTriggerMode matrixTriggerMode;
+    
+    @DataBoundConstructor
+    public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
+                                  String project_default_content, String project_attachments, String project_presend_script,
+                                  int project_attach_buildlog, String project_replyto, boolean project_save_output, 
+                                  List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode) {
+        this.recipientList = project_recipient_list;
+        this.contentType = project_content_type;
+        this.defaultSubject = project_default_subject;
+        this.defaultContent = project_default_content;
+        this.attachmentsPattern = project_attachments;
+        this.presendScript = project_presend_script;        
+        this.attachBuildLog = project_attach_buildlog > 0;
+        this.compressBuildLog = project_attach_buildlog > 1;
+        this.replyTo = project_replyto;
+        this.saveOutput = project_save_output;                
+        this.configuredTriggers = project_triggers;        
+        this.matrixTriggerMode = matrixTriggerMode;
+    }
+    
+    public ExtendedEmailPublisher() {
+        
+    }
 
     /**
      * Get the list of configured email triggers for this project.
@@ -492,7 +516,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
             
             for (User user : users) {
-                if (!isExcludedCommitter(user.getFullName(), listener) && !isExcludedCommitter(user.getId(), listener)) {
+                if (!isExcludedRecipient(user.getFullName(), listener) && !isExcludedRecipient(user.getId(), listener)) {
                     String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
                     if (userAddress != null) {
                         debug(listener.getLogger(), "Adding user address %s, they were not considered an excluded committer", userAddress);
@@ -532,6 +556,16 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
           addAddressesFromRecipientList(recipientAddresses, ccAddresses, emergencyReroute, env, listener);
           listener.getLogger().println("Emergency reroute is set to: " + emergencyReroute);
         }
+        
+        // remove the excluded recipients
+        Set<InternetAddress> excludedRecipients = new LinkedHashSet<InternetAddress>();
+        for(InternetAddress recipient : recipientAddresses) {
+            if(isExcludedRecipient(recipient.getAddress(), listener)) {
+                excludedRecipients.add(recipient);
+            }
+        }
+        recipientAddresses.removeAll(excludedRecipients);
+        ccAddresses.removeAll(excludedRecipients);
         
         msg.setRecipients(Message.RecipientType.TO, recipientAddresses.toArray(new InternetAddress[recipientAddresses.size()]));
         if(ccAddresses.size() > 0) {
@@ -574,15 +608,16 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         if (ExtendedEmailPublisher.DESCRIPTOR.getPrecedenceBulk()) {
             msg.setHeader("Precedence", "bulk");
         }
-
+        
         return msg;
     }
 
-    private boolean isExcludedCommitter(String userName, BuildListener listener) {
-        StringTokenizer tokens = new StringTokenizer(DESCRIPTOR.getExcludedCommitters(), ",");
+    private boolean isExcludedRecipient(String userName, BuildListener listener) {
+        StringTokenizer tokens = new StringTokenizer(DESCRIPTOR.getExcludedRecipients(), ",");
         while (tokens.hasMoreTokens()) {
-            debug(listener.getLogger(), "Checking '%s' against '%s' to see if they are excluded", userName, tokens.nextToken().trim());
-            if (tokens.nextToken().trim().equalsIgnoreCase(userName)) {
+            String check = tokens.nextToken().trim();
+            debug(listener.getLogger(), "Checking '%s' against '%s' to see if they are excluded", userName, check);
+            if (check.equalsIgnoreCase(userName)) {
                 return true;
             }
         }
