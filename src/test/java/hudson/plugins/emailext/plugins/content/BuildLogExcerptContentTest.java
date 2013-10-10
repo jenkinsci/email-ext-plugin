@@ -26,7 +26,7 @@ public class BuildLogExcerptContentTest {
     @Test
     public void testGetContent_emptyBuildLogShouldStayEmpty()
             throws Exception {
-        
+
         AbstractBuild build = mock(AbstractBuild.class);
         when(build.getLogReader()).thenReturn(new StringReader(""));
 

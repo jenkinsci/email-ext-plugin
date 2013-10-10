@@ -14,22 +14,27 @@ import java.util.Set;
 
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import org.junit.Rule;
+import org.junit.Test;
 
-import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.JenkinsRule;
 
-public class EmailRecipientUtilsTest extends HudsonTestCase {
+public class EmailRecipientUtilsTest {
 
+    @Rule 
+    public JenkinsRule j = new JenkinsRule() {
+        @Override
+        protected void before() throws Throwable {
+            emailRecipientUtils = new EmailRecipientUtils();
+            envVars = new EnvVars();
+            super.before();
+        }        
+    };
+    
     private EmailRecipientUtils emailRecipientUtils;
     private EnvVars envVars;
 
-    @Override
-    public void setUp()
-            throws Exception {
-        super.setUp();
-        emailRecipientUtils = new EmailRecipientUtils();
-        envVars = new EnvVars();
-    }
-
+    @Test
     public void testConvertRecipientList_emptyRecipientStringShouldResultInEmptyEmailList()
             throws AddressException, UnsupportedEncodingException {
         Set<InternetAddress> internetAddresses = emailRecipientUtils.convertRecipientString("", envVars);
@@ -37,6 +42,7 @@ public class EmailRecipientUtilsTest extends HudsonTestCase {
         assertTrue(internetAddresses.isEmpty());
     }
 
+    @Test
     public void testConvertRecipientList_emptyRecipientStringWithWhitespaceShouldResultInEmptyEmailList()
             throws AddressException, UnsupportedEncodingException {
         Set<InternetAddress> internetAddresses = emailRecipientUtils.convertRecipientString("   ", envVars);
@@ -44,6 +50,7 @@ public class EmailRecipientUtilsTest extends HudsonTestCase {
         assertTrue(internetAddresses.isEmpty());
     }
 
+    @Test
     public void testConvertRecipientList_singleRecipientShouldResultInOneEmailAddressInList()
             throws AddressException, UnsupportedEncodingException {
         Set<InternetAddress> internetAddresses =
@@ -53,6 +60,7 @@ public class EmailRecipientUtilsTest extends HudsonTestCase {
         assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
     }
 
+    @Test
     public void testConvertRecipientList_singleRecipientWithWhitespaceShouldResultInOneEmailAddressInList()
             throws AddressException, UnsupportedEncodingException, UnsupportedEncodingException {
         Set<InternetAddress> internetAddresses =
@@ -62,6 +70,7 @@ public class EmailRecipientUtilsTest extends HudsonTestCase {
         assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
     }
 
+    @Test
     public void testConvertRecipientList_commaSeparatedRecipientStringShouldResultInMultipleEmailAddressesInList()
             throws AddressException, UnsupportedEncodingException {
         Set<InternetAddress> internetAddresses =
@@ -72,6 +81,7 @@ public class EmailRecipientUtilsTest extends HudsonTestCase {
         assertTrue(internetAddresses.contains(new InternetAddress("mickeymouse@disney.com")));
     }
 
+    @Test
     public void testConvertRecipientList_spaceSeparatedRecipientStringShouldResultInMultipleEmailAddressesInList()
             throws AddressException, UnsupportedEncodingException {
         Set<InternetAddress> internetAddresses =
@@ -82,6 +92,7 @@ public class EmailRecipientUtilsTest extends HudsonTestCase {
         assertTrue(internetAddresses.contains(new InternetAddress("mickeymouse@disney.com")));
     }
 
+    @Test
     public void testConvertRecipientList_emailAddressesShouldBeUnique()
             throws AddressException, UnsupportedEncodingException {
         Set<InternetAddress> internetAddresses =
@@ -92,6 +103,7 @@ public class EmailRecipientUtilsTest extends HudsonTestCase {
         assertTrue(internetAddresses.contains(new InternetAddress("mickeymouse@disney.com")));
     }
 
+    @Test
     public void testConvertRecipientList_recipientStringShouldBeExpanded()
             throws AddressException, UnsupportedEncodingException {
         envVars.put("EMAIL_LIST", "ashlux@gmail.com");
@@ -102,6 +114,7 @@ public class EmailRecipientUtilsTest extends HudsonTestCase {
         assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
     }
 
+    @Test
     public void testValidateFormRecipientList_validationShouldPassAListOfGoodEmailAddresses() {
         FormValidation formValidation =
                 emailRecipientUtils.validateFormRecipientList("ashlux@gmail.com internal somewhere@domain");
@@ -109,6 +122,7 @@ public class EmailRecipientUtilsTest extends HudsonTestCase {
         assertEquals(FormValidation.Kind.OK, formValidation.kind);
     }
 
+    @Test
     public void testValidateFormRecipientList_validationShouldFailWithBadEmailAddress() {
         FormValidation formValidation =
                 emailRecipientUtils.validateFormRecipientList("@@@");
@@ -116,6 +130,7 @@ public class EmailRecipientUtilsTest extends HudsonTestCase {
         assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
     }
 
+    @Test
     public void testConvertRecipientList_defaultSuffix()
             throws AddressException, UnsupportedEncodingException {
         Mailer.descriptor().setDefaultSuffix("@gmail.com");
@@ -125,6 +140,7 @@ public class EmailRecipientUtilsTest extends HudsonTestCase {
         assertEquals("ashlux@gmail.com", internetAddresses[0].getAddress());
     }
 
+    @Test
     public void testConvertRecipientList_userName()
             throws AddressException, IOException, UnsupportedEncodingException {
         Mailer.descriptor().setDefaultSuffix("@gmail.com");
@@ -139,6 +155,7 @@ public class EmailRecipientUtilsTest extends HudsonTestCase {
         assertEquals("advantiss@xxx.com", internetAddresses[0].getAddress());
     }
 
+    @Test
     public void testCC()
             throws Exception {
         envVars.put("EMAIL_LIST", "ashlux@gmail.com, cc:slide.o.mix@gmail.com, another@gmail.com");
@@ -155,6 +172,7 @@ public class EmailRecipientUtilsTest extends HudsonTestCase {
         assertTrue(internetAddresses.contains(new InternetAddress("slide.o.mix@gmail.com")));
     }
 
+    @Test
     public void testUTF8()
             throws Exception {
         envVars.put("EMAIL_LIST", "ashlux@gmail.com, cc:slide.o.mix@gmail.com, 愛嬋 <another@gmail.com>");

@@ -11,18 +11,14 @@ import java.util.LinkedList;
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-public class BuildLogContentTest
-{
+public class BuildLogContentTest {
 
     private AbstractBuild build;
-
     private TaskListener listener;
-    
     private BuildLogContent buildLogContent;
 
     @Before
-    public void setup()
-    {
+    public void setup() {
         build = mock(AbstractBuild.class);
         listener = new StreamTaskListener(System.out);
         buildLogContent = new BuildLogContent();
@@ -30,14 +26,14 @@ public class BuildLogContentTest
 
     @Test
     public void testGetContent_shouldConcatLogWithoutLineLimit()
-            throws Exception
-    {
-        when(build.getLog(anyInt())).thenReturn(new LinkedList<String>()
-        {{
+            throws Exception {
+        when(build.getLog(anyInt())).thenReturn(new LinkedList<String>() {
+            {
                 add("line 1");
                 add("line 2");
                 add("line 3");
-            }});
+            }
+        });
 
         String content = buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);
 
@@ -46,8 +42,7 @@ public class BuildLogContentTest
 
     @Test
     public void testGetContent_shouldTruncateWhenLineLimitIsHit()
-            throws Exception
-    {
+            throws Exception {
         buildLogContent.maxLines = 2;
         buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);
 
@@ -56,8 +51,7 @@ public class BuildLogContentTest
 
     @Test
     public void testGetContent_shouldDefaultToMaxLines()
-            throws Exception
-    {
+            throws Exception {
         buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);
 
         verify(build).getLog(BuildLogContent.MAX_LINES_DEFAULT_VALUE);
@@ -65,26 +59,26 @@ public class BuildLogContentTest
 
     @Test
     public void testGetContent_shouldDefaultToNotEscapeHtml()
-            throws Exception
-    {
-        when(build.getLog(anyInt())).thenReturn(new LinkedList<String>()
-        {{
+            throws Exception {
+        when(build.getLog(anyInt())).thenReturn(new LinkedList<String>() {
+            {
                 add("<b>bold</b>");
-            }});
+            }
+        });
 
         String content = buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);
 
         assertEquals("<b>bold</b>\n", content);
     }
-    
+
     @Test
     public void testGetContent_shouldEscapeHtmlWhenArgumentEscapeHtmlSetToTrue()
-            throws Exception
-    {
-        when(build.getLog(anyInt())).thenReturn(new LinkedList<String>()
-        {{
+            throws Exception {
+        when(build.getLog(anyInt())).thenReturn(new LinkedList<String>() {
+            {
                 add("<b>bold</b>");
-            }});
+            }
+        });
 
         buildLogContent.escapeHtml = true;
         String content = buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);

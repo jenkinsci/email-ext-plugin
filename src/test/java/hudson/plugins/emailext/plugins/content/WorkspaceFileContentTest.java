@@ -7,22 +7,31 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.TaskListener;
 import hudson.util.StreamTaskListener;
-import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Kohsuke Kawaguchi
  */
-public class WorkspaceFileContentTest extends HudsonTestCase {
+public class WorkspaceFileContentTest {
+
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
+
+    @Test
     public void test1() throws Exception {
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = j.createFreeStyleProject();
         TaskListener listener = new StreamTaskListener(System.out);
         project.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-                build.getWorkspace().child("foo").write("Hello, world!","UTF-8");
+                build.getWorkspace().child("foo").write("Hello, world!", "UTF-8");
                 return true;
             }
         });
@@ -32,6 +41,6 @@ public class WorkspaceFileContentTest extends HudsonTestCase {
         content.path = "foo";
         assertEquals("Hello, world!", content.evaluate(build, listener, WorkspaceFileContent.MACRO_NAME));
         content.path = "no-such-file";
-		assertEquals("ERROR: File 'no-such-file' does not exist", content.evaluate(build, listener, WorkspaceFileContent.MACRO_NAME));
+        assertEquals("ERROR: File 'no-such-file' does not exist", content.evaluate(build, listener, WorkspaceFileContent.MACRO_NAME));
     }
 }

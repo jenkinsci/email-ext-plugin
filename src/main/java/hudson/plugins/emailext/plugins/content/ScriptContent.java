@@ -17,6 +17,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -126,17 +128,28 @@ public class ScriptContent extends DataBoundTokenMacro {
     private String renderTemplate(AbstractBuild<?, ?> build, TaskListener listener, InputStream templateStream)
             throws IOException {
         
+        String result;
+        
         Map<String, Object> binding = new HashMap<String, Object>();
+        ExtendedEmailPublisher publisher = build.getProject().getPublishersList().get(ExtendedEmailPublisher.class);
         binding.put("build", build);
         binding.put("listener", listener);
         binding.put("it", new ScriptContentBuildWrapper(build));
-        binding.put("rooturl", ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl());
+        binding.put("rooturl", publisher.getDescriptor().getHudsonUrl());
         binding.put("project", build.getParent());
         
         // we add the binding to the SimpleTemplateEngine instead of the shell
-        GroovyShell shell = createEngine(Collections.EMPTY_MAP);
+        GroovyShell shell = createEngine(publisher, Collections.EMPTY_MAP);
         SimpleTemplateEngine engine = new SimpleTemplateEngine(shell);
-        return engine.createTemplate(new InputStreamReader(templateStream)).make(binding).toString();        
+        try {
+            result = engine.createTemplate(new InputStreamReader(templateStream)).make(binding).toString();        
+        } catch(Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            result = "Exception raised during template rendering: " + e.getMessage() + "\n\n" + sw.toString();
+        }
+        return result;
     }
     
         /**
@@ -151,12 +164,14 @@ public class ScriptContent extends DataBoundTokenMacro {
             throws IOException {
         String result = "";
         Map binding = new HashMap<String, Object>();
+        ExtendedEmailPublisher publisher = build.getProject().getPublishersList().get(ExtendedEmailPublisher.class);
+        
         binding.put("build", build);
         binding.put("it", new ScriptContentBuildWrapper(build));
         binding.put("project", build.getParent());
-        binding.put("rooturl", ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl());
+        binding.put("rooturl", publisher.getDescriptor().getHudsonUrl());
 
-        GroovyShell shell = createEngine(binding);
+        GroovyShell shell = createEngine(publisher, binding);
         Object res = shell.evaluate(new InputStreamReader(scriptStream));
         if (res != null) {
             result = res.toString();
@@ -172,7 +187,7 @@ public class ScriptContent extends DataBoundTokenMacro {
      * @throws FileNotFoundException
      * @throws IOException
      */
-    private GroovyShell createEngine(Map<String, Object> variables)
+    private GroovyShell createEngine(ExtendedEmailPublisher publisher, Map<String, Object> variables)
             throws FileNotFoundException, IOException {
 
         ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
@@ -185,7 +200,7 @@ public class ScriptContent extends DataBoundTokenMacro {
                 "hudson",
                 "hudson.model"));
 
-        if (ExtendedEmailPublisher.DESCRIPTOR.isSecurityEnabled()) {
+        if (publisher.getDescriptor().isSecurityEnabled()) {
             cc.addCompilationCustomizers(new SandboxTransformer());
             sandbox = new ScriptSandbox();
         }

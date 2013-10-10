@@ -9,16 +9,24 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.content.FailedTestsContent;
 import hudson.tasks.junit.JUnitResultArchiver;
 import hudson.util.StreamTaskListener;
-import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
 import java.net.URL;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 
-public class OnlyRegressionsTest extends HudsonTestCase {
+import static org.junit.Assert.*;
 
+public class OnlyRegressionsTest {
+
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
+
+    @Test
     public void testOnlyRegressionsAreShown() throws Exception {
-        FreeStyleProject project = createFreeStyleProject("onlyRegressions");
+        FreeStyleProject project = j.createFreeStyleProject("onlyRegressions");
         project.getPublishersList().add(new JUnitResultArchiver("target/testreports/*.xml", true, null));
 
         project.getBuildersList().add(new TestBuilder() {

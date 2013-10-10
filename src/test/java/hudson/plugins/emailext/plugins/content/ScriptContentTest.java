@@ -7,6 +7,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import hudson.Functions;
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Descriptor;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.User;
@@ -14,12 +16,15 @@ import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.EditType;
+import hudson.tasks.Publisher;
+import hudson.util.DescribableList;
 import hudson.util.StreamTaskListener;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Scanner;
 
@@ -37,6 +42,8 @@ public class ScriptContentTest {
     private final boolean osIsDarwin = osName.equals("Mac OS X") || osName.equals("Darwin");
 
     private ExtendedEmailPublisher publisher;
+    
+    private AbstractBuild build;
     
     private TaskListener listener;
 
@@ -66,18 +73,25 @@ public class ScriptContentTest {
         
         Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultBody" );
         f.setAccessible( true );
-        f.set( ExtendedEmailPublisher.DESCRIPTOR, "Give me $4000 and I'll mail you a check for $40,000!" );
+        f.set( publisher.getDescriptor(), "Give me $4000 and I'll mail you a check for $40,000!" );
         f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultSubject" );
         f.setAccessible( true );
-        f.set( ExtendedEmailPublisher.DESCRIPTOR, "Nigerian needs your help!" );
+        f.set( publisher.getDescriptor(), "Nigerian needs your help!" );
 
         f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "recipientList" );
         f.setAccessible( true );
-        f.set( ExtendedEmailPublisher.DESCRIPTOR, "ashlux@gmail.com" );
+        f.set( publisher.getDescriptor(), "ashlux@gmail.com" );
         
-        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "hudsonUrl" );;;;
+        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "hudsonUrl" );
         f.setAccessible( true );
-        f.set( ExtendedEmailPublisher.DESCRIPTOR, "http://localhost/" );
+        f.set( publisher.getDescriptor(), "http://localhost/" );
+        
+        build =  mock(AbstractBuild.class);
+        AbstractProject project = mock(AbstractProject.class);
+        DescribableList publishers = mock(DescribableList.class);
+        when(publishers.get(ExtendedEmailPublisher.class)).thenReturn(publisher);
+        when(project.getPublishersList()).thenReturn(publishers);
+        when(build.getProject()).thenReturn(project);
     }
 
 
@@ -86,7 +100,7 @@ public class ScriptContentTest {
             throws Exception
     {
         scriptContent.script = "empty-script-on-classpath.groovy";
-        assertEquals("HELLO WORLD!", scriptContent.evaluate(mock( AbstractBuild.class ), listener, ScriptContent.MACRO_NAME));
+        assertEquals("HELLO WORLD!", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
     }
 
     @Test
@@ -95,7 +109,7 @@ public class ScriptContentTest {
     {
         scriptContent.template = "empty-groovy-template-on-classpath.template";
         // the template adds a newline
-        assertEquals("HELLO WORLD!\n", scriptContent.evaluate(mock(AbstractBuild.class), listener, ScriptContent.MACRO_NAME));
+        assertEquals("HELLO WORLD!\n", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
     }
 
     @Test
@@ -104,7 +118,7 @@ public class ScriptContentTest {
     {
         scriptContent.script = "script-does-not-exist";
         assertEquals("Script [script-does-not-exist] was not found in $JENKINS_HOME/email-templates.", 
-            scriptContent.evaluate(mock(AbstractBuild.class), listener, ScriptContent.MACRO_NAME));
+            scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
     }
 
     @Test
@@ -113,7 +127,7 @@ public class ScriptContentTest {
     {
         scriptContent.template = "template-does-not-exist";
         assertEquals("Template [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.", 
-            scriptContent.evaluate(mock(AbstractBuild.class), listener, ScriptContent.MACRO_NAME));
+            scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
     }
     
     @Test
@@ -123,7 +137,6 @@ public class ScriptContentTest {
         scriptContent.template = "content-token.template";
         
         // mock the build 
-        AbstractBuild build = mock(AbstractBuild.class);
         when(build.getResult()).thenReturn(Result.SUCCESS);
         when(build.getUrl()).thenReturn("email-test/34");
         when(build.getId()).thenReturn("34");
@@ -157,7 +170,6 @@ public class ScriptContentTest {
         scriptContent.template = "groovy-sample.template";
 
         // mock the build 
-        AbstractBuild build = mock(AbstractBuild.class);
         when(build.getResult()).thenReturn(Result.SUCCESS);
         when(build.getUrl()).thenReturn("email-test/34");
         when(build.getId()).thenReturn("34");

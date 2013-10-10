@@ -1,7 +1,5 @@
 package hudson.plugins.emailext;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.hasItems;
 import hudson.matrix.Axis;
 import hudson.matrix.AxisList;
 import hudson.matrix.MatrixBuild;
@@ -10,42 +8,50 @@ import hudson.model.labels.LabelAtom;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import hudson.slaves.DumbSlave;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.jvnet.hudson.test.HudsonTestCase;
+import static org.junit.Assert.*;
+import org.junit.Rule;
+import org.junit.Test;
+import static org.junit.matchers.JUnitMatchers.hasItems;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.mock_javamail.Mailbox;
 
-public class ExtendedEmailPublisherMatrixTest extends HudsonTestCase {
+public class ExtendedEmailPublisherMatrixTest {
 
     private ExtendedEmailPublisher publisher;
     private MatrixProject project;
     private List<DumbSlave> slaves;	
  
-    public void setUp() throws Exception{
-        super.setUp();
+    @Rule
+    public JenkinsRule j = new JenkinsRule() { 
+        @Override
+        protected void before() throws Throwable {
+            super.before();
 
-        publisher = new ExtendedEmailPublisher();
-        publisher.defaultSubject = "%DEFAULT_SUBJECT";
-        publisher.defaultContent = "%DEFAULT_CONTENT";
+            publisher = new ExtendedEmailPublisher();
+            publisher.defaultSubject = "%DEFAULT_SUBJECT";
+            publisher.defaultContent = "%DEFAULT_CONTENT";
 
-        project = createMatrixProject();
-        project.getPublishersList().add( publisher );
-        slaves = new ArrayList<DumbSlave>(); 
-        slaves.add(createOnlineSlave(new LabelAtom("success-slave1")));
-        slaves.add(createOnlineSlave(new LabelAtom("success-slave2")));
-        slaves.add(createOnlineSlave(new LabelAtom("success-slave3"))); 
-    }
+            project = createMatrixProject();
+            project.getPublishersList().add( publisher );
+            slaves = new ArrayList<DumbSlave>(); 
+            slaves.add(createOnlineSlave(new LabelAtom("success-slave1")));
+            slaves.add(createOnlineSlave(new LabelAtom("success-slave2")));
+            slaves.add(createOnlineSlave(new LabelAtom("success-slave3"))); 
+        }
+        
+        @Override
+        protected void after() {
+            super.after();
+            slaves.clear();
+            Mailbox.clearAll();
+        }
+    };
 
-    public void tearDown() throws Exception {
-        super.tearDown();
-        slaves.clear();
-        Mailbox.clearAll();
-    }
-
+    @Test
     public void testPreBuildMatrixBuildSendParentOnly() throws Exception {
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_PARENT);
         PreBuildTrigger trigger = new PreBuildTrigger(true, true, true, false, "$DEFAULT_RECIPIENTS",
@@ -53,7 +59,7 @@ public class ExtendedEmailPublisherMatrixTest extends HudsonTestCase {
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
         MatrixBuild build = project.scheduleBuild2(0).get();
-        assertBuildStatusSuccess(build);
+        j.assertBuildStatusSuccess(build);
     
     
         assertThat( "Email should have been triggered, so we should see it in the logs.", build.getLog( 100 ),
@@ -61,6 +67,7 @@ public class ExtendedEmailPublisherMatrixTest extends HudsonTestCase {
         assertEquals( 1, Mailbox.get( "solganik@gmail.com" ).size() );
     }
 
+    @Test
     public void testPreBuildMatrixBuildSendSlavesOnly() throws Exception{	
         addSlaveToProject(0,1,2);
     
@@ -72,10 +79,11 @@ public class ExtendedEmailPublisherMatrixTest extends HudsonTestCase {
        
     
         MatrixBuild build = project.scheduleBuild2(0).get();
-        assertBuildStatusSuccess(build);		
+        j.assertBuildStatusSuccess(build);		
         assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );	
     }
 
+    @Test
     public void testPreBuildMatrixBuildSendSlavesAndParent() throws Exception{	
         addSlaveToProject(0,1);
     
@@ -87,7 +95,7 @@ public class ExtendedEmailPublisherMatrixTest extends HudsonTestCase {
        
     
         MatrixBuild build = project.scheduleBuild2(0).get();
-        assertBuildStatusSuccess(build);		
+        j.assertBuildStatusSuccess(build);		
         assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );	
     }
 

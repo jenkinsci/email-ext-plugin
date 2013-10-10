@@ -44,11 +44,11 @@ public class ContentBuilder {
         String defaultContent = Matcher.quoteReplacement(noNull(publisher.defaultContent));
         String defaultSubject = Matcher.quoteReplacement(noNull(publisher.defaultSubject));
         String defaultReplyTo = Matcher.quoteReplacement(noNull(publisher.replyTo));
-        String defaultBody = Matcher.quoteReplacement(noNull(ExtendedEmailPublisher.DESCRIPTOR.getDefaultBody()));
-        String defaultExtSubject = Matcher.quoteReplacement(noNull(ExtendedEmailPublisher.DESCRIPTOR.getDefaultSubject()));
-        String defaultRecipients = Matcher.quoteReplacement(noNull(ExtendedEmailPublisher.DESCRIPTOR.getDefaultRecipients()));
-        String defaultExtReplyTo = Matcher.quoteReplacement(noNull(ExtendedEmailPublisher.DESCRIPTOR.getDefaultReplyTo()));
-        String defaultPresendScript = Matcher.quoteReplacement(noNull(ExtendedEmailPublisher.DESCRIPTOR.getDefaultPresendScript()));
+        String defaultBody = Matcher.quoteReplacement(noNull(publisher.getDescriptor().getDefaultBody()));
+        String defaultExtSubject = Matcher.quoteReplacement(noNull(publisher.getDescriptor().getDefaultSubject()));
+        String defaultRecipients = Matcher.quoteReplacement(noNull(publisher.getDescriptor().getDefaultRecipients()));
+        String defaultExtReplyTo = Matcher.quoteReplacement(noNull(publisher.getDescriptor().getDefaultReplyTo()));
+        String defaultPresendScript = Matcher.quoteReplacement(noNull(publisher.getDescriptor().getDefaultPresendScript()));
         String newText = origText.replaceAll(
                 PROJECT_DEFAULT_BODY, defaultContent).replaceAll(
                 PROJECT_DEFAULT_SUBJECT, defaultSubject).replaceAll(

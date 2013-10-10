@@ -75,7 +75,8 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
                 "hudson",
                 "hudson.model"));
 
-        if (ExtendedEmailPublisher.DESCRIPTOR.isSecurityEnabled()) {
+        ExtendedEmailPublisher publisher = build.getProject().getPublishersList().get(ExtendedEmailPublisher.class);
+        if (publisher.getDescriptor().isSecurityEnabled()) {
             cc.addCompilationCustomizers(new SandboxTransformer());
             sandbox = new ScriptSandbox();
         }
@@ -83,7 +84,7 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
         Binding binding = new Binding();
         binding.setVariable("build", build);
         binding.setVariable("project", build.getParent());
-        binding.setVariable("rooturl", ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl());
+        binding.setVariable("rooturl", publisher.getDescriptor().getHudsonUrl());
         binding.setVariable("out", listener.getLogger());
         
         GroovyShell shell = new GroovyShell(cl, binding, cc);

@@ -18,7 +18,6 @@ public class ExtendedEmailPublisherDescriptorTest {
 
     @Test
     public void testGlobalConfigDefaultState() throws Exception {
-        /*
         HtmlPage page = j.createWebClient().goTo("configure");
 
         assertEquals("Should be at the Configure System page",
@@ -35,11 +34,11 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("Plain text should be selected by default",
                 "text/plain", contentType.getSelectedOptions().get(0).getValueAttribute());
 
-        HtmlCheckBoxInput useListId = page.getElementByName("extmailer.useListID");
+        HtmlCheckBoxInput useListId = page.getElementByName("ext_mailer_use_list_id");
         assertNotNull("Use List ID should be present", useListId);
         assertFalse("Use List ID should not be checked by default", useListId.isChecked());
 
-        HtmlCheckBoxInput precedenceBulk = page.getElementByName("extmailer.addPrecedenceBulk");
+        HtmlCheckBoxInput precedenceBulk = page.getElementByName("ext_mailer_add_precendence_bulk");
         assertNotNull("Precedence Bulk should be present", precedenceBulk);
         assertFalse("Add precedence bulk should not be checked by default",
                 precedenceBulk.isChecked());
@@ -58,6 +57,11 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertNotNull("Emergency Reroute should be present", emergencyReroute);
         assertEquals("Emergency Reroute should be blank by default", 
                 "", emergencyReroute.getText());
+        
+        HtmlTextInput excludedRecipients = page.getElementByName("ext_mailer_excluded_committers");
+        assertNotNull("Excluded Recipients should be present", excludedRecipients);
+        assertEquals("Excluded Recipients should be blank by default",
+                "", excludedRecipients.getText());
 
         HtmlTextInput defaultSubject = page.getElementByName("ext_mailer_default_subject");
         assertNotNull("Default Subject should be present", defaultSubject);
@@ -83,6 +87,5 @@ public class ExtendedEmailPublisherDescriptorTest {
         HtmlCheckBoxInput securityMode = page.getElementByName("ext_mailer_security_enabled");
         assertNotNull("Security mode should be present", securityMode);
         assertFalse("Security mode should not be checked by default", securityMode.isChecked());
-        */
     }
 }

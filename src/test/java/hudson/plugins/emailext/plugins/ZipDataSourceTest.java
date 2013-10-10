@@ -6,14 +6,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipInputStream;
 
-import org.junit.Assert;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-import junit.framework.TestCase;
+public class ZipDataSourceTest {
 
-public class ZipDataSourceTest extends TestCase {
-	private final static int BUFFER_SIZE = 1024;
+    private final static int BUFFER_SIZE = 1024;
 
-    public void testGetName() throws IOException{
+    @Test
+    public void testGetName() throws IOException {
         String name = "myFile";
 
         ByteArrayInputStream in = new ByteArrayInputStream(new byte[0]);
@@ -22,6 +23,7 @@ public class ZipDataSourceTest extends TestCase {
         assertEquals(name + ".zip", dataSource.getName());
     }
 
+    @Test
     public void testGetContentType() throws IOException {
         String name = "myFile";
 
@@ -31,6 +33,7 @@ public class ZipDataSourceTest extends TestCase {
         assertEquals("application/zip", dataSource.getContentType());
     }
 
+    @Test
     public void testGetInputStream() throws IOException {
         byte[] sample = "Hello World lllllllllllots of repeated charactersssssssssssss Hello World again".getBytes();
         ZipDataSource dataSource = new ZipDataSource("name", new ByteArrayInputStream(sample));
@@ -46,10 +49,10 @@ public class ZipDataSourceTest extends TestCase {
         while ((size = zin.read(buffer, 0, buffer.length)) > 0) {
             baos.write(buffer, 0, size);
         }
-        Assert.assertArrayEquals(sample, baos.toByteArray());
-
+        assertArrayEquals(sample, baos.toByteArray());
     }
 
+    @Test
     public void testGetOutputStream() throws IOException {
         String name = "myFile";
 
@@ -61,6 +64,6 @@ public class ZipDataSourceTest extends TestCase {
         } catch (IOException e) {
             return;
         }
-        Assert.fail("It is not possible to get an OutputStream from the ZipDataSource, an exception should have been thrown");
+        fail("It is not possible to get an OutputStream from the ZipDataSource, an exception should have been thrown");
     }
 }

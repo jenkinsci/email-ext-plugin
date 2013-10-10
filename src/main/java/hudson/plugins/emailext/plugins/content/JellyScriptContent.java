@@ -107,12 +107,12 @@ public class JellyScriptContent extends DataBoundTokenMacro {
         JellyContext context = createContext(new ScriptContentBuildWrapper(build), build);
         Script script = context.compileScript(new InputSource(inputStream));
         if (script != null) {
-            return convert(context, script);
+            return convert(build, context, script);
         }
         return null;
     }
 
-    private String convert(JellyContext context, Script script)
+    private String convert(AbstractBuild<?, ?> build, JellyContext context, Script script)
             throws JellyTagException, IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream(16 * 1024);
         XMLOutput xmlOutput = XMLOutput.createXMLOutput(output);
@@ -120,21 +120,23 @@ public class JellyScriptContent extends DataBoundTokenMacro {
         xmlOutput.flush();
         xmlOutput.close();
         output.close();
-        return output.toString(getCharset());
+        return output.toString(getCharset(build));
     }
 
     private JellyContext createContext(Object it, AbstractBuild<?, ?> build) {
         JellyContext context = new JellyContext();
+        final ExtendedEmailPublisher publisher = build.getProject().getPublishersList().get(ExtendedEmailPublisher.class);        
         context.setVariable("it", it);
         context.setVariable("build", build);
         context.setVariable("project", build.getParent());
-        context.setVariable("rooturl", ExtendedEmailPublisher.DESCRIPTOR.getHudsonUrl());
+        context.setVariable("rooturl", publisher.getDescriptor().getHudsonUrl());
         return context;
     }
 
-    private String getCharset() {
+    private String getCharset(AbstractBuild<?, ?> build) {
         String charset = Mailer.descriptor().getCharset();
-        String overrideCharset = ExtendedEmailPublisher.DESCRIPTOR.getCharset();
+        ExtendedEmailPublisher publisher = build.getProject().getPublishersList().get(ExtendedEmailPublisher.class);
+        String overrideCharset = publisher.getDescriptor().getCharset();
         if (overrideCharset != null) {
             charset = overrideCharset;
         }

@@ -22,12 +22,12 @@ f.section(title: _("Extended E-mail Notification")) {
       input(type: "text", class: "setting-input", value: h.ifThenElse(descriptor.hudsonUrl!=null,descriptor.hudsonUrl,h.inferHudsonURL(request)), name: "ext_mailer_hudson_url") 
     }
     f.advanced() {
-      f.optionalBlock(help: "/help/tasks/mailer/smtpAuth.html", checked: descriptor.smtpAuthUsername!=null, name: "extmailer.useSMTPAuth", title: _("Use SMTP Authentication")) {
+      f.optionalBlock(help: "/help/tasks/mailer/smtpAuth.html", checked: descriptor.smtpAuthUsername!=null, name: "ext_mailer_use_smtp_auth", title: _("Use SMTP Authentication")) {
         f.entry(title: _("User Name")) {
-          input(type: "text", class: "setting-input", value: descriptor.smtpAuthUsername, name: "extmailer.SMTPAuth.userName") 
+          input(type: "text", class: "setting-input", value: descriptor.smtpAuthUsername, name: "ext_mailer_smtp_username") 
         }
         f.entry(title: _("Password")) {
-          input(type: "password", class: "setting-input", value: descriptor.smtpAuthPassword, name: "extmailer.SMTPAuth.password") 
+          input(type: "password", class: "setting-input", value: descriptor.smtpAuthPassword, name: "ext_mailer_smtp_password") 
         }
       }
       f.entry(help: "/descriptor/hudson.tasks.Mailer/help/useSsl", title: _("Use SSL")) {
@@ -47,12 +47,12 @@ f.section(title: _("Extended E-mail Notification")) {
       f.option(selected: 'text/html'==descriptor.defaultContentType, value: "text/html", _("contentType.html")) 
     }
   }
-  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/listId.html", checked: descriptor.listId!=null, name: "extmailer.useListID", title: _("Use List-ID Email Header")) {
+  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/listId.html", checked: descriptor.listId!=null, name: "ext_mailer_use_list_id", title: _("Use List-ID Email Header")) {
     f.entry(title: _("List ID")) {
-      input(type: "text", class: "setting-input", value: descriptor.listId, name: "extmailer.ListID.id") 
+      input(type: "text", class: "setting-input", value: descriptor.listId, name: "ext_mailer_list_id") 
     }
   }
-  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/precedenceBulk.html", checked: descriptor.precedenceBulk, name: "extmailer.addPrecedenceBulk", title: _("Add 'Precedence: bulk' Email Header")) 
+  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/precedenceBulk.html", checked: descriptor.precedenceBulk, name: "ext_mailer_add_precendence_bulk", title: _("Add 'Precedence: bulk' Email Header")) 
   f.entry(field: "recipients", help: "/plugin/email-ext/help/globalConfig/defaultRecipients.html", title: _("Default Recipients")) {
     input(type: "text", class: "setting-input", value: descriptor.defaultRecipients, name: "ext_mailer_default_recipients") 
   }
@@ -62,7 +62,7 @@ f.section(title: _("Extended E-mail Notification")) {
   f.entry(help: "/plugin/email-ext/help/globalConfig/emergencyReroute.html", title: _("Emergency reroute")) {
     input(type: "text", class: "setting-input", value: descriptor.emergencyReroute, name: "ext_mailer_emergency_reroute") 
   }
-  f.entry(help: "/plugin/email-ext/help/globalConfig/excludedCommitters.html", title: _("Excluded Committers")) {
+  f.entry(help: "/plugin/email-ext/help/globalConfig/excludedRecipients.html", title: _("Excluded Recipients")) {
     input(type: "text", class: "setting-input", value: descriptor.excludedCommitters, name: "ext_mailer_excluded_committers")
   }
   f.entry(help: "/plugin/email-ext/help/globalConfig/defaultSubject.html", title: _("Default Subject")) {

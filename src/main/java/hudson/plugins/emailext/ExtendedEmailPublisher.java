@@ -215,7 +215,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     public void debug(PrintStream p, String format, Object... args) {
-        ExtendedEmailPublisher.DESCRIPTOR.debug(p, format, args);
+        getDescriptor().debug(p, format, args);
     }
     
     @Override
@@ -384,7 +384,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     "hudson",
                     "hudson.model"));
 
-            if(ExtendedEmailPublisher.DESCRIPTOR.isSecurityEnabled()) {
+            if(getDescriptor().isSecurityEnabled()) {
                 debug(listener.getLogger(), "Setting up sandbox for pre-send script");
                 cc.addCompilationCustomizers(new SandboxTransformer());
                 sandbox = new ScriptSandbox();
@@ -426,7 +426,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }    
 
     private MimeMessage createMail(EmailType type, AbstractBuild<?, ?> build, BuildListener listener, EmailTrigger trigger) throws MessagingException, IOException, InterruptedException {
-        boolean overrideGlobalSettings = ExtendedEmailPublisher.DESCRIPTOR.getOverrideGlobalSettings();
+        boolean overrideGlobalSettings = getDescriptor().getOverrideGlobalSettings();
 
         MimeMessage msg;
 
@@ -440,18 +440,18 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             msg.setFrom(new InternetAddress(Mailer.descriptor().getAdminAddress()));
         } else {
             debug(listener.getLogger(), "Overriding default server settings, creating our own session");
-            session = ExtendedEmailPublisher.DESCRIPTOR.createSession();
+            session = getDescriptor().createSession();
             msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(ExtendedEmailPublisher.DESCRIPTOR.getAdminAddress()));
+            msg.setFrom(new InternetAddress(getDescriptor().getAdminAddress()));
         }
         
-        if(ExtendedEmailPublisher.DESCRIPTOR.isDebugMode()) {
+        if(getDescriptor().isDebugMode()) {
             session.setDebugOut(listener.getLogger());
         }
         
         String charset = Mailer.descriptor().getCharset();
         if (overrideGlobalSettings) {
-            String overrideCharset = ExtendedEmailPublisher.DESCRIPTOR.getCharset();
+            String overrideCharset = getDescriptor().getCharset();
             if (StringUtils.isNotBlank(overrideCharset)) {
                 debug(listener.getLogger(), "Overriding charset %s", overrideCharset);
                 charset = overrideCharset;
@@ -480,7 +480,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         if(attachBuildLog || type.getAttachBuildLog()) {
             debug(listener.getLogger(), "Request made to attach build log");
-            AttachmentUtils.attachBuildLog(multipart, build, listener, compressBuildLog || type.getCompressBuildLog());
+            AttachmentUtils.attachBuildLog(this, multipart, build, listener, compressBuildLog || type.getCompressBuildLog());
         }
 
         msg.setContent(multipart);
@@ -516,7 +516,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
             
             for (User user : users) {
-                if (!isExcludedRecipient(user.getFullName(), listener) && !isExcludedRecipient(user.getId(), listener)) {
+                if (!isExcludedRecipient(user, listener)) {
                     String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
                     if (userAddress != null) {
                         debug(listener.getLogger(), "Adding user address %s, they were not considered an excluded committer", userAddress);
@@ -547,7 +547,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             addAddressesFromRecipientList(recipientAddresses, ccAddresses, getRecipientList(type, build, type.getRecipientList(), listener, charset), env, listener);
         }
 
-        String emergencyReroute = ExtendedEmailPublisher.DESCRIPTOR.getEmergencyReroute();
+        String emergencyReroute = getDescriptor().getEmergencyReroute();
         boolean isEmergencyReroute = StringUtils.isNotBlank(emergencyReroute);
         
         if (isEmergencyReroute) {
@@ -600,12 +600,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             msg.setHeader("Content-Transfer-Encoding", CONTENT_TRANSFER_ENCODING);
         }
         
-        String listId = ExtendedEmailPublisher.DESCRIPTOR.getListId();
+        String listId = getDescriptor().getListId();
         if (listId != null) {
             msg.setHeader("List-ID", listId);
         }
 
-        if (ExtendedEmailPublisher.DESCRIPTOR.getPrecedenceBulk()) {
+        if (getDescriptor().getPrecedenceBulk()) {
             msg.setHeader("Precedence", "bulk");
         }
         
@@ -613,11 +613,21 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     private boolean isExcludedRecipient(String userName, BuildListener listener) {
-        StringTokenizer tokens = new StringTokenizer(DESCRIPTOR.getExcludedRecipients(), ",");
+        StringTokenizer tokens = new StringTokenizer(getDescriptor().getExcludedCommitters(), ",");
         while (tokens.hasMoreTokens()) {
             String check = tokens.nextToken().trim();
             debug(listener.getLogger(), "Checking '%s' against '%s' to see if they are excluded", userName, check);
             if (check.equalsIgnoreCase(userName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private boolean isExcludedRecipient(User user, BuildListener listener) {
+        String[] testValues = new String[] { user.getFullName(), user.getId(), user.getDisplayName() };
+        for(String testValue : testValues) {
+            if(testValue != null && isExcludedRecipient(testValue, listener)) {
                 return true;
             }
         }
@@ -702,7 +712,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         String messageContentType = type.getContentType().equals("project") ? contentType : type.getContentType();
         // contentType is null if the project was not reconfigured after upgrading.
         if (messageContentType == null || "default".equals(messageContentType)) {
-            messageContentType = DESCRIPTOR.getDefaultContentType();
+            messageContentType = getDescriptor().getDefaultContentType();
             // The defaultContentType is null if the main Jenkins configuration
             // was not reconfigured after upgrading.
             if (messageContentType == null) {
@@ -770,17 +780,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     @Override
-    public BuildStepDescriptor<Publisher> getDescriptor() {
-        return DESCRIPTOR;
-    }
-
-    @Extension
-    public static final ExtendedEmailPublisherDescriptor DESCRIPTOR = new ExtendedEmailPublisherDescriptor();
-
-    // The descriptor has been moved but we need to maintain the old descriptor for backwards compatibility reasons.
-    @SuppressWarnings({"UnusedDeclaration"})
-    public static final class DescriptorImpl
-            extends ExtendedEmailPublisherDescriptor {
+    public ExtendedEmailPublisherDescriptor getDescriptor() {
+        return (ExtendedEmailPublisherDescriptor)Jenkins.getInstance().getDescriptor(getClass());
     }
 
     public MatrixAggregator createAggregator(MatrixBuild matrixbuild,

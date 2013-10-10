@@ -1,9 +1,11 @@
 package hudson.plugins.emailext;
+import org.junit.Test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
-public class EmailTypeTest extends TestCase {
+public class EmailTypeTest {
 
+    @Test
     public void testHasNoRecipients() {
         EmailType t = new EmailType();
 
@@ -13,6 +15,7 @@ public class EmailTypeTest extends TestCase {
         assertFalse(t.getHasRecipients());
     }
 
+    @Test
     public void testHasDeveloperRecipients() {
         EmailType t = new EmailType();
 
@@ -22,6 +25,7 @@ public class EmailTypeTest extends TestCase {
         assertTrue(t.getHasRecipients());
     }
 
+    @Test
     public void testHasRecipientList() {
         EmailType t = new EmailType();
 
@@ -31,6 +35,7 @@ public class EmailTypeTest extends TestCase {
         assertTrue(t.getHasRecipients());
     }
 
+    @Test
     public void testHasDeveloperAndRecipientList() {
         EmailType t = new EmailType();
 
@@ -40,6 +45,7 @@ public class EmailTypeTest extends TestCase {
         assertTrue(t.getHasRecipients());
     }
 
+    @Test
     public void testCompressBuildAttachment() {
         EmailType t = new EmailType();
         t.setCompressBuildLog(true);
@@ -47,6 +53,7 @@ public class EmailTypeTest extends TestCase {
         assertTrue(t.getCompressBuildLog());
     }
 
+    @Test
     public void testDefaultCompressBuildAttachment() {
         EmailType t = new EmailType();
 
