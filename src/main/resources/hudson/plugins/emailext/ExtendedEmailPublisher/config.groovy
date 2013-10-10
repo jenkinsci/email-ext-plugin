@@ -10,7 +10,7 @@ d = namespace("jelly:define")
 
 
 def triggers = hudson.plugins.emailext.plugins.EmailTrigger.all()
-def configured = instance != null ? instance.configured : false
+def configured = instance != null
 
 f.entry(title: _("Project Recipient List"), help: "/plugin/email-ext/help/projectConfig/globalRecipientList.html", description: _("Comma-separated list of email address that should receive notifications for this project.")) {
   f.textbox(name: "project_recipient_list", value: configured ? instance.recipientList : "\$DEFAULT_RECIPIENTS", checkUrl: "'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)") 

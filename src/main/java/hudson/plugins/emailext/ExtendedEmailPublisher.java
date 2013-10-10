@@ -191,20 +191,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return configuredTriggers;
     }
 
-    /**
-     * Return true if the project has been configured, otherwise returns false
-     */
-    public boolean isConfigured() {
-        return !getConfiguredTriggers().isEmpty();
-    }
-
-    /**
-     * Return true if the project has been configured, otherwise returns false
-     */
-    public boolean getConfigured() {
-        return isConfigured();
-    }
-
     public MatrixTriggerMode getMatrixTriggerMode() {
         if (matrixTriggerMode ==null)    return MatrixTriggerMode.BOTH;
         return matrixTriggerMode;

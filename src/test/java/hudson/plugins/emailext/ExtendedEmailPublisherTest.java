@@ -1,5 +1,7 @@
 package hudson.plugins.emailext;
 
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
@@ -42,6 +44,8 @@ import org.jvnet.hudson.test.MockBuilder;
 import org.jvnet.mock_javamail.Mailbox;
 import org.kohsuke.stapler.Stapler;
 import static org.junit.Assert.*;
+import org.jvnet.hudson.test.Bug;
+import org.jvnet.hudson.test.JenkinsRule.WebClient;
 
 public class ExtendedEmailPublisherTest {
 
@@ -762,6 +766,22 @@ public class ExtendedEmailPublisherTest {
                 return null;
             }
         });
+    }
+    
+    @Test
+    @Bug(15442)
+    public void testConfiguredStateNoTriggers()
+            throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("JENKINS-15442");
+        prj.getPublishersList().add(publisher);
+        
+        publisher.recipientList = "mickey@disney.com";
+        publisher.configuredTriggers.clear();
+        
+        WebClient client = j.createWebClient();
+        HtmlPage page = client.goTo("job/JENKINS-15442/configure");
+        HtmlTextInput recipientList = page.getElementByName("project_recipient_list");
+        assertEquals(recipientList.getText(), "mickey@disney.com");
     }
 
     private void addEmailType(EmailTrigger trigger) {
