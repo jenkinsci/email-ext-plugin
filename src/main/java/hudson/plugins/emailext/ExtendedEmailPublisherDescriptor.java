@@ -308,15 +308,15 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             throws FormException {
         // Most of this stuff is the same as the built-in email publisher
 
-        overrideGlobalSettings = formData.optBoolean("ext_mailer_override_global_settings");
+        overrideGlobalSettings = req.hasParameter("ext_mailer_override_global_settings");
 
         // Configure the smtp server
-        smtpHost = nullify(formData.getString("ext_mailer_smtp_server"));
-        adminAddress = formData.getString("ext_mailer_admin_address");
-        defaultSuffix = nullify(formData.getString("ext_mailer_default_suffix"));
+        smtpHost = nullify(req.getParameter("ext_mailer_smtp_server"));
+        adminAddress = req.getParameter("ext_mailer_admin_address");
+        defaultSuffix = nullify(req.getParameter("ext_mailer_default_suffix"));
         
         // Specify the url to this Jenkins instance
-        String url = nullify(formData.getString("ext_mailer_hudson_url"));
+        String url = nullify(req.getParameter("ext_mailer_hudson_url"));
         if (url != null && !url.endsWith("/")) {
             url += '/';
         }
@@ -326,51 +326,51 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         hudsonUrl = url;
 
         // specify authentication information
-        if (formData.optBoolean("ext_mailer_use_smtp_auth")) {
-            smtpAuthUsername = nullify(formData.getString("ext_mailer_smtp_username"));
-            smtpAuthPassword = Secret.fromString(nullify(formData.getString("ext_mailer_smtp_password")));
+        if (req.hasParameter("ext_mailer_use_smtp_auth")) {
+            smtpAuthUsername = nullify(req.getParameter("ext_mailer_smtp_username"));
+            smtpAuthPassword = Secret.fromString(nullify(req.getParameter("ext_mailer_smtp_password")));
         } else {
             smtpAuthUsername = null;
             smtpAuthPassword = null;
         }
 
         // specify if the mail server uses ssl for authentication
-        useSsl = formData.optBoolean("ext_mailer_smtp_use_ssl");
+        useSsl = req.hasParameter("ext_mailer_smtp_use_ssl");
 
         // specify custom smtp port
-        smtpPort = nullify(formData.getString("ext_mailer_smtp_port"));
+        smtpPort = nullify(req.getParameter("ext_mailer_smtp_port"));
 
-        charset = nullify(formData.getString("ext_mailer_charset"));
+        charset = nullify(req.getParameter("ext_mailer_charset"));
 
-        defaultContentType = nullify(formData.getString("ext_mailer_default_content_type"));
+        defaultContentType = nullify(req.getParameter("ext_mailer_default_content_type"));
 
         // Allow global defaults to be set for the subject and body of the email
-        defaultSubject = nullify(formData.getString("ext_mailer_default_subject"));
-        defaultBody = nullify(formData.getString("ext_mailer_default_body"));
-        emergencyReroute = nullify(formData.getString("ext_mailer_emergency_reroute"));
-        defaultReplyTo = nullify(formData.getString("ext_mailer_default_replyto")) != null ?
-            formData.getString("ext_mailer_default_replyto") : "";
-        defaultPresendScript = nullify(formData.getString("ext_mailer_default_presend_script")) != null ?
-            formData.getString("ext_mailer_default_presend_script") : "";
+        defaultSubject = nullify(req.getParameter("ext_mailer_default_subject"));
+        defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
+        emergencyReroute = nullify(req.getParameter("ext_mailer_emergency_reroute"));
+        defaultReplyTo = nullify(req.getParameter("ext_mailer_default_replyto")) != null ?
+            req.getParameter("ext_mailer_default_replyto") : "";
+        defaultPresendScript = nullify(req.getParameter("ext_mailer_default_presend_script")) != null ?
+            req.getParameter("ext_mailer_default_presend_script") : "";
 
-        debugMode = formData.optBoolean("ext_mailer_debug_mode");
+        debugMode = req.hasParameter("ext_mailer_debug_mode");
         
         //enableWatching = req.getParameter("ext_mailer_enable_watching") != null;
 
         // convert the value into megabytes (1024 * 1024 bytes)
-        maxAttachmentSize = nullify(formData.getString("ext_mailer_max_attachment_size")) != null ?
-            (Long.parseLong(formData.getString("ext_mailer_max_attachment_size")) * 1024 * 1024) : -1;
-        recipientList = nullify(formData.getString("ext_mailer_default_recipients")) != null ?
-            formData.getString("ext_mailer_default_recipients") : "";
+        maxAttachmentSize = nullify(req.getParameter("ext_mailer_max_attachment_size")) != null ?
+            (Long.parseLong(req.getParameter("ext_mailer_max_attachment_size")) * 1024 * 1024) : -1;
+        recipientList = nullify(req.getParameter("ext_mailer_default_recipients")) != null ?
+            req.getParameter("ext_mailer_default_recipients") : "";
 
-        precedenceBulk = formData.optBoolean("ext_mailer_add_precedence_bulk");
-        enableSecurity = formData.optBoolean("ext_mailer_security_enabled");
+        precedenceBulk = req.hasParameter("ext_mailer_add_precedence_bulk");
+        enableSecurity = req.hasParameter("ext_mailer_security_enabled");
 
-        excludedCommitters = formData.getString("ext_mailer_excluded_committers");
+        excludedCommitters = req.getParameter("ext_mailer_excluded_committers");
 
         // specify List-ID information
-        if (formData.optBoolean("ext_mailer_use_list_id")) {
-            listId = nullify(formData.getString("ext_mailer_listid"));
+        if (req.hasParameter("ext_mailer_use_list_id")) {
+            listId = nullify(req.getParameter("ext_mailer_listid"));
         } else {
             listId = null;
         }

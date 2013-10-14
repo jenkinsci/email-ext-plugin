@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import static org.junit.Assert.*;
+import org.jvnet.hudson.test.Bug;
 
 public class ExtendedEmailPublisherDescriptorTest {
     
@@ -87,5 +88,17 @@ public class ExtendedEmailPublisherDescriptorTest {
         HtmlCheckBoxInput securityMode = page.getElementByName("ext_mailer_security_enabled");
         assertNotNull("Security mode should be present", securityMode);
         assertFalse("Security mode should not be checked by default", securityMode.isChecked());
+    }
+    
+    @Test
+    @Bug(20030)
+    public void testGlobalConfigSimpleRoundTrip() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);        
+        HtmlPage page = j.createWebClient().goTo("configure");
+        HtmlTextInput defaultRecipients = page.getElementByName("ext_mailer_default_recipients");
+        defaultRecipients.setValueAttribute("mickey@disney.com");
+        j.submit(page.getFormByName("config"));       
+        
+        assertEquals("mickey@disney.com", descriptor.getDefaultRecipients());
     }
 }
