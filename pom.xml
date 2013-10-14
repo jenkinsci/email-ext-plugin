@@ -167,6 +167,12 @@
                 <artifactId>maven-hpi-plugin</artifactId>
                 <version>1.95</version>
             </plugin>                     
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-XX:MaxPermSize=512m</argLine>
+                </configuration>
+            </plugin>                     
         </plugins>
     </build>
 
