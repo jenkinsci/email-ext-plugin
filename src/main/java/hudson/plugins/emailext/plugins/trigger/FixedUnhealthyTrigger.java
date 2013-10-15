@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins.trigger;
 
+import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.TaskListener;
@@ -54,13 +55,7 @@ public class FixedUnhealthyTrigger extends EmailTrigger {
         return prevBuild;
     }
 
-    @Override
-    public EmailTriggerDescriptor getDescriptor() {
-        return DESCRIPTOR;
-    }
-
-    public static DescriptorImpl DESCRIPTOR = new DescriptorImpl();
-
+    @Extension
     public static final class DescriptorImpl extends EmailTriggerDescriptor {
 
         public DescriptorImpl() {

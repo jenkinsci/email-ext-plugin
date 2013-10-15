@@ -9,6 +9,7 @@ import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
+import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import org.kohsuke.stapler.StaplerRequest;
@@ -36,13 +37,6 @@ public class AbortedTrigger extends EmailTrigger {
     }
 
     @Extension
-    public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
-
-    @Override
-    public EmailTriggerDescriptor getDescriptor() {
-        return DESCRIPTOR;
-    }
-
     public static final class DescriptorImpl extends EmailTriggerDescriptor {
 
         @Override

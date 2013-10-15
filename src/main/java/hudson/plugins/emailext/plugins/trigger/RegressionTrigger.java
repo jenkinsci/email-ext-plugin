@@ -37,13 +37,6 @@ public class RegressionTrigger extends EmailTrigger {
     }
 
     @Extension
-    public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
-
-    @Override
-    public EmailTriggerDescriptor getDescriptor() {
-        return DESCRIPTOR;
-    }
-    
     public static final class DescriptorImpl extends EmailTriggerDescriptor {
 
         public DescriptorImpl() {

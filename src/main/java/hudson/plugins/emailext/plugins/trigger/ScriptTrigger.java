@@ -23,14 +23,7 @@ public class ScriptTrigger extends AbstractScriptTrigger {
         return false;
     }
 
-    @Override
-    public EmailTriggerDescriptor getDescriptor() {
-        return DESCRIPTOR;
-    }
-    
     @Extension
-    public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
-
     public static class DescriptorImpl extends EmailTriggerDescriptor {
 
         @Override

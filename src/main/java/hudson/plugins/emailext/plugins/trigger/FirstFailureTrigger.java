@@ -19,14 +19,7 @@ public class FirstFailureTrigger extends NthFailureTrigger {
         super(1, sendToList, sendToDevs, sendToRequestor, sendToCulprits, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
 
-    @Override
-    public EmailTriggerDescriptor getDescriptor() {
-        return DESCRIPTOR;
-    }
-    
     @Extension
-    public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
-
     public static final class DescriptorImpl extends NthFailureTrigger.DescriptorImpl {
 
         @Override
