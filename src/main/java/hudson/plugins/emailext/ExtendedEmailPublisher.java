@@ -239,7 +239,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         debug(listener.getLogger(), "Checking if email needs to be generated");
         Map<String, EmailTrigger> triggered = new HashMap<String, EmailTrigger>();
 
-        for (EmailTrigger trigger : configuredTriggers) {
+        for (EmailTrigger trigger : getConfiguredTriggers()) {
             if (trigger.isPreBuild() == forPreBuild && trigger.trigger(build, listener)) {
                 String tName = trigger.getDescriptor().getDisplayName();
                 triggered.put(tName, trigger);
