@@ -370,7 +370,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
         // specify List-ID information
         if (req.hasParameter("ext_mailer_use_list_id")) {
-            listId = nullify(req.getParameter("ext_mailer_listid"));
+            listId = nullify(req.getParameter("ext_mailer_list_id"));
         } else {
             listId = null;
         }

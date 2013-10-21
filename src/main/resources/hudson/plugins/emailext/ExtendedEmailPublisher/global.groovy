@@ -52,7 +52,7 @@ f.section(title: _("Extended E-mail Notification")) {
       input(type: "text", class: "setting-input", value: descriptor.listId, name: "ext_mailer_list_id") 
     }
   }
-  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/precedenceBulk.html", checked: descriptor.precedenceBulk, name: "ext_mailer_add_precendence_bulk", title: _("Add 'Precedence: bulk' Email Header")) 
+  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/precedenceBulk.html", checked: descriptor.precedenceBulk, name: "ext_mailer_add_precedence_bulk", title: _("Add 'Precedence: bulk' Email Header"))
   f.entry(field: "recipients", help: "/plugin/email-ext/help/globalConfig/defaultRecipients.html", title: _("Default Recipients")) {
     input(type: "text", class: "setting-input", value: descriptor.defaultRecipients, name: "ext_mailer_default_recipients") 
   }

@@ -39,7 +39,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertNotNull("Use List ID should be present", useListId);
         assertFalse("Use List ID should not be checked by default", useListId.isChecked());
 
-        HtmlCheckBoxInput precedenceBulk = page.getElementByName("ext_mailer_add_precendence_bulk");
+        HtmlCheckBoxInput precedenceBulk = page.getElementByName("ext_mailer_add_precedence_bulk");
         assertNotNull("Precedence Bulk should be present", precedenceBulk);
         assertFalse("Add precedence bulk should not be checked by default",
                 precedenceBulk.isChecked());
@@ -100,5 +100,32 @@ public class ExtendedEmailPublisherDescriptorTest {
         j.submit(page.getFormByName("config"));       
         
         assertEquals("mickey@disney.com", descriptor.getDefaultRecipients());
+    }
+
+    @Test
+    @Bug(20133)
+    public void testPrecedenceBulkSettingRoundTrip() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        HtmlPage page = j.createWebClient().goTo("configure");
+        HtmlCheckBoxInput addPrecedenceBulk = page.getElementByName("ext_mailer_add_precedence_bulk");
+        addPrecedenceBulk.setChecked(true);
+        j.submit(page.getFormByName("config"));
+
+        assertEquals(true, descriptor.getPrecedenceBulk());
+    }
+
+    @Test
+    @Bug(20133)
+    public void testListIDRoundTrip() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        HtmlPage page = j.createWebClient().goTo("configure");
+        HtmlCheckBoxInput useListId = page.getElementByName("ext_mailer_use_list_id");
+        useListId.setChecked(true);
+        HtmlTextInput listId = page.getElementByName("ext_mailer_list_id");
+        listId.setValueAttribute("hammer");
+
+        j.submit(page.getFormByName("config"));
+
+        assertEquals("hammer", descriptor.getListId());
     }
 }
