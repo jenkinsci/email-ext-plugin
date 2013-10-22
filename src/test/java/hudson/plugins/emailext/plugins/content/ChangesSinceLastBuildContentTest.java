@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -30,6 +31,7 @@ public class ChangesSinceLastBuildContentTest {
         changesSinceLastBuildContent = new ChangesSinceLastBuildContent();
         listener = new StreamTaskListener(System.out);
         Locale.setDefault(Locale.US);
+        TimeZone.setDefault(TimeZone.getTimeZone("America/Phoenix"));
     }
 
     @Test
