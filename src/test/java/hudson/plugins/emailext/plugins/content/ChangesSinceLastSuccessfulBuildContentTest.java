@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -29,6 +30,7 @@ public class ChangesSinceLastSuccessfulBuildContentTest {
     public void setUp() {
         content = new ChangesSinceLastSuccessfulBuildContent();
         listener = new StreamTaskListener(System.out);
+        Locale.setDefault(Locale.US);
     }
 
     @Test
@@ -141,7 +143,7 @@ public class ChangesSinceLastSuccessfulBuildContentTest {
 
         String contentStr = content.evaluate(currentBuild, listener, ChangesSinceLastSuccessfulBuildContent.MACRO_NAME);
 
-        Assert.assertEquals("Changes for Build #41\n" + "DATE\n" + "Changes for Build #42\n" + "DATE\n", contentStr);
+        Assert.assertEquals("Changes for Build #41\n" + "Oct 21, 2013 7:39:00 PM\n" + "Changes for Build #42\n" + "Oct 21, 2013 7:39:00 PM\n", contentStr);
     }
 
     @Test
@@ -247,14 +249,15 @@ public class ChangesSinceLastSuccessfulBuildContentTest {
             };
         }
 
-        @SuppressWarnings({"UnusedDeclaration"})
-        public String getRevision() {
+        @Override
+        public String getCommitId() {
             return "REVISION";
         }
 
-        @SuppressWarnings({"UnusedDeclaration"})
-        public String getDate() {
-            return "DATE";
+        @Override
+        public long getTimestamp() {
+            // 10/21/13 7:39 PM
+            return 1382409540000L;
         }
     }
 }

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -28,6 +29,7 @@ public class ChangesSinceLastBuildContentTest {
     public void setup() {
         changesSinceLastBuildContent = new ChangesSinceLastBuildContent();
         listener = new StreamTaskListener(System.out);
+        Locale.setDefault(Locale.US);
     }
 
     @Test
@@ -63,7 +65,7 @@ public class ChangesSinceLastBuildContentTest {
 
         String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
 
-        assertEquals("DATE", content);
+        assertEquals("Oct 21, 2013 7:39:00 PM", content);
     }
 
     @Test
@@ -100,6 +102,19 @@ public class ChangesSinceLastBuildContentTest {
         String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
 
         assertEquals("[Ash Lux] Changes for a successful build.\n" + "\tPATH1\n" + "\tPATH2\n" + "\tPATH3\n" + "\n", content);
+    }
+
+    @Test
+    public void testDateFormatString()
+        throws Exception {
+        changesSinceLastBuildContent.format = "%d";
+        changesSinceLastBuildContent.dateFormat = "MMM d, yyyy HH:mm:ss";
+
+        AbstractBuild currentBuild = createBuild(Result.SUCCESS, 42, "Changes for a successful build.");
+
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+
+        assertEquals("Oct 21, 2013 19:39:00", content);
     }
 
     private AbstractBuild createBuild(Result result, int buildNumber, String message) {
@@ -157,14 +172,15 @@ public class ChangesSinceLastBuildContentTest {
             };
         }
 
-        @SuppressWarnings({"UnusedDeclaration"})
-        public String getRevision() {
+        @Override
+        public String getCommitId() {
             return "REVISION";
         }
 
-        @SuppressWarnings({"UnusedDeclaration"})
-        public String getDate() {
-            return "DATE";
+        @Override
+        public long getTimestamp() {
+            // 10/21/13 7:39 PM
+            return 1382409540000L;
         }
     }
 }

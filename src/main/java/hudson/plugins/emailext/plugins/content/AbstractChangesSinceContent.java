@@ -49,6 +49,8 @@ abstract public class AbstractChangesSinceContent
     public String pathFormat = "\\t%p\\n";
     @Parameter
     public boolean showDependencies = false;
+    @Parameter
+    public String dateFormat;
 
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
@@ -96,6 +98,7 @@ abstract public class AbstractChangesSinceContent
         // Use this object since it already formats the changes per build
         final ChangesSinceLastBuildContent changes = new ChangesSinceLastBuildContent(changesFormat, pathFormat, showPaths);
         changes.showDependencies = showDependencies;
+        changes.dateFormat = dateFormat;
 
         Util.printf(buf, format, new Util.PrintfSpec() {
             public boolean printSpec(StringBuffer buf, char formatChar) {
