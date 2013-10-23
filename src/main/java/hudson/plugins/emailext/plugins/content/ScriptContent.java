@@ -8,6 +8,7 @@ import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
+import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.ScriptSandbox;
 import hudson.plugins.emailext.plugins.EmailToken;
 
@@ -131,15 +132,15 @@ public class ScriptContent extends DataBoundTokenMacro {
         String result;
         
         Map<String, Object> binding = new HashMap<String, Object>();
-        ExtendedEmailPublisher publisher = build.getProject().getPublishersList().get(ExtendedEmailPublisher.class);
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         binding.put("build", build);
         binding.put("listener", listener);
         binding.put("it", new ScriptContentBuildWrapper(build));
-        binding.put("rooturl", publisher.getDescriptor().getHudsonUrl());
+        binding.put("rooturl", descriptor.getHudsonUrl());
         binding.put("project", build.getParent());
         
         // we add the binding to the SimpleTemplateEngine instead of the shell
-        GroovyShell shell = createEngine(publisher, Collections.EMPTY_MAP);
+        GroovyShell shell = createEngine(descriptor, Collections.EMPTY_MAP);
         SimpleTemplateEngine engine = new SimpleTemplateEngine(shell);
         try {
             result = engine.createTemplate(new InputStreamReader(templateStream)).make(binding).toString();        
@@ -164,14 +165,14 @@ public class ScriptContent extends DataBoundTokenMacro {
             throws IOException {
         String result = "";
         Map binding = new HashMap<String, Object>();
-        ExtendedEmailPublisher publisher = build.getProject().getPublishersList().get(ExtendedEmailPublisher.class);
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         
         binding.put("build", build);
         binding.put("it", new ScriptContentBuildWrapper(build));
         binding.put("project", build.getParent());
-        binding.put("rooturl", publisher.getDescriptor().getHudsonUrl());
+        binding.put("rooturl", descriptor.getHudsonUrl());
 
-        GroovyShell shell = createEngine(publisher, binding);
+        GroovyShell shell = createEngine(descriptor, binding);
         Object res = shell.evaluate(new InputStreamReader(scriptStream));
         if (res != null) {
             result = res.toString();
@@ -187,7 +188,7 @@ public class ScriptContent extends DataBoundTokenMacro {
      * @throws FileNotFoundException
      * @throws IOException
      */
-    private GroovyShell createEngine(ExtendedEmailPublisher publisher, Map<String, Object> variables)
+    private GroovyShell createEngine(ExtendedEmailPublisherDescriptor descriptor, Map<String, Object> variables)
             throws FileNotFoundException, IOException {
 
         ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
@@ -200,7 +201,7 @@ public class ScriptContent extends DataBoundTokenMacro {
                 "hudson",
                 "hudson.model"));
 
-        if (publisher.getDescriptor().isSecurityEnabled()) {
+        if (descriptor.isSecurityEnabled()) {
             cc.addCompilationCustomizers(new SandboxTransformer());
             sandbox = new ScriptSandbox();
         }

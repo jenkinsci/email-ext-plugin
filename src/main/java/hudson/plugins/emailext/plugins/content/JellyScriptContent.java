@@ -5,6 +5,7 @@ import hudson.model.Hudson;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
+import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.tasks.Mailer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.jelly.JellyContext;
@@ -20,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
@@ -39,20 +41,6 @@ public class JellyScriptContent extends DataBoundTokenMacro {
     public boolean acceptsMacroName(String macroName) {
         return macroName.equals(MACRO_NAME);
     }
-    /*
-     public String getHelpText() {
-     return "Custom message content generated from a Jelly script template. "
-     + "There are two templates provided: \"" + DEFAULT_HTML_TEMPLATE_NAME + "\" "
-     + "and \"" + DEFAULT_TEXT_TEMPLATE_NAME + "\". Custom Jelly templates should be placed in "
-     + "$JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ". When using custom templates, "
-     + "the template filename without \".jelly\" should be used for "
-     + "the \"" + TEMPLATE_NAME_ARG + "\" argument.\n"
-     + "<ul>\n"
-     + "<li><i>" + TEMPLATE_NAME_ARG + "</i> - the template name.<br>\n"
-     + "Defaults to \"" + DEFAULT_TEMPLATE_NAME + "\".\n"
-     + "</ul>\n";
-     }
-     */
 
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
@@ -125,18 +113,18 @@ public class JellyScriptContent extends DataBoundTokenMacro {
 
     private JellyContext createContext(Object it, AbstractBuild<?, ?> build) {
         JellyContext context = new JellyContext();
-        final ExtendedEmailPublisher publisher = build.getProject().getPublishersList().get(ExtendedEmailPublisher.class);        
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         context.setVariable("it", it);
         context.setVariable("build", build);
         context.setVariable("project", build.getParent());
-        context.setVariable("rooturl", publisher.getDescriptor().getHudsonUrl());
+        context.setVariable("rooturl", descriptor.getHudsonUrl());
         return context;
     }
 
     private String getCharset(AbstractBuild<?, ?> build) {
         String charset = Mailer.descriptor().getCharset();
-        ExtendedEmailPublisher publisher = build.getProject().getPublishersList().get(ExtendedEmailPublisher.class);
-        String overrideCharset = publisher.getDescriptor().getCharset();
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        String overrideCharset = descriptor.getCharset();
         if (overrideCharset != null) {
             charset = overrideCharset;
         }
