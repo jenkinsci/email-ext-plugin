@@ -1,4 +1,5 @@
 import hudson.plugins.emailext.plugins.EmailTrigger
+import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger
 
 // Namespaces
 l = namespace("/lib/layout")
@@ -9,7 +10,7 @@ f = namespace("/lib/form")
 d = namespace("jelly:define")
 
 
-def triggers = hudson.plugins.emailext.plugins.EmailTrigger.all()
+def triggers = EmailTrigger.all()
 def configured = instance != null
 
 f.entry(title: _("Project Recipient List"), help: "/plugin/email-ext/help/projectConfig/globalRecipientList.html", description: _("Comma-separated list of email address that should receive notifications for this project.")) {
@@ -60,8 +61,10 @@ f.advanced(title: _("Advanced Settings")) {
   f.entry(title: _("Save to Workspace"), help: "/plugin/email-ext/help/projectConfig/saveOutput.html") {
     f.checkbox(name: "project_save_output", checked: instance?.saveOutput)
   }
+
+  def configuredTriggers = instance != null ? instance.configuredTriggers : [AlwaysTrigger.createDefault()]
   
   f.entry(title: _("Triggers"), help: "/plugin/email-ext/help/projectConfig/triggers.html") {
-    f.hetero_list(name: "project_triggers", hasHeader: true, descriptors: triggers, items: instance?.configuredTriggers, addCaption:_("Add Trigger"), deleteCaption: _("Remove Trigger"))
+    f.hetero_list(name: "project_triggers", hasHeader: true, descriptors: triggers, items: configuredTriggers, addCaption:_("Add Trigger"), deleteCaption: _("Remove Trigger"))
   }
 }
