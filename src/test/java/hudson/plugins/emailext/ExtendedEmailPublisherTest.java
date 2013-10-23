@@ -74,16 +74,6 @@ public class ExtendedEmailPublisherTest {
         }
     };
 
-//    public void testExcludedCommitters() 
-//        throws Exception
-//    {
-//        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("excludedCommitters");
-//        f.setAccessible(true);
-//        f.set(ExtendedEmailPublisher.DESCRIPTOR, "mickeymouse@disney.com");
-//        
-//        
-//        
-//    }
     @Test
     public void testShouldNotSendEmailWhenNoTriggerEnabled()
             throws Exception {
@@ -783,7 +773,7 @@ public class ExtendedEmailPublisherTest {
         HtmlTextInput recipientList = page.getElementByName("project_recipient_list");
         assertEquals(recipientList.getText(), "mickey@disney.com");
     }
-
+    
     private void addEmailType(EmailTrigger trigger) {
         trigger.setEmail(new EmailType() {
             {
