@@ -7,12 +7,7 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
 
 public class UnstableTrigger extends EmailTrigger {
 
@@ -26,13 +21,7 @@ public class UnstableTrigger extends EmailTrigger {
 
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
-        Result buildResult = build.getResult();
-
-        if (buildResult == Result.UNSTABLE) {
-            return true;
-        }
-
-        return false;
+        return build.getResult() == Result.UNSTABLE;
     }
 
     @Extension
@@ -41,11 +30,6 @@ public class UnstableTrigger extends EmailTrigger {
         @Override
         public String getDisplayName() {
             return TRIGGER_NAME;
-        }
-
-        @Override
-        public void doHelp(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-            rsp.getWriter().println(Messages.UnstableTrigger_HelpText());
         }
         
         @Override

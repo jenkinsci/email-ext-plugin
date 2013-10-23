@@ -1,7 +1,6 @@
 package hudson.plugins.emailext;
 
 import hudson.EnvVars;
-import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
@@ -13,13 +12,11 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
 import hudson.model.Cause.UserCause;
-import hudson.model.Hudson;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.CssInliner;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.scm.ChangeLogSet.Entry;
-import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.MailMessageIdAction;
 import hudson.tasks.Notifier;
@@ -183,6 +180,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     /**
      * Get the list of configured email triggers for this project.
+     * @return 
      */
     public List<EmailTrigger> getConfiguredTriggers() {
         if (configuredTriggers == null) {
@@ -192,8 +190,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     public MatrixTriggerMode getMatrixTriggerMode() {
-        if (matrixTriggerMode ==null)    return MatrixTriggerMode.BOTH;
-        return matrixTriggerMode;
+        return matrixTriggerMode == null ? MatrixTriggerMode.BOTH : matrixTriggerMode;
     }
 
     public void setMatrixTriggerMode(MatrixTriggerMode matrixTriggerMode) {
@@ -254,6 +251,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         for (String triggerName : triggered.keySet()) {
             replacedTriggers.addAll(triggered.get(triggerName).getDescriptor().getTriggerReplaceList());
         }
+
         for (String triggerName : replacedTriggers) {
             triggered.remove(triggerName);
             listener.getLogger().println("Trigger " + triggerName + " was overridden by another trigger and will not send an email.");
@@ -360,7 +358,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         boolean cancel = false;
         presendScript = new ContentBuilder().transformText(presendScript, this, build, listener);
         if (StringUtils.isNotBlank(presendScript)) {
-            listener.getLogger().println("Executing pre-send script");
+            debug(listener.getLogger(), "Executing pre-send script");
             ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
             ScriptSandbox sandbox = null;
             CompilerConfiguration cc = new CompilerConfiguration();
@@ -542,7 +540,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
           debug(listener.getLogger(), "Emergency reroute turned on");
           recipientAddresses.clear();
           addAddressesFromRecipientList(recipientAddresses, ccAddresses, emergencyReroute, env, listener);
-          listener.getLogger().println("Emergency reroute is set to: " + emergencyReroute);
+          debug(listener.getLogger(), "Emergency reroute is set to: " + emergencyReroute);
         }
         
         // remove the excluded recipients
@@ -554,7 +552,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
         recipientAddresses.removeAll(excludedRecipients);
         ccAddresses.removeAll(excludedRecipients);
-        
+
         msg.setRecipients(Message.RecipientType.TO, recipientAddresses.toArray(new InternetAddress[recipientAddresses.size()]));
         if(ccAddresses.size() > 0) {
             msg.setRecipients(Message.RecipientType.CC, ccAddresses.toArray(new InternetAddress[ccAddresses.size()]));
@@ -626,7 +624,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             EnvVars env, BuildListener listener) {
         User user = getByUserIdCause(build);
         if (user == null) {
-           user = getByLegacyUserCause(build);
+            user = getByLegacyUserCause(build);
         }
                 
         if (user != null) {
@@ -669,7 +667,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 String name = (String) authenticationName.get(userCause);
                 return User.get(name, false);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOGGER.info(e.getMessage());
         }
         return null;

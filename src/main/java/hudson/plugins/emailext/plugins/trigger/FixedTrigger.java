@@ -7,12 +7,8 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
 
 public class FixedTrigger extends EmailTrigger {
 
@@ -51,11 +47,6 @@ public class FixedTrigger extends EmailTrigger {
             return TRIGGER_NAME;
         }
 
-        @Override
-        public void doHelp(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-            rsp.getWriter().println(Messages.FixedTrigger_HelpText());
-        }
-        
         @Override
         public boolean getDefaultSendToDevs() {
             return true;
