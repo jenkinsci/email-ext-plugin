@@ -632,7 +632,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             if (adrs != null) {
                 addAddressesFromRecipientList(recipientAddresses, ccAddresses, adrs, env, listener);
             } else {
-                listener.getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
+                listener.getLogger().println("The user does not have a configured email address, trying the user's id");
+                addAddressesFromRecipientList(recipientAddresses, ccAddresses, user.getId(), env, listener);                
             }
         }
     }
