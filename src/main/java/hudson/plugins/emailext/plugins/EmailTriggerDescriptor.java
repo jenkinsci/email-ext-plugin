@@ -44,20 +44,4 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
     public boolean getDefaultSendToCulprits() {
         return false;
     }
-
-    /**
-     * Default implementation just creates a new instance of the 
-     * trigger class and returns that.
-     */
-    @Override
-    public EmailTrigger newInstance(StaplerRequest req, JSONObject formData) {
-        EmailTrigger res = null;
-        try {
-            res = clazz.newInstance();
-            res.configure(req, formData);
-        } catch(Exception e) {
-            // should do something here?
-        }
-        return res;
-    }
 }
