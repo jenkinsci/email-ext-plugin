@@ -29,6 +29,7 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import hudson.FilePath;
 import hudson.model.Action;
+import hudson.model.Item;
 import hudson.security.Permission;
 
 import org.apache.commons.lang.StringUtils;
@@ -205,7 +206,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     public Collection<? extends Action> getProjectActions(AbstractProject<?,?> project) {
         // only allow the user to see the email template testing action if they can
         // configure the project itself.        
-        if(project.hasPermission(Permission.CONFIGURE)) {
+        if(project.hasPermission(Item.CONFIGURE)) {
             return Collections.singletonList(new EmailExtTemplateAction(project));
         }
         return Collections.EMPTY_LIST;
@@ -477,7 +478,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             // create an empty set of env vars
             env = new EnvVars(); 
         }
-
+        
         // Get the recipients from the global list of addresses
         Set<InternetAddress> recipientAddresses = new LinkedHashSet<InternetAddress>();
         Set<InternetAddress> ccAddresses = new LinkedHashSet<InternetAddress>();
