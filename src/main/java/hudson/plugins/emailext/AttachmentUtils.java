@@ -102,6 +102,7 @@ public class AttachmentUtils implements Serializable {
                 try {
                     attachmentPart.setDataHandler(new DataHandler(fileDataSource));
                     attachmentPart.setFileName(file.getName());
+                    attachmentPart.setContentID(String.format("<%s>", file.getName()));
                     attachments.add(attachmentPart);
                     totalAttachmentSize += file.length();
                 } catch (MessagingException e) {
