@@ -1,18 +1,13 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
-import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.model.AbstractBuild;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import hudson.plugins.emailext.plugins.EmailTrigger;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
 
 public class StatusChangedTrigger extends EmailTrigger {
 
@@ -44,27 +39,10 @@ public class StatusChangedTrigger extends EmailTrigger {
     }
 
     @Extension
-    public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
-
-    @Override
-    public EmailTriggerDescriptor getDescriptor() {
-        return DESCRIPTOR;
-    }
-
     public static final class DescriptorImpl extends EmailTriggerDescriptor {
-
-        public DescriptorImpl() {
-            addTriggerNameToReplace(UnstableTrigger.TRIGGER_NAME);
-        }
-
         @Override
         public String getDisplayName() {
             return TRIGGER_NAME;
-        }
-
-        @Override
-        public void doHelp(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
-            rsp.getWriter().println("An email will be sent when the build status changes");
         }
 
         @Override
