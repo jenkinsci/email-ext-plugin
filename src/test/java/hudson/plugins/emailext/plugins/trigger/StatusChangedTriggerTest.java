@@ -8,7 +8,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 /**
- * Unit tests for the Calypso-specific "Status changed" trigger.
+ * Unit tests for the "Status changed" trigger.
  *
  * @author francois_ritaly
  */
