@@ -105,10 +105,17 @@
             <version>1.41</version>
             <optional>true</optional>
         </dependency>
+<!--        
+        <dependency>
+            <groupId>org.jenkins-ci.lib</groupId>
+            <artifactId>config-provider-model</artifactId>
+            <version>1.3.4</version>
+        </dependency>
+-->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>token-macro</artifactId>
-            <version>1.8.1</version>
+            <version>1.9</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -130,13 +137,6 @@
             <artifactId>groovy-all</artifactId>
             <version>1.8.5</version>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>org.jenkins-ci.lib</groupId>
-            <artifactId>config-provider-model</artifactId>
-            <version>1.2</version>
-        </dependency>
-        -->
     </dependencies>
 
     <scm>
@@ -165,7 +165,7 @@
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>
                 <artifactId>maven-hpi-plugin</artifactId>
-                <version>1.95</version>
+                <version>1.99</version>
             </plugin>                     
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
