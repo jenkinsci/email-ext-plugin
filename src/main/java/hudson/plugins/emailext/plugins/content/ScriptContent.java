@@ -4,13 +4,17 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
 import groovy.text.SimpleTemplateEngine;
+import hudson.ExtensionList;
+import hudson.Plugin;
 import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
+import hudson.plugins.emailext.GroovyTemplateConfig.GroovyTemplateConfigProvider;
+import hudson.plugins.emailext.JellyTemplateConfig;
 import hudson.plugins.emailext.ScriptSandbox;
 import hudson.plugins.emailext.plugins.EmailToken;
+import java.io.ByteArrayInputStream;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,6 +36,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.jenkinsci.lib.configprovider.ConfigProvider;
+import org.jenkinsci.lib.configprovider.model.Config;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
@@ -109,7 +115,23 @@ public class ScriptContent extends DataBoundTokenMacro {
      */
     private InputStream getFileInputStream(String fileName)
             throws FileNotFoundException {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("hudson/plugins/emailext/templates/" + fileName);
+     
+        InputStream inputStream;
+        if (fileName.startsWith("managed:")) {
+            String managedFileName = fileName.substring(8);
+            try {
+                inputStream = getManagedFile(managedFileName);
+            } catch(NoClassDefFoundError e) {
+                inputStream = null;
+            }
+            
+            if (inputStream == null) {
+                throw new FileNotFoundException(String.format("Managed file '%s' not found", managedFileName));
+            }
+            return inputStream;
+        }
+        
+        inputStream = getClass().getClassLoader().getResourceAsStream("hudson/plugins/emailext/templates/" + fileName);
         if (inputStream == null) {
             final File scriptsFolder = new File(Hudson.getInstance().getRootDir(), EMAIL_TEMPLATES_DIRECTORY);
             final File scriptFile = new File(scriptsFolder, fileName);
@@ -117,6 +139,31 @@ public class ScriptContent extends DataBoundTokenMacro {
         }
         return inputStream;
     }   
+    
+    private InputStream getManagedFile(String templateName) {
+        Plugin plugin = Jenkins.getInstance().getPlugin("config-file-provider");
+        InputStream stream = null;
+        if(plugin != null) {
+            Config config = null;
+            ConfigProvider provider = getTemplateConfigProvider();
+            for(Config c : provider.getAllConfigs()) {
+                if(c.name.equalsIgnoreCase(templateName) && provider.isResponsibleFor(c.id)) {
+                    config = c;
+                    break;
+                }                    
+            }
+            
+            if(config != null) {
+                stream = new ByteArrayInputStream(config.content.getBytes());
+            }
+        }
+        return stream;
+    }
+    
+    private ConfigProvider getTemplateConfigProvider() {
+        ExtensionList<ConfigProvider> providers = ConfigProvider.all();
+        return providers.get(GroovyTemplateConfigProvider.class);
+    }
     
     /**
      * Renders the template using a SimpleTemplateEngine

@@ -1,12 +1,15 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.ExtensionList;
+import hudson.Plugin;
 import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailToken;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
+import hudson.plugins.emailext.JellyTemplateConfig.JellyTemplateConfigProvider;
 import hudson.tasks.Mailer;
+import java.io.ByteArrayInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.jelly.JellyContext;
 import org.apache.commons.jelly.JellyException;
@@ -22,6 +25,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import jenkins.model.Jenkins;
+import org.jenkinsci.lib.configprovider.ConfigProvider;
+import org.jenkinsci.lib.configprovider.model.Config;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
@@ -74,11 +79,28 @@ public class JellyScriptContent extends DataBoundTokenMacro {
      */
     private InputStream getTemplateInputStream(String templateName)
             throws FileNotFoundException {
+        
+        InputStream inputStream;
+        if(templateName.startsWith("managed:")) {
+            String managedTemplateName = templateName.substring(8);
+            try {
+                inputStream = getManagedTemplate(managedTemplateName);
+            } catch(NoClassDefFoundError e) {
+                inputStream = null;
+            }
+            
+            if(inputStream == null) {
+                throw new FileNotFoundException(String.format("Managed template '%s' not found", managedTemplateName));
+            }
+            return inputStream;
+        }
+        
         // add .jelly if needed
         if (!templateName.endsWith(".jelly")) {
             templateName += ".jelly";
         }
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(
+        
+        inputStream = getClass().getClassLoader().getResourceAsStream(
                 "hudson/plugins/emailext/templates/" + templateName);
 
         if (inputStream == null) {
@@ -88,6 +110,31 @@ public class JellyScriptContent extends DataBoundTokenMacro {
         }
 
         return inputStream;
+    }
+    
+    private InputStream getManagedTemplate(String templateName) {
+        Plugin plugin = Jenkins.getInstance().getPlugin("config-file-provider");
+        InputStream stream = null;
+        if(plugin != null) {
+            Config config = null;
+            ConfigProvider provider = getTemplateConfigProvider();
+            for(Config c : provider.getAllConfigs()) {
+                if(c.name.equalsIgnoreCase(templateName) && provider.isResponsibleFor(c.id)) {
+                    config = c;
+                    break;
+                }                    
+            }
+            
+            if(config != null) {
+                stream = new ByteArrayInputStream(config.content.getBytes());
+            }
+        }
+        return stream;
+    }
+    
+    private ConfigProvider getTemplateConfigProvider() {
+        ExtensionList<ConfigProvider> providers = ConfigProvider.all();
+        return providers.get(JellyTemplateConfigProvider.class);
     }
 
     private String renderContent(AbstractBuild<?, ?> build, InputStream inputStream)
