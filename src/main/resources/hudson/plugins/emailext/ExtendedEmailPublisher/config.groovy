@@ -1,5 +1,5 @@
 import hudson.plugins.emailext.plugins.EmailTrigger
-import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger
+import hudson.plugins.emailext.plugins.trigger.FailureTrigger
 
 // Namespaces
 l = namespace("/lib/layout")
@@ -64,7 +64,7 @@ f.advanced(title: _("Advanced Settings")) {
 
   def configuredTriggers = instance != null ? instance.configuredTriggers : [FailureTrigger.createDefault()]
   
-  f.entry(title: _("Triggers"), help: "/plugin/email-ext/help/projectConfig/triggers.html") {
+  f.entry(title: _("Triggers"), help: "/plugin/email-ext/help/projectConfig/addATrigger.html") {
     f.hetero_list(name: "project_triggers", hasHeader: true, descriptors: triggers, items: configuredTriggers, addCaption:_("Add Trigger"), deleteCaption: _("Remove Trigger"))
   }
 }
