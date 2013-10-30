@@ -62,7 +62,7 @@ f.advanced(title: _("Advanced Settings")) {
     f.checkbox(name: "project_save_output", checked: instance?.saveOutput)
   }
 
-  def configuredTriggers = instance != null ? instance.configuredTriggers : [AlwaysTrigger.createDefault()]
+  def configuredTriggers = instance != null ? instance.configuredTriggers : [FailureTrigger.createDefault()]
   
   f.entry(title: _("Triggers"), help: "/plugin/email-ext/help/projectConfig/triggers.html") {
     f.hetero_list(name: "project_triggers", hasHeader: true, descriptors: triggers, items: configuredTriggers, addCaption:_("Add Trigger"), deleteCaption: _("Remove Trigger"))

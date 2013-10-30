@@ -83,9 +83,14 @@ public class JellyScriptContent extends DataBoundTokenMacro {
         InputStream inputStream;
         if(templateName.startsWith("managed:")) {
             String managedTemplateName = templateName.substring(8);
-            inputStream = getManagedTemplate(managedTemplateName);
+            try {
+                inputStream = getManagedTemplate(managedTemplateName);
+            } catch(NoClassDefFoundError e) {
+                inputStream = null;
+            }
+            
             if(inputStream == null) {
-                throw new FileNotFoundException("Managed template '" + managedTemplateName + "' not found");
+                throw new FileNotFoundException(String.format("Managed template '%s' not found", managedTemplateName));
             }
             return inputStream;
         }

@@ -21,10 +21,6 @@ public class AlwaysTrigger extends EmailTrigger {
 
     public static final String TRIGGER_NAME = "Always";
     
-    public static AlwaysTrigger createDefault() {
-        return new AlwaysTrigger(true, true, true, true, "", "$PROJECT_DEFAULT_REPLYTO", "$PROJECT_DEFAULT_SUBJECT", "$PROJECT_DEFAULT_CONTENT", "", 0, "project");
-    }
-    
     @DataBoundConstructor
     public AlwaysTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList,
             String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {

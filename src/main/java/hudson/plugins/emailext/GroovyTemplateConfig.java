@@ -7,39 +7,39 @@ import org.jenkinsci.lib.configprovider.model.ContentType;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 
-public class JellyTemplateConfig extends Config {
+public class GroovyTemplateConfig extends Config {
     
     @DataBoundConstructor
-    public JellyTemplateConfig(String id, String name, String comment, String content) {
+    public GroovyTemplateConfig(String id, String name, String comment, String content) {
         super(id, name, comment, content);
     }
     
     @Extension
-    public static final class JellyTemplateConfigProvider extends AbstractConfigProviderImpl {
+    public static final class GroovyTemplateConfigProvider extends AbstractConfigProviderImpl {
 
-        public JellyTemplateConfigProvider() {
+        public GroovyTemplateConfigProvider() {
             load();
         }
 
         @Override
         public ContentType getContentType() {
-            return ContentType.DefinedType.XML;
+            return ContentType.DefinedType.GROOVY;
         }
 
         @Override
         public String getDisplayName() {
-            return Messages.JellyTemplateConfigProvider_DisplayName();
+            return Messages.GroovyTemplateConfigProvider_DisplayName();
         }
 
         @Override
         public Config newConfig() {
             String id = getProviderId() + System.currentTimeMillis();
-            return new JellyTemplateConfig(id, "Jelly Email Template", "", "");
+            return new GroovyTemplateConfig(id, "Groovy Email Template", "", "");
         }
 
         @Override
         protected String getXmlFileName() {
-            return "email-ext-jelly-config-files.xml";
+            return "email-ext-groovy-config-files.xml";
         }
     }    
 }
