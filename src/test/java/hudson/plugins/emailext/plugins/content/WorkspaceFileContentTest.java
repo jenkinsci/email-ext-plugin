@@ -42,5 +42,7 @@ public class WorkspaceFileContentTest {
         assertEquals("Hello, world!", content.evaluate(build, listener, WorkspaceFileContent.MACRO_NAME));
         content.path = "no-such-file";
         assertEquals("ERROR: File 'no-such-file' does not exist", content.evaluate(build, listener, WorkspaceFileContent.MACRO_NAME));
+        content.fileNotFoundMessage = "No '%s' for you!";
+        assertEquals("No 'no-such-file' for you!", content.evaluate(build, listener, WorkspaceFileContent.MACRO_NAME));
     }
 }

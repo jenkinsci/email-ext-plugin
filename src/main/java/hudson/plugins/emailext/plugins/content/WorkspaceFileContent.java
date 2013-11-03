@@ -5,6 +5,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailToken;
 import java.io.IOException;
+import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
@@ -18,6 +19,8 @@ import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 public class WorkspaceFileContent extends DataBoundTokenMacro  {
     @Parameter(required=true)
     public String path = "";
+    @Parameter
+    public String fileNotFoundMessage = "";
 
     public static final String MACRO_NAME = "FILE";
 
@@ -30,7 +33,7 @@ public class WorkspaceFileContent extends DataBoundTokenMacro  {
     public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
         if(!context.getWorkspace().child(path).exists()) {
-            return "ERROR: File '" + path + "' does not exist";
+            return StringUtils.isNotBlank(fileNotFoundMessage) ? String.format(fileNotFoundMessage, path) : "ERROR: File '" + path + "' does not exist";
         }
         
         // do some environment variable substitution
