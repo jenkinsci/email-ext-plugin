@@ -30,7 +30,7 @@ import groovy.lang.GroovyShell;
 import hudson.FilePath;
 import hudson.model.Action;
 import hudson.model.Item;
-import hudson.security.Permission;
+import hudson.model.TaskListener;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -61,6 +61,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 import javax.mail.Address;
 import javax.mail.Message;
@@ -572,7 +574,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             msg.setReplyTo(replyToAddresses.toArray(new InternetAddress[replyToAddresses.size()]));
         }
 
-        AbstractBuild<?, ?> pb = build.getPreviousBuild();
+        AbstractBuild<?, ?> pb = getPreviousBuild(build, listener);
         if (pb != null) {
             // Send mails as replies until next successful build
             MailMessageIdAction b = pb.getAction(MailMessageIdAction.class);
@@ -764,7 +766,25 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
-        return BuildStepMonitor.BUILD;
+        return BuildStepMonitor.NONE;
+    }
+
+    /**
+     * Looks for a previous build, so long as that is in fact completed.
+     * Necessary since {@link #getRequiredMonitorService} does not wait for the previous build,
+     * so in the case of parallel-capable jobs, we need to behave sensibly when a later build actually finishes before an earlier one.
+     * @param build a build for which we may be sending mail
+     * @param listener a listener to which we may print warnings in case the actual previous build is still in progress
+     * @return the previous build, or null if that build is missing, or is still in progress
+     */
+    public static @CheckForNull AbstractBuild<?,?> getPreviousBuild(@Nonnull AbstractBuild<?,?> build, TaskListener listener) {
+        AbstractBuild<?,?> previousBuild = build.getPreviousBuild();
+        if (previousBuild != null && previousBuild.isBuilding()) {
+            listener.getLogger().println(Messages.ExtendedEmailPublisher__is_still_in_progress_ignoring_for_purpo(previousBuild.getDisplayName()));
+            return null;
+        } else {
+            return previousBuild;
+        }
     }
 
     @Override

@@ -4,6 +4,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractBuild.DependencyChange;
 import hudson.model.AbstractProject;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.Util;
 import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.scm.ChangeLogSet;
@@ -12,7 +13,6 @@ import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -72,18 +72,21 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
             Util.printf(buf, format, new ChangesSincePrintfSpec(entry, pathFormat, dateFormatter));
         }
 
-        if (showDependencies && build.getPreviousBuild() != null)
-            for (Entry<AbstractProject, DependencyChange> e : build
-                    .getDependencyChanges(build.getPreviousBuild()).entrySet()) {
-                buf.append("\n=======================\n");
-                buf.append("\nChanges in ").append(e.getKey().getName())
-                        .append(":\n");
-                for (AbstractBuild<?, ?> b : e.getValue().getBuilds()) {
-                    for (ChangeLogSet.Entry entry : b.getChangeSet()) {
-                        Util.printf(buf, format, new ChangesSincePrintfSpec(entry, pathFormat, dateFormatter));
+        if (showDependencies) {
+            AbstractBuild previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+            if (previousBuild != null) {
+                for (Entry<AbstractProject, DependencyChange> e : build.getDependencyChanges(previousBuild).entrySet()) {
+                    buf.append("\n=======================\n");
+                    buf.append("\nChanges in ").append(e.getKey().getName())
+                            .append(":\n");
+                    for (AbstractBuild<?, ?> b : e.getValue().getBuilds()) {
+                        for (ChangeLogSet.Entry entry : b.getChangeSet()) {
+                            Util.printf(buf, format, new ChangesSincePrintfSpec(entry, pathFormat, dateFormatter));
+                        }
                     }
                 }
             }
+        }
 
         return buf.toString();
     }
