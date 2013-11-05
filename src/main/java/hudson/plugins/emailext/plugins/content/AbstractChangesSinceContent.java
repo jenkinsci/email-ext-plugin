@@ -27,6 +27,7 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.Util;
 import java.io.IOException;
 
@@ -56,7 +57,7 @@ abstract public class AbstractChangesSinceContent
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
         // No previous build so bail
-        if (build.getPreviousBuild() == null) {
+        if (ExtendedEmailPublisher.getPreviousBuild(build, listener) == null) {
             return "";
         }
 
@@ -69,9 +70,9 @@ abstract public class AbstractChangesSinceContent
         final AbstractBuild endBuild;
         if (reverse) {
             startBuild = build;
-            endBuild = getFirstIncludedBuild(build);
+            endBuild = getFirstIncludedBuild(build, listener);
         } else {
-            startBuild = getFirstIncludedBuild(build);
+            startBuild = getFirstIncludedBuild(build, listener);
             endBuild = build;
         }
         AbstractBuild<?, ?> currentBuild = null;
@@ -129,6 +130,5 @@ abstract public class AbstractChangesSinceContent
 
     public abstract String getShortHelpDescription();
 
-    public abstract <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> AbstractBuild<P, B> getFirstIncludedBuild(
-            AbstractBuild<P, B> build);
+    public abstract AbstractBuild<?,?> getFirstIncludedBuild(AbstractBuild<?,?> build, TaskListener listener);
 }

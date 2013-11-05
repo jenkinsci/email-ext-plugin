@@ -3,6 +3,7 @@ package hudson.plugins.emailext.plugins.trigger;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 
@@ -35,7 +36,7 @@ public abstract class NthFailureTrigger extends EmailTrigger {
                 return false;
             }
 
-            build = build.getPreviousBuild();
+            build = ExtendedEmailPublisher.getPreviousBuild(build, listener);
         }
 
         // Check the the preceding build was a success.

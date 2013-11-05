@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 
@@ -22,14 +23,15 @@ public class RegressionTrigger extends EmailTrigger {
     
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
-        if (build.getPreviousBuild() == null)
+        AbstractBuild<?,?> previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+        if (previousBuild == null)
             return build.getResult() == Result.FAILURE;
         if (build.getTestResultAction() == null) return false;
-        if (build.getPreviousBuild().getTestResultAction() == null)
+        if (previousBuild.getTestResultAction() == null)
             return build.getTestResultAction().getFailCount() > 0;
 
         return build.getTestResultAction().getFailCount() > 
-                build.getPreviousBuild().getTestResultAction().getFailCount();
+                previousBuild.getTestResultAction().getFailCount();
     }
 
     @Extension

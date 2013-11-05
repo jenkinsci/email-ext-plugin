@@ -1,8 +1,9 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Result;
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailToken;
 
 @EmailToken
@@ -28,14 +29,13 @@ public class ChangesSinceLastSuccessfulBuildContent
     }
 
     @Override
-    public <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> AbstractBuild<P, B> getFirstIncludedBuild(
-            AbstractBuild<P, B> build) {
-        AbstractBuild<P, B> firstIncludedBuild = build;
+    public AbstractBuild<?,?> getFirstIncludedBuild(AbstractBuild<?,?> build, TaskListener listener) {
+        AbstractBuild<?,?> firstIncludedBuild = build;
 
-        B prev = firstIncludedBuild.getPreviousBuild();
+        AbstractBuild<?,?> prev = ExtendedEmailPublisher.getPreviousBuild(firstIncludedBuild, listener);
         while (prev != null && prev.getResult() != Result.SUCCESS) {
             firstIncludedBuild = prev;
-            prev = firstIncludedBuild.getPreviousBuild();
+            prev = ExtendedEmailPublisher.getPreviousBuild(firstIncludedBuild, listener);
         }
 
         return firstIncludedBuild;
