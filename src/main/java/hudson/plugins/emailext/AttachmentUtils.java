@@ -35,7 +35,7 @@ import javax.mail.internet.MimeBodyPart;
 public class AttachmentUtils implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private String attachmentsPattern;
+    private final String attachmentsPattern;
 
     public AttachmentUtils(String attachmentsPattern) {
         this.attachmentsPattern = attachmentsPattern;
@@ -50,7 +50,7 @@ public class AttachmentUtils implements Serializable {
      */
     private static class FilePathDataSource implements DataSource {
 
-        private FilePath file;
+        private final FilePath file;
 
         public FilePathDataSource(FilePath file) {
             this.file = file;

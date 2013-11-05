@@ -5,6 +5,7 @@
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
         <version>1.509.3</version>
+        <!--<version>1.532</version>-->
         <!--<version>1.538-SNAPSHOT</version>-->
     </parent>
 
@@ -99,7 +100,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>config-file-provider</artifactId>
-            <version>2.6.2</version>
+            <version>2.7.1</version>
             <optional>true</optional>
         </dependency>
 
@@ -163,9 +164,48 @@
                 <configuration>
                     <argLine>-XX:MaxPermSize=512m</argLine>
                 </configuration>
-            </plugin>                     
+            </plugin>
+            <!--    
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>clirr-maven-plugin</artifactId>
+		<version>2.6</version>
+		<executions>
+	            <execution>
+		        <goals>
+			    <goal>clirr</goal>
+		        </goals>
+                        <phase>verify</phase>
+		        <configuration>
+			    <logResults>true</logResults>
+			    <xmlOutputFile>${project.build.directory}/clirr-report.xml</xmlOutputFile>
+			    <failOnError>${clirr.failonerror}</failOnError>
+		        </configuration>
+		    </execution>
+		</executions>
+            </plugin>                 
+            -->
         </plugins>
     </build>
+    
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>clirr-maven-plugin</artifactId>
+		<version>2.6</version>
+		<configuration>
+			<logResults>true</logResults>
+			<xmlOutputFile>${project.build.directory}/clirr-report.xml</xmlOutputFile>
+		</configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>2.3</version>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <pluginRepositories>
         <pluginRepository>

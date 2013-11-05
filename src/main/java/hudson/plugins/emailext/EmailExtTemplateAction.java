@@ -23,7 +23,7 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
  */
 public class EmailExtTemplateAction implements Action {
     
-    private AbstractProject<?,?> project;
+    private final AbstractProject<?,?> project;
 
     public EmailExtTemplateAction(AbstractProject<?,?> project) {
         this.project = project;        
