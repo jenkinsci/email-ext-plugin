@@ -2,14 +2,17 @@ package hudson.plugins.emailext;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.junit.matchers.JUnitMatchers.hasItems;
 import static org.junit.matchers.JUnitMatchers.hasItem;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
 import hudson.model.Cause.UserCause;
+import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.EmailTrigger;
@@ -20,13 +23,17 @@ import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
 import hudson.plugins.emailext.plugins.trigger.FixedUnhealthyTrigger;
 import hudson.plugins.emailext.plugins.trigger.NotBuiltTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
+import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
+import hudson.tasks.Builder;
 import hudson.tasks.Mailer;
+import java.io.IOException;
 
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import javax.mail.Address;
 import javax.mail.Message;
@@ -46,6 +53,7 @@ import org.kohsuke.stapler.Stapler;
 import static org.junit.Assert.*;
 import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
+import org.jvnet.hudson.test.SleepBuilder;
 
 public class ExtendedEmailPublisherTest {
 
@@ -774,7 +782,38 @@ public class ExtendedEmailPublisherTest {
         final HtmlTextInput recipientList = page.getElementByName("project_recipient_list");
         assertEquals(recipientList.getText(), "mickey@disney.com");
     }
-    */
+	*/
+
+    @Bug(16376)
+    @Test public void concurrentBuilds() throws Exception {
+        publisher.configuredTriggers.add(new RegressionTrigger(false, false, false, false, "", "", "", "", "", 0, ""));
+        project.setConcurrentBuild(true);
+        project.getBuildersList().add(new SleepOnceBuilder());
+        FreeStyleBuild build1 = project.scheduleBuild2(0).waitForStart();
+        assertEquals(1, build1.number);
+        FreeStyleBuild build2 = j.assertBuildStatusSuccess(project.scheduleBuild2(0).get(9999, TimeUnit.MILLISECONDS));
+        assertEquals(2, build2.number);
+        assertTrue(build1.isBuilding());
+        assertFalse(build2.isBuilding());
+        j.assertLogContains(Messages.ExtendedEmailPublisher__is_still_in_progress_ignoring_for_purpo(build1.getDisplayName()), build2);
+    }
+    /**
+     * Similar to {@link SleepBuilder} but only on the first build.
+     * (Removing the builder between builds is tricky since you would have to wait for the first one to actually start it.)
+     */
+    private static final class SleepOnceBuilder extends Builder {
+        @Override public boolean perform(AbstractBuild<?,?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            if (build.number == 1) {
+                Thread.sleep(99999);
+            }
+            return true;
+        }
+        public static final class DescriptorImpl extends Descriptor<Builder> {
+            @Override public String getDisplayName() {
+                return "Sleep once";
+            }
+        }
+    }
     
     private void addEmailType(EmailTrigger trigger) {
         trigger.setEmail(new EmailType() {

@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -24,7 +25,7 @@ public class BuildingTrigger extends EmailTrigger {
         Result buildResult = build.getResult();
 
         if (buildResult == Result.UNSTABLE) {
-            AbstractBuild<?, ?> prevBuild = build.getPreviousBuild();
+            AbstractBuild<?, ?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
             if (prevBuild != null && (prevBuild.getResult() == Result.FAILURE)) {
                 return true;
             }
