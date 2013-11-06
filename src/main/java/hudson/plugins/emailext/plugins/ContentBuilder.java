@@ -3,6 +3,7 @@ package hudson.plugins.emailext.plugins;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
+import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.tasks.Publisher;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,18 +38,18 @@ public class ContentBuilder {
     private String noNull(String string) {
         return string == null ? "" : string;
     }
-
-    public String transformText(String origText, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, TaskListener listener) {
+    
+    public String transformText(String origText, ExtendedEmailPublisherContext context, List<TokenMacro> additionalMacros) {
         if(StringUtils.isBlank(origText)) return "";
         
-        String defaultContent = Matcher.quoteReplacement(noNull(publisher.defaultContent));
-        String defaultSubject = Matcher.quoteReplacement(noNull(publisher.defaultSubject));
-        String defaultReplyTo = Matcher.quoteReplacement(noNull(publisher.replyTo));
-        String defaultBody = Matcher.quoteReplacement(noNull(publisher.getDescriptor().getDefaultBody()));
-        String defaultExtSubject = Matcher.quoteReplacement(noNull(publisher.getDescriptor().getDefaultSubject()));
-        String defaultRecipients = Matcher.quoteReplacement(noNull(publisher.getDescriptor().getDefaultRecipients()));
-        String defaultExtReplyTo = Matcher.quoteReplacement(noNull(publisher.getDescriptor().getDefaultReplyTo()));
-        String defaultPresendScript = Matcher.quoteReplacement(noNull(publisher.getDescriptor().getDefaultPresendScript()));
+        String defaultContent = Matcher.quoteReplacement(noNull(context.getPublisher().defaultContent));
+        String defaultSubject = Matcher.quoteReplacement(noNull(context.getPublisher().defaultSubject));
+        String defaultReplyTo = Matcher.quoteReplacement(noNull(context.getPublisher().replyTo));
+        String defaultBody = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultBody()));
+        String defaultExtSubject = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultSubject()));
+        String defaultRecipients = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultRecipients()));
+        String defaultExtReplyTo = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultReplyTo()));
+        String defaultPresendScript = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultPresendScript()));
         String newText = origText.replaceAll(
                 PROJECT_DEFAULT_BODY, defaultContent).replaceAll(
                 PROJECT_DEFAULT_SUBJECT, defaultSubject).replaceAll(
@@ -60,14 +61,22 @@ public class ContentBuilder {
                 DEFAULT_PRESEND_SCRIPT, defaultPresendScript);
         
         try {
-            newText = TokenMacro.expandAll(build, listener, newText, false, getPrivateMacros());
+            List<TokenMacro> privateMacros = getPrivateMacros();
+            if(additionalMacros != null)
+                privateMacros.addAll(additionalMacros);
+            newText = TokenMacro.expandAll(context.getBuild(), context.getListener(), newText, false, privateMacros);
         } catch (MacroEvaluationException e) {
-            listener.getLogger().println("Error evaluating token: " + e.getMessage());
+            context.getListener().getLogger().println("Error evaluating token: " + e.getMessage());
         } catch (Exception e) {
             Logger.getLogger(ContentBuilder.class.getName()).log(Level.SEVERE, null, e);
         }
 
         return newText;
+    }
+
+    public String transformText(String origText, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, TaskListener listener) {
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, listener);
+        return transformText(origText, context, null);
     }
     
     public static List<TokenMacro> getPrivateMacros() {

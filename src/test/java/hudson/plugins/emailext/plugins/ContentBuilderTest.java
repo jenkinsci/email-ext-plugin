@@ -1,14 +1,22 @@
 package hudson.plugins.emailext.plugins;
 
+import com.google.common.collect.ListMultimap;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
+import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
+import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.util.StreamTaskListener;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.Map;
 import static junit.framework.Assert.assertEquals;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
+import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -132,5 +140,31 @@ public class ContentBuilderTest {
         when(build.getEnvironment(listener)).thenReturn(testVars);
 
         assertEquals("\\BAR", new ContentBuilder().transformText("\\${ENV, var=\"FOO\"}", publisher, build, listener));
+    }
+    
+    @Test
+    public void testRuntimeMacro() throws IOException, InterruptedException {
+        RuntimeContent content = new RuntimeContent("Hello, world");
+        assertEquals("Hello, world", new ContentBuilder().transformText("${RUNTIME}", new ExtendedEmailPublisherContext(publisher, build, listener), Collections.singletonList((TokenMacro)content)));
+    }
+    
+    public class RuntimeContent extends TokenMacro {
+        
+        public static final String MACRO_NAME = "RUNTIME";
+        private final String replacement;
+        
+        public RuntimeContent(String replacement) {
+            this.replacement = replacement;
+        }
+
+        @Override
+        public boolean acceptsMacroName(String name) {
+            return name.equals(MACRO_NAME);
+        }
+
+        @Override
+        public String evaluate(AbstractBuild<?, ?> ab, TaskListener tl, String string, Map<String, String> map, ListMultimap<String, String> lm) throws MacroEvaluationException, IOException, InterruptedException {
+            return replacement;
+        }        
     }
 }
