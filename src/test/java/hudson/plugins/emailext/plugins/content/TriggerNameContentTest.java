@@ -56,8 +56,8 @@ public class TriggerNameContentTest {
     
     @Test
     public void testTriggerName() throws Exception {
-        SuccessTrigger trigger = new SuccessTrigger(true, true, true, false, "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "${TRIGGER_NAME}", "", 0, "project");
+        PreBuildTrigger trigger = new PreBuildTrigger(true, true, true, false, "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
@@ -65,10 +65,10 @@ public class TriggerNameContentTest {
         j.assertBuildStatusSuccess(build);
 
         assertThat("Email should have been triggered, so we should see it in the logs.", build.getLog(100),
-                hasItems("Email was triggered for: " + SuccessTrigger.TRIGGER_NAME));
+                hasItems("Email was triggered for: " + PreBuildTrigger.TRIGGER_NAME));
         assertEquals(1, Mailbox.get("mickey@disney.com").size());
         Message message = Mailbox.get("mickey@disney.com").get(0);
-        assertEquals("Success", message.getSubject());
+        assertEquals(PreBuildTrigger.TRIGGER_NAME, message.getSubject());
     }
     
     private void addEmailType(EmailTrigger trigger) {
