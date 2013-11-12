@@ -6,10 +6,10 @@
 
 package hudson.plugins.emailext;
 
+import com.google.common.collect.Multimap;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailTrigger;
-import java.util.Map;
 
 /**
  *
@@ -20,7 +20,7 @@ public class ExtendedEmailPublisherContext {
     private AbstractBuild<?, ?> build;
     private EmailTrigger trigger;
     private TaskListener listener;
-    private Map<String, EmailTrigger> triggered;
+    private Multimap<String, EmailTrigger> triggered;
     
     public ExtendedEmailPublisherContext(ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, TaskListener listener) {
         this.publisher = publisher;
@@ -60,11 +60,11 @@ public class ExtendedEmailPublisherContext {
         this.listener = listener;
     }
     
-    public Map<String, EmailTrigger> getTriggered() {
+    public Multimap<String, EmailTrigger> getTriggered() {
         return triggered;
     }
     
-    protected void setTriggered(Map<String, EmailTrigger> triggered) {
+    protected void setTriggered(Multimap<String, EmailTrigger> triggered) {
         this.triggered = triggered;
     }
 }
