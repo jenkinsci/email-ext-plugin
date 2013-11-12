@@ -766,6 +766,26 @@ public class ExtendedEmailPublisherTest {
         });
     }
     
+    @Bug(20524)
+    @Test
+    public void testMultipleTriggersOfSameType() 
+            throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("JENKINS-20524");
+        prj.getPublishersList().add(publisher);
+        
+        publisher.recipientList = "mickey@disney.com";
+        publisher.configuredTriggers.add(new SuccessTrigger(true, false, false, false, "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project"));
+        publisher.configuredTriggers.add(new SuccessTrigger(true, false, false, false, "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project"));
+        
+        FreeStyleBuild build = prj.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(2, Mailbox.get("mickey@disney.com").size());        
+    }
+    
+    
     /* Need to find out why this gets a 404 on the fileprovider.js file
     @Test
     @Bug(15442)
@@ -785,7 +805,9 @@ public class ExtendedEmailPublisherTest {
 	*/
 
     @Bug(16376)
-    @Test public void concurrentBuilds() throws Exception {
+    @Test 
+    public void testConcurrentBuilds() 
+            throws Exception {
         publisher.configuredTriggers.add(new RegressionTrigger(false, false, false, false, "", "", "", "", "", 0, ""));
         project.setConcurrentBuild(true);
         project.getBuildersList().add(new SleepOnceBuilder());

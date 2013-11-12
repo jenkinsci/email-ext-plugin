@@ -1,5 +1,7 @@
 package hudson.plugins.emailext;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
@@ -52,11 +54,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -79,6 +79,8 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.kohsuke.stapler.DataBoundConstructor;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.ListMultimap;
 
 /**
  * {@link Publisher} that sends notification e-mail.
@@ -239,7 +241,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     private boolean _perform(AbstractBuild<?, ?> build, BuildListener listener, boolean forPreBuild) {
         boolean emailTriggered = false;
         debug(listener.getLogger(), "Checking if email needs to be generated");
-        final Map<String, EmailTrigger> triggered = new HashMap<String, EmailTrigger>();
+        final Multimap<String, EmailTrigger> triggered = ArrayListMultimap.create();
 
         for (EmailTrigger trigger : getConfiguredTriggers()) {
             if (trigger.isPreBuild() == forPreBuild && trigger.trigger(build, listener)) {
@@ -253,12 +255,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         //Go through and remove triggers that are replaced by others
         List<String> replacedTriggers = new ArrayList<String>();
 
-        for (String triggerName : triggered.keySet()) {
-            replacedTriggers.addAll(triggered.get(triggerName).getDescriptor().getTriggerReplaceList());
+        for (Object tName : triggered.keySet()) {
+            String triggerName = (String)tName;
+            for(EmailTrigger trigger : (Collection<EmailTrigger>)triggered.get(triggerName)) {
+                replacedTriggers.addAll(trigger.getDescriptor().getTriggerReplaceList());
+            }
         }
 
-        for (String triggerName : replacedTriggers) {
-            triggered.remove(triggerName);
+        for (String triggerName : replacedTriggers) {           
+            triggered.removeAll(triggerName);
             listener.getLogger().println("Trigger " + triggerName + " was overridden by another trigger and will not send an email.");
         }
 
@@ -270,12 +275,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             return true;
         }
 
-        for (final String triggerName : triggered.keySet()) {
-            listener.getLogger().println("Sending email for trigger: " + triggerName);
-            final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build, listener);
-            context.setTriggered(triggered);
-            context.setTrigger(triggered.get(triggerName));
-            sendMail(context);
+        for (String triggerName : triggered.keySet()) {
+            for(EmailTrigger trigger : triggered.get(triggerName)) {
+                listener.getLogger().println("Sending email for trigger: " + triggerName);            
+                final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build, listener);
+                context.setTriggered(triggered);
+                context.setTrigger(trigger);
+                sendMail(context);
+            }
         }
 
         return true;
@@ -394,7 +401,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             binding.setVariable("logger", context.getListener().getLogger());
             binding.setVariable("cancel", cancel);
             binding.setVariable("trigger", context.getTrigger());
-            binding.setVariable("triggered", Collections.unmodifiableMap(context.getTriggered()));
+            binding.setVariable("triggered", ImmutableMultimap.copyOf(context.getTriggered()));
 
             GroovyShell shell = new GroovyShell(cl, binding, cc);
             StringWriter out = new StringWriter();
