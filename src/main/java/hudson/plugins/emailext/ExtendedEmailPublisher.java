@@ -377,8 +377,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     private boolean executePresendScript(ExtendedEmailPublisherContext context, MimeMessage msg)
             throws RuntimeException {
         boolean cancel = false;
-        presendScript = new ContentBuilder().transformText(presendScript, context, getRuntimeMacros(context));
-        if (StringUtils.isNotBlank(presendScript)) {
+        String script = new ContentBuilder().transformText(presendScript, context, getRuntimeMacros(context));
+        if (StringUtils.isNotBlank(script)) {
             debug(context.getListener().getLogger(), "Executing pre-send script");
             ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
             ScriptSandbox sandbox = null;
@@ -412,7 +412,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
 
             try {
-                Object output = shell.evaluate(presendScript);
+                Object output = shell.evaluate(script);
                 if(output!=null) {
                     pw.println("Result: "+output);
                     cancel = ((Boolean)shell.getVariable("cancel")).booleanValue();
