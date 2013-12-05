@@ -47,7 +47,7 @@ public class TriggerNameContentTest {
         }
 
         @Override
-        protected void after() {
+        protected void after() throws Exception {
             super.after();
             Mailbox.clearAll();
         }

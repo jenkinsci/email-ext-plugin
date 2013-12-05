@@ -44,7 +44,7 @@ public class ExtendedEmailPublisherMatrixTest {
         }
         
         @Override
-        protected void after() {
+        protected void after() throws Exception {
             super.after();
             slaves.clear();
             Mailbox.clearAll();

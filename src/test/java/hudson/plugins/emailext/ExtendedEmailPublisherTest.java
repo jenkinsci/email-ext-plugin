@@ -76,7 +76,7 @@ public class ExtendedEmailPublisherTest {
         }
 
         @Override
-        protected void after() {
+        protected void after() throws Exception {
             super.after();
             Mailbox.clearAll();
         }
