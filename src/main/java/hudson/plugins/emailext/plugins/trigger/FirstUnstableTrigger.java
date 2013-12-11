@@ -14,7 +14,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  */
 public class FirstUnstableTrigger extends EmailTrigger {
 
-    public static final String TRIGGER_NAME = "First unstable";
+    public static final String TRIGGER_NAME = "1st Unstable";
 
     @DataBoundConstructor
     public FirstUnstableTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits,
