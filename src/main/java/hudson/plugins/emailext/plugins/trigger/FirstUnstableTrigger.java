@@ -17,10 +17,10 @@ public class FirstUnstableTrigger extends EmailTrigger {
     public static final String TRIGGER_NAME = "1st Unstable";
 
     @DataBoundConstructor
-    public FirstUnstableTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits,
+    public FirstUnstableTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, boolean sendToUpstream,
                                 String recipientList, String replyTo, String subject, String body,
                                 String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(sendToList, sendToDevs, sendToRequestor, sendToCulprits, recipientList, replyTo, subject, body,
+        super(sendToList, sendToDevs, sendToRequestor, sendToCulprits, sendToUpstream, recipientList, replyTo, subject, body,
                 attachmentsPattern, attachBuildLog, contentType);
     }
 

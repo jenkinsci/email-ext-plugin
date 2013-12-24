@@ -56,7 +56,7 @@ public class TriggerNameContentTest {
     
     @Test
     public void testTriggerName() throws Exception {
-        PreBuildTrigger trigger = new PreBuildTrigger(true, true, true, false, "$DEFAULT_RECIPIENTS",
+        PreBuildTrigger trigger = new PreBuildTrigger(true, true, true, false, false, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
