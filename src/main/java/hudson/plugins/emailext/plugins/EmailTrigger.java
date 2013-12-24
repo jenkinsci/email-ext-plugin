@@ -25,7 +25,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         return Jenkins.getInstance().<EmailTrigger, EmailTriggerDescriptor>getDescriptorList(EmailTrigger.class);
     }
 
-    protected EmailTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList,
+    protected EmailTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, boolean sendToUpstream, String recipientList,
             String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
         email = new EmailType();
         email.setSendToRecipientList(sendToList);
@@ -40,6 +40,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         email.setCompressBuildLog(attachBuildLog > 1);
         email.setContentType(contentType);
         email.setSendToCulprits(sendToCulprits);
+        email.setSendToUpstream(sendToUpstream);
     }
     
     protected EmailTrigger(JSONObject formData) {
@@ -131,6 +132,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         m.setSendToDevelopers(formData.optBoolean(prefix + "sendToDevelopers"));
         m.setSendToRequester(formData.optBoolean(prefix + "sendToRequester"));
         m.setSendToCulprits(formData.optBoolean(prefix + "sendToCulprits"));
+        m.setSendToUpstream(formData.optBoolean(prefix + "sendToUpstream"));
         m.setAttachmentsPattern(formData.getString(prefix + "attachmentsPattern"));
         m.setAttachBuildLog(formData.optBoolean(prefix + "attachBuildLog"));
         m.setReplyTo(formData.getString(prefix + "replyTo"));

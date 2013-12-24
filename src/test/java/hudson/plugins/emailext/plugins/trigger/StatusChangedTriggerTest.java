@@ -16,7 +16,7 @@ public class StatusChangedTriggerTest extends TriggerTestBase {
 
 	@Override
 	EmailTrigger newInstance() {
-		return new StatusChangedTrigger(true, true, true, false, "", "", "", "", "", 0, "project");
+		return new StatusChangedTrigger(true, true, true, false, false, "", "", "", "", "", 0, "project");
 	}
 
 	// --- Transitions from <no-status> to <status> --- //

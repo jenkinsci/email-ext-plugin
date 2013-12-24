@@ -44,4 +44,8 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
     public boolean getDefaultSendToCulprits() {
         return false;
     }
+
+    public boolean getDefaultSendToUpstream() {
+        return false;
+    }
 }

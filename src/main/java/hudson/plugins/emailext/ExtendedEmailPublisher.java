@@ -80,7 +80,6 @@ import javax.mail.internet.MimeMultipart;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.kohsuke.stapler.DataBoundConstructor;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.ListMultimap;
 
 /**
  * {@link Publisher} that sends notification e-mail.
@@ -533,13 +532,29 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
         }
 
-        if (context.getTrigger().getEmail().getSendToRequester()) {
-            debug(context.getListener().getLogger(), "Sending to requester");
-            // looking for Upstream build.
+        if (context.getTrigger().getEmail().getSendToUpstream()) {
+            debug(context.getListener().getLogger(), "Sending to upstream committer");
+            // looking for upstream build.
             AbstractBuild<?, ?> cur = context.getBuild();
             Cause.UpstreamCause upc = context.getBuild().getCause(Cause.UpstreamCause.class);
             while (upc != null) {
-                // UpstreamCause.getUpStreamProject() returns the full name, so use getItemByFullName
+                // UpstreamCause.getUpstreamProject() returns the full name, so use getItemByFullName
+                AbstractProject<?, ?> p = (AbstractProject<?, ?>) Jenkins.getInstance().getItemByFullName(upc.getUpstreamProject());
+                if(p == null)
+                    break;
+                cur = p.getBuildByNumber(upc.getUpstreamBuild());
+                upc = cur.getCause(Cause.UpstreamCause.class);
+                addUpstreamCommittersTriggeringTheBuild(cur, recipientAddresses, ccAddresses, env, context.getListener());
+            }
+        }
+
+        if (context.getTrigger().getEmail().getSendToRequester()) {
+            debug(context.getListener().getLogger(), "Sending to requester");
+            // looking for upstream build.
+            AbstractBuild<?, ?> cur = context.getBuild();
+            Cause.UpstreamCause upc = context.getBuild().getCause(Cause.UpstreamCause.class);
+            while (upc != null) {
+                // UpstreamCause.getUpstreamProject() returns the full name, so use getItemByFullName
                 AbstractProject<?, ?> p = (AbstractProject<?, ?>) Jenkins.getInstance().getItemByFullName(upc.getUpstreamProject());
                 if(p == null)
                     break;
@@ -693,6 +708,22 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             LOGGER.info(e.getMessage());
         }
         return null;
+    }
+
+    private void addUpstreamCommittersTriggeringTheBuild(AbstractBuild<?, ?> build, Set<InternetAddress> recipientAddresses, Set<InternetAddress> ccAddresses, EnvVars env, TaskListener listener) {
+        listener.getLogger().println(String.format("Adding upstream committer from job %s with build number %s", build.getProject().getDisplayName(), build.getNumber()));
+        for (Entry change : build.getChangeSet()) {
+            User user = change.getAuthor();
+            String email = user.getProperty(Mailer.UserProperty.class).getAddress();
+            if (email != null) {
+                listener.getLogger().println(String.format("Adding upstream committer %s to recipient list with email %s", user.getFullName(), email));
+                addAddressesFromRecipientList(recipientAddresses, ccAddresses, email, env, listener);
+            } else {
+                listener.getLogger().println(String.format("The user %s does not have a configured email email, trying the user's id", user.getFullName()));
+                addAddressesFromRecipientList(recipientAddresses, ccAddresses, user.getId(), env, listener);
+            }
+
+        }
     }
 
     private void setSubject(ExtendedEmailPublisherContext context, MimeMessage msg, String charset)

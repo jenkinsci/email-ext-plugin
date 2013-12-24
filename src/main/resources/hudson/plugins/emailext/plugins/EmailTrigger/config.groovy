@@ -13,6 +13,7 @@ f.entry(title: _("Send To"), help:"/plugin/email-ext/help/projectConfig/mailType
   f.checkbox(name: "sendToDevs", title: _("Developers"), checked: instance != null ? instance.email.sendToDevelopers : descriptor.defaultSendToDevs)  
   f.checkbox(name: "sendToRequestor", title: _("Requestor"), checked: instance != null ? instance.email.sendToRequester : descriptor.defaultSendToRequester)
   f.checkbox(name: "sendToCulprits", title: _("Culprits"), checked: instance != null ? instance.email.sendToCulprits : descriptor.defaultSendToCulprits)
+  f.checkbox(name: "sendToUpstream", title: _("Upstream Committer"), checked: instance != null ? instance.email.sendToUpstream : descriptor.defaultSendToUpstream)
 }
 f.advanced() {
   st.include(it: instance, class: descriptor.clazz, page: "local-config", optional: true)

@@ -41,6 +41,12 @@ public class EmailType {
     private boolean includeCulprits;
 
     /**
+     * Specifies whether or not we should send this email to all developers
+     * who made changes in upstream builds.
+     */
+    private boolean includeUpstream;
+
+    /**
      * Specifies whether or not we should send this email to the recipient list
      */
     private boolean sendToRecipientList;
@@ -76,6 +82,7 @@ public class EmailType {
         recipientList = "";
         sendToDevelopers = false;
         includeCulprits = false;
+        includeUpstream = false;
         sendToRecipientList = false;
         sendToRequester = false;
         attachmentsPattern = "";
@@ -123,6 +130,14 @@ public class EmailType {
 
     public void setSendToCulprits(boolean sendToCulprits) {
         this.includeCulprits = sendToCulprits;
+    }
+
+    public boolean getSendToUpstream() {
+        return includeUpstream;
+    }
+
+    public void setSendToUpstream(boolean sendToUpstream) {
+        this.includeUpstream = sendToUpstream;
     }
 
     public boolean getSendToRecipientList() {

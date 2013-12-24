@@ -14,12 +14,6 @@ public class AbortedTrigger extends EmailTrigger {
 
     public static final String TRIGGER_NAME = "Aborted";
     
-    @DataBoundConstructor
-    public AbortedTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList,
-            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(sendToList, sendToDevs, sendToRequestor, sendToCulprits, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
-    }
-
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
         Result buildResult = build.getResult();
@@ -29,6 +23,12 @@ public class AbortedTrigger extends EmailTrigger {
         }
 
         return false;
+    }
+
+    @DataBoundConstructor
+    public AbortedTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, boolean sendToUpstream, String recipientList,
+                          String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        super(sendToList, sendToDevs, sendToRequestor, sendToCulprits, sendToUpstream, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
 
     @Extension
