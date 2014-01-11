@@ -20,7 +20,8 @@ public class WorkspaceFileContent extends DataBoundTokenMacro  {
     @Parameter(required=true)
     public String path = "";
     @Parameter
-    public String fileNotFoundMessage = "";
+    public String fileNotFoundMessage = "ERROR: File '%s' does not exist";
+    
 
     public static final String MACRO_NAME = "FILE";
 
@@ -31,17 +32,17 @@ public class WorkspaceFileContent extends DataBoundTokenMacro  {
 
     @Override
     public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName)
-            throws MacroEvaluationException, IOException, InterruptedException {
-        if(!context.getWorkspace().child(path).exists()) {
-            return StringUtils.isNotBlank(fileNotFoundMessage) ? String.format(fileNotFoundMessage, path) : "ERROR: File '" + path + "' does not exist";
-        }
-        
+            throws MacroEvaluationException, IOException, InterruptedException {        
         // do some environment variable substitution
         try {
             EnvVars env = context.getEnvironment(listener);
             path = env.expand(path);
         } catch(Exception e) {
             listener.error("Error retrieving environment");
+        }
+        
+        if(!context.getWorkspace().child(path).exists()) {
+            return String.format(fileNotFoundMessage, path);
         }
 
         try {
