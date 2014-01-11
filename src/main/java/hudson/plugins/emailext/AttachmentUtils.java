@@ -1,6 +1,3 @@
-/**
- *
- */
 package hudson.plugins.emailext;
 
 import hudson.FilePath;
