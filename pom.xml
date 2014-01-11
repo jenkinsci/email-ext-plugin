@@ -7,6 +7,14 @@
         <version>1.532.1</version>
         <!--<version>1.538-SNAPSHOT</version>-->
     </parent>
+    
+    <licenses>
+      <license>
+        <name>The MIT License (MIT)</name>
+        <url>http://opensource.org/licenses/MIT</url>
+        <distribution>repo</distribution>
+      </license>
+    </licenses>
 
     <artifactId>email-ext</artifactId>
     <packaging>hpi</packaging>
@@ -51,6 +59,11 @@
     </developers>
 
     <dependencies>
+        <dependency>
+            <groupId>org.jenkins-ci.main</groupId>
+            <artifactId>maven-plugin</artifactId>
+            <version>1.409</version>
+        </dependency>
 
         <dependency>
             <groupId>javax.mail</groupId>
