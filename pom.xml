@@ -177,7 +177,6 @@
                     <argLine>-XX:MaxPermSize=512m</argLine>
                 </configuration>
             </plugin>
-            <!--    
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>clirr-maven-plugin</artifactId>
@@ -196,7 +195,6 @@
 		    </execution>
 		</executions>
             </plugin>                 
-            -->
         </plugins>
     </build>
     
