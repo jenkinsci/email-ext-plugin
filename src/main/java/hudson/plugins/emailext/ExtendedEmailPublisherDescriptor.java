@@ -37,7 +37,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     /**
      * Jenkins's own URL, to put into the e-mail.
      */
-    private String hudsonUrl;
+    private transient String hudsonUrl;
  
     /**
      * If non-null, use SMTP-AUTH
@@ -201,7 +201,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public String getHudsonUrl() {
-        return hudsonUrl;
+        return Jenkins.getInstance().getRootUrl();
     }
 
     public String getSmtpServer() {
@@ -315,16 +315,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         adminAddress = req.getParameter("ext_mailer_admin_address");
         defaultSuffix = nullify(req.getParameter("ext_mailer_default_suffix"));
         
-        // Specify the url to this Jenkins instance
-        String url = nullify(req.getParameter("ext_mailer_hudson_url"));
-        if (url != null && !url.endsWith("/")) {
-            url += '/';
-        }
-        if (!overrideGlobalSettings || url == null) {
-            url = Jenkins.getInstance().getRootUrl();
-        }
-        hudsonUrl = url;
-
         // specify authentication information
         if (req.hasParameter("ext_mailer_use_smtp_auth")) {
             smtpAuthUsername = nullify(req.getParameter("ext_mailer_smtp_username"));

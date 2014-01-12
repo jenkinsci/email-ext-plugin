@@ -7,7 +7,6 @@ st = namespace("jelly:stapler")
 t = namespace("/lib/hudson")
 
 f.section(title: _("Extended E-mail Notification")) {
-  script(src: "${rootURL}/plugin/email-ext/scripts/emailext-behavior.js", type: "text/javascript") 
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/override-global-settings.html", checked: descriptor.overrideGlobalSettings, name: "ext_mailer_override_global_settings", title: _("Override Global Settings")) {
     f.entry(help: "/descriptor/hudson.tasks.Mailer/help/smtpServer", title: _("SMTP server")) {
       input(type: "text", class: "setting-input", value: descriptor.smtpServer, name: "ext_mailer_smtp_server") 
@@ -17,9 +16,6 @@ f.section(title: _("Extended E-mail Notification")) {
     }
     f.entry(help: "/descriptor/hudson.tasks.Mailer/help/adminAddress", title: _("System Admin E-mail Address")) {
       f.textbox(checkUrl: "'${rootURL}/publisher/Mailer/addressCheck?value='+encode(this.value)", name: "ext_mailer_admin_address", value: descriptor.adminAddress) 
-    }
-    f.entry(help: "/descriptor/hudson.tasks.Mailer/help/url", title: _("Jenkins URL")) {
-      input(type: "text", class: "setting-input", value: h.ifThenElse(descriptor.hudsonUrl!=null,descriptor.hudsonUrl,h.inferHudsonURL(request)), name: "ext_mailer_hudson_url") 
     }
     f.advanced() {
       f.optionalBlock(help: "/help/tasks/mailer/smtpAuth.html", checked: descriptor.smtpAuthUsername!=null, name: "ext_mailer_use_smtp_auth", title: _("Use SMTP Authentication")) {
