@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import hudson.Functions;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Descriptor;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.User;
@@ -16,7 +15,6 @@ import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.EditType;
-import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
 import hudson.util.StreamTaskListener;
 
@@ -24,9 +22,9 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Scanner;
+import jenkins.model.JenkinsLocationConfiguration;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -65,6 +63,8 @@ public class ScriptContentTest {
         
         scriptContent = new ScriptContent();
         listener = new StreamTaskListener(System.out);
+        
+        JenkinsLocationConfiguration.get().setUrl("http://localhost");
 
         publisher = new ExtendedEmailPublisher();
         publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";
@@ -81,10 +81,6 @@ public class ScriptContentTest {
         f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "recipientList" );
         f.setAccessible( true );
         f.set( publisher.getDescriptor(), "ashlux@gmail.com" );
-        
-        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "hudsonUrl" );
-        f.setAccessible( true );
-        f.set( publisher.getDescriptor(), "http://localhost/" );
         
         build =  mock(AbstractBuild.class);
         AbstractProject project = mock(AbstractProject.class);

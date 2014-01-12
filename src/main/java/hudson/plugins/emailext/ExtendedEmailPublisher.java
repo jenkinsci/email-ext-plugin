@@ -80,7 +80,6 @@ import javax.mail.internet.MimeMultipart;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.kohsuke.stapler.DataBoundConstructor;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.ListMultimap;
 
 /**
  * {@link Publisher} that sends notification e-mail.
