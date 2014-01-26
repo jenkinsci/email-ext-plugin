@@ -14,7 +14,7 @@ public class GroovyTemplateConfig extends Config {
         super(id, name, comment, content);
     }
     
-    @Extension
+    @Extension(optional=true)
     public static final class GroovyTemplateConfigProvider extends AbstractConfigProviderImpl {
 
         public GroovyTemplateConfigProvider() {

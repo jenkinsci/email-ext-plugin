@@ -6,7 +6,6 @@ import org.jenkinsci.lib.configprovider.model.Config;
 import org.jenkinsci.lib.configprovider.model.ContentType;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-
 public class JellyTemplateConfig extends Config {
     
     @DataBoundConstructor
@@ -14,7 +13,7 @@ public class JellyTemplateConfig extends Config {
         super(id, name, comment, content);
     }
     
-    @Extension
+    @Extension(optional=true)
     public static final class JellyTemplateConfigProvider extends AbstractConfigProviderImpl {
 
         public JellyTemplateConfigProvider() {
