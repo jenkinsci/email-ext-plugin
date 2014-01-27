@@ -6,6 +6,8 @@ import hudson.model.AbstractBuild;
 
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.ZipDataSource;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -68,6 +70,45 @@ public class AttachmentUtils implements Serializable {
 
         public String getName() {
             return file.getName();
+        }
+    }
+    
+    private static class LogFileDataSource implements DataSource {
+        
+        private static final String DATA_SOURCE_NAME = "build.log";
+        
+        private final AbstractBuild<?,?> build;
+        private final boolean compress;
+        
+        public LogFileDataSource(AbstractBuild<?,?> build, boolean compress) {
+            this.build = build;
+            this.compress = compress;
+        }
+        
+        public InputStream getInputStream() throws IOException {
+            InputStream res;
+            ByteArrayOutputStream bao = new ByteArrayOutputStream();
+            build.getLogText().writeLogTo(0, bao);
+            
+            res = new ByteArrayInputStream(bao.toByteArray());
+            if(compress) {
+                ZipDataSource z = new ZipDataSource(getName(), res);
+                res = z.getInputStream();            
+            }
+            return res;
+        }
+        
+        public OutputStream getOutputStream() throws IOException {
+            throw new IOException("Unsupported");
+        }
+        
+        public String getContentType() {
+            return MimetypesFileTypeMap.getDefaultFileTypeMap()
+                    .getContentType(build.getLogFile());
+        }
+        
+        public String getName() {
+            return DATA_SOURCE_NAME;
         }
     }
 
@@ -151,23 +192,24 @@ public class AttachmentUtils implements Serializable {
             MimeBodyPart attachment = new MimeBodyPart();
             if (compress) {
                 context.getListener().getLogger().println("Request made to compress build log");
-                fileSource = new ZipDataSource(logFile);
-                attachment.setFileName("build.zip");
-            } else {
-                fileSource = new FileDataSource(logFile);
-                attachment.setFileName("build.log");
             }
+            
+            fileSource = new LogFileDataSource(context.getBuild(), compress);
+            attachment.setFileName("build." + (compress ? "zip" : "log"));
             attachment.setDataHandler(new DataHandler(fileSource));
             multipart.addBodyPart(attachment);
         } catch (MessagingException e) {
-            context.getListener().error("Error attaching build log to message: " + e.getMessage());
-        } catch (IOException e) {
             context.getListener().error("Error attaching build log to message: " + e.getMessage());
         }
     }
 
     /**
      * Attaches the build log to the multipart item.
+     * @param publisher
+     * @param multipart
+     * @param build
+     * @param listener
+     * @param compress
      */
     public static void attachBuildLog(ExtendedEmailPublisher publisher, Multipart multipart, AbstractBuild<?, ?> build, BuildListener listener, boolean compress) {
         final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, listener);

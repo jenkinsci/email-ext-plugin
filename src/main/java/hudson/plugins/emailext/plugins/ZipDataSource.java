@@ -26,7 +26,7 @@ public class ZipDataSource implements DataSource {
         this(f.getName(), new FileInputStream(f));
     }
 
-    ZipDataSource(String name, InputStream in) throws IOException {
+    public ZipDataSource(String name, InputStream in) throws IOException {
         this.name = name + FILE_EXTENSION;
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
