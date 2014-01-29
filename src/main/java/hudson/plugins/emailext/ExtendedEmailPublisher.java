@@ -294,12 +294,16 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             Address[] allRecipients = msg.getAllRecipients();
             int retries = 0;
             if (allRecipients != null) {
-                StringBuilder buf = new StringBuilder("Sending email to:");
-                for (Address a : allRecipients) {
-                    buf.append(' ').append(a);
-                }
-                context.getListener().getLogger().println(buf);
                 if(executePresendScript(context, msg)) {
+                    
+                    // presend script might have modified recipients:
+                    allRecipients = msg.getAllRecipients();
+                    StringBuilder buf = new StringBuilder("Sending email to:");
+                    for (Address a : allRecipients) {
+                        buf.append(' ').append(a);
+                    }
+                    context.getListener().getLogger().println(buf);
+
                     while(true) {
                         try {
                             Transport.send(msg);
