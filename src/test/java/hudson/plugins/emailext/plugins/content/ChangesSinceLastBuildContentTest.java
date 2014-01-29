@@ -5,6 +5,8 @@ import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
+import hudson.scm.ChangeLogSet.AffectedFile;
+import hudson.scm.EditType;
 import hudson.util.StreamTaskListener;
 import org.junit.Before;
 import org.junit.Test;
@@ -118,11 +120,47 @@ public class ChangesSinceLastBuildContentTest {
 
         assertEquals("Oct 21, 2013 19:39:00", content);
     }
+    
+    @Test
+    public void testTypeFormatStringWithNoGetAffectedFiles()
+        throws Exception {
+        changesSinceLastBuildContent.showPaths = true;
+        changesSinceLastBuildContent.pathFormat = "\t%p\t%a\n";
+
+        AbstractBuild currentBuild = createBuild(Result.SUCCESS, 42, "Changes for a successful build.");
+
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+
+        assertEquals("[Ash Lux] Changes for a successful build.\n" + "\tPATH1\tUnknown\n" + "\tPATH2\tUnknown\n" + "\tPATH3\tUnknown\n" + "\n", content);
+    }
+    
+    @Test
+    public void testTypeFormatStringWithAffectedFiles()
+        throws Exception {
+        changesSinceLastBuildContent.showPaths = true;
+        changesSinceLastBuildContent.pathFormat = "\t%p\t%a - %d\n";
+
+        AbstractBuild currentBuild = createBuildWithAffectedFiles(Result.SUCCESS, 42, "Changes for a successful build.");
+
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+
+        assertEquals("[Ash Lux] Changes for a successful build.\n" + "\tPATH1\tadd - The file was added\n" + "\tPATH2\tdelete - The file was removed\n" + "\tPATH3\tedit - The file was modified\n" + "\n", content);
+    }
 
     private AbstractBuild createBuild(Result result, int buildNumber, String message) {
         AbstractBuild build = mock(AbstractBuild.class);
         when(build.getResult()).thenReturn(result);
         ChangeLogSet changes1 = createChangeLog(message);
+        when(build.getChangeSet()).thenReturn(changes1);
+        when(build.getNumber()).thenReturn(buildNumber);
+
+        return build;
+    }
+    
+    private AbstractBuild createBuildWithAffectedFiles(Result result, int buildNumber, String message) {
+        AbstractBuild build = mock(AbstractBuild.class);
+        when(build.getResult()).thenReturn(result);
+        ChangeLogSet changes1 = createChangeLogWithAffectedFiles(message);
         when(build.getChangeSet()).thenReturn(changes1);
         when(build.getNumber()).thenReturn(buildNumber);
 
@@ -139,7 +177,18 @@ public class ChangesSinceLastBuildContentTest {
 
         return changes;
     }
+    
+    public ChangeLogSet createChangeLogWithAffectedFiles(String message) {
+        ChangeLogSet changes = mock(ChangeLogSet.class);
 
+        List<ChangeLogSet.Entry> entries = new LinkedList<ChangeLogSet.Entry>();
+        ChangeLogSet.Entry entry = new ChangeLogEntryWithAffectedFiles(message, "Ash Lux");
+        entries.add(entry);
+        when(changes.iterator()).thenReturn(entries.iterator());
+
+        return changes;
+    }
+    
     public static class ChangeLogEntry
             extends ChangeLogSet.Entry {
 
@@ -173,7 +222,7 @@ public class ChangesSinceLastBuildContentTest {
                 }
             };
         }
-
+        
         @Override
         public String getCommitId() {
             return "REVISION";
@@ -184,5 +233,43 @@ public class ChangesSinceLastBuildContentTest {
             // 10/21/13 7:39 PM
             return 1382409540000L;
         }
+    }
+    
+    public static class TestAffectedFile implements AffectedFile {
+        
+        private final String path;
+        private final EditType type;
+        
+        public TestAffectedFile(String path, EditType type) {
+            this.path = path;
+            this.type = type;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public EditType getEditType() {
+            return type;
+        }        
+    }
+    
+    public static class ChangeLogEntryWithAffectedFiles
+            extends ChangeLogEntry {
+
+        public ChangeLogEntryWithAffectedFiles(String message, String author) {
+            super(message, author);
+        }
+        
+        @Override
+        public Collection<AffectedFile> getAffectedFiles() {
+            return new ArrayList<AffectedFile>() {
+                {
+                    add(new TestAffectedFile("PATH1", EditType.ADD));
+                    add(new TestAffectedFile("PATH2", EditType.DELETE));
+                    add(new TestAffectedFile("PATH3", EditType.EDIT));
+                }
+            };
+        }                
     }
 }

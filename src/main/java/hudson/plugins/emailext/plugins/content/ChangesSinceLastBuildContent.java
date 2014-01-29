@@ -8,6 +8,7 @@ import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.Util;
 import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.scm.ChangeLogSet;
+import hudson.scm.ChangeLogSet.AffectedFile;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
@@ -131,21 +132,49 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
                     return true;
                 }
                 case 'p': {
-                    Collection<String> affectedPaths = entry.getAffectedPaths();
-                    for (final String affectedPath : affectedPaths) {
-                        Util.printf(buf, pathFormatString, new Util.PrintfSpec() {
-                            public boolean printSpec(StringBuffer buf, char formatChar) {
-                                if (formatChar == 'p') {
-                                    buf.append(affectedPath);
-                                    return true;
-                                } else {
-                                    return false;
+                    try {
+                        Collection<? extends AffectedFile> affectedFiles = entry.getAffectedFiles();
+                        for (final AffectedFile file : affectedFiles) {
+                            Util.printf(buf, pathFormatString, new Util.PrintfSpec() {
+                                public boolean printSpec(StringBuffer buf, char formatChar) {
+                                    if (formatChar == 'p') {
+                                        buf.append(file.getPath());
+                                        return true;
+                                    } else if(formatChar == 'a') {
+                                        buf.append(file.getEditType().getName());
+                                        return true;
+                                    } else if(formatChar == 'd') {
+                                        buf.append(file.getEditType().getDescription());
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
+                    } catch(UnsupportedOperationException e) {
+                        Collection<String> affectedPaths = entry.getAffectedPaths();
+                        for (final String affectedPath : affectedPaths) {
+                            Util.printf(buf, pathFormatString, new Util.PrintfSpec() {
+                                public boolean printSpec(StringBuffer buf, char formatChar) {
+                                    if (formatChar == 'p') {
+                                        buf.append(affectedPath);
+                                        return true;
+                                    } else if(formatChar == 'a') {
+                                        buf.append("Unknown");
+                                        return true;
+                                    } else if(formatChar == 'd') {
+                                        buf.append("Unknown");
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
+                                }
+                            });
+                        }
                     }
                     return true;
-                }
+                }                
                 case 'r': {
                     try {
                         buf.append(entry.getCommitId());
