@@ -3,14 +3,14 @@ package hudson.plugins.emailext.plugins;
 import hudson.model.Descriptor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import net.sf.json.JSONObject;
-import org.kohsuke.stapler.StaplerRequest;
 
 public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
 
     protected List<String> replacesList = new ArrayList<String>();
+    protected List<RecipientProvider> recipientProviders = new ArrayList<RecipientProvider>();
 
     /**
      * You can add the name of a trigger that this trigger should override if both this
@@ -29,19 +29,11 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
         return replacesList;
     }
     
-    public boolean getDefaultSendToList() {
-        return false;
-    }
-
-    public boolean getDefaultSendToDevs() {
-        return false;
-    }
-
-    public boolean getDefaultSendToRequester() {
-        return false;
+    public void addDefaultRecipientProvider(RecipientProvider provider) {
+        recipientProviders.add(provider);
     }
     
-    public boolean getDefaultSendToCulprits() {
-        return false;
+    public List<RecipientProvider> getDefaultRecipientProviders() {
+        return recipientProviders;
     }
 }

@@ -7,6 +7,10 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
+import java.util.List;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -14,22 +18,21 @@ import org.kohsuke.stapler.DataBoundConstructor;
  */
 public class FirstUnstableTrigger extends EmailTrigger {
 
-    public static final String TRIGGER_NAME = "1st Unstable";
+    public static final String TRIGGER_NAME = "Unstable (First)";
 
     @DataBoundConstructor
-    public FirstUnstableTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits,
-                                String recipientList, String replyTo, String subject, String body,
-                                String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(sendToList, sendToDevs, sendToRequestor, sendToCulprits, recipientList, replyTo, subject, body,
+    public FirstUnstableTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body,
+            String attachmentsPattern, int attachBuildLog, String contentType) {
+        super(recipientProviders, recipientList, replyTo, subject, body,
                 attachmentsPattern, attachBuildLog, contentType);
     }
 
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
         AbstractBuild<?, ?> previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
-        return previousBuild != null ?
-                previousBuild.getResult() != Result.UNSTABLE && build.getResult() == Result.UNSTABLE :
-                build.getResult() == Result.UNSTABLE;
+        return previousBuild != null
+                ? previousBuild.getResult() != Result.UNSTABLE && build.getResult() == Result.UNSTABLE
+                : build.getResult() == Result.UNSTABLE;
     }
 
     @Extension
@@ -38,21 +41,14 @@ public class FirstUnstableTrigger extends EmailTrigger {
         public DescriptorImpl() {
             addTriggerNameToReplace(UnstableTrigger.TRIGGER_NAME);
             addTriggerNameToReplace(StatusChangedTrigger.TRIGGER_NAME);
+
+            addDefaultRecipientProvider(new DevelopersRecipientProvider());
+            addDefaultRecipientProvider(new ListRecipientProvider());
         }
 
         @Override
         public String getDisplayName() {
             return TRIGGER_NAME;
-        }
-
-        @Override
-        public boolean getDefaultSendToDevs() {
-            return true;
-        }
-
-        @Override
-        public boolean getDefaultSendToList() {
-            return false;
         }
     }
 }

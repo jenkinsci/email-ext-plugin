@@ -1,5 +1,6 @@
-package hudson.plugins.emailext;
+package hudson.plugins.emailext.recipients;
 
+import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.EnvVars;
 import hudson.model.User;
 import hudson.util.FormValidation;

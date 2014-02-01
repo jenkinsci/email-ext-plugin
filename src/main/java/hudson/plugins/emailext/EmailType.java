@@ -1,5 +1,9 @@
 package hudson.plugins.emailext;
 
+import hudson.plugins.emailext.plugins.RecipientProvider;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class defines what the contents of an email will be if it gets sent.
  * 
@@ -21,29 +25,11 @@ public class EmailType {
      * The body of the email
      */
     private String body;
-
+    
     /**
-     * Specifies whether or not we should send this email to the developer/s
-     * who made changes.
+     * The list of configured recipient providers
      */
-    private boolean sendToDevelopers;
-
-    /**
-     * Specifies whether or not we should send this email to the requester
-     * who triggered build.
-     */
-    private boolean sendToRequester;
-
-    /**
-     * Specifies whether or not we should send this email to all developers
-     * since the last success.
-     */
-    private boolean includeCulprits;
-
-    /**
-     * Specifies whether or not we should send this email to the recipient list
-     */
-    private boolean sendToRecipientList;
+    private List<RecipientProvider> recipientProviders;
 
     /**
      * Pattern for attachments to be sent as part of this email type.
@@ -74,15 +60,12 @@ public class EmailType {
         subject = "";
         body = "";
         recipientList = "";
-        sendToDevelopers = false;
-        includeCulprits = false;
-        sendToRecipientList = false;
-        sendToRequester = false;
         attachmentsPattern = "";
         attachBuildLog = false;
         compressBuildLog = false;
         replyTo = "";
         contentType = "project";
+        recipientProviders = new ArrayList<RecipientProvider>();
     }
 
     public String getSubject() {
@@ -101,46 +84,29 @@ public class EmailType {
         this.body = body;
     }
 
-    public boolean getSendToDevelopers() {
-        return sendToDevelopers;
-    }
-
-    public void setSendToDevelopers(boolean sendToDevelopers) {
-        this.sendToDevelopers = sendToDevelopers;
-    }
-
-    public boolean getSendToRequester() {
-        return sendToRequester;
-    }
-
-    public void setSendToRequester(boolean sendToRequester) {
-        this.sendToRequester = sendToRequester;
-    }
-
-    public boolean getSendToCulprits() {
-        return includeCulprits;
-    }
-
-    public void setSendToCulprits(boolean sendToCulprits) {
-        this.includeCulprits = sendToCulprits;
-    }
-
-    public boolean getSendToRecipientList() {
-        return sendToRecipientList;
-    }
-
-    public void setSendToRecipientList(boolean sendToRecipientList) {
-        this.sendToRecipientList = sendToRecipientList;
-    }
-
     public boolean getHasRecipients() {
-        return sendToRecipientList
-                || sendToDevelopers
+        return (recipientProviders != null && !recipientProviders.isEmpty())
                 || (recipientList != null && recipientList.trim().length() != 0);
     }
 
     public String getRecipientList() {
         return recipientList != null ? recipientList.trim() : recipientList;
+    }
+    
+    public List<RecipientProvider> getRecipientProviders() {
+        return recipientProviders;
+    }
+    
+    public void addRecipientProvider(RecipientProvider provider) {
+        if(recipientProviders == null) 
+            recipientProviders = new ArrayList<RecipientProvider>();
+        recipientProviders.add(provider);
+    }
+    
+    public void addRecipientProviders(List<RecipientProvider> providers) {
+        if(recipientProviders == null)
+            recipientProviders = new ArrayList<RecipientProvider>();
+        recipientProviders.addAll(providers);
     }
 
     public void setRecipientList(String recipientList) {

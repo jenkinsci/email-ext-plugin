@@ -1,4 +1,6 @@
 package hudson.plugins.emailext;
+import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -9,29 +11,24 @@ public class EmailTypeTest {
     public void testHasNoRecipients() {
         EmailType t = new EmailType();
 
-        t.setSendToRecipientList(false);
-        t.setSendToDevelopers(false);
-
         assertFalse(t.getHasRecipients());
     }
 
     @Test
     public void testHasDeveloperRecipients() {
         EmailType t = new EmailType();
-
-        t.setSendToRecipientList(false);
-        t.setSendToDevelopers(true);
-
+        
+        t.addRecipientProvider(new DevelopersRecipientProvider());
+        
         assertTrue(t.getHasRecipients());
     }
 
     @Test
     public void testHasRecipientList() {
         EmailType t = new EmailType();
-
-        t.setSendToRecipientList(true);
-        t.setSendToDevelopers(false);
-
+        
+        t.addRecipientProvider(new ListRecipientProvider());
+        
         assertTrue(t.getHasRecipients());
     }
 
@@ -39,8 +36,8 @@ public class EmailTypeTest {
     public void testHasDeveloperAndRecipientList() {
         EmailType t = new EmailType();
 
-        t.setSendToRecipientList(true);
-        t.setSendToDevelopers(true);
+        t.addRecipientProvider(new ListRecipientProvider());
+        t.addRecipientProvider(new DevelopersRecipientProvider());
 
         assertTrue(t.getHasRecipients());
     }

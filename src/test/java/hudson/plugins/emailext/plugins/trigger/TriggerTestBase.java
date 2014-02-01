@@ -5,9 +5,12 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.util.StreamTaskListener;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -18,6 +21,8 @@ import static org.mockito.Mockito.when;
  * Base class for testing
  */
 public abstract class TriggerTestBase {
+    
+    protected List<RecipientProvider> recProviders = Collections.emptyList();
 
     abstract EmailTrigger newInstance();
     

@@ -10,9 +10,17 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 
 import hudson.EnvVars;
+import hudson.model.TaskListener;
 import hudson.model.User;
+import hudson.plugins.emailext.ExtendedEmailPublisherContext;
+import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
+import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.tasks.Mailer;
 import hudson.util.FormValidation;
+import java.util.StringTokenizer;
+import java.util.logging.Level;
+import javax.mail.MessagingException;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 
 public class EmailRecipientUtils {
@@ -24,12 +32,12 @@ public class EmailRecipientUtils {
     public static final int TO = 0;
     public static final int CC = 1;
     
-    public Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars)
+    public static Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars)
             throws AddressException, UnsupportedEncodingException {
         return convertRecipientString(recipientList, envVars, TO);
     }
     
-    public Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars, int type)
+    public static Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars, int type)
         throws AddressException, UnsupportedEncodingException {
         final Set<InternetAddress> internetAddresses = new LinkedHashSet<InternetAddress>();
         if (!StringUtils.isBlank(recipientList)) {
@@ -112,11 +120,58 @@ public class EmailRecipientUtils {
         }
     }
 
-    private String fixupSpaces(String input) {
+    private static String fixupSpaces(String input) {
         input = input.replaceAll("\\s+", " ");
         if(input.contains(" ") && !input.contains(",")) {
             input = input.replace(" ", ",");
         }
         return input;
+    }
+    
+    public static boolean isExcludedRecipient(String userName, TaskListener listener) {
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        StringTokenizer tokens = new StringTokenizer(descriptor.getExcludedCommitters(), ",");
+        while (tokens.hasMoreTokens()) {
+            String check = tokens.nextToken().trim();
+            descriptor.debug(listener.getLogger(), "Checking '%s' against '%s' to see if they are excluded", userName, check);
+            if (check.equalsIgnoreCase(userName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static boolean isExcludedRecipient(User user, TaskListener listener) {
+        String[] testValues = new String[] { user.getFullName(), user.getId(), user.getDisplayName() };
+        for(String testValue : testValues) {
+            if(testValue != null && isExcludedRecipient(testValue, listener)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static void addAddressesFromRecipientList(Set<InternetAddress> to, Set<InternetAddress> cc, String recipientList,
+            EnvVars envVars, TaskListener listener) {
+        try {
+            Set<InternetAddress> internetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.TO);
+            to.addAll(internetAddresses);
+            if(cc != null) {
+                Set<InternetAddress> ccInternetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.CC);
+                cc.addAll(ccInternetAddresses);
+            }
+        } catch (AddressException ae) {
+            LOGGER.log(Level.WARNING, "Could not create email address.", ae);
+            listener.getLogger().println("Failed to create e-mail address for " + ae.getRef());
+        } catch(UnsupportedEncodingException e) {
+            LOGGER.log(Level.WARNING, "Could not create email address.", e);
+            listener.getLogger().println("Failed to create e-mail address because of invalid encoding");
+        }
+    }
+    
+    public static String getRecipientList(ExtendedEmailPublisherContext context, String recipients)
+        throws MessagingException {
+        final String recipientsTransformed = StringUtils.isBlank(recipients) ? "" : ContentBuilder.transformText(recipients, context, context.getPublisher().getRuntimeMacros(context));
+        return recipientsTransformed;
     }
 }

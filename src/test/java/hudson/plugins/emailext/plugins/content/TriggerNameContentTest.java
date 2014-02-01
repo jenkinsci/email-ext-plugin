@@ -5,8 +5,10 @@ import hudson.model.FreeStyleProject;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
-import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
+import java.util.Collections;
+import java.util.List;
 import javax.mail.Message;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -56,7 +58,8 @@ public class TriggerNameContentTest {
     
     @Test
     public void testTriggerName() throws Exception {
-        PreBuildTrigger trigger = new PreBuildTrigger(true, true, true, false, "$DEFAULT_RECIPIENTS",
+        List<RecipientProvider> recProviders = Collections.emptyList();
+        PreBuildTrigger trigger = new PreBuildTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);

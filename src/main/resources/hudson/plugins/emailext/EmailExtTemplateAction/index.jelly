@@ -21,7 +21,7 @@
             </p>
             <form action="" method="post" name="templateTest" onSubmit="return onSubmit();">
                 <table>
-                    <f:entry title="${%Groovy Template File Name}">
+                    <f:entry title="${%Jelly/Groovy Template File Name}">
                         <f:textbox name="template_file_name" id="template_file_name" clazz="required" checkUrl="'templateFileCheck?value='+this.value" />
                     </f:entry>
                     <f:entry title="${%Build To Test}">

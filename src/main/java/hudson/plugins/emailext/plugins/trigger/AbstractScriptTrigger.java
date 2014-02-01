@@ -8,6 +8,10 @@ import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ScriptSandbox;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
+import hudson.plugins.emailext.plugins.RecipientProvider;
+import java.util.ArrayList;
+import java.util.List;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -21,9 +25,8 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
     protected String triggerScript;
     
     @DataBoundConstructor
-    public AbstractScriptTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList,
-            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
-        super(sendToList, sendToDevs, sendToRequestor, sendToCulprits, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public AbstractScriptTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
+        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
         this.triggerScript = triggerScript;
     }
     
@@ -93,14 +96,13 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
     }
 
     public abstract static class DescriptorImpl extends EmailTriggerDescriptor {
-        @Override
-        public boolean getDefaultSendToDevs() {
-            return false;
-        }
-
-        @Override
-        public boolean getDefaultSendToList() {
-            return true;
+        
+        public List<RecipientProvider> getDefaultRecipientProviders() {
+            return new ArrayList<RecipientProvider>() {
+                    {
+                        add(new ListRecipientProvider());
+                    }
+            };
         }
     }
 }

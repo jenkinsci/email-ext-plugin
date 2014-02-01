@@ -15,7 +15,7 @@ public class BuildingTriggerTest extends TriggerTestBase {
 
     @Override
     EmailTrigger newInstance() {
-        return new BuildingTrigger(true, true, true, false, "", "", "", "", "", 0, "project");
+        return new BuildingTrigger(recProviders, "", "", "", "", "", 0, "project");
     }
     
     @Test
