@@ -23,6 +23,7 @@ public class EmailRecipientUtils {
 
     public static final int TO = 0;
     public static final int CC = 1;
+    public static final int BCC = 2;
     
     public Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars)
             throws AddressException, UnsupportedEncodingException {
@@ -34,20 +35,25 @@ public class EmailRecipientUtils {
         final Set<InternetAddress> internetAddresses = new LinkedHashSet<InternetAddress>();
         if (!StringUtils.isBlank(recipientList)) {
             final String expandedRecipientList = fixupSpaces(envVars.expand(recipientList));
-            InternetAddress[] all = InternetAddress.parse(expandedRecipientList.replace("cc:", ""));
+            InternetAddress[] all = InternetAddress.parse(expandedRecipientList.replace("bcc:", "").replace("cc:", ""));
             final Set<InternetAddress> to = new LinkedHashSet<InternetAddress>();
             final Set<InternetAddress> cc = new LinkedHashSet<InternetAddress>();
+            final Set<InternetAddress> bcc = new LinkedHashSet<InternetAddress>();
             final String defaultSuffix = Mailer.descriptor().getDefaultSuffix();
 
             for(InternetAddress address : all) {
                 if(address.getPersonal() != null) {
-                    if(expandedRecipientList.contains("cc:" + address.getPersonal()) || expandedRecipientList.contains("cc:\"" + address.toString() + "\"")) {
+                    if(expandedRecipientList.contains("bcc:" + address.getPersonal()) || expandedRecipientList.contains("bcc:\"" + address.toString() + "\"")) {
+                        bcc.add(address);
+                    } else if (expandedRecipientList.contains("cc:" + address.getPersonal()) || expandedRecipientList.contains("cc:\"" + address.toString() + "\"")) {
                         cc.add(address);
                     } else {
                         to.add(address);
                     }
                 } else {
-                    if(expandedRecipientList.contains("cc:" + address.toString())) {
+                    if(expandedRecipientList.contains("bcc:" + address.toString())) {
+                        bcc.add(address);
+                    } else if(expandedRecipientList.contains("cc:" + address.toString())) {
                         cc.add(address);
                     } else {
                         to.add(address);
@@ -55,7 +61,9 @@ public class EmailRecipientUtils {
                 }
             }
 
-            if(type == CC) {
+            if(type == BCC) {
+                internetAddresses.addAll(bcc);
+            } else if(type == CC) {
                 internetAddresses.addAll(cc);
             } else {
                 internetAddresses.addAll(to);
@@ -103,6 +111,7 @@ public class EmailRecipientUtils {
         // Try and convert the recipient string to a list of InternetAddress. If this fails then the validation fails.
         try {
             convertRecipientString(recipientList, new EnvVars(), TO);
+            convertRecipientString(recipientList, new EnvVars(), BCC);
             convertRecipientString(recipientList, new EnvVars(), CC);
             return FormValidation.ok();
         } catch (AddressException e) {
