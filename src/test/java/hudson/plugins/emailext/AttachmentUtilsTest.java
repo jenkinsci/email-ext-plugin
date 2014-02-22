@@ -31,6 +31,7 @@ import org.jvnet.hudson.test.TestBuilder;
 
 import org.jvnet.mock_javamail.Mailbox;
 import static org.junit.Assert.*;
+import org.junit.Before;
 
 /**
  *
@@ -40,6 +41,11 @@ public class AttachmentUtilsTest {
     
     @Rule
     public final JenkinsRule j = new JenkinsRule();
+    
+    @Before
+    public void setUp() {
+        Mailbox.clearAll();
+    }
     
     @Test
     public void testAttachmentFromWorkspace() throws Exception {
