@@ -59,6 +59,8 @@ public class ScriptContent extends DataBoundTokenMacro {
 
     public static final String MACRO_NAME = "SCRIPT";
     
+    private static Object configProvider;
+    
     @Override
     public boolean acceptsMacroName(String macroName) {
         return macroName.equals(MACRO_NAME);
@@ -160,9 +162,13 @@ public class ScriptContent extends DataBoundTokenMacro {
         return stream;
     }
     
-    private ConfigProvider getTemplateConfigProvider() {
-        ExtensionList<ConfigProvider> providers = ConfigProvider.all();
-        return providers.get(GroovyTemplateConfigProvider.class);
+    
+    private static ConfigProvider getTemplateConfigProvider() {
+        if(configProvider == null) {
+            ExtensionList<ConfigProvider> providers = ConfigProvider.all();
+            configProvider = providers.get(GroovyTemplateConfigProvider.class);
+        }
+        return (ConfigProvider)configProvider;
     }
     
     /**

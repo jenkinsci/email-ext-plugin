@@ -39,6 +39,8 @@ public class JellyScriptContent extends DataBoundTokenMacro {
     private static final String DEFAULT_TEMPLATE_NAME = DEFAULT_HTML_TEMPLATE_NAME;
     private static final String EMAIL_TEMPLATES_DIRECTORY = "email-templates";
     
+    private static Object configProvider;
+    
     @Parameter
     public String template = DEFAULT_TEMPLATE_NAME;
 
@@ -132,9 +134,12 @@ public class JellyScriptContent extends DataBoundTokenMacro {
         return stream;
     }
     
-    private ConfigProvider getTemplateConfigProvider() {
-        ExtensionList<ConfigProvider> providers = ConfigProvider.all();
-        return providers.get(JellyTemplateConfigProvider.class);
+    private static ConfigProvider getTemplateConfigProvider() {
+        if(configProvider == null) {
+            ExtensionList<ConfigProvider> providers = ConfigProvider.all();
+            configProvider = providers.get(JellyTemplateConfigProvider.class);
+        }
+        return (ConfigProvider)configProvider;
     }
 
     private String renderContent(AbstractBuild<?, ?> build, InputStream inputStream)
