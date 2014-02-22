@@ -26,7 +26,7 @@ import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
-import hudson.plugins.emailext.plugins.recipients.RequestorRecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
 import hudson.tasks.Builder;
 import hudson.tasks.Mailer;
 import java.io.IOException;
@@ -509,7 +509,7 @@ public class ExtendedEmailPublisherTest {
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
             {
-                addRecipientProvider(new RequestorRecipientProvider());
+                addRecipientProvider(new RequesterRecipientProvider());
             }
         });
         publisher.getConfiguredTriggers().add(successTrigger);
@@ -534,7 +534,7 @@ public class ExtendedEmailPublisherTest {
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
             {
-                addRecipientProvider(new RequestorRecipientProvider());
+                addRecipientProvider(new RequesterRecipientProvider());
             }
         });
         publisher.getConfiguredTriggers().add(successTrigger);
@@ -560,7 +560,7 @@ public class ExtendedEmailPublisherTest {
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
             {
-                addRecipientProvider(new RequestorRecipientProvider());
+                addRecipientProvider(new RequesterRecipientProvider());
             }
         });
         publisher.getConfiguredTriggers().add(successTrigger);
@@ -590,7 +590,7 @@ public class ExtendedEmailPublisherTest {
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
             {
-                addRecipientProvider(new RequestorRecipientProvider());
+                addRecipientProvider(new RequesterRecipientProvider());
             }
         });
         publisher.getConfiguredTriggers().add(successTrigger);
@@ -623,7 +623,7 @@ public class ExtendedEmailPublisherTest {
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
             {
-                addRecipientProvider(new RequestorRecipientProvider());
+                addRecipientProvider(new RequesterRecipientProvider());
             }
         });
         publisher.getConfiguredTriggers().add(successTrigger);
@@ -651,7 +651,7 @@ public class ExtendedEmailPublisherTest {
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
             {
-                addRecipientProvider(new RequestorRecipientProvider());
+                addRecipientProvider(new RequesterRecipientProvider());
             }
         });
         publisher.getConfiguredTriggers().add(successTrigger);
@@ -675,7 +675,7 @@ public class ExtendedEmailPublisherTest {
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
             {
-                addRecipientProvider(new RequestorRecipientProvider());
+                addRecipientProvider(new RequesterRecipientProvider());
             }
         });
         publisher.getConfiguredTriggers().add(successTrigger);
@@ -707,7 +707,7 @@ public class ExtendedEmailPublisherTest {
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
             {
-                addRecipientProvider(new RequestorRecipientProvider());
+                addRecipientProvider(new RequesterRecipientProvider());
             }
         });
         publisher.getConfiguredTriggers().add(successTrigger);

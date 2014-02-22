@@ -10,24 +10,27 @@ import hudson.model.AbstractProject;
 import hudson.model.Cause;
 import hudson.model.TaskListener;
 import hudson.model.User;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
-import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.tasks.Mailer;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.mail.internet.InternetAddress;
 import jenkins.model.Jenkins;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * Created by acearl on 12/25/13.
  */
 
-public class RequestorRecipientProvider extends RecipientProvider {
-    private static final Logger LOGGER = Logger.getLogger(RequestorRecipientProvider.class.getName());
+public class RequesterRecipientProvider extends RecipientProvider {
+    private static final Logger LOGGER = Logger.getLogger(RequesterRecipientProvider.class.getName());
 
+    @DataBoundConstructor
+    public RequesterRecipientProvider() {
+        
+    }
+    
     @Override
     public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc) {
         // looking for Upstream build.
@@ -66,13 +69,10 @@ public class RequestorRecipientProvider extends RecipientProvider {
     @SuppressWarnings("unchecked")
     private User getByUserIdCause(AbstractBuild<?, ?> build) {
         try {
-            Class<? extends Cause> userIdCause = (Class<? extends Cause>) ExtendedEmailPublisher.class.getClassLoader().loadClass("hudson.model.Cause$UserIdCause");
-            Method getUserId = userIdCause.getMethod("getUserId", new Class[0]);
-
-            Cause cause = build.getCause(userIdCause);
+            Cause.UserIdCause cause = build.getCause(Cause.UserIdCause.class);
             if (cause != null) {
-                String id = (String) getUserId.invoke(cause, new Object[0]);
-                return User.get(id, false);
+                String id = cause.getUserId();
+                return User.get(id, false, null);
             }
 
         } catch (Exception e) {
@@ -81,6 +81,7 @@ public class RequestorRecipientProvider extends RecipientProvider {
         return null;
     }
 
+    @SuppressWarnings("deprecated")
     private User getByLegacyUserCause(AbstractBuild<?, ?> build) {
         try {
             Cause.UserCause userCause = build.getCause(Cause.UserCause.class);
@@ -90,7 +91,7 @@ public class RequestorRecipientProvider extends RecipientProvider {
                 Field authenticationName = Cause.UserCause.class.getDeclaredField("authenticationName");
                 authenticationName.setAccessible(true);
                 String name = (String) authenticationName.get(userCause);
-                return User.get(name, false);
+                return User.get(name, false, null);
             }
         } catch (Exception e) {
             LOGGER.info(e.getMessage());
