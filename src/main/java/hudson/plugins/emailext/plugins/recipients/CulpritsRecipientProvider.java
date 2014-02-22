@@ -14,11 +14,10 @@ import hudson.Extension;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.scm.ChangeLogSet;
-import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
 import jenkins.model.Jenkins;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  *
@@ -26,6 +25,11 @@ import jenkins.model.Jenkins;
  */
 
 public class CulpritsRecipientProvider extends RecipientProvider {
+    
+    @DataBoundConstructor
+    public CulpritsRecipientProvider() {
+        
+    }
     
     @Override
     public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc) {

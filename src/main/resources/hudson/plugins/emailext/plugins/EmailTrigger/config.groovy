@@ -7,9 +7,9 @@ t = namespace("/lib/hudson")
 f = namespace("/lib/form")
 d = namespace("jelly:define")
 
-def providers = hudson.plugins.emailext.plugins.recipients.RecipientProvider.all()
-def recipientProviders = instance != null ? instance.email.recipientProviders : instance.descriptor.defaultRecipientProviders
-f.entry(title: _("Send To"), help:"/plugin/email-ext/help/projectConfig/mailType/sendTo.html") {
+def providers = hudson.plugins.emailext.plugins.RecipientProvider.all()
+def recipientProviders = instance != null ? instance.email.recipientProviders : descriptor.defaultRecipientProviders
+f.entry(title: _("Send To")) {
   f.hetero_list(name: "recipientProviders", hasHeader: true, descriptors: providers, items: recipientProviders, oneEach: true)
 }
 

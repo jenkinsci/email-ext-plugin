@@ -71,8 +71,8 @@ public class EmailRecipientUtils {
 
             for(InternetAddress address : internetAddresses) {
                 if(!address.getAddress().contains("@")) {
-                    User u = User.get(address.getAddress(), false);
-                    String userEmail = null;
+                    User u = User.get(address.getAddress(), false, null);
+                    String userEmail;
                     if(u != null) {
                         userEmail = getUserConfiguredEmail(u);
                         if(userEmail != null){

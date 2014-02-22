@@ -13,11 +13,17 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
 import jenkins.model.Jenkins;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * Created by acearl on 12/25/13.
  */
 public class DevelopersRecipientProvider extends RecipientProvider {
+    
+    @DataBoundConstructor
+    public DevelopersRecipientProvider() {
+        
+    }
     
     @Override
     public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc) {
@@ -42,11 +48,9 @@ public class DevelopersRecipientProvider extends RecipientProvider {
 
     @Extension
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
-
         @Override
         public String getDisplayName() {
             return "Developers";
-        }
-        
+        }       
     }
 }

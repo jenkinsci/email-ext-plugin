@@ -13,14 +13,13 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.plugins.emailext.plugins.ContentBuilder;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  *
@@ -28,6 +27,11 @@ import org.apache.commons.lang.StringUtils;
  */
 public class ListRecipientProvider extends RecipientProvider {
 
+    @DataBoundConstructor
+    public ListRecipientProvider() {
+        
+    }
+    
     @Override
     public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc) {
         try {
