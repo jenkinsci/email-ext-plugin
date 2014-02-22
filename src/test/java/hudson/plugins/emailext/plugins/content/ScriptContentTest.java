@@ -56,13 +56,12 @@ public class ScriptContentTest {
     
 
     @Before
-    public void setup()
-            throws Throwable
+    public void setup() throws Throwable
     {
         assumeThat(osIsDarwin, is(false));
         
         scriptContent = new ScriptContent();
-        listener = new StreamTaskListener(System.out);
+        listener = StreamTaskListener.fromStdout();
         
         JenkinsLocationConfiguration.get().setUrl("http://localhost");
 

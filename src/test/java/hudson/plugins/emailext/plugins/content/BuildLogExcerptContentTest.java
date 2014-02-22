@@ -20,7 +20,7 @@ public class BuildLogExcerptContentTest {
     @Before
     public void beforeTest() {
         buildLogExcerptContent = new BuildLogExcerptContent();
-        listener = new StreamTaskListener(System.out);
+        listener = StreamTaskListener.fromStdout();
     }
 
     @Test

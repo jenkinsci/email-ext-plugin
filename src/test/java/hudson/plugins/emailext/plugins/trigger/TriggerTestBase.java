@@ -27,7 +27,7 @@ public abstract class TriggerTestBase {
     abstract EmailTrigger newInstance();
     
     TaskListener getTaskListener() {
-        return new StreamTaskListener(System.out);
+        return StreamTaskListener.fromStdout();
     }
 
     /**

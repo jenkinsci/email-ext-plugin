@@ -26,7 +26,7 @@ public class CauseContentTest {
     public void setUp() {
         causeContent = new CauseContent();
         build = mock(Build.class);
-        listener = new StreamTaskListener(System.out);
+        listener = StreamTaskListener.fromStdout();
     }
 
     @Test

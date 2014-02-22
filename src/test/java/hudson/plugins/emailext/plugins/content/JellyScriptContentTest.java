@@ -32,7 +32,7 @@ public class JellyScriptContentTest {
             super.before();
 
             content = new JellyScriptContent();
-            listener = new StreamTaskListener(System.out);
+            listener = StreamTaskListener.fromStdout();
 
             publisher = new ExtendedEmailPublisher();
             publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";

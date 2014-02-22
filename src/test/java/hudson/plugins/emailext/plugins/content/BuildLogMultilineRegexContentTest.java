@@ -24,7 +24,7 @@ public class BuildLogMultilineRegexContentTest {
         buildLogMultilineRegexContent = new BuildLogMultilineRegexContent();
         buildLogMultilineRegexContent.regex = ".+";
         build = mock(AbstractBuild.class);
-        listener = new StreamTaskListener(System.out);
+        listener = StreamTaskListener.fromStdout();
     }
 
     @Test

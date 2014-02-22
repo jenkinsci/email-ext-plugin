@@ -43,7 +43,7 @@ public class OnlyRegressionsTest {
                 return true;
             }
         });
-        TaskListener listener = new StreamTaskListener(System.out);
+        TaskListener listener = StreamTaskListener.fromStdout();
         project.scheduleBuild2(0).get();
         FailedTestsContent failedTestsContent = new FailedTestsContent();
         failedTestsContent.onlyRegressions = true;
