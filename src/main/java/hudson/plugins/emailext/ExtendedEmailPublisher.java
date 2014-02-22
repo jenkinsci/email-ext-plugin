@@ -12,12 +12,9 @@ import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Cause;
-import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.CssInliner;
 import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.scm.ChangeLogSet.Entry;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.MailMessageIdAction;
 import hudson.tasks.Notifier;
@@ -34,6 +31,7 @@ import hudson.model.Item;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.content.TriggerNameContent;
 
+import jenkins.model.JenkinsLocationConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
@@ -44,14 +42,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.PrintStream;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
@@ -68,7 +64,6 @@ import javax.mail.Multipart;
 import javax.mail.SendFailedException;
 import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -185,7 +180,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     public ExtendedEmailPublisher() {
 
     }
-
+    
     /**
      * Get the list of configured email theTriggers for this project.
      *
@@ -197,7 +192,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
         return configuredTriggers;
     }
-
+  
     public MatrixTriggerMode getMatrixTriggerMode() {
         return matrixTriggerMode == null ? MatrixTriggerMode.BOTH : matrixTriggerMode;
     }
@@ -448,7 +443,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             debug(context.getListener().getLogger(), "NOT overriding default server settings, using Mailer to create session");
             session = Mailer.descriptor().createSession();
             msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(Mailer.descriptor().getAdminAddress()));
+            msg.setFrom(new InternetAddress(JenkinsLocationConfiguration.get().getAdminAddress()));
         } else {
             debug(context.getListener().getLogger(), "Overriding default server settings, creating our own session");
             session = descriptor.createSession();
@@ -586,7 +581,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         msg.setSubject(subject, charset);
     }
 
-    private boolean isExecuteOnMatrixNodes() {
+    public boolean isExecuteOnMatrixNodes() {
         MatrixTriggerMode mtm = getMatrixTriggerMode();
         return MatrixTriggerMode.BOTH == mtm
                 || MatrixTriggerMode.ONLY_CONFIGURATIONS == mtm;

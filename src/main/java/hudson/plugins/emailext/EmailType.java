@@ -1,12 +1,16 @@
 package hudson.plugins.emailext;
 
 import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.CulpritsRecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * This class defines what the contents of an email will be if it gets sent.
- * 
+ *
  * @author kyle.sweeney@valtech.com
  */
 public class EmailType {
@@ -25,7 +29,7 @@ public class EmailType {
      * The body of the email
      */
     private String body;
-    
+
     /**
      * The list of configured recipient providers
      */
@@ -50,11 +54,34 @@ public class EmailType {
      * List of email addresses to put into the Reply-To header
      */
     private String replyTo;
-    
+
     /**
      * Content type to send the email as (HTML or Plaintext)
      */
     private String contentType;
+
+    /**
+     * Specifies whether or not we should send this email to the developer/s who
+     * made changes.
+     */
+    private transient boolean sendToDevelopers;
+
+    /**
+     * Specifies whether or not we should send this email to the requester who
+     * triggered build.
+     */
+    private transient boolean sendToRequester;
+
+    /**
+     * Specifies whether or not we should send this email to all developers
+     * since the last success.
+     */
+    private transient boolean includeCulprits;
+
+    /**
+     * Specifies whether or not we should send this email to the recipient list
+     */
+    private transient boolean sendToRecipientList;
 
     public EmailType() {
         subject = "";
@@ -92,20 +119,22 @@ public class EmailType {
     public String getRecipientList() {
         return recipientList != null ? recipientList.trim() : recipientList;
     }
-    
+
     public List<RecipientProvider> getRecipientProviders() {
         return recipientProviders;
     }
-    
+
     public void addRecipientProvider(RecipientProvider provider) {
-        if(recipientProviders == null) 
+        if (recipientProviders == null) {
             recipientProviders = new ArrayList<RecipientProvider>();
+        }
         recipientProviders.add(provider);
     }
-    
+
     public void addRecipientProviders(List<RecipientProvider> providers) {
-        if(recipientProviders == null)
+        if (recipientProviders == null) {
             recipientProviders = new ArrayList<RecipientProvider>();
+        }
         recipientProviders.addAll(providers);
     }
 
@@ -144,22 +173,173 @@ public class EmailType {
     public void setCompressBuildLog(boolean compressBuildLog) {
         this.compressBuildLog = compressBuildLog;
     }
-    
+
     public String getContentType() {
-        if(contentType == null)
+        if (contentType == null) {
             contentType = "project";
+        }
         return contentType;
     }
-    
+
     public void setContentType(String contentType) {
         this.contentType = contentType;
     }
 
     public Object readResolve() {
-        if(this.recipientList != null) {
+        if (this.recipientList != null) {
             // get rid of PROJECT_DEFAULT_RECIPIENTS stuff
-            this.recipientList = this.recipientList.replaceAll("\\$\\{?PROJECT_DEFAULT_RECIPIENTS\\}?", ""); 
+            this.recipientList = this.recipientList.replaceAll("\\$\\{?PROJECT_DEFAULT_RECIPIENTS\\}?", "");
         }
+
+        // upgrade the various fields to the new RecipientProvider method
+        if (this.sendToDevelopers) {
+            if (recipientProviders == null) {
+                recipientProviders = new ArrayList<RecipientProvider>();
+            }
+
+            recipientProviders.add(new DevelopersRecipientProvider());
+        }
+
+        if (this.sendToRequester) {
+            if (recipientProviders == null) {
+                recipientProviders = new ArrayList<RecipientProvider>();
+            }
+
+            recipientProviders.add(new RequesterRecipientProvider());
+        }
+
+        if (this.includeCulprits) {
+            if (recipientProviders == null) {
+                recipientProviders = new ArrayList<RecipientProvider>();
+            }
+
+            recipientProviders.add(new CulpritsRecipientProvider());
+        }
+
+        if (this.sendToRecipientList) {
+            if (recipientProviders == null) {
+                recipientProviders = new ArrayList<RecipientProvider>();
+            }
+
+            recipientProviders.add(new ListRecipientProvider());
+        }
+
         return this;
+    }
+    
+    @Deprecated
+    public boolean getSendToCulprits() {
+        for(RecipientProvider p : recipientProviders) {
+            if(p instanceof CulpritsRecipientProvider) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    @Deprecated
+    public void setSendToCulprits(boolean sendToCulprits) {
+        if(sendToCulprits && !getSendToCulprits()) {
+            // need to add
+            recipientProviders.add(new CulpritsRecipientProvider());
+        } else if(!sendToCulprits && getSendToCulprits()) {
+            int index;
+            for(index = 0; index < recipientProviders.size(); index++) {
+                if(recipientProviders.get(index) instanceof CulpritsRecipientProvider) {
+                    break;
+                }
+            }
+            
+            if(index >=0 && index < recipientProviders.size()) {
+                recipientProviders.remove(index);
+            }
+        }
+    }
+    
+    @Deprecated
+    public boolean getSendToDevelopers() {
+        for(RecipientProvider p : recipientProviders) {
+            if(p instanceof DevelopersRecipientProvider) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    @Deprecated
+    public void setSendToDevelopers(boolean sendToDevelopers) {
+        if(sendToDevelopers && !getSendToDevelopers()) {
+            // need to add
+            recipientProviders.add(new DevelopersRecipientProvider());
+        } else if(!sendToDevelopers && getSendToDevelopers()) {
+            int index;
+            for(index = 0; index < recipientProviders.size(); index++) {
+                if(recipientProviders.get(index) instanceof DevelopersRecipientProvider) {
+                    break;
+                }
+            }
+            
+            if(index >= 0 && index < recipientProviders.size()) {
+                recipientProviders.remove(index);
+            }
+        }
+    }
+    
+    @Deprecated
+    public boolean getSendToRequester() {
+        for(RecipientProvider p : recipientProviders) {
+            if(p instanceof RequesterRecipientProvider) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    @Deprecated
+    public void setSendToRequester(boolean sendToRequester) {
+        if(sendToRequester && !getSendToRequester()) {
+            // need to add
+            recipientProviders.add(new RequesterRecipientProvider());
+        } else if(!sendToRequester && getSendToRequester()) {
+            int index;
+            for(index = 0; index < recipientProviders.size(); index++) {
+                if(recipientProviders.get(index) instanceof RequesterRecipientProvider) {
+                    break;
+                }
+            }
+            
+            if(index >= 0 && index < recipientProviders.size()) {
+                recipientProviders.remove(index);
+            }
+        }
+    }
+    
+    @Deprecated
+    public boolean getSendToRecipientList() {
+        for(RecipientProvider p : recipientProviders) {
+            if(p instanceof ListRecipientProvider) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    @Deprecated
+    public void setSendToRecipientList(boolean sendToRecipientList) {
+        if(sendToRecipientList && !getSendToRecipientList()) {
+            // need to add
+            recipientProviders.add(new RequesterRecipientProvider());
+        } else if(!sendToRecipientList && getSendToRecipientList()) {
+            int index;
+            for(index = 0; index < recipientProviders.size(); index++) {
+                if(recipientProviders.get(index) instanceof ListRecipientProvider) {
+                    break;
+                }
+            }
+            
+            if(index >= 0 && index < recipientProviders.size()) {
+                recipientProviders.remove(index);
+            }
+        }
     }
 }
