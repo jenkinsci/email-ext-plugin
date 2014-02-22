@@ -18,13 +18,17 @@ import org.kohsuke.stapler.DataBoundConstructor;
  */
 public class FirstUnstableTrigger extends EmailTrigger {
 
-    public static final String TRIGGER_NAME = "Unstable (First)";
+    public static final String TRIGGER_NAME = "Unstable (Test Failures) - 1st";
 
     @DataBoundConstructor
     public FirstUnstableTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body,
             String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(recipientProviders, recipientList, replyTo, subject, body,
-                attachmentsPattern, attachBuildLog, contentType);
+        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    }
+    
+    @Deprecated
+    public FirstUnstableTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
 
     @Override

@@ -3,14 +3,13 @@ package hudson.plugins.emailext.plugins;
 import hudson.model.Descriptor;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
 public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
 
     protected List<String> replacesList = new ArrayList<String>();
-    protected List<RecipientProvider> recipientProviders = new ArrayList<RecipientProvider>();
+    protected List<RecipientProvider> defaultRecipientProviders = new ArrayList<RecipientProvider>();
 
     /**
      * You can add the name of a trigger that this trigger should override if both this
@@ -30,10 +29,30 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
     }
     
     public void addDefaultRecipientProvider(RecipientProvider provider) {
-        recipientProviders.add(provider);
+        defaultRecipientProviders.add(provider);
     }
     
     public List<RecipientProvider> getDefaultRecipientProviders() {
-        return recipientProviders;
+        return defaultRecipientProviders;
+    }
+    
+    @Deprecated
+    public boolean getDefaultSendToCulprits() {
+        return false;
+    }
+    
+    @Deprecated
+    public boolean getDefaultSendToDevs() {
+        return false;
+    }
+    
+    @Deprecated
+    public boolean getDefaultSendToList() {
+        return false;
+    }
+    
+    @Deprecated
+    public boolean getDefaultSendToRequester() {
+        return false;
     }
 }

@@ -16,11 +16,16 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 public class FixedUnhealthyTrigger extends EmailTrigger {
 
-    public static final String TRIGGER_NAME = "Unstable/Failure -> Success";
+    public static final String TRIGGER_NAME = "Unstable (Test Failures)/Failure -> Success";
 
     @DataBoundConstructor
     public FixedUnhealthyTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
         super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    }
+    
+    @Deprecated
+    public FixedUnhealthyTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
 
     @Override

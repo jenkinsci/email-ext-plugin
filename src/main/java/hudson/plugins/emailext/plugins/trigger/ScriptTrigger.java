@@ -9,11 +9,16 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 public class ScriptTrigger extends AbstractScriptTrigger {
 
-    public static final String TRIGGER_NAME = "Script (After Build)";
+    public static final String TRIGGER_NAME = "Script - After Build";
     
     @DataBoundConstructor
     public ScriptTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
         super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, triggerScript);
+    }
+    
+    @Deprecated
+    public ScriptTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
+        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, triggerScript);
     }
 
     @Override

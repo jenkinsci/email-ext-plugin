@@ -30,6 +30,12 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
         this.triggerScript = triggerScript;
     }
     
+    @Deprecated
+    public AbstractScriptTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
+        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+        this.triggerScript = triggerScript;
+    }
+    
     public String getTriggerScript() {
         return triggerScript;
     }

@@ -15,11 +15,16 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 public class NotBuiltTrigger extends EmailTrigger {
 
-    public static final String TRIGGER_NAME = "Not Built (Aborted)";
+    public static final String TRIGGER_NAME = "Not Built";
     
     @DataBoundConstructor
     public NotBuiltTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
         super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    }
+    
+    @Deprecated
+    public NotBuiltTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
 
     @Override

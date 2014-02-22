@@ -17,7 +17,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 public class FailureTrigger extends EmailTrigger {
 
-    public static final String TRIGGER_NAME = "Failure (Any)";
+    public static final String TRIGGER_NAME = "Failure - Any";
     
     public static FailureTrigger createDefault() {
         return new FailureTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "$PROJECT_DEFAULT_REPLYTO", "$PROJECT_DEFAULT_SUBJECT", "$PROJECT_DEFAULT_CONTENT", "", 0, "project");
@@ -26,6 +26,11 @@ public class FailureTrigger extends EmailTrigger {
     @DataBoundConstructor
     public FailureTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
         super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    }
+    
+    @Deprecated
+    public FailureTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
 
     @Override
