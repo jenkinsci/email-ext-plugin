@@ -11,7 +11,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.GroovyTemplateConfig.GroovyTemplateConfigProvider;
-import hudson.plugins.emailext.JellyTemplateConfig;
 import hudson.plugins.emailext.ScriptSandbox;
 import hudson.plugins.emailext.plugins.EmailToken;
 import java.io.ByteArrayInputStream;
@@ -224,6 +223,7 @@ public class ScriptContent extends DataBoundTokenMacro {
         binding.put("it", new ScriptContentBuildWrapper(build));
         binding.put("project", build.getParent());
         binding.put("rooturl", descriptor.getHudsonUrl());
+        binding.put("logger", listener.getLogger());
 
         GroovyShell shell = createEngine(descriptor, binding);
         Object res = shell.evaluate(new InputStreamReader(scriptStream));

@@ -56,7 +56,7 @@ public class JellyScriptContent extends DataBoundTokenMacro {
 
         try {
             inputStream = getTemplateInputStream(template);
-            return renderContent(build, inputStream);
+            return renderContent(build, inputStream, listener);
         } catch (JellyException e) {
             return "JellyException: " + e.getMessage();
         } catch (FileNotFoundException e) {
@@ -142,9 +142,9 @@ public class JellyScriptContent extends DataBoundTokenMacro {
         return (ConfigProvider)configProvider;
     }
 
-    private String renderContent(AbstractBuild<?, ?> build, InputStream inputStream)
+    private String renderContent(AbstractBuild<?, ?> build, InputStream inputStream, TaskListener listener)
             throws JellyException, IOException {
-        JellyContext context = createContext(new ScriptContentBuildWrapper(build), build);
+        JellyContext context = createContext(new ScriptContentBuildWrapper(build), build, listener);
         Script script = context.compileScript(new InputSource(inputStream));
         if (script != null) {
             return convert(build, context, script);
@@ -163,12 +163,13 @@ public class JellyScriptContent extends DataBoundTokenMacro {
         return output.toString(getCharset(build));
     }
 
-    private JellyContext createContext(Object it, AbstractBuild<?, ?> build) {
+    private JellyContext createContext(Object it, AbstractBuild<?, ?> build, TaskListener listener) {
         JellyContext context = new JellyContext();
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         context.setVariable("it", it);
         context.setVariable("build", build);
         context.setVariable("project", build.getParent());
+        context.setVariable("logger", listener.getLogger());
         context.setVariable("rooturl", descriptor.getHudsonUrl());
         return context;
     }
