@@ -21,7 +21,7 @@ public class BuildLogRegexContentTest {
     @Before
     public void beforeTest() {
         buildLogRegexContent = new BuildLogRegexContent();
-        listener = new StreamTaskListener(System.out);
+        listener = StreamTaskListener.fromStdout();
         build = mock(AbstractBuild.class);
     }
 

@@ -6,6 +6,10 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
+import java.util.List;
 
 /**
  * Triggers an email after the specified number of consecutive failures
@@ -15,9 +19,14 @@ public abstract class NthFailureTrigger extends EmailTrigger {
 
     protected int failureCount;
     
-    public NthFailureTrigger(int failureCount, boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList,
-            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(sendToList, sendToDevs, sendToRequestor, sendToCulprits, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public NthFailureTrigger(int failureCount, List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+        this.failureCount = failureCount;
+    }
+    
+    @Deprecated
+    public NthFailureTrigger(int failureCount, boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
         this.failureCount = failureCount;
     }
 
@@ -39,14 +48,7 @@ public abstract class NthFailureTrigger extends EmailTrigger {
             build = ExtendedEmailPublisher.getPreviousBuild(build, listener);
         }
 
-        // Check the the preceding build was a success.
-        // if there is no previous build, this is a first failure
-        // if there is a previous build and it's result was success, this is first failure
-        if (build == null || build.getResult() == Result.SUCCESS) {
-            return true;
-        }
-
-        return false;
+        return (build == null || build.getResult() == Result.SUCCESS || build.getResult() == Result.UNSTABLE);
     }
 
     public abstract static class DescriptorImpl extends EmailTriggerDescriptor {
@@ -54,16 +56,9 @@ public abstract class NthFailureTrigger extends EmailTrigger {
         public DescriptorImpl() {
             addTriggerNameToReplace(FailureTrigger.TRIGGER_NAME);
             addTriggerNameToReplace(StillFailingTrigger.TRIGGER_NAME);
-        }
-        
-        @Override
-        public boolean getDefaultSendToDevs() {
-            return true;
-        }
-
-        @Override
-        public boolean getDefaultSendToList() {
-            return true;
+            
+            addDefaultRecipientProvider(new DevelopersRecipientProvider());
+            addDefaultRecipientProvider(new ListRecipientProvider());
         }
     }
 }

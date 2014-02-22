@@ -1,7 +1,6 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.Functions;
-import hudson.maven.reporters.SurefireAggregatedReport;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.tasks.junit.TestResult;
@@ -74,7 +73,7 @@ public class ScriptContentBuildWrapperTest
     @Test
     public void testGetJUnitTestResult_whenMavenProjectUseMavenPluginsSurefireAggregatedReport()
     {
-        final SurefireAggregatedReport surefireAggregatedReport = mock( SurefireAggregatedReport.class );
+        final AggregatedTestResultAction surefireAggregatedReport = mock( AggregatedTestResultAction.class );
         final ChildReport childReport1 = mockChildReport();
         final ChildReport childReport2 = mockChildReport();
         when( surefireAggregatedReport.getChildReports() ).thenReturn(

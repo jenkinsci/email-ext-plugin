@@ -13,7 +13,7 @@ public class FirstUnstableTriggerTest extends TriggerTestBase {
 
     @Override
     EmailTrigger newInstance() {
-        return new FirstUnstableTrigger(true, true, true, true, "", "", "", "", "", 0, "");
+        return new FirstUnstableTrigger(recProviders, "", "", "", "", "", 0, "");
     }
 
     @Test

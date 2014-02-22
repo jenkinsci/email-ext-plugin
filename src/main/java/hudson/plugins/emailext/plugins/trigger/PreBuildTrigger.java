@@ -5,6 +5,9 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
+import java.util.List;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -13,9 +16,13 @@ public class PreBuildTrigger extends EmailTrigger {
     public static final String TRIGGER_NAME = "Before Build";
     
     @DataBoundConstructor
-    public PreBuildTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList,
-            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(sendToList, sendToDevs, sendToRequestor, sendToCulprits, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public PreBuildTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    }
+    
+    @Deprecated
+    public PreBuildTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
 
     @Override
@@ -31,19 +38,13 @@ public class PreBuildTrigger extends EmailTrigger {
     @Extension
     public static final class DescriptorImpl extends EmailTriggerDescriptor {
 
-        @Override
-        public String getDisplayName() {
-            return TRIGGER_NAME;
+        public DescriptorImpl() {
+            addDefaultRecipientProvider(new ListRecipientProvider());
         }
         
         @Override
-        public boolean getDefaultSendToDevs() {
-            return false;
-        }
-
-        @Override
-        public boolean getDefaultSendToList() {
-            return true;
-        }
+        public String getDisplayName() {
+            return TRIGGER_NAME;
+        }        
     }    
 }

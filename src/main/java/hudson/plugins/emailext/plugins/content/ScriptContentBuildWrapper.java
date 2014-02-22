@@ -1,7 +1,6 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.Functions;
-import hudson.maven.reporters.SurefireAggregatedReport;
 import hudson.model.Action;
 import hudson.model.AbstractBuild;
 import hudson.tasks.junit.TestResult;
@@ -75,10 +74,10 @@ public class ScriptContentBuildWrapper {
         List<TestResult> result = new ArrayList<TestResult>();
         List<Action> actions = build.getActions();
         for (Action action : actions) {
-            if (action instanceof hudson.maven.reporters.SurefireAggregatedReport) {
+            if (action instanceof hudson.tasks.test.AggregatedTestResultAction) {
                 /* Maven Project */
                 List<AggregatedTestResultAction.ChildReport> reportList =
-                        ((SurefireAggregatedReport) action).getChildReports();
+                        ((AggregatedTestResultAction) action).getChildReports();
                 for (AggregatedTestResultAction.ChildReport report : reportList) {
                     if (report.result instanceof hudson.tasks.junit.TestResult) {
                         result.add((TestResult) report.result);

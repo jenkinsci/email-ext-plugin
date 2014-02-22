@@ -27,7 +27,7 @@ public class WorkspaceFileContentTest {
     @Test
     public void test1() throws Exception {
         FreeStyleProject project = j.createFreeStyleProject();
-        TaskListener listener = new StreamTaskListener(System.out);
+        TaskListener listener = StreamTaskListener.fromStdout();
         project.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {

@@ -6,10 +6,13 @@ import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixProject;
 import hudson.model.labels.LabelAtom;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
+import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.slaves.DumbSlave;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import static org.junit.Assert.*;
@@ -54,7 +57,8 @@ public class ExtendedEmailPublisherMatrixTest {
     @Test
     public void testPreBuildMatrixBuildSendParentOnly() throws Exception {
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_PARENT);
-        PreBuildTrigger trigger = new PreBuildTrigger(true, true, true, false, "$DEFAULT_RECIPIENTS",
+        List<RecipientProvider> recProviders = Collections.emptyList();
+        PreBuildTrigger trigger = new PreBuildTrigger(recProviders, "$DEFAULT_RECIPIENTS",
             "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
@@ -70,9 +74,9 @@ public class ExtendedEmailPublisherMatrixTest {
     @Test
     public void testPreBuildMatrixBuildSendSlavesOnly() throws Exception{	
         addSlaveToProject(0,1,2);
-    
+        List<RecipientProvider> recProviders = Collections.emptyList();
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_CONFIGURATIONS);
-        PreBuildTrigger trigger = new PreBuildTrigger(true, true, true, false, "$DEFAULT_RECIPIENTS",
+        PreBuildTrigger trigger = new PreBuildTrigger(recProviders, "$DEFAULT_RECIPIENTS",
             "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
@@ -86,9 +90,9 @@ public class ExtendedEmailPublisherMatrixTest {
     @Test
     public void testPreBuildMatrixBuildSendSlavesAndParent() throws Exception{	
         addSlaveToProject(0,1);
-    
+        List<RecipientProvider> recProviders = Collections.emptyList();
         publisher.setMatrixTriggerMode(MatrixTriggerMode.BOTH);
-        PreBuildTrigger trigger = new PreBuildTrigger(true, true, true, false, "$DEFAULT_RECIPIENTS",
+        PreBuildTrigger trigger = new PreBuildTrigger(recProviders, "$DEFAULT_RECIPIENTS",
             "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );

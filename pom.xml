@@ -7,7 +7,7 @@
         <version>1.532.1</version>
         <!--<version>1.538-SNAPSHOT</version>-->
     </parent>
-    
+
     <licenses>
       <license>
         <name>The MIT License (MIT)</name>
@@ -19,7 +19,7 @@
     <artifactId>email-ext</artifactId>
     <packaging>hpi</packaging>
     <version>2.38-SNAPSHOT</version>
-    <name>Jenkins Email Extension Plugin</name>
+    <name>Email Extension Plugin</name>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin</url>
     <issueManagement>
         <system>JIRA</system>
@@ -60,12 +60,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.jenkins-ci.main</groupId>
-            <artifactId>maven-plugin</artifactId>
-            <version>1.409</version>
-        </dependency>
-
-        <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
             <version>1.4</version>
@@ -95,7 +89,7 @@
             <artifactId>powermock-module-junit4</artifactId>
             <version>${powermock.version}</version>
             <scope>test</scope>
-        </dependency>    
+        </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito</artifactId>
@@ -105,7 +99,7 @@
         <dependency>
             <groupId>org.jvnet.hudson.plugins</groupId>
             <artifactId>analysis-core</artifactId>
-            <version>1.41</version>
+            <version>1.54</version>
             <optional>true</optional>
         </dependency>
 
@@ -119,7 +113,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>token-macro</artifactId>
-            <version>1.9</version>
+            <version>1.10</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -163,20 +157,16 @@
             <url>http://download.java.net/maven/2/</url>
         </repository>
     </repositories>
-    
+
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.jenkins-ci.tools</groupId>
-                <artifactId>maven-hpi-plugin</artifactId>
-                <version>1.99</version>
-            </plugin>                     
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <argLine>-XX:MaxPermSize=512m</argLine>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>clirr-maven-plugin</artifactId>
@@ -190,23 +180,22 @@
 		        <configuration>
 			    <logResults>true</logResults>
 			    <xmlOutputFile>${project.build.directory}/clirr-report.xml</xmlOutputFile>
-			    <failOnError>${clirr.failonerror}</failOnError>
 		        </configuration>
 		    </execution>
 		</executions>
-            </plugin>                 
+            </plugin>
         </plugins>
     </build>
-    
+
     <reporting>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>clirr-maven-plugin</artifactId>
-		<version>2.6</version>
+		<version>2.6.1</version>
 		<configuration>
-			<logResults>true</logResults>
-			<xmlOutputFile>${project.build.directory}/clirr-report.xml</xmlOutputFile>
+                    <logResults>true</logResults>
+                    <xmlOutputFile>${project.build.directory}/clirr-report.xml</xmlOutputFile>
 		</configuration>
             </plugin>
             <plugin>

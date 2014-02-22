@@ -18,7 +18,7 @@ public class BuildStatusContentTest {
         AbstractBuild build = mock(AbstractBuild.class);
         when(build.isBuilding()).thenReturn(true);
 
-        String content = new BuildStatusContent().evaluate(build, new StreamTaskListener(System.out), BuildStatusContent.MACRO_NAME);
+        String content = new BuildStatusContent().evaluate(build, StreamTaskListener.fromStdout(), BuildStatusContent.MACRO_NAME);
 
         assertEquals("Building", content);
     }

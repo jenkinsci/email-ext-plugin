@@ -4,6 +4,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.User;
+import hudson.plugins.emailext.Messages;
 import hudson.scm.ChangeLogSet;
 import hudson.util.StreamTaskListener;
 import junit.framework.Assert;
@@ -12,12 +13,13 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import static junit.framework.Assert.assertEquals;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,11 +32,11 @@ public class ChangesSinceLastUnstableBuildContentTest {
     @Before
     public void setUp() {
         content = new ChangesSinceLastUnstableBuildContent();
-        listener = new StreamTaskListener(System.out);
+        listener = StreamTaskListener.fromStdout();
         Locale.setDefault(Locale.US);
         TimeZone.setDefault(TimeZone.getTimeZone("America/Phoenix"));
     }
-
+    
     @Test
     public void testGetContent_shouldGetNoContentSinceUnstableBuildIfNoPreviousBuild()
             throws Exception {
@@ -196,6 +198,24 @@ public class ChangesSinceLastUnstableBuildContentTest {
         Assert.assertEquals("Changes for Build #41\n" + "[Ash Lux] Changes for a failed build.\n" + "\tPATH1\n"
                 + "\tPATH2\n" + "\tPATH3\n" + "\n" + "\n" + "Changes for Build #42\n"
                 + "[Ash Lux] Changes for a successful build.\n" + "\tPATH1\n" + "\tPATH2\n" + "\tPATH3\n" + "\n" + "\n", contentStr);
+    }
+    
+    private AbstractBuild createBuildWithNoChanges(Result result, int buildNumber) {
+        AbstractBuild build = mock(AbstractBuild.class);
+        when(build.getResult()).thenReturn(result);
+        ChangeLogSet changes1 = createEmptyChangeLog();
+        when(build.getChangeSet()).thenReturn(changes1);
+        when(build.getNumber()).thenReturn(buildNumber);
+
+        return build;
+    }
+
+    public ChangeLogSet createEmptyChangeLog() {
+        ChangeLogSet changes = mock(ChangeLogSet.class);
+        List<ChangeLogSet.Entry> entries = Collections.emptyList();
+        when(changes.iterator()).thenReturn(entries.iterator());
+
+        return changes;
     }
 
     private AbstractBuild createBuild(Result result, int buildNumber, String message) {

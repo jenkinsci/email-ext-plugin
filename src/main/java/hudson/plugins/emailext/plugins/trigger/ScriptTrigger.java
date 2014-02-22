@@ -2,16 +2,23 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
+import java.util.List;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class ScriptTrigger extends AbstractScriptTrigger {
 
-    public static final String TRIGGER_NAME = "Script";
+    public static final String TRIGGER_NAME = "Script - After Build";
     
     @DataBoundConstructor
-    public ScriptTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList,
-            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
-        super(sendToList, sendToDevs, sendToRequestor, sendToCulprits, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, triggerScript);
+    public ScriptTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
+        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, triggerScript);
+    }
+    
+    @Deprecated
+    public ScriptTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
+        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, triggerScript);
     }
 
     @Override
@@ -22,19 +29,13 @@ public class ScriptTrigger extends AbstractScriptTrigger {
     @Extension
     public static class DescriptorImpl extends EmailTriggerDescriptor {
 
-        @Override
-        public String getDisplayName() {
-            return TRIGGER_NAME;
+        public DescriptorImpl() {
+            addDefaultRecipientProvider(new ListRecipientProvider());
         }
         
         @Override
-        public boolean getDefaultSendToDevs() {
-            return false;
-        }
-
-        @Override
-        public boolean getDefaultSendToList() {
-            return true;
+        public String getDisplayName() {
+            return TRIGGER_NAME;
         }
     }    
 }

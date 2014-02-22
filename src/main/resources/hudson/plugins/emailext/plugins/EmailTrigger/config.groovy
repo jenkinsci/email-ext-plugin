@@ -7,13 +7,12 @@ t = namespace("/lib/hudson")
 f = namespace("/lib/form")
 d = namespace("jelly:define")
 
-f.entry(title: _("Send To"), help:"/plugin/email-ext/help/projectConfig/mailType/sendTo.html") {
-  br()
-  f.checkbox(name: "sendToList", title: _("Recipients"), checked: instance != null ? instance.email.sendToRecipientList : descriptor.defaultSendToList)
-  f.checkbox(name: "sendToDevs", title: _("Developers"), checked: instance != null ? instance.email.sendToDevelopers : descriptor.defaultSendToDevs)  
-  f.checkbox(name: "sendToRequestor", title: _("Requestor"), checked: instance != null ? instance.email.sendToRequester : descriptor.defaultSendToRequester)
-  f.checkbox(name: "sendToCulprits", title: _("Culprits"), checked: instance != null ? instance.email.sendToCulprits : descriptor.defaultSendToCulprits)
+def providers = hudson.plugins.emailext.plugins.RecipientProvider.all()
+def recipientProviders = instance != null ? instance.email.recipientProviders : descriptor.defaultRecipientProviders
+f.entry(title: _("Send To")) {
+  f.hetero_list(name: "recipientProviders", hasHeader: true, descriptors: providers, items: recipientProviders, oneEach: true)
 }
+
 f.advanced() {
   st.include(it: instance, class: descriptor.clazz, page: "local-config", optional: true)
   f.entry(title: _("Recipient List"), help: "/plugin/email-ext/help/projectConfig/mailType/recipientList.html") {

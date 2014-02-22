@@ -25,7 +25,7 @@ public class TestCountsContentTest {
     public void setUp() {
         target = new TestCountsContent();
         build = mock(AbstractBuild.class);
-        listener = new StreamTaskListener(System.out);
+        listener = StreamTaskListener.fromStdout();
     }
 
     @After

@@ -34,7 +34,7 @@ public class FailedTestsContentTest
     public void setUp()
     {
         failedTestContent = new FailedTestsContent();
-        listener = new StreamTaskListener(System.out);
+        listener = StreamTaskListener.fromStdout();
 
         build = mock( AbstractBuild.class );
     }

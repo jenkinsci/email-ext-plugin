@@ -123,7 +123,7 @@ public class AttachmentUtils implements Serializable {
         } else if (!StringUtils.isBlank(attachmentsPattern)) {
             attachments = new ArrayList<MimeBodyPart>();
 
-            FilePath[] files = ws.list(new ContentBuilder().transformText(attachmentsPattern, context, null));
+            FilePath[] files = ws.list(ContentBuilder.transformText(attachmentsPattern, context, null));
 
             for (FilePath file : files) {
                 if (maxAttachmentSize > 0

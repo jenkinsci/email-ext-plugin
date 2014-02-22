@@ -35,7 +35,7 @@ public class ContentBuilderTest {
         protected void before() throws Throwable {
             super.before();
 
-            listener = new StreamTaskListener(System.out);
+            listener = StreamTaskListener.fromStdout();
 
             publisher = new ExtendedEmailPublisher();
             publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";
@@ -61,18 +61,18 @@ public class ContentBuilderTest {
     @Test
     public void testTransformText_shouldExpand_$PROJECT_DEFAULT_CONTENT()
             throws IOException, InterruptedException {
-        assertEquals(publisher.defaultContent, new ContentBuilder().transformText("$PROJECT_DEFAULT_CONTENT", publisher,
+        assertEquals(publisher.defaultContent, ContentBuilder.transformText("$PROJECT_DEFAULT_CONTENT", publisher,
                 build, listener));
-        assertEquals(publisher.defaultContent, new ContentBuilder().transformText("${PROJECT_DEFAULT_CONTENT}", publisher,
+        assertEquals(publisher.defaultContent, ContentBuilder.transformText("${PROJECT_DEFAULT_CONTENT}", publisher,
                 build, listener));
     }
 
     @Test
     public void testTransformText_shouldExpand_$PROJECT_DEFAULT_SUBJECT()
             throws IOException, InterruptedException {
-        assertEquals(publisher.defaultSubject, new ContentBuilder().transformText("$PROJECT_DEFAULT_SUBJECT", publisher,
+        assertEquals(publisher.defaultSubject, ContentBuilder.transformText("$PROJECT_DEFAULT_SUBJECT", publisher,
                 build, listener));
-        assertEquals(publisher.defaultSubject, new ContentBuilder().transformText("${PROJECT_DEFAULT_SUBJECT}", publisher,
+        assertEquals(publisher.defaultSubject, ContentBuilder.transformText("${PROJECT_DEFAULT_SUBJECT}", publisher,
                 build, listener));
     }
 
@@ -80,10 +80,10 @@ public class ContentBuilderTest {
     public void testTransformText_shouldExpand_$DEFAULT_CONTENT()
             throws IOException, InterruptedException {
         assertEquals(publisher.getDescriptor().getDefaultBody(),
-                new ContentBuilder().transformText("$DEFAULT_CONTENT", publisher,
+                ContentBuilder.transformText("$DEFAULT_CONTENT", publisher,
                 build, listener));
         assertEquals(publisher.getDescriptor().getDefaultBody(),
-                new ContentBuilder().transformText("${DEFAULT_CONTENT}", publisher,
+                ContentBuilder.transformText("${DEFAULT_CONTENT}", publisher,
                 build, listener));
     }
 
@@ -91,10 +91,10 @@ public class ContentBuilderTest {
     public void testTransformText_shouldExpand_$DEFAULT_SUBJECT()
             throws IOException, InterruptedException {
         assertEquals(publisher.getDescriptor().getDefaultSubject(),
-                new ContentBuilder().transformText("$DEFAULT_SUBJECT", publisher,
+                ContentBuilder.transformText("$DEFAULT_SUBJECT", publisher,
                 build, listener));
         assertEquals(publisher.getDescriptor().getDefaultSubject(),
-                new ContentBuilder().transformText("${DEFAULT_SUBJECT}", publisher,
+                ContentBuilder.transformText("${DEFAULT_SUBJECT}", publisher,
                 build, listener));
     }
 
@@ -102,10 +102,10 @@ public class ContentBuilderTest {
     public void testTransformText_shouldExpand_$DEFAULT_RECIPIENT_LIST()
             throws IOException, InterruptedException {
         assertEquals(publisher.getDescriptor().getDefaultRecipients(),
-                new ContentBuilder().transformText("$DEFAULT_RECIPIENTS", publisher,
+                ContentBuilder.transformText("$DEFAULT_RECIPIENTS", publisher,
                 build, listener));
         assertEquals(publisher.getDescriptor().getDefaultRecipients(),
-                new ContentBuilder().transformText("${DEFAULT_RECIPIENTS}", publisher,
+                ContentBuilder.transformText("${DEFAULT_RECIPIENTS}", publisher,
                 build, listener));
     }
 
@@ -113,10 +113,10 @@ public class ContentBuilderTest {
     public void testTransformText_shouldExpand_$DEFAULT_PRESEND_SCRIPT()
             throws IOException, InterruptedException {
         assertEquals(publisher.getDescriptor().getDefaultPresendScript(),
-                new ContentBuilder().transformText("$DEFAULT_PRESEND_SCRIPT", publisher,
+                ContentBuilder.transformText("$DEFAULT_PRESEND_SCRIPT", publisher,
                 build, listener));
         assertEquals(publisher.getDescriptor().getDefaultPresendScript(),
-                new ContentBuilder().transformText("${DEFAULT_PRESEND_SCRIPT}", publisher,
+                ContentBuilder.transformText("${DEFAULT_PRESEND_SCRIPT}", publisher,
                 build, listener));
     }
 
@@ -128,8 +128,8 @@ public class ContentBuilderTest {
         f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultSubject");
         f.setAccessible(true);
         f.set(publisher.getDescriptor(), null);
-        assertEquals("", new ContentBuilder().transformText("$DEFAULT_SUBJECT", publisher, build, listener));
-        assertEquals("", new ContentBuilder().transformText("$DEFAULT_CONTENT", publisher, build, listener));
+        assertEquals("", ContentBuilder.transformText("$DEFAULT_SUBJECT", publisher, build, listener));
+        assertEquals("", ContentBuilder.transformText("$DEFAULT_CONTENT", publisher, build, listener));
     }
 
     @Test
@@ -139,13 +139,13 @@ public class ContentBuilderTest {
         testVars.put("FOO", "BAR");
         when(build.getEnvironment(listener)).thenReturn(testVars);
 
-        assertEquals("\\BAR", new ContentBuilder().transformText("\\${ENV, var=\"FOO\"}", publisher, build, listener));
+        assertEquals("\\BAR", ContentBuilder.transformText("\\${ENV, var=\"FOO\"}", publisher, build, listener));
     }
     
     @Test
     public void testRuntimeMacro() throws IOException, InterruptedException {
         RuntimeContent content = new RuntimeContent("Hello, world");
-        assertEquals("Hello, world", new ContentBuilder().transformText("${RUNTIME}", new ExtendedEmailPublisherContext(publisher, build, listener), Collections.singletonList((TokenMacro)content)));
+        assertEquals("Hello, world", ContentBuilder.transformText("${RUNTIME}", new ExtendedEmailPublisherContext(publisher, build, listener), Collections.singletonList((TokenMacro)content)));
     }
     
     public class RuntimeContent extends TokenMacro {

@@ -7,14 +7,21 @@ import hudson.model.Describable;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
+import hudson.plugins.emailext.plugins.recipients.CulpritsRecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction.ChildReport;
+import java.util.ArrayList;
+import java.util.List;
 
 import jenkins.model.Jenkins;
 
 import net.sf.json.JSONObject;
+import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 
 public abstract class EmailTrigger implements Describable<EmailTrigger>, ExtensionPoint {
@@ -25,12 +32,27 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         return Jenkins.getInstance().<EmailTrigger, EmailTriggerDescriptor>getDescriptorList(EmailTrigger.class);
     }
 
-    protected EmailTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList,
-            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+    @Deprecated
+    protected EmailTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        List<RecipientProvider> providers = new ArrayList<RecipientProvider>();
+        if(sendToList) {
+            providers.add(new ListRecipientProvider());
+        }
+        
+        if(sendToDevs) {
+            providers.add(new DevelopersRecipientProvider());
+        }
+        
+        if(sendToRequestor) {
+            providers.add(new RequesterRecipientProvider());
+        }
+        
+        if(sendToCulprits) {
+            providers.add(new CulpritsRecipientProvider());
+        }
+        
         email = new EmailType();
-        email.setSendToRecipientList(sendToList);
-        email.setSendToDevelopers(sendToDevs);
-        email.setSendToRequester(sendToRequestor);
+        email.addRecipientProviders(providers);
         email.setRecipientList(recipientList);
         email.setReplyTo(replyTo);
         email.setSubject(subject);
@@ -39,7 +61,20 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         email.setAttachBuildLog(attachBuildLog > 0);
         email.setCompressBuildLog(attachBuildLog > 1);
         email.setContentType(contentType);
-        email.setSendToCulprits(sendToCulprits);
+    }
+    
+    protected EmailTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, 
+            String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        email = new EmailType();
+        email.addRecipientProviders(recipientProviders);
+        email.setRecipientList(recipientList);
+        email.setReplyTo(replyTo);
+        email.setSubject(subject);
+        email.setBody(body);
+        email.setAttachmentsPattern(attachmentsPattern);
+        email.setAttachBuildLog(attachBuildLog > 0);
+        email.setCompressBuildLog(attachBuildLog > 1);
+        email.setContentType(contentType);
     }
     
     protected EmailTrigger(JSONObject formData) {
@@ -51,6 +86,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
      * trigger an email have been met.
      *
      * @param build The Build object after the project has been built
+     * @param listener Used for logging to the build log
      * @return true if the conditions have been met to trigger a build of this
      * type
      */
@@ -64,7 +100,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     public EmailType getEmail() {
         return email;
     }
-
+    
     public void setEmail(EmailType email) {
         if (email == null) {
             email = new EmailType();
@@ -77,10 +113,20 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     public EmailTriggerDescriptor getDescriptor() {
         return (EmailTriggerDescriptor) Jenkins.getInstance().getDescriptor(getClass());
     }
-
+    
     public boolean configure(StaplerRequest req, JSONObject formData) {
-        setEmail(createMailType(formData));
+        setEmail(createMailType(req, formData));
         return true;
+    }
+    
+    @Deprecated
+    protected EmailType createMailType(JSONObject formData) {
+        return createMailType(Stapler.getCurrentRequest(), formData);
+    }
+    
+    protected EmailType createMailType(StaplerRequest req, JSONObject formData) {
+        EmailType m = (EmailType)req.bindJSON(EmailType.class, formData);
+        return m;
     }
 
     /**
@@ -116,25 +162,9 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
 
     /**
      * Should this trigger run before the build? Defaults to false.
+     * @return true if the trigger should be checked before the build.
      */
     public boolean isPreBuild() {
         return false;
-    }
-
-    protected EmailType createMailType(JSONObject formData) {
-        EmailType m = new EmailType();
-        String prefix = "mailer_" + getDescriptor().getJsonSafeClassName() + '_';
-        m.setSubject(formData.getString(prefix + "subject"));
-        m.setBody(formData.getString(prefix + "body"));
-        m.setRecipientList(formData.getString(prefix + "recipientList"));
-        m.setSendToRecipientList(formData.optBoolean(prefix + "sendToRecipientList"));
-        m.setSendToDevelopers(formData.optBoolean(prefix + "sendToDevelopers"));
-        m.setSendToRequester(formData.optBoolean(prefix + "sendToRequester"));
-        m.setSendToCulprits(formData.optBoolean(prefix + "sendToCulprits"));
-        m.setAttachmentsPattern(formData.getString(prefix + "attachmentsPattern"));
-        m.setAttachBuildLog(formData.optBoolean(prefix + "attachBuildLog"));
-        m.setReplyTo(formData.getString(prefix + "replyTo"));
-        m.setContentType(formData.getString(prefix + "contentType"));
-        return m;
     }
 }

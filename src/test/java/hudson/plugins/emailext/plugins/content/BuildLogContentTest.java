@@ -20,7 +20,7 @@ public class BuildLogContentTest {
     @Before
     public void setup() {
         build = mock(AbstractBuild.class);
-        listener = new StreamTaskListener(System.out);
+        listener = StreamTaskListener.fromStdout();
         buildLogContent = new BuildLogContent();
     }
 

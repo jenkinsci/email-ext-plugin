@@ -1,5 +1,7 @@
 package hudson.plugins.emailext;
 
+import hudson.ExtensionList;
+import hudson.Plugin;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
@@ -9,7 +11,12 @@ import hudson.plugins.emailext.plugins.content.JellyScriptContent;
 import hudson.plugins.emailext.plugins.content.ScriptContent;
 import hudson.util.FormValidation;
 import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.lib.configprovider.ConfigProvider;
+import org.jenkinsci.lib.configprovider.model.Config;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
@@ -48,13 +55,50 @@ public class EmailExtTemplateAction implements Action {
     
     public FormValidation doTemplateFileCheck(@QueryParameter final String value) {
         if(!StringUtils.isEmpty(value)) {
-            final File scriptsFolder = new File(Hudson.getInstance().getRootDir(), "email-templates");
-            final File scriptFile = new File(scriptsFolder, value);
-            if(!scriptFile.exists()) {
-                return FormValidation.error("The file '" + value + "' does not exist");
+            if(value.startsWith("managed:")) {
+                return checkForManagedFile(value);
+            } else {
+                final File scriptsFolder = new File(Hudson.getInstance().getRootDir(), "email-templates");
+                final File scriptFile = new File(scriptsFolder, value);
+                if(!scriptFile.exists()) {
+                    return FormValidation.error("The file '" + value + "' does not exist");
+                }
             }
         }
         return FormValidation.ok();
+    }
+    
+    private FormValidation checkForManagedFile(final String value) {
+        Plugin plugin = Jenkins.getInstance().getPlugin("config-file-provider");
+        if(plugin != null) {
+            Config config = null;
+            Collection<ConfigProvider> providers = getTemplateConfigProviders();
+            for(ConfigProvider provider : providers) {
+                for(Config c : provider.getAllConfigs()) {
+                    if(c.name.equalsIgnoreCase(value) && provider.isResponsibleFor(c.id)) {
+                        return FormValidation.ok();
+                    }                    
+                }            
+            }
+        } else {
+            return FormValidation.error(Messages.EmailExtTemplateAction_ConfigFileProviderNotAvailable());
+        }
+        return FormValidation.error(Messages.EmailExtTemplateAction_ManagedTemplateNotFound());
+    }
+    
+    private static Collection<ConfigProvider> getTemplateConfigProviders() {
+        Collection<ConfigProvider> providers = Collections.emptyList();
+        ExtensionList<ConfigProvider> all = ConfigProvider.all();
+        ConfigProvider p = all.get(GroovyTemplateConfig.GroovyTemplateConfigProvider.class);
+        if(p != null) {
+            providers.add(p);
+        }
+        
+        p = all.get(JellyTemplateConfig.JellyTemplateConfigProvider.class);
+        if(p != null) {
+            providers.add(p);
+        }
+        return providers;
     }
     
     @JavaScriptMethod
