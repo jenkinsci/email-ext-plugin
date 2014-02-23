@@ -65,10 +65,10 @@ public class ContentBuilder {
                 DEFAULT_PRESEND_SCRIPT, defaultPresendScript);
         
         try {
-            List<TokenMacro> privMacros = getPrivateMacros();
+            List<TokenMacro> macros = new ArrayList<TokenMacro>(getPrivateMacros());
             if(additionalMacros != null)
-                privateMacros.addAll(additionalMacros);
-            newText = TokenMacro.expandAll(context.getBuild(), context.getListener(), newText, false, privMacros);
+                macros.addAll(additionalMacros);
+            newText = TokenMacro.expandAll(context.getBuild(), context.getListener(), newText, false, macros);
         } catch (MacroEvaluationException e) {
             context.getListener().getLogger().println("Error evaluating token: " + e.getMessage());
         } catch (Exception e) {
