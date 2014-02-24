@@ -174,6 +174,45 @@ public class EmailRecipientUtilsTest {
     }
 
     @Test
+    public void testBCC()
+            throws Exception {
+        envVars.put("EMAIL_LIST", "ashlux@gmail.com, bcc:slide.o.mix@gmail.com, another@gmail.com");
+
+        Set<InternetAddress> internetAddresses = emailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars);
+
+        assertEquals(2, internetAddresses.size());
+        assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
+        assertTrue(internetAddresses.contains(new InternetAddress("another@gmail.com")));
+
+        internetAddresses = emailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars, EmailRecipientUtils.BCC);
+
+        assertEquals(1, internetAddresses.size());
+        assertTrue(internetAddresses.contains(new InternetAddress("slide.o.mix@gmail.com")));
+    }
+
+    @Test
+    public void testBCCandCC()
+            throws Exception {
+        envVars.put("EMAIL_LIST", "ashlux@gmail.com, bcc:slide.o.mix@gmail.com, another@gmail.com, cc:example@gmail.com");
+
+        Set<InternetAddress> internetAddresses = emailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars);
+
+        assertEquals(2, internetAddresses.size());
+        assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
+        assertTrue(internetAddresses.contains(new InternetAddress("another@gmail.com")));
+
+        internetAddresses = emailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars, EmailRecipientUtils.BCC);
+
+        assertEquals(1, internetAddresses.size());
+        assertTrue(internetAddresses.contains(new InternetAddress("slide.o.mix@gmail.com")));
+
+        internetAddresses = emailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars, EmailRecipientUtils.CC);
+
+        assertEquals(1, internetAddresses.size());
+        assertTrue(internetAddresses.contains(new InternetAddress("example@gmail.com")));
+    }
+
+    @Test
     public void testUTF8()
             throws Exception {
         envVars.put("EMAIL_LIST", "ashlux@gmail.com, cc:slide.o.mix@gmail.com, 愛嬋 <another@gmail.com>");

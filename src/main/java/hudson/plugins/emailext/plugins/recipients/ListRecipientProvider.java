@@ -33,11 +33,11 @@ public class ListRecipientProvider extends RecipientProvider {
     }
     
     @Override
-    public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc) {
+    public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
         try {
             ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
             descriptor.debug(context.getListener().getLogger(), "Adding recipients from project recipient list");
-            EmailRecipientUtils.addAddressesFromRecipientList(to, cc, EmailRecipientUtils.getRecipientList(context, context.getPublisher().recipientList), env, context.getListener());            
+            EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, EmailRecipientUtils.getRecipientList(context, context.getPublisher().recipientList), env, context.getListener());
         } catch (MessagingException ex) {
             Logger.getLogger(ListRecipientProvider.class.getName()).log(Level.SEVERE, null, ex);
         }
