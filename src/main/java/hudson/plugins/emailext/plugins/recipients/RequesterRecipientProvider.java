@@ -32,7 +32,7 @@ public class RequesterRecipientProvider extends RecipientProvider {
     }
     
     @Override
-    public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc) {
+    public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
         // looking for Upstream build.
         AbstractBuild<?, ?> cur = context.getBuild();
         Cause.UpstreamCause upc = context.getBuild().getCause(Cause.UpstreamCause.class);
@@ -45,10 +45,10 @@ public class RequesterRecipientProvider extends RecipientProvider {
             cur = p.getBuildByNumber(upc.getUpstreamBuild());
             upc = cur.getCause(Cause.UpstreamCause.class);
         }
-        addUserTriggeringTheBuild(cur, to, cc, env, context.getListener());
+        addUserTriggeringTheBuild(cur, to, cc, bcc, env, context.getListener());
     }
 
-    private void addUserTriggeringTheBuild(AbstractBuild<?, ?> build, Set<InternetAddress> to, Set<InternetAddress> cc,
+    private void addUserTriggeringTheBuild(AbstractBuild<?, ?> build, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc,
             EnvVars env, TaskListener listener) {
         User user = getByUserIdCause(build);
         if (user == null) {
@@ -58,10 +58,10 @@ public class RequesterRecipientProvider extends RecipientProvider {
         if (user != null) {
             String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
             if (adrs != null) {
-                EmailRecipientUtils.addAddressesFromRecipientList(to, cc, adrs, env, listener);
+                EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, adrs, env, listener);
             } else {
                 listener.getLogger().println("The user does not have a configured email address, trying the user's id");
-                EmailRecipientUtils.addAddressesFromRecipientList(to, cc, user.getId(), env, listener);
+                EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, user.getId(), env, listener);
             }
         }
     }

@@ -26,7 +26,7 @@ public class DevelopersRecipientProvider extends RecipientProvider {
     }
     
     @Override
-    public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc) {
+    public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         Set<User> users = new HashSet<User>();
         for (ChangeLogSet.Entry change : context.getBuild().getChangeSet()) {
@@ -38,7 +38,7 @@ public class DevelopersRecipientProvider extends RecipientProvider {
                 String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
                 if (userAddress != null) {
                     descriptor.debug(context.getListener().getLogger(), "Adding user address %s, they were not considered an excluded committer", userAddress);
-                    EmailRecipientUtils.addAddressesFromRecipientList(to, cc, userAddress, env, context.getListener());
+                    EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, userAddress, env, context.getListener());
                 } else {
                     context.getListener().getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
                 }

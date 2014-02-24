@@ -503,20 +503,21 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         // Get the recipients from the global list of addresses
         Set<InternetAddress> to = new LinkedHashSet<InternetAddress>();
         Set<InternetAddress> cc = new LinkedHashSet<InternetAddress>();
+        Set<InternetAddress> bcc = new LinkedHashSet<InternetAddress>();
 
         String emergencyReroute = descriptor.getEmergencyReroute();
 
         if (StringUtils.isNotBlank(emergencyReroute)) {
             debug(context.getListener().getLogger(), "Emergency reroute turned on");
-            EmailRecipientUtils.addAddressesFromRecipientList(to, cc, emergencyReroute, env, context.getListener());
+            EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, emergencyReroute, env, context.getListener());
             debug(context.getListener().getLogger(), "Emergency reroute is set to: " + emergencyReroute);
         } else {
             for (RecipientProvider provider : context.getTrigger().getEmail().getRecipientProviders()) {
-                provider.addRecipients(context, env, to, cc);
+                provider.addRecipients(context, env, to, cc, bcc);
             }
             
             descriptor.debug(context.getListener().getLogger(), "Adding recipients from trigger recipient list");
-            EmailRecipientUtils.addAddressesFromRecipientList(to, cc, EmailRecipientUtils.getRecipientList(context, context.getTrigger().getEmail().getRecipientList()), env, context.getListener());
+            EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, EmailRecipientUtils.getRecipientList(context, context.getTrigger().getEmail().getRecipientList()), env, context.getListener());
         }
 
         // remove the excluded recipients
@@ -528,20 +529,24 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
         to.removeAll(excludedRecipients);
         cc.removeAll(excludedRecipients);
+        bcc.removeAll(excludedRecipients);
 
         msg.setRecipients(Message.RecipientType.TO, to.toArray(new InternetAddress[to.size()]));
         if (cc.size() > 0) {
             msg.setRecipients(Message.RecipientType.CC, cc.toArray(new InternetAddress[cc.size()]));
         }
+        if (bcc.size() > 0) {
+            msg.setRecipients(Message.RecipientType.BCC, bcc.toArray(new InternetAddress[bcc.size()]));
+        }
 
         Set<InternetAddress> replyToAddresses = new LinkedHashSet<InternetAddress>();
 
         if (StringUtils.isNotBlank(replyTo)) {
-            EmailRecipientUtils.addAddressesFromRecipientList(replyToAddresses, null, EmailRecipientUtils.getRecipientList(context, replyTo), env, context.getListener());
+            EmailRecipientUtils.addAddressesFromRecipientList(replyToAddresses, null, null, EmailRecipientUtils.getRecipientList(context, replyTo), env, context.getListener());
         }
 
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getReplyTo())) {
-            EmailRecipientUtils.addAddressesFromRecipientList(replyToAddresses, null, EmailRecipientUtils.getRecipientList(context, context.getTrigger().getEmail().getReplyTo()), env, context.getListener());
+            EmailRecipientUtils.addAddressesFromRecipientList(replyToAddresses, null, null, EmailRecipientUtils.getRecipientList(context, context.getTrigger().getEmail().getReplyTo()), env, context.getListener());
         }
 
         if (replyToAddresses.size() > 0) {
