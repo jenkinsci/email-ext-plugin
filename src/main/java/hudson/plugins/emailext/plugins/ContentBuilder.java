@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins;
 
+import hudson.CopyOnWrite;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
@@ -25,6 +26,9 @@ import org.jenkinsci.plugins.tokenmacro.TokenMacro;
  *
  */
 public class ContentBuilder {
+    
+    @CopyOnWrite
+    private static volatile List<TokenMacro> privateMacros;
 
     private static final String DEFAULT_BODY = "\\$DEFAULT_CONTENT|\\$\\{DEFAULT_CONTENT\\}";
     private static final String DEFAULT_SUBJECT = "\\$DEFAULT_SUBJECT|\\$\\{DEFAULT_SUBJECT\\}";
@@ -61,10 +65,10 @@ public class ContentBuilder {
                 DEFAULT_PRESEND_SCRIPT, defaultPresendScript);
         
         try {
-            List<TokenMacro> privateMacros = getPrivateMacros();
+            List<TokenMacro> macros = new ArrayList<TokenMacro>(getPrivateMacros());
             if(additionalMacros != null)
-                privateMacros.addAll(additionalMacros);
-            newText = TokenMacro.expandAll(context.getBuild(), context.getListener(), newText, false, privateMacros);
+                macros.addAll(additionalMacros);
+            newText = TokenMacro.expandAll(context.getBuild(), context.getListener(), newText, false, macros);
         } catch (MacroEvaluationException e) {
             context.getListener().getLogger().println("Error evaluating token: " + e.getMessage());
         } catch (Exception e) {
@@ -80,15 +84,18 @@ public class ContentBuilder {
     }
     
     public static List<TokenMacro> getPrivateMacros() {
-        List<TokenMacro> macros = new ArrayList<TokenMacro>();
+        if(privateMacros != null)
+            return privateMacros;
+        
+        privateMacros = new ArrayList<TokenMacro>();
         ClassLoader cl = Jenkins.getInstance().pluginManager.uberClassLoader;
         for (final IndexItem<EmailToken, TokenMacro> item : Index.load(EmailToken.class, TokenMacro.class, cl)) {
             try {
-                macros.add(item.instance());
+                privateMacros.add(item.instance());
             } catch (Exception e) {
                 // ignore errors loading tokens
             }
         }
-        return macros;
+        return privateMacros;
     }
 }
