@@ -75,6 +75,130 @@ public class FailedTestsContentTest
     }
 
     @Test
+    public void testGetContent_withMessage_withStack()
+            throws Exception {
+        AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+        when( testResults.getFailCount() ).thenReturn( 2 );
+
+        List<CaseResult> failedTests = new ArrayList<CaseResult>();
+        for(int i = 0; i < 2; i++) {
+            CaseResult result = mock( CaseResult.class );
+            when( result.getStatus() ).thenReturn( CaseResult.Status.FAILED );
+            when( result.getClassName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
+            when( result.getDisplayName() ).thenReturn( "Test" + i );
+            when( result.getErrorDetails() ).thenReturn( "Error" + i );
+            when( result.getErrorStackTrace() ).thenReturn( "Stack" + i );
+            failedTests.add(result);
+        }
+        when( testResults.getFailedTests() ).thenReturn( failedTests );
+        when( build.getTestResultAction() ).thenReturn( testResults );
+
+        failedTestContent.maxTests = 2;
+        failedTestContent.showMessage = true;
+        failedTestContent.showStack = true;
+        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+
+        for(int i = 0; i < 2; i++) {
+            assertTrue( content.contains("FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test" + i) );
+            assertTrue( content.contains("Error Message:\nError" + i) );
+            assertTrue( content.contains("Stack Trace:\nStack" + i) );
+        }
+    }
+
+    @Test
+    public void testGetContent_noMessage_withStack()
+            throws Exception {
+        AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+        when( testResults.getFailCount() ).thenReturn( 2 );
+
+        List<CaseResult> failedTests = new ArrayList<CaseResult>();
+        for(int i = 0; i < 2; i++) {
+            CaseResult result = mock( CaseResult.class );
+            when( result.getStatus() ).thenReturn( CaseResult.Status.FAILED );
+            when( result.getClassName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
+            when( result.getDisplayName() ).thenReturn( "Test" + i );
+            when( result.getErrorDetails() ).thenReturn( "Error" + i );
+            when( result.getErrorStackTrace() ).thenReturn( "Stack" + i );
+            failedTests.add(result);
+        }
+        when( testResults.getFailedTests() ).thenReturn( failedTests );
+        when( build.getTestResultAction() ).thenReturn( testResults );
+
+        failedTestContent.maxTests = 2;
+        failedTestContent.showMessage = false;
+        failedTestContent.showStack = true;
+        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+
+        for(int i = 0; i < 2; i++) {
+            assertTrue( content.contains("FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test" + i) );
+            assertFalse( content.contains("Error Message:\nError" + i) );
+            assertTrue( content.contains("Stack Trace:\nStack" + i) );
+        }
+    }
+
+    @Test
+    public void testGetContent_withMessage_noStack()
+            throws Exception {
+        AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+        when( testResults.getFailCount() ).thenReturn( 2 );
+
+        List<CaseResult> failedTests = new ArrayList<CaseResult>();
+        for(int i = 0; i < 2; i++) {
+            CaseResult result = mock( CaseResult.class );
+            when( result.getStatus() ).thenReturn( CaseResult.Status.FAILED );
+            when( result.getClassName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
+            when( result.getDisplayName() ).thenReturn( "Test" + i );
+            when( result.getErrorDetails() ).thenReturn( "Error" + i );
+            when( result.getErrorStackTrace() ).thenReturn( "Stack" + i );
+            failedTests.add(result);
+        }
+        when( testResults.getFailedTests() ).thenReturn( failedTests );
+        when( build.getTestResultAction() ).thenReturn( testResults );
+
+        failedTestContent.maxTests = 2;
+        failedTestContent.showMessage = true;
+        failedTestContent.showStack = false;
+        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+
+        for(int i = 0; i < 2; i++) {
+            assertTrue( content.contains("FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test" + i) );
+            assertTrue( content.contains("Error Message:\nError" + i) );
+            assertFalse( content.contains("Stack Trace:\nStack" + i) );
+        }
+    }
+
+    @Test
+    public void testGetContent_noMessage_noStack()
+            throws Exception {
+        AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+        when( testResults.getFailCount() ).thenReturn( 2 );
+
+        List<CaseResult> failedTests = new ArrayList<CaseResult>();
+        for(int i = 0; i < 2; i++) {
+            CaseResult result = mock( CaseResult.class );
+            when( result.getStatus() ).thenReturn( CaseResult.Status.FAILED );
+            when( result.getClassName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
+            when( result.getDisplayName() ).thenReturn( "Test" + i );
+            when( result.getErrorDetails() ).thenReturn( "Error" + i );
+            when( result.getErrorStackTrace() ).thenReturn( "Stack" + i );
+            failedTests.add(result);
+        }
+        when( testResults.getFailedTests() ).thenReturn( failedTests );
+        when( build.getTestResultAction() ).thenReturn( testResults );
+
+        failedTestContent.maxTests = 2;
+        failedTestContent.showMessage = false;
+        failedTestContent.showStack = false;
+        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+
+        for(int i = 0; i < 2; i++) {
+            assertTrue( content.contains("FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test" + i) );
+            assertFalse( content.contains("Error Message:\nError" + i) );
+            assertFalse( content.contains("Stack Trace:\nStack" + i) );
+        }
+    }
+
+    @Test
     public void testGetContent_whenContentLargerThanMaxLengthShouldTruncate()
             throws Exception {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
