@@ -2,45 +2,39 @@ package hudson.plugins.emailext;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
 import hudson.EnvVars;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
-import hudson.matrix.MatrixRun;
 import hudson.matrix.MatrixBuild;
-import hudson.model.BuildListener;
-import hudson.model.Result;
+import hudson.matrix.MatrixRun;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.BuildListener;
+import hudson.model.BuildableItemWithBuildWrappers;
+import hudson.model.Item;
+import hudson.model.Result;
+import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.CssInliner;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.content.TriggerNameContent;
 import hudson.tasks.BuildStepMonitor;
+import hudson.tasks.BuildWrapper;
+import hudson.tasks.BuildWrapper.Environment;
 import hudson.tasks.MailMessageIdAction;
+import hudson.tasks.Mailer;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
-import hudson.tasks.Mailer;
-
-import jenkins.model.Jenkins;
-
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-import hudson.FilePath;
-import hudson.model.Action;
-import hudson.model.Item;
-import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.content.TriggerNameContent;
-
-import jenkins.model.JenkinsLocationConfiguration;
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
-
-import org.kohsuke.groovy.sandbox.SandboxTransformer;
-
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.ConnectException;
 import java.net.SocketException;
@@ -56,7 +50,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -68,10 +61,14 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import jenkins.model.Jenkins;
+import jenkins.model.JenkinsLocationConfiguration;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.kohsuke.stapler.DataBoundConstructor;
-import com.google.common.collect.Multimap;
-import hudson.plugins.emailext.plugins.RecipientProvider;
 
 /**
  * {@link Publisher} that sends notification e-mail.
@@ -220,7 +217,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         debug(listener.getLogger(), "Checking for pre-build");
         if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
             debug(listener.getLogger(), "Executing pre-build step");
-            return _perform(build, listener, true);
+            return _perform(build, null, listener, true);
         }
         return true;
     }
@@ -230,12 +227,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         debug(listener.getLogger(), "Checking for post-build");
         if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
             debug(listener.getLogger(), "Performing post-build step");
-            return _perform(build, listener, false);
+            return _perform(build, launcher, listener, false);
         }
         return true;
     }
 
-    private boolean _perform(AbstractBuild<?, ?> build, BuildListener listener, boolean forPreBuild) {
+    private boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, boolean forPreBuild) {
         boolean emailTriggered = false;
         debug(listener.getLogger(), "Checking if email needs to be generated");
         final Multimap<String, EmailTrigger> triggered = ArrayListMultimap.create();
@@ -275,7 +272,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         for (String triggerName : triggered.keySet()) {
             for (EmailTrigger trigger : triggered.get(triggerName)) {
                 listener.getLogger().println("Sending email for trigger: " + triggerName);
-                final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build, listener);
+                final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build, launcher, listener);
                 context.setTriggered(triggered);
                 context.setTrigger(trigger);
                 sendMail(context);
@@ -499,7 +496,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             // create an empty set of env vars
             env = new EnvVars();
         }
-
+        
         // Get the recipients from the global list of addresses
         Set<InternetAddress> to = new LinkedHashSet<InternetAddress>();
         Set<InternetAddress> cc = new LinkedHashSet<InternetAddress>();
@@ -681,7 +678,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
                 // Will be run by parent so we check if needed to be executed by parent
                 if (getMatrixTriggerMode().forParent) {
-                    return ExtendedEmailPublisher.this._perform(this.build, this.listener, false);
+                    return ExtendedEmailPublisher.this._perform(this.build, this.launcher, this.listener, false);
                 }
                 return true;
             }
@@ -691,7 +688,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 LOGGER.log(Level.FINER, "end build of " + this.build.getDisplayName());
                 // Will be run by parent so we check if needed to be executed by parent 
                 if (getMatrixTriggerMode().forParent) {
-                    return ExtendedEmailPublisher.this._perform(this.build, this.listener, true);
+                    return ExtendedEmailPublisher.this._perform(this.build, this.launcher, this.listener, true);
                 }
                 return true;
             }

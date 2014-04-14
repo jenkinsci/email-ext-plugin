@@ -3,6 +3,8 @@ package hudson.plugins.emailext;
 import hudson.Extension;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
+import hudson.model.Item;
+import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
@@ -130,6 +132,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private boolean debugMode = false;
 
     private boolean enableSecurity = false;
+    
+    private Permission templateTestPermission = Item.CONFIGURE;
     
     /**
      * Enables the "Watch This Job" feature
@@ -292,6 +296,14 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     public String getDefaultPresendScript() {
         return defaultPresendScript;
     }
+    
+    public Permission getTemplateTestPermission() {
+        return templateTestPermission;
+    }
+    
+    public void setTemplateTestPermission(Permission templateTestPermission) {
+        this.templateTestPermission = templateTestPermission;
+    }
 
     public ExtendedEmailPublisherDescriptor() {
         super(ExtendedEmailPublisher.class);
@@ -365,6 +377,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         } else {
             listId = null;
         }
+        
+        templateTestPermission = Permission.fromId(req.getParameter("ext_mailer_template_test_permission"));
 
         save();
         return super.configure(req, formData);

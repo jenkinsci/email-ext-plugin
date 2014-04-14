@@ -1,16 +1,13 @@
 package hudson.plugins.emailext;
 
 import hudson.FilePath;
-import hudson.model.BuildListener;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
-
+import hudson.model.BuildListener;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.ZipDataSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-
-import org.apache.commons.lang.StringUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +15,6 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
@@ -26,6 +22,7 @@ import javax.activation.MimetypesFileTypeMap;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * @author acearl
@@ -152,11 +149,16 @@ public class AttachmentUtils implements Serializable {
         }
         return attachments;
     }
-
+    
+    @Deprecated
     public void attach(Multipart multipart, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, BuildListener listener) {
-        final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, listener);
+        final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, null, listener);
         attach(multipart, context);
-        
+    }
+
+    public void attach(Multipart multipart, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+        final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, launcher, listener);
+        attach(multipart, context);
     }
     
     public void attach(Multipart multipart, ExtendedEmailPublisherContext context) {
@@ -203,16 +205,14 @@ public class AttachmentUtils implements Serializable {
         }
     }
 
-    /**
-     * Attaches the build log to the multipart item.
-     * @param publisher
-     * @param multipart
-     * @param build
-     * @param listener
-     * @param compress
-     */
+    @Deprecated
     public static void attachBuildLog(ExtendedEmailPublisher publisher, Multipart multipart, AbstractBuild<?, ?> build, BuildListener listener, boolean compress) {
-        final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, listener);
+        final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, null, listener);
+        attachBuildLog(context, multipart, compress);
+    }
+    
+    public static void attachBuildLog(ExtendedEmailPublisher publisher, Multipart multipart, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, boolean compress) {
+        final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, launcher, listener);
         attachBuildLog(context, multipart, compress);
     }
 }
