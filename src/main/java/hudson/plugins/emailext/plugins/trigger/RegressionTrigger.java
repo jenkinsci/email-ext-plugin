@@ -39,17 +39,23 @@ public class RegressionTrigger extends EmailTrigger {
         if (build.getTestResultAction() == null)
             return false;
 
+        // if previous run didn't have test results and this one does (with failures)
         if (previousBuild.getTestResultAction() == null)
             return build.getTestResultAction().getFailCount() > 0;
 
+        // if more tests failed during this run
+        if(build.getTestResultAction().getFailCount() >
+                previousBuild.getTestResultAction().getFailCount())
+            return true;
+
+        // if any test failed this time, but not last time
         for (Object result : build.getTestResultAction().getFailedTests()){
             CaseResult res = (CaseResult)result;
             if (res.getAge() == 1)
                 return true;
         }
 
-        return build.getTestResultAction().getFailCount() > 
-                previousBuild.getTestResultAction().getFailCount();
+        return false;
     }
 
     @Extension
