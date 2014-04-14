@@ -21,6 +21,9 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     public boolean showStack = true;
 
     @Parameter
+    public boolean showMessage = true;
+
+    @Parameter
     public int maxTests = Integer.MAX_VALUE;
 
     @Parameter
@@ -67,7 +70,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
                 for (CaseResult failedTest : testResult.getFailedTests()) {
                     if (showOldFailures || failedTest.getAge() == 1) {
                         if (printedTests < maxTests && printedLength <= maxLength) {
-                            printedLength += outputTest(buffer, failedTest, showStack, maxLength-printedLength);
+                            printedLength += outputTest(buffer, failedTest, showStack, showMessage, maxLength-printedLength);
                             printedTests++;
                         }
                     }
@@ -87,7 +90,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     }
 
     private int outputTest(StringBuilder buffer, CaseResult failedTest,
-            boolean showStack, int lengthLeft) {
+            boolean showStack, boolean showMessage, int lengthLeft) {
         StringBuilder local = new StringBuilder();
         int currLength = buffer.length();
 
@@ -98,18 +101,25 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         local.append(".");
 
         local.append(failedTest.getDisplayName());
-        local.append("\n\n");
+        local.append("\n");
 
-        local.append("Error Message:\n");
-        local.append(failedTest.getErrorDetails());
-
+        if (showMessage) {
+            local.append("\n");
+            local.append("Error Message:\n");
+            local.append(failedTest.getErrorDetails());
+            local.append("\n");
+        }
+        
         if (showStack) {
-            local.append("\n\n");
+            local.append("\n");
             local.append("Stack Trace:\n");
             local.append(failedTest.getErrorStackTrace());
+            local.append("\n");
         }
 
-        local.append("\n\n");
+        if (showMessage || showStack) {
+            local.append("\n");
+        }
 
         if(local.length() > lengthLeft) {
             local.setLength(lengthLeft);

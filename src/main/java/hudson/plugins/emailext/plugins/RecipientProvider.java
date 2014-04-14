@@ -24,5 +24,5 @@ public abstract class RecipientProvider implements Describable<RecipientProvider
         return (RecipientProviderDescriptor) Jenkins.getInstance().getDescriptor(getClass());
     }
 
-    public abstract void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc);
+    public abstract void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc);
 }

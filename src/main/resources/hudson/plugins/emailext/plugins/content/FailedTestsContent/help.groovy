@@ -5,6 +5,9 @@ dd() {
     dt("showStack")
     dd("Shows stack trace in failing test output. Defaults to true.")
 
+    dt("showMessage")
+    dd("Shows error message in failing test output. Defaults to true.")
+
     dt("maxTests")
     dd("Display at most this many tests. No limit is set by default.")
 
