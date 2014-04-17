@@ -48,13 +48,18 @@ public class RequesterRecipientProvider extends RecipientProvider {
         addUserTriggeringTheBuild(cur, to, cc, bcc, env, context.getListener());
     }
 
-    private void addUserTriggeringTheBuild(AbstractBuild<?, ?> build, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc,
-            EnvVars env, TaskListener listener) {
+    public static User getUserTriggeringTheBuild(final AbstractBuild<?, ?> build) {
         User user = getByUserIdCause(build);
         if (user == null) {
             user = getByLegacyUserCause(build);
         }
+        return user;
+    }
 
+    private static void addUserTriggeringTheBuild(AbstractBuild<?, ?> build, Set<InternetAddress> to,
+        Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener) {
+
+        final User user = getUserTriggeringTheBuild(build);
         if (user != null) {
             String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
             if (adrs != null) {
@@ -67,7 +72,7 @@ public class RequesterRecipientProvider extends RecipientProvider {
     }
 
     @SuppressWarnings("unchecked")
-    private User getByUserIdCause(AbstractBuild<?, ?> build) {
+    private static User getByUserIdCause(AbstractBuild<?, ?> build) {
         try {
             Cause.UserIdCause cause = build.getCause(Cause.UserIdCause.class);
             if (cause != null) {
@@ -82,7 +87,7 @@ public class RequesterRecipientProvider extends RecipientProvider {
     }
 
     @SuppressWarnings("deprecated")
-    private User getByLegacyUserCause(AbstractBuild<?, ?> build) {
+    private static User getByLegacyUserCause(AbstractBuild<?, ?> build) {
         try {
             Cause.UserCause userCause = build.getCause(Cause.UserCause.class);
             // userCause.getUserName() returns displayName which may be different from authentication name
