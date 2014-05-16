@@ -37,12 +37,10 @@ import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.User;
-import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
-import hudson.scm.ChangeLogSet;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import jenkins.model.Jenkins;
@@ -50,9 +48,6 @@ import jenkins.model.Jenkins;
 /**
  * A recipient provider that assigns ownership of a failing test to the set of developers (including any initiator)
  * that committed changes that first broke the test.
- *
- * InstabilityCommitter
- * Committers or Initiators Causing First Committer
  */
 public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
 
@@ -64,13 +59,13 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
     public void addRecipients(final ExtendedEmailPublisherContext context, final EnvVars env,
         final Set<InternetAddress> to, final Set<InternetAddress> cc, final Set<InternetAddress> bcc) {
 
-        final class Debug {
+        final class Debug implements RecipientProviderUtilities.IDebug {
             private final ExtendedEmailPublisherDescriptor descriptor
                 = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 
-            void send(final String format, final Object... args) {
+            public void send(final String format, final Object... args) {
                 descriptor.debug(logger, format, args);
             }
         }
@@ -139,49 +134,14 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
                         }
                     }
                     debug.send("Collecting suspects...");
-                    for (final AbstractBuild<?, ?> buildWithSuspects : buildsWithSuspects) {
-                        debug.send("  buildWithSuspects: %d", buildWithSuspects.getNumber());
-                        final ChangeLogSet<?> changeLogSet = buildWithSuspects.getChangeSet();
-                        if (changeLogSet == null) {
-                            debug.send("    changeLogSet was null");
-                        } else {
-                            final Set<User> changeAuthors = new HashSet<User>();
-                            for (final ChangeLogSet.Entry change : changeLogSet) {
-                                final User changeAuthor = change.getAuthor();
-                                if (changeAuthors.add(changeAuthor)) {
-                                    debug.send("    adding change author: %s", changeAuthor.getFullName());
-                                }
-                            }
-                            users.addAll(changeAuthors);
-                        }
-                        final User buildRequestor = RequesterRecipientProvider.getUserTriggeringTheBuild(buildWithSuspects);
-                        if (buildRequestor != null) {
-                            debug.send("    adding build requestor: %s", buildRequestor.getFullName());
-                            users.add(buildRequestor);
-                        } else {
-                            debug.send("    buildRequestor was null");
-                        }
-                    }
+                    users.addAll(RecipientProviderUtilities.getChangeSetAuthors(buildsWithSuspects, debug));
+                    users.addAll(RecipientProviderUtilities.getUsersTriggeringTheBuilds(buildsWithSuspects, debug));
                 }
             }
         }
 
         if (users != null) {
-            for (final User user : users) {
-                if (EmailRecipientUtils.isExcludedRecipient(user, context.getListener())) {
-                    debug.send("User %s is an excluded recipient.", user.getFullName());
-                } else {
-                    final String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
-                    if (userAddress != null) {
-                        debug.send("Adding %s with address %s", user.getFullName(), userAddress);
-                        EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, userAddress, env, context.getListener());
-                    } else {
-                        context.getListener().getLogger().println("Failed to send e-mail to "
-                            + user.getFullName()
-                            + " because no e-mail address is known, and no default e-mail domain is configured");
-                    }
-                }
-            }
+            RecipientProviderUtilities.addUsers(users, context.getListener(), env, to, cc, bcc, debug);
         }
     }
 
