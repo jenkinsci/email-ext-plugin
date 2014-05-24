@@ -37,6 +37,7 @@ public class TriggerNameContentTest {
         @Override
         protected void before() throws Throwable {
             super.before();
+            Mailbox.clearAll();
             publisher = new ExtendedEmailPublisher();
             publisher.defaultSubject = "%DEFAULT_SUBJECT";
             publisher.defaultContent = "%DEFAULT_CONTENT";
@@ -46,12 +47,6 @@ public class TriggerNameContentTest {
 
             project = createFreeStyleProject();
             project.getPublishersList().add(publisher);
-        }
-
-        @Override
-        protected void after() throws Exception {
-            super.after();
-            Mailbox.clearAll();
         }
     };
 
