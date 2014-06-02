@@ -32,7 +32,6 @@ import hudson.model.Cause;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
 import hudson.model.StreamBuildListener;
-import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
@@ -40,6 +39,8 @@ import hudson.scm.ChangeLogSet;
 import hudson.tasks.Mailer;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.TestResultAction;
+import hudson.util.StreamTaskListener;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -165,8 +166,7 @@ public class FailingTestSuspectsRecipientProviderTest {
     }
 
     private static void checkRecipients(final Build build, final String... inAuthors) throws AddressException {
-        TaskListener listener = StreamBuildListener.fromStdout();
-        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(null, build, new Launcher.LocalLauncher(listener), (BuildListener)listener);
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(null, build, new Launcher.LocalLauncher(StreamTaskListener.fromStdout()), new StreamBuildListener(System.out, Charset.defaultCharset()));
         EnvVars envVars = new EnvVars();
         Set<InternetAddress> to = new HashSet<InternetAddress>();
         Set<InternetAddress> cc = new HashSet<InternetAddress>();
