@@ -23,14 +23,6 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
-import java.io.PrintStream;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.mail.internet.InternetAddress;
-
-import org.kohsuke.stapler.DataBoundConstructor;
-
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
@@ -43,9 +35,14 @@ import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.scm.ChangeLogSet;
-import hudson.tasks.junit.CaseResult;
+import hudson.tasks.test.TestResult;
 import hudson.tasks.test.AbstractTestResultAction;
+import java.io.PrintStream;
+import java.util.HashSet;
+import java.util.Set;
+import javax.mail.internet.InternetAddress;
 import jenkins.model.Jenkins;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * A recipient provider that assigns ownership of a failing test to the set of developers (including any initiator)
@@ -92,7 +89,7 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
                     users = new HashSet<User>();
                     debug.send("Collecting builds where a test started failing...");
                     final HashSet<AbstractBuild<?, ?>> buildsWhereATestStartedFailing = new HashSet<AbstractBuild<?, ?>>();
-                    for (final CaseResult caseResult : testResultAction.getFailedTests()) {
+                    for (final TestResult caseResult : testResultAction.getFailedTests()) {
                         final Run<?, ?> runWhereTestStartedFailing = caseResult.getFailedSinceRun();
                         if (runWhereTestStartedFailing instanceof AbstractBuild) {
                             final AbstractBuild<?, ?> buildWhereTestStartedFailing = (AbstractBuild<?, ?>) runWhereTestStartedFailing;

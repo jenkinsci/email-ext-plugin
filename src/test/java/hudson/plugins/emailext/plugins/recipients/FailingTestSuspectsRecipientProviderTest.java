@@ -23,6 +23,23 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
+import hudson.EnvVars;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.Build;
+import hudson.model.BuildListener;
+import hudson.model.Cause;
+import hudson.model.FreeStyleBuild;
+import hudson.model.Result;
+import hudson.model.StreamBuildListener;
+import hudson.model.TaskListener;
+import hudson.model.User;
+import hudson.plugins.emailext.ExtendedEmailPublisherContext;
+import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
+import hudson.scm.ChangeLogSet;
+import hudson.tasks.Mailer;
+import hudson.tasks.junit.CaseResult;
+import hudson.tasks.junit.TestResultAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,10 +49,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-
+import jenkins.model.Jenkins;
 import org.apache.commons.collections.Transformer;
 import org.apache.commons.collections.iterators.TransformIterator;
 import static org.junit.Assert.assertTrue;
@@ -46,22 +62,6 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import hudson.EnvVars;
-import hudson.model.AbstractBuild;
-import hudson.model.Build;
-import hudson.model.Cause;
-import hudson.model.FreeStyleBuild;
-import hudson.model.Result;
-import hudson.model.StreamBuildListener;
-import hudson.model.User;
-import hudson.plugins.emailext.ExtendedEmailPublisherContext;
-import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.scm.ChangeLogSet;
-import hudson.tasks.Mailer;
-import hudson.tasks.junit.CaseResult;
-import hudson.tasks.junit.TestResultAction;
-import jenkins.model.Jenkins;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -165,7 +165,8 @@ public class FailingTestSuspectsRecipientProviderTest {
     }
 
     private static void checkRecipients(final Build build, final String... inAuthors) throws AddressException {
-        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(null, build, StreamBuildListener.fromStdout());
+        TaskListener listener = StreamBuildListener.fromStdout();
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(null, build, new Launcher.LocalLauncher(listener), (BuildListener)listener);
         EnvVars envVars = new EnvVars();
         Set<InternetAddress> to = new HashSet<InternetAddress>();
         Set<InternetAddress> cc = new HashSet<InternetAddress>();
