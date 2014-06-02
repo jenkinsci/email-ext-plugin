@@ -1,0 +1,79 @@
+<div>
+    Sends email to the list of users suspected of causing a unit test to begin failing.
+    This list includes committers and requestors of the build where the test began to fail,
+    and those for any consecutive failed builds prior to the build in which the test began to fail.
+    <table>
+        <tr>
+            <th>Build Number</th>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+        </tr>
+        <tr>
+            <th>Requestor</th>
+            <td>Alice</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>Alice</td>
+        </tr>
+        <tr>
+            <th>Committers</th>
+            <td></td>
+            <td>Bob<br>Clay</td>
+            <td>Clay<br>Dan</td>
+            <td>Bob<br>Ed</td>
+            <td>Ed</td>
+        </tr>
+        <tr>
+            <th>foo</th>
+            <td>Failed</td>
+            <td>Failed</td>
+            <td>Passed</td>
+            <td>N/A</td>
+            <td>Failed</td>
+        </tr>
+        <tr>
+            <th>bar</th>
+            <td>Failed</td>
+            <td>Failed</td>
+            <td>Passed</td>
+            <td>N/A</td>
+            <td>Passed</td>
+        </tr>
+        <tr>
+            <th>baz</th>
+            <td>Passed</td>
+            <td>Failed</td>
+            <td>Failed</td>
+            <td>N/A</td>
+            <td>Passed</td>
+        </tr>
+        <tr>
+            <th>qux</th>
+            <td>Passed</td>
+            <td>Passed</td>
+            <td>Failed</td>
+            <td>N/A</td>
+            <td>Passed</td>
+        </tr>
+        <tr>
+            <th>new</th>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>N/A</td>
+            <td>Failed</td>
+        </tr>
+        <tr>
+            <th>Suspects</th>
+            <td>Alice (foo, bar)</td>
+            <td>Alice (foo, bar)<br>Bob (baz)<br>Clay (baz)</td>
+            <td>Bob (baz)<br>Clay (baz, qux)<br>Dan (qux)</td>
+            <td>N/A<br>(build failed)</td>
+            <td>Alice (foo, new)<br>Bob (foo, new)<br>Ed (foo, new)</td>
+        </tr>
+    </table>
+</div>
