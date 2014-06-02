@@ -25,7 +25,7 @@ public class EmailRecipientUtilsTest {
     @Rule 
     public JenkinsRule j = new JenkinsRule() {
         @Override
-        protected void before() throws Throwable {
+        public void before() throws Throwable {
             emailRecipientUtils = new EmailRecipientUtils();
             envVars = new EnvVars();
             super.before();

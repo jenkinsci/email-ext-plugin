@@ -65,7 +65,7 @@ public class ExtendedEmailPublisherTest {
     @Rule
     public JenkinsRule j = new JenkinsRule() {
         @Override
-        protected void before() throws Throwable {
+        public void before() throws Throwable {
             super.before();
             publisher = new ExtendedEmailPublisher();
             publisher.defaultSubject = "%DEFAULT_SUBJECT";
@@ -81,7 +81,7 @@ public class ExtendedEmailPublisherTest {
         }
 
         @Override
-        protected void after() throws Exception {
+        public void after() throws Exception {
             super.after();
             Mailbox.clearAll();
         }
@@ -525,6 +525,38 @@ public class ExtendedEmailPublisherTest {
         j.assertBuildStatusSuccess(build);
 
         assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
+    }
+
+    @Test
+    @Bug(22777)
+    public void testEmergencyRerouteOverridesPresendScript() throws Exception {
+        publisher.getDescriptor().setEmergencyReroute("emergency@foo.com");
+        publisher.presendScript = "import javax.mail.Message.RecipientType\n"
+                + "msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')";
+        SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
+        successTrigger.setEmail(new EmailType() {
+            {
+                addRecipientProvider(new RequesterRecipientProvider());
+            }
+        });
+        publisher.getConfiguredTriggers().add(successTrigger);
+
+        User u = User.get("kutzi");
+        u.setFullName("Christoph Kutzinski");
+        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
+        u.addProperty(prop);
+
+        UserCause cause = new MockUserCause("kutzi");
+
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
+        assertEquals(0, Mailbox.get("slide.o.mix@xxx.com").size());
+        assertEquals(1, Mailbox.get("emergency@foo.com").size());
+        
+        publisher.getDescriptor().setEmergencyReroute(null);
     }
 
     @Test

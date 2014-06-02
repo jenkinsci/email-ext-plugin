@@ -28,7 +28,7 @@ public class JellyScriptContentTest {
     @Rule
     public JenkinsRule j = new JenkinsRule() {
         @Override
-        protected void before() throws Throwable {
+        public void before() throws Throwable {
             super.before();
 
             content = new JellyScriptContent();

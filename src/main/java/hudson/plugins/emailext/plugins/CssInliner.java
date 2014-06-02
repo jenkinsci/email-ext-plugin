@@ -5,6 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Entities;
 import org.jsoup.select.Elements;
 
 import java.net.URL;
@@ -74,7 +75,7 @@ public class CssInliner {
     applyStyles(doc);
     inlineImages(doc);
 
-    doc.outputSettings(doc.outputSettings().prettyPrint(false));
+    doc.outputSettings(doc.outputSettings().prettyPrint(false).escapeMode(Entities.EscapeMode.xhtml));
     String output = doc.outerHtml();
     return output;
   }

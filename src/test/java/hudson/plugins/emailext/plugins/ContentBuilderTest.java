@@ -34,7 +34,7 @@ public class ContentBuilderTest {
     @Rule
     public JenkinsRule j = new JenkinsRule() {
         @Override
-        protected void before() throws Throwable {
+        public void before() throws Throwable {
             super.before();
 
             listener = new StreamBuildListener(System.out);

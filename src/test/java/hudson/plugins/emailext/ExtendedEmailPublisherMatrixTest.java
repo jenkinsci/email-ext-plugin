@@ -31,7 +31,7 @@ public class ExtendedEmailPublisherMatrixTest {
     @Rule
     public JenkinsRule j = new JenkinsRule() { 
         @Override
-        protected void before() throws Throwable {
+        public void before() throws Throwable {
             super.before();
 
             publisher = new ExtendedEmailPublisher();
@@ -47,7 +47,7 @@ public class ExtendedEmailPublisherMatrixTest {
         }
         
         @Override
-        protected void after() throws Exception {
+        public void after() throws Exception {
             super.after();
             slaves.clear();
             Mailbox.clearAll();

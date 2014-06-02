@@ -16,7 +16,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
-import hudson.model.BuildableItemWithBuildWrappers;
 import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.TaskListener;
@@ -26,8 +25,6 @@ import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.content.TriggerNameContent;
 import hudson.tasks.BuildStepMonitor;
-import hudson.tasks.BuildWrapper;
-import hudson.tasks.BuildWrapper.Environment;
 import hudson.tasks.MailMessageIdAction;
 import hudson.tasks.Mailer;
 import hudson.tasks.Notifier;
@@ -292,6 +289,16 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 if (executePresendScript(context, msg)) {
                     // presend script might have modified recipients:
                     allRecipients = msg.getAllRecipients();
+
+                    if(StringUtils.isNotBlank(getDescriptor().getEmergencyReroute())) {
+                        // clear out all the existing recipients
+                        msg.setRecipients(Message.RecipientType.TO, (Address[])null);
+                        msg.setRecipients(Message.RecipientType.CC, (Address[])null);
+                        msg.setRecipients(Message.RecipientType.BCC, (Address[])null);
+                        // and set the emergency reroute
+                        msg.setRecipients(Message.RecipientType.TO, getDescriptor().getEmergencyReroute());
+                    }
+
                     StringBuilder buf = new StringBuilder("Sending email to:");
                     for (Address a : allRecipients) {
                         buf.append(' ').append(a);
