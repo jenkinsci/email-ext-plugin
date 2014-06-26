@@ -20,6 +20,7 @@ import java.util.Set;
  * Sends emails to committers of upstream builds which triggered this build.
  */
 public class UpstreamComitterRecipientProvider extends RecipientProvider {
+    private static final ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
     @DataBoundConstructor
     public UpstreamComitterRecipientProvider() {
@@ -27,20 +28,17 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
 
     @Override
     public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         descriptor.debug(context.getListener().getLogger(), "Sending email to upstream committer(s).");
-
         AbstractBuild<?, ?> cur;
-            Cause.UpstreamCause upc = context.getBuild().getCause(Cause.UpstreamCause.class);
-            while (upc != null) {
-                // UpstreamCause.getUpstreamProject() returns the full name, so use getItemByFullName
-                AbstractProject<?, ?> p = (AbstractProject<?, ?>) Jenkins.getInstance().getItemByFullName(upc.getUpstreamProject());
-                if(p == null)
-                    break;
-                cur = p.getBuildByNumber(upc.getUpstreamBuild());
-                upc = cur.getCause(Cause.UpstreamCause.class);
-                addUpstreamCommittersTriggeringBuild(cur, to, cc, bcc, env, context.getListener());
-            }
+        Cause.UpstreamCause upc = context.getBuild().getCause(Cause.UpstreamCause.class);
+        while (upc != null) {
+            AbstractProject<?, ?> p = (AbstractProject<?, ?>) Jenkins.getInstance().getItemByFullName(upc.getUpstreamProject());
+            if(p == null)
+                break;
+            cur = p.getBuildByNumber(upc.getUpstreamBuild());
+            upc = cur.getCause(Cause.UpstreamCause.class);
+            addUpstreamCommittersTriggeringBuild(cur, to, cc, bcc, env, context.getListener());
+        }
     }
 
     /**
@@ -54,15 +52,15 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
      * @param listener
      */
     private void addUpstreamCommittersTriggeringBuild(AbstractBuild<?, ?> build, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener) {
-        listener.getLogger().println(String.format("Adding upstream committer from job %s with build number %s", build.getProject().getDisplayName(), build.getNumber()));
+        descriptor.debug(listener.getLogger(), "Adding upstream committer from job %s with build number %s", build.getProject().getDisplayName(), build.getNumber());
         for (ChangeLogSet.Entry change : build.getChangeSet()) {
             User user = change.getAuthor();
             String email = user.getProperty(Mailer.UserProperty.class).getAddress();
             if (email != null) {
-                listener.getLogger().println(String.format("Adding upstream committer %s to recipient list with email %s", user.getFullName(), email));
+                descriptor.debug(listener.getLogger(), "Adding upstream committer %s to recipient list with email %s", user.getFullName(), email);
                 EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, email, env, listener);
             } else {
-                listener.getLogger().println(String.format("The user %s does not have a configured email email, trying the user's id", user.getFullName()));
+                descriptor.debug(listener.getLogger(), "The user %s does not have a configured email email, trying the user's id", user.getFullName());
                 EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, user.getId(), env, listener);
             }
         }
