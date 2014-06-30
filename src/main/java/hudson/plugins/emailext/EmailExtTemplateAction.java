@@ -11,6 +11,7 @@ import hudson.plugins.emailext.plugins.content.JellyScriptContent;
 import hudson.plugins.emailext.plugins.content.ScriptContent;
 import hudson.util.FormValidation;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import jenkins.model.Jenkins;
@@ -87,7 +88,7 @@ public class EmailExtTemplateAction implements Action {
     }
     
     private static Collection<ConfigProvider> getTemplateConfigProviders() {
-        Collection<ConfigProvider> providers = new ArrayList<ConfigProvider>(1);
+        Collection<ConfigProvider> providers = new ArrayList<ConfigProvider>();
         ExtensionList<ConfigProvider> all = ConfigProvider.all();
         ConfigProvider p = all.get(GroovyTemplateConfig.GroovyTemplateConfigProvider.class);
         if(p != null) {
