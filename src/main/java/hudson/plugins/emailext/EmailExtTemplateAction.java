@@ -87,7 +87,7 @@ public class EmailExtTemplateAction implements Action {
     }
     
     private static Collection<ConfigProvider> getTemplateConfigProviders() {
-        Collection<ConfigProvider> providers = Collections.emptyList();
+        Collection<ConfigProvider> providers = new ArrayList<ConfigProvider>(1);
         ExtensionList<ConfigProvider> all = ConfigProvider.all();
         ConfigProvider p = all.get(GroovyTemplateConfig.GroovyTemplateConfigProvider.class);
         if(p != null) {
