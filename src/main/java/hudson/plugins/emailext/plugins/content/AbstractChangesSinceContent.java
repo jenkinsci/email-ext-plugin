@@ -52,6 +52,10 @@ abstract public class AbstractChangesSinceContent
     public boolean showDependencies = false;
     @Parameter
     public String dateFormat;
+    @Parameter
+    public String regex;
+    @Parameter
+    public String replace;
 
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
@@ -100,6 +104,8 @@ abstract public class AbstractChangesSinceContent
         final ChangesSinceLastBuildContent changes = new ChangesSinceLastBuildContent(changesFormat, pathFormat, showPaths);
         changes.showDependencies = showDependencies;
         changes.dateFormat = dateFormat;
+        changes.regex = regex;
+        changes.replace = replace;
 
         Util.printf(buf, format, new Util.PrintfSpec() {
             public boolean printSpec(StringBuffer buf, char formatChar) {

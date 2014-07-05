@@ -34,5 +34,9 @@ dd() {
     dt("pathFormat")
     dd(_("A string containing %p to indicate how to print paths. Defaults to "
         +"\"\\\\t%p\\\\n\""))
+    dt("regex")
+    dd(_("A regular expression."))
+    dt("replace")
+    dd(_("A replacement for all substrings of the change message that match the given regular expression."))
   }
 }
