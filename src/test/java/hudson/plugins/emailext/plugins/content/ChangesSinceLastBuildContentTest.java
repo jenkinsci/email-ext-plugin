@@ -149,6 +149,20 @@ public class ChangesSinceLastBuildContentTest {
         assertEquals("[Ash Lux] Changes for a successful build.\n" + "\tPATH1\tadd - The file was added\n" + "\tPATH2\tdelete - The file was removed\n" + "\tPATH3\tedit - The file was modified\n" + "\n", content);
     }
 
+    @Test
+    public void testRegexReplace()
+            throws Exception {
+        changesSinceLastBuildContent.regex = "<defectId>(DEFECT-[0-9]+)</defectId><message>(.*)</message>";
+        changesSinceLastBuildContent.replace = "[$1] $2";
+        changesSinceLastBuildContent.format = "%m\\n";
+
+        AbstractBuild currentBuild = createBuildWithAffectedFiles(Result.SUCCESS, 42, "<defectId>DEFECT-666</defectId><message>Initial commit</message>");
+
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+
+        assertEquals("[DEFECT-666] Initial commit\n\n", content);
+    }
+
     private AbstractBuild createBuild(Result result, int buildNumber, String message) {
         AbstractBuild build = mock(AbstractBuild.class);
         when(build.getResult()).thenReturn(result);
