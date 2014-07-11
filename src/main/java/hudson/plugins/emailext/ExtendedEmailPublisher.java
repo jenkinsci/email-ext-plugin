@@ -146,13 +146,18 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * If true, save the generated email content to email-ext-message.[txt|html]
      */
     public boolean saveOutput = false;
+    
+    /**
+     * If true, disables the publisher from running.
+     */
+    public boolean disabled = false;
 
     /**
      * How to theTrigger the email if the project is a matrix project.
      */
     public MatrixTriggerMode matrixTriggerMode;
 
-    @DataBoundConstructor
+    @Deprecated
     public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
             String project_default_content, String project_attachments, String project_presend_script,
             int project_attach_buildlog, String project_replyto, boolean project_save_output,
@@ -169,6 +174,26 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.saveOutput = project_save_output;
         this.configuredTriggers = project_triggers;
         this.matrixTriggerMode = matrixTriggerMode;
+    }
+    
+    @DataBoundConstructor
+    public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
+            String project_default_content, String project_attachments, String project_presend_script,
+            int project_attach_buildlog, String project_replyto, boolean project_save_output,
+            List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode, boolean project_disabled) {
+        this.recipientList = project_recipient_list;
+        this.contentType = project_content_type;
+        this.defaultSubject = project_default_subject;
+        this.defaultContent = project_default_content;
+        this.attachmentsPattern = project_attachments;
+        this.presendScript = project_presend_script;
+        this.attachBuildLog = project_attach_buildlog > 0;
+        this.compressBuildLog = project_attach_buildlog > 1;
+        this.replyTo = project_replyto;
+        this.saveOutput = project_save_output;
+        this.configuredTriggers = project_triggers;
+        this.matrixTriggerMode = matrixTriggerMode;
+        this.disabled = project_disabled;
     }
 
     public ExtendedEmailPublisher() {
@@ -229,7 +254,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return true;
     }
 
-    private boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, boolean forPreBuild) {
+    private boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, boolean forPreBuild) {        
+        if(disabled) {
+            listener.getLogger().println("Extended Email Publisher is currently disabled in project settings");
+            return true;
+        }        
+        
         boolean emailTriggered = false;
         debug(listener.getLogger(), "Checking if email needs to be generated");
         final Multimap<String, EmailTrigger> triggered = ArrayListMultimap.create();

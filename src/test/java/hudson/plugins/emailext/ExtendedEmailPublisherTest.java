@@ -826,6 +826,29 @@ public class ExtendedEmailPublisherTest {
         assertEquals(2, Mailbox.get("mickey@disney.com").size());        
     }
     
+    @Bug(22154)
+    @Test
+    public void testProjectDisable() throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("JENKINS-22154");
+        prj.getPublishersList().add(publisher);
+        
+        publisher.disabled = true;
+        publisher.recipientList = "mickey@disney.com";
+        publisher.configuredTriggers.add(new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project"));
+        
+        for(EmailTrigger trigger : publisher.configuredTriggers) {
+            trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
+        }
+        
+        FreeStyleBuild build = prj.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+        
+        assertEquals(0, Mailbox.get("mickey@disney.com").size());        
+        assertThat("Publisher is disabled, should have message in build log", build.getLog(100),
+                hasItem("Extended Email Publisher is currently disabled in project settings"));        
+    }
+    
     
     /* Need to find out why this gets a 404 on the fileprovider.js file
     @Test
