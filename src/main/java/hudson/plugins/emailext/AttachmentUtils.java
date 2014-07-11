@@ -84,8 +84,13 @@ public class AttachmentUtils implements Serializable {
         
         public InputStream getInputStream() throws IOException {
             InputStream res;
+            long logFileLength = build.getLogText().length();
+            long pos = 0;
             ByteArrayOutputStream bao = new ByteArrayOutputStream();
-            build.getLogText().writeLogTo(0, bao);
+            
+            while(pos < logFileLength) {
+                pos = build.getLogText().writeLogTo(pos, bao);
+            }            
             
             res = new ByteArrayInputStream(bao.toByteArray());
             if(compress) {
@@ -189,7 +194,7 @@ public class AttachmentUtils implements Serializable {
                         + " too large for maximum attachments size");
                 return;
             }
-
+            
             DataSource fileSource;
             MimeBodyPart attachment = new MimeBodyPart();
             if (compress) {
