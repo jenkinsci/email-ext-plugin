@@ -78,6 +78,7 @@ public class ExtendedEmailPublisherTest {
             project.getPublishersList().add(publisher);
             
             recProviders = Collections.emptyList();
+            Mailbox.clearAll();
         }
 
         @Override

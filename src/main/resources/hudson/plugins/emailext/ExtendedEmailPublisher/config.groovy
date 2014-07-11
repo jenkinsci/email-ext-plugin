@@ -10,7 +10,7 @@ d = namespace("jelly:define")
 def triggers = hudson.plugins.emailext.plugins.EmailTrigger.all()
 def configured = instance != null
 
-f.entry(title: _("Disable Extended Email Publisher"), help: "/plugin/email-ext/help/projectConfig/disablePublisher.html", description: _("Allows the user to disable the publisher, while maintaining the settings")) {
+f.entry(title: _("Disable Extended Email Publisher"), help: "/plugin/email-ext/help/projectConfig/disable.html", description: _("Allows the user to disable the publisher, while maintaining the settings")) {
     f.checkbox(name: "project_disabled", checked: instance?.disabled)
 }
 
