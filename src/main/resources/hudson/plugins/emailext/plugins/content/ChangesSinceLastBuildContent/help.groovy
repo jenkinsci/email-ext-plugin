@@ -6,7 +6,7 @@ dd() {
     dd(_("If true, changes to projects this build depends on are shown. Defaults to false"))
   
     dt("showPaths")
-    dd(_("If true, the paths, modifued by a commit are shown. Defaults to false"))
+    dd(_("If true, the paths, modified by a commit are shown. Defaults to false"))
   
     dt("format")
     dd() {
@@ -34,5 +34,9 @@ dd() {
     dt("pathFormat")
     dd(_("A string containing %p to indicate how to print paths. Defaults to "
         +"\"\\\\t%p\\\\n\""))
+    dt("regex")
+    dd(_("A regular expression."))
+    dt("replace")
+    dd(_("A replacement for all substrings of the change message that match the given regular expression."))
   }
 }

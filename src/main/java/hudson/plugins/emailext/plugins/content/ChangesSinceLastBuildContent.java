@@ -37,6 +37,10 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
     public boolean showDependencies = false;
     @Parameter
     public String dateFormat;
+    @Parameter
+    public String regex;
+    @Parameter
+    public String replace;
 
     public ChangesSinceLastBuildContent() {
 
@@ -125,6 +129,9 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
                 }
                 case 'm': {
                     String m = entry.getMsg();
+                    if(!StringUtils.isEmpty(regex) && !StringUtils.isEmpty(replace)) {
+                        m = m.replaceAll(regex, replace);
+                    }
                     buf.append(m);
                     if (m == null || !m.endsWith("\n")) {
                         buf.append('\n');
