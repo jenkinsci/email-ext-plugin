@@ -4,11 +4,11 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
 import groovy.text.SimpleTemplateEngine;
+import groovy.text.Template;
 import hudson.ExtensionList;
 import hudson.Plugin;
 import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
-import hudson.model.Hudson;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.GroovyTemplateConfig.GroovyTemplateConfigProvider;
 import hudson.plugins.emailext.ScriptSandbox;
@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +61,8 @@ public class ScriptContent extends DataBoundTokenMacro {
     public static final String MACRO_NAME = "SCRIPT";
     
     private static Object configProvider;
+
+    private static final Map<String,Reference<Template>> templateCache = new HashMap<String,Reference<Template>>();
     
     @Override
     public boolean acceptsMacroName(String macroName) {
@@ -134,12 +138,16 @@ public class ScriptContent extends DataBoundTokenMacro {
         
         inputStream = getClass().getClassLoader().getResourceAsStream("hudson/plugins/emailext/templates/" + fileName);
         if (inputStream == null) {
-            final File scriptsFolder = new File(Hudson.getInstance().getRootDir(), EMAIL_TEMPLATES_DIRECTORY);
+            File scriptsFolder = scriptsFolder();
             final File scriptFile = new File(scriptsFolder, fileName);
             inputStream = new FileInputStream(scriptFile);
         }
         return inputStream;
     }   
+
+    static File scriptsFolder() {
+        return new File(Jenkins.getInstance().getRootDir(), EMAIL_TEMPLATES_DIRECTORY);
+    }
     
     private InputStream getManagedFile(String templateName) {
         Plugin plugin = Jenkins.getInstance().getPlugin("config-file-provider");
@@ -195,7 +203,17 @@ public class ScriptContent extends DataBoundTokenMacro {
         GroovyShell shell = createEngine(descriptor, Collections.EMPTY_MAP);
         SimpleTemplateEngine engine = new SimpleTemplateEngine(shell);
         try {
-            result = engine.createTemplate(new InputStreamReader(templateStream)).make(binding).toString();        
+            String text = IOUtils.toString(templateStream);
+            Template tmpl;
+            synchronized (templateCache) {
+                Reference<Template> templateR = templateCache.get(text);
+                tmpl = templateR == null ? null : templateR.get();
+                if (tmpl == null) {
+                    tmpl = engine.createTemplate(text);
+                    templateCache.put(text, new SoftReference<Template>(tmpl));
+                }
+            }
+            result = tmpl.make(binding).toString();
         } catch(Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
