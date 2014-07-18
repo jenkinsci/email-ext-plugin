@@ -71,7 +71,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
 
         @Override
         public String getDisplayName() {
-            return "Upstream Committer";
+            return "Upstream Committers";
         }
     }
 }
