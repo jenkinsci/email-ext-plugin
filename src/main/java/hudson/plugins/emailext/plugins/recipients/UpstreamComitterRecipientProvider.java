@@ -2,10 +2,15 @@ package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Cause;
+import hudson.model.TaskListener;
+import hudson.model.User;
 import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
+import hudson.plugins.emailext.Messages;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.scm.ChangeLogSet;
@@ -71,7 +76,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
 
         @Override
         public String getDisplayName() {
-            return "Upstream Committers";
+            return Messages.UpstreamComitterRecipientProvider_DisplayName();
         }
     }
 }
