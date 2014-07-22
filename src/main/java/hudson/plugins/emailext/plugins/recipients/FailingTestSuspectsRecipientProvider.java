@@ -79,7 +79,7 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
         if (currentBuild == null) {
             debug.send("currentBuild was null");
         } else {
-            final AbstractTestResultAction<?> testResultAction = currentBuild.getTestResultAction();
+            final AbstractTestResultAction<?> testResultAction = currentBuild.getAction(AbstractTestResultAction.class);
             if (testResultAction == null) {
                 debug.send("testResultAction was null");
             } else {
