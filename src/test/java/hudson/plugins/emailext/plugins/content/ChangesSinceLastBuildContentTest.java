@@ -163,6 +163,27 @@ public class ChangesSinceLastBuildContentTest {
         assertEquals("[DEFECT-666] Initial commit\n\n", content);
     }
 
+    @Test
+    public void testShouldPrintDefaultMessageWhenNoChanges()
+            throws Exception {
+        AbstractBuild currentBuild = createBuildWithNoChanges(Result.SUCCESS, 42);
+
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+
+        assertEquals(ChangesSinceLastBuildContent.DEFAULT_DEFAULT_VALUE, content);
+    }
+
+    @Test
+    public void testShouldPrintMessageWhenNoChanges()
+            throws Exception {
+    	changesSinceLastBuildContent.def = "another default message\n";
+        AbstractBuild currentBuild = createBuildWithNoChanges(Result.SUCCESS, 42);
+
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+
+        assertEquals("another default message\n", content);
+    }
+
     private AbstractBuild createBuild(Result result, int buildNumber, String message) {
         AbstractBuild build = mock(AbstractBuild.class);
         when(build.getResult()).thenReturn(result);
@@ -208,6 +229,7 @@ public class ChangesSinceLastBuildContentTest {
         ChangeLogSet changes = mock(ChangeLogSet.class);
         List<ChangeLogSet.Entry> entries = Collections.emptyList();
         when(changes.iterator()).thenReturn(entries.iterator());
+        when(changes.isEmptySet()).thenReturn(true);
 
         return changes;
     }
