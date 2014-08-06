@@ -260,7 +260,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
     
     public long getMaxAttachmentSize() {
-    	return maxAttachmentSize;
+        return maxAttachmentSize;
     }
     
     public long getMaxAttachmentSizeMb() {
@@ -308,7 +308,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public List<GroovyScriptPath> getDefaultClasspath() {
-    	return defaultClasspath;
+        return defaultClasspath;
     }
     
     public ExtendedEmailPublisherDescriptor() {
@@ -362,10 +362,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         defaultPresendScript = nullify(req.getParameter("ext_mailer_default_presend_script")) != null ?
             req.getParameter("ext_mailer_default_presend_script") : "";
         if (req.hasParameter("ext_mailer_default_classpath")) {
-        	defaultClasspath.clear();
-        	for(String s : req.getParameterValues("ext_mailer_default_classpath")) {
-        		defaultClasspath.add(new GroovyScriptPath(s));
-        	}
+            defaultClasspath.clear();
+            for(String s : req.getParameterValues("ext_mailer_default_classpath")) {
+                defaultClasspath.add(new GroovyScriptPath(s));
+            }
         }
         debugMode = req.hasParameter("ext_mailer_debug_mode");
         

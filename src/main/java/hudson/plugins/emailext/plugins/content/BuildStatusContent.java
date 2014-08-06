@@ -26,7 +26,7 @@ public class BuildStatusContent extends DataBoundTokenMacro {
 
         // Build can be "building" when the pre-build trigger is used. (and in this case there is not result set yet for the build)
         // Reporting "success", "still failing", etc doesn't make sense in this case.
-		// When using on matrix build, the build is still in building stage when matrix aggregator end build trigger is fired, though 
+        // When using on matrix build, the build is still in building stage when matrix aggregator end build trigger is fired, though 
         if ( (build.isBuilding()) && (null == build.getResult())) {
             return "Building";
         }

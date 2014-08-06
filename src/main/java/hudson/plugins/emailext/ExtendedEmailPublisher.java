@@ -485,25 +485,25 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * @return the new expanded classloader
      */
     private ClassLoader expandClassLoader(ClassLoader cl, CompilerConfiguration cc) {
-    	if ((classpath != null) && classpath.size() > 0) {
-    		cl = new GroovyClassLoader(cl, cc);
-    		for(GroovyScriptPath path : classpath) {
-    			((GroovyClassLoader)cl).addURL(path.asURL());
-    		}
-    	}
-    	List<GroovyScriptPath> globalClasspath = getDescriptor().getDefaultClasspath();
-    	if ((globalClasspath != null) && (globalClasspath.size() > 0)) {
-    		if (!(cl instanceof GroovyClassLoader)) {
-    			cl = new GroovyClassLoader(cl, cc);
+        if ((classpath != null) && classpath.size() > 0) {
+            cl = new GroovyClassLoader(cl, cc);
+            for(GroovyScriptPath path : classpath) {
+                ((GroovyClassLoader)cl).addURL(path.asURL());
             }
-    		for(GroovyScriptPath path : globalClasspath) {
-    			((GroovyClassLoader)cl).addURL(path.asURL());
-    		}
-    	}
-		return cl;
-	}
+        }
+        List<GroovyScriptPath> globalClasspath = getDescriptor().getDefaultClasspath();
+        if ((globalClasspath != null) && (globalClasspath.size() > 0)) {
+            if (!(cl instanceof GroovyClassLoader)) {
+                cl = new GroovyClassLoader(cl, cc);
+            }
+            for(GroovyScriptPath path : globalClasspath) {
+                ((GroovyClassLoader)cl).addURL(path.asURL());
+            }
+        }
+        return cl;
+    }
 
-	private MimeMessage createMail(ExtendedEmailPublisherContext context) throws MessagingException, IOException, InterruptedException {
+    private MimeMessage createMail(ExtendedEmailPublisherContext context) throws MessagingException, IOException, InterruptedException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
         boolean overrideGlobalSettings = descriptor.getOverrideGlobalSettings();
 

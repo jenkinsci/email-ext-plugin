@@ -22,35 +22,35 @@ import hudson.model.Descriptor;
  */
 public class GroovyScriptPath extends AbstractDescribableImpl<GroovyScriptPath> {
 
-	private String path;
-	
-	@DataBoundConstructor
-	public GroovyScriptPath(String path) {
-		this.path = path;
-	}
-	
-	public String getPath() {
-		return path;
-	}
+    private String path;
+    
+    @DataBoundConstructor
+    public GroovyScriptPath(String path) {
+        this.path = path;
+    }
+    
+    public String getPath() {
+        return path;
+    }
 
-	public URL asURL() {
-		URL url = null;
-		
-		try {
-			url = new URL(path);
-		}
-		catch (MalformedURLException e) {
-			try {
-				url = new File(path).toURI().toURL();
-			} catch (MalformedURLException e1) {
-			}
-		}
-		return url;
-	}
-	
-	@Extension
+    public URL asURL() {
+        URL url = null;
+        
+        try {
+            url = new URL(path);
+        }
+        catch (MalformedURLException e) {
+            try {
+                url = new File(path).toURI().toURL();
+            } catch (MalformedURLException e1) {
+            }
+        }
+        return url;
+    }
+    
+    @Extension
     public static class GroovyScriptPathDescriptor extends Descriptor<GroovyScriptPath> {
-		@Override
+        @Override
         public String getDisplayName() {
             return "";
         }

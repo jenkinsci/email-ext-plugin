@@ -176,7 +176,7 @@ public class ChangesSinceLastBuildContentTest {
     @Test
     public void testShouldPrintMessageWhenNoChanges()
             throws Exception {
-    	changesSinceLastBuildContent.def = "another default message\n";
+        changesSinceLastBuildContent.def = "another default message\n";
         AbstractBuild currentBuild = createBuildWithNoChanges(Result.SUCCESS, 42);
 
         String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);

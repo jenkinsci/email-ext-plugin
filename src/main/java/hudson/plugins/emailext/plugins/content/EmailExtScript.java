@@ -18,7 +18,7 @@ import hudson.plugins.emailext.plugins.ContentBuilder;
 
 public abstract class EmailExtScript extends Script {
 
-	private void populateArgs(Object args, Map<String, String> map, ListMultimap<String, String> multiMap) {
+    private void populateArgs(Object args, Map<String, String> map, ListMultimap<String, String> multiMap) {
         if(args instanceof Object[]) {
             Object[] argArray = (Object[])args;
             if(argArray.length > 0) {
@@ -40,7 +40,7 @@ public abstract class EmailExtScript extends Script {
         }
     }
 
-	public Object methodMissing(String name, Object args)
+    public Object methodMissing(String name, Object args)
             throws MacroEvaluationException, IOException, InterruptedException {
     
         TokenMacro macro = null;

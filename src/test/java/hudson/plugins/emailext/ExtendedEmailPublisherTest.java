@@ -618,7 +618,7 @@ public class ExtendedEmailPublisherTest {
     @Test
     public void testPresendScriptModifiesToUsingProjectExternalScript() throws Exception {
         publisher.presendScript = "import javax.mail.Message.RecipientType\n" +
-        		                  "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n" +
+                                  "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n" +
                 "msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())";
         publisher.classpath = new ArrayList<GroovyScriptPath>();
         publisher.classpath.add(new GroovyScriptPath("src/test/presend"));
@@ -648,7 +648,7 @@ public class ExtendedEmailPublisherTest {
     @Test
     public void testPresendScriptModifiesToUsingGlobalExternalScript() throws Exception {
         publisher.presendScript = "import javax.mail.Message.RecipientType\n" +
-        		                  "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n" +
+                                  "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n" +
                 "msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())";
         Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultClasspath");
         f.setAccessible(true);
@@ -933,7 +933,7 @@ public class ExtendedEmailPublisherTest {
         final HtmlTextInput recipientList = page.getElementByName("project_recipient_list");
         assertEquals(recipientList.getText(), "mickey@disney.com");
     }
-	*/
+    */
 
     @Bug(16376)
     @Test 

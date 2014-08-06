@@ -94,8 +94,8 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertFalse("Security mode should not be checked by default", securityMode.isChecked());
         
         try {
-        	page.getElementByName("defaultClasspath");
-        	fail("defaultClasspath section should not be present");
+            page.getElementByName("defaultClasspath");
+            fail("defaultClasspath section should not be present");
         } catch (ElementNotFoundException e) {}
     }
     

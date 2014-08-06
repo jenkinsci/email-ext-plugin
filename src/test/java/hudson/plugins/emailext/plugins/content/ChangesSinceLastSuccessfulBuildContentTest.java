@@ -246,7 +246,7 @@ public class ChangesSinceLastSuccessfulBuildContentTest {
     @Test
     public void testShouldPrintMessageWhenNoChanges()
             throws Exception {
-    	content.def = "another default message\n";
+        content.def = "another default message\n";
         AbstractBuild failureBuild = createBuild(Result.FAILURE, 41, "[DEFECT-666] Changes for a failed build.");
 
         AbstractBuild currentBuild = createBuildWithNoChanges(Result.SUCCESS, 42);

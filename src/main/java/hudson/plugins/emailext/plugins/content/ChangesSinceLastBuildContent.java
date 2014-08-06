@@ -77,14 +77,14 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
 
         StringBuffer buf = new StringBuffer();
         if (!build.getChangeSet().isEmptySet()) {
-			for (ChangeLogSet.Entry entry : build.getChangeSet()) {
-				Util.printf(buf, format, new ChangesSincePrintfSpec(entry,
-						pathFormat, dateFormatter));
-			}
-		} else {
-			buf.append(def);
-		}
-		if (showDependencies) {
+            for (ChangeLogSet.Entry entry : build.getChangeSet()) {
+                Util.printf(buf, format, new ChangesSincePrintfSpec(entry,
+                        pathFormat, dateFormatter));
+            }
+        } else {
+            buf.append(def);
+        }
+        if (showDependencies) {
             AbstractBuild previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
             if (previousBuild != null) {
                 for (Entry<AbstractProject, DependencyChange> e : build.getDependencyChanges(previousBuild).entrySet()) {
@@ -93,14 +93,14 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
                             .append(":\n");
                     for (AbstractBuild<?, ?> b : e.getValue().getBuilds()) {
                         if (!b.getChangeSet().isEmptySet()) {
-							for (ChangeLogSet.Entry entry : b.getChangeSet()) {
-								Util.printf(buf, format,
-										new ChangesSincePrintfSpec(entry,
-												pathFormat, dateFormatter));
-							}
-						} else {
-							buf.append(def);
-						}
+                            for (ChangeLogSet.Entry entry : b.getChangeSet()) {
+                                Util.printf(buf, format,
+                                        new ChangesSincePrintfSpec(entry,
+                                                pathFormat, dateFormatter));
+                            }
+                        } else {
+                            buf.append(def);
+                        }
                     }
                 }
             }
