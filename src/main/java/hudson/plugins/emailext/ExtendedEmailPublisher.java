@@ -184,7 +184,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.saveOutput = project_save_output;
         this.configuredTriggers = project_triggers;
         this.matrixTriggerMode = matrixTriggerMode;
-        System.out.println("Deprecated const called");
     }
     
     @DataBoundConstructor
@@ -207,11 +206,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.matrixTriggerMode = matrixTriggerMode;
         this.disabled = project_disabled;
         this.classpath = classpath;
-        System.out.println("Const called");
     }
 
     public ExtendedEmailPublisher() {
-    	System.out.println("Empty const called");
     }
     
     /**
