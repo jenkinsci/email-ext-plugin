@@ -29,9 +29,10 @@ import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
 import hudson.tasks.Builder;
 import hudson.tasks.Mailer;
-import java.io.IOException;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -44,15 +45,17 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import net.sf.json.JSONObject;
+
 import org.junit.Rule;
 import org.junit.Test;
-
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockBuilder;
 import org.jvnet.mock_javamail.Mailbox;
 import org.kohsuke.stapler.Stapler;
+
 import static org.junit.Assert.*;
+
 import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.SleepBuilder;
 
@@ -589,6 +592,69 @@ public class ExtendedEmailPublisherTest {
     public void testPresendScriptModifiesTo() throws Exception {
         publisher.presendScript = "import javax.mail.Message.RecipientType\n"
                 + "msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')";
+        SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
+        successTrigger.setEmail(new EmailType() {
+            {
+                addRecipientProvider(new RequesterRecipientProvider());
+            }
+        });
+        publisher.getConfiguredTriggers().add(successTrigger);
+
+        User u = User.get("kutzi");
+        u.setFullName("Christoph Kutzinski");
+        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
+        u.addProperty(prop);
+
+        UserCause cause = new MockUserCause("kutzi");
+
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
+        assertEquals(1, Mailbox.get("slide.o.mix@xxx.com").size());
+    }
+    
+    @Test
+    public void testPresendScriptModifiesToUsingProjectExternalScript() throws Exception {
+        publisher.presendScript = "import javax.mail.Message.RecipientType\n" +
+        		                  "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n" +
+                "msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())";
+        publisher.classpath = new ArrayList<GroovyScriptPath>();
+        publisher.classpath.add(new GroovyScriptPath("src/test/presend"));
+        SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
+        successTrigger.setEmail(new EmailType() {
+            {
+                addRecipientProvider(new RequesterRecipientProvider());
+            }
+        });
+        publisher.getConfiguredTriggers().add(successTrigger);
+
+        User u = User.get("kutzi");
+        u.setFullName("Christoph Kutzinski");
+        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
+        u.addProperty(prop);
+
+        UserCause cause = new MockUserCause("kutzi");
+
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
+        assertEquals(1, Mailbox.get("slide.o.mix@xxx.com").size());
+    }
+    
+    @Test
+    public void testPresendScriptModifiesToUsingGlobalExternalScript() throws Exception {
+        publisher.presendScript = "import javax.mail.Message.RecipientType\n" +
+        		                  "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n" +
+                "msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())";
+        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultClasspath");
+        f.setAccessible(true);
+        List<GroovyScriptPath> classpath = new ArrayList<GroovyScriptPath>();
+        classpath.add(new GroovyScriptPath("src/test/presend"));
+        f.set(publisher.getDescriptor(), classpath);
         SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {

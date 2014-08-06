@@ -3,7 +3,9 @@ package hudson.plugins.emailext;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+
 import groovy.lang.Binding;
+import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import hudson.EnvVars;
 import hudson.FilePath;
@@ -29,12 +31,15 @@ import hudson.tasks.MailMessageIdAction;
 import hudson.tasks.Mailer;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.ConnectException;
 import java.net.SocketException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,6 +50,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.mail.Address;
@@ -58,8 +64,10 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
@@ -126,6 +134,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * The project's pre-send script.
      */
     public String presendScript;
+    
+    public List<GroovyScriptPath> classpath;
 
     /**
      * True to attach the log from the build to the email.
@@ -174,13 +184,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.saveOutput = project_save_output;
         this.configuredTriggers = project_triggers;
         this.matrixTriggerMode = matrixTriggerMode;
+        System.out.println("Deprecated const called");
     }
     
     @DataBoundConstructor
     public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
             String project_default_content, String project_attachments, String project_presend_script,
             int project_attach_buildlog, String project_replyto, boolean project_save_output,
-            List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode, boolean project_disabled) {
+            List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode, boolean project_disabled,
+            List<GroovyScriptPath> classpath) {
         this.recipientList = project_recipient_list;
         this.contentType = project_content_type;
         this.defaultSubject = project_default_subject;
@@ -194,10 +206,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.configuredTriggers = project_triggers;
         this.matrixTriggerMode = matrixTriggerMode;
         this.disabled = project_disabled;
+        this.classpath = classpath;
+        System.out.println("Const called");
     }
 
     public ExtendedEmailPublisher() {
-
+    	System.out.println("Empty const called");
     }
     
     /**
@@ -423,6 +437,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     "hudson",
                     "hudson.model"));
 
+            cl = expandClassLoader(cl, cc);
             if (getDescriptor().isSecurityEnabled()) {
                 debug(context.getListener().getLogger(), "Setting up sandbox for pre-send script");
                 cc.addCompilationCustomizers(new SandboxTransformer());
@@ -464,7 +479,34 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return !cancel;
     }
 
-    private MimeMessage createMail(ExtendedEmailPublisherContext context) throws MessagingException, IOException, InterruptedException {
+    /**
+     * Expand the plugin class loader with URL taken from the project descriptor
+     * and the global configuration.
+     * 
+     * @param cl the original plugin classloader
+     * @param cc 
+     * @return the new expanded classloader
+     */
+    private ClassLoader expandClassLoader(ClassLoader cl, CompilerConfiguration cc) {
+    	if ((classpath != null) && classpath.size() > 0) {
+    		cl = new GroovyClassLoader(cl, cc);
+    		for(GroovyScriptPath path : classpath) {
+    			((GroovyClassLoader)cl).addURL(path.asURL());
+    		}
+    	}
+    	List<GroovyScriptPath> globalClasspath = getDescriptor().getDefaultClasspath();
+    	if ((globalClasspath != null) && (globalClasspath.size() > 0)) {
+    		if (!(cl instanceof GroovyClassLoader)) {
+    			cl = new GroovyClassLoader(cl, cc);
+            }
+    		for(GroovyScriptPath path : globalClasspath) {
+    			((GroovyClassLoader)cl).addURL(path.asURL());
+    		}
+    	}
+		return cl;
+	}
+
+	private MimeMessage createMail(ExtendedEmailPublisherContext context) throws MessagingException, IOException, InterruptedException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
         boolean overrideGlobalSettings = descriptor.getOverrideGlobalSettings();
 
