@@ -194,6 +194,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if (smtpAuthUsername != null) {
             props.put("mail.smtp.auth", "true");
         }
+
+        // avoid hang by setting some timeout.
+        props.put("mail.smtp.timeout","60000");
+        props.put("mail.smtp.connectiontimeout","60000");
+
         return Session.getInstance(props, getAuthenticator());
     }
 
