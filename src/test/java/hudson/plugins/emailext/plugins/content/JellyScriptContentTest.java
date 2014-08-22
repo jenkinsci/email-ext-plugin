@@ -126,7 +126,7 @@ public class JellyScriptContentTest {
     }
 
     private void mockChangeSet(final AbstractBuild build) {
-        Mockito.when(build.getChangeSet()).thenReturn(new ChangeLogSet(build) {
+        Mockito.when(build.getChangeSet()).thenReturn(new ChangeLogSet(build, null) {
             @Override
             public boolean isEmptySet() {
                 return false;

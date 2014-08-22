@@ -193,7 +193,7 @@ public class FailingTestSuspectsRecipientProviderTest {
     }
 
     private static void addMockChangeSet(final AbstractBuild build, final String... inAuthors) {
-        PowerMockito.when(build.getChangeSet()).thenReturn(new ChangeLogSet(build) {
+        PowerMockito.when(build.getChangeSet()).thenReturn(new ChangeLogSet(build, null) {
 
             final String[] authors = inAuthors;
 

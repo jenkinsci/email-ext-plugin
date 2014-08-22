@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.554.1</version>
+        <version>1.578-SNAPSHOT</version><!-- TODO BuildStep-Job branch -->
     </parent>
 
     <licenses>
@@ -26,8 +26,10 @@
     </issueManagement>
 
     <properties>
-        <powermock.version>1.4.12</powermock.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- See mockito/powermock compatibility matrix: https://code.google.com/p/powermock/wiki/MockitoUsage13 -->
+        <mockito.version>1.9.0</mockito.version>
+        <powermock.version>1.4.12</powermock.version>
     </properties>
 
     <developers>
@@ -80,7 +82,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>1.8.5</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -109,6 +111,16 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>matrix-project</artifactId>
+            <version>1.0-beta-1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>junit</artifactId>
+            <version>1.0</version>
+        </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>token-macro</artifactId>
