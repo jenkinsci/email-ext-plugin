@@ -20,6 +20,7 @@ import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Item;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.CssInliner;
@@ -38,8 +39,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.ConnectException;
 import java.net.SocketException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -138,6 +137,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     public List<GroovyScriptPath> classpath;
 
     /**
+     * Attach buildlog configuration value.  Used to configure attachBuildLog and compressBuildLog flags.
+     */
+    public int project_attach_buildlog;
+
+    /**
      * True to attach the log from the build to the email.
      */
     public boolean attachBuildLog;
@@ -178,6 +182,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.defaultContent = project_default_content;
         this.attachmentsPattern = project_attachments;
         this.presendScript = project_presend_script;
+        this.project_attach_buildlog = project_attach_buildlog;
         this.attachBuildLog = project_attach_buildlog > 0;
         this.compressBuildLog = project_attach_buildlog > 1;
         this.replyTo = project_replyto;
@@ -198,6 +203,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.defaultContent = project_default_content;
         this.attachmentsPattern = project_attachments;
         this.presendScript = project_presend_script;
+        this.project_attach_buildlog = project_attach_buildlog;
         this.attachBuildLog = project_attach_buildlog > 0;
         this.compressBuildLog = project_attach_buildlog > 1;
         this.replyTo = project_replyto;
@@ -222,7 +228,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
         return configuredTriggers;
     }
-  
+
     public MatrixTriggerMode getMatrixTriggerMode() {
         return matrixTriggerMode == null ? MatrixTriggerMode.BOTH : matrixTriggerMode;
     }
@@ -265,12 +271,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return true;
     }
 
-    private boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, boolean forPreBuild) {        
+    private boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, boolean forPreBuild) {
         if(disabled) {
             listener.getLogger().println("Extended Email Publisher is currently disabled in project settings");
             return true;
-        }        
-        
+        }
+
         boolean emailTriggered = false;
         debug(listener.getLogger(), "Checking if email needs to be generated");
         final Multimap<String, EmailTrigger> triggered = ArrayListMultimap.create();
@@ -310,7 +316,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         for (String triggerName : triggered.keySet()) {
             for (EmailTrigger trigger : triggered.get(triggerName)) {
                 listener.getLogger().println("Sending email for trigger: " + triggerName);
-                final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build, launcher, listener);
+                final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build.getWorkspace(), build, launcher, listener);
                 context.setTriggered(triggered);
                 context.setTrigger(trigger);
                 sendMail(context);
@@ -320,7 +326,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return true;
     }
 
-    private boolean sendMail(ExtendedEmailPublisherContext context) {
+    protected boolean sendMail(ExtendedEmailPublisherContext context) {
         try {
             MimeMessage msg = createMail(context);
             debug(context.getListener().getLogger(), "Successfully created MimeMessage");
@@ -546,7 +552,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         // Set the contents of the email
-        msg.addHeader("X-Jenkins-Job", context.getBuild().getProject().getDisplayName());
+        msg.addHeader("X-Jenkins-Job", context.getBuild().getParent().getDisplayName());
         if (context.getBuild().getResult() != null) {
             msg.addHeader("X-Jenkins-Result", context.getBuild().getResult().toString());
         }
@@ -634,7 +640,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             msg.setReplyTo(replyToAddresses.toArray(new InternetAddress[replyToAddresses.size()]));
         }
 
-        AbstractBuild<?, ?> pb = getPreviousBuild(context.getBuild(), context.getListener());
+        Run<?, ?> pb = getPreviousBuild(context.getBuild(), context.getListener());
         if (pb != null) {
             // Send mails as replies until next successful build
             MailMessageIdAction b = pb.getAction(MailMessageIdAction.class);
@@ -697,7 +703,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     extension = ".txt";
                 }
 
-                FilePath savedOutput = new FilePath(context.getBuild().getWorkspace(),
+                FilePath savedOutput = new FilePath(context.getWorkspace(),
                         String.format("%s-%s%d%s", context.getTrigger().getDescriptor().getDisplayName(), context.getBuild().getId(), random.nextInt(), extension));
                 savedOutput.write(text, charset);
             }
@@ -743,8 +749,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * in progress
      */
     public static @CheckForNull
-    AbstractBuild<?, ?> getPreviousBuild(@Nonnull AbstractBuild<?, ?> build, TaskListener listener) {
-        AbstractBuild<?, ?> previousBuild = build.getPreviousBuild();
+    Run<?, ?> getPreviousBuild(@Nonnull Run<?, ?> build, TaskListener listener) {
+        Run<?, ?> previousBuild = build.getPreviousBuild();
         if (previousBuild != null && previousBuild.isBuilding()) {
             listener.getLogger().println(Messages.ExtendedEmailPublisher__is_still_in_progress_ignoring_for_purpo(previousBuild.getDisplayName()));
             return null;

@@ -32,10 +32,11 @@ public class ChangesSinceLastSuccessfulBuildContent
     public AbstractBuild<?,?> getFirstIncludedBuild(AbstractBuild<?,?> build, TaskListener listener) {
         AbstractBuild<?,?> firstIncludedBuild = build;
 
-        AbstractBuild<?,?> prev = ExtendedEmailPublisher.getPreviousBuild(firstIncludedBuild, listener);
+        // TODO: Must be an AbstractBuild?
+        AbstractBuild<?,?> prev = (AbstractBuild<?, ?>) ExtendedEmailPublisher.getPreviousBuild(firstIncludedBuild, listener);
         while (prev != null && prev.getResult() != Result.SUCCESS) {
             firstIncludedBuild = prev;
-            prev = ExtendedEmailPublisher.getPreviousBuild(firstIncludedBuild, listener);
+            prev = (AbstractBuild<?, ?>) ExtendedEmailPublisher.getPreviousBuild(firstIncludedBuild, listener);
         }
 
         return firstIncludedBuild;

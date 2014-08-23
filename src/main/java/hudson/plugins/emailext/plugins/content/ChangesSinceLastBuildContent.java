@@ -85,7 +85,8 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
             buf.append(def);
         }
         if (showDependencies) {
-            AbstractBuild previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+            // TODO: Must be an AbstractBuild?
+            AbstractBuild previousBuild = (AbstractBuild) ExtendedEmailPublisher.getPreviousBuild(build, listener);
             if (previousBuild != null) {
                 for (Entry<AbstractProject, DependencyChange> e : build.getDependencyChanges(previousBuild).entrySet()) {
                     buf.append("\n=======================\n");

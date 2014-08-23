@@ -3,6 +3,7 @@ package hudson.plugins.emailext.plugins.trigger;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
@@ -34,7 +35,7 @@ public class FixedUnhealthyTrigger extends EmailTrigger {
         Result buildResult = build.getResult();
 
         if (buildResult == Result.SUCCESS) {
-            AbstractBuild<?, ?> prevBuild = getPreviousBuild(build, listener);
+            Run<?, ?> prevBuild = getPreviousBuild(build, listener);
             if (prevBuild != null && (prevBuild.getResult() == Result.UNSTABLE || prevBuild.getResult() == Result.FAILURE)) {
                 return true;
             }
@@ -46,9 +47,9 @@ public class FixedUnhealthyTrigger extends EmailTrigger {
     /**
      * Find most recent previous build matching certain criteria.
      */
-    private AbstractBuild<?, ?> getPreviousBuild(AbstractBuild<?, ?> build, TaskListener listener) {
+    private Run<?, ?> getPreviousBuild(Run<?, ?> build, TaskListener listener) {
 
-        AbstractBuild<?, ?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+        Run<?, ?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
 
         // Skip ABORTED builds
         if (prevBuild != null && (prevBuild.getResult() == Result.ABORTED)) {

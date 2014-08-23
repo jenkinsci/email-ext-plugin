@@ -45,7 +45,7 @@ public abstract class NthFailureTrigger extends EmailTrigger {
                 return false;
             }
 
-            build = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+            build = (AbstractBuild<?, ?>) ExtendedEmailPublisher.getPreviousBuild(build, listener);
         }
 
         return (build == null || build.getResult() == Result.SUCCESS || build.getResult() == Result.UNSTABLE);

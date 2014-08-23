@@ -1,11 +1,11 @@
 package hudson.plugins.emailext.plugins.recipients;
 
+import hudson.model.Run;
 import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
 import hudson.model.TaskListener;
@@ -34,7 +34,7 @@ public class RequesterRecipientProvider extends RecipientProvider {
     @Override
     public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
         // looking for Upstream build.
-        AbstractBuild<?, ?> cur = context.getBuild();
+        Run<?, ?> cur = context.getBuild();
         Cause.UpstreamCause upc = context.getBuild().getCause(Cause.UpstreamCause.class);
         while (upc != null) {
             // UpstreamCause.getUpStreamProject() returns the full name, so use getItemByFullName
@@ -48,7 +48,7 @@ public class RequesterRecipientProvider extends RecipientProvider {
         addUserTriggeringTheBuild(cur, to, cc, bcc, env, context.getListener());
     }
 
-    public static User getUserTriggeringTheBuild(final AbstractBuild<?, ?> build) {
+    public static User getUserTriggeringTheBuild(final Run<?, ?> build) {
         User user = getByUserIdCause(build);
         if (user == null) {
             user = getByLegacyUserCause(build);
@@ -56,7 +56,7 @@ public class RequesterRecipientProvider extends RecipientProvider {
         return user;
     }
 
-    private static void addUserTriggeringTheBuild(AbstractBuild<?, ?> build, Set<InternetAddress> to,
+    private static void addUserTriggeringTheBuild(Run<?, ?> build, Set<InternetAddress> to,
         Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener) {
 
         final User user = getUserTriggeringTheBuild(build);
@@ -72,7 +72,7 @@ public class RequesterRecipientProvider extends RecipientProvider {
     }
 
     @SuppressWarnings("unchecked")
-    private static User getByUserIdCause(AbstractBuild<?, ?> build) {
+    private static User getByUserIdCause(Run<?, ?> build) {
         try {
             Cause.UserIdCause cause = build.getCause(Cause.UserIdCause.class);
             if (cause != null) {
@@ -87,7 +87,7 @@ public class RequesterRecipientProvider extends RecipientProvider {
     }
 
     @SuppressWarnings("deprecated")
-    private static User getByLegacyUserCause(AbstractBuild<?, ?> build) {
+    private static User getByLegacyUserCause(Run<?, ?> build) {
         try {
             Cause.UserCause userCause = build.getCause(Cause.UserCause.class);
             // userCause.getUserName() returns displayName which may be different from authentication name

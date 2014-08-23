@@ -2,6 +2,7 @@ package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailToken;
@@ -33,14 +34,14 @@ public class BuildStatusContent extends DataBoundTokenMacro {
 
         Result buildResult = build.getResult();
         if (buildResult == Result.FAILURE) {
-            AbstractBuild<?,?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+            Run<?,?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
             if (prevBuild != null && (prevBuild.getResult() == Result.FAILURE)) {
                 return "Still Failing";
             } else {
                 return "Failure";
             }
         } else if (buildResult == Result.UNSTABLE) {
-            AbstractBuild<?,?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+            Run<?,?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
             if (prevBuild != null) {
                if (prevBuild.getResult() == Result.UNSTABLE) {
                   return "Still Unstable";
@@ -52,7 +53,7 @@ public class BuildStatusContent extends DataBoundTokenMacro {
                   //iterate through previous builds
                   //(fail_or_aborted)* and then an unstable : return still unstable
                   //(fail_or_aborted)* and then successful : return unstable
-                  AbstractBuild<?,?> previous = ExtendedEmailPublisher.getPreviousBuild(prevBuild, listener);
+                  Run<?,?> previous = ExtendedEmailPublisher.getPreviousBuild(prevBuild, listener);
                   while (previous != null) {
                      if (previous.getResult() == Result.SUCCESS) {
                         return "Unstable";
@@ -68,7 +69,7 @@ public class BuildStatusContent extends DataBoundTokenMacro {
                 return "Unstable";
             }
         } else if (buildResult == Result.SUCCESS) {
-            AbstractBuild<?,?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+            Run<?,?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
             if (prevBuild != null && (prevBuild.getResult() == Result.UNSTABLE || prevBuild.getResult() == Result.FAILURE)) {
                 return "Fixed";
             } else {
