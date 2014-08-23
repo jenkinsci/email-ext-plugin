@@ -385,6 +385,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                 debug(context.getListener().getLogger(), "SendFailedException message: " + e.getMessage());
                                 break;
                             }
+                        } catch (MessagingException e) {
+                            if (e.getNextException() != null && (e.getNextException() instanceof ConnectException)) {
+                                context.getListener().getLogger().println("Connection error sending email, retrying once more in 10 seconds...");
+                                Thread.sleep(10000);
+                            } else {
+                                debug(context.getListener().getLogger(), "MessagingException message: " + e.getMessage());
+                                break;
+                            }
                         }
                         retries++;
                         if (retries > 1) {
