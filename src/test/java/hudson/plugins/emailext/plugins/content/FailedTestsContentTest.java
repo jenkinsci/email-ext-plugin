@@ -53,7 +53,7 @@ public class FailedTestsContentTest
         AbstractTestResultAction testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 0 );
 
-        when( build.getTestResultAction() ).thenReturn( testResults );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
 
@@ -66,7 +66,7 @@ public class FailedTestsContentTest
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 123 );
 
-        when( build.getTestResultAction() ).thenReturn( testResults );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxTests = 0;
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
@@ -91,7 +91,7 @@ public class FailedTestsContentTest
             failedTests.add(result);
         }
         when( testResults.getFailedTests() ).thenReturn( failedTests );
-        when( build.getTestResultAction() ).thenReturn( testResults );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxTests = 2;
         failedTestContent.showMessage = true;
@@ -122,7 +122,7 @@ public class FailedTestsContentTest
             failedTests.add(result);
         }
         when( testResults.getFailedTests() ).thenReturn( failedTests );
-        when( build.getTestResultAction() ).thenReturn( testResults );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxTests = 2;
         failedTestContent.showMessage = false;
@@ -153,7 +153,7 @@ public class FailedTestsContentTest
             failedTests.add(result);
         }
         when( testResults.getFailedTests() ).thenReturn( failedTests );
-        when( build.getTestResultAction() ).thenReturn( testResults );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxTests = 2;
         failedTestContent.showMessage = true;
@@ -184,7 +184,7 @@ public class FailedTestsContentTest
             failedTests.add(result);
         }
         when( testResults.getFailedTests() ).thenReturn( failedTests );
-        when( build.getTestResultAction() ).thenReturn( testResults );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxTests = 2;
         failedTestContent.showMessage = false;
@@ -215,7 +215,7 @@ public class FailedTestsContentTest
             failedTests.add(result);
         }
         when( testResults.getFailedTests() ).thenReturn( failedTests );
-        when( build.getTestResultAction() ).thenReturn( testResults );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxLength = 10;
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );

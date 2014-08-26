@@ -12,6 +12,7 @@ import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import java.util.List;
 
+import hudson.tasks.test.AbstractTestResultAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 
@@ -34,12 +35,12 @@ public class RegressionTrigger extends EmailTrigger {
         AbstractBuild<?,?> previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
         if (previousBuild == null)
             return build.getResult() == Result.FAILURE;
-        if (build.getTestResultAction() == null) return false;
-        if (previousBuild.getTestResultAction() == null)
-            return build.getTestResultAction().getFailCount() > 0;
+        if (build.getAction(AbstractTestResultAction.class) == null) return false;
+        if (previousBuild.getAction(AbstractTestResultAction.class) == null)
+            return build.getAction(AbstractTestResultAction.class).getFailCount() > 0;
 
-        return build.getTestResultAction().getFailCount() > 
-                previousBuild.getTestResultAction().getFailCount();
+        return build.getAction(AbstractTestResultAction.class).getFailCount() > 
+                previousBuild.getAction(AbstractTestResultAction.class).getFailCount();
     }
 
     @Extension

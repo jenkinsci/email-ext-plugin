@@ -44,7 +44,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             throws MacroEvaluationException, IOException, InterruptedException {
 
         StringBuilder buffer = new StringBuilder();
-        AbstractTestResultAction<?> testResult = build.getTestResultAction();
+        AbstractTestResultAction<?> testResult = build.getAction(AbstractTestResultAction.class);
 
         if (null == testResult) {
             return "No tests ran.";
