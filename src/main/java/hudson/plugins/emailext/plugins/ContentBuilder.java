@@ -1,7 +1,9 @@
 package hudson.plugins.emailext.plugins;
 
 import hudson.CopyOnWrite;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
@@ -16,7 +18,6 @@ import net.java.sezpoz.Index;
 import net.java.sezpoz.IndexItem;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
-
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
 /**
@@ -78,8 +79,13 @@ public class ContentBuilder {
         return newText;
     }
 
-    public static String transformText(String origText, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, TaskListener listener) {
-        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, listener);
+    @Deprecated
+    public static String transformText(String origText, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, BuildListener listener) {
+        return transformText(origText, publisher, build, null, listener);
+    }
+    
+    public static String transformText(String origText, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, null, listener);
         return transformText(origText, context, null);
     }
     

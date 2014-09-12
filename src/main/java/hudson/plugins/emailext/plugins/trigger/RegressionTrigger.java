@@ -12,6 +12,8 @@ import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import java.util.List;
 
+import hudson.tasks.junit.CaseResult;
+import hudson.tasks.test.AbstractTestResultAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 
@@ -34,12 +36,27 @@ public class RegressionTrigger extends EmailTrigger {
         AbstractBuild<?,?> previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
         if (previousBuild == null)
             return build.getResult() == Result.FAILURE;
-        if (build.getTestResultAction() == null) return false;
-        if (previousBuild.getTestResultAction() == null)
-            return build.getTestResultAction().getFailCount() > 0;
 
-        return build.getTestResultAction().getFailCount() > 
-                previousBuild.getTestResultAction().getFailCount();
+        if (build.getAction(AbstractTestResultAction.class) == null)
+            return false;
+
+        // if previous run didn't have test results and this one does (with failures)
+        if (previousBuild.getAction(AbstractTestResultAction.class) == null)
+            return build.getAction(AbstractTestResultAction.class).getFailCount() > 0;
+
+        // if more tests failed during this run
+        if(build.getAction(AbstractTestResultAction.class).getFailCount() >
+                previousBuild.getAction(AbstractTestResultAction.class).getFailCount())
+            return true;
+
+        // if any test failed this time, but not last time
+        for (Object result : build.getAction(AbstractTestResultAction.class).getFailedTests()){
+            CaseResult res = (CaseResult)result;
+            if (res.getAge() == 1)
+                return true;
+        }
+
+        return false;
     }
 
     @Extension

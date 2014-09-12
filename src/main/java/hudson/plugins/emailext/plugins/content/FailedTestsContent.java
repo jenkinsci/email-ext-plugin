@@ -6,6 +6,8 @@ import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import java.io.IOException;
+
+import hudson.tasks.test.TestResult;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
@@ -44,7 +46,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             throws MacroEvaluationException, IOException, InterruptedException {
 
         StringBuilder buffer = new StringBuilder();
-        AbstractTestResultAction<?> testResult = build.getTestResultAction();
+        AbstractTestResultAction<?> testResult = build.getAction(AbstractTestResultAction.class);
 
         if (null == testResult) {
             return "No tests ran.";
@@ -67,8 +69,8 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             if (maxTests > 0) {
                 int printedTests = 0;
                 int printedLength = 0;
-                for (CaseResult failedTest : testResult.getFailedTests()) {
-                    if (showOldFailures || failedTest.getAge() == 1) {
+                for (TestResult failedTest : testResult.getFailedTests()) {
+                    if (showOldFailures || getTestAge(failedTest) == 1) {
                         if (printedTests < maxTests && printedLength <= maxLength) {
                             printedLength += outputTest(buffer, failedTest, showStack, showMessage, maxLength-printedLength);
                             printedTests++;
@@ -89,15 +91,28 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         return buffer.toString();
     }
 
-    private int outputTest(StringBuilder buffer, CaseResult failedTest,
+    private int getTestAge(TestResult result) {
+        if(result.isPassed())
+            return 0;
+        else if (result.getOwner() != null) {
+            return result.getOwner().getNumber()-result.getFailedSince()+1;
+        } else {
+            return 0;
+        }
+    }
+
+    private int outputTest(StringBuilder buffer, TestResult failedTest,
             boolean showStack, boolean showMessage, int lengthLeft) {
         StringBuilder local = new StringBuilder();
-        int currLength = buffer.length();
 
-        local.append(failedTest.getStatus().toString());
+        local.append(failedTest.isPassed() ? "PASSED" : "FAILED");
         local.append(":  ");
         
-        local.append(failedTest.getClassName());
+        if(failedTest instanceof CaseResult) {
+            local.append(((CaseResult)failedTest).getClassName());
+        } else {
+            local.append(failedTest.getFullName());
+        }
         local.append(".");
 
         local.append(failedTest.getDisplayName());

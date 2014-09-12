@@ -1,4 +1,26 @@
 <div>
-    Allows the user to define a script which must have the last line resolve to a true or false which will
-    indicate whether the trigger should cause an email to be sent BEFORE build or not.
+    Allows the user to define a script that is executed to determine if an email should be sent <strong>BEFORE</strong>
+    the build occurs. The last line of the script should resolve to true to send an email, or false to not send an email.
+    <br/>
+    There are four objects added to the model for the script to use to interact with the build.
+    <dl>
+        <dt>build</dt>
+        <dd>This is the current build, usually a child class of <a href="http://javadoc.jenkins-ci.org/hudson/model/AbstractBuild.html">AbstractBuild</a></dd>
+
+        <dt>project</dt>
+        <dd>The project object that the current build was started from, usually a child class of <a href="http://javadoc.jenkins-ci.org/hudson/model/AbstractProject.html">AbstractProject</a></dd>
+
+        <dt>rooturl</dt>
+        <dd>The Jenkins instance root URL, useful for links.</dd>
+
+        <dt>out</dt>
+        <dd>A <a href="http://docs.oracle.com/javase/6/docs/api/java/io/PrintStream.html">PrintStream</a> that can be used to log messages to the build log.</dd>
+    </dl>
+    Example:
+    <pre>
+        // the last line in the script should resolve to a boolean true or false
+        // only send am email if the previous build failed
+        // this could be used to notify people that a new build is happening
+        build.previousBuild.result.toString().equals('FAILURE')
+    </pre>
 </div>

@@ -135,7 +135,9 @@ public class EmailType {
         if (recipientProviders == null) {
             recipientProviders = new ArrayList<RecipientProvider>();
         }
-        recipientProviders.addAll(providers);
+        if(providers != null) {
+            recipientProviders.addAll(providers);
+        }
     }
 
     public void setRecipientList(String recipientList) {

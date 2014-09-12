@@ -35,8 +35,8 @@ public class StatusChangedTrigger extends EmailTrigger {
             final AbstractBuild<?, ?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
 
             if (prevBuild == null) {
-            	// Notify at the first status defined
-            	return true;
+                // Notify at the first status defined
+                return true;
             }
 
             return (build.getResult() != prevBuild.getResult());

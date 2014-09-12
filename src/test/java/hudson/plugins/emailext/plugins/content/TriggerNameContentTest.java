@@ -18,12 +18,6 @@ import static org.junit.matchers.JUnitMatchers.hasItems;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.mock_javamail.Mailbox;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  *
  * @author acearl
@@ -35,8 +29,9 @@ public class TriggerNameContentTest {
     @Rule
     public JenkinsRule j = new JenkinsRule() {
         @Override
-        protected void before() throws Throwable {
+        public void before() throws Throwable {
             super.before();
+            Mailbox.clearAll();
             publisher = new ExtendedEmailPublisher();
             publisher.defaultSubject = "%DEFAULT_SUBJECT";
             publisher.defaultContent = "%DEFAULT_CONTENT";
@@ -46,12 +41,6 @@ public class TriggerNameContentTest {
 
             project = createFreeStyleProject();
             project.getPublishersList().add(publisher);
-        }
-
-        @Override
-        protected void after() throws Exception {
-            super.after();
-            Mailbox.clearAll();
         }
     };
 

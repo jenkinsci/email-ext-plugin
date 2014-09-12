@@ -44,6 +44,7 @@ import hudson.scm.ChangeLogSet;
 import hudson.tasks.Mailer;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.TestResultAction;
+import hudson.tasks.test.AbstractTestResultAction;
 
 /* package private */ final class MockUtilities {
     private static final String AT_DOMAIN = "@DOMAIN";
@@ -129,7 +130,7 @@ import hudson.tasks.junit.TestResultAction;
         final TestResultAction testResultAction = PowerMockito.mock(TestResultAction.class);
         PowerMockito.when(testResultAction.getFailedTests()).thenReturn(failedTests);
         PowerMockito.when(testResultAction.getFailCount()).thenReturn(failedTests.size());
-        PowerMockito.when(build.getTestResultAction()).thenReturn(testResultAction);
+        PowerMockito.when(build.getAction(AbstractTestResultAction.class)).thenReturn(testResultAction);
     }
 
 }

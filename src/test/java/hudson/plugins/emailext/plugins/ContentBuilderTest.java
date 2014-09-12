@@ -3,18 +3,20 @@ package hudson.plugins.emailext.plugins;
 import com.google.common.collect.ListMultimap;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
+import hudson.model.StreamBuildListener;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.util.StreamTaskListener;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Map;
 import static junit.framework.Assert.assertEquals;
-import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertEquals;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.junit.Rule;
@@ -27,15 +29,15 @@ import static org.mockito.Mockito.*;
 public class ContentBuilderTest {
 
     private ExtendedEmailPublisher publisher;
-    private StreamTaskListener listener;
+    private BuildListener listener;
     private AbstractBuild<?, ?> build;
     @Rule
     public JenkinsRule j = new JenkinsRule() {
         @Override
-        protected void before() throws Throwable {
+        public void before() throws Throwable {
             super.before();
 
-            listener = StreamTaskListener.fromStdout();
+            listener = new StreamBuildListener(System.out);
 
             publisher = new ExtendedEmailPublisher();
             publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";
@@ -62,9 +64,9 @@ public class ContentBuilderTest {
     public void testTransformText_shouldExpand_$PROJECT_DEFAULT_CONTENT()
             throws IOException, InterruptedException {
         assertEquals(publisher.defaultContent, ContentBuilder.transformText("$PROJECT_DEFAULT_CONTENT", publisher,
-                build, listener));
+                build, j.createLocalLauncher(), listener));
         assertEquals(publisher.defaultContent, ContentBuilder.transformText("${PROJECT_DEFAULT_CONTENT}", publisher,
-                build, listener));
+                build, j.createLocalLauncher(), listener));
     }
 
     @Test
@@ -145,7 +147,7 @@ public class ContentBuilderTest {
     @Test
     public void testRuntimeMacro() throws IOException, InterruptedException {
         RuntimeContent content = new RuntimeContent("Hello, world");
-        assertEquals("Hello, world", ContentBuilder.transformText("${RUNTIME}", new ExtendedEmailPublisherContext(publisher, build, listener), Collections.singletonList((TokenMacro)content)));
+        assertEquals("Hello, world", ContentBuilder.transformText("${RUNTIME}", new ExtendedEmailPublisherContext(publisher, build, j.createLocalLauncher(), listener), Collections.singletonList((TokenMacro)content)));
     }
     
     public class RuntimeContent extends TokenMacro {

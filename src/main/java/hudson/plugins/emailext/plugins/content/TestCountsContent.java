@@ -47,7 +47,7 @@ public class TestCountsContent extends DataBoundTokenMacro {
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
 
-        AbstractTestResultAction<?> action = build.getTestResultAction();
+        AbstractTestResultAction<?> action = build.getAction(AbstractTestResultAction.class);
         if (action == null) {
             return "";
         }

@@ -23,6 +23,7 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,10 +34,12 @@ import javax.mail.internet.InternetAddress;
 import static org.junit.Assert.assertTrue;
 
 import hudson.EnvVars;
+import hudson.Launcher;
 import hudson.model.Build;
 import hudson.model.StreamBuildListener;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.util.StreamTaskListener;
 
 /* package private */ final class TestUtilities {
     private static final String AT_DOMAIN = "@DOMAIN";
@@ -48,7 +51,7 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
         final Build<?, ?> build,
         final RecipientProvider provider,
         final String... inAuthors) throws AddressException {
-        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(null, build, StreamBuildListener.fromStdout());
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(null, build, new Launcher.LocalLauncher(StreamTaskListener.fromStdout()), new StreamBuildListener(System.out, Charset.defaultCharset()));
         EnvVars envVars = new EnvVars();
         Set<InternetAddress> to = new HashSet<InternetAddress>();
         Set<InternetAddress> cc = new HashSet<InternetAddress>();

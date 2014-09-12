@@ -5,8 +5,9 @@ import java.util.List;
 
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
+import hudson.tasks.test.TestObject;
+import hudson.tasks.test.TestResult;
 import hudson.util.StreamTaskListener;
 
 import org.apache.commons.lang.StringUtils;
@@ -16,12 +17,15 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import org.mockito.Mockito;
+
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+
 @SuppressWarnings({"unchecked"})
 @RunWith(PowerMockRunner.class)
-@PrepareForTest( { CaseResult.class })
+@PrepareForTest( { TestResult.class })
 public class FailedTestsContentTest
 {
     private FailedTestsContent failedTestContent;
@@ -29,13 +33,12 @@ public class FailedTestsContentTest
     private AbstractBuild build;
     
     private TaskListener listener;
-
+    
     @Before
     public void setUp()
     {
         failedTestContent = new FailedTestsContent();
         listener = StreamTaskListener.fromStdout();
-
         build = mock( AbstractBuild.class );
     }
 
@@ -53,7 +56,7 @@ public class FailedTestsContentTest
         AbstractTestResultAction testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 0 );
 
-        when( build.getTestResultAction() ).thenReturn( testResults );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
 
@@ -66,7 +69,7 @@ public class FailedTestsContentTest
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 123 );
 
-        when( build.getTestResultAction() ).thenReturn( testResults );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxTests = 0;
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
@@ -80,18 +83,19 @@ public class FailedTestsContentTest
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 2 );
 
-        List<CaseResult> failedTests = new ArrayList<CaseResult>();
+        List<TestResult> failedTests = new ArrayList<TestResult>();
         for(int i = 0; i < 2; i++) {
-            CaseResult result = mock( CaseResult.class );
-            when( result.getStatus() ).thenReturn( CaseResult.Status.FAILED );
-            when( result.getClassName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
+            TestResult result = mock( TestResult.class );
+            when( result.isPassed() ).thenReturn( false );
+            when( result.getFullName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
             when( result.getDisplayName() ).thenReturn( "Test" + i );
             when( result.getErrorDetails() ).thenReturn( "Error" + i );
             when( result.getErrorStackTrace() ).thenReturn( "Stack" + i );
             failedTests.add(result);
         }
-        when( testResults.getFailedTests() ).thenReturn( failedTests );
-        when( build.getTestResultAction() ).thenReturn( testResults );
+        
+        Mockito.<List<? extends TestResult>>when( testResults.getFailedTests() ).thenReturn( failedTests );        
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxTests = 2;
         failedTestContent.showMessage = true;
@@ -111,18 +115,18 @@ public class FailedTestsContentTest
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 2 );
 
-        List<CaseResult> failedTests = new ArrayList<CaseResult>();
+        List<TestResult> failedTests = new ArrayList<TestResult>();
         for(int i = 0; i < 2; i++) {
-            CaseResult result = mock( CaseResult.class );
-            when( result.getStatus() ).thenReturn( CaseResult.Status.FAILED );
-            when( result.getClassName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
+            TestResult result = mock( TestResult.class );
+            when( result.isPassed() ).thenReturn( false );
+            when( result.getFullName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
             when( result.getDisplayName() ).thenReturn( "Test" + i );
             when( result.getErrorDetails() ).thenReturn( "Error" + i );
             when( result.getErrorStackTrace() ).thenReturn( "Stack" + i );
             failedTests.add(result);
         }
-        when( testResults.getFailedTests() ).thenReturn( failedTests );
-        when( build.getTestResultAction() ).thenReturn( testResults );
+        Mockito.<List<? extends TestResult>>when( testResults.getFailedTests() ).thenReturn( failedTests );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxTests = 2;
         failedTestContent.showMessage = false;
@@ -142,18 +146,18 @@ public class FailedTestsContentTest
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 2 );
 
-        List<CaseResult> failedTests = new ArrayList<CaseResult>();
+        List<TestResult> failedTests = new ArrayList<TestResult>();
         for(int i = 0; i < 2; i++) {
-            CaseResult result = mock( CaseResult.class );
-            when( result.getStatus() ).thenReturn( CaseResult.Status.FAILED );
-            when( result.getClassName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
+            TestResult result = mock( TestResult.class );
+            when( result.isPassed() ).thenReturn( false );
+            when( result.getFullName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
             when( result.getDisplayName() ).thenReturn( "Test" + i );
             when( result.getErrorDetails() ).thenReturn( "Error" + i );
             when( result.getErrorStackTrace() ).thenReturn( "Stack" + i );
             failedTests.add(result);
         }
-        when( testResults.getFailedTests() ).thenReturn( failedTests );
-        when( build.getTestResultAction() ).thenReturn( testResults );
+        Mockito.<List<? extends TestResult>>when( testResults.getFailedTests() ).thenReturn( failedTests );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxTests = 2;
         failedTestContent.showMessage = true;
@@ -173,18 +177,18 @@ public class FailedTestsContentTest
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 2 );
 
-        List<CaseResult> failedTests = new ArrayList<CaseResult>();
+        List<TestResult> failedTests = new ArrayList<TestResult>();
         for(int i = 0; i < 2; i++) {
-            CaseResult result = mock( CaseResult.class );
-            when( result.getStatus() ).thenReturn( CaseResult.Status.FAILED );
-            when( result.getClassName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
+            TestResult result = mock( TestResult.class );
+            when( result.isPassed() ).thenReturn( false );
+            when( result.getFullName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
             when( result.getDisplayName() ).thenReturn( "Test" + i );
             when( result.getErrorDetails() ).thenReturn( "Error" + i );
             when( result.getErrorStackTrace() ).thenReturn( "Stack" + i );
             failedTests.add(result);
         }
-        when( testResults.getFailedTests() ).thenReturn( failedTests );
-        when( build.getTestResultAction() ).thenReturn( testResults );
+        Mockito.<List<? extends TestResult>>when( testResults.getFailedTests() ).thenReturn( failedTests );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxTests = 2;
         failedTestContent.showMessage = false;
@@ -204,18 +208,19 @@ public class FailedTestsContentTest
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 5 );
 
-        List<CaseResult> failedTests = new ArrayList<CaseResult>();
+        List<TestResult> failedTests = new ArrayList<TestResult>();
         for(int i = 0; i < 5; i++) {
-            CaseResult result = mock( CaseResult.class );
-            when( result.getStatus() ).thenReturn( CaseResult.Status.FAILED );
-            when( result.getClassName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
+            TestResult result = mock( TestResult.class );
+            when( result.isPassed() ).thenReturn( false );
+            when( result.getFullName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
             when( result.getDisplayName() ).thenReturn( "Test" + i );
             when( result.getErrorDetails() ).thenReturn( StringUtils.leftPad( "", 3 * 1024, 'z' ) );
             when( result.getErrorStackTrace() ).thenReturn( StringUtils.leftPad( "", 200, 'e' ) );
             failedTests.add(result);
         }
-        when( testResults.getFailedTests() ).thenReturn( failedTests );
-        when( build.getTestResultAction() ).thenReturn( testResults );
+
+        Mockito.<List<? extends TestResult>>when( testResults.getFailedTests() ).thenReturn( failedTests );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxLength = 10;
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );

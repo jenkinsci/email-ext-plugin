@@ -197,7 +197,73 @@ public class ChangesSinceLastSuccessfulBuildContentTest {
                 + "\tPATH2\n" + "\tPATH3\n" + "\n" + "\n" + "Changes for Build #42\n"
                 + "[Ash Lux] Changes for a successful build.\n" + "\tPATH1\n" + "\tPATH2\n" + "\tPATH3\n" + "\n" + "\n", contentStr);
     }
+
+    @Test
+    public void testRegexReplace()
+            throws Exception {
+        content.regex = "<defectId>(DEFECT-[0-9]+)</defectId><message>(.*)</message>";
+        content.replace = "[$1] $2";
+        content.changesFormat = "%m\\n";
+
+        AbstractBuild failureBuild = createBuild(Result.FAILURE, 41, "<defectId>DEFECT-666</defectId><message>Changes for a failed build.</message>");
+
+        AbstractBuild currentBuild = createBuild(Result.SUCCESS, 42, "<defectId>DEFECT-666</defectId><message>Changes for a successful build.</message>");
+        when(currentBuild.getPreviousBuild()).thenReturn(failureBuild);
+        when(failureBuild.getNextBuild()).thenReturn(currentBuild);
+
+        String contentStr = content.evaluate(currentBuild, listener, ChangesSinceLastSuccessfulBuildContent.MACRO_NAME);
+
+        Assert.assertEquals("Changes for Build #41\n"
+                + "[DEFECT-666] Changes for a failed build.\n"
+                + "\n"
+                + "\n"
+                + "Changes for Build #42\n"
+                + "[DEFECT-666] Changes for a successful build.\n"
+                + "\n"
+                + "\n", contentStr);
+    }
     
+    @Test
+    public void testShouldPrintDefaultMessageWhenNoChanges()
+            throws Exception {
+        AbstractBuild failureBuild = createBuild(Result.FAILURE, 41, "[DEFECT-666] Changes for a failed build.");
+
+        AbstractBuild currentBuild = createBuildWithNoChanges(Result.SUCCESS, 42);
+        when(currentBuild.getPreviousBuild()).thenReturn(failureBuild);
+        when(failureBuild.getNextBuild()).thenReturn(currentBuild);
+
+        String contentStr = content.evaluate(currentBuild, listener, ChangesSinceLastSuccessfulBuildContent.MACRO_NAME);
+
+        Assert.assertEquals("Changes for Build #41\n"
+                + "[Ash Lux] [DEFECT-666] Changes for a failed build.\n"
+                + "\n"
+                + "\n"
+                + "Changes for Build #42\n"
+                + ChangesSinceLastBuildContent.DEFAULT_DEFAULT_VALUE
+                + "\n", contentStr);
+    }
+
+    @Test
+    public void testShouldPrintMessageWhenNoChanges()
+            throws Exception {
+        content.def = "another default message\n";
+        AbstractBuild failureBuild = createBuild(Result.FAILURE, 41, "[DEFECT-666] Changes for a failed build.");
+
+        AbstractBuild currentBuild = createBuildWithNoChanges(Result.SUCCESS, 42);
+        when(currentBuild.getPreviousBuild()).thenReturn(failureBuild);
+        when(failureBuild.getNextBuild()).thenReturn(currentBuild);
+
+        String contentStr = content.evaluate(currentBuild, listener, ChangesSinceLastSuccessfulBuildContent.MACRO_NAME);
+
+        Assert.assertEquals("Changes for Build #41\n"
+                + "[Ash Lux] [DEFECT-666] Changes for a failed build.\n"
+                + "\n"
+                + "\n"
+                + "Changes for Build #42\n"
+                + "another default message\n"
+                + "\n", contentStr);
+    }
+
     private AbstractBuild createBuildWithNoChanges(Result result, int buildNumber) {
         AbstractBuild build = mock(AbstractBuild.class);
         when(build.getResult()).thenReturn(result);
@@ -222,6 +288,7 @@ public class ChangesSinceLastSuccessfulBuildContentTest {
         ChangeLogSet changes = mock(ChangeLogSet.class);
         List<ChangeLogSet.Entry> entries = Collections.emptyList();
         when(changes.iterator()).thenReturn(entries.iterator());
+        when(changes.isEmptySet()).thenReturn(true);
 
         return changes;
     }
