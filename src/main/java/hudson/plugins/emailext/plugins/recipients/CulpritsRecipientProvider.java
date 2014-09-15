@@ -6,7 +6,6 @@
 
 package hudson.plugins.emailext.plugins.recipients;
 
-import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
@@ -40,19 +39,16 @@ public class CulpritsRecipientProvider extends RecipientProvider {
     ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         Run<?, ?> build = context.getBuild();
 
-        // TODO: What if not an AbstractBuild?
-        if (build instanceof AbstractBuild) {
-            Set<User> users = ((AbstractBuild)build).getCulprits();
+        Set<User> users = build.getCulprits();
 
-            for (User user : users) {
-                if (!EmailRecipientUtils.isExcludedRecipient(user, context.getListener())) {
-                    String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
-                    if (userAddress != null) {
-                        descriptor.debug(context.getListener().getLogger(), "Adding user address %s, they were not considered an excluded committer", userAddress);
-                        EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, userAddress, env, context.getListener());
-                    } else {
-                        context.getListener().getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
-                    }
+        for (User user : users) {
+            if (!EmailRecipientUtils.isExcludedRecipient(user, context.getListener())) {
+                String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
+                if (userAddress != null) {
+                    descriptor.debug(context.getListener().getLogger(), "Adding user address %s, they were not considered an excluded committer", userAddress);
+                    EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, userAddress, env, context.getListener());
+                } else {
+                    context.getListener().getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
                 }
             }
         }

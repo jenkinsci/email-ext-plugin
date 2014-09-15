@@ -97,7 +97,7 @@ public class ScriptContentTest {
             throws Exception
     {
         scriptContent.script = "empty-script-on-classpath.groovy";
-        assertEquals("HELLO WORLD!", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+        assertEquals("HELLO WORLD!", scriptContent.evaluate(build, build.getWorkspace(), listener, ScriptContent.MACRO_NAME));
     }
 
     @Test
@@ -106,7 +106,7 @@ public class ScriptContentTest {
     {
         scriptContent.template = "empty-groovy-template-on-classpath.template";
         // the template adds a newline
-        assertEquals("HELLO WORLD!\n", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+        assertEquals("HELLO WORLD!\n", scriptContent.evaluate(build, build.getWorkspace(), listener, ScriptContent.MACRO_NAME));
     }
 
     @Test
@@ -115,7 +115,7 @@ public class ScriptContentTest {
     {
         scriptContent.script = "script-does-not-exist";
         assertEquals("Script [script-does-not-exist] was not found in $JENKINS_HOME/email-templates.", 
-            scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+            scriptContent.evaluate(build, build.getWorkspace(), listener, ScriptContent.MACRO_NAME));
     }
 
     @Test
@@ -124,7 +124,7 @@ public class ScriptContentTest {
     {
         scriptContent.template = "template-does-not-exist";
         assertEquals("Template [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.", 
-            scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+            scriptContent.evaluate(build, build.getWorkspace(), listener, ScriptContent.MACRO_NAME));
     }
     
     @Test
@@ -142,7 +142,7 @@ public class ScriptContentTest {
         mockChangeSet(build);
         
         // generate result from groovy template
-        String content = scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME);
+        String content = scriptContent.evaluate(build, build.getWorkspace(), listener, ScriptContent.MACRO_NAME);
 
         // read expected file in resource to easy compare
         String expectedFile = "hudson/plugins/emailext/templates/" + "content-token.result";
@@ -175,7 +175,7 @@ public class ScriptContentTest {
         mockChangeSet(build);
         
         // generate result from groovy template
-        String content = scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME);
+        String content = scriptContent.evaluate(build, build.getWorkspace(), listener, ScriptContent.MACRO_NAME);
 
         // read expected file in resource to easy compare
         String expectedFile = "hudson/plugins/emailext/templates/" + "groovy-sample.result";
@@ -193,20 +193,20 @@ public class ScriptContentTest {
     @Test public void templateOnDisk() throws Exception {
         scriptContent.template = "testing1.template";
         FileUtils.write(new File(ScriptContent.scriptsFolder(), "testing1.template"), "2+2=${2+2}");
-        assertEquals("2+2=4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+        assertEquals("2+2=4", scriptContent.evaluate(build, build.getWorkspace(), listener, ScriptContent.MACRO_NAME));
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
-            assertEquals("2+2=4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+            assertEquals("2+2=4", scriptContent.evaluate(build, build.getWorkspace(), listener, ScriptContent.MACRO_NAME));
         }
         long end = System.currentTimeMillis();
         System.out.printf("average time %.2fmsec%n", (end - start) / 1000.0);
         FileUtils.write(new File(ScriptContent.scriptsFolder(), "testing1.template"), "2 + 2 = ${2+2}");
-        assertEquals("2 + 2 = 4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+        assertEquals("2 + 2 = 4", scriptContent.evaluate(build, build.getWorkspace(), listener, ScriptContent.MACRO_NAME));
         scriptContent.template = "testing2.template";
         FileUtils.write(new File(ScriptContent.scriptsFolder(), "testing2.template"), "2 + 2 is ${2+2}");
-        assertEquals("2 + 2 is 4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+        assertEquals("2 + 2 is 4", scriptContent.evaluate(build, build.getWorkspace(), listener, ScriptContent.MACRO_NAME));
         scriptContent.template = "testing1.template";
-        assertEquals("2 + 2 = 4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+        assertEquals("2 + 2 = 4", scriptContent.evaluate(build, build.getWorkspace(), listener, ScriptContent.MACRO_NAME));
     }
     
     private void mockChangeSet(final AbstractBuild build) {

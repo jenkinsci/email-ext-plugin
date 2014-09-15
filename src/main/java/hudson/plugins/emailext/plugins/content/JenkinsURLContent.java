@@ -1,7 +1,9 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.FilePath;
 import hudson.Util;
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
@@ -26,12 +28,12 @@ public class JenkinsURLContent extends DataBoundTokenMacro {
     }
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName)
+    public String evaluate(Run<?, ?> context, FilePath workspace, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
         // JENKINS-6193 - Only override the global URL if we should override global settings
         String jenkinsUrl = Jenkins.getInstance().getRootUrl();
         
-        ExtendedEmailPublisher publisher = context.getProject().getPublishersList().get(ExtendedEmailPublisher.class);
+        ExtendedEmailPublisher publisher = context.getParent().getPublishersList().get(ExtendedEmailPublisher.class);
         
         if (publisher.getDescriptor().getOverrideGlobalSettings()) {
             jenkinsUrl = publisher.getDescriptor().getHudsonUrl();

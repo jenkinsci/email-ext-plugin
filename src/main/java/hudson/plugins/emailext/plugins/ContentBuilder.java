@@ -70,13 +70,7 @@ public class ContentBuilder {
             if(additionalMacros != null)
                 macros.addAll(additionalMacros);
 
-            // TODO: What if it's not an AbstractBuild? TokenMacro needs it.
-            Run<?, ?> run = context.getBuild();
-            if (run instanceof AbstractBuild) {
-                newText = TokenMacro.expandAll((AbstractBuild<?, ?>) run, context.getListener(), newText, false, macros);
-            } else {
-                context.getListener().getLogger().println("Unable to transform email text.  Not an impl of AbstractBuild.");
-            }
+            newText = TokenMacro.expandAll(context.getBuild(), context.getWorkspace(), context.getListener(), newText, false, macros);
         } catch (MacroEvaluationException e) {
             context.getListener().getLogger().println("Error evaluating token: " + e.getMessage());
         } catch (Exception e) {

@@ -30,7 +30,7 @@ public class BuildLogRegexContentTest {
             throws Exception {
         when(build.getLogReader()).thenReturn(new StringReader(""));
 
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("", result);
     }
@@ -42,7 +42,7 @@ public class BuildLogRegexContentTest {
                 "1\n2\n3\n4\n5\n6 ERROR\n7\n8\n9 ERROR\n10\n11\n12\n13\n14\n15\n16\n17\n18 ERROR\n19\n20\n21\n22\n23\n"));
         buildLogRegexContent.showTruncatedLines = false;
 
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("6 ERROR\n9 ERROR\n18 ERROR\n", result);
     }
@@ -53,7 +53,7 @@ public class BuildLogRegexContentTest {
         when(build.getLogReader()).thenReturn(new StringReader(
                 "1\n2\n3\n4\n5\n6 ERROR\n7\n8\n9 ERROR\n10\n11\n12\n13\n14\n15\n16\n17\n18 ERROR\n19\n20\n21\n22\n23\n"));
 
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("[...truncated 5 lines...]\n6 ERROR\n[...truncated 2 lines...]\n9 ERROR\n[...truncated 8 lines...]\n18 ERROR\n[...truncated 5 lines...]\n", result);
     }
@@ -65,7 +65,7 @@ public class BuildLogRegexContentTest {
                 "1\n2\n3\n4\n5\n6 ERROR\n7\n8\n9 ERROR\n10\n11\n12\n13\n14\n15\n16\n17\n18 ERROR\n19\n20\n21\n22\n23\n"));
         buildLogRegexContent.linesBefore = 3;
         buildLogRegexContent.linesAfter = 3;
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("[...truncated 2 lines...]\n3\n4\n5\n6 ERROR\n7\n8\n9 ERROR\n10\n11\n12\n[...truncated 2 lines...]\n15\n16\n17\n18 ERROR\n19\n20\n21\n[...truncated 2 lines...]\n", result);
     }
@@ -78,7 +78,7 @@ public class BuildLogRegexContentTest {
         buildLogRegexContent.showTruncatedLines = false;
         buildLogRegexContent.linesBefore = 3;
         buildLogRegexContent.linesAfter = 3;
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("3\n4\n5\n6 ERROR\n7\n8\n9 ERROR\n10\n11\n12\n15\n16\n17\n18 ERROR\n19\n20\n21\n", result);
     }
@@ -91,7 +91,7 @@ public class BuildLogRegexContentTest {
         buildLogRegexContent.matchedLineHtmlStyle = "color: red";
         buildLogRegexContent.linesBefore = 3;
         buildLogRegexContent.linesAfter = 3;
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("<p>[...truncated 2 lines...]</p>\n<pre>\n3\n4\n5\n<b style=\"color: red\">6 ERROR</b>\n7\n8\n<b style=\"color: red\">9 ERROR</b>\n10\n11\n12\n</pre>\n<p>[...truncated 2 lines...]</p>\n<pre>\n15\n16\n17\n<b style=\"color: red\">18 ERROR</b>\n19\n20\n21\n</pre>\n<p>[...truncated 2 lines...]</p>\n", result);
     }
@@ -105,7 +105,7 @@ public class BuildLogRegexContentTest {
         buildLogRegexContent.linesBefore = 3;
         buildLogRegexContent.linesAfter = 3;
         buildLogRegexContent.showTruncatedLines = false;
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("<pre>\n3\n4\n5\n<b style=\"color: red\">6 ERROR</b>\n7\n8\n<b style=\"color: red\">9 ERROR</b>\n10\n11\n12\n15\n16\n17\n<b style=\"color: red\">18 ERROR</b>\n19\n20\n21\n</pre>\n", result);
     }
@@ -116,7 +116,7 @@ public class BuildLogRegexContentTest {
         when(build.getLogReader()).thenReturn(new StringReader("error foo bar fubber"));
         buildLogRegexContent.substText = "$0";
 
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("error foo bar fubber\n", result);
     }
@@ -127,7 +127,7 @@ public class BuildLogRegexContentTest {
         when(build.getLogReader()).thenReturn(new StringReader("error foo bar fubber"));
         buildLogRegexContent.substText = null;
 
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("error foo bar fubber\n", result);
     }
@@ -138,7 +138,7 @@ public class BuildLogRegexContentTest {
         when(build.getLogReader()).thenReturn(new StringReader("error foo bar error fubber"));
         buildLogRegexContent.substText = "REPLACE";
 
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("REPLACE foo bar REPLACE fubber\n", result);
     }
@@ -152,7 +152,7 @@ public class BuildLogRegexContentTest {
         buildLogRegexContent.showTruncatedLines = false;
         buildLogRegexContent.substText = "$1";
 
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("Yes\nNo\n", result);
     }
@@ -165,7 +165,7 @@ public class BuildLogRegexContentTest {
         buildLogRegexContent.showTruncatedLines = false;
         buildLogRegexContent.escapeHtml = true;
 
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("error &lt;&gt;&amp;&quot;\n", result);
     }
@@ -178,7 +178,7 @@ public class BuildLogRegexContentTest {
         buildLogRegexContent.showTruncatedLines = false;
         buildLogRegexContent.matchedLineHtmlStyle = "";
 
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("<pre>\n<b>error</b>\n</pre>\n", result);
     }
@@ -191,7 +191,7 @@ public class BuildLogRegexContentTest {
         buildLogRegexContent.showTruncatedLines = false;
         buildLogRegexContent.matchedLineHtmlStyle = "color: red";
 
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("<pre>\n<b style=\"color: red\">error</b>\n</pre>\n", result);
     }
@@ -205,7 +205,7 @@ public class BuildLogRegexContentTest {
         when(build.getLogReader()).thenReturn(
                 new StringReader(ConsoleNote.PREAMBLE_STR + "AAAAdB+LCAAAAAAAAABb85aBtbiIQSOjNKU4P0+vIKc0PTOvWK8kMze1uCQxtyC1SC8ExvbLL0llgABGJgZGLwaB3MycnMzi4My85FTXgvzkjIoiBimoScn5ecX5Oal6zhAaVS9DRQGQ1uaZsmc5AAaMIAyBAAAA" + ConsoleNote.POSTAMBLE_STR + "No emails were triggered."));
 
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("No emails were triggered.\n", result);
     }
@@ -221,7 +221,7 @@ public class BuildLogRegexContentTest {
         buildLogRegexContent.substText = "$1";
         when(build.getLogReader()).thenReturn(
                 new StringReader("*** Application: Firefox 15.0a2\n*** Platform: Mac OS X 10.7.4 64bit"));
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("Firefox 15.0a2", result);
     }
@@ -237,7 +237,7 @@ public class BuildLogRegexContentTest {
         buildLogRegexContent.substText = "$1";
         when(build.getLogReader()).thenReturn(
                 new StringReader("*** Application: Firefox 15.0a2\n*** Platform: Mac OS X 10.7.4 64bit"));
-        final String result = buildLogRegexContent.evaluate(build, listener, BuildLogRegexContent.MACRO_NAME);
+        final String result = buildLogRegexContent.evaluate(build, build.getWorkspace(), listener, BuildLogRegexContent.MACRO_NAME);
 
         assertEquals("JENKINS", result);
     }

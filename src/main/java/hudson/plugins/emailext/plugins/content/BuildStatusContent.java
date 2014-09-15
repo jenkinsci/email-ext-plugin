@@ -1,6 +1,6 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.model.AbstractBuild;
+import hudson.FilePath;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -22,7 +22,7 @@ public class BuildStatusContent extends DataBoundTokenMacro {
     }
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+    public String evaluate(Run<?, ?> build, FilePath workspace, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
 
         // Build can be "building" when the pre-build trigger is used. (and in this case there is not result set yet for the build)

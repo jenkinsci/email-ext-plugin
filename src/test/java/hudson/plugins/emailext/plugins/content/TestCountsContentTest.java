@@ -36,7 +36,7 @@ public class TestCountsContentTest {
     @SuppressWarnings("unchecked")
     public void testGetContent_NoTestResults() throws Exception {
         target.var = "total";
-        assertEquals("", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+        assertEquals("", target.evaluate(build, build.getWorkspace(), listener, TestCountsContent.MACRO_NAME));
     }
 
     @Test
@@ -49,18 +49,18 @@ public class TestCountsContentTest {
         when(results.getSkipCount()).thenReturn(1);
         when(build.getAction(AbstractTestResultAction.class)).thenReturn(results);
 
-        assertEquals("5", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+        assertEquals("5", target.evaluate(build, build.getWorkspace(), listener, TestCountsContent.MACRO_NAME));
         target.var = "total";
-        assertEquals("5", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+        assertEquals("5", target.evaluate(build, build.getWorkspace(), listener, TestCountsContent.MACRO_NAME));
         target.var = "pass";
-        assertEquals("2", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+        assertEquals("2", target.evaluate(build, build.getWorkspace(), listener, TestCountsContent.MACRO_NAME));
         target.var = "fail";
-        assertEquals("2", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+        assertEquals("2", target.evaluate(build, build.getWorkspace(), listener, TestCountsContent.MACRO_NAME));
         target.var = "skip";
-        assertEquals("1", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+        assertEquals("1", target.evaluate(build, build.getWorkspace(), listener, TestCountsContent.MACRO_NAME));
         target.var = "SKIP";
-        assertEquals("1", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+        assertEquals("1", target.evaluate(build, build.getWorkspace(), listener, TestCountsContent.MACRO_NAME));
         target.var = "wrongvar";
-        assertEquals("", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+        assertEquals("", target.evaluate(build, build.getWorkspace(), listener, TestCountsContent.MACRO_NAME));
     }
 }

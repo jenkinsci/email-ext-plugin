@@ -1,7 +1,8 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.EnvVars;
-import hudson.model.AbstractBuild;
+import hudson.FilePath;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailToken;
 import java.io.IOException;
@@ -30,7 +31,7 @@ public class WorkspaceFileContent extends DataBoundTokenMacro  {
     }
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName)
+    public String evaluate(Run<?, ?> context, FilePath workspace, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {        
         // do some environment variable substitution
         try {
@@ -40,12 +41,12 @@ public class WorkspaceFileContent extends DataBoundTokenMacro  {
             listener.error("Error retrieving environment");
         }
         
-        if(!context.getWorkspace().child(path).exists()) {
+        if(!workspace.child(path).exists()) {
             return String.format(fileNotFoundMessage, path);
         }
 
         try {
-            return context.getWorkspace().child(path).readToString();
+            return workspace.child(path).readToString();
         } catch (IOException e) {
             return "ERROR: File '" + path + "' could not be read";
         }

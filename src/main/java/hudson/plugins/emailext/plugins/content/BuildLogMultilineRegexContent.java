@@ -21,8 +21,9 @@
  */
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.FilePath;
 import hudson.console.ConsoleNote;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailToken;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -120,7 +121,7 @@ public class BuildLogMultilineRegexContent extends DataBoundTokenMacro {
     }
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+    public String evaluate(Run<?, ?> build, FilePath workspace, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
         try {
             BufferedReader reader = new BufferedReader(build.getLogReader());

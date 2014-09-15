@@ -6,9 +6,10 @@ import groovy.lang.GroovyShell;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
 import hudson.ExtensionList;
+import hudson.FilePath;
 import hudson.Plugin;
+import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.model.AbstractBuild;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.GroovyTemplateConfig.GroovyTemplateConfigProvider;
 import hudson.plugins.emailext.ScriptSandbox;
@@ -70,7 +71,7 @@ public class ScriptContent extends DataBoundTokenMacro {
     } 
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName)
+    public String evaluate(Run<?, ?> context, FilePath workspace, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
 
         InputStream inputStream = null;
@@ -114,7 +115,7 @@ public class ScriptContent extends DataBoundTokenMacro {
      * Try to get the script from the classpath first before trying the file
      * system.
      *
-     * @param scriptName
+     * @param fileName
      * @return
      * @throws java.io.FileNotFoundException
      */
@@ -186,7 +187,7 @@ public class ScriptContent extends DataBoundTokenMacro {
      * @return the rendered template content
      * @throws IOException
      */
-    private String renderTemplate(AbstractBuild<?, ?> build, TaskListener listener, InputStream templateStream)
+    private String renderTemplate(Run<?, ?> build, TaskListener listener, InputStream templateStream)
             throws IOException {
         
         String result;
@@ -231,7 +232,7 @@ public class ScriptContent extends DataBoundTokenMacro {
      * @return a String containing the toString of the last item in the script
      * @throws IOException
      */
-    private String executeScript(AbstractBuild<?, ?> build, TaskListener listener, InputStream scriptStream)
+    private String executeScript(Run<?, ?> build, TaskListener listener, InputStream scriptStream)
             throws IOException {
         String result = "";
         Map binding = new HashMap<String, Object>();

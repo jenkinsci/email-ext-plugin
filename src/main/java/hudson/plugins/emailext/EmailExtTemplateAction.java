@@ -111,11 +111,11 @@ public class EmailExtTemplateAction implements Action {
             if(templateFile.endsWith(".jelly")) {
                 JellyScriptContent jellyContent = new JellyScriptContent();
                 jellyContent.template = templateFile;
-                result = jellyContent.evaluate(build, TaskListener.NULL, "JELLY_SCRIPT");
+                result = jellyContent.evaluate(build, build.getWorkspace(), TaskListener.NULL, "JELLY_SCRIPT");
             } else {
                 ScriptContent scriptContent = new ScriptContent();
                 scriptContent.template = templateFile;                
-                result = scriptContent.evaluate(build, TaskListener.NULL, "SCRIPT");
+                result = scriptContent.evaluate(build, build.getWorkspace(), TaskListener.NULL, "SCRIPT");
             }
         } catch (Exception ex) {
             result = renderError(ex);

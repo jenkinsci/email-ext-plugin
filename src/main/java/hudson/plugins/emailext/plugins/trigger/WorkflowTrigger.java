@@ -8,13 +8,10 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 public class WorkflowTrigger extends EmailTrigger {
 
-    private final String triggerName;
-
     @DataBoundConstructor
-    public WorkflowTrigger(String triggerName, String recipientList, String replyTo, String subject, String body, String attachmentsPattern,
+    public WorkflowTrigger(String recipientList, String replyTo, String subject, String body, String attachmentsPattern,
                            int attachBuildLog, String contentType) {
         super(null, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
-        this.triggerName = (triggerName != null ? triggerName : "Workflow");
     }
 
     @Override
@@ -28,7 +25,7 @@ public class WorkflowTrigger extends EmailTrigger {
 
             @Override
             public String getDisplayName() {
-                return triggerName;
+                return "Workflow";
             }
         };
     }

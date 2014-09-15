@@ -2,6 +2,7 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
@@ -32,23 +33,24 @@ public abstract class NthFailureTrigger extends EmailTrigger {
 
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
+        Run<?, ?> run = build;
 
         // Work back through the failed builds.
         for (int i = 0; i < failureCount; i++) {
-            if (build == null) {
+            if (run == null) {
                 // We don't have enough history to have reached the failure count.
                 return false;
             }
 
-            Result buildResult = build.getResult();
+            Result buildResult = run.getResult();
             if (buildResult != Result.FAILURE) {
                 return false;
             }
 
-            build = (AbstractBuild<?, ?>) ExtendedEmailPublisher.getPreviousBuild(build, listener);
+            run = ExtendedEmailPublisher.getPreviousBuild(run, listener);
         }
 
-        return (build == null || build.getResult() == Result.SUCCESS || build.getResult() == Result.UNSTABLE);
+        return (run == null || run.getResult() == Result.SUCCESS || run.getResult() == Result.UNSTABLE);
     }
 
     public abstract static class DescriptorImpl extends EmailTriggerDescriptor {

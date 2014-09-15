@@ -43,7 +43,7 @@ public class ChangesSinceLastUnstableBuildContentTest {
             throws Exception {
         AbstractBuild build = mock(AbstractBuild.class);
 
-        String contentStr = content.evaluate(build, listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
+        String contentStr = content.evaluate(build, build.getWorkspace(), listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
 
         assertEquals("", contentStr);
     }
@@ -57,7 +57,7 @@ public class ChangesSinceLastUnstableBuildContentTest {
         when(currentBuild.getPreviousBuild()).thenReturn(failureBuild);
         when(failureBuild.getNextBuild()).thenReturn(currentBuild);
 
-        String contentStr = content.evaluate(currentBuild, listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
+        String contentStr = content.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
 
         assertEquals("Changes for Build #41\n"
                 + "[Ash Lux] Changes for a failed build.\n"
@@ -80,7 +80,7 @@ public class ChangesSinceLastUnstableBuildContentTest {
         when(currentBuild.getPreviousBuild()).thenReturn(failureBuild);
         when(failureBuild.getNextBuild()).thenReturn(currentBuild);
 
-        String contentStr = content.evaluate(currentBuild, listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
+        String contentStr = content.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
 
         assertEquals("Changes for Build #42\n" + "[Ash Lux] Changes for a successful build.\n" + "\n" + "\n"
                 + "Changes for Build #41\n" + "[Ash Lux] Changes for a failed build.\n" + "\n" + "\n", contentStr);
@@ -113,7 +113,7 @@ public class ChangesSinceLastUnstableBuildContentTest {
         when(currentBuild.getPreviousBuild()).thenReturn(notBuiltBuild);
         when(notBuiltBuild.getNextBuild()).thenReturn(currentBuild);
 
-        String contentStr = content.evaluate(currentBuild, listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
+        String contentStr = content.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
 
         assertEquals(
                 "Changes for Build #4\n"
@@ -145,7 +145,7 @@ public class ChangesSinceLastUnstableBuildContentTest {
         when(currentBuild.getPreviousBuild()).thenReturn(failureBuild);
         when(failureBuild.getNextBuild()).thenReturn(currentBuild);
 
-        String contentStr = content.evaluate(currentBuild, listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
+        String contentStr = content.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
 
         Assert.assertEquals("Changes for Build #41\n" + "Oct 21, 2013 7:39:00 PM\n" + "Changes for Build #42\n" + "Oct 21, 2013 7:39:00 PM\n", contentStr);
     }
@@ -161,7 +161,7 @@ public class ChangesSinceLastUnstableBuildContentTest {
         when(currentBuild.getPreviousBuild()).thenReturn(failureBuild);
         when(failureBuild.getNextBuild()).thenReturn(currentBuild);
 
-        String contentStr = content.evaluate(currentBuild, listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
+        String contentStr = content.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
 
         Assert.assertEquals("Changes for Build #41\n" + "REVISION\n" + "Changes for Build #42\n" + "REVISION\n", contentStr);
     }
@@ -177,7 +177,7 @@ public class ChangesSinceLastUnstableBuildContentTest {
         when(currentBuild.getPreviousBuild()).thenReturn(failureBuild);
         when(failureBuild.getNextBuild()).thenReturn(currentBuild);
 
-        String contentStr = content.evaluate(currentBuild, listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
+        String contentStr = content.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
 
         Assert.assertEquals("Changes for Build #41\n" + "\tPATH1\n" + "\tPATH2\n" + "\tPATH3\n" + "\n"
                 + "Changes for Build #42\n" + "\tPATH1\n" + "\tPATH2\n" + "\tPATH3\n" + "\n", contentStr);
@@ -194,7 +194,7 @@ public class ChangesSinceLastUnstableBuildContentTest {
         when(currentBuild.getPreviousBuild()).thenReturn(failureBuild);
         when(failureBuild.getNextBuild()).thenReturn(currentBuild);
 
-        String contentStr = content.evaluate(currentBuild, listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
+        String contentStr = content.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
 
         Assert.assertEquals("Changes for Build #41\n" + "[Ash Lux] Changes for a failed build.\n" + "\tPATH1\n"
                 + "\tPATH2\n" + "\tPATH3\n" + "\n" + "\n" + "Changes for Build #42\n"
@@ -214,7 +214,7 @@ public class ChangesSinceLastUnstableBuildContentTest {
         when(currentBuild.getPreviousBuild()).thenReturn(failureBuild);
         when(failureBuild.getNextBuild()).thenReturn(currentBuild);
 
-        String contentStr = content.evaluate(currentBuild, listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
+        String contentStr = content.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastUnstableBuildContent.MACRO_NAME);
 
         assertEquals("Changes for Build #41\n"
                 + "[DEFECT-666] Changes for a failed build.\n"
@@ -235,7 +235,7 @@ public class ChangesSinceLastUnstableBuildContentTest {
         when(currentBuild.getPreviousBuild()).thenReturn(failureBuild);
         when(failureBuild.getNextBuild()).thenReturn(currentBuild);
 
-        String contentStr = content.evaluate(currentBuild, listener, ChangesSinceLastSuccessfulBuildContent.MACRO_NAME);
+        String contentStr = content.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastSuccessfulBuildContent.MACRO_NAME);
 
         Assert.assertEquals("Changes for Build #41\n"
                 + "[Ash Lux] [DEFECT-666] Changes for a failed build.\n"
@@ -256,7 +256,7 @@ public class ChangesSinceLastUnstableBuildContentTest {
         when(currentBuild.getPreviousBuild()).thenReturn(failureBuild);
         when(failureBuild.getNextBuild()).thenReturn(currentBuild);
 
-        String contentStr = content.evaluate(currentBuild, listener, ChangesSinceLastSuccessfulBuildContent.MACRO_NAME);
+        String contentStr = content.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastSuccessfulBuildContent.MACRO_NAME);
 
         Assert.assertEquals("Changes for Build #41\n"
                 + "[Ash Lux] [DEFECT-666] Changes for a failed build.\n"

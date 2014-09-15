@@ -33,7 +33,7 @@ public class BuildLogExcerptContentTest {
         buildLogExcerptContent.start = "START";
         buildLogExcerptContent.end = "END";
 
-        final String result = buildLogExcerptContent.evaluate(build, listener, BuildLogExcerptContent.MACRO_NAME);
+        final String result = buildLogExcerptContent.evaluate(build, build.getWorkspace(), listener, BuildLogExcerptContent.MACRO_NAME);
 
         assertEquals("", result);
     }
@@ -49,7 +49,7 @@ public class BuildLogExcerptContentTest {
         buildLogExcerptContent.start = "START";
         buildLogExcerptContent.end = "END";
 
-        final String result = buildLogExcerptContent.evaluate(build, listener, BuildLogExcerptContent.MACRO_NAME);
+        final String result = buildLogExcerptContent.evaluate(build, build.getWorkspace(), listener, BuildLogExcerptContent.MACRO_NAME);
 
         assertEquals("7\n8\n9\n", result);
     }
@@ -63,7 +63,7 @@ public class BuildLogExcerptContentTest {
         buildLogExcerptContent.start = ".*START.*";
         buildLogExcerptContent.end = ".*STOP.*";
 
-        final String result = buildLogExcerptContent.evaluate(build, listener, BuildLogExcerptContent.MACRO_NAME);
+        final String result = buildLogExcerptContent.evaluate(build, build.getWorkspace(), listener, BuildLogExcerptContent.MACRO_NAME);
 
         assertEquals("7\n8\n9\n", result);
     }

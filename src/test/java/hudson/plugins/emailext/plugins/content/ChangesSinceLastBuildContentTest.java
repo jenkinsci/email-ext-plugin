@@ -24,6 +24,8 @@ import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+
+
 @SuppressWarnings({"unchecked"})
 public class ChangesSinceLastBuildContentTest {
 
@@ -43,7 +45,7 @@ public class ChangesSinceLastBuildContentTest {
             throws Exception {
         AbstractBuild currentBuild = createBuild(Result.SUCCESS, 42, "Changes for a successful build.");
 
-        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastBuildContent.MACRO_NAME);
 
         assertEquals("[Ash Lux] Changes for a successful build.\n\n", content);
     }
@@ -57,7 +59,7 @@ public class ChangesSinceLastBuildContentTest {
         when(currentBuild.getPreviousBuild()).thenReturn(failureBuild);
         when(failureBuild.getNextBuild()).thenReturn(currentBuild);
 
-        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastBuildContent.MACRO_NAME);
 
         assertEquals("[Ash Lux] Changes for a successful build.\n\n", content);
     }
@@ -69,7 +71,7 @@ public class ChangesSinceLastBuildContentTest {
 
         AbstractBuild currentBuild = createBuild(Result.SUCCESS, 42, "Changes for a successful build.");
 
-        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastBuildContent.MACRO_NAME);
 
         assertEquals("Oct 21, 2013 7:39:00 PM", content);
     }
@@ -81,7 +83,7 @@ public class ChangesSinceLastBuildContentTest {
 
         AbstractBuild currentBuild = createBuild(Result.SUCCESS, 42, "Changes for a successful build.");
 
-        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastBuildContent.MACRO_NAME);
 
         assertEquals("REVISION", content);
     }
@@ -93,7 +95,7 @@ public class ChangesSinceLastBuildContentTest {
 
         AbstractBuild currentBuild = createBuild(Result.SUCCESS, 42, "Changes for a successful build.");
 
-        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastBuildContent.MACRO_NAME);
 
         assertEquals("\tPATH1\n\tPATH2\n\tPATH3\n", content);
     }
@@ -105,7 +107,7 @@ public class ChangesSinceLastBuildContentTest {
 
         AbstractBuild currentBuild = createBuild(Result.SUCCESS, 42, "Changes for a successful build.");
 
-        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastBuildContent.MACRO_NAME);
 
         assertEquals("[Ash Lux] Changes for a successful build.\n" + "\tPATH1\n" + "\tPATH2\n" + "\tPATH3\n" + "\n", content);
     }
@@ -118,7 +120,7 @@ public class ChangesSinceLastBuildContentTest {
 
         AbstractBuild currentBuild = createBuild(Result.SUCCESS, 42, "Changes for a successful build.");
 
-        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastBuildContent.MACRO_NAME);
 
         assertEquals("Oct 21, 2013 19:39:00", content);
     }
@@ -131,7 +133,7 @@ public class ChangesSinceLastBuildContentTest {
 
         AbstractBuild currentBuild = createBuild(Result.SUCCESS, 42, "Changes for a successful build.");
 
-        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastBuildContent.MACRO_NAME);
 
         assertEquals("[Ash Lux] Changes for a successful build.\n" + "\tPATH1\tUnknown\n" + "\tPATH2\tUnknown\n" + "\tPATH3\tUnknown\n" + "\n", content);
     }
@@ -144,7 +146,7 @@ public class ChangesSinceLastBuildContentTest {
 
         AbstractBuild currentBuild = createBuildWithAffectedFiles(Result.SUCCESS, 42, "Changes for a successful build.");
 
-        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastBuildContent.MACRO_NAME);
 
         assertEquals("[Ash Lux] Changes for a successful build.\n" + "\tPATH1\tadd - The file was added\n" + "\tPATH2\tdelete - The file was removed\n" + "\tPATH3\tedit - The file was modified\n" + "\n", content);
     }
@@ -158,7 +160,7 @@ public class ChangesSinceLastBuildContentTest {
 
         AbstractBuild currentBuild = createBuildWithAffectedFiles(Result.SUCCESS, 42, "<defectId>DEFECT-666</defectId><message>Initial commit</message>");
 
-        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastBuildContent.MACRO_NAME);
 
         assertEquals("[DEFECT-666] Initial commit\n\n", content);
     }
@@ -168,7 +170,7 @@ public class ChangesSinceLastBuildContentTest {
             throws Exception {
         AbstractBuild currentBuild = createBuildWithNoChanges(Result.SUCCESS, 42);
 
-        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastBuildContent.MACRO_NAME);
 
         assertEquals(ChangesSinceLastBuildContent.DEFAULT_DEFAULT_VALUE, content);
     }
@@ -179,7 +181,7 @@ public class ChangesSinceLastBuildContentTest {
         changesSinceLastBuildContent.def = "another default message\n";
         AbstractBuild currentBuild = createBuildWithNoChanges(Result.SUCCESS, 42);
 
-        String content = changesSinceLastBuildContent.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME);
+        String content = changesSinceLastBuildContent.evaluate(currentBuild, currentBuild.getWorkspace(), listener, ChangesSinceLastBuildContent.MACRO_NAME);
 
         assertEquals("another default message\n", content);
     }

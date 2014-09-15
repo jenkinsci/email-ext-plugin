@@ -34,7 +34,7 @@ public class CauseContentTest {
         throws Exception {
         when(build.getAction(CauseAction.class)).thenReturn(null);
 
-        assertEquals("N/A", causeContent.evaluate(build, listener, CauseContent.MACRO_NAME));
+        assertEquals("N/A", causeContent.evaluate(build, build.getWorkspace(), listener, CauseContent.MACRO_NAME));
     }
 
     @Test
@@ -43,7 +43,7 @@ public class CauseContentTest {
         CauseAction causeAction = mock(CauseAction.class);
         when(build.getAction(CauseAction.class)).thenReturn(causeAction);
 
-        assertEquals("N/A", causeContent.evaluate(build, listener, CauseContent.MACRO_NAME));
+        assertEquals("N/A", causeContent.evaluate(build, build.getWorkspace(), listener, CauseContent.MACRO_NAME));
     }
 
     @Test
@@ -52,7 +52,7 @@ public class CauseContentTest {
         CauseAction causeAction = new CauseAction(new CauseStub("Cause1"));
         when(build.getAction(CauseAction.class)).thenReturn(causeAction);
 
-        assertEquals("Cause1", causeContent.evaluate(build, listener, CauseContent.MACRO_NAME));
+        assertEquals("Cause1", causeContent.evaluate(build, build.getWorkspace(), listener, CauseContent.MACRO_NAME));
     }
 
     @Test
@@ -66,7 +66,7 @@ public class CauseContentTest {
         }});
         when(build.getAction(CauseAction.class)).thenReturn(causeAction);
 
-        assertEquals("Cause1, Cause2, Cause3", causeContent.evaluate(build, listener, CauseContent.MACRO_NAME));
+        assertEquals("Cause1, Cause2, Cause3", causeContent.evaluate(build, build.getWorkspace(), listener, CauseContent.MACRO_NAME));
     }
 
     private class CauseStub extends Cause {

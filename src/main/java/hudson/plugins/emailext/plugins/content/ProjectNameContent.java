@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.model.AbstractBuild;
+import hudson.FilePath;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailToken;
 import java.io.IOException;
@@ -20,11 +21,11 @@ public class ProjectNameContent extends DataBoundTokenMacro {
     }
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+    public String evaluate(Run<?, ?> build, FilePath workspace, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
         if(macroName.equals(MACRO_NAME2)) {
-            return build.getProject().getDisplayName();
+            return build.getParent().getDisplayName();
         } 
-        return build.getProject().getFullDisplayName();
+        return build.getParent().getFullDisplayName();
     }
 }
