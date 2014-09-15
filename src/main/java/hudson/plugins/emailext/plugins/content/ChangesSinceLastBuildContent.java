@@ -1,8 +1,9 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractBuild.DependencyChange;
-import hudson.model.AbstractProject;
+import hudson.FilePath;
+import hudson.model.DependencyChange;
+import hudson.model.Job;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.Util;
@@ -61,7 +62,7 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
     }
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+    public String evaluate(Run<?, ?> build, FilePath workspace, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
 
         if (StringUtils.isEmpty(format)) {
@@ -76,22 +77,26 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
         }
 
         StringBuffer buf = new StringBuffer();
-        if (!build.getChangeSet().isEmptySet()) {
-            for (ChangeLogSet.Entry entry : build.getChangeSet()) {
+        ChangeLogSet<? extends ChangeLogSet.Entry> changeset = build.getChangeSet();
+
+        // TODO: what if there are multiple SCMs?
+        if (changeset != null && !changeset.isEmptySet()) {
+            for (ChangeLogSet.Entry entry : changeset) {
                 Util.printf(buf, format, new ChangesSincePrintfSpec(entry,
                         pathFormat, dateFormatter));
             }
         } else {
             buf.append(def);
         }
+
         if (showDependencies) {
-            AbstractBuild previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+            Run previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
             if (previousBuild != null) {
-                for (Entry<AbstractProject, DependencyChange> e : build.getDependencyChanges(previousBuild).entrySet()) {
+                for (Entry<Job, DependencyChange> e : build.getDependencyChanges(previousBuild).entrySet()) {
                     buf.append("\n=======================\n");
                     buf.append("\nChanges in ").append(e.getKey().getName())
                             .append(":\n");
-                    for (AbstractBuild<?, ?> b : e.getValue().getBuilds()) {
+                    for (Run<?, ?> b : e.getValue().getBuilds()) {
                         if (!b.getChangeSet().isEmptySet()) {
                             for (ChangeLogSet.Entry entry : b.getChangeSet()) {
                                 Util.printf(buf, format,

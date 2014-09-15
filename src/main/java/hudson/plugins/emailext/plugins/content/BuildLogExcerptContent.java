@@ -24,8 +24,9 @@
 
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.FilePath;
 import hudson.console.ConsoleNote;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailToken;
 
@@ -34,7 +35,6 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
-import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro.Parameter;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 /**
@@ -57,7 +57,7 @@ public class BuildLogExcerptContent extends DataBoundTokenMacro {
     }
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName)
+    public String evaluate(Run<?, ?> context, FilePath workspace, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
         try {
             BufferedReader reader = new BufferedReader(context.getLogReader());

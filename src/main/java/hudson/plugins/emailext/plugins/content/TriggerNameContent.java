@@ -1,7 +1,8 @@
 package hudson.plugins.emailext.plugins.content;
 
 import com.google.common.collect.ListMultimap;
-import hudson.model.AbstractBuild;
+import hudson.FilePath;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import java.io.IOException;
 import java.util.Map;
@@ -22,7 +23,7 @@ public class TriggerNameContent extends TokenMacro {
     }
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> ab, TaskListener tl, String string, Map<String, String> map, ListMultimap<String, String> lm) throws MacroEvaluationException, IOException, InterruptedException {
+    public String evaluate(Run<?, ?> ab, FilePath workspace, TaskListener tl, String string, Map<String, String> map, ListMultimap<String, String> lm) throws MacroEvaluationException, IOException, InterruptedException {
         return name;
     }
 }

@@ -4,6 +4,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.Run;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.ZipDataSource;
 import java.io.ByteArrayInputStream;
@@ -17,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 import javax.activation.MimetypesFileTypeMap;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -74,10 +74,10 @@ public class AttachmentUtils implements Serializable {
         
         private static final String DATA_SOURCE_NAME = "build.log";
         
-        private final AbstractBuild<?,?> build;
+        private final Run<?,?> build;
         private final boolean compress;
         
-        public LogFileDataSource(AbstractBuild<?,?> build, boolean compress) {
+        public LogFileDataSource(Run<?,?> build, boolean compress) {
             this.build = build;
             this.compress = compress;
         }
@@ -117,7 +117,7 @@ public class AttachmentUtils implements Serializable {
     private List<MimeBodyPart> getAttachments(final ExtendedEmailPublisherContext context)
             throws MessagingException, InterruptedException, IOException {
         List<MimeBodyPart> attachments = null;
-        FilePath ws = context.getBuild().getWorkspace();
+        FilePath ws = context.getWorkspace();
         long totalAttachmentSize = 0;
         long maxAttachmentSize = context.getPublisher().getDescriptor().getMaxAttachmentSize();
         if (ws == null) {

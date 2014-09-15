@@ -6,6 +6,7 @@
 
 package hudson.plugins.emailext.plugins.recipients;
 
+import hudson.model.Run;
 import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
@@ -14,8 +15,10 @@ import hudson.Extension;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
+
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
+
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -34,7 +37,9 @@ public class CulpritsRecipientProvider extends RecipientProvider {
     @Override
     public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
     ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        Set<User> users = context.getBuild().getCulprits();
+        Run<?, ?> build = context.getBuild();
+
+        Set<User> users = build.getCulprits();
 
         for (User user : users) {
             if (!EmailRecipientUtils.isExcludedRecipient(user, context.getListener())) {
@@ -58,5 +63,4 @@ public class CulpritsRecipientProvider extends RecipientProvider {
         }
         
     }
-    
 }

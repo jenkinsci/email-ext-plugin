@@ -75,7 +75,7 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
 
         Set<User> users = null;
 
-        final AbstractBuild<?, ?> currentBuild = context.getBuild();
+        final Run<?, ?> currentBuild = context.getBuild();
         if (currentBuild == null) {
             debug.send("currentBuild was null");
         } else {

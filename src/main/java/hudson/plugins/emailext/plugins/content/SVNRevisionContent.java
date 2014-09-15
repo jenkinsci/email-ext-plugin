@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.model.AbstractBuild;
+import hudson.FilePath;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailToken;
 
@@ -20,7 +21,7 @@ public class SVNRevisionContent extends DataBoundTokenMacro {
     }
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+    public String evaluate(Run<?, ?> build, FilePath workspace, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
 
         Map<String, String> env = build.getEnvironment(listener);

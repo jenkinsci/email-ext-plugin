@@ -72,14 +72,14 @@ public class JellyScriptContentTest {
     public void testShouldFindTemplateOnClassPath()
             throws Exception {
         content.template = "empty-template-on-classpath";
-        assertEquals("HELLO WORLD!", content.evaluate(build, listener, JellyScriptContent.MACRO_NAME));
+        assertEquals("HELLO WORLD!", content.evaluate(build, build.getWorkspace(), listener, JellyScriptContent.MACRO_NAME));
     }
 
     @Test
     public void testWhenTemplateNotFoundThrowFileNotFoundException()
             throws Exception {
         content.template = "template-does-not-exist";
-        String output = content.evaluate(build, listener, JellyScriptContent.MACRO_NAME);
+        String output = content.evaluate(build, build.getWorkspace(), listener, JellyScriptContent.MACRO_NAME);
 
         assertEquals("Jelly script [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.", output);
     }
@@ -95,7 +95,7 @@ public class JellyScriptContentTest {
         when(build.getTimestamp()).thenReturn(new GregorianCalendar());
         mockChangeSet(build);
 
-        String output = content.evaluate(build, listener, JellyScriptContent.MACRO_NAME);
+        String output = content.evaluate(build, build.getWorkspace(), listener, JellyScriptContent.MACRO_NAME);
 
         assertTrue(output.contains(
                 "CHANGE SET\n"
@@ -115,7 +115,7 @@ public class JellyScriptContentTest {
         when(build.getTimestamp()).thenReturn(new GregorianCalendar());
         mockChangeSet(build);
 
-        String output = content.evaluate(build, listener, JellyScriptContent.MACRO_NAME);
+        String output = content.evaluate(build, build.getWorkspace(), listener, JellyScriptContent.MACRO_NAME);
 
         assertTrue(output.contains("COMMIT MESSAGE"));
         assertTrue(output.contains("Kohsuke Kawaguchi"));
@@ -126,7 +126,7 @@ public class JellyScriptContentTest {
     }
 
     private void mockChangeSet(final AbstractBuild build) {
-        Mockito.when(build.getChangeSet()).thenReturn(new ChangeLogSet(build) {
+        Mockito.when(build.getChangeSet()).thenReturn(new ChangeLogSet(build, null) {
             @Override
             public boolean isEmptySet() {
                 return false;

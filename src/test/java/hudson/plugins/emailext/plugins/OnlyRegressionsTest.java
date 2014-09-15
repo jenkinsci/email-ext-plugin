@@ -4,6 +4,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.content.FailedTestsContent;
@@ -47,11 +48,13 @@ public class OnlyRegressionsTest {
         project.scheduleBuild2(0).get();
         FailedTestsContent failedTestsContent = new FailedTestsContent();
         failedTestsContent.onlyRegressions = true;
-        String content = failedTestsContent.evaluate(project.getLastBuild(), listener, FailedTestsContent.MACRO_NAME);
+        FreeStyleBuild lastBuild = project.getLastBuild();
+        String content = failedTestsContent.evaluate(lastBuild, lastBuild.getWorkspace(), listener, FailedTestsContent.MACRO_NAME);
         assertTrue("The failing test should be reported the first time it fails", content.contains("hudson.plugins.emailext"));
 
         project.scheduleBuild2(0).get();
-        content = failedTestsContent.evaluate(project.getLastBuild(), listener, FailedTestsContent.MACRO_NAME);
+        lastBuild = project.getLastBuild();
+        content = failedTestsContent.evaluate(lastBuild, lastBuild.getWorkspace(), listener, FailedTestsContent.MACRO_NAME);
         assertFalse("The failing test should not be reported the second time it fails", content.contains("hudson.plugins.emailext"));
         assertTrue("The content should state that there are other failing tests still", content.contains("and 1 other failed test"));
     }

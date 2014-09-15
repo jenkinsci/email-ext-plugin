@@ -4,7 +4,7 @@ import hudson.CopyOnWrite;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
-import hudson.model.TaskListener;
+import hudson.model.Run;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.tasks.Publisher;
@@ -69,7 +69,8 @@ public class ContentBuilder {
             List<TokenMacro> macros = new ArrayList<TokenMacro>(getPrivateMacros());
             if(additionalMacros != null)
                 macros.addAll(additionalMacros);
-            newText = TokenMacro.expandAll(context.getBuild(), context.getListener(), newText, false, macros);
+
+            newText = TokenMacro.expandAll(context.getBuild(), context.getWorkspace(), context.getListener(), newText, false, macros);
         } catch (MacroEvaluationException e) {
             context.getListener().getLogger().println("Error evaluating token: " + e.getMessage());
         } catch (Exception e) {

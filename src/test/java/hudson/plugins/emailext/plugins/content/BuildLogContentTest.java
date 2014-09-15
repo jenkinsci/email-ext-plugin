@@ -35,7 +35,7 @@ public class BuildLogContentTest {
             }
         });
 
-        String content = buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);
+        String content = buildLogContent.evaluate(build, build.getWorkspace(), listener, BuildLogContent.MACRO_NAME);
 
         assertEquals("line 1\nline 2\nline 3\n", content);
     }
@@ -44,7 +44,7 @@ public class BuildLogContentTest {
     public void testGetContent_shouldTruncateWhenLineLimitIsHit()
             throws Exception {
         buildLogContent.maxLines = 2;
-        buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);
+        buildLogContent.evaluate(build, build.getWorkspace(), listener, BuildLogContent.MACRO_NAME);
 
         verify(build).getLog(2);
     }
@@ -52,7 +52,7 @@ public class BuildLogContentTest {
     @Test
     public void testGetContent_shouldDefaultToMaxLines()
             throws Exception {
-        buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);
+        buildLogContent.evaluate(build, build.getWorkspace(), listener, BuildLogContent.MACRO_NAME);
 
         verify(build).getLog(BuildLogContent.MAX_LINES_DEFAULT_VALUE);
     }
@@ -66,7 +66,7 @@ public class BuildLogContentTest {
             }
         });
 
-        String content = buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);
+        String content = buildLogContent.evaluate(build, build.getWorkspace(), listener, BuildLogContent.MACRO_NAME);
 
         assertEquals("<b>bold</b>\n", content);
     }
@@ -81,7 +81,7 @@ public class BuildLogContentTest {
         });
 
         buildLogContent.escapeHtml = true;
-        String content = buildLogContent.evaluate(build, listener, BuildLogContent.MACRO_NAME);
+        String content = buildLogContent.evaluate(build, build.getWorkspace(), listener, BuildLogContent.MACRO_NAME);
 
         assertEquals("&lt;b&gt;bold&lt;/b&gt;\n", content);
     }

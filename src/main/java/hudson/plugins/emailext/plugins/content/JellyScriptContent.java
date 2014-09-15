@@ -1,9 +1,10 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.ExtensionList;
+import hudson.FilePath;
 import hudson.Plugin;
-import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
@@ -50,7 +51,7 @@ public class JellyScriptContent extends DataBoundTokenMacro {
     }
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+    public String evaluate(Run<?, ?> build, FilePath workspace, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
         InputStream inputStream = null;
 
@@ -142,7 +143,7 @@ public class JellyScriptContent extends DataBoundTokenMacro {
         return (ConfigProvider)configProvider;
     }
 
-    private String renderContent(AbstractBuild<?, ?> build, InputStream inputStream, TaskListener listener)
+    private String renderContent(Run<?, ?> build, InputStream inputStream, TaskListener listener)
             throws JellyException, IOException {
         JellyContext context = createContext(new ScriptContentBuildWrapper(build), build, listener);
         Script script = context.compileScript(new InputSource(inputStream));
@@ -152,7 +153,7 @@ public class JellyScriptContent extends DataBoundTokenMacro {
         return null;
     }
 
-    private String convert(AbstractBuild<?, ?> build, JellyContext context, Script script)
+    private String convert(Run<?, ?> build, JellyContext context, Script script)
             throws JellyTagException, IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream(16 * 1024);
         XMLOutput xmlOutput = XMLOutput.createXMLOutput(output);
@@ -163,7 +164,7 @@ public class JellyScriptContent extends DataBoundTokenMacro {
         return output.toString(getCharset(build));
     }
 
-    private JellyContext createContext(Object it, AbstractBuild<?, ?> build, TaskListener listener) {
+    private JellyContext createContext(Object it, Run<?, ?> build, TaskListener listener) {
         JellyContext context = new JellyContext();
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         context.setVariable("it", it);
@@ -174,7 +175,7 @@ public class JellyScriptContent extends DataBoundTokenMacro {
         return context;
     }
 
-    private String getCharset(AbstractBuild<?, ?> build) {
+    private String getCharset(Run<?, ?> build) {
         String charset = Mailer.descriptor().getCharset();
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         String overrideCharset = descriptor.getCharset();

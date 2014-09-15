@@ -27,7 +27,6 @@ import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.Build;
-import hudson.model.BuildListener;
 import hudson.model.Cause;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
@@ -193,7 +192,7 @@ public class FailingTestSuspectsRecipientProviderTest {
     }
 
     private static void addMockChangeSet(final AbstractBuild build, final String... inAuthors) {
-        PowerMockito.when(build.getChangeSet()).thenReturn(new ChangeLogSet(build) {
+        PowerMockito.when(build.getChangeSet()).thenReturn(new ChangeLogSet(build, null) {
 
             final String[] authors = inAuthors;
 

@@ -45,7 +45,7 @@ public class FailedTestsContentTest
     @Test
     public void testGetContent_noTestsRanShouldGiveAMeaningfulMessage()
             throws Exception {
-        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+        String content = failedTestContent.evaluate( build, build.getWorkspace(), listener, FailedTestsContent.MACRO_NAME );
 
         assertEquals( "No tests ran.", content );
     }
@@ -58,7 +58,7 @@ public class FailedTestsContentTest
 
         when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
-        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+        String content = failedTestContent.evaluate( build, build.getWorkspace(), listener, FailedTestsContent.MACRO_NAME );
 
         assertEquals( "All tests passed", content );
     }
@@ -72,7 +72,7 @@ public class FailedTestsContentTest
         when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxTests = 0;
-        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+        String content = failedTestContent.evaluate( build, build.getWorkspace(), listener, FailedTestsContent.MACRO_NAME );
 
         assertEquals( "123 tests failed.\n", content );
     }
@@ -100,7 +100,7 @@ public class FailedTestsContentTest
         failedTestContent.maxTests = 2;
         failedTestContent.showMessage = true;
         failedTestContent.showStack = true;
-        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+        String content = failedTestContent.evaluate( build, build.getWorkspace(), listener, FailedTestsContent.MACRO_NAME );
 
         for(int i = 0; i < 2; i++) {
             assertTrue( content.contains("FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test" + i) );
@@ -131,7 +131,7 @@ public class FailedTestsContentTest
         failedTestContent.maxTests = 2;
         failedTestContent.showMessage = false;
         failedTestContent.showStack = true;
-        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+        String content = failedTestContent.evaluate( build, build.getWorkspace(), listener, FailedTestsContent.MACRO_NAME );
 
         for(int i = 0; i < 2; i++) {
             assertTrue( content.contains("FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test" + i) );
@@ -162,7 +162,7 @@ public class FailedTestsContentTest
         failedTestContent.maxTests = 2;
         failedTestContent.showMessage = true;
         failedTestContent.showStack = false;
-        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+        String content = failedTestContent.evaluate( build, build.getWorkspace(), listener, FailedTestsContent.MACRO_NAME );
 
         for(int i = 0; i < 2; i++) {
             assertTrue( content.contains("FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test" + i) );
@@ -193,7 +193,7 @@ public class FailedTestsContentTest
         failedTestContent.maxTests = 2;
         failedTestContent.showMessage = false;
         failedTestContent.showStack = false;
-        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+        String content = failedTestContent.evaluate( build, build.getWorkspace(), listener, FailedTestsContent.MACRO_NAME );
 
         for(int i = 0; i < 2; i++) {
             assertTrue( content.contains("FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test" + i) );
@@ -223,12 +223,12 @@ public class FailedTestsContentTest
         when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxLength = 10;
-        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+        String content = failedTestContent.evaluate( build, build.getWorkspace(), listener, FailedTestsContent.MACRO_NAME );
         assertTrue( content.length() < (3 * 1024 * 5) );
 
         failedTestContent = new FailedTestsContent();
         failedTestContent.showStack = true;
-        content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+        content = failedTestContent.evaluate( build, build.getWorkspace(), listener, FailedTestsContent.MACRO_NAME );
         assertTrue( content.length() >= (3 * 1024 * 5) );
     }
 }

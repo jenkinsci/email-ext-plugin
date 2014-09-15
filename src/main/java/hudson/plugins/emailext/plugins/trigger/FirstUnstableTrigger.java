@@ -3,6 +3,7 @@ package hudson.plugins.emailext.plugins.trigger;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
@@ -33,7 +34,7 @@ public class FirstUnstableTrigger extends EmailTrigger {
 
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
-        AbstractBuild<?, ?> previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+        Run<?, ?> previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
         return previousBuild != null
                 ? previousBuild.getResult() != Result.UNSTABLE && build.getResult() == Result.UNSTABLE
                 : build.getResult() == Result.UNSTABLE;
