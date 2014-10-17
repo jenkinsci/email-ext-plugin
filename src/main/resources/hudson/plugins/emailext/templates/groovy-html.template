@@ -23,6 +23,7 @@ TD.console { font-family:Courier New; }
   <TR><TD>Project:</TD><TD>${project.name}</TD></TR>
   <TR><TD>Date of build:</TD><TD>${it.timestampString}</TD></TR>
   <TR><TD>Build duration:</TD><TD>${build.durationString}</TD></TR>
+  <TR><TD>Build duration:</TD><TD><% build.causes.each() { cause -> %> ${cause.shortDescription} <%  } %></TD></TR>
 </TABLE>
 <BR/>
 
