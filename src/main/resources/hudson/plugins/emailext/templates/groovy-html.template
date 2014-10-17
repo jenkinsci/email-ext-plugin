@@ -116,6 +116,12 @@ try {
 <!-- JUnit TEMPLATE -->
 
 <% def junitResultList = it.JUnitTestResult
+try {
+ def cucumberTestResultAction = it.getAction("org.jenkinsci.plugins.cucumber.jsontestsupport.CucumberTestResultAction")
+ junitResultList.add(cucumberTestResultAction.getResult())
+} catch(e) {
+        //cucumberTestResultAction not exist in this build
+}
 if (junitResultList.size() > 0) { %>
   <TABLE width="100%">
     <TR><TD class="bg1" colspan="2"><B>JUnit Tests</B></TD></TR>
