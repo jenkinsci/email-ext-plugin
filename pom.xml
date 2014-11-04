@@ -120,9 +120,9 @@
             <version>1.5</version>
         </dependency>
         <dependency>
-            <groupId>org.kohsuke</groupId>
-            <artifactId>groovy-sandbox</artifactId>
-            <version>1.0</version>
+          <groupId>org.jenkins-ci.plugins</groupId>
+          <artifactId>script-security</artifactId>
+          <version>1.6</version>
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>
