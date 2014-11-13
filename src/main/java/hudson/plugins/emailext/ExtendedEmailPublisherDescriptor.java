@@ -1,7 +1,6 @@
 package hudson.plugins.emailext;
 
 import hudson.Extension;
-import hudson.ExtensionList;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
@@ -10,6 +9,8 @@ import hudson.util.FormValidation;
 import hudson.util.Secret;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
