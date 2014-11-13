@@ -26,6 +26,7 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
     public static final String FORMAT_DEFAULT_VALUE = "[%a] %m\\n";
     public static final String PATH_FORMAT_DEFAULT_VALUE = "\\t%p\\n";
     public static final String FORMAT_DEFAULT_VALUE_WITH_PATHS = "[%a] %m%p\\n";
+    public static final String DEFAULT_DEFAULT_VALUE = "No changes\n";
     public static final String MACRO_NAME = "CHANGES";
     @Parameter
     public boolean showPaths = false;
@@ -41,6 +42,8 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
     public String regex;
     @Parameter
     public String replace;
+    @Parameter(alias="default")
+    public String def = DEFAULT_DEFAULT_VALUE;
 
     public ChangesSinceLastBuildContent() {
 
@@ -73,10 +76,14 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
         }
 
         StringBuffer buf = new StringBuffer();
-        for (ChangeLogSet.Entry entry : build.getChangeSet()) {
-            Util.printf(buf, format, new ChangesSincePrintfSpec(entry, pathFormat, dateFormatter));
+        if (!build.getChangeSet().isEmptySet()) {
+            for (ChangeLogSet.Entry entry : build.getChangeSet()) {
+                Util.printf(buf, format, new ChangesSincePrintfSpec(entry,
+                        pathFormat, dateFormatter));
+            }
+        } else {
+            buf.append(def);
         }
-
         if (showDependencies) {
             AbstractBuild previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
             if (previousBuild != null) {
@@ -85,8 +92,14 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
                     buf.append("\nChanges in ").append(e.getKey().getName())
                             .append(":\n");
                     for (AbstractBuild<?, ?> b : e.getValue().getBuilds()) {
-                        for (ChangeLogSet.Entry entry : b.getChangeSet()) {
-                            Util.printf(buf, format, new ChangesSincePrintfSpec(entry, pathFormat, dateFormatter));
+                        if (!b.getChangeSet().isEmptySet()) {
+                            for (ChangeLogSet.Entry entry : b.getChangeSet()) {
+                                Util.printf(buf, format,
+                                        new ChangesSincePrintfSpec(entry,
+                                                pathFormat, dateFormatter));
+                            }
+                        } else {
+                            buf.append(def);
                         }
                     }
                 }

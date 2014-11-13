@@ -47,7 +47,7 @@ public class TestCountsContentTest {
         when(results.getTotalCount() - results.getFailCount() - results.getSkipCount()).thenReturn(2);
         when(results.getFailCount()).thenReturn(2);
         when(results.getSkipCount()).thenReturn(1);
-        when(build.getTestResultAction()).thenReturn(results);
+        when(build.getAction(AbstractTestResultAction.class)).thenReturn(results);
 
         assertEquals("5", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
         target.var = "total";

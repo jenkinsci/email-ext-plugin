@@ -19,7 +19,7 @@ public class StatusChangedTriggerTest extends TriggerTestBase {
         return new StatusChangedTrigger(recProviders, "", "", "", "", "", 0, "project");
     }
 
-	// --- Transitions from <no-status> to <status> --- //
+    // --- Transitions from <no-status> to <status> --- //
     @Test
     public void testTrigger_Success() throws IOException, InterruptedException {
         // Notification expected since this is the first build status defined
@@ -50,10 +50,10 @@ public class StatusChangedTriggerTest extends TriggerTestBase {
         assertTriggered(Result.UNSTABLE);
     }
 
-	// --- Transitions between 2 statuses --- //
-	// There are 5 possible statuses (success, aborted, failure, not_built and unstable)
+    // --- Transitions between 2 statuses --- //
+    // There are 5 possible statuses (success, aborted, failure, not_built and unstable)
     // so we must test 5x5 = 25 transitions
-	// Transitions from the "success" status
+    // Transitions from the "success" status
     @Test
     public void testTrigger_SuccessSuccess() throws IOException, InterruptedException {
         assertNotTriggered(Result.SUCCESS, Result.SUCCESS);
@@ -79,7 +79,7 @@ public class StatusChangedTriggerTest extends TriggerTestBase {
         assertTriggered(Result.SUCCESS, Result.UNSTABLE);
     }
 
-	// Transitions from the "aborted" status
+    // Transitions from the "aborted" status
     @Test
     public void testTrigger_AbortedSuccess() throws IOException, InterruptedException {
         assertTriggered(Result.ABORTED, Result.SUCCESS);
@@ -105,7 +105,7 @@ public class StatusChangedTriggerTest extends TriggerTestBase {
         assertTriggered(Result.ABORTED, Result.UNSTABLE);
     }
 
-	// Transitions from the "failure" status
+    // Transitions from the "failure" status
     @Test
     public void testTrigger_FailureSuccess() throws IOException, InterruptedException {
         assertTriggered(Result.FAILURE, Result.SUCCESS);
@@ -131,7 +131,7 @@ public class StatusChangedTriggerTest extends TriggerTestBase {
         assertTriggered(Result.FAILURE, Result.UNSTABLE);
     }
 
-	// Transitions from the "not_built" status
+    // Transitions from the "not_built" status
     @Test
     public void testTrigger_NotBuiltSuccess() throws IOException, InterruptedException {
         assertTriggered(Result.NOT_BUILT, Result.SUCCESS);
@@ -157,7 +157,7 @@ public class StatusChangedTriggerTest extends TriggerTestBase {
         assertTriggered(Result.NOT_BUILT, Result.UNSTABLE);
     }
 
-	// Transitions from the "unstable" status
+    // Transitions from the "unstable" status
     @Test
     public void testTrigger_UnstableSuccess() throws IOException, InterruptedException {
         assertTriggered(Result.UNSTABLE, Result.SUCCESS);

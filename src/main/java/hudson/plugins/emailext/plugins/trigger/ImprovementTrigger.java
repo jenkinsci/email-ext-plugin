@@ -9,6 +9,7 @@ import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
+import hudson.tasks.test.AbstractTestResultAction;
 import java.util.List;
 
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -33,8 +34,8 @@ public class ImprovementTrigger extends EmailTrigger {
 
         if (previousBuild == null)
             return false;
-        if (build.getTestResultAction() == null) return false;
-        if (previousBuild.getTestResultAction() == null)
+        if (build.getAction(AbstractTestResultAction.class) == null) return false;
+        if (previousBuild.getAction(AbstractTestResultAction.class) == null)
             return false;
         
         int numCurrFailures = getNumFailures(build);
@@ -42,7 +43,7 @@ public class ImprovementTrigger extends EmailTrigger {
         // The first part of the condition avoids accidental triggering for
         // builds that aggregate downstream test results before those test
         // results are available...
-        return build.getTestResultAction().getTotalCount() > 0
+        return build.getAction(AbstractTestResultAction.class).getTotalCount() > 0
                 && numCurrFailures < getNumFailures(previousBuild)
                 && numCurrFailures > 0;
     }

@@ -26,7 +26,7 @@ public class ExtendedEmailPublisherMatrixTest {
 
     private ExtendedEmailPublisher publisher;
     private MatrixProject project;
-    private List<DumbSlave> slaves;	
+    private List<DumbSlave> slaves;    
  
     @Rule
     public JenkinsRule j = new JenkinsRule() { 
@@ -72,7 +72,7 @@ public class ExtendedEmailPublisherMatrixTest {
     }
 
     @Test
-    public void testPreBuildMatrixBuildSendSlavesOnly() throws Exception{	
+    public void testPreBuildMatrixBuildSendSlavesOnly() throws Exception{    
         addSlaveToProject(0,1,2);
         List<RecipientProvider> recProviders = Collections.emptyList();
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_CONFIGURATIONS);
@@ -83,12 +83,12 @@ public class ExtendedEmailPublisherMatrixTest {
        
     
         MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);		
-        assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );	
+        j.assertBuildStatusSuccess(build);        
+        assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );    
     }
 
     @Test
-    public void testPreBuildMatrixBuildSendSlavesAndParent() throws Exception{	
+    public void testPreBuildMatrixBuildSendSlavesAndParent() throws Exception{    
         addSlaveToProject(0,1);
         List<RecipientProvider> recProviders = Collections.emptyList();
         publisher.setMatrixTriggerMode(MatrixTriggerMode.BOTH);
@@ -99,8 +99,8 @@ public class ExtendedEmailPublisherMatrixTest {
        
     
         MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);		
-        assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );	
+        j.assertBuildStatusSuccess(build);        
+        assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );    
     }
 
     private void addEmailType( EmailTrigger trigger ) {

@@ -1,6 +1,7 @@
 package hudson.plugins.emailext;
 
 import hudson.Extension;
+import hudson.ExtensionList;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
@@ -92,6 +93,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      * This is the global default pre-send script.
      */
     private String defaultPresendScript = "";
+    
+    private List<GroovyScriptPath> defaultClasspath = new ArrayList<GroovyScriptPath>();
     
     /**
      * This is the global emergency email address
@@ -187,6 +190,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if (smtpAuthUsername != null) {
             props.put("mail.smtp.auth", "true");
         }
+
+        // avoid hang by setting some timeout.
+        props.put("mail.smtp.timeout","60000");
+        props.put("mail.smtp.connectiontimeout","60000");
+
         return Session.getInstance(props, getAuthenticator());
     }
 
@@ -255,7 +263,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
     
     public long getMaxAttachmentSize() {
-    	return maxAttachmentSize;
+        return maxAttachmentSize;
     }
     
     public long getMaxAttachmentSizeMb() {
@@ -306,6 +314,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return defaultPresendScript;
     }
 
+    public List<GroovyScriptPath> getDefaultClasspath() {
+        return defaultClasspath;
+    }
+    
     public ExtendedEmailPublisherDescriptor() {
         super(ExtendedEmailPublisher.class);
         load();
@@ -355,7 +367,12 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             req.getParameter("ext_mailer_default_replyto") : "";
         defaultPresendScript = nullify(req.getParameter("ext_mailer_default_presend_script")) != null ?
             req.getParameter("ext_mailer_default_presend_script") : "";
-
+        if (req.hasParameter("ext_mailer_default_classpath")) {
+            defaultClasspath.clear();
+            for(String s : req.getParameterValues("ext_mailer_default_classpath")) {
+                defaultClasspath.add(new GroovyScriptPath(s));
+            }
+        }
         debugMode = req.hasParameter("ext_mailer_debug_mode");
         
         //enableWatching = req.getParameter("ext_mailer_enable_watching") != null;

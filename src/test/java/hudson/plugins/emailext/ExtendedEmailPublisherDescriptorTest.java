@@ -1,15 +1,19 @@
 package hudson.plugins.emailext;
 
+import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.html.HtmlCheckBoxInput;
+import com.gargoylesoftware.htmlunit.html.HtmlDivision;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import static org.junit.Assert.*;
+
 import org.jvnet.hudson.test.Bug;
 
 public class ExtendedEmailPublisherDescriptorTest {
@@ -88,6 +92,11 @@ public class ExtendedEmailPublisherDescriptorTest {
         HtmlCheckBoxInput securityMode = page.getElementByName("ext_mailer_security_enabled");
         assertNotNull("Security mode should be present", securityMode);
         assertFalse("Security mode should not be checked by default", securityMode.isChecked());
+        
+        try {
+            page.getElementByName("defaultClasspath");
+            fail("defaultClasspath section should not be present");
+        } catch (ElementNotFoundException e) {}
     }
     
     @Test

@@ -17,6 +17,7 @@ import hudson.scm.ChangeLogSet;
 import hudson.scm.EditType;
 import hudson.util.DescribableList;
 import hudson.util.StreamTaskListener;
+import java.io.File;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -25,6 +26,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Scanner;
 import jenkins.model.JenkinsLocationConfiguration;
+import org.apache.commons.io.FileUtils;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -186,6 +188,25 @@ public class ScriptContentTest {
         }
         // remove end space before compare
         assertEquals(expected.trim(), content.trim());
+    }
+
+    @Test public void templateOnDisk() throws Exception {
+        scriptContent.template = "testing1.template";
+        FileUtils.write(new File(ScriptContent.scriptsFolder(), "testing1.template"), "2+2=${2+2}");
+        assertEquals("2+2=4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++) {
+            assertEquals("2+2=4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+        }
+        long end = System.currentTimeMillis();
+        System.out.printf("average time %.2fmsec%n", (end - start) / 1000.0);
+        FileUtils.write(new File(ScriptContent.scriptsFolder(), "testing1.template"), "2 + 2 = ${2+2}");
+        assertEquals("2 + 2 = 4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+        scriptContent.template = "testing2.template";
+        FileUtils.write(new File(ScriptContent.scriptsFolder(), "testing2.template"), "2 + 2 is ${2+2}");
+        assertEquals("2 + 2 is 4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+        scriptContent.template = "testing1.template";
+        assertEquals("2 + 2 = 4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
     }
     
     private void mockChangeSet(final AbstractBuild build) {
