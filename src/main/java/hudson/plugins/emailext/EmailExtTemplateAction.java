@@ -13,7 +13,6 @@ import hudson.util.FormValidation;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
@@ -34,7 +33,8 @@ public class EmailExtTemplateAction implements Action {
     }
     
     public String getIconFileName() {
-        return "/plugin/email-ext/images/template-debugger.png";
+        // returning null allows us to have our own action.jelly
+        return null;
     }
 
     public String getDisplayName() {

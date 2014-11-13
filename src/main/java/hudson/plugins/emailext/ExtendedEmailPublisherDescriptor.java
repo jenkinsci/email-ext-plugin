@@ -3,25 +3,25 @@ package hudson.plugins.emailext;
 import hudson.Extension;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
-import hudson.model.Item;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
-import jenkins.model.Jenkins;
-import net.sf.json.JSONObject;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
-
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Properties;
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Properties;
+import jenkins.model.Jenkins;
+import jenkins.model.JenkinsLocationConfiguration;
+import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
 
 
 /**
@@ -52,7 +52,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      * The e-mail address that Jenkins puts to "From:" field in outgoing e-mails.
      * Null if not configured.
      */
-    private String adminAddress;
+    private transient String adminAddress;
 
     /**
      * The SMTP server to use for sending e-mail. Null for default to the environment,
@@ -133,6 +133,12 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private boolean enableSecurity = false;
     
     /**
+     * If true, then the 'Email Template Testing' link will only be
+     * displayed for users with ADMINISTER privileges.
+     */
+    private boolean requireAdminForTemplateTesting = false;
+    
+    /**
      * Enables the "Watch This Job" feature
      */
     private boolean enableWatching;
@@ -143,11 +149,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public String getAdminAddress() {
-        String v = adminAddress;
-        if (v == null) {
-            v = Messages.ExtendedEmailPublisherDescriptor_AdminAddress();
-        }
-        return v;
+        return JenkinsLocationConfiguration.get().getAdminAddress();
     }
 
     public String getDefaultSuffix() {
@@ -227,7 +229,9 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public String getCharset() {
-        return charset;
+        String c = charset;
+        if (StringUtils.isBlank(c))	c = "UTF-8";
+        return c;
     }
 
     public String getDefaultContentType() {
@@ -286,6 +290,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return enableSecurity;
     }
     
+    public boolean isAdminRequiredForTemplateTesting() {
+        return requireAdminForTemplateTesting;
+    }
+    
     public boolean isWatchingEnabled() {
         return enableWatching;
     }
@@ -318,7 +326,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
         // Configure the smtp server
         smtpHost = nullify(req.getParameter("ext_mailer_smtp_server"));
-        adminAddress = req.getParameter("ext_mailer_admin_address");
         defaultSuffix = nullify(req.getParameter("ext_mailer_default_suffix"));
         
         // specify authentication information
@@ -363,6 +370,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         enableSecurity = req.hasParameter("ext_mailer_security_enabled");
 
         excludedCommitters = req.getParameter("ext_mailer_excluded_committers");
+        
+        requireAdminForTemplateTesting = req.hasParameter("ext_mailer_require_admin_for_template_testing");
 
         // specify List-ID information
         if (req.hasParameter("ext_mailer_use_list_id")) {

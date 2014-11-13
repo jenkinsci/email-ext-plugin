@@ -192,37 +192,25 @@ public class EmailType {
             // get rid of PROJECT_DEFAULT_RECIPIENTS stuff
             this.recipientList = this.recipientList.replaceAll("\\$\\{?PROJECT_DEFAULT_RECIPIENTS\\}?", "");
         }
+        
+        if(recipientProviders == null) {
+            recipientProviders = new ArrayList<RecipientProvider>();
+        }
 
         // upgrade the various fields to the new RecipientProvider method
         if (this.sendToDevelopers) {
-            if (recipientProviders == null) {
-                recipientProviders = new ArrayList<RecipientProvider>();
-            }
-
             recipientProviders.add(new DevelopersRecipientProvider());
         }
 
         if (this.sendToRequester) {
-            if (recipientProviders == null) {
-                recipientProviders = new ArrayList<RecipientProvider>();
-            }
-
             recipientProviders.add(new RequesterRecipientProvider());
         }
 
         if (this.includeCulprits) {
-            if (recipientProviders == null) {
-                recipientProviders = new ArrayList<RecipientProvider>();
-            }
-
             recipientProviders.add(new CulpritsRecipientProvider());
         }
 
         if (this.sendToRecipientList) {
-            if (recipientProviders == null) {
-                recipientProviders = new ArrayList<RecipientProvider>();
-            }
-
             recipientProviders.add(new ListRecipientProvider());
         }
 

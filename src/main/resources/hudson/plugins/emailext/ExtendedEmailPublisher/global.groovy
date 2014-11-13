@@ -79,6 +79,7 @@ f.section(title: _("Extended E-mail Notification")) {
   }
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/debugMode.html", checked: descriptor.isDebugMode(), name: "ext_mailer_debug_mode", title: _("Enable Debug Mode")) 
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/security.html", checked: descriptor.isSecurityEnabled(), name: "ext_mailer_security_enabled", title: _("Enable Security")) 
+  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/requireAdmin.html", checked: descriptor.isAdminRequiredForTemplateTesting(), name: "ext_mailer_require_admin_for_template_testing", title: _("Require Administrator for Template Testing"))
   
   f.entry(title: _("Content Token Reference"), field:"tokens")
 }

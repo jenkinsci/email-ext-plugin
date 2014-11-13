@@ -1,0 +1,8 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <j:set var="requiresAdmin" value="${app.getDescriptor('hudson.plugins.emailext.ExtendedEmailPublisher').isAdminRequiredForTemplateTesting()}"/>
+    <j:if test="${requiresAdmin ? h.hasPermission(app.ADMINISTER) : h.hasPermission(action.project,action.project.CONFIGURE)}"> 
+        <l:task icon="/plugin/email-ext/images/template-debugger.png" title="${action.displayName}"
+            href="${h.getActionUrl(it.url,action)}" contextMenu="${h.isContextMenuVisible(action)}"/>
+    </j:if>
+</j:jelly>

@@ -51,5 +51,4 @@ public class ListRecipientProvider extends RecipientProvider {
             return "Recipient List";
         }
     }
-
 }

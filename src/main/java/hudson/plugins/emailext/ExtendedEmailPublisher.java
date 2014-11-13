@@ -13,10 +13,7 @@ import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixRun;
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
 import hudson.model.BuildListener;
-import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.ContentBuilder;
@@ -25,8 +22,6 @@ import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.content.TriggerNameContent;
 import hudson.tasks.BuildStepMonitor;
-import hudson.tasks.MailMessageIdAction;
-import hudson.tasks.Mailer;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import java.io.IOException;
@@ -37,7 +32,6 @@ import java.net.ConnectException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -59,7 +53,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import jenkins.model.Jenkins;
-import jenkins.model.JenkinsLocationConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
@@ -222,16 +215,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     public void debug(PrintStream p, String format, Object... args) {
         getDescriptor().debug(p, format, args);
-    }
-
-    @Override
-    public Collection<? extends Action> getProjectActions(AbstractProject<?, ?> project) {
-        // only allow the user to see the email template testing action if they can
-        // configure the project itself.        
-        if (project.hasPermission(Item.CONFIGURE)) {
-            return Collections.singletonList(new EmailExtTemplateAction(project));
-        }
-        return Collections.EMPTY_LIST;
     }
 
     @Override
@@ -449,7 +432,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 Object output = shell.evaluate(script);
                 if (output != null) {
                     pw.println("Result: " + output);
-                    cancel = ((Boolean) shell.getVariable("cancel")).booleanValue();
+                    cancel = ((Boolean)shell.getVariable("cancel"));
                     debug(context.getListener().getLogger(), "Pre-send script set cancel to %b", cancel);
                 }
             } catch (SecurityException e) {
@@ -709,6 +692,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     @Override
     public ExtendedEmailPublisherDescriptor getDescriptor() {
         return (ExtendedEmailPublisherDescriptor) Jenkins.getInstance().getDescriptor(getClass());
+    }
+    
+    public static ExtendedEmailPublisherDescriptor descriptor() {
+        return Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
     }
 
     public MatrixAggregator createAggregator(MatrixBuild matrixbuild,
