@@ -10,7 +10,10 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.content.JellyScriptContent;
 import hudson.plugins.emailext.plugins.content.ScriptContent;
 import hudson.util.FormValidation;
+import hudson.util.StreamTaskListener;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import jenkins.model.Jenkins;
@@ -59,10 +62,14 @@ public class EmailExtTemplateAction implements Action {
             if(value.startsWith("managed:")) {
                 return checkForManagedFile(value);
             } else {
-                final File scriptsFolder = new File(Hudson.getInstance().getRootDir(), "email-templates");
-                final File scriptFile = new File(scriptsFolder, value);
-                if(!scriptFile.exists()) {
-                    return FormValidation.error("The file '" + value + "' does not exist");
+                // first check in the default resources area...
+                InputStream inputStream = getClass().getClassLoader().getResourceAsStream("hudson/plugins/emailext/templates/" + value);                
+                if(inputStream == null) {                
+                    final File scriptsFolder = new File(Jenkins.getInstance().getRootDir(), "email-templates");
+                    final File scriptFile = new File(scriptsFolder, value);
+                    if(!scriptFile.exists()) {
+                        return FormValidation.error("The file '" + value + "' does not exist");
+                    }
                 }
             }
         }
@@ -103,24 +110,29 @@ public class EmailExtTemplateAction implements Action {
     }
     
     @JavaScriptMethod
-    public String renderTemplate(String templateFile, String buildId) {
-        String result;
+    public String[] renderTemplate(String templateFile, String buildId) {
+        String[] result = new String[2];
+        result[0] = StringUtils.EMPTY;
+        result[1] = StringUtils.EMPTY;
         
         try {
             AbstractBuild<?,?> build = project.getBuild(buildId);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            StreamTaskListener listener = new StreamTaskListener(stream);
+            
             if(templateFile.endsWith(".jelly")) {
                 JellyScriptContent jellyContent = new JellyScriptContent();
-                jellyContent.template = templateFile;
-                result = jellyContent.evaluate(build, TaskListener.NULL, "JELLY_SCRIPT");
+                jellyContent.template = templateFile;                
+                result[0] = jellyContent.evaluate(build, listener, "JELLY_SCRIPT");
             } else {
                 ScriptContent scriptContent = new ScriptContent();
                 scriptContent.template = templateFile;                
-                result = scriptContent.evaluate(build, TaskListener.NULL, "SCRIPT");
+                result[0] = scriptContent.evaluate(build, listener, "SCRIPT");                
             }
+            result[1] = stream.toString(ExtendedEmailPublisher.descriptor().getCharset());
         } catch (Exception ex) {
-            result = renderError(ex);
-        } 
-        
+            result[0] = renderError(ex);
+        }         
         return result;
     }
     
