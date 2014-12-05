@@ -35,6 +35,8 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
     public List<RecipientProvider> getDefaultRecipientProviders() {
         return defaultRecipientProviders;
     }
+
+    public boolean isWatchable() { return true; }
     
     @Deprecated
     public boolean getDefaultSendToCulprits() {
@@ -55,4 +57,5 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
     public boolean getDefaultSendToRequester() {
         return false;
     }
+
 }

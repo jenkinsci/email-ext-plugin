@@ -208,63 +208,9 @@ public class ScriptContentTest {
         scriptContent.template = "testing1.template";
         assertEquals("2 + 2 = 4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
     }
-    
+
     private void mockChangeSet(final AbstractBuild build) {
-        Mockito.when(build.getChangeSet()).thenReturn(new ChangeLogSet(build) {
-            @Override
-            public boolean isEmptySet() {
-                return false;
-            }
-
-            public Iterator iterator() {
-                return Arrays.asList(new Entry() {
-                    @Override
-                    public String getMsg() {
-                        return "COMMIT MESSAGE";
-                    }
-
-                    @Override
-                    public User getAuthor() {
-                        User user = mock(User.class);
-                        when(user.getDisplayName()).thenReturn("Kohsuke Kawaguchi");
-                        when(user.getFullName()).thenReturn("Kohsuke Kawaguchi");
-                        return user;
-                    }
-
-                    @Override
-                    public Collection<String> getAffectedPaths() {
-                        return Arrays.asList("path1", "path2");
-                    }
-
-                    @Override
-                    public String getMsgAnnotated() {
-                        return getMsg();
-                    }
-
-                    @Override
-                    public Collection<? extends AffectedFile> getAffectedFiles() {
-                        return Arrays.asList(
-                                new AffectedFile() {
-                                    public String getPath() {
-                                        return "path1";
-                                    }
-
-                                    public EditType getEditType() {
-                                        return EditType.EDIT;
-                                    }
-                                },
-                                new AffectedFile() {
-                                    public String getPath() {
-                                        return "path2";
-                                    }
-
-                                    public EditType getEditType() {
-                                        return EditType.ADD;
-                                    }
-                                });
-                    }
-                }).iterator();
-            }
-        });
+        ScriptContentChangeLogSet changeLog = new ScriptContentChangeLogSet(build);
+        Mockito.when(build.getChangeSet()).thenReturn(changeLog);
     }
 }

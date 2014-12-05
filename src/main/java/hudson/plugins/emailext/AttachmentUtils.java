@@ -53,7 +53,13 @@ public class AttachmentUtils implements Serializable {
         }
 
         public InputStream getInputStream() throws IOException {
-            return file.read();
+            InputStream stream = null;
+            try {
+                stream = file.read();
+            } catch(InterruptedException e) {
+                stream = null;
+            }
+            return stream;
         }
 
         public OutputStream getOutputStream() throws IOException {

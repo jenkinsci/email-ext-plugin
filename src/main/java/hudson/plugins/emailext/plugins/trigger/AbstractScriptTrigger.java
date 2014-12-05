@@ -24,7 +24,6 @@ import org.kohsuke.stapler.StaplerRequest;
 public abstract class AbstractScriptTrigger extends EmailTrigger {
     protected String triggerScript;
     
-    @DataBoundConstructor
     public AbstractScriptTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
         super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
         this.triggerScript = triggerScript;
@@ -99,16 +98,5 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
         }
 
         return shell;
-    }
-
-    public abstract static class DescriptorImpl extends EmailTriggerDescriptor {
-        
-        public List<RecipientProvider> getDefaultRecipientProviders() {
-            return new ArrayList<RecipientProvider>() {
-                    {
-                        add(new ListRecipientProvider());
-                    }
-            };
-        }
     }
 }

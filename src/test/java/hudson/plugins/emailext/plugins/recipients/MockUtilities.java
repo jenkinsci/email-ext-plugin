@@ -59,51 +59,61 @@ import hudson.tasks.test.AbstractTestResultAction;
         return user;
     }
 
+    public static class MockUtilitiesChangeSet extends ChangeLogSet<ChangeLogSet.Entry> {
+        final String[] authors;
+        final AbstractBuild<?, ?> build;
+
+        public MockUtilitiesChangeSet(AbstractBuild<?, ?> build, final String... authors) {
+            super(build, null);
+            this.build = build;
+            this.authors = authors;
+        }
+
+        @Override
+        public boolean isEmptySet() {
+            return authors.length == 0;
+        }
+
+        public Iterator iterator() {
+            return new TransformIterator(Arrays.asList(authors).iterator(), new Transformer() {
+                @Override
+                public Object transform(final Object inAuthor) {
+                    return new ChangeLogSet.Entry() {
+                        @Override
+                        public String getMsg() {
+                            return "COMMIT MESSAGE";
+                        }
+
+                        @Override
+                        public User getAuthor() {
+                            return getUser((String) inAuthor);
+                        }
+
+                        @Override
+                        public Collection<String> getAffectedPaths() {
+                            return Collections.EMPTY_SET;
+                        }
+
+                        @Override
+                        public String getMsgAnnotated() {
+                            return getMsg();
+                        }
+
+                        @Override
+                        public Collection<? extends ChangeLogSet.AffectedFile> getAffectedFiles() {
+                            return Collections.EMPTY_SET;
+                        }
+                    };
+                }
+
+            });
+        }
+
+    }
+
     public static void addChangeSet(final AbstractBuild<?, ?> build, final String... inAuthors) {
-        PowerMockito.when(build.getChangeSet()).thenReturn(new ChangeLogSet(build) {
-
-            final String[] authors = inAuthors;
-
-            @Override
-            public boolean isEmptySet() {
-                return authors.length == 0;
-            }
-
-            public Iterator<?> iterator() {
-                return new TransformIterator(Arrays.asList(authors).iterator(), new Transformer() {
-                    @Override
-                    public Object transform(final Object inAuthor) {
-                        return new ChangeLogSet.Entry() {
-                            @Override
-                            public String getMsg() {
-                                return "COMMIT MESSAGE";
-                            }
-
-                            @Override
-                            public User getAuthor() {
-                                return getUser((String) inAuthor);
-                            }
-
-                            @Override
-                            public Collection<String> getAffectedPaths() {
-                                return Collections.EMPTY_SET;
-                            }
-
-                            @Override
-                            public String getMsgAnnotated() {
-                                return getMsg();
-                            }
-
-                            @Override
-                            public Collection<? extends ChangeLogSet.AffectedFile> getAffectedFiles() {
-                                return Collections.EMPTY_SET;
-                            }
-                        };
-                    }
-
-                });
-            }
-        });
+        MockUtilitiesChangeSet changeSet = new MockUtilitiesChangeSet(build, inAuthors);
+        PowerMockito.when(build.getChangeSet()).thenReturn((ChangeLogSet)changeSet);
     }
 
     public static void addRequestor(final AbstractBuild<?, ?> build, final String requestor) throws Exception {

@@ -391,6 +391,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         
         requireAdminForTemplateTesting = req.hasParameter("ext_mailer_require_admin_for_template_testing");
 
+        enableWatching = req.hasParameter("ext_mailer_watching_enabled");
+
         // specify List-ID information
         if (req.hasParameter("ext_mailer_use_list_id")) {
             listId = nullify(req.getParameter("ext_mailer_list_id"));

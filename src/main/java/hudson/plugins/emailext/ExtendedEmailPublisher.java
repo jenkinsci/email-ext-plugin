@@ -13,15 +13,14 @@ import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixRun;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.Result;
-import hudson.model.TaskListener;
+import hudson.model.*;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.CssInliner;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.content.TriggerNameContent;
+import hudson.plugins.emailext.watching.EmailExtWatchAction;
+import hudson.plugins.emailext.watching.EmailExtWatchJobProperty;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.MailMessageIdAction;
 import hudson.tasks.Mailer;
@@ -33,15 +32,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.ConnectException;
 import java.net.SocketException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.CheckForNull;
@@ -163,18 +154,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             String project_default_content, String project_attachments, String project_presend_script,
             int project_attach_buildlog, String project_replyto, boolean project_save_output,
             List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode) {
-        this.recipientList = project_recipient_list;
-        this.contentType = project_content_type;
-        this.defaultSubject = project_default_subject;
-        this.defaultContent = project_default_content;
-        this.attachmentsPattern = project_attachments;
-        this.presendScript = project_presend_script;
-        this.attachBuildLog = project_attach_buildlog > 0;
-        this.compressBuildLog = project_attach_buildlog > 1;
-        this.replyTo = project_replyto;
-        this.saveOutput = project_save_output;
-        this.configuredTriggers = project_triggers;
-        this.matrixTriggerMode = matrixTriggerMode;
+        
+        this(project_recipient_list, project_content_type, project_default_subject, project_default_content, 
+                project_attachments, project_presend_script, project_attach_buildlog, project_replyto, 
+                project_save_output, project_triggers, matrixTriggerMode, false, Collections.EMPTY_LIST);
     }
     
     @DataBoundConstructor
@@ -220,6 +203,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     public void setMatrixTriggerMode(MatrixTriggerMode matrixTriggerMode) {
         this.matrixTriggerMode = matrixTriggerMode;
+    }
+
+	@Override
+    public Collection<? extends Action> getProjectActions(AbstractProject<?,?> project) {
+        return Collections.singletonList(new EmailExtWatchAction(project));
     }
 
     public void debug(PrintStream p, String format, Object... args) {
@@ -278,6 +266,45 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         for (String triggerName : replacedTriggers) {
             triggered.removeAll(triggerName);
             listener.getLogger().println("Trigger " + triggerName + " was overridden by another trigger and will not send an email.");
+        }
+
+        EmailExtWatchJobProperty jprop = build.getParent().getProperty(EmailExtWatchJobProperty.class);
+        
+        if(jprop != null) {
+            for(String u : jprop.getWatchers()) {
+                User user = User.get(u);
+                if(user != null) {
+                    EmailExtWatchAction.UserProperty prop = user.getProperty(EmailExtWatchAction.UserProperty.class);
+                    if (prop != null) {
+                        final Multimap<String, EmailTrigger> watcherTriggered = ArrayListMultimap.create();
+                        for (EmailTrigger trigger : prop.getTriggers()) {
+                            if (trigger.isPreBuild() == forPreBuild && trigger.trigger(build, listener)) {
+                                String tName = trigger.getDescriptor().getDisplayName();
+                                watcherTriggered.put(tName, trigger);
+                                listener.getLogger().println("Email was triggered for watcher '" + user.getDisplayName() + "' for: " + tName);
+                                emailTriggered = true;
+                            }
+                        }
+
+                        //Go through and remove triggers that are replaced by others
+                        replacedTriggers = new ArrayList<String>();
+
+                        for (Object tName : triggered.keySet()) {
+                            String triggerName = (String) tName;
+                            for (EmailTrigger trigger : (Collection<EmailTrigger>) triggered.get(triggerName)) {
+                                replacedTriggers.addAll(trigger.getDescriptor().getTriggerReplaceList());
+                            }
+                        }
+
+                        for (String triggerName : replacedTriggers) {
+                            watcherTriggered.removeAll(triggerName);
+                            listener.getLogger().println("Trigger " + triggerName + " was overridden by another trigger and will not send an email.");
+                        }
+
+                        triggered.putAll(watcherTriggered);
+                    }
+                }
+            }
         }
 
         if (emailTriggered && triggered.isEmpty()) {

@@ -32,6 +32,17 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         return Jenkins.getInstance().<EmailTrigger, EmailTriggerDescriptor>getDescriptorList(EmailTrigger.class);
     }
 
+    public static List<EmailTriggerDescriptor> allWatchable() {
+        List<EmailTriggerDescriptor> list = new ArrayList<EmailTriggerDescriptor>();
+        for(EmailTriggerDescriptor d : all()) {
+            if(d.isWatchable()) {
+                list.add(d);
+            }
+        }
+
+        return list;
+    }
+
     @Deprecated
     protected EmailTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
         List<RecipientProvider> providers = new ArrayList<RecipientProvider>();

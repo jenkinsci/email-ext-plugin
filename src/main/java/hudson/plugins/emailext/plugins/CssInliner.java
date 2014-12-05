@@ -12,35 +12,41 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.MessageFormat;
 import java.util.StringTokenizer;
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
- * <p>Inlines CSS to avoid the dreaded GMail Grimace.</p>
+ * <p>
+ * Inlines CSS to avoid the dreaded GMail Grimace.</p>
  *
- * <p>The magic keyword is <code><em>data-inline="true"</em></code>.</p>
+ * <p>
+ * The magic keyword is <code><em>data-inline="true"</em></code>.</p>
  *
  * <ul>
  * <li>
- * When used in conjunction with the <code>style</code> tag, it inlines the stylesheet defined there into all
- * html elements matching the rules.
+ * When used in conjunction with the <code>style</code> tag, it inlines the
+ * stylesheet defined there into all html elements matching the rules.
  * </li>
  * <li>
- * When used with the <code>img</code> tag, it base64 encodes the image it found to make it visible in the
- * email.
+ * When used with the <code>img</code> tag, it base64 encodes the image it found
+ * to make it visible in the email.
  * </li>
  * </ul>
  *
  * @author <a href="https://github.com/rahulsom">Rahul Somasunderam</a>
  */
 public class CssInliner {
+
   public static final String CSS_STYLE = "cssstyle";
   public static final String STYLE_ATTR = "style";
   public static final String STYLE_TAG = "style";
   public static final String IMG_TAG = "img";
   public static final String IMG_SRC_ATTR = "src";
+    public static final String DATA_INLINE_ATTR = "data-inline";
 
   private static String concatenateProperties(String oldProp, String newProp) {
-    if (!oldProp.endsWith(";"))
+        if (!oldProp.endsWith(";")) {
       oldProp += ";";
+        }
     return oldProp.trim() + " " + newProp.trim() + ";";
   }
 
@@ -63,7 +69,9 @@ public class CssInliner {
   }
 
   /**
-   * Takes an input string representing an html document and processes it with the Css Inliner.
+     * Takes an input string representing an html document and processes it with
+     * the Css Inliner.
+     *
    * @param input the html document
    * @return the processed html document
    */
@@ -71,13 +79,18 @@ public class CssInliner {
 
     Document doc = Jsoup.parse(input);
     
+        // check if the user wants to inline the data
+        Elements elements = doc.getElementsByAttributeValue(DATA_INLINE_ATTR, "true");
+        if (elements.isEmpty()) {
+            return input;
+        }
+
     extractStyles(doc);
     applyStyles(doc);
     inlineImages(doc);
 
     doc.outputSettings(doc.outputSettings().prettyPrint(false).escapeMode(Entities.EscapeMode.xhtml));
-    String output = doc.outerHtml();
-    return output;
+        return StringEscapeUtils.unescapeHtml(doc.outerHtml());
   }
 
   /**
@@ -88,7 +101,7 @@ public class CssInliner {
   private void inlineImages(Document doc) {
     Elements allImages = doc.getElementsByTag(IMG_TAG);
     for (Element img : allImages) {
-      if (img.attr("data-inline").equals("true")) {
+            if (img.attr(DATA_INLINE_ATTR).equals("true")) {
         String src = img.attr(IMG_SRC_ATTR);
         try {
           URL url = new URL(src);
@@ -109,7 +122,8 @@ public class CssInliner {
   }
 
   /**
-   * Transfers styles from the <code>cssstyle</code> attribute to the <code>style</code> attribute.
+     * Transfers styles from the <code>cssstyle</code> attribute to the
+     * <code>style</code> attribute.
    *
    * @param doc the html document
    */
@@ -125,8 +139,10 @@ public class CssInliner {
   }
 
   /**
-   * Extracts styles from the stylesheet and applies them to a <code>cssstyle</code> attribute. This is because the
-   * styles need to be applied sequentially, but before the <code>style</code> defined for the element inline.
+     * Extracts styles from the stylesheet and applies them to a
+     * <code>cssstyle</code> attribute. This is because the styles need to be
+     * applied sequentially, but before the <code>style</code> defined for the
+     * element inline.
    *
    * @param doc the html document
    */

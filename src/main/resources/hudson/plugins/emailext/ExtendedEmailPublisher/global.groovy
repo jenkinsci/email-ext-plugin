@@ -14,9 +14,6 @@ f.section(title: _("Extended E-mail Notification")) {
     f.entry(help: "/descriptor/hudson.tasks.Mailer/help/defaultSuffix", title: _("Default user E-mail suffix")) {
       input(type: "text", class: "setting-input", value: descriptor.defaultSuffix, name: "ext_mailer_default_suffix") 
     }
-    f.entry(help: "/descriptor/hudson.tasks.Mailer/help/adminAddress", title: _("System Admin E-mail Address")) {
-      f.textbox(checkUrl: "'${rootURL}/publisher/Mailer/addressCheck?value='+encode(this.value)", name: "ext_mailer_admin_address", value: descriptor.adminAddress) 
-    }
     f.advanced() {
       f.optionalBlock(help: "/help/tasks/mailer/smtpAuth.html", checked: descriptor.smtpAuthUsername!=null, name: "ext_mailer_use_smtp_auth", title: _("Use SMTP Authentication")) {
         f.entry(title: _("User Name")) {
@@ -88,6 +85,8 @@ f.section(title: _("Extended E-mail Notification")) {
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/debugMode.html", checked: descriptor.isDebugMode(), name: "ext_mailer_debug_mode", title: _("Enable Debug Mode")) 
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/security.html", checked: descriptor.isSecurityEnabled(), name: "ext_mailer_security_enabled", title: _("Enable Security")) 
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/requireAdmin.html", checked: descriptor.isAdminRequiredForTemplateTesting(), name: "ext_mailer_require_admin_for_template_testing", title: _("Require Administrator for Template Testing"))
+  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/watching.html", checked: descriptor.isWatchingEnabled(), name: "ext_mailer_watching_enabled", title: _("Enable watching for jobs"))
+
   
   f.entry(title: _("Content Token Reference"), field:"tokens")
 }

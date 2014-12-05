@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 import org.junit.Rule;
+import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.JenkinsRule;
 
 public class EmailTypeTest {
@@ -88,5 +89,23 @@ public class EmailTypeTest {
         
         // should have developers, requestor and culprits
         assertEquals(3, pub.configuredTriggers.get(0).getEmail().getRecipientProviders().size());
+    }
+
+	@Test
+    @Bug(24506)
+    public void testUpgradeTriggerWithNoRecipients() throws IOException {
+        URL url = this.getClass().getResource("/recipient-provider-upgrade2.xml");
+        File jobConfig = new File(url.getFile());    
+
+        final ExtendedEmailPublisherDescriptor desc = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        FreeStyleProject prj = j.createFreeStyleProject();
+        prj.updateByXml((Source)new StreamSource(new FileReader(jobConfig)));
+        
+        ExtendedEmailPublisher pub = (ExtendedEmailPublisher)prj.getPublisher(desc);
+        
+        // make sure the publisher got picked up
+        assertNotNull(pub);
+        
+        assertNotNull(pub.getConfiguredTriggers().get(0).getEmail().getRecipientProviders());
     }
 }

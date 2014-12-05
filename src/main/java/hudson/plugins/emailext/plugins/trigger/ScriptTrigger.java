@@ -37,5 +37,10 @@ public class ScriptTrigger extends AbstractScriptTrigger {
         public String getDisplayName() {
             return TRIGGER_NAME;
         }
+
+        @Override
+        public boolean isWatchable() {
+            return false;
+        }
     }    
 }
