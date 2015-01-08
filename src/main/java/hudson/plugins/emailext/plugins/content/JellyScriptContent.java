@@ -165,6 +165,7 @@ public class JellyScriptContent extends DataBoundTokenMacro {
     private JellyContext createContext(Object it, AbstractBuild<?, ?> build, TaskListener listener) {
         JellyContext context = new JellyContext();
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        context.setClassLoader(Jenkins.getInstance().getPluginManager().uberClassLoader);
         context.setVariable("it", it);
         context.setVariable("build", build);
         context.setVariable("project", build.getParent());
