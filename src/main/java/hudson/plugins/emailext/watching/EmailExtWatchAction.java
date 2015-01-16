@@ -48,7 +48,7 @@ public class EmailExtWatchAction implements Action {
         @Extension
         public static final class DescriptorImpl extends UserPropertyDescriptor {
             public String getDisplayName() {
-                return "Extended Email Watch Property";
+                return "Extended Email Job Watching";
             }
 
             @Override
