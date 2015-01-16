@@ -18,6 +18,7 @@ import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.CssInliner;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.content.EmailExtScript;
 import hudson.plugins.emailext.plugins.content.TriggerNameContent;
 import hudson.plugins.emailext.watching.EmailExtWatchAction;
 import hudson.plugins.emailext.watching.EmailExtWatchJobProperty;
@@ -444,6 +445,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
             ScriptSandbox sandbox = null;
             CompilerConfiguration cc = new CompilerConfiguration();
+            cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName()); 
             cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
                     "jenkins",
                     "jenkins.model",
@@ -460,6 +462,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             Binding binding = new Binding();
             binding.setVariable("build", context.getBuild());
             binding.setVariable("msg", msg);
+            binding.setVariable("listener", context.getListener());
             binding.setVariable("logger", context.getListener().getLogger());
             binding.setVariable("cancel", cancel);
             binding.setVariable("trigger", context.getTrigger());
