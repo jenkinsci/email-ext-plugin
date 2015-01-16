@@ -2,8 +2,11 @@ package hudson.plugins.emailext;
 
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.matrix.MatrixBuild;
+import hudson.matrix.MatrixRun;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.Run;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.ZipDataSource;
 import java.io.ByteArrayInputStream;
@@ -80,22 +83,22 @@ public class AttachmentUtils implements Serializable {
         
         private static final String DATA_SOURCE_NAME = "build.log";
         
-        private final AbstractBuild<?,?> build;
+        private final Run<?,?> run;
         private final boolean compress;
         
-        public LogFileDataSource(AbstractBuild<?,?> build, boolean compress) {
-            this.build = build;
+        public LogFileDataSource(Run<?,?> run, boolean compress) {
+            this.run = run;
             this.compress = compress;
         }
         
         public InputStream getInputStream() throws IOException {
             InputStream res;
-            long logFileLength = build.getLogText().length();
+            long logFileLength = run.getLogText().length();
             long pos = 0;
             ByteArrayOutputStream bao = new ByteArrayOutputStream();
             
             while(pos < logFileLength) {
-                pos = build.getLogText().writeLogTo(pos, bao);
+                pos = run.getLogText().writeLogTo(pos, bao);
             }            
             
             res = new ByteArrayInputStream(bao.toByteArray());
@@ -112,7 +115,7 @@ public class AttachmentUtils implements Serializable {
         
         public String getContentType() {
             return MimetypesFileTypeMap.getDefaultFileTypeMap()
-                    .getContentType(build.getLogFile());
+                    .getContentType(run.getLogFile());
         }
         
         public String getName() {
@@ -190,9 +193,9 @@ public class AttachmentUtils implements Serializable {
         }    
     }
     
-    public static void attachBuildLog(ExtendedEmailPublisherContext context, Multipart multipart, boolean compress) {
+    private static void attachSingleLog(ExtendedEmailPublisherContext context, Run<?,?> run, Multipart multipart, boolean compress) {
         try {
-            File logFile = context.getBuild().getLogFile();
+            File logFile = run.getLogFile();
             long maxAttachmentSize = context.getPublisher().getDescriptor().getMaxAttachmentSize();
 
             if (maxAttachmentSize > 0 && logFile.length() >= maxAttachmentSize) {
@@ -207,12 +210,26 @@ public class AttachmentUtils implements Serializable {
                 context.getListener().getLogger().println("Request made to compress build log");
             }
             
-            fileSource = new LogFileDataSource(context.getBuild(), compress);
-            attachment.setFileName("build." + (compress ? "zip" : "log"));
+            fileSource = new LogFileDataSource(run, compress);
+            if(run instanceof MatrixRun)
+                attachment.setFileName("build" + "-" + ((MatrixRun)run).getParent().getCombination().toString('-', '-') +  "." + (compress ? "zip" : "log"));
+            else
+                attachment.setFileName("build." + (compress ? "zip" : "log"));
             attachment.setDataHandler(new DataHandler(fileSource));
             multipart.addBodyPart(attachment);
-        } catch (MessagingException e) {
+        } catch(MessagingException e) {
             context.getListener().error("Error attaching build log to message: " + e.getMessage());
+        }
+    }
+    
+    public static void attachBuildLog(ExtendedEmailPublisherContext context, Multipart multipart, boolean compress) {
+        if(context.getBuild() instanceof MatrixBuild) {
+            MatrixBuild build = (MatrixBuild)context.getBuild();
+            for(MatrixRun run : build.getExactRuns()) {
+                attachSingleLog(context, run, multipart, compress);
+            }
+        } else {
+            attachSingleLog(context, context.getBuild(), multipart, compress);
         }
     }
 

@@ -4,17 +4,22 @@ import hudson.matrix.Axis;
 import hudson.matrix.AxisList;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixProject;
+import hudson.matrix.MatrixRun;
 import hudson.model.labels.LabelAtom;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
-import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.slaves.DumbSlave;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import static org.junit.Assert.*;
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,6 +42,7 @@ public class ExtendedEmailPublisherMatrixTest {
             publisher = new ExtendedEmailPublisher();
             publisher.defaultSubject = "%DEFAULT_SUBJECT";
             publisher.defaultContent = "%DEFAULT_CONTENT";
+            publisher.attachBuildLog = false;
 
             project = createMatrixProject();
             project.getPublishersList().add( publisher );
@@ -63,8 +69,7 @@ public class ExtendedEmailPublisherMatrixTest {
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
         MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);
-    
+        j.assertBuildStatusSuccess(build);    
     
         assertThat( "Email should have been triggered, so we should see it in the logs.", build.getLog( 100 ),
                 hasItems( "Email was triggered for: " + PreBuildTrigger.TRIGGER_NAME ) );
@@ -88,7 +93,7 @@ public class ExtendedEmailPublisherMatrixTest {
     }
 
     @Test
-    public void testPreBuildMatrixBuildSendSlavesAndParent() throws Exception{    
+    public void testPreBuildMatrixBuildSendSlavesAndParent() throws Exception {    
         addSlaveToProject(0,1);
         List<RecipientProvider> recProviders = Collections.emptyList();
         publisher.setMatrixTriggerMode(MatrixTriggerMode.BOTH);
@@ -101,6 +106,42 @@ public class ExtendedEmailPublisherMatrixTest {
         MatrixBuild build = project.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(build);        
         assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );    
+    }
+    
+    @Test
+    public void testAttachBuildLogForAllAxes() throws Exception { 
+        publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_PARENT);
+        publisher.attachBuildLog = true;
+        addSlaveToProject(0,1,2);
+        List<RecipientProvider> recProviders = Collections.emptyList();
+        AlwaysTrigger trigger = new AlwaysTrigger(recProviders, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
+        addEmailType( trigger );
+        publisher.getConfiguredTriggers().add( trigger );
+        MatrixBuild build = project.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);    
+    
+        assertThat( "Email should have been triggered, so we should see it in the logs.", build.getLog( 100 ),
+                hasItems( "Email was triggered for: " + AlwaysTrigger.TRIGGER_NAME ) );
+        
+        assertEquals( 1, Mailbox.get( "solganik@gmail.com" ).size() );
+        
+        Message msg = Mailbox.get("solganik@gmail.com").get(0);
+        
+        assertTrue("Message should be multipart", msg instanceof MimeMessage);
+        assertTrue("Content should be a MimeMultipart", msg.getContent() instanceof MimeMultipart);
+        
+        MimeMultipart part = (MimeMultipart)msg.getContent();
+        
+        assertEquals("Should have four body items (message + attachment)", 4, part.getCount());
+        
+        int i = 1;
+        for(MatrixRun r : build.getExactRuns()) {
+            String fileName = "build" + "-" + r.getParent().getCombination().toString('-', '-') +  ".log";
+            BodyPart attach = part.getBodyPart(i);
+            assertTrue("There should be a log named \"" + fileName + "\" attached", fileName.equalsIgnoreCase(attach.getFileName()));        
+            i++;
+        }
     }
 
     private void addEmailType( EmailTrigger trigger ) {
