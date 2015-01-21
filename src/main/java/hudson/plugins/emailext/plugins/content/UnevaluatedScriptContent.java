@@ -3,7 +3,6 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.model.AbstractBuild;
 import hudson.Extension;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailToken;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

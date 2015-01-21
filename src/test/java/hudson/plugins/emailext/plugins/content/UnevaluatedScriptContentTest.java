@@ -3,14 +3,12 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.TaskListener;
-import hudson.util.StreamTaskListener;
 import hudson.plugins.emailext.plugins.content.UnevaluatedScriptContent;
-import org.jenkinsci.plugins.tokenmacro.TokenMacro;
-import java.util.AbstractCollection;
-
-import java.io.PrintStream;
+import hudson.util.StreamTaskListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -18,9 +16,6 @@ import static org.mockito.Mockito.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import net.java.sezpoz.Index;
-import hudson.plugins.emailext.plugins.EmailToken;
 
 public class UnevaluatedScriptContentTest {
 
