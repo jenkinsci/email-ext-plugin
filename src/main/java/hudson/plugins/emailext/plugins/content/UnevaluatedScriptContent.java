@@ -27,14 +27,6 @@ public class UnevaluatedScriptContent extends DataBoundTokenMacro  {
         return macroName.equals(MACRO_NAME);
     }
 
-/*
-    @Override
-    evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName, 
-            Map<String, String> arguments, ListMultimap<String, String> argumentMultimap) 
-            throws MacroEvaluationException, IOException, InterruptedException {
-
-    }
-*/
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
