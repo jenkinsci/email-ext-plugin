@@ -2,7 +2,6 @@ package hudson.plugins.emailext;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.html.HtmlCheckBoxInput;
-import com.gargoylesoftware.htmlunit.html.HtmlDivision;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
@@ -14,7 +13,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import static org.junit.Assert.*;
 
-import org.jvnet.hudson.test.Bug;
+import org.jvnet.hudson.test.Issue;
 
 public class ExtendedEmailPublisherDescriptorTest {
     
@@ -100,7 +99,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
     
     @Test
-    @Bug(20030)
+    @Issue("JENKINS-20030")
     public void testGlobalConfigSimpleRoundTrip() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);        
         HtmlPage page = j.createWebClient().goTo("configure");
@@ -112,7 +111,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
-    @Bug(20133)
+    @Issue("JENKINS-20133")
     public void testPrecedenceBulkSettingRoundTrip() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
@@ -124,7 +123,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
-    @Bug(20133)
+    @Issue("JENKINS-20133")
     public void testListIDRoundTrip() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");

@@ -2,7 +2,7 @@ package hudson.plugins.emailext.plugins;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.jvnet.hudson.test.Bug;
+import org.jvnet.hudson.test.Issue;
 
 /**
  * Tests for CssInliner
@@ -24,7 +24,7 @@ public class CssInlinerTest {
     }
     
     @Test
-    @Bug(25719)
+    @Issue("JENKINS-25719")
     public void testEntities() {
         String input = "<html>"
                 + "  <head>"

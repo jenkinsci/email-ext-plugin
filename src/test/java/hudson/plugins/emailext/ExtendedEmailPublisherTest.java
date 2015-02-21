@@ -1,5 +1,7 @@
 package hudson.plugins.emailext;
 
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -26,7 +28,9 @@ import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.tasks.Builder;
 import hudson.tasks.Mailer;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,6 +44,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import net.sf.json.JSONObject;
+import org.apache.commons.io.IOUtils;
 import static org.hamcrest.CoreMatchers.not;
 
 import static org.junit.Assert.*;
@@ -49,11 +54,13 @@ import org.junit.Test;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.junit.matchers.JUnitMatchers.hasItem;
 import static org.junit.matchers.JUnitMatchers.hasItems;
-import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.FailureBuilder;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.MockBuilder;
 import org.jvnet.hudson.test.SleepBuilder;
+import org.jvnet.hudson.test.recipes.WithPlugin;
 import org.jvnet.mock_javamail.Mailbox;
 import org.kohsuke.stapler.Stapler;
 
@@ -530,7 +537,7 @@ public class ExtendedEmailPublisherTest {
     }
 
     @Test
-    @Bug(22777)
+    @Issue("JENKINS-22777")
     public void testEmergencyRerouteOverridesPresendScript() throws Exception {
         publisher.getDescriptor().setEmergencyReroute("emergency@foo.com");
         publisher.presendScript = "import javax.mail.Message.RecipientType\n"
@@ -868,7 +875,7 @@ public class ExtendedEmailPublisherTest {
         });
     }
 
-    @Bug(20524)
+    @Issue("JENKINS-20524")
     @Test
     public void testMultipleTriggersOfSameType()
             throws Exception {
@@ -891,7 +898,7 @@ public class ExtendedEmailPublisherTest {
         assertEquals(2, Mailbox.get("mickey@disney.com").size());
     }
 
-    @Bug(22154)
+    @Issue("JENKINS-22154")
     @Test
     public void testProjectDisable() throws Exception {
         FreeStyleProject prj = j.createFreeStyleProject("JENKINS-22154");
@@ -914,24 +921,63 @@ public class ExtendedEmailPublisherTest {
                 hasItem("Extended Email Publisher is currently disabled in project settings"));
     }
 
-    /* Need to find out why this gets a 404 on the fileprovider.js file
-     @Test
-     @Bug(15442)
-     public void testConfiguredStateNoTriggers()
-     throws Exception {
-     FreeStyleProject prj = j.createFreeStyleProject("JENKINS-15442");
-     prj.getPublishersList().add(publisher);
+    
+//    @Test
+//    @Issue("JENKINS-15442")
+//    @WithPlugin("config-file-provider")
+//    public void testConfiguredStateNoTriggers()
+//            throws Exception {
+//        FreeStyleProject prj = j.createFreeStyleProject("JENKINS-15442");
+//        prj.getPublishersList().add(publisher);
+//
+//        publisher.recipientList = "mickey@disney.com";
+//        publisher.configuredTriggers.clear();
+//
+//        final WebClient client = j.createWebClient();
+//        final HtmlPage page = client.goTo("job/JENKINS-15442/configure");
+//        final HtmlTextInput recipientList = page.getElementByName("project_recipient_list");
+//        assertEquals(recipientList.getText(), "mickey@disney.com");
+//    }
+    
+    @Test
+    @Issue("JENKINS-23126")
+    public void testPlainTextAndHtml() throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("JENKINS-23126");
+        prj.getPublishersList().add(publisher);      
         
-     publisher.recipientList = "mickey@disney.com";
-     publisher.configuredTriggers.clear();
+        final String content = "<html><head><title>Foo</title></head><body><b>This is a test</b><br/>Hello world</body></html>";
+        publisher.contentType = "both";
+        publisher.recipientList = "mickey@disney.com";
+        publisher.configuredTriggers.add(new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", content, "", 0, "project"));
+
+        for (EmailTrigger trigger : publisher.configuredTriggers) {
+            trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
+        }
+
+        FreeStyleBuild build = prj.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(1, Mailbox.get("mickey@disney.com").size());
         
-     final WebClient client = j.createWebClient();
-     final HtmlPage page = client.goTo("job/JENKINS-15442/configure");
-     final HtmlTextInput recipientList = page.getElementByName("project_recipient_list");
-     assertEquals(recipientList.getText(), "mickey@disney.com");
-     }
-     */
-    @Bug(16376)
+        Message msg = Mailbox.get("mickey@disney.com").get(0);
+        assertTrue("Message should be multipart", msg instanceof MimeMessage);
+        assertTrue("Content should be a MimeMultipart", msg.getContent() instanceof MimeMultipart);
+        
+        MimeMultipart part = (MimeMultipart)msg.getContent();
+        assertEquals("Should have two body items (html + plaintext)", 2, part.getCount());  
+        
+        BodyPart plainText = part.getBodyPart(0);
+        String plainTextString = IOUtils.toString(plainText.getInputStream(), publisher.getDescriptor().getCharset()).replace("\r", "");
+        assertEquals("Should have the same plain text body", "This is a test\nHello world", plainTextString);
+        
+        BodyPart html = part.getBodyPart(1);
+        String htmlString = IOUtils.toString(html.getInputStream(), publisher.getDescriptor().getCharset());
+        
+        assertEquals("Should have the same HTML body", content, htmlString);
+    }
+    
+    @Issue("JENKINS-16376")
     @Test
     public void testConcurrentBuilds()
             throws Exception {

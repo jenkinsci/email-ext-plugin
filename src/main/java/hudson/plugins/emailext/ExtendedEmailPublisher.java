@@ -564,8 +564,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         msg.setSentDate(new Date());
         setSubject(context, msg, charset);
 
-        Multipart multipart = new MimeMultipart();
-        multipart.addBodyPart(getContent(context, charset));
+        Multipart multipart = addContent(context, charset);
 
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
         attachments.attach(multipart, context);
@@ -684,9 +683,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 || MatrixTriggerMode.ONLY_CONFIGURATIONS == mtm;
     }
 
-    private MimeBodyPart getContent(ExtendedEmailPublisherContext context, String charset)
+    private Multipart addContent(ExtendedEmailPublisherContext context, String charset)
             throws MessagingException {
         final String text = ContentBuilder.transformText(context.getTrigger().getEmail().getBody(), context, getRuntimeMacros(context));
+        final Multipart multipart;
+        boolean doBoth = false;
 
         String messageContentType = context.getTrigger().getEmail().getContentType().equals("project") ? contentType : context.getTrigger().getEmail().getContentType();
         // contentType is null if the project was not reconfigured after upgrading.
@@ -698,6 +699,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 messageContentType = "text/plain";
             }
         }
+        
+        if("both".equals(messageContentType)) {
+            doBoth = true;
+            multipart = new MimeMultipart("alternative");
+            messageContentType = "text/html";
+        } else {
+            multipart = new MimeMultipart();
+        }
+        
         messageContentType += "; charset=" + charset;
 
         try {
@@ -723,12 +733,22 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         MimeBodyPart msgPart = new MimeBodyPart();
         debug(context.getListener().getLogger(), "messageContentType = %s", messageContentType);
         if (messageContentType.startsWith("text/html")) {
-            String inlinedCssHtml = new CssInliner().process(text);
-            msgPart.setContent(inlinedCssHtml, messageContentType);
+            CssInliner inliner = new CssInliner();
+            if(doBoth) {
+                MimeBodyPart plainTextPart = new MimeBodyPart();
+                plainTextPart.setContent(inliner.stripHtml(text), "text/plain; charset=" + charset);
+                multipart.addBodyPart(plainTextPart);
+            }            
+            String inlinedCssHtml = inliner.process(text);
+            msgPart.setContent(inlinedCssHtml, messageContentType);            
         } else {
             msgPart.setContent(text, messageContentType);
         }
-        return msgPart;
+        
+        multipart.addBodyPart(msgPart);
+        
+        return multipart;
+        
     }
 
     @Override
