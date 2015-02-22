@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
@@ -43,7 +44,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      */
     private transient String hudsonUrl;
  
-    /**
+    /**o
      * If non-null, use SMTP-AUTH
      */
     private String smtpAuthUsername;
@@ -409,6 +410,24 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             v = null;
         }
         return v;
+    }
+    
+    public Object readResolve() {        
+        if(!this.overrideGlobalSettings) {
+            // need to get the plugin info from Mailer
+            this.defaultSuffix = Mailer.descriptor().getDefaultSuffix();
+            this.defaultReplyTo = Mailer.descriptor().getReplyToAddress();
+            this.useSsl = Mailer.descriptor().getUseSsl();            
+            if(StringUtils.isNotBlank(Mailer.descriptor().getSmtpAuthUserName())) {
+                this.smtpAuthPassword = Secret.fromString(Mailer.descriptor().getSmtpAuthPassword());
+                this.smtpAuthUsername = Mailer.descriptor().getSmtpAuthUserName();
+            }
+            this.smtpPort = Mailer.descriptor().getSmtpPort();
+            this.smtpHost = Mailer.descriptor().getSmtpServer();
+            this.charset = Mailer.descriptor().getCharset();
+            this.overrideGlobalSettings = true;
+        }
+        return this;
     }
 
     @Override

@@ -7,33 +7,31 @@ st = namespace("jelly:stapler")
 t = namespace("/lib/hudson")
 
 f.section(title: _("Extended E-mail Notification")) {
-  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/override-global-settings.html", checked: descriptor.overrideGlobalSettings, name: "ext_mailer_override_global_settings", title: _("Override Global Settings")) {
-    f.entry(help: "/descriptor/hudson.tasks.Mailer/help/smtpServer", title: _("SMTP server")) {
-      input(type: "text", class: "setting-input", value: descriptor.smtpServer, name: "ext_mailer_smtp_server") 
-    }
-    f.entry(help: "/descriptor/hudson.tasks.Mailer/help/defaultSuffix", title: _("Default user E-mail suffix")) {
-      input(type: "text", class: "setting-input", value: descriptor.defaultSuffix, name: "ext_mailer_default_suffix") 
-    }
-    f.advanced() {
-      f.optionalBlock(help: "/help/tasks/mailer/smtpAuth.html", checked: descriptor.smtpAuthUsername!=null, name: "ext_mailer_use_smtp_auth", title: _("Use SMTP Authentication")) {
-        f.entry(title: _("User Name")) {
-          input(type: "text", class: "setting-input", value: descriptor.smtpAuthUsername, name: "ext_mailer_smtp_username") 
-        }
-        f.entry(title: _("Password")) {
-          input(type: "password", class: "setting-input", value: descriptor.smtpAuthPassword, name: "ext_mailer_smtp_password") 
-        }
-      }
-      f.entry(help: "/descriptor/hudson.tasks.Mailer/help/useSsl", title: _("Use SSL")) {
-        f.checkbox(checked: descriptor.useSsl, name: "ext_mailer_smtp_use_ssl") 
-      }
-      f.entry(help: "/descriptor/hudson.tasks.Mailer/help/smtpPort", title: _("SMTP port")) {
-        input(type: "text", class: "setting-input", value: descriptor.smtpPort, name: "ext_mailer_smtp_port") 
-      }
-      f.entry(title: _("Charset")) {
-        input(type: "text", class: "setting-input", value: descriptor.charset, name: "ext_mailer_charset") 
-      }
-    }
+  f.entry(help: "/descriptor/hudson.tasks.Mailer/help/smtpServer", title: _("SMTP server")) {
+    input(type: "text", class: "setting-input", value: descriptor.smtpServer, name: "ext_mailer_smtp_server") 
   }
+  f.entry(help: "/descriptor/hudson.tasks.Mailer/help/defaultSuffix", title: _("Default user E-mail suffix")) {
+    input(type: "text", class: "setting-input", value: descriptor.defaultSuffix, name: "ext_mailer_default_suffix") 
+  }
+  f.advanced() {
+    f.optionalBlock(help: "/help/tasks/mailer/smtpAuth.html", checked: descriptor.smtpAuthUsername!=null, name: "ext_mailer_use_smtp_auth", title: _("Use SMTP Authentication")) {
+      f.entry(title: _("User Name")) {
+        input(type: "text", class: "setting-input", value: descriptor.smtpAuthUsername, name: "ext_mailer_smtp_username") 
+      }
+      f.entry(title: _("Password")) {
+        input(type: "password", class: "setting-input", value: descriptor.smtpAuthPassword, name: "ext_mailer_smtp_password") 
+      }
+    }
+    f.entry(help: "/descriptor/hudson.tasks.Mailer/help/useSsl", title: _("Use SSL")) {
+      f.checkbox(checked: descriptor.useSsl, name: "ext_mailer_smtp_use_ssl") 
+    }
+    f.entry(help: "/descriptor/hudson.tasks.Mailer/help/smtpPort", title: _("SMTP port")) {
+      input(type: "text", class: "setting-input", value: descriptor.smtpPort, name: "ext_mailer_smtp_port") 
+    }
+    f.entry(title: _("Charset")) {
+      input(type: "text", class: "setting-input", value: descriptor.charset, name: "ext_mailer_charset") 
+    }
+  }  
   f.entry(help: "/plugin/email-ext/help/globalConfig/contentType.html", title: _("Default Content Type")) {
     select(class: "setting-input", name: "ext_mailer_default_content_type") {
       f.option(selected: 'text/plain'==descriptor.defaultContentType, value: "text/plain", _("contentType.plainText")) 

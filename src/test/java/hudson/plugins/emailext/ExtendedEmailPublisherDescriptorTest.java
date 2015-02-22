@@ -27,11 +27,6 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("Should be at the Configure System page",
                 "Configure System [Jenkins]", page.getTitleText());
 
-        // override global settings checkbox control                
-        HtmlCheckBoxInput overrideGlobal = page.getElementByName("ext_mailer_override_global_settings");
-        assertNotNull("Override global settings should be present", overrideGlobal);
-        assertFalse("Override global config should not be checked by default", overrideGlobal.isChecked());
-
         // default content type select control
         HtmlSelect contentType = page.getElementByName("ext_mailer_default_content_type");
         assertNotNull("Content type selection should be present", contentType);
