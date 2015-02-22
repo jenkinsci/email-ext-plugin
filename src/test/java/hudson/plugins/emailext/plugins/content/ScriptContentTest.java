@@ -114,7 +114,7 @@ public class ScriptContentTest {
             throws Exception
     {
         scriptContent.script = "script-does-not-exist";
-        assertEquals("Script [script-does-not-exist] was not found in $JENKINS_HOME/email-templates.", 
+        assertEquals("Groovy Script file [script-does-not-exist] was not found in $JENKINS_HOME/email-templates.", 
             scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
     }
 
@@ -123,7 +123,7 @@ public class ScriptContentTest {
             throws Exception
     {
         scriptContent.template = "template-does-not-exist";
-        assertEquals("Template [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.", 
+        assertEquals("Groovy Template file [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.", 
             scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
     }
     
