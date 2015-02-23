@@ -26,7 +26,6 @@ import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-
 /**
  * These settings are global configurations
  */
@@ -34,8 +33,8 @@ import org.kohsuke.stapler.StaplerRequest;
 public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publisher> {
 
     /**
-     * The default e-mail address suffix appended to the user name found from changelog,
-     * to send e-mails. Null if not configured.
+     * The default e-mail address suffix appended to the user name found from
+     * changelog, to send e-mails. Null if not configured.
      */
     private String defaultSuffix;
 
@@ -43,8 +42,9 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      * Jenkins's own URL, to put into the e-mail.
      */
     private transient String hudsonUrl;
- 
-    /**o
+
+    /**
+     * o
      * If non-null, use SMTP-AUTH
      */
     private String smtpAuthUsername;
@@ -52,25 +52,26 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private Secret smtpAuthPassword;
 
     /**
-     * The e-mail address that Jenkins puts to "From:" field in outgoing e-mails.
-     * Null if not configured.
+     * The e-mail address that Jenkins puts to "From:" field in outgoing
+     * e-mails. Null if not configured.
      */
     private transient String adminAddress;
 
     /**
-     * The SMTP server to use for sending e-mail. Null for default to the environment,
-     * which is usually <tt>localhost</tt>.
+     * The SMTP server to use for sending e-mail. Null for default to the
+     * environment, which is usually <tt>localhost</tt>.
      */
     private String smtpHost;
 
     /**
-     * If true use SSL on port 465 (standard SMTPS) unless <code>smtpPort</code> is set.
+     * If true use SSL on port 465 (standard SMTPS) unless <code>smtpPort</code>
+     * is set.
      */
     private boolean useSsl;
 
     /**
-     * The SMTP port to use for sending e-mail. Null for default to the environment,
-     * which is usually <tt>25</tt>.
+     * The SMTP port to use for sending e-mail. Null for default to the
+     * environment, which is usually <tt>25</tt>.
      */
     private String smtpPort;
 
@@ -90,24 +91,24 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      * This is a global default body for sending emails.
      */
     private String defaultBody;
-    
+
     /**
      * This is the global default pre-send script.
      */
     private String defaultPresendScript = "";
-    
+
     private List<GroovyScriptPath> defaultClasspath = new ArrayList<GroovyScriptPath>();
-    
+
     /**
      * This is the global emergency email address
      */
     private String emergencyReroute;
-    
+
     /**
      * The maximum size of all the attachments (in bytes)
      */
     private long maxAttachmentSize = -1;
-    
+
     /*
      * This is a global default recipient list for sending emails.
      */
@@ -123,9 +124,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      */
     private String excludedCommitters = "";
 
-
     private boolean overrideGlobalSettings;
-    
+
     /**
      * If non-null, set a List-ID email header.
      */
@@ -136,13 +136,13 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private boolean debugMode = false;
 
     private boolean enableSecurity = false;
-    
+
     /**
-     * If true, then the 'Email Template Testing' link will only be
-     * displayed for users with ADMINISTER privileges.
+     * If true, then the 'Email Template Testing' link will only be displayed
+     * for users with ADMINISTER privileges.
      */
     private boolean requireAdminForTemplateTesting = false;
-    
+
     /**
      * Enables the "Watch This Job" feature
      */
@@ -160,7 +160,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     public String getDefaultSuffix() {
         return defaultSuffix;
     }
-    
+
     /**
      * JavaMail session.
      */
@@ -194,8 +194,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
 
         // avoid hang by setting some timeout.
-        props.put("mail.smtp.timeout","60000");
-        props.put("mail.smtp.connectiontimeout","60000");
+        props.put("mail.smtp.timeout", "60000");
+        props.put("mail.smtp.connectiontimeout", "60000");
 
         return Session.getInstance(props, getAuthenticator());
     }
@@ -240,7 +240,9 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     public String getCharset() {
         String c = charset;
-        if (StringUtils.isBlank(c))	c = "UTF-8";
+        if (StringUtils.isBlank(c)) {
+            c = "UTF-8";
+        }
         return c;
     }
 
@@ -255,7 +257,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     public String getDefaultBody() {
         return defaultBody;
     }
-    
+
     public String getEmergencyReroute() {
         return emergencyReroute;
     }
@@ -263,15 +265,15 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     protected void setEmergencyReroute(String emergencyReroute) {
         this.emergencyReroute = emergencyReroute;
     }
-    
+
     public long getMaxAttachmentSize() {
         return maxAttachmentSize;
     }
-    
+
     public long getMaxAttachmentSizeMb() {
         return maxAttachmentSize / (1024 * 1024);
     }
-    
+
     public String getDefaultRecipients() {
         return recipientList;
     }
@@ -299,11 +301,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     public boolean isSecurityEnabled() {
         return enableSecurity;
     }
-    
+
     public boolean isAdminRequiredForTemplateTesting() {
         return requireAdminForTemplateTesting;
     }
-    
+
     public boolean isWatchingEnabled() {
         return enableWatching;
     }
@@ -311,7 +313,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     public boolean isApplicable(Class<? extends AbstractProject> jobType) {
         return true;
     }
-    
+
     public String getDefaultPresendScript() {
         return defaultPresendScript;
     }
@@ -319,7 +321,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     public List<GroovyScriptPath> getDefaultClasspath() {
         return defaultClasspath;
     }
-    
+
     public ExtendedEmailPublisherDescriptor() {
         super(ExtendedEmailPublisher.class);
         load();
@@ -334,14 +336,13 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @Override
     public boolean configure(StaplerRequest req, JSONObject formData)
             throws FormException {
-        // Most of this stuff is the same as the built-in email publisher
 
-        overrideGlobalSettings = req.hasParameter("ext_mailer_override_global_settings");
+        overrideGlobalSettings = true;
 
         // Configure the smtp server
         smtpHost = nullify(req.getParameter("ext_mailer_smtp_server"));
         defaultSuffix = nullify(req.getParameter("ext_mailer_default_suffix"));
-        
+
         // specify authentication information
         if (req.hasParameter("ext_mailer_use_smtp_auth")) {
             smtpAuthUsername = nullify(req.getParameter("ext_mailer_smtp_username"));
@@ -365,31 +366,30 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         defaultSubject = nullify(req.getParameter("ext_mailer_default_subject"));
         defaultBody = nullify(req.getParameter("ext_mailer_default_body"));
         emergencyReroute = nullify(req.getParameter("ext_mailer_emergency_reroute"));
-        defaultReplyTo = nullify(req.getParameter("ext_mailer_default_replyto")) != null ?
-            req.getParameter("ext_mailer_default_replyto") : "";
-        defaultPresendScript = nullify(req.getParameter("ext_mailer_default_presend_script")) != null ?
-            req.getParameter("ext_mailer_default_presend_script") : "";
+        defaultReplyTo = nullify(req.getParameter("ext_mailer_default_replyto")) != null
+                ? req.getParameter("ext_mailer_default_replyto") : "";
+        defaultPresendScript = nullify(req.getParameter("ext_mailer_default_presend_script")) != null
+                ? req.getParameter("ext_mailer_default_presend_script") : "";
         if (req.hasParameter("ext_mailer_default_classpath")) {
             defaultClasspath.clear();
-            for(String s : req.getParameterValues("ext_mailer_default_classpath")) {
+            for (String s : req.getParameterValues("ext_mailer_default_classpath")) {
                 defaultClasspath.add(new GroovyScriptPath(s));
             }
         }
         debugMode = req.hasParameter("ext_mailer_debug_mode");
-        
-        //enableWatching = req.getParameter("ext_mailer_enable_watching") != null;
 
+        //enableWatching = req.getParameter("ext_mailer_enable_watching") != null;
         // convert the value into megabytes (1024 * 1024 bytes)
-        maxAttachmentSize = nullify(req.getParameter("ext_mailer_max_attachment_size")) != null ?
-            (Long.parseLong(req.getParameter("ext_mailer_max_attachment_size")) * 1024 * 1024) : -1;
-        recipientList = nullify(req.getParameter("ext_mailer_default_recipients")) != null ?
-            req.getParameter("ext_mailer_default_recipients") : "";
+        maxAttachmentSize = nullify(req.getParameter("ext_mailer_max_attachment_size")) != null
+                ? (Long.parseLong(req.getParameter("ext_mailer_max_attachment_size")) * 1024 * 1024) : -1;
+        recipientList = nullify(req.getParameter("ext_mailer_default_recipients")) != null
+                ? req.getParameter("ext_mailer_default_recipients") : "";
 
         precedenceBulk = req.hasParameter("ext_mailer_add_precedence_bulk");
         enableSecurity = req.hasParameter("ext_mailer_security_enabled");
 
         excludedCommitters = req.getParameter("ext_mailer_excluded_committers");
-        
+
         requireAdminForTemplateTesting = req.hasParameter("ext_mailer_require_admin_for_template_testing");
 
         enableWatching = req.hasParameter("ext_mailer_watching_enabled");
@@ -400,7 +400,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         } else {
             listId = null;
         }
-        
+
         save();
         return super.configure(req, formData);
     }
@@ -411,14 +411,14 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
         return v;
     }
-    
-    public Object readResolve() {        
-        if(!this.overrideGlobalSettings) {
+
+    public Object readResolve() {
+        if (!this.overrideGlobalSettings) {
             // need to get the plugin info from Mailer
             this.defaultSuffix = Mailer.descriptor().getDefaultSuffix();
             this.defaultReplyTo = Mailer.descriptor().getReplyToAddress();
-            this.useSsl = Mailer.descriptor().getUseSsl();            
-            if(StringUtils.isNotBlank(Mailer.descriptor().getSmtpAuthUserName())) {
+            this.useSsl = Mailer.descriptor().getUseSsl();
+            if (StringUtils.isNotBlank(Mailer.descriptor().getSmtpAuthUserName())) {
                 this.smtpAuthPassword = Secret.fromString(Mailer.descriptor().getSmtpAuthPassword());
                 this.smtpAuthUsername = Mailer.descriptor().getSmtpAuthUserName();
             }
@@ -434,7 +434,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     public String getHelpFile() {
         return "/plugin/email-ext/help/main.html";
     }
-    
+
     public FormValidation doAddressCheck(@QueryParameter final String value)
             throws IOException, ServletException {
         try {
@@ -444,19 +444,19 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             return FormValidation.error(e.getMessage());
         }
     }
-    
+
     public FormValidation doRecipientListRecipientsCheck(@QueryParameter final String value)
             throws IOException, ServletException {
         return new EmailRecipientUtils().validateFormRecipientList(value);
     }
-    
+
     public FormValidation doMaxAttachmentSizeCheck(@QueryParameter final String value)
             throws IOException, ServletException {
         try {
             String testValue = value.trim();
             // we support an empty value (which means default)
             // or a number
-            if(testValue.length() > 0) {
+            if (testValue.length() > 0) {
                 Long.parseLong(testValue);
             }
             return FormValidation.ok();
@@ -478,7 +478,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public void debug(PrintStream logger, String format, Object... args) {
-        if(debugMode) {
+        if (debugMode) {
             logger.format(format, args);
             logger.println();
         }
