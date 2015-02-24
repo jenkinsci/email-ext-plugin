@@ -49,6 +49,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeUtility;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import org.apache.commons.lang.StringUtils;
@@ -524,36 +525,20 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     private MimeMessage createMail(ExtendedEmailPublisherContext context) throws MessagingException, IOException, InterruptedException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
-        boolean overrideGlobalSettings = descriptor.getOverrideGlobalSettings();
-
-        MimeMessage msg;
-
-        // If not overriding global settings, use the Mailer class to create a session and set the from address
-        // Else we'll do it ourselves
-        Session session;
-        if (!overrideGlobalSettings) {
-            debug(context.getListener().getLogger(), "NOT overriding default server settings, using Mailer to create session");
-            session = Mailer.descriptor().createSession();
-            msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(JenkinsLocationConfiguration.get().getAdminAddress()));
-        } else {
-            debug(context.getListener().getLogger(), "Overriding default server settings, creating our own session");
-            session = descriptor.createSession();
-            msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(descriptor.getAdminAddress()));
+        String charset = descriptor.getCharset();
+        
+        Session session = descriptor.createSession();
+        MimeMessage msg = new MimeMessage(session);
+        
+        InternetAddress from = new InternetAddress(descriptor.getAdminAddress());
+        if(from.getPersonal() != null) {
+            from.setPersonal(from.getPersonal(), charset);
         }
+        
+        msg.setFrom(from);
 
         if (descriptor.isDebugMode()) {
             session.setDebugOut(context.getListener().getLogger());
-        }
-
-        String charset = Mailer.descriptor().getCharset();
-        if (overrideGlobalSettings) {
-            String overrideCharset = descriptor.getCharset();
-            if (StringUtils.isNotBlank(overrideCharset)) {
-                debug(context.getListener().getLogger(), "Overriding charset %s", overrideCharset);
-                charset = overrideCharset;
-            }
         }
 
         // Set the contents of the email

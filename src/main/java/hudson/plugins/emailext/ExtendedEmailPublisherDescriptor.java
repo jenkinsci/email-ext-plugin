@@ -160,6 +160,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     public String getDefaultSuffix() {
         return defaultSuffix;
     }
+    
+    public void setDefaultSuffix(String defaultSuffix) {
+        this.defaultSuffix = defaultSuffix;
+    }
 
     /**
      * JavaMail session.
@@ -283,7 +287,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public boolean getOverrideGlobalSettings() {
-        return overrideGlobalSettings;
+        return true;
     }
 
     public String getListId() {

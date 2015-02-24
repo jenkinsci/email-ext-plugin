@@ -26,6 +26,7 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.Plugin;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.tasks.Mailer;
 import java.io.ByteArrayInputStream;
@@ -132,12 +133,6 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     }
     
     protected String getCharset(AbstractBuild<?, ?> build) {
-        String charset = Mailer.descriptor().getCharset();
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        String overrideCharset = descriptor.getCharset();
-        if (overrideCharset != null) {
-            charset = overrideCharset;
-        }
-        return charset;
+        return ExtendedEmailPublisher.descriptor().getCharset();
     }    
 }
