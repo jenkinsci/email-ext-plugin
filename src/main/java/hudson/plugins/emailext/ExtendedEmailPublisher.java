@@ -528,25 +528,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         MimeMessage msg;
 
-        // If not overriding global settings, use the Mailer class to create a session and set the from address
-        // Else we'll do it ourselves
-        Session session;
-        if (!overrideGlobalSettings) {
-            debug(context.getListener().getLogger(), "NOT overriding default server settings, using Mailer to create session");
-            session = Mailer.descriptor().createSession();
-            msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(JenkinsLocationConfiguration.get().getAdminAddress()));
-        } else {
-            debug(context.getListener().getLogger(), "Overriding default server settings, creating our own session");
-            session = descriptor.createSession();
-            msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(descriptor.getAdminAddress()));
-        }
-
-        if (descriptor.isDebugMode()) {
-            session.setDebugOut(context.getListener().getLogger());
-        }
-
         String charset = Mailer.descriptor().getCharset();
         if (overrideGlobalSettings) {
             String overrideCharset = descriptor.getCharset();
@@ -554,6 +535,25 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 debug(context.getListener().getLogger(), "Overriding charset %s", overrideCharset);
                 charset = overrideCharset;
             }
+        }
+
+        // If not overriding global settings, use the Mailer class to create a session and set the from address
+        // Else we'll do it ourselves
+        Session session;
+        if (!overrideGlobalSettings) {
+            debug(context.getListener().getLogger(), "NOT overriding default server settings, using Mailer to create session");
+            session = Mailer.descriptor().createSession();
+            msg = new MimeMessage(session);
+            msg.setFrom(Mailer.StringToAddress(JenkinsLocationConfiguration.get().getAdminAddress(), charset));
+        } else {
+            debug(context.getListener().getLogger(), "Overriding default server settings, creating our own session");
+            session = descriptor.createSession();
+            msg = new MimeMessage(session);
+            msg.setFrom(Mailer.StringToAddress(descriptor.getAdminAddress(), charset));
+        }
+
+        if (descriptor.isDebugMode()) {
+            session.setDebugOut(context.getListener().getLogger());
         }
 
         // Set the contents of the email
