@@ -783,7 +783,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return new MatrixAggregator(matrixbuild, launcher, buildlistener) {
             @Override
             public boolean endBuild() throws InterruptedException, IOException {
-                LOGGER.log(Level.FINER, "end build of " + this.build.getDisplayName());
+                LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
 
                 // Will be run by parent so we check if needed to be executed by parent
                 if (getMatrixTriggerMode().forParent) {
@@ -794,7 +794,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
             @Override
             public boolean startBuild() throws InterruptedException, IOException {
-                LOGGER.log(Level.FINER, "end build of " + this.build.getDisplayName());
+                LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
                 // Will be run by parent so we check if needed to be executed by parent 
                 if (getMatrixTriggerMode().forParent) {
                     return ExtendedEmailPublisher.this._perform(this.build, this.launcher, this.listener, true);
