@@ -478,12 +478,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
 
             try {
-                Object output = shell.evaluate(script);
-                if (output != null) {
-                    pw.println("Result: " + output);
-                    cancel = ((Boolean) shell.getVariable("cancel"));
-                    debug(context.getListener().getLogger(), "Pre-send script set cancel to %b", cancel);
-                }
+                shell.evaluate(script);
+                cancel = ((Boolean) shell.getVariable("cancel"));
+                debug(context.getListener().getLogger(), "Pre-send script set cancel to %b", cancel);
             } catch (SecurityException e) {
                 context.getListener().getLogger().println("Pre-send script tried to access secured objects: " + e.getMessage());
             } catch (Throwable t) {
