@@ -1,6 +1,8 @@
 package hudson.plugins.emailext.plugins;
 
 import hudson.model.Descriptor;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +37,19 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
     public List<RecipientProvider> getDefaultRecipientProviders() {
         return defaultRecipientProviders;
     }
+    
+    public abstract EmailTrigger createDefault();
+    
+    protected EmailTrigger _createDefault() {
+        EmailTrigger trigger;
+        try {
+            Constructor ctor = clazz.getConstructor(List.class, String.class, String.class, String.class, String.class, String.class, int.class, String.class);
+            trigger = (EmailTrigger)ctor.newInstance(defaultRecipientProviders, "", "$PROJECT_DEFAULT_REPLYTO", "$PROJECT_DEFAULT_SUBJECT", "$PROJECT_DEFAULT_CONTENT", "", 0, "project");
+        } catch(Exception e) {
+                trigger = null;
+        }
+        return trigger;
+    }
 
     public boolean isWatchable() { return true; }
     
@@ -57,5 +72,4 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
     public boolean getDefaultSendToRequester() {
         return false;
     }
-
-}
+            }

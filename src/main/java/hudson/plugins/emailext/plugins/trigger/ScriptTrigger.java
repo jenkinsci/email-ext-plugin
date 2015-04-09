@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
+import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
@@ -37,10 +38,15 @@ public class ScriptTrigger extends AbstractScriptTrigger {
         public String getDisplayName() {
             return TRIGGER_NAME;
         }
-
+        
         @Override
         public boolean isWatchable() {
             return false;
+        }
+        
+        @Override
+        public EmailTrigger createDefault() {
+            return new ScriptTrigger(defaultRecipientProviders, "", "$PROJECT_DEFAULT_REPLYTO", "$PROJECT_DEFAULT_SUBJECT", "$PROJECT_DEFAULT_CONTENT", "", 0, "project", "");
         }
     }    
 }

@@ -2,14 +2,13 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
 import hudson.model.AbstractBuild;
+import jenkins.model.Jenkins;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProvider;
-import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
-import java.util.Collections;
 import java.util.List;
 
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -19,27 +18,27 @@ public class FailureTrigger extends EmailTrigger {
 
     public static final String TRIGGER_NAME = "Failure - Any";
     
+    @Deprecated
     public static FailureTrigger createDefault() {
-        return new FailureTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "$PROJECT_DEFAULT_REPLYTO", "$PROJECT_DEFAULT_SUBJECT", "$PROJECT_DEFAULT_CONTENT", "", 0, "project");
+        DescriptorImpl descriptor = (DescriptorImpl)Jenkins.getInstance().getDescriptor(FailureTrigger.class);
+        return (FailureTrigger)descriptor.createDefault();
     }
     
     @DataBoundConstructor
-    public FailureTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+    public FailureTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, 
+            String attachmentsPattern, int attachBuildLog, String contentType) {
         super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
     
     @Deprecated
-    public FailureTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+    public FailureTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, 
+            String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
         super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
 
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
-        Result buildResult = build.getResult();
-        if (buildResult == Result.FAILURE) {
-            return true;
-        }
-        return false;
+        return build.getResult() == Result.FAILURE;
     }
 
     @Extension
@@ -52,6 +51,11 @@ public class FailureTrigger extends EmailTrigger {
         @Override
         public String getDisplayName() {
             return TRIGGER_NAME;
-        }        
+        }      
+        
+        @Override
+        public EmailTrigger createDefault() {
+            return _createDefault();
+        }
     }    
 }

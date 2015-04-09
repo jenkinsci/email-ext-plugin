@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
+import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import java.util.List;
 
@@ -26,6 +27,10 @@ public class FirstFailureTrigger extends NthFailureTrigger {
         @Override
         public String getDisplayName() {
             return TRIGGER_NAME;
+        }
+        
+        public EmailTrigger createDefault() {
+            return _createDefault();
         }
     }
 

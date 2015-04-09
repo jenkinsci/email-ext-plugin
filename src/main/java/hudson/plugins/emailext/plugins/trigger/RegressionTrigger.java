@@ -74,5 +74,10 @@ public class RegressionTrigger extends EmailTrigger {
         public String getDisplayName() {
             return TRIGGER_NAME;
         }
+        
+        @Override
+        public EmailTrigger createDefault() {
+            return _createDefault();
+        }
     }    
 }
