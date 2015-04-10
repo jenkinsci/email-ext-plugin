@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
+import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import java.util.List;
@@ -37,6 +38,11 @@ public class PreBuildScriptTrigger extends AbstractScriptTrigger {
         @Override
         public boolean isWatchable() {
             return false;
+        }
+        
+        @Override
+        public EmailTrigger createDefault() {
+            return new PreBuildScriptTrigger(defaultRecipientProviders, "", "$PROJECT_DEFAULT_REPLYTO", "$PROJECT_DEFAULT_SUBJECT", "$PROJECT_DEFAULT_CONTENT", "", 0, "project", "");
         }
     }
 }

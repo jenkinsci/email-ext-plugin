@@ -85,6 +85,14 @@ f.section(title: _("Extended E-mail Notification")) {
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/requireAdmin.html", checked: descriptor.isAdminRequiredForTemplateTesting(), name: "ext_mailer_require_admin_for_template_testing", title: _("Require Administrator for Template Testing"))
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/watching.html", checked: descriptor.isWatchingEnabled(), name: "ext_mailer_watching_enabled", title: _("Enable watching for jobs"))
 
-  
+  f.advanced(title: _("Default Triggers")) {
+    f.entry(title: _("Default Triggers"), help: "/plugin/email-ext/help/globalConfig/defaultTriggers.html") {
+      hudson.plugins.emailext.plugins.EmailTrigger.all().each { t ->
+        f.checkbox(name: "defaultTriggers", title: t.displayName, checked: descriptor.defaultTriggers.contains(t), json: t.clazz.name)
+        br()
+      }
+    }
+  }
+
   f.entry(title: _("Content Token Reference"), field:"tokens")
 }

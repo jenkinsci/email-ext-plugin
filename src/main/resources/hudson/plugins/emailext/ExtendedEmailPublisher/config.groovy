@@ -71,8 +71,17 @@ f.advanced(title: _("Advanced Settings")) {
   f.entry(title: _("Save to Workspace"), help: "/plugin/email-ext/help/projectConfig/saveOutput.html") {
     f.checkbox(name: "project_save_output", checked: instance?.saveOutput)
   }
-
-  def configuredTriggers = instance != null ? instance.configuredTriggers : [hudson.plugins.emailext.plugins.trigger.FailureTrigger.createDefault()]
+  
+  def configuredTriggers = []
+  if(instance != null) {
+    configuredTriggers = instance.configuredTriggers
+  } else {
+    jenkins.model.Jenkins.instance.getDescriptor(hudson.plugins.emailext.ExtendedEmailPublisher).defaultTriggers.each { t ->
+        configuredTriggers << t.createDefault()              
+    }
+  }
+  
+  //def configuredTriggers = instance != null ? instance.configuredTriggers : [jenkins.model.Jenkins.instance.getDescriptor(hudson.plugins.emailext.plugins.trigger.FailureTrigger.class).createDefault()]
   
   f.entry(title: _("Triggers"), help: "/plugin/email-ext/help/projectConfig/addATrigger.html") {
     f.hetero_list(name: "project_triggers", hasHeader: true, descriptors: triggers, items: configuredTriggers, addCaption:_("Add Trigger"), deleteCaption: _("Remove Trigger"))

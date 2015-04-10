@@ -3,6 +3,8 @@ package hudson.plugins.emailext;
 import hudson.Extension;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
+import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
@@ -98,6 +100,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private String defaultPresendScript = "";
 
     private List<GroovyScriptPath> defaultClasspath = new ArrayList<GroovyScriptPath>();
+    
+    private List<EmailTriggerDescriptor> defaultTriggers = new ArrayList<EmailTriggerDescriptor>();
 
     /**
      * This is the global emergency email address
@@ -325,6 +329,13 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     public List<GroovyScriptPath> getDefaultClasspath() {
         return defaultClasspath;
     }
+    
+    public List<EmailTriggerDescriptor> getDefaultTriggers() {
+        if(defaultTriggers.isEmpty()) {
+            defaultTriggers.add((EmailTriggerDescriptor)Jenkins.getInstance().getDescriptor(FailureTrigger.class));
+        }
+        return defaultTriggers;
+    }
 
     public ExtendedEmailPublisherDescriptor() {
         super(ExtendedEmailPublisher.class);
@@ -403,6 +414,27 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             listId = nullify(req.getParameter("ext_mailer_list_id"));
         } else {
             listId = null;
+        }
+
+        List<String> classes = new ArrayList<String>();
+        if(formData.optJSONArray("defaultTriggers") != null) {
+            for(Object tName : formData.getJSONArray("defaultTriggers")) {
+               String triggerName = tName.toString();
+               classes.add(triggerName);
+            }
+        } else if(StringUtils.isNotEmpty(formData.optString("defaultTriggers"))) {
+            String triggerName = formData.getString("defaultTriggers");
+            classes.add(triggerName);
+        }
+        
+        if(!classes.isEmpty()) {
+            defaultTriggers.clear();
+            for(String triggerName : classes) {
+               EmailTriggerDescriptor d = (EmailTriggerDescriptor)Jenkins.getInstance().getDescriptorByName(triggerName);
+               if(d != null) {
+                   defaultTriggers.add(d);
+               }
+            }
         }
 
         save();

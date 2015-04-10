@@ -18,7 +18,6 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
-import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
 public abstract class AbstractScriptTrigger extends EmailTrigger {

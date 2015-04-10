@@ -44,6 +44,11 @@ public class AbortedTrigger extends EmailTrigger {
         @Override
         public String getDisplayName() {
             return TRIGGER_NAME;
-        }    
+        }        
+        
+        @Override
+        public EmailTrigger createDefault() {
+            return _createDefault();
+        }
     }    
 }
