@@ -416,13 +416,15 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             listId = null;
         }
         
-        defaultTriggers.clear();
-        for(Object tName : formData.getJSONArray("defaultTriggers")) {
-           String triggerName = tName.toString();
-           EmailTriggerDescriptor d = (EmailTriggerDescriptor)Jenkins.getInstance().getDescriptorByName(triggerName);
-           if(d != null) {
-               defaultTriggers.add(d);
-           }
+        if(formData.containsKey("defaultTriggers") && formData.getJSONObject("defaultTriggers").isArray()) {
+            defaultTriggers.clear();
+            for(Object tName : formData.getJSONArray("defaultTriggers")) {
+               String triggerName = tName.toString();
+               EmailTriggerDescriptor d = (EmailTriggerDescriptor)Jenkins.getInstance().getDescriptorByName(triggerName);
+               if(d != null) {
+                   defaultTriggers.add(d);
+               }
+            }
         }
 
         save();
