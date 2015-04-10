@@ -26,6 +26,7 @@ f.advanced() {
       f.option(selected: 'project'== (instance != null ? instance.email.contentType : ""), value: "project", _("Project Content Type")) 
       f.option(selected: 'text/plain'==(instance != null ? instance.email.contentType : ""), value: "text/plain", _("projectContentType.plainText")) 
       f.option(selected: 'text/html'==(instance != null ? instance.email.contentType : ""), value: "text/html", _("projectContentType.html")) 
+      f.option(selected: 'both'==(instance != null ? instance.email.contentType : ""), value: "both", _("projectContentType.both")) 
     }
   }
   f.entry(title: _("Subject"), help: "/plugin/email-ext/help/projectConfig/mailType/subject.html") {

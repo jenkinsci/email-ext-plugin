@@ -25,6 +25,7 @@ f.entry(title: _("Content Type"), help: "/plugin/email-ext/help/projectConfig/co
     f.option(selected: 'default'==instance?.contentType, value: "default", _("Default Content Type")) 
     f.option(selected: 'text/plain'==instance?.contentType, value: "text/plain", _("projectContentType.plainText")) 
     f.option(selected: 'text/html'==instance?.contentType, value: "text/html", _("projectContentType.html")) 
+    f.option(selected: 'both'==instance?.contentType, value: "both", _("projectContentType.both")) 
   }
 }
 f.entry(title: _("Default Subject"), help: "/plugin/email-ext/help/projectConfig/defaultSubject.html") {

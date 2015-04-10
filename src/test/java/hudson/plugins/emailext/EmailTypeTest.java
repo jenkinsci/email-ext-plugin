@@ -8,11 +8,11 @@ import java.io.IOException;
 import java.net.URL;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 import org.junit.Rule;
-import org.jvnet.hudson.test.Bug;
+import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 public class EmailTypeTest {
@@ -91,8 +91,8 @@ public class EmailTypeTest {
         assertEquals(3, pub.configuredTriggers.get(0).getEmail().getRecipientProviders().size());
     }
 
-	@Test
-    @Bug(24506)
+    @Test
+    @Issue("JENKINS-24506")
     public void testUpgradeTriggerWithNoRecipients() throws IOException {
         URL url = this.getClass().getResource("/recipient-provider-upgrade2.xml");
         File jobConfig = new File(url.getFile());    

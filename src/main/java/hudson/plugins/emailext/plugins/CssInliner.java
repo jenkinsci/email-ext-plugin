@@ -12,6 +12,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.MessageFormat;
 import java.util.StringTokenizer;
+import net.htmlparser.jericho.Source;
 import org.apache.commons.lang.StringEscapeUtils;
 
 /**
@@ -66,6 +67,10 @@ public class CssInliner {
       }
     }
     return styles.toString();
+  }
+  
+  public String stripHtml(String input) {
+      return new Source(input).getRenderer().toString();      
   }
 
   /**
