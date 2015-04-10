@@ -535,6 +535,32 @@ public class ExtendedEmailPublisherTest {
 
         assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
     }
+    
+    @Test
+    @Issue("JENKINS-27448")
+    public void testCancelFromPresendScriptCausesNoEmailWithCodeAfter() throws Exception {
+        publisher.presendScript = "cancel = true\nlogger.println('You are here')";
+        SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
+        successTrigger.setEmail(new EmailType() {
+            {
+                addRecipientProvider(new RequesterRecipientProvider());
+            }
+        });
+        publisher.getConfiguredTriggers().add(successTrigger);
+
+        User u = User.get("kutzi");
+        u.setFullName("Christoph Kutzinski");
+        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
+        u.addProperty(prop);
+
+        UserCause cause = new MockUserCause("kutzi");
+
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
+    }
 
     @Test
     @Issue("JENKINS-22777")

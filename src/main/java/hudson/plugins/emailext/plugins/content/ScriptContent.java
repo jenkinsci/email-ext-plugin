@@ -44,7 +44,7 @@ import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 
 @EmailToken
-public class ScriptContent extends DataBoundTokenMacro {
+public class ScriptContent extends AbstractEvalContent {
 
     private static final Logger LOGGER = Logger.getLogger(ScriptContent.class.getName());
     
@@ -56,18 +56,13 @@ public class ScriptContent extends DataBoundTokenMacro {
     @Parameter
     public String template = DEFAULT_TEMPLATE_NAME;
     
-    private static final String EMAIL_TEMPLATES_DIRECTORY = "email-templates";
-
     public static final String MACRO_NAME = "SCRIPT";
     
-    private static Object configProvider;
-
     private static final Map<String,Reference<Template>> templateCache = new HashMap<String,Reference<Template>>();
     
-    @Override
-    public boolean acceptsMacroName(String macroName) {
-        return macroName.equals(MACRO_NAME);
-    } 
+    public ScriptContent() {
+        super(MACRO_NAME);
+    }
 
     @Override
     public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName)
@@ -78,14 +73,19 @@ public class ScriptContent extends DataBoundTokenMacro {
         
         try {
             if (!StringUtils.isEmpty(script)) {
-                inputStream = getFileInputStream(script);
+                inputStream = getFileInputStream(script, ".groovy");
                 result = executeScript(context, listener, inputStream);
             } else {
-                inputStream = getFileInputStream(template);
+                inputStream = getFileInputStream(template, ".template");
                 result = renderTemplate(context, listener, inputStream);
             }
         } catch (FileNotFoundException e) {
-            String missingScriptError = generateMissingFile(script, template);
+            String missingScriptError = "";
+            if (!StringUtils.isEmpty(script)) {
+                missingScriptError = generateMissingFile("Groovy Script", script);
+            } else {
+                missingScriptError = generateMissingFile("Groovy Template", template);
+            }
             LOGGER.log(Level.SEVERE, missingScriptError);
             result = missingScriptError;
         } catch (GroovyRuntimeException e) {
@@ -96,81 +96,8 @@ public class ScriptContent extends DataBoundTokenMacro {
         return result;
     }
 
-    /**
-     * Generates a missing file error message
-     *
-     * @param script name of the script requested
-     * @param template name of the template requested
-     * @return a message about the missing file
-     */
-    private String generateMissingFile(String script, String template) {
-        if (!StringUtils.isEmpty(script)) {
-            return "Script [" + script + "] was not found in $JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ".";
-        }
-        return "Template [" + template + "] was not found in $JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ".";
-    }
-
-    /**
-     * Try to get the script from the classpath first before trying the file
-     * system.
-     *
-     * @param scriptName
-     * @return
-     * @throws java.io.FileNotFoundException
-     */
-    private InputStream getFileInputStream(String fileName)
-            throws FileNotFoundException {
-     
-        InputStream inputStream;
-        if (fileName.startsWith("managed:")) {
-            String managedFileName = fileName.substring(8);
-            try {
-                inputStream = getManagedFile(managedFileName);
-            } catch(NoClassDefFoundError e) {
-                inputStream = null;
-            }
-            
-            if (inputStream == null) {
-                throw new FileNotFoundException(String.format("Managed file '%s' not found", managedFileName));
-            }
-            return inputStream;
-        }
-        
-        inputStream = getClass().getClassLoader().getResourceAsStream("hudson/plugins/emailext/templates/" + fileName);
-        if (inputStream == null) {
-            File scriptsFolder = scriptsFolder();
-            final File scriptFile = new File(scriptsFolder, fileName);
-            inputStream = new FileInputStream(scriptFile);
-        }
-        return inputStream;
-    }   
-
-    static File scriptsFolder() {
-        return new File(Jenkins.getInstance().getRootDir(), EMAIL_TEMPLATES_DIRECTORY);
-    }
-    
-    private InputStream getManagedFile(String templateName) {
-        Plugin plugin = Jenkins.getInstance().getPlugin("config-file-provider");
-        InputStream stream = null;
-        if(plugin != null) {
-            Config config = null;
-            ConfigProvider provider = getTemplateConfigProvider();
-            for(Config c : provider.getAllConfigs()) {
-                if(c.name.equalsIgnoreCase(templateName) && provider.isResponsibleFor(c.id)) {
-                    config = c;
-                    break;
-                }                    
-            }
-            
-            if(config != null) {
-                stream = new ByteArrayInputStream(config.content.getBytes());
-            }
-        }
-        return stream;
-    }
-    
-    
-    private static ConfigProvider getTemplateConfigProvider() {
+    @Override
+    protected ConfigProvider getConfigProvider() {
         if(configProvider == null) {
             ExtensionList<ConfigProvider> providers = ConfigProvider.all();
             configProvider = providers.get(GroovyTemplateConfigProvider.class);

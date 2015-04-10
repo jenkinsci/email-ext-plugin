@@ -3,6 +3,7 @@ package hudson.plugins.emailext.recipients;
 import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.EnvVars;
 import hudson.model.User;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.util.FormValidation;
 import hudson.tasks.Mailer;
 
@@ -134,7 +135,7 @@ public class EmailRecipientUtilsTest {
     @Test
     public void testConvertRecipientList_defaultSuffix()
             throws AddressException, UnsupportedEncodingException {
-        Mailer.descriptor().setDefaultSuffix("@gmail.com");
+        ExtendedEmailPublisher.descriptor().setDefaultSuffix("@gmail.com");
         InternetAddress[] internetAddresses = emailRecipientUtils.convertRecipientString("ashlux", envVars).toArray(new InternetAddress[0]);
 
         assertEquals(1, internetAddresses.length);
@@ -144,7 +145,7 @@ public class EmailRecipientUtilsTest {
     @Test
     public void testConvertRecipientList_userName()
             throws AddressException, IOException, UnsupportedEncodingException {
-        Mailer.descriptor().setDefaultSuffix("@gmail.com");
+        ExtendedEmailPublisher.descriptor().setDefaultSuffix("@gmail.com");
         User u = User.get("advantiss");
         u.setFullName("Peter Samoshkin");
         Mailer.UserProperty prop = new Mailer.UserProperty("advantiss@xxx.com");

@@ -81,7 +81,7 @@ public class JellyScriptContentTest {
         content.template = "template-does-not-exist";
         String output = content.evaluate(build, listener, JellyScriptContent.MACRO_NAME);
 
-        assertEquals("Jelly script [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.", output);
+        assertEquals("Jelly file [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.", output);
     }
 
     /**

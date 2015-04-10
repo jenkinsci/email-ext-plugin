@@ -47,7 +47,7 @@ public class EmailRecipientUtils {
             final Set<InternetAddress> to = new LinkedHashSet<InternetAddress>();
             final Set<InternetAddress> cc = new LinkedHashSet<InternetAddress>();
             final Set<InternetAddress> bcc = new LinkedHashSet<InternetAddress>();
-            final String defaultSuffix = Mailer.descriptor().getDefaultSuffix();
+            final String defaultSuffix = ExtendedEmailPublisher.descriptor().getDefaultSuffix();
 
             for(InternetAddress address : all) {
                 if(address.getPersonal() != null) {
@@ -95,7 +95,7 @@ public class EmailRecipientUtils {
                 }
 
                 if(address.getPersonal() != null) {
-                    address.setPersonal(MimeUtility.encodeWord(address.getPersonal(), "UTF-8", "B"));
+                    address.setPersonal(address.getPersonal(), ExtendedEmailPublisher.descriptor().getCharset());
                 }
             }
         }

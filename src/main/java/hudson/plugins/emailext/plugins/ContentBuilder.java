@@ -4,7 +4,6 @@ import hudson.CopyOnWrite;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
-import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.tasks.Publisher;

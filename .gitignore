@@ -11,3 +11,4 @@ work
 /email-ext.sublime-project
 *.bak
 nbactions.xml
+.directory
