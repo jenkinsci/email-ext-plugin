@@ -83,7 +83,7 @@ try {
       <TR><TD class="bg1"><B>BUILD ARTIFACTS</B></TD></TR>
 <% 
     try {  
-        mbuild.each() { m -> %>	  
+        mbuilds.each() { m -> %>	  
         <TR><TD class="bg2"><B>${m.key.displayName}</B></TD></TR>
 <%		m.value.each() { mvnbld ->
 			def artifactz = mvnbld.artifacts
