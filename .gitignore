@@ -12,3 +12,4 @@ work
 *.bak
 nbactions.xml
 .directory
+nb-configuration.xml
