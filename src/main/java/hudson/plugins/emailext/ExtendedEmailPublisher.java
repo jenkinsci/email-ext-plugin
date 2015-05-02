@@ -453,7 +453,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     "hudson",
                     "hudson.model"));
 
-            cl = expandClassLoader(cl, cc);
+            expandClasspath(context, cc);
             if (getDescriptor().isSecurityEnabled()) {
                 debug(context.getListener().getLogger(), "Setting up sandbox for pre-send script");
                 cc.addCompilationCustomizers(new SandboxTransformer());
@@ -501,23 +501,22 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * @param cc
      * @return the new expanded classloader
      */
-    private ClassLoader expandClassLoader(ClassLoader cl, CompilerConfiguration cc) {
+    private void expandClasspath(ExtendedEmailPublisherContext context, CompilerConfiguration cc) {
+        List<String> classpathList = new ArrayList<String>();
+        
         if ((classpath != null) && classpath.size() > 0) {
-            cl = new GroovyClassLoader(cl, cc);
             for (GroovyScriptPath path : classpath) {
-                ((GroovyClassLoader) cl).addURL(path.asURL());
+                classpathList.add(ContentBuilder.transformText(path.getPath(), context, getRuntimeMacros(context)));
             }
         }
+        
         List<GroovyScriptPath> globalClasspath = getDescriptor().getDefaultClasspath();
         if ((globalClasspath != null) && (globalClasspath.size() > 0)) {
-            if (!(cl instanceof GroovyClassLoader)) {
-                cl = new GroovyClassLoader(cl, cc);
-            }
             for (GroovyScriptPath path : globalClasspath) {
-                ((GroovyClassLoader) cl).addURL(path.asURL());
+                classpathList.add(ContentBuilder.transformText(path.getPath(), context, getRuntimeMacros(context)));
             }
-        }
-        return cl;
+        }        
+        cc.setClasspathList(classpathList);
     }
 
     private MimeMessage createMail(ExtendedEmailPublisherContext context) throws MessagingException, IOException, InterruptedException {
