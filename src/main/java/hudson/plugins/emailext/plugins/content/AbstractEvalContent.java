@@ -36,6 +36,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import jenkins.model.Jenkins;
+import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.lib.configprovider.model.Config;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
@@ -92,10 +93,12 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
             return inputStream;
         }
         
+        String fileExt = FilenameUtils.getExtension(fileName);
+        
         // add .jelly if needed
-        if (!fileName.endsWith(extension)) {
+        if (fileExt.equals("")) {
             fileName += extension;
-        }
+        }        
         
         inputStream = getClass().getClassLoader().getResourceAsStream(
                 "hudson/plugins/emailext/templates/" + fileName);
