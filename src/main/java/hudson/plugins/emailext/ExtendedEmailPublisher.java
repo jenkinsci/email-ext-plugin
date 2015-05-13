@@ -534,6 +534,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         msg.setFrom(from);
 
         if (descriptor.isDebugMode()) {
+            session.setDebug(true);
             session.setDebugOut(context.getListener().getLogger());
         }
 
