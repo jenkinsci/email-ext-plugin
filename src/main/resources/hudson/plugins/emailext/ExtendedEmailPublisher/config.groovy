@@ -76,12 +76,11 @@ f.advanced(title: _("Advanced Settings")) {
   if(instance != null) {
     configuredTriggers = instance.configuredTriggers
   } else {
-    jenkins.model.Jenkins.instance.getDescriptor(hudson.plugins.emailext.ExtendedEmailPublisher).defaultTriggers.each { t ->
-        configuredTriggers << t.createDefault()              
+    jenkins.model.Jenkins.instance.getDescriptor(hudson.plugins.emailext.ExtendedEmailPublisher).defaultTriggerIds.each { t ->
+        def desc = jenkins.model.Jenkins.instance.getDescriptor(t)
+        configuredTriggers << desc.createDefault()              
     }
   }
-  
-  //def configuredTriggers = instance != null ? instance.configuredTriggers : [jenkins.model.Jenkins.instance.getDescriptor(hudson.plugins.emailext.plugins.trigger.FailureTrigger.class).createDefault()]
   
   f.entry(title: _("Triggers"), help: "/plugin/email-ext/help/projectConfig/addATrigger.html") {
     f.hetero_list(name: "project_triggers", hasHeader: true, descriptors: triggers, items: configuredTriggers, addCaption:_("Add Trigger"), deleteCaption: _("Remove Trigger"))

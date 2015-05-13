@@ -101,8 +101,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     private List<GroovyScriptPath> defaultClasspath = new ArrayList<GroovyScriptPath>();
     
-    private List<EmailTriggerDescriptor> defaultTriggers = new ArrayList<EmailTriggerDescriptor>();
-
+    private transient List<EmailTriggerDescriptor> defaultTriggers = new ArrayList<EmailTriggerDescriptor>();
+    
+    private List<String> defaultTriggerIds = new ArrayList<String>();
+    
     /**
      * This is the global emergency email address
      */
@@ -330,11 +332,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return defaultClasspath;
     }
     
-    public List<EmailTriggerDescriptor> getDefaultTriggers() {
-        if(defaultTriggers.isEmpty()) {
-            defaultTriggers.add((EmailTriggerDescriptor)Jenkins.getInstance().getDescriptor(FailureTrigger.class));
+    public List<String> getDefaultTriggerIds() {
+        if(defaultTriggerIds.isEmpty()) {
+            defaultTriggerIds.add(Jenkins.getInstance().getDescriptor(FailureTrigger.class).getId());
         }
-        return defaultTriggers;
+        return defaultTriggerIds;
     }
 
     public ExtendedEmailPublisherDescriptor() {
@@ -416,23 +418,21 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             listId = null;
         }
 
-        List<String> classes = new ArrayList<String>();
+        List<String> ids = new ArrayList<String>();
         if(formData.optJSONArray("defaultTriggers") != null) {
-            for(Object tName : formData.getJSONArray("defaultTriggers")) {
-               String triggerName = tName.toString();
-               classes.add(triggerName);
+            for(Object id : formData.getJSONArray("defaultTriggers")) {
+               ids.add(id.toString());
             }
         } else if(StringUtils.isNotEmpty(formData.optString("defaultTriggers"))) {
-            String triggerName = formData.getString("defaultTriggers");
-            classes.add(triggerName);
+            ids.add(formData.getString("defaultTriggers"));
         }
         
-        if(!classes.isEmpty()) {
-            defaultTriggers.clear();
-            for(String triggerName : classes) {
-               EmailTriggerDescriptor d = (EmailTriggerDescriptor)Jenkins.getInstance().getDescriptorByName(triggerName);
+        if(!ids.isEmpty()) {
+            defaultTriggerIds.clear();
+            for(String id : ids) {
+               EmailTriggerDescriptor d = (EmailTriggerDescriptor)Jenkins.getInstance().getDescriptor(id);
                if(d != null) {
-                   defaultTriggers.add(d);
+                   defaultTriggerIds.add(id);
                }
             }
         }
@@ -447,7 +447,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
         return v;
     }
-
+    
     public Object readResolve() {
         if (!this.overrideGlobalSettings) {
             // need to get the plugin info from Mailer
@@ -463,6 +463,16 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             this.charset = Mailer.descriptor().getCharset();
             this.overrideGlobalSettings = true;
         }
+        
+        if(!this.defaultTriggers.isEmpty()) {
+            defaultTriggerIds.clear();
+            for(EmailTriggerDescriptor t : this.defaultTriggers) {
+                if(!defaultTriggerIds.contains(t.getId())) {
+                    defaultTriggerIds.add(t.getId());
+                }
+            }
+        }
+        
         return this;
     }
 
