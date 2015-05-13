@@ -95,7 +95,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         
         String fileExt = FilenameUtils.getExtension(fileName);
         
-        // add .jelly if needed
+        // add default extension if needed
         if (fileExt.equals("")) {
             fileName += extension;
         }        
