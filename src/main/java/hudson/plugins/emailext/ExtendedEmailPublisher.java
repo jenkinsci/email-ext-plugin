@@ -4,7 +4,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import groovy.lang.Binding;
-import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import hudson.EnvVars;
 import hudson.FilePath;
@@ -24,7 +23,6 @@ import hudson.plugins.emailext.watching.EmailExtWatchAction;
 import hudson.plugins.emailext.watching.EmailExtWatchJobProperty;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.MailMessageIdAction;
-import hudson.tasks.Mailer;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import java.io.IOException;
@@ -49,9 +47,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimeUtility;
 import jenkins.model.Jenkins;
-import jenkins.model.JenkinsLocationConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
@@ -521,6 +517,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     private MimeMessage createMail(ExtendedEmailPublisherContext context) throws MessagingException, IOException, InterruptedException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
+        
+        if (!descriptor.getOverrideGlobalSettings()) {
+            descriptor.upgradeFromMailer();            
+        }
+        
         String charset = descriptor.getCharset();
 
         Session session = descriptor.createSession();

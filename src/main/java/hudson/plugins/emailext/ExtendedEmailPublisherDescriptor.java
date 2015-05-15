@@ -293,9 +293,9 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public boolean getOverrideGlobalSettings() {
-        return true;
+        return overrideGlobalSettings;
     }
-
+    
     public String getListId() {
         return listId;
     }
@@ -353,8 +353,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @Override
     public boolean configure(StaplerRequest req, JSONObject formData)
             throws FormException {
-
-        overrideGlobalSettings = true;
 
         // Configure the smtp server
         smtpHost = nullify(req.getParameter("ext_mailer_smtp_server"));
@@ -436,6 +434,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                }
             }
         }
+        
+        if(!overrideGlobalSettings) {
+            upgradeFromMailer();
+        }
 
         save();
         return super.configure(req, formData);
@@ -449,21 +451,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
     
     public Object readResolve() {
-        if (!this.overrideGlobalSettings) {
-            // need to get the plugin info from Mailer
-            this.defaultSuffix = Mailer.descriptor().getDefaultSuffix();
-            this.defaultReplyTo = Mailer.descriptor().getReplyToAddress();
-            this.useSsl = Mailer.descriptor().getUseSsl();
-            if (StringUtils.isNotBlank(Mailer.descriptor().getSmtpAuthUserName())) {
-                this.smtpAuthPassword = Secret.fromString(Mailer.descriptor().getSmtpAuthPassword());
-                this.smtpAuthUsername = Mailer.descriptor().getSmtpAuthUserName();
-            }
-            this.smtpPort = Mailer.descriptor().getSmtpPort();
-            this.smtpHost = Mailer.descriptor().getSmtpServer();
-            this.charset = Mailer.descriptor().getCharset();
-            this.overrideGlobalSettings = true;
-        }
-        
         if(!this.defaultTriggers.isEmpty()) {
             defaultTriggerIds.clear();
             for(EmailTriggerDescriptor t : this.defaultTriggers) {
@@ -471,9 +458,23 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                     defaultTriggerIds.add(t.getId());
                 }
             }
-        }
-        
+        }        
         return this;
+    }
+    
+    void upgradeFromMailer() {
+        // get the data from Mailer and then set override to true
+        this.defaultSuffix = Mailer.descriptor().getDefaultSuffix();
+        this.defaultReplyTo = Mailer.descriptor().getReplyToAddress();
+        this.useSsl = Mailer.descriptor().getUseSsl();
+        if (StringUtils.isNotBlank(Mailer.descriptor().getSmtpAuthUserName())) {
+            this.smtpAuthPassword = Secret.fromString(Mailer.descriptor().getSmtpAuthPassword());
+            this.smtpAuthUsername = Mailer.descriptor().getSmtpAuthUserName();
+        }
+        this.smtpPort = Mailer.descriptor().getSmtpPort();
+        this.smtpHost = Mailer.descriptor().getSmtpServer();
+        this.charset = Mailer.descriptor().getCharset();
+        this.overrideGlobalSettings = true;
     }
 
     @Override
