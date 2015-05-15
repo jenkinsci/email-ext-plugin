@@ -104,7 +104,13 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
                 "hudson/plugins/emailext/templates/" + fileName);
 
         if (inputStream == null) {
-            final File templateFile = new File(scriptsFolder(), fileName);
+            File templateFile = new File(scriptsFolder(), fileName);
+            
+            // the file may have an extension, but not the correct one
+            if(!templateFile.exists()) {
+                fileName += extension;
+                templateFile = new File(scriptsFolder(), fileName);
+            }            
             inputStream = new FileInputStream(templateFile);
         }
 
