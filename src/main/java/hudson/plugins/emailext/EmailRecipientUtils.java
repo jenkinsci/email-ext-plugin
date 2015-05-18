@@ -165,11 +165,11 @@ public class EmailRecipientUtils {
         try {
             Set<InternetAddress> internetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.TO);
             to.addAll(internetAddresses);
-            if(bcc != null && bcc.size() > 0) {
+            if(bcc != null) {
                 Set<InternetAddress> bccInternetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.BCC);
                 bcc.addAll(bccInternetAddresses);
             }
-            if(cc != null && cc.size() > 0) {
+            if(cc != null) {
                 Set<InternetAddress> ccInternetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.CC);
                 cc.addAll(ccInternetAddresses);
             }
