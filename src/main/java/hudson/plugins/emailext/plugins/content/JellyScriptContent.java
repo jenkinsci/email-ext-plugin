@@ -23,6 +23,8 @@ import org.xml.sax.InputSource;
 
 @EmailToken
 public class JellyScriptContent extends AbstractEvalContent {
+    
+    private static Object configProvider;
 
     public static final String MACRO_NAME = "JELLY_SCRIPT";
     private static final String DEFAULT_HTML_TEMPLATE_NAME = "html";

@@ -20,6 +20,8 @@ import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 @EmailToken
 public class TemplateContent extends AbstractEvalContent {
+    
+    private static Object configProvider;
 
     private static final Logger LOGGER = Logger.getLogger(TemplateContent.class.getName());
     

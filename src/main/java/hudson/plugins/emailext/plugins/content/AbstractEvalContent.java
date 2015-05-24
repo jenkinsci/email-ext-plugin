@@ -48,7 +48,6 @@ import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
  */
 public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     
-    protected static Object configProvider;
     protected static final String EMAIL_TEMPLATES_DIRECTORY = "email-templates";
     protected final String macroName;
     
