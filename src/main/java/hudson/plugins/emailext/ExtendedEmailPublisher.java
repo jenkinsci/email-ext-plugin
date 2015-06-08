@@ -499,29 +499,29 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      */
     private void expandClasspath(ExtendedEmailPublisherContext context, CompilerConfiguration cc) {
         List<String> classpathList = new ArrayList<String>();
-        
+
         if ((classpath != null) && classpath.size() > 0) {
             for (GroovyScriptPath path : classpath) {
                 classpathList.add(ContentBuilder.transformText(path.getPath(), context, getRuntimeMacros(context)));
             }
         }
-        
+
         List<GroovyScriptPath> globalClasspath = getDescriptor().getDefaultClasspath();
         if ((globalClasspath != null) && (globalClasspath.size() > 0)) {
             for (GroovyScriptPath path : globalClasspath) {
                 classpathList.add(ContentBuilder.transformText(path.getPath(), context, getRuntimeMacros(context)));
             }
-        }        
+        }
         cc.setClasspathList(classpathList);
     }
 
     private MimeMessage createMail(ExtendedEmailPublisherContext context) throws MessagingException, IOException, InterruptedException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
-        
+
         if (!descriptor.getOverrideGlobalSettings()) {
-            descriptor.upgradeFromMailer();            
+            descriptor.upgradeFromMailer();
         }
-        
+
         String charset = descriptor.getCharset();
 
         Session session = descriptor.createSession();
@@ -793,7 +793,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             @Override
             public boolean startBuild() throws InterruptedException, IOException {
                 LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
-                // Will be run by parent so we check if needed to be executed by parent 
+                // Will be run by parent so we check if needed to be executed by parent
                 if (getMatrixTriggerMode().forParent) {
                     return ExtendedEmailPublisher.this._perform(this.build, this.launcher, this.listener, true);
                 }

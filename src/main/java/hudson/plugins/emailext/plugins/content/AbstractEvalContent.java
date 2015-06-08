@@ -27,8 +27,6 @@ import hudson.Plugin;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.tasks.Mailer;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;

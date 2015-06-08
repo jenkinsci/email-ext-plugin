@@ -334,7 +334,19 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     
     public List<String> getDefaultTriggerIds() {
         if(defaultTriggerIds.isEmpty()) {
-            defaultTriggerIds.add(Jenkins.getInstance().getDescriptor(FailureTrigger.class).getId());
+            if(!defaultTriggers.isEmpty()) {
+                defaultTriggerIds.clear();
+                for(EmailTriggerDescriptor t : this.defaultTriggers) {
+                    // we have to do the below because a bunch of stuff is not serialized for the Descriptor
+                    EmailTriggerDescriptor d = (EmailTriggerDescriptor)Jenkins.getInstance().getDescriptorByType(t.getClass());                
+                    if(!defaultTriggerIds.contains(d.getId())) {
+                        defaultTriggerIds.add(d.getId());
+                    }
+                }
+            } else {
+                defaultTriggerIds.add(Jenkins.getInstance().getDescriptor(FailureTrigger.class).getId());
+            }
+            save();
         }
         return defaultTriggerIds;
     }
@@ -449,19 +461,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
         return v;
     }
-    
-    public Object readResolve() {
-        if(!this.defaultTriggers.isEmpty()) {
-            defaultTriggerIds.clear();
-            for(EmailTriggerDescriptor t : this.defaultTriggers) {
-                if(!defaultTriggerIds.contains(t.getId())) {
-                    defaultTriggerIds.add(t.getId());
-                }
-            }
-        }        
-        return this;
-    }
-    
+
     void upgradeFromMailer() {
         // get the data from Mailer and then set override to true
         this.defaultSuffix = Mailer.descriptor().getDefaultSuffix();

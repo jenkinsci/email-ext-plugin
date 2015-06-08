@@ -28,7 +28,6 @@ public class JellyScriptContent extends AbstractEvalContent {
 
     public static final String MACRO_NAME = "JELLY_SCRIPT";
     private static final String DEFAULT_HTML_TEMPLATE_NAME = "html";
-    private static final String DEFAULT_TEXT_TEMPLATE_NAME = "text";
     private static final String DEFAULT_TEMPLATE_NAME = DEFAULT_HTML_TEMPLATE_NAME;
     private static final String JELLY_EXTENSION = ".jelly";
     
