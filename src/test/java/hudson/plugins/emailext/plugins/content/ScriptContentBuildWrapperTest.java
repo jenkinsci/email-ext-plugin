@@ -63,7 +63,7 @@ public class ScriptContentBuildWrapperTest
     {
         final Action expectedAction = mock( Action.class );
         when( mockBuild.getActions() ).thenReturn( new LinkedList<Action>()
-        {{
+            {{
                 add( expectedAction );
             }} );
 
