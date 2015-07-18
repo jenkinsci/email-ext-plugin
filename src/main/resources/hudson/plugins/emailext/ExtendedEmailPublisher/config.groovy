@@ -81,8 +81,9 @@ f.advanced(title: _("Advanced Settings")) {
         configuredTriggers << desc.createDefault()              
     }
   }
-  
+
+  showSendTo = true
   f.entry(title: _("Triggers"), help: "/plugin/email-ext/help/projectConfig/addATrigger.html") {
-    f.hetero_list(name: "project_triggers", hasHeader: true, descriptors: triggers, items: configuredTriggers, addCaption:_("Add Trigger"), deleteCaption: _("Remove Trigger"))
+    f.hetero_list(name: "project_triggers", hasHeader: true, descriptors: triggers, items: configuredTriggers, addCaption:_("Add Trigger"), deleteCaption: _("Remove Trigger"), capture: "showSendTo")
   }
 }

@@ -47,8 +47,10 @@ l.layout(norefresh: true) {
                     def triggers = hudson.plugins.emailext.plugins.EmailTrigger.all().findAll { t -> t.isWatchable() }
                     def configuredTriggers = (my != null && my.triggers.size() > 0) ? my.triggers : []
                     // do we want to filter the triggers somehow so that only some show up?
+
+                    showSendTo = false
                     f.entry(field:"triggers", title: _("Triggers")) {
-                      f.hetero_list(name: "triggers", hasHeader: true, descriptors: triggers, items: configuredTriggers, addCaption:_("Add Trigger"), deleteCaption: _("Remove Trigger"))
+                      f.hetero_list(name: "triggers", hasHeader: true, descriptors: triggers, items: configuredTriggers, addCaption:_("Add Trigger"), deleteCaption: _("Remove Trigger"), capture: "showSendTo")
                     }
 
                     f.block {
