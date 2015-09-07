@@ -55,6 +55,7 @@ public class FailingTestSuspectsRecipientProviderTest {
         final Jenkins jenkins = PowerMockito.mock(Jenkins.class);
         final ExtendedEmailPublisherDescriptor extendedEmailPublisherDescriptor = PowerMockito.mock(ExtendedEmailPublisherDescriptor.class);
         extendedEmailPublisherDescriptor.setDebugMode(true);
+        PowerMockito.when(extendedEmailPublisherDescriptor.getExcludedCommitters()).thenReturn("");
 
         PowerMockito.when(jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class)).thenReturn(extendedEmailPublisherDescriptor);
         PowerMockito.mockStatic(Jenkins.class);

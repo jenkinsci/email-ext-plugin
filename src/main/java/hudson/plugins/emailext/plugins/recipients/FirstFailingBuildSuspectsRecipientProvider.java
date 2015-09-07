@@ -80,7 +80,7 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
             } else {
                 users = new HashSet<User>();
                 debug.send("Collecting builds with suspects...");
-                final HashSet<AbstractBuild<?, ?>> buildsWithSuspects = new HashSet<AbstractBuild<?, ?>>();
+                final HashSet<Run<?, ?>> buildsWithSuspects = new HashSet<Run<?, ?>>();
                 Run<?, ?> firstFailedBuild = currentBuild;
                 Run<?, ?> candidate = currentBuild;
                 while (candidate != null && candidate.getResult().isWorseOrEqualTo(Result.FAILURE)) {
@@ -88,7 +88,7 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
                     candidate = candidate.getPreviousCompletedBuild();
                 }
                 if (firstFailedBuild instanceof AbstractBuild) {
-                    buildsWithSuspects.add((AbstractBuild<?, ?>) firstFailedBuild);
+                    buildsWithSuspects.add(firstFailedBuild);
                 } else {
                     debug.send("  firstFailedBuild was not an instance of AbstractBuild");
                 }

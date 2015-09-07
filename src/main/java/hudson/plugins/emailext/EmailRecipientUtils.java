@@ -1,6 +1,7 @@
 package hudson.plugins.emailext;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -139,19 +140,22 @@ public class EmailRecipientUtils {
     
     public static boolean isExcludedRecipient(String userName, TaskListener listener) {
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        StringTokenizer tokens = new StringTokenizer(descriptor.getExcludedCommitters(), ",");
-        while (tokens.hasMoreTokens()) {
-            String check = tokens.nextToken().trim();
-            descriptor.debug(listener.getLogger(), "Checking '%s' against '%s' to see if they are excluded", userName, check);
-            if (check.equalsIgnoreCase(userName)) {
-                return true;
+        if(descriptor.getExcludedCommitters() != null) {
+            StringTokenizer tokens = new StringTokenizer(descriptor.getExcludedCommitters(), ", ");
+            while (tokens.hasMoreTokens()) {
+                String check = tokens.nextToken().trim();
+                descriptor.debug(listener.getLogger(), "Checking '%s' against '%s' to see if they are excluded", userName, check);
+                if (check.equalsIgnoreCase(userName)) {
+                    return true;
+                }
             }
         }
         return false;
     }
     
     public static boolean isExcludedRecipient(User user, TaskListener listener) {
-        String[] testValues = new String[] { user.getFullName(), user.getId(), user.getDisplayName() };
+        Mailer.UserProperty prop = user.getProperty(Mailer.UserProperty.class);
+        String[] testValues = new String[] { user.getFullName(), user.getId(), user.getDisplayName(), prop != null ? prop.getAddress() : null };
         for(String testValue : testValues) {
             if(testValue != null && isExcludedRecipient(testValue, listener)) {
                 return true;

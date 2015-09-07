@@ -64,8 +64,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     private static final String CONTENT_TRANSFER_ENCODING = System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
 
-    public static final String DEFAULT_RECIPIENTS_TEXT = "";
-
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
     public static final String DEFAULT_BODY_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:\n\n"

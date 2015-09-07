@@ -84,25 +84,20 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
                 } else {
                     users = new HashSet<User>();
                     debug.send("Collecting builds where a test started failing...");
-                    final HashSet<AbstractBuild<?, ?>> buildsWhereATestStartedFailing = new HashSet<AbstractBuild<?, ?>>();
+                    final HashSet<Run<?, ?>> buildsWhereATestStartedFailing = new HashSet<Run<?, ?>>();
                     for (final TestResult caseResult : testResultAction.getFailedTests()) {
                         final Run<?, ?> runWhereTestStartedFailing = caseResult.getFailedSinceRun();
-                        if (runWhereTestStartedFailing instanceof AbstractBuild) {
-                            final AbstractBuild<?, ?> buildWhereTestStartedFailing = (AbstractBuild<?, ?>) runWhereTestStartedFailing;
-                            debug.send("  buildWhereTestStartedFailing: %d", buildWhereTestStartedFailing.getNumber());
-                            buildsWhereATestStartedFailing.add(buildWhereTestStartedFailing);
-                        } else {
-                            debug.send("  runWhereTestStartedFailing was not an instance of AbstractBuild");
-                        }
+                        debug.send("  runWhereTestStartedFailing: %d", runWhereTestStartedFailing.getNumber());
+                        buildsWhereATestStartedFailing.add(runWhereTestStartedFailing);
                     }
                     // For each build where a test started failing, walk backward looking for build results worse than
                     // UNSTABLE. All of those builds will be used to find suspects.
                     debug.send("Collecting builds with suspects...");
-                    final HashSet<AbstractBuild<?, ?>> buildsWithSuspects = new HashSet<AbstractBuild<?, ?>>();
-                    for (final AbstractBuild<?, ?> buildWhereATestStartedFailing : buildsWhereATestStartedFailing) {
+                    final HashSet<Run<?, ?>> buildsWithSuspects = new HashSet<Run<?, ?>>();
+                    for (final Run<?, ?> buildWhereATestStartedFailing : buildsWhereATestStartedFailing) {
                         debug.send("  buildWhereATestStartedFailing: %d", buildWhereATestStartedFailing.getNumber());
                         buildsWithSuspects.add(buildWhereATestStartedFailing);
-                        AbstractBuild<?, ?> previousBuildToCheck = buildWhereATestStartedFailing.getPreviousCompletedBuild();
+                        Run<?, ?> previousBuildToCheck = buildWhereATestStartedFailing.getPreviousCompletedBuild();
                         if (previousBuildToCheck != null) {
                             debug.send("    previousBuildToCheck: %d", previousBuildToCheck.getNumber());
                         }
