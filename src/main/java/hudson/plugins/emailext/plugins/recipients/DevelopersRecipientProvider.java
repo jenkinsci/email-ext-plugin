@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins.recipients;
 
+import hudson.model.AbstractBuild;
 import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
@@ -29,8 +30,12 @@ public class DevelopersRecipientProvider extends RecipientProvider {
     public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         Set<User> users = new HashSet<User>();
-        for (ChangeLogSet.Entry change : context.getBuild().getChangeSet()) {
-            users.add(change.getAuthor());
+
+        if (context.getRun() instanceof AbstractBuild) {
+            AbstractBuild<?, ?> build = (AbstractBuild) context.getRun();
+            for (ChangeLogSet.Entry change : build.getChangeSet()) {
+                users.add(change.getAuthor());
+            }
         }
 
         for (User user : users) {

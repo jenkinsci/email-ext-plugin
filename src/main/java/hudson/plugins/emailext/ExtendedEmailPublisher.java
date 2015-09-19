@@ -314,7 +314,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         for (String triggerName : triggered.keySet()) {
             for (EmailTrigger trigger : triggered.get(triggerName)) {
                 listener.getLogger().println("Sending email for trigger: " + triggerName);
-                final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build, launcher, listener);
+                final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build, build.getWorkspace(), launcher, listener);
                 context.setTriggered(triggered);
                 context.setTrigger(trigger);
                 sendMail(context);
@@ -324,7 +324,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return true;
     }
 
-    private boolean sendMail(ExtendedEmailPublisherContext context) {
+    boolean sendMail(ExtendedEmailPublisherContext context) {
         try {
             MimeMessage msg = createMail(context);
             debug(context.getListener().getLogger(), "Successfully created MimeMessage");
@@ -404,8 +404,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                             break;
                         }
                     }
-                    if (context.getBuild().getAction(MailMessageIdAction.class) == null) {
-                        context.getBuild().addAction(new MailMessageIdAction(msg.getMessageID()));
+                    if (context.getRun().getAction(MailMessageIdAction.class) == null) {
+                        context.getRun().addAction(new MailMessageIdAction(msg.getMessageID()));
                     }
                 } else {
                     context.getListener().getLogger().println("Email sending was cancelled"
@@ -456,6 +456,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
             Binding binding = new Binding();
             binding.setVariable("build", context.getBuild());
+            binding.setVariable("run", context.getRun());
             binding.setVariable("msg", msg);
             binding.setVariable("listener", context.getListener());
             binding.setVariable("logger", context.getListener().getLogger());
@@ -538,9 +539,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         // Set the contents of the email
-        msg.addHeader("X-Jenkins-Job", context.getBuild().getProject().getDisplayName());
-        if (context.getBuild().getResult() != null) {
-            msg.addHeader("X-Jenkins-Result", context.getBuild().getResult().toString());
+        msg.addHeader("X-Jenkins-Job", context.getRun().getParent().getDisplayName());
+        if (context.getRun().getResult() != null) {
+            msg.addHeader("X-Jenkins-Result", context.getRun().getResult().toString());
         }
         msg.setSentDate(new Date());
         setSubject(context, msg, charset);
@@ -565,7 +566,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         EnvVars env = null;
         try {
-            env = context.getBuild().getEnvironment(context.getListener());
+            env = context.getRun().getEnvironment(context.getListener());
         } catch (Exception e) {
             context.getListener().getLogger().println("Error retrieving environment vars: " + e.getMessage());
             // create an empty set of env vars
@@ -625,7 +626,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             msg.setReplyTo(replyToAddresses.toArray(new InternetAddress[replyToAddresses.size()]));
         }
 
-        AbstractBuild<?, ?> pb = getPreviousBuild(context.getBuild(), context.getListener());
+        Run<?, ?> pb = getPreviousRun(context.getRun(), context.getListener());
         if (pb != null) {
             // Send mails as replies until next successful build
             MailMessageIdAction b = pb.getAction(MailMessageIdAction.class);
@@ -699,8 +700,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     extension = ".txt";
                 }
 
-                FilePath savedOutput = new FilePath(context.getBuild().getWorkspace(),
-                        String.format("%s-%s%d%s", context.getTrigger().getDescriptor().getDisplayName(), context.getBuild().getId(), random.nextInt(), extension));
+                FilePath savedOutput = new FilePath(context.getWorkspace(),
+                        String.format("%s-%s%d%s", context.getTrigger().getDescriptor().getDisplayName(), context.getRun().getId(), random.nextInt(), extension));
                 savedOutput.write(text, charset);
             }
         } catch (IOException e) {
@@ -748,20 +749,20 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * behave sensibly when a later build actually finishes before an earlier
      * one.
      *
-     * @param build a build for which we may be sending mail
+     * @param run a build for which we may be sending mail
      * @param listener a listener to which we may print warnings in case the
      * actual previous build is still in progress
      * @return the previous build, or null if that build is missing, or is still
      * in progress
      */
     public static @CheckForNull
-    AbstractBuild<?, ?> getPreviousBuild(@Nonnull AbstractBuild<?, ?> build, TaskListener listener) {
-        AbstractBuild<?, ?> previousBuild = build.getPreviousBuild();
-        if (previousBuild != null && previousBuild.isBuilding()) {
-            listener.getLogger().println(Messages.ExtendedEmailPublisher__is_still_in_progress_ignoring_for_purpo(previousBuild.getDisplayName()));
+    Run<?, ?> getPreviousRun(@Nonnull Run<?, ?> run, TaskListener listener) {
+        Run<?, ?> previousRun = run.getPreviousBuild();
+        if (previousRun != null && previousRun.isBuilding()) {
+            listener.getLogger().println(Messages.ExtendedEmailPublisher__is_still_in_progress_ignoring_for_purpo(previousRun.getDisplayName()));
             return null;
         } else {
-            return previousBuild;
+            return previousRun;
         }
     }
 

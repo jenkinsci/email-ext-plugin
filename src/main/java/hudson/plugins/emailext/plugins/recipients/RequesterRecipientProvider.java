@@ -30,8 +30,8 @@ public class RequesterRecipientProvider extends RecipientProvider {
     @Override
     public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
         // looking for Upstream build.
-        Run<?, ?> cur = context.getBuild();
-        Cause.UpstreamCause upc = context.getBuild().getCause(Cause.UpstreamCause.class);
+        Run<?, ?> cur = context.getRun();
+        Cause.UpstreamCause upc = cur.getCause(Cause.UpstreamCause.class);
         while (upc != null) {
             // UpstreamCause.getUpStreamProject() returns the full name, so use getItemByFullName
             Job<?, ?> p = (Job<?, ?>) Jenkins.getInstance().getItemByFullName(upc.getUpstreamProject());

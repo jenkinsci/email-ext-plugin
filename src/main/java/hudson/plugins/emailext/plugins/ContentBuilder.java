@@ -68,7 +68,9 @@ public class ContentBuilder {
             List<TokenMacro> macros = new ArrayList<TokenMacro>(getPrivateMacros());
             if(additionalMacros != null)
                 macros.addAll(additionalMacros);
-            newText = TokenMacro.expandAll(context.getBuild(), context.getListener(), newText, false, macros);
+            if(context.getBuild() != null) {
+                newText = TokenMacro.expandAll(context.getBuild(), context.getListener(), newText, false, macros);
+            }
         } catch (MacroEvaluationException e) {
             context.getListener().getLogger().println("Error evaluating token: " + e.getMessage());
         } catch (Exception e) {

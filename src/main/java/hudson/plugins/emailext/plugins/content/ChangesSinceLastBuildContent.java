@@ -3,6 +3,7 @@ package hudson.plugins.emailext.plugins.content;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractBuild.DependencyChange;
 import hudson.model.AbstractProject;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.Util;
@@ -85,9 +86,9 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
             buf.append(def);
         }
         if (showDependencies) {
-            AbstractBuild previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
-            if (previousBuild != null) {
-                for (Entry<AbstractProject, DependencyChange> e : build.getDependencyChanges(previousBuild).entrySet()) {
+            Run<?,?> previousRun = ExtendedEmailPublisher.getPreviousRun(build, listener);
+            if (previousRun != null && previousRun instanceof AbstractBuild) {
+                for (Entry<AbstractProject, DependencyChange> e : build.getDependencyChanges((AbstractBuild)previousRun).entrySet()) {
                     buf.append("\n=======================\n");
                     buf.append("\nChanges in ").append(e.getKey().getName())
                             .append(":\n");

@@ -24,9 +24,7 @@
 
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.TaskListener;
+import hudson.model.*;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.Util;
 import java.io.IOException;
@@ -63,7 +61,7 @@ abstract public class AbstractChangesSinceContent
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
         // No previous build so bail
-        if (ExtendedEmailPublisher.getPreviousBuild(build, listener) == null) {
+        if (ExtendedEmailPublisher.getPreviousRun(build, listener) == null) {
             return "";
         }
 
@@ -72,16 +70,16 @@ abstract public class AbstractChangesSinceContent
         }
 
         StringBuffer sb = new StringBuffer();
-        final AbstractBuild startBuild;
-        final AbstractBuild endBuild;
+        final Run startBuild;
+        final Run endBuild;
         if (reverse) {
             startBuild = build;
-            endBuild = getFirstIncludedBuild(build, listener);
+            endBuild = getFirstIncludedRun(build, listener);
         } else {
-            startBuild = getFirstIncludedBuild(build, listener);
+            startBuild = getFirstIncludedRun(build, listener);
             endBuild = build;
         }
-        AbstractBuild<?, ?> currentBuild = null;
+        Run<?, ?> currentBuild = null;
         while (currentBuild != endBuild) {
             if (currentBuild == null) {
                 currentBuild = startBuild;
@@ -98,9 +96,9 @@ abstract public class AbstractChangesSinceContent
         return sb.toString();
     }
 
-    private <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> void appendBuild(StringBuffer buf,
+    private void appendBuild(StringBuffer buf,
             final TaskListener listener,
-            final AbstractBuild<P, B> currentBuild)
+            final Run<?, ?> currentRun)
             throws MacroEvaluationException {
         // Use this object since it already formats the changes per build
         final ChangesSinceLastBuildContent changes = new ChangesSinceLastBuildContent(changesFormat, pathFormat, showPaths);
@@ -115,13 +113,13 @@ abstract public class AbstractChangesSinceContent
                 switch (formatChar) {
                     case 'c':
                         try {
-                            buf.append(changes.evaluate(currentBuild, listener, ChangesSinceLastBuildContent.MACRO_NAME));
+                            buf.append(changes.evaluate((AbstractBuild)currentRun, listener, ChangesSinceLastBuildContent.MACRO_NAME));
                         } catch(Exception e) {
                             // do nothing
                         }
                         return true;
                     case 'n':
-                        buf.append(currentBuild.getNumber());
+                        buf.append(currentRun.getNumber());
                         return true;
                     default:
                         return false;
@@ -139,5 +137,5 @@ abstract public class AbstractChangesSinceContent
 
     public abstract String getShortHelpDescription();
 
-    public abstract AbstractBuild<?,?> getFirstIncludedBuild(AbstractBuild<?,?> build, TaskListener listener);
+    public abstract Run<?,?> getFirstIncludedRun(Run<?,?> build, TaskListener listener);
 }

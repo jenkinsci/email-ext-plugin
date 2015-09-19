@@ -2,6 +2,7 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
@@ -32,14 +33,14 @@ public class StatusChangedTrigger extends EmailTrigger {
         final Result buildResult = build.getResult();
 
         if (buildResult != null) {
-            final AbstractBuild<?, ?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+            final Run<?, ?> prevRun = ExtendedEmailPublisher.getPreviousRun(build, listener);
 
-            if (prevBuild == null) {
+            if (prevRun == null) {
                 // Notify at the first status defined
                 return true;
             }
 
-            return (build.getResult() != prevBuild.getResult());
+            return (build.getResult() != prevRun.getResult());
         }
 
         return false;

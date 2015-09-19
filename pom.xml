@@ -28,6 +28,7 @@
     <properties>
         <powermock.version>1.4.12</powermock.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <workflow.version>1.10</workflow.version>
     </properties>
 
     <developers>
@@ -144,6 +145,34 @@
             <artifactId>matrix-project</artifactId>
             <version>1.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <version>${workflow.version}</version>
+            <artifactId>workflow-step-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-aggregator</artifactId>
+            <version>${workflow.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-aggregator</artifactId>
+            <classifier>tests</classifier>
+            <version>${workflow.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency> <!-- StepConfigTester -->
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
+            <classifier>tests</classifier>
+            <version>${workflow.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <scm>

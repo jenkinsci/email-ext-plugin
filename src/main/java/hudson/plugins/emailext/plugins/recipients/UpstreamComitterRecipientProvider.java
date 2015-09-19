@@ -35,7 +35,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
     public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
         descriptor.debug(context.getListener().getLogger(), "Sending email to upstream committer(s).");
         Run<?, ?> cur;
-        Cause.UpstreamCause upc = context.getBuild().getCause(Cause.UpstreamCause.class);
+        Cause.UpstreamCause upc = context.getRun().getCause(Cause.UpstreamCause.class);
         while (upc != null) {
             Job<?, ?> p = (Job<?, ?>) Jenkins.getInstance().getItemByFullName(upc.getUpstreamProject());
             if(p == null) {

@@ -1,9 +1,12 @@
 package hudson.plugins.emailext;
 
 import com.google.common.collect.Multimap;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 
 /**
@@ -12,15 +15,26 @@ import hudson.plugins.emailext.plugins.EmailTrigger;
  */
 public class ExtendedEmailPublisherContext {
     private ExtendedEmailPublisher publisher;
-    private AbstractBuild<?, ?> build;
+    private Run<?, ?> run;
+    private FilePath workspace;
     private EmailTrigger trigger;
-    private BuildListener listener;
+    private TaskListener listener;
     private Launcher launcher;
     private Multimap<String, EmailTrigger> triggered;
-    
+
+    @Deprecated
     public ExtendedEmailPublisherContext(ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         this.publisher = publisher;
-        this.build = build;
+        this.run = build;
+        this.workspace = build.getWorkspace();
+        this.launcher = launcher;
+        this.listener = listener;
+    }
+
+    public ExtendedEmailPublisherContext(ExtendedEmailPublisher publisher, Run<?,?> run, FilePath workspace, Launcher launcher, TaskListener listener) {
+        this.publisher = publisher;
+        this.run = run;
+        this.workspace = workspace;
         this.launcher = launcher;
         this.listener = listener;
     }
@@ -32,15 +46,23 @@ public class ExtendedEmailPublisherContext {
     protected void setPublisher(ExtendedEmailPublisher publisher) {
         this.publisher = publisher;
     }
-    
+
+    @Deprecated
     public AbstractBuild<?, ?> getBuild() {
-        return build;
+        if(run instanceof AbstractBuild) {
+            return (AbstractBuild)run;
+        }
+        return null;
     }
-    
-    protected void setBuild(AbstractBuild<?, ?> build) {
-        this.build = build;
+
+    public Run<?,?> getRun() {
+        return run;
     }
-    
+
+    public FilePath getWorkspace() {
+        return workspace;
+    }
+
     public EmailTrigger getTrigger() {
         return trigger;
     }    
@@ -56,12 +78,12 @@ public class ExtendedEmailPublisherContext {
     public Launcher getLauncher() {
         return launcher;
     }
-    
-    public BuildListener getListener() {
+
+    public TaskListener getListener() {
         return listener;
     }
-    
-    protected void setListener(BuildListener listener) {
+
+    protected void setListener(TaskListener listener) {
         this.listener = listener;
     }
     

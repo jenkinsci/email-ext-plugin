@@ -2,6 +2,7 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
@@ -30,12 +31,12 @@ public class ImprovementTrigger extends EmailTrigger {
 
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
-        AbstractBuild<?,?> previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+        Run<?,?> previousRun = ExtendedEmailPublisher.getPreviousRun(build, listener);
 
-        if (previousBuild == null)
+        if (previousRun == null)
             return false;
         if (build.getAction(AbstractTestResultAction.class) == null) return false;
-        if (previousBuild.getAction(AbstractTestResultAction.class) == null)
+        if (previousRun.getAction(AbstractTestResultAction.class) == null)
             return false;
         
         int numCurrFailures = getNumFailures(build);
@@ -44,7 +45,7 @@ public class ImprovementTrigger extends EmailTrigger {
         // builds that aggregate downstream test results before those test
         // results are available...
         return build.getAction(AbstractTestResultAction.class).getTotalCount() > 0
-                && numCurrFailures < getNumFailures(previousBuild)
+                && numCurrFailures < getNumFailures(previousRun)
                 && numCurrFailures > 0;
     }
 

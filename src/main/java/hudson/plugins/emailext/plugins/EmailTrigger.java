@@ -4,6 +4,7 @@ import hudson.ExtensionPoint;
 import hudson.DescriptorExtensionList;
 import hudson.model.AbstractBuild;
 import hudson.model.Describable;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
@@ -146,7 +147,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
      * because at the time this trigger runs, the current build's aggregated
      * results aren't available yet, but those of the previous build may be.
      */
-    protected int getNumFailures(AbstractBuild<?, ?> build) {
+    protected int getNumFailures(Run<?, ?> build) {
         AbstractTestResultAction a = build.getAction(AbstractTestResultAction.class);
         if (a instanceof AggregatedTestResultAction) {
             int result = 0;
