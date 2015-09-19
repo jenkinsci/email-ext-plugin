@@ -1,6 +1,7 @@
 package hudson.plugins.emailext;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -997,22 +998,22 @@ public class ExtendedEmailPublisherTest {
     }
 
     
-//    @Test
-//    @Issue("JENKINS-15442")
-//    @WithPlugin("config-file-provider")
-//    public void testConfiguredStateNoTriggers()
-//            throws Exception {
-//        FreeStyleProject prj = j.createFreeStyleProject("JENKINS-15442");
-//        prj.getPublishersList().add(publisher);
-//
-//        publisher.recipientList = "mickey@disney.com";
-//        publisher.configuredTriggers.clear();
-//
-//        final WebClient client = j.createWebClient();
-//        final HtmlPage page = client.goTo("job/JENKINS-15442/configure");
-//        final HtmlTextInput recipientList = page.getElementByName("project_recipient_list");
-//        assertEquals(recipientList.getText(), "mickey@disney.com");
-//    }
+    @Test
+    @Issue("JENKINS-15442")
+    @WithPlugin("config-file-provider.hpi")
+    public void testConfiguredStateNoTriggers()
+            throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("JENKINS-15442");
+        prj.getPublishersList().add(publisher);
+
+        publisher.recipientList = "mickey@disney.com";
+        publisher.configuredTriggers.clear();
+
+        final WebClient client = j.createWebClient();
+        final HtmlPage page = client.goTo("job/JENKINS-15442/configure");
+        final HtmlTextArea recipientList = page.getElementByName("project_recipient_list");
+        assertEquals(recipientList.getText(), "mickey@disney.com");
+    }
     
     @Test
     @Issue("JENKINS-23126")
