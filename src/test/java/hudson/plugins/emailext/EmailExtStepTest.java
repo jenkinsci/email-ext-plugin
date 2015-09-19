@@ -6,8 +6,6 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.recipes.WithPlugin;
 
-import java.net.URL;
-
 /**
  * Created by acearl on 9/15/2015.
  */
@@ -20,9 +18,9 @@ public class EmailExtStepTest {
     @WithPlugin("config-file-provider.hpi")
     public void configRoundTrip() throws Exception {
         EmailExtStep step1 = new EmailExtStep("subject", "body");
-        step1.to = "mickeymouse@disney.com";
-        step1.replyTo = "mickeymouse@disney.com";
-        step1.mimeType = "text/html";
+        step1.setTo("mickeymouse@disney.com");
+        step1.setReplyTo("mickeymouse@disney.com");
+        step1.setMimeType("text/html");
 
         EmailExtStep step2 = new StepConfigTester(r).configRoundTrip(step1);
         r.assertEqualDataBoundBeans(step1, step2);
