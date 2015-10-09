@@ -357,6 +357,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                         try {
                             ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
                             String smtpHost = descriptor.getSmtpServer();
+                            if (smtpHost == null) {
+                                smtpHost = "";
+                            }
                             String awsRegex = "^email-smtp\\.([a-z0-9-]+)\\.amazonaws\\.com$";
                             Pattern p = Pattern.compile(awsRegex);
                             Matcher m = p.matcher(smtpHost);
