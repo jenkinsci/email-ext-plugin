@@ -18,6 +18,9 @@ dl() {
   dt("\${DEFAULT_PRESEND_SCRIPT}")
   dd(_("defaultPresend"))
 
+  dt("\${DEFAULT_POSTSEND_SCRIPT}")
+  dd(_("defaultPostsend"))
+
   dt("\${PROJECT_DEFAULT_SUBJECT}")
   dd(_("projectDefaultSubject"))
 

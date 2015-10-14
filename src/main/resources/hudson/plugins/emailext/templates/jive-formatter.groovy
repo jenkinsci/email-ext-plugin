@@ -2,12 +2,12 @@ import java.lang.reflect.Array;
 import java.util.regex.*
 /**
  * This is a Groovy class to allow easy formatting for Jive social networking systems. 
- * It was designed to work in the email-ext plugin for Jenkins. It should be called from the Pre-send Script area. 
+ * It was designed to work in the email-ext plugin for Jenkins. It should be called from the Pre-send or Post-send Script area. 
  * Also, it doesn't seem like Jive supports text with multiple formats, so only call one formatting method per block of text.
  * Either formatLine or formatText can and should be called on every line of text that will be sent to the Jive system 
  * prior to calling formatting methods like color or size.
  * <p>
- * The following lines should be added to the Pre-send Script area prior to attempting to invoke any functions.
+ * The following lines should be added to the Pre-send or Post-send Script area prior to attempting to invoke any functions.
  * <p>
  * File sourceFile = new File("/your/preferred/path/jive-formatter.groovy");
  * Class groovyClass = new GroovyClassLoader(getClass().getClassLoader()).parseClass(sourceFile);

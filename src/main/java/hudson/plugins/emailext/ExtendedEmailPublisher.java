@@ -113,6 +113,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      */
     public String presendScript;
 
+    /**
+     * The project's post-send script.
+     */
+    public String postsendScript;
+
     public List<GroovyScriptPath> classpath;
 
     /**
@@ -147,18 +152,18 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     @Deprecated
     public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
-            String project_default_content, String project_attachments, String project_presend_script,
+            String project_default_content, String project_attachments, String project_presend_script, String project_postsend_script,
             int project_attach_buildlog, String project_replyto, boolean project_save_output,
             List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode) {
 
         this(project_recipient_list, project_content_type, project_default_subject, project_default_content,
-                project_attachments, project_presend_script, project_attach_buildlog, project_replyto,
+                project_attachments, project_presend_script, project_postsend_script, project_attach_buildlog, project_replyto,
                 project_save_output, project_triggers, matrixTriggerMode, false, Collections.EMPTY_LIST);
     }
 
     @DataBoundConstructor
     public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
-            String project_default_content, String project_attachments, String project_presend_script,
+            String project_default_content, String project_attachments, String project_presend_script, String project_postsend_script,
             int project_attach_buildlog, String project_replyto, boolean project_save_output,
             List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode, boolean project_disabled,
             List<GroovyScriptPath> classpath) {
@@ -168,6 +173,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.defaultContent = project_default_content;
         this.attachmentsPattern = project_attachments;
         this.presendScript = project_presend_script;
+        this.postsendScript = project_postsend_script;
         this.attachBuildLog = project_attach_buildlog > 0;
         this.compressBuildLog = project_attach_buildlog > 1;
         this.replyTo = project_replyto;
@@ -350,15 +356,23 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     }
                     context.getListener().getLogger().println(buf);
 
+                    ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
+                    Session session = descriptor.createSession();
+                    // emergency reroute might have modified recipients:
+                    allRecipients = msg.getAllRecipients();
+                    // all email addresses are of type "rfc822", so just take first one:
+                    Transport transport = session.getTransport(allRecipients[0]);
                     while (true) {
                         try {
-                            Transport.send(msg);
+                            transport.connect();
+                            transport.sendMessage(msg, allRecipients);
                             break;
                         } catch (SendFailedException e) {
                             if (e.getNextException() != null
                                     && ((e.getNextException() instanceof SocketException)
                                     || (e.getNextException() instanceof ConnectException))) {
                                 context.getListener().getLogger().println("Socket error sending email, retrying once more in 10 seconds...");
+                                transport.close();
                                 Thread.sleep(10000);
                             } else {
                                 Address[] addresses = e.getValidSentAddresses();
@@ -392,6 +406,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                         } catch (MessagingException e) {
                             if (e.getNextException() != null && (e.getNextException() instanceof ConnectException)) {
                                 context.getListener().getLogger().println("Connection error sending email, retrying once more in 10 seconds...");
+                                transport.close();
                                 Thread.sleep(10000);
                             } else {
                                 debug(context.getListener().getLogger(), "MessagingException message: " + e.getMessage());
@@ -404,6 +419,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                             break;
                         }
                     }
+
+                    executePostsendScript(context, msg, session, transport);
+                    // close transport after post-send script, so server response can be accessed:
+                    transport.close();
+
                     if (context.getBuild().getAction(MailMessageIdAction.class) == null) {
                         context.getBuild().addAction(new MailMessageIdAction(msg.getMessageID()));
                     }
@@ -485,6 +505,58 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             debug(context.getListener().getLogger(), out.toString());
         }
         return !cancel;
+    }
+
+    private void executePostsendScript(ExtendedEmailPublisherContext context, MimeMessage msg, Session session, Transport transport)
+            throws RuntimeException {
+        String script = ContentBuilder.transformText(postsendScript, context, getRuntimeMacros(context));
+        if (StringUtils.isNotBlank(script)) {
+            debug(context.getListener().getLogger(), "Executing post-send script");
+            ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
+            ScriptSandbox sandbox = null;
+            CompilerConfiguration cc = new CompilerConfiguration();
+            cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
+            cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
+                    "jenkins",
+                    "jenkins.model",
+                    "hudson",
+                    "hudson.model"));
+
+            expandClasspath(context, cc);
+            if (getDescriptor().isSecurityEnabled()) {
+                debug(context.getListener().getLogger(), "Setting up sandbox for post-send script");
+                cc.addCompilationCustomizers(new SandboxTransformer());
+                sandbox = new ScriptSandbox();
+            }
+
+            Binding binding = new Binding();
+            binding.setVariable("build", context.getBuild());
+            binding.setVariable("msg", msg);
+            binding.setVariable("props", session.getProperties());
+            binding.setVariable("transport", transport);
+            binding.setVariable("listener", context.getListener());
+            binding.setVariable("logger", context.getListener().getLogger());
+            binding.setVariable("trigger", context.getTrigger());
+            binding.setVariable("triggered", ImmutableMultimap.copyOf(context.getTriggered()));
+
+            GroovyShell shell = new GroovyShell(cl, binding, cc);
+            StringWriter out = new StringWriter();
+            PrintWriter pw = new PrintWriter(out);
+
+            if (sandbox != null) {
+                sandbox.register();
+            }
+
+            try {
+                shell.evaluate(script);
+            } catch (SecurityException e) {
+                context.getListener().getLogger().println("Post-send script tried to access secured objects: " + e.getMessage());
+            } catch (Throwable t) {
+                t.printStackTrace(pw);
+                context.getListener().getLogger().println(out.toString());
+            }
+            debug(context.getListener().getLogger(), out.toString());
+        }
     }
 
     /**
