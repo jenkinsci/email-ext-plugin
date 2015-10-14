@@ -43,10 +43,13 @@ import javax.mail.Multipart;
 import javax.mail.SendFailedException;
 import javax.mail.Session;
 import javax.mail.Transport;
+import com.sun.mail.smtp.SMTPTransport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -352,7 +355,35 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
                     while (true) {
                         try {
-                            Transport.send(msg);
+                            ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
+                            String smtpHost = descriptor.getSmtpServer();
+                            if (smtpHost == null) {
+                                smtpHost = "";
+                            }
+                            String awsRegex = "^email-smtp\\.([a-z0-9-]+)\\.amazonaws\\.com$";
+                            Pattern p = Pattern.compile(awsRegex);
+                            Matcher m = p.matcher(smtpHost);
+                            if (m.matches()) {
+                                String region = m.group(1);
+                                Session session = descriptor.createSession();
+                                Transport transport = session.getTransport(allRecipients[0]);
+                                try {
+                                    transport.connect();
+                                    transport.sendMessage(msg, allRecipients);
+                                    if (transport instanceof SMTPTransport) {
+                                        String response = ((SMTPTransport)transport).getLastServerResponse();
+                                        String[] parts = response.trim().split(" +");
+                                        if (parts.length == 3 && parts[0].equals("250") && parts[1].equals("Ok")) {
+                                            String MessageID = "<" + parts[2] + "@" + region + ".amazonses.com>";
+                                            msg.setHeader("Message-ID", MessageID);
+                                        }
+                                    }
+                                } finally {
+                                    transport.close();
+                                }
+                            } else {
+                                Transport.send(msg);
+                            }
                             break;
                         } catch (SendFailedException e) {
                             if (e.getNextException() != null
