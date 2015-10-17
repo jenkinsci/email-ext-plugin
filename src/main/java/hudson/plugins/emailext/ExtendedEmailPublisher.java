@@ -453,10 +453,21 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     private boolean executePresendScript(ExtendedEmailPublisherContext context, MimeMessage msg)
             throws RuntimeException {
+        return executeScript(presendScript, "pre-send", context, msg, null, null);
+    }
+
+    private void executePostsendScript(ExtendedEmailPublisherContext context, MimeMessage msg, Session session, Transport transport)
+            throws RuntimeException {
+        executeScript(postsendScript, "post-send", context, msg, session, transport);
+    }
+
+    private boolean executeScript(String rawScript, String scriptName, ExtendedEmailPublisherContext context,
+            MimeMessage msg, Session session, Transport transport)
+            throws RuntimeException {
         boolean cancel = false;
-        String script = ContentBuilder.transformText(presendScript, context, getRuntimeMacros(context));
+        String script = ContentBuilder.transformText(rawScript, context, getRuntimeMacros(context));
         if (StringUtils.isNotBlank(script)) {
-            debug(context.getListener().getLogger(), "Executing pre-send script");
+            debug(context.getListener().getLogger(), "Executing %s script", scriptName);
             ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
             ScriptSandbox sandbox = null;
             CompilerConfiguration cc = new CompilerConfiguration();
@@ -469,7 +480,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
             expandClasspath(context, cc);
             if (getDescriptor().isSecurityEnabled()) {
-                debug(context.getListener().getLogger(), "Setting up sandbox for pre-send script");
+                debug(context.getListener().getLogger(), "Setting up sandbox for %s script", scriptName);
                 cc.addCompilationCustomizers(new SandboxTransformer());
                 sandbox = new ScriptSandbox();
             }
@@ -477,6 +488,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             Binding binding = new Binding();
             binding.setVariable("build", context.getBuild());
             binding.setVariable("msg", msg);
+            if (session != null) {
+                binding.setVariable("props", session.getProperties());
+            }
+            if (transport != null) {
+                binding.setVariable("transport", transport);
+            }
             binding.setVariable("listener", context.getListener());
             binding.setVariable("logger", context.getListener().getLogger());
             binding.setVariable("cancel", cancel);
@@ -494,9 +511,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             try {
                 shell.evaluate(script);
                 cancel = ((Boolean) shell.getVariable("cancel"));
-                debug(context.getListener().getLogger(), "Pre-send script set cancel to %b", cancel);
+                debug(context.getListener().getLogger(), "%s script set cancel to %b", StringUtils.capitalize(scriptName), cancel);
             } catch (SecurityException e) {
-                context.getListener().getLogger().println("Pre-send script tried to access secured objects: " + e.getMessage());
+                context.getListener().getLogger().println(StringUtils.capitalize(scriptName) + " script tried to access secured objects: " + e.getMessage());
             } catch (Throwable t) {
                 t.printStackTrace(pw);
                 context.getListener().getLogger().println(out.toString());
@@ -505,58 +522,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             debug(context.getListener().getLogger(), out.toString());
         }
         return !cancel;
-    }
-
-    private void executePostsendScript(ExtendedEmailPublisherContext context, MimeMessage msg, Session session, Transport transport)
-            throws RuntimeException {
-        String script = ContentBuilder.transformText(postsendScript, context, getRuntimeMacros(context));
-        if (StringUtils.isNotBlank(script)) {
-            debug(context.getListener().getLogger(), "Executing post-send script");
-            ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
-            ScriptSandbox sandbox = null;
-            CompilerConfiguration cc = new CompilerConfiguration();
-            cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
-            cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
-                    "jenkins",
-                    "jenkins.model",
-                    "hudson",
-                    "hudson.model"));
-
-            expandClasspath(context, cc);
-            if (getDescriptor().isSecurityEnabled()) {
-                debug(context.getListener().getLogger(), "Setting up sandbox for post-send script");
-                cc.addCompilationCustomizers(new SandboxTransformer());
-                sandbox = new ScriptSandbox();
-            }
-
-            Binding binding = new Binding();
-            binding.setVariable("build", context.getBuild());
-            binding.setVariable("msg", msg);
-            binding.setVariable("props", session.getProperties());
-            binding.setVariable("transport", transport);
-            binding.setVariable("listener", context.getListener());
-            binding.setVariable("logger", context.getListener().getLogger());
-            binding.setVariable("trigger", context.getTrigger());
-            binding.setVariable("triggered", ImmutableMultimap.copyOf(context.getTriggered()));
-
-            GroovyShell shell = new GroovyShell(cl, binding, cc);
-            StringWriter out = new StringWriter();
-            PrintWriter pw = new PrintWriter(out);
-
-            if (sandbox != null) {
-                sandbox.register();
-            }
-
-            try {
-                shell.evaluate(script);
-            } catch (SecurityException e) {
-                context.getListener().getLogger().println("Post-send script tried to access secured objects: " + e.getMessage());
-            } catch (Throwable t) {
-                t.printStackTrace(pw);
-                context.getListener().getLogger().println(out.toString());
-            }
-            debug(context.getListener().getLogger(), out.toString());
-        }
     }
 
     /**
