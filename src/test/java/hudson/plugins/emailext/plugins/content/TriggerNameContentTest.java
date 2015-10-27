@@ -38,6 +38,7 @@ public class TriggerNameContentTest {
             publisher.attachmentsPattern = "";
             publisher.recipientList = "%DEFAULT_RECIPIENTS";
             publisher.presendScript = "";
+            publisher.postsendScript = "";
 
             project = createFreeStyleProject();
             project.getPublishersList().add(publisher);

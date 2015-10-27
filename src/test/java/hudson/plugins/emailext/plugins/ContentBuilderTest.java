@@ -123,6 +123,17 @@ public class ContentBuilderTest {
     }
 
     @Test
+    public void testTransformText_shouldExpand_$DEFAULT_POSTSEND_SCRIPT()
+            throws IOException, InterruptedException {
+        assertEquals(publisher.getDescriptor().getDefaultPostsendScript(),
+                ContentBuilder.transformText("$DEFAULT_POSTSEND_SCRIPT", publisher,
+                build, listener));
+        assertEquals(publisher.getDescriptor().getDefaultPostsendScript(),
+                ContentBuilder.transformText("${DEFAULT_POSTSEND_SCRIPT}", publisher,
+                build, listener));
+    }
+
+    @Test
     public void testTransformText_noNPEWithNullDefaultSubjectBody() throws NoSuchFieldException, IllegalAccessException {
         Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultBody");
         f.setAccessible(true);
