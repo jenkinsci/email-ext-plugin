@@ -59,11 +59,7 @@ public class ScriptContentBuildWrapper {
      *         <code>false</code> if not.
      */
     public static boolean isPluginInstalled(final String shortName) {
-        Jenkins instance = Jenkins.getInstance();
-        if (instance != null) {
-            return instance.getPlugin(shortName) != null;
-        }
-        return true;
+        return Jenkins.getActiveInstance().getPlugin(shortName) != null;
     }
 
     public Action getCoberturaAction() {

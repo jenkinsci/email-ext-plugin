@@ -30,7 +30,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     private EmailType email;
 
     public static DescriptorExtensionList<EmailTrigger, EmailTriggerDescriptor> all() {
-        return Jenkins.getInstance().<EmailTrigger, EmailTriggerDescriptor>getDescriptorList(EmailTrigger.class);
+        return Jenkins.getActiveInstance().<EmailTrigger, EmailTriggerDescriptor>getDescriptorList(EmailTrigger.class);
     }
 
     public static List<EmailTriggerDescriptor> allWatchable() {
@@ -123,7 +123,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     }
 
     public EmailTriggerDescriptor getDescriptor() {
-        return (EmailTriggerDescriptor) Jenkins.getInstance().getDescriptor(getClass());
+        return (EmailTriggerDescriptor) Jenkins.getActiveInstance().getDescriptor(getClass());
     }
     
     public boolean configure(StaplerRequest req, JSONObject formData) {

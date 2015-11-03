@@ -222,7 +222,7 @@ public class AttachmentUtils implements Serializable {
     }
     
     public static void attachBuildLog(ExtendedEmailPublisherContext context, Multipart multipart, boolean compress) {
-        if(context.getRun() instanceof MatrixBuild) {
+        if (context.getRun() instanceof MatrixBuild) {
             MatrixBuild build = (MatrixBuild)context.getRun();
             for(MatrixRun run : build.getExactRuns()) {
                 attachSingleLog(context, run, multipart, compress);

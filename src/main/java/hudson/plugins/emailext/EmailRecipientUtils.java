@@ -139,7 +139,7 @@ public class EmailRecipientUtils {
     }
     
     public static boolean isExcludedRecipient(String userName, TaskListener listener) {
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if(descriptor.getExcludedCommitters() != null) {
             StringTokenizer tokens = new StringTokenizer(descriptor.getExcludedCommitters(), ", ");
             while (tokens.hasMoreTokens()) {

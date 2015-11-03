@@ -90,12 +90,12 @@ public class ContentBuilder {
         return transformText(origText, context, null);
     }
     
-    public static List<TokenMacro> getPrivateMacros() {
+    public static synchronized List<TokenMacro> getPrivateMacros() {
         if(privateMacros != null)
             return privateMacros;
         
         privateMacros = new ArrayList<TokenMacro>();
-        ClassLoader cl = Jenkins.getInstance().pluginManager.uberClassLoader;
+        ClassLoader cl = Jenkins.getActiveInstance().pluginManager.uberClassLoader;
         for (final IndexItem<EmailToken, TokenMacro> item : Index.load(EmailToken.class, TokenMacro.class, cl)) {
             try {
                 privateMacros.add(item.instance());
@@ -103,6 +103,7 @@ public class ContentBuilder {
                 // ignore errors loading tokens
             }
         }
+
         return privateMacros;
     }
 }

@@ -25,7 +25,7 @@ import java.util.Set;
  * Sends emails to committers of upstream builds which triggered this build.
  */
 public class UpstreamComitterRecipientProvider extends RecipientProvider {
-    private static final ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+    private static final ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
     @DataBoundConstructor
     public UpstreamComitterRecipientProvider() {
@@ -37,7 +37,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
         Run<?, ?> cur;
         Cause.UpstreamCause upc = context.getRun().getCause(Cause.UpstreamCause.class);
         while (upc != null) {
-            Job<?, ?> p = (Job<?, ?>) Jenkins.getInstance().getItemByFullName(upc.getUpstreamProject());
+            Job<?, ?> p = (Job<?, ?>) Jenkins.getActiveInstance().getItemByFullName(upc.getUpstreamProject());
             if(p == null) {
                 context.getListener().getLogger().print("There is a break in the project linkage, could not retrieve upstream project information");
                 break;

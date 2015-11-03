@@ -88,7 +88,7 @@ public class JellyScriptContent extends AbstractEvalContent {
 
     private JellyContext createContext(Object it, AbstractBuild<?, ?> build, TaskListener listener) {
         JellyContext context = new JellyContext();
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         context.setVariable("it", it);
         context.setVariable("build", build);
         context.setVariable("project", build.getParent());
