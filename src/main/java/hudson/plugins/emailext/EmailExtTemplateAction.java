@@ -63,7 +63,7 @@ public class EmailExtTemplateAction implements Action {
                 // first check in the default resources area...
                 InputStream inputStream = getClass().getClassLoader().getResourceAsStream("hudson/plugins/emailext/templates/" + value);                
                 if(inputStream == null) {                
-                    final File scriptsFolder = new File(Jenkins.getInstance().getRootDir(), "email-templates");
+                    final File scriptsFolder = new File(Jenkins.getActiveInstance().getRootDir(), "email-templates");
                     final File scriptFile = new File(scriptsFolder, value);
                     if(!scriptFile.exists()) {
                         return FormValidation.error("The file '" + value + "' does not exist");
@@ -75,7 +75,7 @@ public class EmailExtTemplateAction implements Action {
     }
     
     private FormValidation checkForManagedFile(final String value) {
-        Plugin plugin = Jenkins.getInstance().getPlugin("config-file-provider");
+        Plugin plugin = Jenkins.getActiveInstance().getPlugin("config-file-provider");
         if(plugin != null) {
             Config config = null;
             Collection<ConfigProvider> providers = getTemplateConfigProviders();

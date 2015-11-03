@@ -35,9 +35,9 @@ public class CulpritsRecipientProvider extends RecipientProvider {
     
     @Override
     public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         Run<?,?> run = context.getRun();
-        if(run instanceof AbstractBuild) {
+        if (run instanceof AbstractBuild) {
             Set<User> users = ((AbstractBuild<?,?>)run).getCulprits();
             for (User user : users) {
                 if (!EmailRecipientUtils.isExcludedRecipient(user, context.getListener())) {

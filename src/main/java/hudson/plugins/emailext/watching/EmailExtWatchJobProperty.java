@@ -51,7 +51,7 @@ public class EmailExtWatchJobProperty extends JobProperty<Job<?, ?>> {
         }
 
         if (remove != null) {
-            watchers.remove(user);
+            watchers.remove(user.getId());
         }
     }
 

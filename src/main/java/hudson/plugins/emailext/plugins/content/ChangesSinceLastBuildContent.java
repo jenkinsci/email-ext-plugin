@@ -87,7 +87,7 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
         }
         if (showDependencies) {
             Run<?,?> previousRun = ExtendedEmailPublisher.getPreviousRun(build, listener);
-            if (previousRun != null && previousRun instanceof AbstractBuild) {
+            if (previousRun instanceof AbstractBuild) {
                 for (Entry<AbstractProject, DependencyChange> e : build.getDependencyChanges((AbstractBuild)previousRun).entrySet()) {
                     buf.append("\n=======================\n");
                     buf.append("\nChanges in ").append(e.getKey().getName())

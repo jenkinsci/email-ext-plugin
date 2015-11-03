@@ -437,7 +437,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         String script = ContentBuilder.transformText(presendScript, context, getRuntimeMacros(context));
         if (StringUtils.isNotBlank(script)) {
             debug(context.getListener().getLogger(), "Executing pre-send script");
-            ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
+            ClassLoader cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
             ScriptSandbox sandbox = null;
             CompilerConfiguration cc = new CompilerConfiguration();
             cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
@@ -540,7 +540,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         // Set the contents of the email
         msg.addHeader("X-Jenkins-Job", context.getRun().getParent().getDisplayName());
-        if (context.getRun().getResult() != null) {
+        if (context.getRun() != null && context.getRun().getResult() != null) {
             msg.addHeader("X-Jenkins-Result", context.getRun().getResult().toString());
         }
         msg.setSentDate(new Date());
@@ -768,11 +768,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     @Override
     public ExtendedEmailPublisherDescriptor getDescriptor() {
-        return (ExtendedEmailPublisherDescriptor) Jenkins.getInstance().getDescriptor(getClass());
+        return (ExtendedEmailPublisherDescriptor) Jenkins.getActiveInstance().getDescriptor(getClass());
     }
 
     public static ExtendedEmailPublisherDescriptor descriptor() {
-        return Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        return Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
     }
 
     public MatrixAggregator createAggregator(MatrixBuild matrixbuild,

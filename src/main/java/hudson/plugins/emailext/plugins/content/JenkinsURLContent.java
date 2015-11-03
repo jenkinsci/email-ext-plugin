@@ -29,7 +29,7 @@ public class JenkinsURLContent extends DataBoundTokenMacro {
     public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
         // JENKINS-6193 - Only override the global URL if we should override global settings
-        String jenkinsUrl = Jenkins.getInstance().getRootUrl();
+        String jenkinsUrl = Jenkins.getActiveInstance().getRootUrl();
         
         ExtendedEmailPublisher publisher = context.getProject().getPublishersList().get(ExtendedEmailPublisher.class);
         

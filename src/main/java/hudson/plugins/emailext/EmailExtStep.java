@@ -61,7 +61,7 @@ public class EmailExtStep extends AbstractStepImpl {
 
     @DataBoundSetter
     public void setAttachmentsPattern(@CheckForNull String attachmentsPattern) {
-        if(StringUtils.isNotBlank(attachmentsPattern)) {
+        if (StringUtils.isNotBlank(attachmentsPattern)) {
             this.attachmentsPattern = attachmentsPattern;
         }
     }
@@ -135,7 +135,7 @@ public class EmailExtStep extends AbstractStepImpl {
             ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
             publisher.configuredTriggers.clear();
 
-            AlwaysTrigger.DescriptorImpl descriptor = Jenkins.getInstance().getDescriptorByType(AlwaysTrigger.DescriptorImpl.class);
+            AlwaysTrigger.DescriptorImpl descriptor = Jenkins.getActiveInstance().getDescriptorByType(AlwaysTrigger.DescriptorImpl.class);
             publisher.configuredTriggers.add(descriptor.createDefault());
 
             publisher.defaultSubject = step.subject;
@@ -143,19 +143,19 @@ public class EmailExtStep extends AbstractStepImpl {
             publisher.attachBuildLog = step.attachLog;
             publisher.compressBuildLog = step.compressLog;
 
-            if(StringUtils.isNotBlank(step.to)) {
+            if (StringUtils.isNotBlank(step.to)) {
                 publisher.recipientList = step.to;
             }
 
-            if(StringUtils.isNotBlank(step.replyTo)) {
+            if (StringUtils.isNotBlank(step.replyTo)) {
                 publisher.replyTo = step.replyTo;
             }
 
-            if(StringUtils.isNotBlank(step.attachmentsPattern)) {
+            if (StringUtils.isNotBlank(step.attachmentsPattern)) {
                 publisher.attachmentsPattern = step.attachmentsPattern;
             }
 
-            if(StringUtils.isNotBlank(step.mimeType)) {
+            if (StringUtils.isNotBlank(step.mimeType)) {
                 publisher.contentType = step.mimeType;
             }
 
@@ -163,6 +163,7 @@ public class EmailExtStep extends AbstractStepImpl {
             final Multimap<String, EmailTrigger> triggered = ArrayListMultimap.create();
             triggered.put(AlwaysTrigger.TRIGGER_NAME, publisher.configuredTriggers.get(0));
             ctx.setTrigger(publisher.configuredTriggers.get(0));
+            ctx.setTriggered(triggered);
             publisher.sendMail(ctx);
             return null;
         }

@@ -59,7 +59,7 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
 
         final class Debug implements RecipientProviderUtilities.IDebug {
             private final ExtendedEmailPublisherDescriptor descriptor
-                = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+                = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 
