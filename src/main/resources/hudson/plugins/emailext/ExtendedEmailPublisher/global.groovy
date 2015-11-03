@@ -72,6 +72,9 @@ f.section(title: _("Extended E-mail Notification")) {
   f.entry(help: "/plugin/email-ext/help/globalConfig/defaultPresendScript.html", title: _("Default Pre-send Script")) {
     f.textarea(class: "setting-input", value: descriptor.defaultPresendScript, name: "ext_mailer_default_presend_script")
   }
+  f.entry(help: "/plugin/email-ext/help/globalConfig/defaultPostsendScript.html", title: _("Default Post-send Script")) {
+    f.textarea(class: "setting-input", value: descriptor.defaultPostsendScript, name: "ext_mailer_default_postsend_script")
+  }
   f.entry(title: _("Additional groovy classpath"), help: "/plugin/email-ext/help/globalConfig/defaultClasspath.html") {
     f.repeatable(field: "defaultClasspath") {
       f.textbox(field: "path", name: "ext_mailer_default_classpath") 

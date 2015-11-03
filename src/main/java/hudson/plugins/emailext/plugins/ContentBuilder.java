@@ -35,6 +35,7 @@ public class ContentBuilder {
     private static final String DEFAULT_RECIPIENTS = "\\$DEFAULT_RECIPIENTS|\\$\\{DEFAULT_RECIPIENTS\\}";
     private static final String DEFAULT_REPLYTO = "\\$DEFAULT_REPLYTO|\\$\\{DEFAULT_REPLYTO\\}";
     private static final String DEFAULT_PRESEND_SCRIPT = "\\$DEFAULT_PRESEND_SCRIPT|\\$\\{DEFAULT_PRESEND_SCRIPT\\}";
+    private static final String DEFAULT_POSTSEND_SCRIPT = "\\$DEFAULT_POSTSEND_SCRIPT|\\$\\{DEFAULT_POSTSEND_SCRIPT\\}";
     private static final String PROJECT_DEFAULT_BODY = "\\$PROJECT_DEFAULT_CONTENT|\\$\\{PROJECT_DEFAULT_CONTENT\\}";
     private static final String PROJECT_DEFAULT_SUBJECT = "\\$PROJECT_DEFAULT_SUBJECT|\\$\\{PROJECT_DEFAULT_SUBJECT\\}";
     private static final String PROJECT_DEFAULT_REPLYTO = "\\$PROJECT_DEFAULT_REPLYTO|\\$\\{PROJECT_DEFAULT_REPLYTO\\}";
@@ -54,6 +55,7 @@ public class ContentBuilder {
         String defaultRecipients = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultRecipients()));
         String defaultExtReplyTo = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultReplyTo()));
         String defaultPresendScript = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultPresendScript()));
+        String defaultPostsendScript = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultPostsendScript()));
         String newText = origText.replaceAll(
                 PROJECT_DEFAULT_BODY, defaultContent).replaceAll(
                 PROJECT_DEFAULT_SUBJECT, defaultSubject).replaceAll(
@@ -62,7 +64,8 @@ public class ContentBuilder {
                 DEFAULT_SUBJECT, defaultExtSubject).replaceAll(
                 DEFAULT_RECIPIENTS, defaultRecipients).replaceAll(
                 DEFAULT_REPLYTO, defaultExtReplyTo).replaceAll(
-                DEFAULT_PRESEND_SCRIPT, defaultPresendScript);
+                DEFAULT_PRESEND_SCRIPT, defaultPresendScript).replaceAll(
+                DEFAULT_POSTSEND_SCRIPT, defaultPostsendScript);
         
         try {
             List<TokenMacro> macros = new ArrayList<TokenMacro>(getPrivateMacros());

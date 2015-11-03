@@ -99,6 +99,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      */
     private String defaultPresendScript = "";
 
+    /**
+     * This is the global default post-send script.
+     */
+    private String defaultPostsendScript = "";
+
     private List<GroovyScriptPath> defaultClasspath = new ArrayList<GroovyScriptPath>();
     
     private transient List<EmailTriggerDescriptor> defaultTriggers = new ArrayList<EmailTriggerDescriptor>();
@@ -328,6 +333,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return defaultPresendScript;
     }
 
+    public String getDefaultPostsendScript() {
+        return defaultPostsendScript;
+    }
+
     public List<GroovyScriptPath> getDefaultClasspath() {
         return defaultClasspath;
     }
@@ -397,6 +406,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                 ? req.getParameter("ext_mailer_default_replyto") : "";
         defaultPresendScript = nullify(req.getParameter("ext_mailer_default_presend_script")) != null
                 ? req.getParameter("ext_mailer_default_presend_script") : "";
+        defaultPostsendScript = nullify(req.getParameter("ext_mailer_default_postsend_script")) != null
+                ? req.getParameter("ext_mailer_default_postsend_script") : "";
         if (req.hasParameter("ext_mailer_default_classpath")) {
             defaultClasspath.clear();
             for (String s : req.getParameterValues("ext_mailer_default_classpath")) {
