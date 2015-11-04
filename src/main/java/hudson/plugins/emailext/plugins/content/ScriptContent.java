@@ -5,13 +5,13 @@ import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
+import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.GroovyTemplateConfig.GroovyTemplateConfigProvider;
 import hudson.plugins.emailext.ScriptSandbox;
-import hudson.plugins.emailext.plugins.EmailToken;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +36,7 @@ import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 
-@EmailToken
+@Extension
 public class ScriptContent extends AbstractEvalContent {
     
     private static Object configProvider;
@@ -92,7 +92,7 @@ public class ScriptContent extends AbstractEvalContent {
     }
 
     @Override
-    protected ConfigProvider getConfigProvider() {
+    protected synchronized ConfigProvider getConfigProvider() {
         if(configProvider == null) {
             ExtensionList<ConfigProvider> providers = ConfigProvider.all();
             configProvider = providers.get(GroovyTemplateConfigProvider.class);
@@ -114,7 +114,7 @@ public class ScriptContent extends AbstractEvalContent {
         String result;
         
         Map<String, Object> binding = new HashMap<String, Object>();
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         binding.put("build", build);
         binding.put("listener", listener);
         binding.put("it", new ScriptContentBuildWrapper(build));
@@ -157,7 +157,7 @@ public class ScriptContent extends AbstractEvalContent {
             throws IOException {
         String result = "";
         Map binding = new HashMap<String, Object>();
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         
         binding.put("build", build);
         binding.put("it", new ScriptContentBuildWrapper(build));
@@ -166,7 +166,7 @@ public class ScriptContent extends AbstractEvalContent {
         binding.put("logger", listener.getLogger());
 
         GroovyShell shell = createEngine(descriptor, binding);
-        Object res = shell.evaluate(new InputStreamReader(scriptStream));
+        Object res = shell.evaluate(new InputStreamReader(scriptStream, descriptor.getCharset()));
         if (res != null) {
             result = res.toString();
         }
@@ -184,7 +184,7 @@ public class ScriptContent extends AbstractEvalContent {
     private GroovyShell createEngine(ExtendedEmailPublisherDescriptor descriptor, Map<String, Object> variables)
             throws FileNotFoundException, IOException {
 
-        ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
+        ClassLoader cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
         ScriptSandbox sandbox = null;
         CompilerConfiguration cc = new CompilerConfiguration();
         cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName()); 

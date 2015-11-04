@@ -71,7 +71,9 @@ public class ContentBuilder {
             List<TokenMacro> macros = new ArrayList<TokenMacro>(getPrivateMacros());
             if(additionalMacros != null)
                 macros.addAll(additionalMacros);
-            newText = TokenMacro.expandAll(context.getBuild(), context.getListener(), newText, false, macros);
+            if(context.getBuild() != null) {
+                newText = TokenMacro.expandAll(context.getBuild(), context.getListener(), newText, false, macros);
+            }
         } catch (MacroEvaluationException e) {
             context.getListener().getLogger().println("Error evaluating token: " + e.getMessage());
         } catch (Exception e) {
@@ -91,19 +93,11 @@ public class ContentBuilder {
         return transformText(origText, context, null);
     }
     
-    public static List<TokenMacro> getPrivateMacros() {
+    public static synchronized List<TokenMacro> getPrivateMacros() {
         if(privateMacros != null)
             return privateMacros;
         
         privateMacros = new ArrayList<TokenMacro>();
-        ClassLoader cl = Jenkins.getInstance().pluginManager.uberClassLoader;
-        for (final IndexItem<EmailToken, TokenMacro> item : Index.load(EmailToken.class, TokenMacro.class, cl)) {
-            try {
-                privateMacros.add(item.instance());
-            } catch (Exception e) {
-                // ignore errors loading tokens
-            }
-        }
         return privateMacros;
     }
 }

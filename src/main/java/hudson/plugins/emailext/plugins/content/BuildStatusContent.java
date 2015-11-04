@@ -1,16 +1,17 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailToken;
 import java.io.IOException;
 
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
-@EmailToken
+@Extension
 public class BuildStatusContent extends DataBoundTokenMacro {
 
     public static final String MACRO_NAME = "BUILD_STATUS";
@@ -33,26 +34,26 @@ public class BuildStatusContent extends DataBoundTokenMacro {
 
         Result buildResult = build.getResult();
         if (buildResult == Result.FAILURE) {
-            AbstractBuild<?,?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+            Run<?,?> prevBuild = ExtendedEmailPublisher.getPreviousRun(build, listener);
             if (prevBuild != null && (prevBuild.getResult() == Result.FAILURE)) {
                 return "Still Failing";
             } else {
                 return "Failure";
             }
         } else if (buildResult == Result.UNSTABLE) {
-            AbstractBuild<?,?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
-            if (prevBuild != null) {
-               if (prevBuild.getResult() == Result.UNSTABLE) {
+            Run<?,?> prevRun = ExtendedEmailPublisher.getPreviousRun(build, listener);
+            if (prevRun != null) {
+               if (prevRun.getResult() == Result.UNSTABLE) {
                   return "Still Unstable";
-               } else if (prevBuild.getResult() == Result.SUCCESS) {
+               } else if (prevRun.getResult() == Result.SUCCESS) {
                   return "Unstable";
-               } else if (prevBuild.getResult() == Result.FAILURE ||
-                  prevBuild.getResult() == Result.ABORTED ||
-                  prevBuild.getResult() == Result.NOT_BUILT) {
+               } else if (prevRun.getResult() == Result.FAILURE ||
+                  prevRun.getResult() == Result.ABORTED ||
+                  prevRun.getResult() == Result.NOT_BUILT) {
                   //iterate through previous builds
                   //(fail_or_aborted)* and then an unstable : return still unstable
                   //(fail_or_aborted)* and then successful : return unstable
-                  AbstractBuild<?,?> previous = ExtendedEmailPublisher.getPreviousBuild(prevBuild, listener);
+                  Run<?,?> previous = ExtendedEmailPublisher.getPreviousRun(prevRun, listener);
                   while (previous != null) {
                      if (previous.getResult() == Result.SUCCESS) {
                         return "Unstable";
@@ -60,7 +61,7 @@ public class BuildStatusContent extends DataBoundTokenMacro {
                      if (previous.getResult() == Result.UNSTABLE) {
                         return "Still unstable";
                      }
-                     previous = ExtendedEmailPublisher.getPreviousBuild(previous, listener);
+                     previous = ExtendedEmailPublisher.getPreviousRun(previous, listener);
                   }
                   return "Unstable";
                }
@@ -68,7 +69,7 @@ public class BuildStatusContent extends DataBoundTokenMacro {
                 return "Unstable";
             }
         } else if (buildResult == Result.SUCCESS) {
-            AbstractBuild<?,?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+            Run<?,?> prevBuild = ExtendedEmailPublisher.getPreviousRun(build, listener);
             if (prevBuild != null && (prevBuild.getResult() == Result.UNSTABLE || prevBuild.getResult() == Result.FAILURE)) {
                 return "Fixed";
             } else {

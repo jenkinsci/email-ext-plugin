@@ -1,9 +1,9 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.JellyTemplateConfig.JellyTemplateConfigProvider;
 import java.io.ByteArrayOutputStream;
@@ -21,7 +21,7 @@ import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.xml.sax.InputSource;
 
-@EmailToken
+@Extension
 public class JellyScriptContent extends AbstractEvalContent {
     
     private static Object configProvider;
@@ -88,7 +88,7 @@ public class JellyScriptContent extends AbstractEvalContent {
 
     private JellyContext createContext(Object it, AbstractBuild<?, ?> build, TaskListener listener) {
         JellyContext context = new JellyContext();
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         context.setVariable("it", it);
         context.setVariable("build", build);
         context.setVariable("project", build.getParent());

@@ -1,38 +1,34 @@
 package hudson.plugins.emailext.plugins.content;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import hudson.EnvVars;
 import hudson.Functions;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
 import hudson.model.TaskListener;
-import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.scm.ChangeLogSet;
-import hudson.scm.EditType;
 import hudson.util.DescribableList;
 import hudson.util.StreamTaskListener;
-import java.io.File;
-
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Scanner;
 import jenkins.model.JenkinsLocationConfiguration;
 import org.apache.commons.io.FileUtils;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockito.Mockito;
+
+import java.io.File;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.Scanner;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
 
 public class ScriptContentTest {
     private ScriptContent scriptContent;
@@ -131,12 +127,16 @@ public class ScriptContentTest {
     public void testGroovyTemplateWithContentToken()
             throws Exception
     {
+        EnvVars env = new EnvVars();
+        env.put("BUILD_ID", "34");
+
         scriptContent.template = "content-token.template";
         
         // mock the build 
         when(build.getResult()).thenReturn(Result.SUCCESS);
         when(build.getUrl()).thenReturn("email-test/34");
         when(build.getId()).thenReturn("34");
+        when(build.getEnvironment(any(TaskListener.class))).thenReturn(env);
         
         // mock changeSet
         mockChangeSet(build);
@@ -165,11 +165,14 @@ public class ScriptContentTest {
     @Test
     public void testWithGroovyTemplate() throws Exception {
         scriptContent.template = "groovy-sample.template";
+        EnvVars env = new EnvVars();
+        env.put("BUILD_ID", "34");
 
         // mock the build 
         when(build.getResult()).thenReturn(Result.SUCCESS);
         when(build.getUrl()).thenReturn("email-test/34");
         when(build.getId()).thenReturn("34");
+        when(build.getEnvironment(any(TaskListener.class))).thenReturn(env);
         
         // mock changeSet
         mockChangeSet(build);

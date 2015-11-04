@@ -125,7 +125,7 @@ public class AttachmentUtils implements Serializable {
     private List<MimeBodyPart> getAttachments(final ExtendedEmailPublisherContext context)
             throws MessagingException, InterruptedException, IOException {
         List<MimeBodyPart> attachments = null;
-        FilePath ws = context.getBuild().getWorkspace();
+        FilePath ws = context.getWorkspace();
         long totalAttachmentSize = 0;
         long maxAttachmentSize = context.getPublisher().getDescriptor().getMaxAttachmentSize();
         if (ws == null) {
@@ -222,13 +222,13 @@ public class AttachmentUtils implements Serializable {
     }
     
     public static void attachBuildLog(ExtendedEmailPublisherContext context, Multipart multipart, boolean compress) {
-        if(context.getBuild() instanceof MatrixBuild) {
-            MatrixBuild build = (MatrixBuild)context.getBuild();
+        if (context.getRun() instanceof MatrixBuild) {
+            MatrixBuild build = (MatrixBuild)context.getRun();
             for(MatrixRun run : build.getExactRuns()) {
                 attachSingleLog(context, run, multipart, compress);
             }
         } else {
-            attachSingleLog(context, context.getBuild(), multipart, compress);
+            attachSingleLog(context, context.getRun(), multipart, compress);
         }
     }
 

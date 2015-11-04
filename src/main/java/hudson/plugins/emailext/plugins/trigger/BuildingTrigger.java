@@ -3,6 +3,7 @@ package hudson.plugins.emailext.plugins.trigger;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
@@ -33,8 +34,8 @@ public class BuildingTrigger extends EmailTrigger {
         Result buildResult = build.getResult();
 
         if (buildResult == Result.UNSTABLE) {
-            AbstractBuild<?, ?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
-            if (prevBuild != null && (prevBuild.getResult() == Result.FAILURE)) {
+            Run<?, ?> prevRun = ExtendedEmailPublisher.getPreviousRun(build, listener);
+            if (prevRun != null && (prevRun.getResult() == Result.FAILURE)) {
                 return true;
             }
         }

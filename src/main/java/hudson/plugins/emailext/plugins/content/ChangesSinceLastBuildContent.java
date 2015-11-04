@@ -1,12 +1,13 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractBuild.DependencyChange;
 import hudson.model.AbstractProject;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.Util;
-import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import org.apache.commons.lang.StringUtils;
@@ -20,7 +21,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map.Entry;
 
-@EmailToken
+@Extension
 public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
 
     public static final String FORMAT_DEFAULT_VALUE = "[%a] %m\\n";
@@ -85,9 +86,9 @@ public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
             buf.append(def);
         }
         if (showDependencies) {
-            AbstractBuild previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
-            if (previousBuild != null) {
-                for (Entry<AbstractProject, DependencyChange> e : build.getDependencyChanges(previousBuild).entrySet()) {
+            Run<?,?> previousRun = ExtendedEmailPublisher.getPreviousRun(build, listener);
+            if (previousRun instanceof AbstractBuild) {
+                for (Entry<AbstractProject, DependencyChange> e : build.getDependencyChanges((AbstractBuild)previousRun).entrySet()) {
                     buf.append("\n=======================\n");
                     buf.append("\nChanges in ").append(e.getKey().getName())
                             .append(":\n");

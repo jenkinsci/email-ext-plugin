@@ -67,5 +67,4 @@ import hudson.util.StreamTaskListener;
         assertTrue(cc.isEmpty());
         assertTrue(bcc.isEmpty());
     }
-
 }

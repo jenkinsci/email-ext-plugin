@@ -1,12 +1,12 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.model.AbstractBuild;
+import hudson.Extension;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailToken;
 
-@EmailToken
+@Extension
 public class ChangesSinceLastUnstableBuildContent
         extends AbstractChangesSinceContent {
 
@@ -29,13 +29,13 @@ public class ChangesSinceLastUnstableBuildContent
     }
 
     @Override
-    public AbstractBuild<?,?> getFirstIncludedBuild(AbstractBuild<?,?> build, TaskListener listener) {
-        AbstractBuild<?,?> firstIncludedBuild = build;
+    public Run<?,?> getFirstIncludedRun(Run<?,?> run, TaskListener listener) {
+        Run<?,?> firstIncludedBuild = run;
 
-        AbstractBuild<?,?> prev = ExtendedEmailPublisher.getPreviousBuild(firstIncludedBuild, listener);
+        Run<?,?> prev = ExtendedEmailPublisher.getPreviousRun(firstIncludedBuild, listener);
         while (prev != null && prev.getResult().isWorseThan(Result.UNSTABLE)) {
             firstIncludedBuild = prev;
-            prev = ExtendedEmailPublisher.getPreviousBuild(firstIncludedBuild, listener);
+            prev = ExtendedEmailPublisher.getPreviousRun(firstIncludedBuild, listener);
         }
 
         return firstIncludedBuild;

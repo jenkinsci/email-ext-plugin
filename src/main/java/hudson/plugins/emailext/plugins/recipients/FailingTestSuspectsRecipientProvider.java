@@ -59,7 +59,7 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
 
         final class Debug implements RecipientProviderUtilities.IDebug {
             private final ExtendedEmailPublisherDescriptor descriptor
-                = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+                = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 
@@ -71,11 +71,11 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
 
         Set<User> users = null;
 
-        final AbstractBuild<?, ?> currentBuild = context.getBuild();
-        if (currentBuild == null) {
-            debug.send("currentBuild was null");
+        final Run<?, ?> currentRun = context.getRun();
+        if (currentRun == null) {
+            debug.send("currentRun was null");
         } else {
-            final AbstractTestResultAction<?> testResultAction = currentBuild.getAction(AbstractTestResultAction.class);
+            final AbstractTestResultAction<?> testResultAction = currentRun.getAction(AbstractTestResultAction.class);
             if (testResultAction == null) {
                 debug.send("testResultAction was null");
             } else {

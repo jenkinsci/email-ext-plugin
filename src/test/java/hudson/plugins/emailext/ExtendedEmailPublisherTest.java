@@ -479,8 +479,7 @@ public class ExtendedEmailPublisherTest {
     }
 
     @Test
-    public void testShouldSendEmailUsingUtf8ByDefault()
-            throws Exception {
+    public void testShouldSendEmailUsingUtf8ByDefault() throws Exception {
         project.getBuildersList().add(new FailureBuilder());
 
         FailureTrigger trigger = new FailureTrigger(recProviders, "$DEFAULT_RECIPIENTS",
@@ -1234,8 +1233,7 @@ public class ExtendedEmailPublisherTest {
     
     @Issue("JENKINS-16376")
     @Test
-    public void testConcurrentBuilds()
-            throws Exception {
+    public void testConcurrentBuilds() throws Exception {
         publisher.configuredTriggers.add(new RegressionTrigger(recProviders, "", "", "", "", "", 0, ""));
         project.setConcurrentBuild(true);
         project.getBuildersList().add(new SleepOnceBuilder());

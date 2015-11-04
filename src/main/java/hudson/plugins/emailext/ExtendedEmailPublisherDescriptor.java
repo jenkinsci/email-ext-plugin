@@ -230,7 +230,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public String getHudsonUrl() {
-        return Jenkins.getInstance().getRootUrl();
+        return Jenkins.getActiveInstance().getRootUrl();
     }
 
     public String getSmtpServer() {
@@ -342,18 +342,18 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
     
     public List<String> getDefaultTriggerIds() {
-        if(defaultTriggerIds.isEmpty()) {
-            if(!defaultTriggers.isEmpty()) {
+        if (defaultTriggerIds.isEmpty()) {
+            if (!defaultTriggers.isEmpty()) {
                 defaultTriggerIds.clear();
                 for(EmailTriggerDescriptor t : this.defaultTriggers) {
                     // we have to do the below because a bunch of stuff is not serialized for the Descriptor
-                    EmailTriggerDescriptor d = (EmailTriggerDescriptor)Jenkins.getInstance().getDescriptorByType(t.getClass());                
+                    EmailTriggerDescriptor d = (EmailTriggerDescriptor)Jenkins.getActiveInstance().getDescriptorByType(t.getClass());
                     if(!defaultTriggerIds.contains(d.getId())) {
                         defaultTriggerIds.add(d.getId());
                     }
                 }
             } else {
-                defaultTriggerIds.add(Jenkins.getInstance().getDescriptor(FailureTrigger.class).getId());
+                defaultTriggerIds.add(Jenkins.getActiveInstance().getDescriptor(FailureTrigger.class).getId());
             }
             save();
         }
@@ -451,7 +451,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if(!ids.isEmpty()) {
             defaultTriggerIds.clear();
             for(String id : ids) {
-               EmailTriggerDescriptor d = (EmailTriggerDescriptor)Jenkins.getInstance().getDescriptor(id);
+               EmailTriggerDescriptor d = (EmailTriggerDescriptor)Jenkins.getActiveInstance().getDescriptor(id);
                if(d != null) {
                    defaultTriggerIds.add(id);
                }

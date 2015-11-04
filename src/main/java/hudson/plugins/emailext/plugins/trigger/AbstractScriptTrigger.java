@@ -68,8 +68,7 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
     }
     
     private GroovyShell createEngine(AbstractBuild<?, ?> build, TaskListener listener) {
-
-        ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
+        ClassLoader cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
         ScriptSandbox sandbox = null;
         CompilerConfiguration cc = new CompilerConfiguration();
         cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
@@ -89,7 +88,7 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
         binding.setVariable("project", build.getParent());
         binding.setVariable("rooturl", publisher.getDescriptor().getHudsonUrl());
         binding.setVariable("out", listener.getLogger());
-        
+
         GroovyShell shell = new GroovyShell(cl, binding, cc);
 
         if (sandbox != null) {

@@ -59,7 +59,7 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
 
         final class Debug implements RecipientProviderUtilities.IDebug {
             private final ExtendedEmailPublisherDescriptor descriptor
-                = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+                = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 
@@ -71,18 +71,18 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
 
         Set<User> users = null;
 
-        final AbstractBuild<?, ?> currentBuild = context.getBuild();
-        if (currentBuild == null) {
-            debug.send("currentBuild was null");
+        final Run<?, ?> currentRun = context.getRun();
+        if (currentRun == null) {
+            debug.send("currentRun was null");
         } else {
-            if (!currentBuild.getResult().equals(Result.FAILURE)) {
+            if (!currentRun.getResult().equals(Result.FAILURE)) {
                 debug.send("currentBuild did not fail");
             } else {
                 users = new HashSet<User>();
                 debug.send("Collecting builds with suspects...");
                 final HashSet<Run<?, ?>> buildsWithSuspects = new HashSet<Run<?, ?>>();
-                Run<?, ?> firstFailedBuild = currentBuild;
-                Run<?, ?> candidate = currentBuild;
+                Run<?, ?> firstFailedBuild = currentRun;
+                Run<?, ?> candidate = currentRun;
                 while (candidate != null && candidate.getResult().isWorseOrEqualTo(Result.FAILURE)) {
                     firstFailedBuild = candidate;
                     candidate = candidate.getPreviousCompletedBuild();

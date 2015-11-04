@@ -1,10 +1,10 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailToken;
 import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
 
@@ -13,7 +13,7 @@ import java.util.List;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
-@EmailToken
+@Extension
 public class CauseContent extends DataBoundTokenMacro {
 
     public static final String MACRO_NAME = "CAUSE";

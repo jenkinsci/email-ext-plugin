@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -8,11 +9,11 @@
     </parent>
 
     <licenses>
-      <license>
-        <name>The MIT License (MIT)</name>
-        <url>http://opensource.org/licenses/MIT</url>
-        <distribution>repo</distribution>
-      </license>
+        <license>
+            <name>The MIT License (MIT)</name>
+            <url>http://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
     </licenses>
 
     <artifactId>email-ext</artifactId>
@@ -28,9 +29,15 @@
     <properties>
         <powermock.version>1.4.12</powermock.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <workflow.version>1.10</workflow.version>
     </properties>
 
     <developers>
+        <developer>
+            <id>slide</id>
+            <name>Alex Earl</name>
+            <email>slide.o.mix@gmail.com</email>
+        </developer>
         <developer>
             <id>ashlux</id>
             <name>Ash Lux</name>
@@ -50,21 +57,88 @@
             <name>Seiji Sogabe</name>
             <email>s.sogabe@gmail.com</email>
         </developer>
-        <developer>
-            <id>slide</id>
-            <name>Alex Earl</name>
-            <email>slide.o.mix@gmail.com</email>
-        </developer>
     </developers>
 
     <dependencies>
+        <!-- libraries -->
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
             <version>1.4</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.7.2</version>
+        </dependency>
+        <dependency>
+            <groupId>net.htmlparser.jericho</groupId>
+            <artifactId>jericho-html</artifactId>
+            <version>3.3</version>
+        </dependency>
 
+        <!-- other plugins -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>junit</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>matrix-project</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>mailer</artifactId>
+            <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jvnet.hudson.plugins</groupId>
+            <artifactId>analysis-core</artifactId>
+            <version>1.54</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>config-file-provider</artifactId>
+            <version>2.7.1</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>token-macro</artifactId>
+            <version>1.11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>script-security</artifactId>
+            <version>1.6</version>
+        </dependency>
+
+        <!-- workflow stuff -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <version>${workflow.version}</version>
+            <artifactId>workflow-step-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-aggregator</artifactId>
+            <version>${workflow.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency> <!-- StepConfigTester -->
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
+            <classifier>tests</classifier>
+            <version>${workflow.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- testing -->
         <dependency>
             <groupId>org.jvnet.mock-javamail</groupId>
             <artifactId>mock-javamail</artifactId>
@@ -95,62 +169,22 @@
             <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- static analysys -->
         <dependency>
-            <groupId>org.jvnet.hudson.plugins</groupId>
-            <artifactId>analysis-core</artifactId>
-            <version>1.54</version>
-            <optional>true</optional>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>annotations</artifactId>
+            <version>3.0.0</version>
+            <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>config-file-provider</artifactId>
-            <version>2.7.1</version>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>token-macro</artifactId>
-            <version>1.10</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>mailer</artifactId>
-            <version>1.5</version>
-        </dependency>
-        <dependency>
-          <groupId>org.jenkins-ci.plugins</groupId>
-          <artifactId>script-security</artifactId>
-          <version>1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>1.7.2</version>
-        </dependency>
-        <dependency>
-            <groupId>net.htmlparser.jericho</groupId>
-            <artifactId>jericho-html</artifactId>
-            <version>3.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>junit</artifactId>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>matrix-project</artifactId>
-            <version>1.4</version>
-        </dependency>
     </dependencies>
 
     <scm>
         <connection>scm:git:https://github.com/jenkinsci/email-ext-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/email-ext-plugin.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <repositories>
         <repository>
@@ -171,28 +205,50 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.jenkins-ci.tools</groupId>
+                <artifactId>maven-hpi-plugin</artifactId>
+                <version>1.99</version>
+            </plugin>
+            <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <argLine>-XX:MaxPermSize=512m</argLine>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>clirr-maven-plugin</artifactId>
-		<version>2.6.1</version>
-		<executions>
-	            <execution>
-		        <goals>
-			    <goal>clirr</goal>
-		        </goals>
+                <version>2.6.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>clirr</goal>
+                        </goals>
                         <phase>verify</phase>
-		        <configuration>
-			    <logResults>true</logResults>
-			    <xmlOutputFile>${project.build.directory}/clirr-report.xml</xmlOutputFile>
-		        </configuration>
-		    </execution>
-		</executions>
+                        <configuration>
+                            <logResults>true</logResults>
+                            <xmlOutputFile>${project.build.directory}/clirr-report.xml</xmlOutputFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <xmlOutput>true</xmlOutput>
+                    <findbugsXmlWithMessages>true</findbugsXmlWithMessages>
+                    <failOnError>false</failOnError>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -202,11 +258,11 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>clirr-maven-plugin</artifactId>
-		<version>2.6.1</version>
-		<configuration>
+                <version>2.6.1</version>
+                <configuration>
                     <logResults>true</logResults>
                     <xmlOutputFile>${project.build.directory}/clirr-report.xml</xmlOutputFile>
-		</configuration>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

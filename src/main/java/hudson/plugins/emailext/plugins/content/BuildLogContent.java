@@ -1,8 +1,8 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailToken;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.io.IOException;
@@ -15,7 +15,7 @@ import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
  * 
  * @author dvrzalik
  */
-@EmailToken
+@Extension
 public class BuildLogContent extends DataBoundTokenMacro {
 
     public static final String MACRO_NAME = "BUILD_LOG";

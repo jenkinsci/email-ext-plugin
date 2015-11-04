@@ -1,14 +1,14 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailToken;
 import java.io.IOException;
 
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
-@EmailToken
+@Extension
 public class JobDescriptionContent extends DataBoundTokenMacro {
 
     public static final String MACRO_NAME = "JOB_DESCRIPTION";
