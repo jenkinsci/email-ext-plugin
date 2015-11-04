@@ -24,23 +24,22 @@
 
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.Extension;
 import hudson.console.ConsoleNote;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailToken;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
-import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro.Parameter;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 /**
  * @author <a href="mailto:nicolas.deloof@cloudbees.com">Nicolas De loof</a>
  */
-@EmailToken
+@Extension
 public class BuildLogExcerptContent extends DataBoundTokenMacro {
 
     public static final String MACRO_NAME = "BUILD_LOG_EXCERPT";

@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import hudson.EnvVars;
+import hudson.model.Run;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
@@ -51,16 +54,7 @@ public abstract class EmailExtScript extends Script {
             }
         }
 
-        if(macro == null) {
-            for(TokenMacro m : ContentBuilder.getPrivateMacros()) {
-                if(m.acceptsMacroName(name)) {
-                    macro = m;
-                    break;
-                }
-            }
-        }
-
-        if(macro != null) {                
+        if(macro != null) {
             Map<String, String> argsMap = new HashMap<String, String>();
             ListMultimap<String, String> argsMultimap = ArrayListMultimap.create();
             populateArgs(args, argsMap, argsMultimap);
@@ -70,7 +64,18 @@ public abstract class EmailExtScript extends Script {
             TaskListener listener = (TaskListener)this.getBinding().getVariable("listener");
 
             return macro.evaluate(build, listener, name, argsMap, argsMultimap);
+        } else {
+            // try environment variables
+
+            // Get the build and listener from the binding.
+            Run<?, ?> build = (Run<?, ?>)this.getBinding().getVariable("build");
+            TaskListener listener = (TaskListener)this.getBinding().getVariable("listener");
+            EnvVars vars = build.getEnvironment(listener);
+            if(vars.containsKey(name)) {
+                return vars.get(name, "");
+            }
         }
+
         return String.format("[Could not find content token (check your usage): %s]", name);
     }
 }

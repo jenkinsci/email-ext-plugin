@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractBuild.DependencyChange;
 import hudson.model.AbstractProject;
@@ -7,7 +8,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.Util;
-import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import org.apache.commons.lang.StringUtils;
@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map.Entry;
 
-@EmailToken
+@Extension
 public class ChangesSinceLastBuildContent extends DataBoundTokenMacro {
 
     public static final String FORMAT_DEFAULT_VALUE = "[%a] %m\\n";

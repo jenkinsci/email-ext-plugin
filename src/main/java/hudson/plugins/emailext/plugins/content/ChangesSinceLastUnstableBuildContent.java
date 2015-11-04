@@ -1,13 +1,12 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.model.AbstractBuild;
+import hudson.Extension;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailToken;
 
-@EmailToken
+@Extension
 public class ChangesSinceLastUnstableBuildContent
         extends AbstractChangesSinceContent {
 

@@ -1,9 +1,9 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.Extension;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import java.io.IOException;
 import jenkins.model.Jenkins;
@@ -11,7 +11,7 @@ import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
-@EmailToken
+@Extension
 public class JenkinsURLContent extends DataBoundTokenMacro {
 
     private static final String MACRO_NAME = "JENKINS_URL";
@@ -19,10 +19,6 @@ public class JenkinsURLContent extends DataBoundTokenMacro {
     @Override
     public boolean acceptsMacroName(String macroName) {
         return macroName.equals(MACRO_NAME) || macroName.equals("HUDSON_URL");
-    }
-
-    public String getHelpText() {
-        return "Displays the URL to the Jenkins server. (You can change this on the system configuration page.)";
     }
 
     @Override

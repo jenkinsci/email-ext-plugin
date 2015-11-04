@@ -24,11 +24,7 @@ public class ExtendedEmailPublisherContext {
 
     @Deprecated
     public ExtendedEmailPublisherContext(ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
-        this.publisher = publisher;
-        this.run = build;
-        this.workspace = build.getWorkspace();
-        this.launcher = launcher;
-        this.listener = listener;
+        this(publisher, build, build.getWorkspace(), launcher, listener);
     }
 
     public ExtendedEmailPublisherContext(ExtendedEmailPublisher publisher, Run<?,?> run, FilePath workspace, Launcher launcher, TaskListener listener) {
@@ -48,6 +44,9 @@ public class ExtendedEmailPublisherContext {
     }
 
     @Deprecated
+    /**
+     * @see ExtendedEmailPublisherContext#getRun()
+     */
     public AbstractBuild<?, ?> getBuild() {
         if(run instanceof AbstractBuild) {
             return (AbstractBuild)run;

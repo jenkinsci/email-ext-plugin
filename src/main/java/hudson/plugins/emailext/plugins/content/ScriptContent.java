@@ -5,13 +5,13 @@ import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
+import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.GroovyTemplateConfig.GroovyTemplateConfigProvider;
 import hudson.plugins.emailext.ScriptSandbox;
-import hudson.plugins.emailext.plugins.EmailToken;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +36,7 @@ import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 
-@EmailToken
+@Extension
 public class ScriptContent extends AbstractEvalContent {
     
     private static Object configProvider;

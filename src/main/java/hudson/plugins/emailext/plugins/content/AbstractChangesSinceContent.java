@@ -113,7 +113,9 @@ abstract public class AbstractChangesSinceContent
                 switch (formatChar) {
                     case 'c':
                         try {
-                            buf.append(changes.evaluate((AbstractBuild)currentRun, listener, ChangesSinceLastBuildContent.MACRO_NAME));
+                            if(currentRun instanceof AbstractBuild) {
+                                buf.append(changes.evaluate((AbstractBuild) currentRun, listener, ChangesSinceLastBuildContent.MACRO_NAME));
+                            }
                         } catch(Exception e) {
                             // do nothing
                         }

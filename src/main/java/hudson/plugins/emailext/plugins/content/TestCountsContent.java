@@ -1,8 +1,8 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.tasks.test.AbstractTestResultAction;
 import java.io.IOException;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
@@ -13,7 +13,7 @@ import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
  *
  * @author Seiji Sogabe
  */
-@EmailToken
+@Extension
 public class TestCountsContent extends DataBoundTokenMacro {
 
     public static final String MACRO_NAME = "TEST_COUNTS";
