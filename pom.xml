@@ -57,6 +57,11 @@
             <name>Seiji Sogabe</name>
             <email>s.sogabe@gmail.com</email>
         </developer>
+        <developer>
+            <id>pavanmt9</id>
+            <name>Pavan MT</name>
+            <email>pavan_mt9@gmail.com</email>
+        </developer>
     </developers>
 
     <dependencies>

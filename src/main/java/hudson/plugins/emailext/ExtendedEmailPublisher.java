@@ -763,8 +763,30 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 plainTextPart.setContent(inliner.stripHtml(text), "text/plain; charset=" + charset);
                 multipart.addBodyPart(plainTextPart);
             }
-            String inlinedCssHtml = inliner.process(text);
+            
+            String inlinedCssHtml = null;
+           
+            
+            /**Adding the code to support gmail integration without relying on DATA_INLINE_ATTR check. 
+            *  Most of the reports doesnot have this attribute. 
+            *  
+            *  Set property inlineSet=true
+            */
+            
+            String envInline = System.getenv("inlineSet");
+            
+            if(envInline!=null && envInline.equalsIgnoreCase("true")){
+            	
+            	inlinedCssHtml=inliner.processInline(text);
+            	
+            }else{
+            	
+            	inlinedCssHtml=inliner.process(text);
+            	
+            }
+            
             msgPart.setContent(inlinedCssHtml, messageContentType);
+            
         } else {
             msgPart.setContent(text, messageContentType);
         }

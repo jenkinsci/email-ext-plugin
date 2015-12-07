@@ -96,6 +96,44 @@ public class CssInliner {
         doc.outputSettings(doc.outputSettings().prettyPrint(false).escapeMode(Entities.EscapeMode.xhtml));
         return StringEscapeUtils.unescapeHtml(doc.outerHtml());
     }
+    
+    public String processInline(String input) {
+        Document doc = Jsoup.parse(input);
+
+        // check if the user wants to inline the data
+       /**
+        * Commenting out the check for inline! 
+        * 
+        * Elements elements = doc.getElementsByAttributeValue(DATA_INLINE_ATTR, "true");
+        if (elements.isEmpty()) {
+            return input;
+        }*/
+
+        extractStyles(doc);
+        applyStyles(doc);
+        inlineImages(doc);
+
+        doc.outputSettings(doc.outputSettings().prettyPrint(false).escapeMode(Entities.EscapeMode.xhtml));
+        return StringEscapeUtils.unescapeHtml(doc.outerHtml());
+    }
+    
+    
+    public String process(String input,boolean dataInlinerCheck) {
+        Document doc = Jsoup.parse(input);
+
+        // check if the user wants to inline the data
+        Elements elements = doc.getElementsByAttributeValue(DATA_INLINE_ATTR, "true");
+        if (elements.isEmpty()) {
+            return input;
+        }
+
+        extractStyles(doc);
+        applyStyles(doc);
+        inlineImages(doc);
+
+        doc.outputSettings(doc.outputSettings().prettyPrint(false).escapeMode(Entities.EscapeMode.xhtml));
+        return StringEscapeUtils.unescapeHtml(doc.outerHtml());
+    }
 
     /**
      * Inlines images marked with <code>data-inline="true"</code>
