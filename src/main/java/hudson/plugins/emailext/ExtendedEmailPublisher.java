@@ -145,6 +145,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * If true, disables the publisher from running.
      */
     public boolean disabled = false;
+    
+    /**
+     * If true, enables css inline supporting gmail web clients.
+     */
+    public boolean cssInlineEnable = false;
 
     /**
      * How to theTrigger the email if the project is a matrix project.
@@ -159,14 +164,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         this(project_recipient_list, project_content_type, project_default_subject, project_default_content,
                 project_attachments, project_presend_script, project_attach_buildlog, project_replyto,
-                project_save_output, project_triggers, matrixTriggerMode, false, Collections.EMPTY_LIST);
+                project_save_output, project_triggers, matrixTriggerMode, false,false, Collections.EMPTY_LIST);
     }
 
     @DataBoundConstructor
     public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
             String project_default_content, String project_attachments, String project_presend_script,
             int project_attach_buildlog, String project_replyto, boolean project_save_output,
-            List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode, boolean project_disabled,
+            List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode, boolean project_disabled,boolean css_inline_enabled,
             List<GroovyScriptPath> classpath) {
         this.recipientList = project_recipient_list;
         this.contentType = project_content_type;
@@ -181,6 +186,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.configuredTriggers = project_triggers;
         this.matrixTriggerMode = matrixTriggerMode;
         this.disabled = project_disabled;
+        this.cssInlineEnable = css_inline_enabled;
         this.classpath = classpath;
     }
 
@@ -245,6 +251,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         if (disabled) {
             listener.getLogger().println("Extended Email Publisher is currently disabled in project settings");
             return true;
+        }
+        
+        if(cssInlineEnable){
+        	listener.getLogger().println("Adding css inline attribute check");
         }
 
         boolean emailTriggered = false;
@@ -735,7 +745,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         messageContentType += "; charset=" + charset;
 
         try {
-            if (saveOutput) {
+			if (saveOutput) {
                 Random random = new Random();
                 String extension = ".html";
                 if (messageContentType.startsWith("text/plain")) {
@@ -769,15 +779,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             
             /**Adding the code to support gmail integration without relying on DATA_INLINE_ATTR check. 
             *  Most of the reports doesnot have this attribute. 
-            *  
-            *  Set property inlineSet=true
+            * 
             */
             
-            String envInline = System.getenv("inlineSet");
-            
-            if(envInline!=null && envInline.equalsIgnoreCase("true")){
+           if(cssInlineEnable){
             	
-            	inlinedCssHtml=inliner.processInline(text);
+            	inlinedCssHtml=inliner.processCssInline(text);
             	
             }else{
             	

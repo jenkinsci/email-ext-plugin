@@ -97,7 +97,7 @@ public class CssInliner {
         return StringEscapeUtils.unescapeHtml(doc.outerHtml());
     }
     
-    public String processInline(String input) {
+    public String processCssInline(String input) {
         Document doc = Jsoup.parse(input);
 
         // check if the user wants to inline the data
