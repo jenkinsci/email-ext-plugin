@@ -15,7 +15,7 @@ f.entry(title: _("Disable Extended Email Publisher"), help: "/plugin/email-ext/h
 }
 
 f.entry(title: _("Enable CSS Inline Attribute"), help: "/plugin/email-ext/help/projectConfig/cssInlineEnable.html", description: _("Allows html css inline rendering on gmail webclients")) {
-    f.checkbox(name: "css_inline_enabled", checked: instance?.cssInlineEnable)
+    f.checkbox(name: "project_cssinline_enabled", checked: instance?.cssInlineEnable)
 }
 
 f.entry(title: _("Project Recipient List"), help: "/plugin/email-ext/help/projectConfig/globalRecipientList.html", description: _("Comma-separated list of email address that should receive notifications for this project.")) {
