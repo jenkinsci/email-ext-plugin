@@ -24,9 +24,12 @@
 
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.model.*;
+import hudson.model.TaskListener;
+import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.Util;
+
 import java.io.IOException;
 
 import org.apache.commons.lang.StringUtils;
