@@ -560,14 +560,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     private void expandClasspath(ExtendedEmailPublisherContext context, CompilerConfiguration cc) {
         List<String> classpathList = new ArrayList<String>();
 
-        if ((classpath != null) && classpath.size() > 0) {
+        if ((classpath != null) && !classpath.isEmpty()) {
             for (GroovyScriptPath path : classpath) {
                 classpathList.add(ContentBuilder.transformText(path.getPath(), context, getRuntimeMacros(context)));
             }
         }
 
         List<GroovyScriptPath> globalClasspath = getDescriptor().getDefaultClasspath();
-        if ((globalClasspath != null) && (globalClasspath.size() > 0)) {
+        if (globalClasspath != null && !globalClasspath.isEmpty()) {
             for (GroovyScriptPath path : globalClasspath) {
                 classpathList.add(ContentBuilder.transformText(path.getPath(), context, getRuntimeMacros(context)));
             }
@@ -666,10 +666,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         bcc.removeAll(excludedRecipients);
 
         msg.setRecipients(Message.RecipientType.TO, to.toArray(new InternetAddress[to.size()]));
-        if (cc.size() > 0) {
+        if (!cc.isEmpty()) {
             msg.setRecipients(Message.RecipientType.CC, cc.toArray(new InternetAddress[cc.size()]));
         }
-        if (bcc.size() > 0) {
+        if (!bcc.isEmpty()) {
             msg.setRecipients(Message.RecipientType.BCC, bcc.toArray(new InternetAddress[bcc.size()]));
         }
 
@@ -683,7 +683,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             EmailRecipientUtils.addAddressesFromRecipientList(replyToAddresses, null, null, EmailRecipientUtils.getRecipientList(context, context.getTrigger().getEmail().getReplyTo()), env, context.getListener());
         }
 
-        if (replyToAddresses.size() > 0) {
+        if (!replyToAddresses.isEmpty()) {
             msg.setReplyTo(replyToAddresses.toArray(new InternetAddress[replyToAddresses.size()]));
         }
 

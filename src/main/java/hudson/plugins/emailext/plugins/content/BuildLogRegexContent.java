@@ -229,7 +229,7 @@ public class BuildLogRegexContent extends DataBoundTokenMacro {
         if (showTruncatedLines == true) {
             // Count the rest of the lines.
             // Include any lines in linesBefore.
-            while (linesBeforeList.size() > 0) {
+            while (!linesBeforeList.isEmpty()) {
                 linesBeforeList.remove();
                 ++numLinesTruncated;
             }

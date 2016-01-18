@@ -98,7 +98,7 @@ public class EmailExtWatchAction implements Action {
     
     public boolean isWatching() {
         List<EmailTrigger> triggers = getTriggers();
-        return triggers != null && triggers.size() > 0;
+        return triggers != null && !triggers.isEmpty();
     }
     
     public List<EmailTrigger> getTriggers() {
