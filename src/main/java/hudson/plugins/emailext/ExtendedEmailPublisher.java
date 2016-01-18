@@ -178,7 +178,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         this(project_recipient_list, project_content_type, project_default_subject, project_default_content,
                 project_attachments, project_presend_script, project_attach_buildlog, project_replyto,
-                project_save_output, project_triggers, matrixTriggerMode, false, Collections.EMPTY_LIST);
+                project_save_output, project_triggers, matrixTriggerMode, false, Collections.<GroovyScriptPath>emptyList());
     }
 
     @DataBoundConstructor
