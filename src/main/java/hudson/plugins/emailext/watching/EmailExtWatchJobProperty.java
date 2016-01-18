@@ -25,7 +25,7 @@ public class EmailExtWatchJobProperty extends JobProperty<Job<?, ?>> {
 
     @Override
     public Collection<Action> getJobActions(Job<?, ?> job) {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     public List<String> getWatchers() {

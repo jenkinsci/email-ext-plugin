@@ -48,7 +48,7 @@ public class EmailExtWatchAction implements Action {
         }
         
         private void clearTriggers() {
-            triggers = Collections.EMPTY_LIST;
+            triggers = Collections.<EmailTrigger>emptyList();
         }
 
         @Extension
