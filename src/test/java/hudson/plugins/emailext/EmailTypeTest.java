@@ -85,7 +85,7 @@ public class EmailTypeTest {
         assertNotNull(pub);
         
         // make sure the trigger was marshalled
-        assertFalse(0 == pub.configuredTriggers.size());
+        assertFalse(pub.configuredTriggers.isEmpty());
         
         // should have developers, requestor and culprits
         assertEquals(3, pub.configuredTriggers.get(0).getEmail().getRecipientProviders().size());
