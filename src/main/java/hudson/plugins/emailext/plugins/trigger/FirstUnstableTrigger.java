@@ -6,9 +6,6 @@ import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import java.util.List;
@@ -17,13 +14,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
 /**
  * @author Adrien Lecharpentier <adrien.lecharpentier@zenika.com>
  */
-public class FirstUnstableTrigger extends EmailTrigger {
+public class FirstUnstableTrigger extends hudson.plugins.emailext.plugins.AbstractEmailTrigger {
 
     public static final String TRIGGER_NAME = "Unstable (Test Failures) - 1st";
 
     @DataBoundConstructor
-    public FirstUnstableTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body,
-            String attachmentsPattern, int attachBuildLog, String contentType) {
+    public FirstUnstableTrigger(List<hudson.plugins.emailext.plugins.AbstractRecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body,
+                                String attachmentsPattern, int attachBuildLog, String contentType) {
         super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
     
@@ -41,7 +38,7 @@ public class FirstUnstableTrigger extends EmailTrigger {
     }
 
     @Extension
-    public static final class DescriptorImpl extends EmailTriggerDescriptor {
+    public static final class DescriptorImpl extends hudson.plugins.emailext.plugins.AbstractEmailTriggerDescriptor {
 
         public DescriptorImpl() {
             addTriggerNameToReplace(UnstableTrigger.TRIGGER_NAME);
@@ -57,7 +54,7 @@ public class FirstUnstableTrigger extends EmailTrigger {
         }
         
         @Override
-        public EmailTrigger createDefault() {
+        public hudson.plugins.emailext.plugins.AbstractEmailTrigger createDefault() {
             return _createDefault();
         }
     }

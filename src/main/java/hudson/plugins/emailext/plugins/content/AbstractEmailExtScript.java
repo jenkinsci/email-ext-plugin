@@ -19,7 +19,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 
-public abstract class EmailExtScript extends Script {
+public abstract class AbstractEmailExtScript extends Script {
 
     private void populateArgs(Object args, Map<String, String> map, ListMultimap<String, String> multiMap) {
         if(args instanceof Object[]) {

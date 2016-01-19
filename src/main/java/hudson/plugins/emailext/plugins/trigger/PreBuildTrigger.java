@@ -3,20 +3,17 @@ package hudson.plugins.emailext.plugins.trigger;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import java.util.List;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class PreBuildTrigger extends EmailTrigger {
+public class PreBuildTrigger extends hudson.plugins.emailext.plugins.AbstractEmailTrigger {
 
     public static final String TRIGGER_NAME = "Before Build";
     
     @DataBoundConstructor
-    public PreBuildTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+    public PreBuildTrigger(List<hudson.plugins.emailext.plugins.AbstractRecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
         super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
     
@@ -36,7 +33,7 @@ public class PreBuildTrigger extends EmailTrigger {
     }
 
     @Extension
-    public static final class DescriptorImpl extends EmailTriggerDescriptor {
+    public static final class DescriptorImpl extends hudson.plugins.emailext.plugins.AbstractEmailTriggerDescriptor {
 
         public DescriptorImpl() {
             addDefaultRecipientProvider(new ListRecipientProvider());
@@ -48,7 +45,7 @@ public class PreBuildTrigger extends EmailTrigger {
         }        
         
         @Override
-        public EmailTrigger createDefault() {
+        public hudson.plugins.emailext.plugins.AbstractEmailTrigger createDefault() {
             return _createDefault();
         }
     }    

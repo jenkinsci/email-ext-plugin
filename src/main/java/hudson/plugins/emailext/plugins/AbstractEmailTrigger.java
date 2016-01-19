@@ -25,17 +25,17 @@ import net.sf.json.JSONObject;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 
-public abstract class EmailTrigger implements Describable<EmailTrigger>, ExtensionPoint {
+public abstract class AbstractEmailTrigger implements Describable<AbstractEmailTrigger>, ExtensionPoint {
 
     private EmailType email;
 
-    public static DescriptorExtensionList<EmailTrigger, EmailTriggerDescriptor> all() {
-        return Jenkins.getActiveInstance().<EmailTrigger, EmailTriggerDescriptor>getDescriptorList(EmailTrigger.class);
+    public static DescriptorExtensionList<AbstractEmailTrigger, AbstractEmailTriggerDescriptor> all() {
+        return Jenkins.getActiveInstance().<AbstractEmailTrigger, AbstractEmailTriggerDescriptor>getDescriptorList(AbstractEmailTrigger.class);
     }
 
-    public static List<EmailTriggerDescriptor> allWatchable() {
-        List<EmailTriggerDescriptor> list = new ArrayList<EmailTriggerDescriptor>();
-        for(EmailTriggerDescriptor d : all()) {
+    public static List<AbstractEmailTriggerDescriptor> allWatchable() {
+        List<AbstractEmailTriggerDescriptor> list = new ArrayList<AbstractEmailTriggerDescriptor>();
+        for(AbstractEmailTriggerDescriptor d : all()) {
             if(d.isWatchable()) {
                 list.add(d);
             }
@@ -45,8 +45,8 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     }
 
     @Deprecated
-    protected EmailTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        List<RecipientProvider> providers = new ArrayList<RecipientProvider>();
+    protected AbstractEmailTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        List<AbstractRecipientProvider> providers = new ArrayList<AbstractRecipientProvider>();
         if(sendToList) {
             providers.add(new ListRecipientProvider());
         }
@@ -75,8 +75,8 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         email.setContentType(contentType);
     }
     
-    protected EmailTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, 
-            String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+    protected AbstractEmailTrigger(List<AbstractRecipientProvider> recipientProviders, String recipientList, String replyTo,
+                                   String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
         email = new EmailType();
         email.addRecipientProviders(recipientProviders);
         email.setRecipientList(recipientList);
@@ -89,7 +89,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         email.setContentType(contentType);
     }
     
-    protected EmailTrigger(JSONObject formData) {
+    protected AbstractEmailTrigger(JSONObject formData) {
         
     }
 
@@ -122,8 +122,8 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         this.email = email;
     }
 
-    public EmailTriggerDescriptor getDescriptor() {
-        return (EmailTriggerDescriptor) Jenkins.getActiveInstance().getDescriptor(getClass());
+    public AbstractEmailTriggerDescriptor getDescriptor() {
+        return (AbstractEmailTriggerDescriptor) Jenkins.getActiveInstance().getDescriptor(getClass());
     }
     
     public boolean configure(StaplerRequest req, JSONObject formData) {

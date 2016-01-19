@@ -12,7 +12,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import java.io.File;
@@ -58,7 +57,7 @@ public class AttachmentUtilsTest {
         publisher.attachmentsPattern = "*.pdf";
         publisher.recipientList = "mickey@disney.com";
         
-        SuccessTrigger trigger = new SuccessTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(Collections.<hudson.plugins.emailext.plugins.AbstractRecipientProvider>singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
         
         publisher.getConfiguredTriggers().add(trigger);
         
@@ -99,7 +98,7 @@ public class AttachmentUtilsTest {
         publisher.attachmentsPattern = "**/*.pdf";
         publisher.recipientList = "mickey@disney.com";
         
-        SuccessTrigger trigger = new SuccessTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(Collections.<hudson.plugins.emailext.plugins.AbstractRecipientProvider>singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
         
         publisher.getConfiguredTriggers().add(trigger);
         
@@ -142,7 +141,7 @@ public class AttachmentUtilsTest {
         publisher.attachmentsPattern = "**/*.html";
         publisher.recipientList = "mickey@disney.com";
         
-        SuccessTrigger trigger = new SuccessTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(Collections.<hudson.plugins.emailext.plugins.AbstractRecipientProvider>singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
         
         publisher.getConfiguredTriggers().add(trigger);
         

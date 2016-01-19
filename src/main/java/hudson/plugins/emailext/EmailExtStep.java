@@ -8,7 +8,6 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
 import jenkins.model.Jenkins;
 import hudson.Util;
@@ -21,7 +20,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.CheckForNull;
-import javax.management.Descriptor;
 
 /**
  * Created by acearl on 9/14/2015.
@@ -160,7 +158,7 @@ public class EmailExtStep extends AbstractStepImpl {
             }
 
             final ExtendedEmailPublisherContext ctx = new ExtendedEmailPublisherContext(publisher, run, workspace, launcher, listener);
-            final Multimap<String, EmailTrigger> triggered = ArrayListMultimap.create();
+            final Multimap<String, hudson.plugins.emailext.plugins.AbstractEmailTrigger> triggered = ArrayListMultimap.create();
             triggered.put(AlwaysTrigger.TRIGGER_NAME, publisher.configuredTriggers.get(0));
             ctx.setTrigger(publisher.configuredTriggers.get(0));
             ctx.setTriggered(triggered);

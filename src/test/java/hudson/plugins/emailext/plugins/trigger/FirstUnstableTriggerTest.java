@@ -1,7 +1,6 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.Result;
-import hudson.plugins.emailext.plugins.EmailTrigger;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -9,10 +8,10 @@ import java.io.IOException;
 /**
  * @author Adrien Lecharpentier <adrien.lecharpentier@zenika.com>
  */
-public class FirstUnstableTriggerTest extends TriggerTestBase {
+public class FirstUnstableTriggerTest extends AbstractTriggerTestBase {
 
     @Override
-    EmailTrigger newInstance() {
+    hudson.plugins.emailext.plugins.AbstractEmailTrigger newInstance() {
         return new FirstUnstableTrigger(recProviders, "", "", "", "", "", 0, "");
     }
 

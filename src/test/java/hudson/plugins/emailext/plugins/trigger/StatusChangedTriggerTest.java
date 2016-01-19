@@ -1,7 +1,6 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.Result;
-import hudson.plugins.emailext.plugins.EmailTrigger;
 
 import java.io.IOException;
 
@@ -12,10 +11,10 @@ import org.junit.Test;
  *
  * @author francois_ritaly
  */
-public class StatusChangedTriggerTest extends TriggerTestBase {
+public class StatusChangedTriggerTest extends AbstractTriggerTestBase {
 
     @Override
-    EmailTrigger newInstance() {
+    hudson.plugins.emailext.plugins.AbstractEmailTrigger newInstance() {
         return new StatusChangedTrigger(recProviders, "", "", "", "", "", 0, "project");
     }
 

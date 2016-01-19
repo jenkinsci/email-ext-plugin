@@ -48,9 +48,9 @@ public interface EmailContent extends ExtensionPoint {
      */
     public boolean hasNestedContent();
 
-    public abstract class Args {
+    public abstract class AbstractArgs {
 
-        private Args() {
+        private AbstractArgs() {
         }
 
         public static String get(Map<String, ?> args, String name, String defaultValue) {

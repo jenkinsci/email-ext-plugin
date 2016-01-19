@@ -6,9 +6,6 @@ import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import java.util.List;
@@ -16,12 +13,12 @@ import java.util.List;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 
-public class FixedTrigger extends EmailTrigger {
+public class FixedTrigger extends hudson.plugins.emailext.plugins.AbstractEmailTrigger {
 
     public static final String TRIGGER_NAME = "Fixed";
     
     @DataBoundConstructor
-    public FixedTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+    public FixedTrigger(List<hudson.plugins.emailext.plugins.AbstractRecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
         super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
     
@@ -46,7 +43,7 @@ public class FixedTrigger extends EmailTrigger {
     }
 
     @Extension
-    public static final class DescriptorImpl extends EmailTriggerDescriptor {
+    public static final class DescriptorImpl extends hudson.plugins.emailext.plugins.AbstractEmailTriggerDescriptor {
 
         public DescriptorImpl() {
             addTriggerNameToReplace(SuccessTrigger.TRIGGER_NAME);
@@ -61,7 +58,7 @@ public class FixedTrigger extends EmailTrigger {
         }
         
         @Override
-        public EmailTrigger createDefault() {
+        public hudson.plugins.emailext.plugins.AbstractEmailTrigger createDefault() {
             return _createDefault();
         }
     }    

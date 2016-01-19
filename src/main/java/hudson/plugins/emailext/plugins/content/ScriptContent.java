@@ -187,7 +187,7 @@ public class ScriptContent extends AbstractEvalContent {
         ClassLoader cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
         ScriptSandbox sandbox = null;
         CompilerConfiguration cc = new CompilerConfiguration();
-        cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName()); 
+        cc.setScriptBaseClass(AbstractEmailExtScript.class.getCanonicalName());
         cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
                 "jenkins",
                 "jenkins.model",

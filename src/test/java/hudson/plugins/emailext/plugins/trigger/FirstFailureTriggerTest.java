@@ -1,7 +1,6 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.Result;
-import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.util.XStream2;
 
 import java.io.IOException;
@@ -10,10 +9,10 @@ import java.io.InputStream;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
-public class FirstFailureTriggerTest extends TriggerTestBase {
+public class FirstFailureTriggerTest extends AbstractTriggerTestBase {
 
     @Override
-    EmailTrigger newInstance() {
+    hudson.plugins.emailext.plugins.AbstractEmailTrigger newInstance() {
         return new FirstFailureTrigger(recProviders, "", "", "", "", "", 0, "project");
     }
 

@@ -1,17 +1,16 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
-import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.RecipientProvider;
+
 import java.util.List;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class SecondFailureTrigger extends NthFailureTrigger {
+public class SecondFailureTrigger extends AbstractNthFailureTrigger {
 
     public static final String TRIGGER_NAME = "Failure - 2nd";
 
     @DataBoundConstructor
-    public SecondFailureTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+    public SecondFailureTrigger(List<hudson.plugins.emailext.plugins.AbstractRecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
         super(2, recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
     
@@ -21,7 +20,7 @@ public class SecondFailureTrigger extends NthFailureTrigger {
     }
 
     @Extension
-    public static final class DescriptorImpl extends NthFailureTrigger.DescriptorImpl {
+    public static final class DescriptorImpl extends AbstractNthFailureTrigger.DescriptorImpl {
 
         @Override
         public String getDisplayName() {
@@ -29,7 +28,7 @@ public class SecondFailureTrigger extends NthFailureTrigger {
         }
         
         @Override
-        public EmailTrigger createDefault() {
+        public hudson.plugins.emailext.plugins.AbstractEmailTrigger createDefault() {
             return _createDefault();
         }
     }

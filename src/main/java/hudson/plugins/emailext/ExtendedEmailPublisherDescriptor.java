@@ -3,7 +3,6 @@ package hudson.plugins.emailext;
 import hudson.Extension;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
-import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Mailer;
@@ -106,7 +105,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     private List<GroovyScriptPath> defaultClasspath = new ArrayList<GroovyScriptPath>();
     
-    private transient List<EmailTriggerDescriptor> defaultTriggers = new ArrayList<EmailTriggerDescriptor>();
+    private transient List<hudson.plugins.emailext.plugins.AbstractEmailTriggerDescriptor> defaultTriggers = new ArrayList<hudson.plugins.emailext.plugins.AbstractEmailTriggerDescriptor>();
     
     private List<String> defaultTriggerIds = new ArrayList<String>();
     
@@ -345,9 +344,9 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if (defaultTriggerIds.isEmpty()) {
             if (!defaultTriggers.isEmpty()) {
                 defaultTriggerIds.clear();
-                for(EmailTriggerDescriptor t : this.defaultTriggers) {
+                for(hudson.plugins.emailext.plugins.AbstractEmailTriggerDescriptor t : this.defaultTriggers) {
                     // we have to do the below because a bunch of stuff is not serialized for the Descriptor
-                    EmailTriggerDescriptor d = (EmailTriggerDescriptor)Jenkins.getActiveInstance().getDescriptorByType(t.getClass());
+                    hudson.plugins.emailext.plugins.AbstractEmailTriggerDescriptor d = (hudson.plugins.emailext.plugins.AbstractEmailTriggerDescriptor)Jenkins.getActiveInstance().getDescriptorByType(t.getClass());
                     if(!defaultTriggerIds.contains(d.getId())) {
                         defaultTriggerIds.add(d.getId());
                     }
@@ -451,7 +450,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if(!ids.isEmpty()) {
             defaultTriggerIds.clear();
             for(String id : ids) {
-               EmailTriggerDescriptor d = (EmailTriggerDescriptor)Jenkins.getActiveInstance().getDescriptor(id);
+               hudson.plugins.emailext.plugins.AbstractEmailTriggerDescriptor d = (hudson.plugins.emailext.plugins.AbstractEmailTriggerDescriptor)Jenkins.getActiveInstance().getDescriptor(id);
                if(d != null) {
                    defaultTriggerIds.add(id);
                }

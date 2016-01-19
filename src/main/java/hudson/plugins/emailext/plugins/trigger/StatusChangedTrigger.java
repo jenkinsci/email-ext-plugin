@@ -6,20 +6,17 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import java.util.List;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class StatusChangedTrigger extends EmailTrigger {
+public class StatusChangedTrigger extends hudson.plugins.emailext.plugins.AbstractEmailTrigger {
 
     public static final String TRIGGER_NAME = "Status Changed";
 
     @DataBoundConstructor
-    public StatusChangedTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+    public StatusChangedTrigger(List<hudson.plugins.emailext.plugins.AbstractRecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
         super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
     
@@ -47,7 +44,7 @@ public class StatusChangedTrigger extends EmailTrigger {
     }
 
     @Extension
-    public static final class DescriptorImpl extends EmailTriggerDescriptor {
+    public static final class DescriptorImpl extends hudson.plugins.emailext.plugins.AbstractEmailTriggerDescriptor {
         
         public DescriptorImpl() {
             addDefaultRecipientProvider(new DevelopersRecipientProvider());
@@ -59,7 +56,7 @@ public class StatusChangedTrigger extends EmailTrigger {
         }
         
         @Override
-        public EmailTrigger createDefault() {
+        public hudson.plugins.emailext.plugins.AbstractEmailTrigger createDefault() {
             return _createDefault();
         }
     }

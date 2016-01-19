@@ -3,11 +3,9 @@ package hudson.plugins.emailext.plugins.trigger;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
-import hudson.plugins.emailext.plugins.RecipientProvider;
+
 import java.util.List;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -15,12 +13,12 @@ import org.kohsuke.stapler.DataBoundConstructor;
  *
  * @author acearl
  */
-public class AlwaysTrigger extends EmailTrigger {
+public class AlwaysTrigger extends hudson.plugins.emailext.plugins.AbstractEmailTrigger {
 
     public static final String TRIGGER_NAME = "Always";
     
     @DataBoundConstructor
-    public AlwaysTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+    public AlwaysTrigger(List<hudson.plugins.emailext.plugins.AbstractRecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
         super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
     
@@ -35,7 +33,7 @@ public class AlwaysTrigger extends EmailTrigger {
     }
 
     @Extension
-    public static final class DescriptorImpl extends EmailTriggerDescriptor {
+    public static final class DescriptorImpl extends hudson.plugins.emailext.plugins.AbstractEmailTriggerDescriptor {
         
         public DescriptorImpl() {
             addDefaultRecipientProvider(new DevelopersRecipientProvider());
@@ -48,7 +46,7 @@ public class AlwaysTrigger extends EmailTrigger {
         }
         
         @Override
-        public EmailTrigger createDefault() {
+        public hudson.plugins.emailext.plugins.AbstractEmailTrigger createDefault() {
             return _createDefault();
         }
     }   

@@ -38,7 +38,6 @@ import hudson.Launcher;
 import hudson.model.Build;
 import hudson.model.StreamBuildListener;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
-import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.util.StreamTaskListener;
 
 /* package private */ final class TestUtilities {
@@ -49,7 +48,7 @@ import hudson.util.StreamTaskListener;
 
     public static void checkRecipients(
         final Build<?, ?> build,
-        final RecipientProvider provider,
+        final hudson.plugins.emailext.plugins.AbstractRecipientProvider provider,
         final String... inAuthors) throws AddressException {
         ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(null, build, new Launcher.LocalLauncher(StreamTaskListener.fromStdout()), new StreamBuildListener(System.out, Charset.defaultCharset()));
         EnvVars envVars = new EnvVars();

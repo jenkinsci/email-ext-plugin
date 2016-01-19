@@ -25,15 +25,11 @@ package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.plugins.emailext.plugins.RecipientProvider;
-import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
-import hudson.scm.ChangeLogSet;
 import hudson.tasks.test.TestResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import java.io.PrintStream;
@@ -47,7 +43,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * A recipient provider that assigns ownership of a failing test to the set of developers (including any initiator)
  * that committed changes that first broke the test.
  */
-public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
+public class FailingTestSuspectsRecipientProvider extends hudson.plugins.emailext.plugins.AbstractRecipientProvider {
 
     @DataBoundConstructor
     public FailingTestSuspectsRecipientProvider() {
@@ -139,7 +135,7 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
     }
 
     @Extension
-    public static final class DescriptorImpl extends RecipientProviderDescriptor {
+    public static final class DescriptorImpl extends hudson.plugins.emailext.plugins.AbstractRecipientProviderDescriptor {
         @Override
         public String getDisplayName() {
             return "Suspects Causing Unit Tests to Begin Failing";

@@ -5,9 +5,8 @@ def l = namespace(lib.LayoutTagLib)
 def f = namespace(lib.FormTagLib)
 def st = namespace("jelly:stapler")
 
-import hudson.Functions
-import hudson.matrix.MatrixProject
 import hudson.model.User
+import hudson.plugins.emailext.plugins.AbstractEmailTrigger
 
 def descriptor = app.getDescriptor("hudson.plugins.emailext.ExtendedEmailPublisher")
 def watchEnabled = descriptor.watchingEnabled
@@ -44,7 +43,7 @@ l.layout(norefresh: true) {
                 f.form(method: "post", action: "configSubmit", name: "config") {
 
                     f.entry(title: _("Content Token Reference"), help: descriptor.getHelpFile('tokens'))
-                    def triggers = hudson.plugins.emailext.plugins.EmailTrigger.all().findAll { t -> t.isWatchable() }
+                    def triggers = AbstractEmailTrigger.all().findAll { t -> t.isWatchable() }
                     def configuredTriggers = (my != null && my.triggers.size() > 0) ? my.triggers : []
                     // do we want to filter the triggers somehow so that only some show up?
 
