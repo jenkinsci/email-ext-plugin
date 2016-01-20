@@ -9,8 +9,8 @@ import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
-import hudson.plugins.emailext.plugins.RecipientProvider;
-import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
+import hudson.plugins.emailext.plugins.AbstractRecipientProvider;
+import hudson.plugins.emailext.plugins.AbstractRecipientProviderDescriptor;
 import hudson.tasks.Mailer;
 
 import java.util.Set;
@@ -26,7 +26,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * Created by acearl on 12/25/13.
  */
 
-public class RequesterRecipientProvider extends RecipientProvider {
+public class RequesterRecipientProvider extends AbstractRecipientProvider {
     private static final Logger LOGGER = Logger.getLogger(RequesterRecipientProvider.class.getName());
 
     @DataBoundConstructor
@@ -71,7 +71,7 @@ public class RequesterRecipientProvider extends RecipientProvider {
 
     
     @Extension
-    public static final class DescriptorImpl extends RecipientProviderDescriptor {
+    public static final class DescriptorImpl extends AbstractRecipientProviderDescriptor {
 
         @Override
         public String getDisplayName() {

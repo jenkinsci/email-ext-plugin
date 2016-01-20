@@ -7,7 +7,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.AbstractEmailTrigger;
 
 /**
  *
@@ -17,10 +17,10 @@ public class ExtendedEmailPublisherContext {
     private ExtendedEmailPublisher publisher;
     private Run<?, ?> run;
     private FilePath workspace;
-    private EmailTrigger trigger;
+    private AbstractEmailTrigger trigger;
     private TaskListener listener;
     private Launcher launcher;
-    private Multimap<String, EmailTrigger> triggered;
+    private Multimap<String, AbstractEmailTrigger> triggered;
 
     @Deprecated
     public ExtendedEmailPublisherContext(ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
@@ -62,11 +62,11 @@ public class ExtendedEmailPublisherContext {
         return workspace;
     }
 
-    public EmailTrigger getTrigger() {
+    public AbstractEmailTrigger getTrigger() {
         return trigger;
     }    
     
-    protected void setTrigger(EmailTrigger trigger) {
+    protected void setTrigger(AbstractEmailTrigger trigger) {
         this.trigger = trigger;
     }
     
@@ -86,11 +86,11 @@ public class ExtendedEmailPublisherContext {
         this.listener = listener;
     }
     
-    public Multimap<String, EmailTrigger> getTriggered() {
+    public Multimap<String, AbstractEmailTrigger> getTriggered() {
         return triggered;
     }
     
-    protected void setTriggered(Multimap<String, EmailTrigger> triggered) {
+    protected void setTriggered(Multimap<String, AbstractEmailTrigger> triggered) {
         this.triggered = triggered;
     }
 }

@@ -1,6 +1,6 @@
 package hudson.plugins.emailext;
 
-import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.AbstractRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.CulpritsRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
@@ -33,7 +33,7 @@ public class EmailType {
     /**
      * The list of configured recipient providers
      */
-    private List<RecipientProvider> recipientProviders;
+    private List<AbstractRecipientProvider> recipientProviders;
 
     /**
      * Pattern for attachments to be sent as part of this email type.
@@ -92,7 +92,7 @@ public class EmailType {
         compressBuildLog = false;
         replyTo = "";
         contentType = "project";
-        recipientProviders = new ArrayList<RecipientProvider>();
+        recipientProviders = new ArrayList<AbstractRecipientProvider>();
     }
 
     public String getSubject() {
@@ -120,20 +120,20 @@ public class EmailType {
         return recipientList != null ? recipientList.trim() : recipientList;
     }
 
-    public List<RecipientProvider> getRecipientProviders() {
+    public List<AbstractRecipientProvider> getRecipientProviders() {
         return recipientProviders;
     }
 
-    public void addRecipientProvider(RecipientProvider provider) {
+    public void addRecipientProvider(AbstractRecipientProvider provider) {
         if (recipientProviders == null) {
-            recipientProviders = new ArrayList<RecipientProvider>();
+            recipientProviders = new ArrayList<AbstractRecipientProvider>();
         }
         recipientProviders.add(provider);
     }
 
-    public void addRecipientProviders(List<RecipientProvider> providers) {
+    public void addRecipientProviders(List<AbstractRecipientProvider> providers) {
         if (recipientProviders == null) {
-            recipientProviders = new ArrayList<RecipientProvider>();
+            recipientProviders = new ArrayList<AbstractRecipientProvider>();
         }
         if(providers != null) {
             recipientProviders.addAll(providers);
@@ -194,7 +194,7 @@ public class EmailType {
         }
         
         if(recipientProviders == null) {
-            recipientProviders = new ArrayList<RecipientProvider>();
+            recipientProviders = new ArrayList<AbstractRecipientProvider>();
         }
 
         // upgrade the various fields to the new RecipientProvider method
@@ -219,7 +219,7 @@ public class EmailType {
     
     @Deprecated
     public boolean getSendToCulprits() {
-        for(RecipientProvider p : recipientProviders) {
+        for(AbstractRecipientProvider p : recipientProviders) {
             if(p instanceof CulpritsRecipientProvider) {
                 return true;
             }
@@ -248,7 +248,7 @@ public class EmailType {
     
     @Deprecated
     public boolean getSendToDevelopers() {
-        for(RecipientProvider p : recipientProviders) {
+        for(AbstractRecipientProvider p : recipientProviders) {
             if(p instanceof DevelopersRecipientProvider) {
                 return true;
             }
@@ -277,7 +277,7 @@ public class EmailType {
     
     @Deprecated
     public boolean getSendToRequester() {
-        for(RecipientProvider p : recipientProviders) {
+        for(AbstractRecipientProvider p : recipientProviders) {
             if(p instanceof RequesterRecipientProvider) {
                 return true;
             }
@@ -306,7 +306,7 @@ public class EmailType {
     
     @Deprecated
     public boolean getSendToRecipientList() {
-        for(RecipientProvider p : recipientProviders) {
+        for(AbstractRecipientProvider p : recipientProviders) {
             if(p instanceof ListRecipientProvider) {
                 return true;
             }

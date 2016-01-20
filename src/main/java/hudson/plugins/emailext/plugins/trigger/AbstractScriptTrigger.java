@@ -6,11 +6,9 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ScriptSandbox;
-import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
-import hudson.plugins.emailext.plugins.RecipientProvider;
-import java.util.ArrayList;
+import hudson.plugins.emailext.plugins.AbstractEmailTrigger;
+import hudson.plugins.emailext.plugins.AbstractRecipientProvider;
+
 import java.util.List;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -20,10 +18,10 @@ import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.kohsuke.stapler.StaplerRequest;
 
-public abstract class AbstractScriptTrigger extends EmailTrigger {
+public abstract class AbstractScriptTrigger extends AbstractEmailTrigger {
     protected String triggerScript;
     
-    public AbstractScriptTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
+    public AbstractScriptTrigger(List<AbstractRecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
         super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
         this.triggerScript = triggerScript;
     }

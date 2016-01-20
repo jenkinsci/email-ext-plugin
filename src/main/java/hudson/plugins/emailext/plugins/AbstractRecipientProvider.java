@@ -14,15 +14,15 @@ import jenkins.model.Jenkins;
 /**
  * Created by acearl on 12/24/13.
  */
-public abstract class RecipientProvider extends AbstractDescribableImpl<RecipientProvider> implements ExtensionPoint {
+public abstract class AbstractRecipientProvider extends AbstractDescribableImpl<AbstractRecipientProvider> implements ExtensionPoint {
     
-    public static DescriptorExtensionList<RecipientProvider, RecipientProviderDescriptor> all() {
-        return Jenkins.getActiveInstance().<RecipientProvider, RecipientProviderDescriptor>getDescriptorList(RecipientProvider.class);
+    public static DescriptorExtensionList<AbstractRecipientProvider, AbstractRecipientProviderDescriptor> all() {
+        return Jenkins.getActiveInstance().<AbstractRecipientProvider, AbstractRecipientProviderDescriptor>getDescriptorList(AbstractRecipientProvider.class);
     }
 
     @Override
-    public RecipientProviderDescriptor getDescriptor() {
-        return (RecipientProviderDescriptor) super.getDescriptor();
+    public AbstractRecipientProviderDescriptor getDescriptor() {
+        return (AbstractRecipientProviderDescriptor) super.getDescriptor();
     }
 
     public abstract void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc);

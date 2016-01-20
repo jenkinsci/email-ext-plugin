@@ -19,9 +19,9 @@ import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.CssInliner;
-import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.RecipientProvider;
-import hudson.plugins.emailext.plugins.content.EmailExtScript;
+import hudson.plugins.emailext.plugins.AbstractEmailTrigger;
+import hudson.plugins.emailext.plugins.AbstractRecipientProvider;
+import hudson.plugins.emailext.plugins.content.AbstractEmailExtScript;
 import hudson.plugins.emailext.plugins.content.TriggerNameContent;
 import hudson.plugins.emailext.watching.EmailExtWatchAction;
 import hudson.plugins.emailext.watching.EmailExtWatchJobProperty;
@@ -104,7 +104,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     /**
      * This is the list of email theTriggers that the project has configured
      */
-    public List<EmailTrigger> configuredTriggers = new ArrayList<EmailTrigger>();
+    public List<AbstractEmailTrigger> configuredTriggers = new ArrayList<AbstractEmailTrigger>();
 
     /**
      * The contentType of the emails for this project (text/html, text/plain,
@@ -172,9 +172,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     @Deprecated
     public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
-            String project_default_content, String project_attachments, String project_presend_script,
-            int project_attach_buildlog, String project_replyto, boolean project_save_output,
-            List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode) {
+                                  String project_default_content, String project_attachments, String project_presend_script,
+                                  int project_attach_buildlog, String project_replyto, boolean project_save_output,
+                                  List<AbstractEmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode) {
 
         this(project_recipient_list, project_content_type, project_default_subject, project_default_content,
                 project_attachments, project_presend_script, project_attach_buildlog, project_replyto,
@@ -183,10 +183,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     @DataBoundConstructor
     public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
-            String project_default_content, String project_attachments, String project_presend_script,
-            int project_attach_buildlog, String project_replyto, boolean project_save_output,
-            List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode, boolean project_disabled,
-            List<GroovyScriptPath> classpath) {
+                                  String project_default_content, String project_attachments, String project_presend_script,
+                                  int project_attach_buildlog, String project_replyto, boolean project_save_output,
+                                  List<AbstractEmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode, boolean project_disabled,
+                                  List<GroovyScriptPath> classpath) {
         this.recipientList = project_recipient_list;
         this.contentType = project_content_type;
         this.defaultSubject = project_default_subject;
@@ -216,9 +216,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      *
      * @return
      */
-    public List<EmailTrigger> getConfiguredTriggers() {
+    public List<AbstractEmailTrigger> getConfiguredTriggers() {
         if (configuredTriggers == null) {
-            configuredTriggers = new ArrayList<EmailTrigger>();
+            configuredTriggers = new ArrayList<AbstractEmailTrigger>();
         }
         return configuredTriggers;
     }
@@ -268,9 +268,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         boolean emailTriggered = false;
         debug(listener.getLogger(), "Checking if email needs to be generated");
-        final Multimap<String, EmailTrigger> triggered = ArrayListMultimap.create();
+        final Multimap<String, AbstractEmailTrigger> triggered = ArrayListMultimap.create();
 
-        for (EmailTrigger trigger : getConfiguredTriggers()) {
+        for (AbstractEmailTrigger trigger : getConfiguredTriggers()) {
             if (trigger.isPreBuild() == forPreBuild && trigger.trigger(build, listener)) {
                 String tName = trigger.getDescriptor().getDisplayName();
                 triggered.put(tName, trigger);
@@ -284,7 +284,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         for (Object tName : triggered.keySet()) {
             String triggerName = (String) tName;
-            for (EmailTrigger trigger : (Collection<EmailTrigger>) triggered.get(triggerName)) {
+            for (AbstractEmailTrigger trigger : (Collection<AbstractEmailTrigger>) triggered.get(triggerName)) {
                 replacedTriggers.addAll(trigger.getDescriptor().getTriggerReplaceList());
             }
         }
@@ -302,8 +302,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 if (user != null) {
                     EmailExtWatchAction.UserProperty prop = user.getProperty(EmailExtWatchAction.UserProperty.class);
                     if (prop != null) {
-                        final Multimap<String, EmailTrigger> watcherTriggered = ArrayListMultimap.create();
-                        for (EmailTrigger trigger : prop.getTriggers()) {
+                        final Multimap<String, AbstractEmailTrigger> watcherTriggered = ArrayListMultimap.create();
+                        for (AbstractEmailTrigger trigger : prop.getTriggers()) {
                             if (trigger.isPreBuild() == forPreBuild && trigger.trigger(build, listener)) {
                                 String tName = trigger.getDescriptor().getDisplayName();
                                 watcherTriggered.put(tName, trigger);
@@ -317,7 +317,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
                         for (Object tName : triggered.keySet()) {
                             String triggerName = (String) tName;
-                            for (EmailTrigger trigger : (Collection<EmailTrigger>) triggered.get(triggerName)) {
+                            for (AbstractEmailTrigger trigger : (Collection<AbstractEmailTrigger>) triggered.get(triggerName)) {
                                 replacedTriggers.addAll(trigger.getDescriptor().getTriggerReplaceList());
                             }
                         }
@@ -342,7 +342,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         for (String triggerName : triggered.keySet()) {
-            for (EmailTrigger trigger : triggered.get(triggerName)) {
+            for (AbstractEmailTrigger trigger : triggered.get(triggerName)) {
                 listener.getLogger().println("Sending email for trigger: " + triggerName);
                 final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build, build.getWorkspace(), launcher, listener);
                 context.setTriggered(triggered);
@@ -495,7 +495,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             ClassLoader cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
             ScriptSandbox sandbox = null;
             CompilerConfiguration cc = new CompilerConfiguration();
-            cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
+            cc.setScriptBaseClass(AbstractEmailExtScript.class.getCanonicalName());
             cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
                     "jenkins",
                     "jenkins.model",
@@ -646,7 +646,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, emergencyReroute, env, context.getListener());
             debug(context.getListener().getLogger(), "Emergency reroute is set to: " + emergencyReroute);
         } else {
-            for (RecipientProvider provider : context.getTrigger().getEmail().getRecipientProviders()) {
+            for (AbstractRecipientProvider provider : context.getTrigger().getEmail().getRecipientProviders()) {
                 provider.addRecipients(context, env, to, cc, bcc);
             }
 

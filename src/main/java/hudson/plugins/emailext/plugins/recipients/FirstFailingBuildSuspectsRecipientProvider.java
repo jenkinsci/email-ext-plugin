@@ -39,15 +39,15 @@ import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.plugins.emailext.plugins.RecipientProvider;
-import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
+import hudson.plugins.emailext.plugins.AbstractRecipientProvider;
+import hudson.plugins.emailext.plugins.AbstractRecipientProviderDescriptor;
 import jenkins.model.Jenkins;
 
 /**
  * A recipient provider that assigns ownership of a failing build to the set of developers (including any initiator)
  * that committed changes that first broke the build.
  */
-public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvider {
+public class FirstFailingBuildSuspectsRecipientProvider extends AbstractRecipientProvider {
 
     @DataBoundConstructor
     public FirstFailingBuildSuspectsRecipientProvider() {
@@ -103,7 +103,7 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
     }
 
     @Extension
-    public static final class DescriptorImpl extends RecipientProviderDescriptor {
+    public static final class DescriptorImpl extends AbstractRecipientProviderDescriptor {
         @Override
         public String getDisplayName() {
             return "Suspects Causing the Build to Begin Failing";
