@@ -112,9 +112,9 @@ public class BuildLogRegexContent extends DataBoundTokenMacro {
             if (style.length() > 0) {
                 buffer.append(" style=\"");
                 buffer.append(style);
-                buffer.append("\"");
+                buffer.append('"');
             }
-            buffer.append(">");
+            buffer.append('>');
         }
         buffer.append(line);
         if (style != null) {
@@ -229,7 +229,7 @@ public class BuildLogRegexContent extends DataBoundTokenMacro {
         if (showTruncatedLines == true) {
             // Count the rest of the lines.
             // Include any lines in linesBefore.
-            while (linesBeforeList.size() > 0) {
+            while (!linesBeforeList.isEmpty()) {
                 linesBeforeList.remove();
                 ++numLinesTruncated;
             }

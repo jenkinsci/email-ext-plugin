@@ -36,6 +36,6 @@ public class EmailExtTemplateActionFactory extends TransientProjectActionFactory
         if(hasEmailExt) {
             return Collections.singletonList(new EmailExtTemplateAction(target));
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }        
 }
