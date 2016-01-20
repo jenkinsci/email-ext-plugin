@@ -4,8 +4,8 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.AbstractEmailTrigger;
+import hudson.plugins.emailext.plugins.AbstractRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +48,7 @@ public class TriggerNameContentTest {
     
     @Test
     public void testTriggerName() throws Exception {
-        List<RecipientProvider> recProviders = Collections.emptyList();
+        List<AbstractRecipientProvider> recProviders = Collections.emptyList();
         PreBuildTrigger trigger = new PreBuildTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         addEmailType(trigger);
@@ -64,7 +64,7 @@ public class TriggerNameContentTest {
         assertEquals(PreBuildTrigger.TRIGGER_NAME, message.getSubject());
     }
     
-    private void addEmailType(EmailTrigger trigger) {
+    private void addEmailType(AbstractEmailTrigger trigger) {
         trigger.setEmail(new EmailType() {
             {
                 setRecipientList("mickey@disney.com");

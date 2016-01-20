@@ -1,3 +1,5 @@
+import hudson.plugins.emailext.plugins.AbstractRecipientProvider
+
 // Namespaces
 m = namespace("/lib/email-ext")
 l = namespace("/lib/layout")
@@ -7,7 +9,7 @@ t = namespace("/lib/hudson")
 f = namespace("/lib/form")
 d = namespace("jelly:define")
 
-def providers = hudson.plugins.emailext.plugins.RecipientProvider.all()
+def providers = AbstractRecipientProvider.all()
 def recipientProviders = instance != null ? instance.email.recipientProviders : descriptor.defaultRecipientProviders
 
 if(showSendTo) {

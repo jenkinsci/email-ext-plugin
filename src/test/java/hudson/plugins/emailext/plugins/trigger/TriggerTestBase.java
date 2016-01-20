@@ -4,8 +4,8 @@ import hudson.model.AbstractBuild;
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.AbstractEmailTrigger;
+import hudson.plugins.emailext.plugins.AbstractRecipientProvider;
 import hudson.util.StreamTaskListener;
 
 import java.io.IOException;
@@ -22,9 +22,9 @@ import static org.mockito.Mockito.when;
  */
 public abstract class TriggerTestBase {
     
-    protected List<RecipientProvider> recProviders = Collections.emptyList();
+    protected List<AbstractRecipientProvider> recProviders = Collections.emptyList();
 
-    abstract EmailTrigger newInstance();
+    abstract AbstractEmailTrigger newInstance();
     
     TaskListener getTaskListener() {
         return StreamTaskListener.fromStdout();
@@ -35,7 +35,7 @@ public abstract class TriggerTestBase {
      */
     void assertTriggered(Result... resultHistory)
             throws IOException, InterruptedException {
-        EmailTrigger trigger = newInstance();
+        AbstractEmailTrigger trigger = newInstance();
         AbstractBuild<?, ?> build = mockBuild(resultHistory);
         assertTrue(trigger.trigger(build, getTaskListener()));
     }
@@ -46,7 +46,7 @@ public abstract class TriggerTestBase {
      */
     void assertNotTriggered(Result... resultHistory)
             throws IOException, InterruptedException {
-        EmailTrigger trigger = newInstance();
+        AbstractEmailTrigger trigger = newInstance();
         AbstractBuild<?, ?> build = mockBuild(resultHistory);
         assertFalse(trigger.trigger(build, getTaskListener()));
     }

@@ -7,8 +7,8 @@
 package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.plugins.emailext.EmailRecipientUtils;
-import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
-import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.AbstractRecipientProviderDescriptor;
+import hudson.plugins.emailext.plugins.AbstractRecipientProvider;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
@@ -25,7 +25,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  *
  * @author acearl
  */
-public class ListRecipientProvider extends RecipientProvider {
+public class ListRecipientProvider extends AbstractRecipientProvider {
 
     @DataBoundConstructor
     public ListRecipientProvider() {
@@ -44,7 +44,7 @@ public class ListRecipientProvider extends RecipientProvider {
     }
     
     @Extension
-    public static final class DescriptorImpl extends RecipientProviderDescriptor {
+    public static final class DescriptorImpl extends AbstractRecipientProviderDescriptor {
         
         @Override
         public String getDisplayName() {

@@ -12,8 +12,8 @@ import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.Messages;
-import hudson.plugins.emailext.plugins.RecipientProvider;
-import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
+import hudson.plugins.emailext.plugins.AbstractRecipientProvider;
+import hudson.plugins.emailext.plugins.AbstractRecipientProviderDescriptor;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.Mailer;
 
@@ -32,7 +32,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 /**
  * Sends emails to committers of upstream builds which triggered this build.
  */
-public class UpstreamComitterRecipientProvider extends RecipientProvider {
+public class UpstreamComitterRecipientProvider extends AbstractRecipientProvider {
     private static final ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
     @DataBoundConstructor
@@ -118,7 +118,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
     }
 
     @Extension
-    public static final class DescriptorImpl extends RecipientProviderDescriptor {
+    public static final class DescriptorImpl extends AbstractRecipientProviderDescriptor {
 
         @Override
         public String getDisplayName() {

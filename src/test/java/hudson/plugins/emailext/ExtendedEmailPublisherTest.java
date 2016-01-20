@@ -2,7 +2,6 @@ package hudson.plugins.emailext;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
-import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -12,8 +11,8 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.User;
-import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.AbstractEmailTrigger;
+import hudson.plugins.emailext.plugins.AbstractRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
@@ -29,9 +28,8 @@ import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.tasks.Builder;
 import hudson.tasks.Mailer;
-import java.io.BufferedReader;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,7 +68,7 @@ public class ExtendedEmailPublisherTest {
 
     private ExtendedEmailPublisher publisher;
     private FreeStyleProject project;
-    private List<RecipientProvider> recProviders;
+    private List<AbstractRecipientProvider> recProviders;
 
     @Rule
     public JenkinsRule j = new JenkinsRule() {
@@ -1142,7 +1140,7 @@ public class ExtendedEmailPublisherTest {
         publisher.configuredTriggers.add(new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project"));
 
-        for (EmailTrigger trigger : publisher.configuredTriggers) {
+        for (AbstractEmailTrigger trigger : publisher.configuredTriggers) {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
@@ -1163,7 +1161,7 @@ public class ExtendedEmailPublisherTest {
         publisher.configuredTriggers.add(new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project"));
 
-        for (EmailTrigger trigger : publisher.configuredTriggers) {
+        for (AbstractEmailTrigger trigger : publisher.configuredTriggers) {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
@@ -1205,7 +1203,7 @@ public class ExtendedEmailPublisherTest {
         publisher.configuredTriggers.add(new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", content, "", 0, "project"));
 
-        for (EmailTrigger trigger : publisher.configuredTriggers) {
+        for (AbstractEmailTrigger trigger : publisher.configuredTriggers) {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
@@ -1299,7 +1297,7 @@ public class ExtendedEmailPublisherTest {
         }
     }
 
-    private void addEmailType(EmailTrigger trigger) {
+    private void addEmailType(AbstractEmailTrigger trigger) {
         trigger.setEmail(new EmailType() {
             {
                 setRecipientList("ashlux@gmail.com");

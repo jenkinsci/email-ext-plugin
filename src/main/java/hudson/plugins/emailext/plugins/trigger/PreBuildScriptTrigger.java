@@ -1,9 +1,9 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
-import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.AbstractEmailTrigger;
+import hudson.plugins.emailext.plugins.AbstractEmailTriggerDescriptor;
+import hudson.plugins.emailext.plugins.AbstractRecipientProvider;
 import java.util.List;
 
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -13,7 +13,7 @@ public class PreBuildScriptTrigger extends AbstractScriptTrigger {
     public static final String TRIGGER_NAME = "Script - Before Build";
     
     @DataBoundConstructor
-    public PreBuildScriptTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
+    public PreBuildScriptTrigger(List<AbstractRecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
         super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, triggerScript);
     }
     
@@ -28,7 +28,7 @@ public class PreBuildScriptTrigger extends AbstractScriptTrigger {
     }
 
     @Extension
-    public static final class DescriptorImpl extends EmailTriggerDescriptor {
+    public static final class DescriptorImpl extends AbstractEmailTriggerDescriptor {
 
         @Override
         public String getDisplayName() {
@@ -41,7 +41,7 @@ public class PreBuildScriptTrigger extends AbstractScriptTrigger {
         }
         
         @Override
-        public EmailTrigger createDefault() {
+        public AbstractEmailTrigger createDefault() {
             return new PreBuildScriptTrigger(defaultRecipientProviders, "", "$PROJECT_DEFAULT_REPLYTO", "$PROJECT_DEFAULT_SUBJECT", "$PROJECT_DEFAULT_CONTENT", "", 0, "project", "");
         }
     }
