@@ -112,9 +112,9 @@ public class BuildLogRegexContent extends DataBoundTokenMacro {
             if (style.length() > 0) {
                 buffer.append(" style=\"");
                 buffer.append(style);
-                buffer.append("\"");
+                buffer.append('"');
             }
-            buffer.append(">");
+            buffer.append('>');
         }
         buffer.append(line);
         if (style != null) {
