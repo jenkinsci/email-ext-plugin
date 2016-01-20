@@ -245,7 +245,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return Secret.toString(smtpAuthPassword);
     }
 
-    public boolean getUseSsl() {
+    public boolean isUseSsl() {
         return useSsl;
     }
 
@@ -297,7 +297,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return excludedCommitters;
     }
 
-    public boolean getOverrideGlobalSettings() {
+    public boolean isOverrideGlobalSettings() {
         return overrideGlobalSettings;
     }
     

@@ -578,7 +578,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     private MimeMessage createMail(ExtendedEmailPublisherContext context) throws MessagingException, IOException, InterruptedException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
 
-        if (!descriptor.getOverrideGlobalSettings()) {
+        if (!descriptor.isOverrideGlobalSettings()) {
             descriptor.upgradeFromMailer();
         }
 
@@ -618,9 +618,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             typeAttachments.attach(multipart, context);
         }
 
-        if (attachBuildLog || context.getTrigger().getEmail().getAttachBuildLog()) {
+        if (attachBuildLog || context.getTrigger().getEmail().isAttachBuildLog()) {
             debug(context.getListener().getLogger(), "Request made to attach build log");
-            AttachmentUtils.attachBuildLog(context, multipart, compressBuildLog || context.getTrigger().getEmail().getCompressBuildLog());
+            AttachmentUtils.attachBuildLog(context, multipart, compressBuildLog || context.getTrigger().getEmail().isCompressBuildLog());
         }
 
         msg.setContent(multipart);
