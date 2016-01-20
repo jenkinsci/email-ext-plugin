@@ -113,27 +113,27 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         } else {
             local.append(failedTest.getFullName());
         }
-        local.append(".");
+        local.append('.');
 
         local.append(failedTest.getDisplayName());
-        local.append("\n");
+        local.append('\n');
 
         if (showMessage) {
-            local.append("\n");
+            local.append('\n');
             local.append("Error Message:\n");
             local.append(failedTest.getErrorDetails());
-            local.append("\n");
+            local.append('\n');
         }
         
         if (showStack) {
-            local.append("\n");
+            local.append('\n');
             local.append("Stack Trace:\n");
             local.append(failedTest.getErrorStackTrace());
-            local.append("\n");
+            local.append('\n');
         }
 
         if (showMessage || showStack) {
-            local.append("\n");
+            local.append('\n');
         }
 
         if(local.length() > lengthLeft) {
