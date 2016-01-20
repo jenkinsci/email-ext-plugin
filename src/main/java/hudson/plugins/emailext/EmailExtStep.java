@@ -93,7 +93,7 @@ public class EmailExtStep extends AbstractStepImpl {
         this.mimeType = Util.fixNull(mimeType);
     }
 
-    public boolean getAttachLog() {
+    public boolean isAttachLog() {
         return attachLog;
     }
 
@@ -102,7 +102,7 @@ public class EmailExtStep extends AbstractStepImpl {
         this.attachLog = attachLog;
     }
 
-    public boolean getCompressLog() {
+    public boolean isCompressLog() {
         return compressLog;
     }
 

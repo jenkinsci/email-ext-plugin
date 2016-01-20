@@ -111,7 +111,7 @@ public class EmailType {
         this.body = body;
     }
 
-    public boolean getHasRecipients() {
+    public boolean isHasRecipients() {
         return (recipientProviders != null && !recipientProviders.isEmpty())
                 || (recipientList != null && recipientList.trim().length() != 0);
     }
@@ -160,11 +160,11 @@ public class EmailType {
         this.attachmentsPattern = attachmentsPattern;
     }
 
-    public boolean getAttachBuildLog() {
+    public boolean isAttachBuildLog() {
         return attachBuildLog;
     }
 
-    public boolean getCompressBuildLog() {
+    public boolean isCompressBuildLog() {
         return compressBuildLog;
     }
 

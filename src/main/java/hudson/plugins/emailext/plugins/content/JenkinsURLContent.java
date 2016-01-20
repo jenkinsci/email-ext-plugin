@@ -29,7 +29,7 @@ public class JenkinsURLContent extends DataBoundTokenMacro {
         
         ExtendedEmailPublisher publisher = context.getProject().getPublishersList().get(ExtendedEmailPublisher.class);
         
-        if (publisher.getDescriptor().getOverrideGlobalSettings()) {
+        if (publisher.getDescriptor().isOverrideGlobalSettings()) {
             jenkinsUrl = publisher.getDescriptor().getHudsonUrl();
         }
 

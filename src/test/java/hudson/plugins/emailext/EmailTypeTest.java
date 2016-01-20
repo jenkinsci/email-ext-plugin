@@ -24,7 +24,7 @@ public class EmailTypeTest {
     public void testHasNoRecipients() {
         EmailType t = new EmailType();
 
-        assertFalse(t.getHasRecipients());
+        assertFalse(t.isHasRecipients());
     }
 
     @Test
@@ -33,7 +33,7 @@ public class EmailTypeTest {
         
         t.addRecipientProvider(new DevelopersRecipientProvider());
         
-        assertTrue(t.getHasRecipients());
+        assertTrue(t.isHasRecipients());
     }
 
     @Test
@@ -42,7 +42,7 @@ public class EmailTypeTest {
         
         t.addRecipientProvider(new ListRecipientProvider());
         
-        assertTrue(t.getHasRecipients());
+        assertTrue(t.isHasRecipients());
     }
 
     @Test
@@ -52,7 +52,7 @@ public class EmailTypeTest {
         t.addRecipientProvider(new ListRecipientProvider());
         t.addRecipientProvider(new DevelopersRecipientProvider());
 
-        assertTrue(t.getHasRecipients());
+        assertTrue(t.isHasRecipients());
     }
 
     @Test
@@ -60,14 +60,14 @@ public class EmailTypeTest {
         EmailType t = new EmailType();
         t.setCompressBuildLog(true);
 
-        assertTrue(t.getCompressBuildLog());
+        assertTrue(t.isCompressBuildLog());
     }
 
     @Test
     public void testDefaultCompressBuildAttachment() {
         EmailType t = new EmailType();
 
-        assertFalse(t.getCompressBuildLog());
+        assertFalse(t.isCompressBuildLog());
     }
     
     @Test
