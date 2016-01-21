@@ -70,7 +70,7 @@ public class EmailExtWatchAction implements Action {
         }
     }
     
-    private AbstractProject<?,?> project;
+    private final AbstractProject<?,?> project;
     
     public EmailExtWatchAction(AbstractProject project) {
         this.project = project;

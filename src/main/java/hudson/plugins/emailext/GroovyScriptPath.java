@@ -22,7 +22,7 @@ import hudson.model.Descriptor;
  */
 public class GroovyScriptPath extends AbstractDescribableImpl<GroovyScriptPath> {
 
-    private String path;
+    private final String path;
     
     @DataBoundConstructor
     public GroovyScriptPath(String path) {
