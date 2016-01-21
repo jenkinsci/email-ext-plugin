@@ -70,7 +70,7 @@ public class CauseContentTest {
     }
 
     private class CauseStub extends Cause {
-        private String name;
+        private final String name;
 
         private CauseStub(String name) {
             this.name = name;

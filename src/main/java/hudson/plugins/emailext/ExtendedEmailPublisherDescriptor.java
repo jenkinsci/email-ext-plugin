@@ -104,11 +104,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      */
     private String defaultPostsendScript = "";
 
-    private List<GroovyScriptPath> defaultClasspath = new ArrayList<GroovyScriptPath>();
+    private final List<GroovyScriptPath> defaultClasspath = new ArrayList<GroovyScriptPath>();
     
-    private transient List<EmailTriggerDescriptor> defaultTriggers = new ArrayList<EmailTriggerDescriptor>();
+    private final transient List<EmailTriggerDescriptor> defaultTriggers = new ArrayList<EmailTriggerDescriptor>();
     
-    private List<String> defaultTriggerIds = new ArrayList<String>();
+    private final List<String> defaultTriggerIds = new ArrayList<String>();
     
     /**
      * This is the global emergency email address

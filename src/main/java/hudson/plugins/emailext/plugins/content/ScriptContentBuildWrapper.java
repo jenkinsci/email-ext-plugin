@@ -14,7 +14,7 @@ import jenkins.model.Jenkins;
 
 public class ScriptContentBuildWrapper {
 
-    private AbstractBuild<?, ?> build;
+    private final AbstractBuild<?, ?> build;
 
     public ScriptContentBuildWrapper(AbstractBuild<?, ?> build) {
         this.build = build;
