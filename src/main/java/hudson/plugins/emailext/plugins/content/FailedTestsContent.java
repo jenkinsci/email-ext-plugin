@@ -57,9 +57,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         if (failCount == 0) {
             buffer.append("All tests passed");
         } else {
-            buffer.append(failCount);
-            buffer.append(" tests failed.");
-            buffer.append('\n');
+            buffer.append(failCount).append(" tests failed.").append('\n');
 
             boolean showOldFailures = !onlyRegressions;
             if(maxLength < Integer.MAX_VALUE) {
@@ -78,9 +76,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
                     }
                 }
                 if (failCount > printedTests) {
-                    buffer.append("... and ");
-                    buffer.append(failCount - printedTests);
-                    buffer.append(" other failed tests.\n\n");
+                    buffer.append("... and ").append(failCount - printedTests).append(" other failed tests.\n\n");
                 }
                 if (printedLength >= maxLength) {
                     buffer.append("\n\n... output truncated.\n\n");
@@ -104,32 +100,22 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     private int outputTest(StringBuilder buffer, TestResult failedTest,
             boolean showStack, boolean showMessage, int lengthLeft) {
         StringBuilder local = new StringBuilder();
-
-        local.append(failedTest.isPassed() ? "PASSED" : "FAILED");
-        local.append(":  ");
+        
+        local.append(failedTest.isPassed() ? "PASSED" : "FAILED").append(":  ");
         
         if(failedTest instanceof CaseResult) {
             local.append(((CaseResult)failedTest).getClassName());
         } else {
             local.append(failedTest.getFullName());
         }
-        local.append('.');
-
-        local.append(failedTest.getDisplayName());
-        local.append('\n');
+        local.append('.').append(failedTest.getDisplayName()).append('\n');
 
         if (showMessage) {
-            local.append('\n');
-            local.append("Error Message:\n");
-            local.append(failedTest.getErrorDetails());
-            local.append('\n');
+            local.append('\n').append("Error Message:\n").append(failedTest.getErrorDetails()).append('\n');
         }
         
         if (showStack) {
-            local.append('\n');
-            local.append("Stack Trace:\n");
-            local.append(failedTest.getErrorStackTrace());
-            local.append('\n');
+            local.append('\n').append("Stack Trace:\n").append(failedTest.getErrorStackTrace()).append('\n');
         }
 
         if (showMessage || showStack) {
