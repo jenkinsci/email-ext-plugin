@@ -32,7 +32,7 @@ public class OnlyRegressionsTest {
         project.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> abstractBuild, Launcher launcher, BuildListener buildListener) throws InterruptedException, IOException {
-                final URL failedTestReport = OnlyRegressionsTest.class.getClassLoader().getResource("hudson/plugins/emailext/testreports/failed_test.xml");
+                final URL failedTestReport = Thread.currentThread().getContextClassLoader().getResource("hudson/plugins/emailext/testreports/failed_test.xml");
                 FilePath workspace = abstractBuild.getWorkspace();
 
                 FilePath testDir = workspace.child("target").child("testreports");

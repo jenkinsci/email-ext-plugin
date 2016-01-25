@@ -11,6 +11,7 @@ import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.util.DescribableList;
 import hudson.util.StreamTaskListener;
 import jenkins.model.JenkinsLocationConfiguration;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -146,7 +147,7 @@ public class ScriptContentTest {
 
         // read expected file in resource to easy compare
         String expectedFile = "hudson/plugins/emailext/templates/" + "content-token.result";
-        InputStream in = getClass().getClassLoader().getResourceAsStream(expectedFile);
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(expectedFile);
         String expected = new Scanner(in).useDelimiter("\\Z").next();
         
         // windows has a \r in each line, so make sure the comparison works correctly
@@ -182,7 +183,7 @@ public class ScriptContentTest {
 
         // read expected file in resource to easy compare
         String expectedFile = "hudson/plugins/emailext/templates/" + "groovy-sample.result";
-        InputStream in = getClass().getClassLoader().getResourceAsStream(expectedFile);
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(expectedFile);
         String expected = new Scanner(in).useDelimiter("\\Z").next();
         
         // windows has a \r in each line, so make sure the comparison works correctly
