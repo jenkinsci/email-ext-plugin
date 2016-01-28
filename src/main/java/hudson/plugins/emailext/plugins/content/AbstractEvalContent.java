@@ -27,6 +27,7 @@ import hudson.Plugin;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,6 +37,7 @@ import java.io.InputStream;
 
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import jenkins.model.Jenkins;
+
 import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.lib.configprovider.model.Config;
@@ -99,7 +101,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
             fileName += extension;
         }        
         
-        inputStream = getClass().getClassLoader().getResourceAsStream(
+        inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(
                 "hudson/plugins/emailext/templates/" + fileName);
 
         if (inputStream == null) {
