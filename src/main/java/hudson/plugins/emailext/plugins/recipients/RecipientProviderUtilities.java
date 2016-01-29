@@ -51,7 +51,7 @@ public final class RecipientProviderUtilities {
         final Set<User> users = new HashSet<User>();
         for (final Run<?, ?> run : runs) {
             debug.send("    build: %d", run.getNumber());
-            if(run instanceof AbstractBuild<?,?>) {
+            if (run instanceof AbstractBuild<?,?>) {
                 final ChangeLogSet<?> changeLogSet = ((AbstractBuild<?,?>)run).getChangeSet();
                 if (changeLogSet == null) {
                     debug.send("      changeLogSet was null");

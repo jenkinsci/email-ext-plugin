@@ -26,23 +26,7 @@ public class TestCountsContent extends DataBoundTokenMacro {
     public boolean acceptsMacroName(String macroName) {
         return macroName.equals(MACRO_NAME);
     }
-
- /*
-    public String getHelpText() {
-        return "Displays the number of tests.\n"
-                + "<ul>\n"
-                + "<li><i>" + VAR_ARG_NAME + "</i> - Defaults to \"" + VAR_DEFAULT_VALUE + "\".\n"
-                + "  <ul>\n"
-                + "    <li>total - the number of all tests. </li>\n"
-                + "    <li>pass - the number of passed tests. </li>\n"
-                + "    <li>fail - the number of failed tests.</li>\n"
-                + "    <li>skip - the number of skipped tests.</li> \n"
-                + "  </ul>\n"
-                + "</li>\n"
-                + "</ul>\n";
-    }
-*/
-    
+   
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {

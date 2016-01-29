@@ -1,23 +1,20 @@
 package hudson.plugins.emailext.plugins.content;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import groovy.lang.Script;
+import hudson.EnvVars;
+import hudson.model.AbstractBuild;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.plugins.ContentBuilder;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
+import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import hudson.EnvVars;
-import hudson.model.Run;
-import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
-import org.jenkinsci.plugins.tokenmacro.TokenMacro;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-
-import groovy.lang.Script;
-import hudson.model.AbstractBuild;
-import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.ContentBuilder;
 
 public abstract class EmailExtScript extends Script {
 
@@ -54,7 +51,16 @@ public abstract class EmailExtScript extends Script {
             }
         }
 
-        if(macro != null) {
+		if (macro == null) {
+            for(TokenMacro m : ContentBuilder.getPrivateMacros()) {
+                if(m.acceptsMacroName(name)) {
+                    macro = m;
+                    break;
+                }
+            }
+        }
+
+        if (macro != null) {
             Map<String, String> argsMap = new HashMap<String, String>();
             ListMultimap<String, String> argsMultimap = ArrayListMultimap.create();
             populateArgs(args, argsMap, argsMultimap);
@@ -68,7 +74,7 @@ public abstract class EmailExtScript extends Script {
             // try environment variables
 
             // Get the build and listener from the binding.
-            Run<?, ?> build = (Run<?, ?>)this.getBinding().getVariable("build");
+            Run<?,?> build = (Run<?,?>)this.getBinding().getVariable("build");
             TaskListener listener = (TaskListener)this.getBinding().getVariable("listener");
             EnvVars vars = build.getEnvironment(listener);
             if(vars.containsKey(name)) {

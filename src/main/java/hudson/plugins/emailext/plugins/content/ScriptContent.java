@@ -5,29 +5,14 @@ import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
-import hudson.Extension;
 import hudson.ExtensionList;
-import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
+import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.GroovyTemplateConfig.GroovyTemplateConfigProvider;
 import hudson.plugins.emailext.ScriptSandbox;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import hudson.plugins.emailext.plugins.EmailToken;
 import jenkins.model.Jenkins;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -36,7 +21,16 @@ import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 
-@Extension
+import java.io.*;
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+@EmailToken
 public class ScriptContent extends AbstractEvalContent {
     
     private static Object configProvider;

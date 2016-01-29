@@ -1,22 +1,22 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.Extension;
 import hudson.ExtensionList;
-import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import hudson.model.TaskListener;
+import hudson.plugins.emailext.plugins.EmailToken;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.plugins.configfiles.custom.CustomConfig.CustomConfigProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
-@Extension
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+@EmailToken
 public class TemplateContent extends AbstractEvalContent {
     
     private static Object configProvider;

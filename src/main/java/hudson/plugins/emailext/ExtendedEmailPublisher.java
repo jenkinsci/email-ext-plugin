@@ -791,7 +791,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * behave sensibly when a later build actually finishes before an earlier
      * one.
      *
-     * @param run a build for which we may be sending mail
+     * @param run a run for which we may be sending mail
      * @param listener a listener to which we may print warnings in case the
      * actual previous build is still in progress
      * @return the previous build, or null if that build is missing, or is still

@@ -1,27 +1,24 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.Extension;
 import hudson.ExtensionList;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.JellyTemplateConfig.JellyTemplateConfigProvider;
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import hudson.plugins.emailext.plugins.EmailToken;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.jelly.JellyContext;
-import org.apache.commons.jelly.JellyException;
-import org.apache.commons.jelly.JellyTagException;
-import org.apache.commons.jelly.Script;
-import org.apache.commons.jelly.XMLOutput;
+import org.apache.commons.jelly.*;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.xml.sax.InputSource;
 
-@Extension
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
+@EmailToken
 public class JellyScriptContent extends AbstractEvalContent {
     
     private static Object configProvider;
