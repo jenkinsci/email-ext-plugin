@@ -170,6 +170,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      */
     public MatrixTriggerMode matrixTriggerMode;
 
+    public ExtendedEmailPublisher() {
+    }
+
     @Deprecated
     public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
             String project_default_content, String project_attachments, String project_presend_script,
@@ -207,10 +210,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     public void setPostsendScript(String project_postsend_script) {
         this.postsendScript = project_postsend_script;
     }
-
-    public ExtendedEmailPublisher() {
-    }
-
+    
     /**
      * Get the list of configured email theTriggers for this project.
      *

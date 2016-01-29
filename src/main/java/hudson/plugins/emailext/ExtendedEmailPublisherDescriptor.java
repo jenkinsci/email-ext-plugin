@@ -159,6 +159,17 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      */
     private boolean enableWatching;
 
+    public ExtendedEmailPublisherDescriptor() {
+        super(ExtendedEmailPublisher.class);
+        load();
+        if (defaultBody == null && defaultSubject == null && emergencyReroute == null) {
+            defaultBody = ExtendedEmailPublisher.DEFAULT_BODY_TEXT;
+            defaultSubject = ExtendedEmailPublisher.DEFAULT_SUBJECT_TEXT;
+            emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
+            enableSecurity = false;
+        }
+    }
+
     @Override
     public String getDisplayName() {
         return Messages.ExtendedEmailPublisherDescriptor_DisplayName();
@@ -358,17 +369,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             save();
         }
         return defaultTriggerIds;
-    }
-
-    public ExtendedEmailPublisherDescriptor() {
-        super(ExtendedEmailPublisher.class);
-        load();
-        if (defaultBody == null && defaultSubject == null && emergencyReroute == null) {
-            defaultBody = ExtendedEmailPublisher.DEFAULT_BODY_TEXT;
-            defaultSubject = ExtendedEmailPublisher.DEFAULT_SUBJECT_TEXT;
-            emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
-            enableSecurity = false;
-        }
     }
 
     @Override
