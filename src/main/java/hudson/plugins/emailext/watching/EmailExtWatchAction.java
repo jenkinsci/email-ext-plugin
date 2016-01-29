@@ -1,19 +1,25 @@
 package hudson.plugins.emailext.watching;
 
 import hudson.Extension;
-import hudson.model.*;
+import hudson.model.Action;
+import hudson.model.UserPropertyDescriptor;
+import hudson.model.AbstractProject;
 import hudson.model.Descriptor.FormException;
-import hudson.plugins.emailext.*;
+import hudson.model.User;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.tasks.Publisher;
+import hudson.tasks.Mailer;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import hudson.tasks.Mailer;
-import java.util.ArrayList;
+
 import javax.servlet.ServletException;
 
 import net.sf.json.JSONObject;
+
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
@@ -42,7 +48,7 @@ public class EmailExtWatchAction implements Action {
         }
         
         private void clearTriggers() {
-            triggers = Collections.EMPTY_LIST;
+            triggers = Collections.<EmailTrigger>emptyList();
         }
 
         @Extension
@@ -92,7 +98,7 @@ public class EmailExtWatchAction implements Action {
     
     public boolean isWatching() {
         List<EmailTrigger> triggers = getTriggers();
-        return triggers != null && triggers.size() > 0;
+        return triggers != null && !triggers.isEmpty();
     }
     
     public List<EmailTrigger> getTriggers() {

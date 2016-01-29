@@ -116,7 +116,7 @@ public class ScriptContent extends AbstractEvalContent {
         binding.put("project", build.getParent());
         
         // we add the binding to the SimpleTemplateEngine instead of the shell
-        GroovyShell shell = createEngine(descriptor, Collections.EMPTY_MAP);
+        GroovyShell shell = createEngine(descriptor, Collections.<String, Object>emptyMap());
         SimpleTemplateEngine engine = new SimpleTemplateEngine(shell);
         try {
             String text = IOUtils.toString(templateStream);

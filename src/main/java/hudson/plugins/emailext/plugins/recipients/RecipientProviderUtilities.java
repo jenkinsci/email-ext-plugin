@@ -23,6 +23,15 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
+import hudson.EnvVars;
+import hudson.model.TaskListener;
+import hudson.model.AbstractBuild;
+import hudson.model.Cause;
+import hudson.model.Run;
+import hudson.model.User;
+import hudson.plugins.emailext.EmailRecipientUtils;
+import hudson.scm.ChangeLogSet;
+
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashSet;
@@ -30,11 +39,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.mail.internet.InternetAddress;
-
-import hudson.EnvVars;
-import hudson.model.*;
-import hudson.plugins.emailext.EmailRecipientUtils;
-import hudson.scm.ChangeLogSet;
 
 public final class RecipientProviderUtilities {
     private static final Logger LOGGER = Logger.getLogger(RecipientProviderUtilities.class.getName());

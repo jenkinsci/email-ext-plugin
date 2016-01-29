@@ -25,7 +25,7 @@ import org.jenkinsci.plugins.tokenmacro.TokenMacro;
  * @author kyle.sweeney@valtech.com
  *
  */
-public class ContentBuilder {
+public final class ContentBuilder {
     
     @CopyOnWrite
     private static volatile List<TokenMacro> privateMacros;
@@ -39,6 +39,10 @@ public class ContentBuilder {
     private static final String PROJECT_DEFAULT_BODY = "\\$PROJECT_DEFAULT_CONTENT|\\$\\{PROJECT_DEFAULT_CONTENT\\}";
     private static final String PROJECT_DEFAULT_SUBJECT = "\\$PROJECT_DEFAULT_SUBJECT|\\$\\{PROJECT_DEFAULT_SUBJECT\\}";
     private static final String PROJECT_DEFAULT_REPLYTO = "\\$PROJECT_DEFAULT_REPLYTO|\\$\\{PROJECT_DEFAULT_REPLYTO\\}";
+
+    private ContentBuilder() {
+    	throw new InstantiationError( "Must not instantiate this class" );
+    }
 
     private static String noNull(String string) {
         return string == null ? "" : string;

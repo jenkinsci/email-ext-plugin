@@ -91,7 +91,7 @@ import hudson.tasks.test.AbstractTestResultAction;
 
                         @Override
                         public Collection<String> getAffectedPaths() {
-                            return Collections.EMPTY_SET;
+                            return Collections.emptySet();
                         }
 
                         @Override
@@ -101,7 +101,7 @@ import hudson.tasks.test.AbstractTestResultAction;
 
                         @Override
                         public Collection<? extends ChangeLogSet.AffectedFile> getAffectedFiles() {
-                            return Collections.EMPTY_SET;
+                            return Collections.emptySet();
                         }
                     };
                 }

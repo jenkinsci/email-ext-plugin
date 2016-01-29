@@ -1,15 +1,20 @@
 package hudson.plugins.emailext.watching;
 
 import hudson.Extension;
-import hudson.model.*;
-import net.sf.json.JSONObject;
-import org.kohsuke.stapler.StaplerRequest;
+import hudson.model.Action;
+import hudson.model.JobProperty;
+import hudson.model.JobPropertyDescriptor;
+import hudson.model.Job;
+import hudson.model.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+
+import net.sf.json.JSONObject;
+
+import org.kohsuke.stapler.StaplerRequest;
 
 /**
  * Created by acearl on 12/4/2014.
@@ -20,7 +25,7 @@ public class EmailExtWatchJobProperty extends JobProperty<Job<?, ?>> {
 
     @Override
     public Collection<Action> getJobActions(Job<?, ?> job) {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     public List<String> getWatchers() {
