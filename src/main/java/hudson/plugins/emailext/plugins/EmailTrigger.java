@@ -137,8 +137,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     }
     
     protected EmailType createMailType(StaplerRequest req, JSONObject formData) {
-        EmailType m = (EmailType)req.bindJSON(EmailType.class, formData);
-        return m;
+        return (EmailType)req.bindJSON(EmailType.class, formData);
     }
 
     /**
