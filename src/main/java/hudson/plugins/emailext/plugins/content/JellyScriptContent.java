@@ -46,8 +46,7 @@ public class JellyScriptContent extends AbstractEvalContent {
         } catch (JellyException e) {
             return "JellyException: " + e.getMessage();
         } catch (FileNotFoundException e) {
-            String missingTemplateError = generateMissingFile("Jelly", template);
-            return missingTemplateError;
+            return generateMissingFile("Jelly", template);
         } finally {
             IOUtils.closeQuietly(inputStream);
         }

@@ -64,24 +64,24 @@ public class EmailType {
      * Specifies whether or not we should send this email to the developer/s who
      * made changes.
      */
-    private transient boolean sendToDevelopers;
+    private boolean sendToDevelopers;
 
     /**
      * Specifies whether or not we should send this email to the requester who
      * triggered build.
      */
-    private transient boolean sendToRequester;
+    private boolean sendToRequester;
 
     /**
      * Specifies whether or not we should send this email to all developers
      * since the last success.
      */
-    private transient boolean includeCulprits;
+    private boolean includeCulprits;
 
     /**
      * Specifies whether or not we should send this email to the recipient list
      */
-    private transient boolean sendToRecipientList;
+    private boolean sendToRecipientList;
 
     public EmailType() {
         subject = "";
