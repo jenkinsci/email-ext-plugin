@@ -29,6 +29,55 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
 
     private EmailType email;
 
+    @Deprecated
+    protected EmailTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        List<RecipientProvider> providers = new ArrayList<RecipientProvider>();
+        if(sendToList) {
+            providers.add(new ListRecipientProvider());
+        }
+
+        if(sendToDevs) {
+            providers.add(new DevelopersRecipientProvider());
+        }
+
+        if(sendToRequestor) {
+            providers.add(new RequesterRecipientProvider());
+        }
+
+        if(sendToCulprits) {
+            providers.add(new CulpritsRecipientProvider());
+        }
+
+        email = new EmailType();
+        email.addRecipientProviders(providers);
+        email.setRecipientList(recipientList);
+        email.setReplyTo(replyTo);
+        email.setSubject(subject);
+        email.setBody(body);
+        email.setAttachmentsPattern(attachmentsPattern);
+        email.setAttachBuildLog(attachBuildLog > 0);
+        email.setCompressBuildLog(attachBuildLog > 1);
+        email.setContentType(contentType);
+    }
+
+    protected EmailTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo,
+                           String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        email = new EmailType();
+        email.addRecipientProviders(recipientProviders);
+        email.setRecipientList(recipientList);
+        email.setReplyTo(replyTo);
+        email.setSubject(subject);
+        email.setBody(body);
+        email.setAttachmentsPattern(attachmentsPattern);
+        email.setAttachBuildLog(attachBuildLog > 0);
+        email.setCompressBuildLog(attachBuildLog > 1);
+        email.setContentType(contentType);
+    }
+
+    protected EmailTrigger(JSONObject formData) {
+
+    }
+
     public static DescriptorExtensionList<EmailTrigger, EmailTriggerDescriptor> all() {
         return Jenkins.getActiveInstance().<EmailTrigger, EmailTriggerDescriptor>getDescriptorList(EmailTrigger.class);
     }
@@ -42,55 +91,6 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         }
 
         return list;
-    }
-
-    @Deprecated
-    protected EmailTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        List<RecipientProvider> providers = new ArrayList<RecipientProvider>();
-        if(sendToList) {
-            providers.add(new ListRecipientProvider());
-        }
-        
-        if(sendToDevs) {
-            providers.add(new DevelopersRecipientProvider());
-        }
-        
-        if(sendToRequestor) {
-            providers.add(new RequesterRecipientProvider());
-        }
-        
-        if(sendToCulprits) {
-            providers.add(new CulpritsRecipientProvider());
-        }
-        
-        email = new EmailType();
-        email.addRecipientProviders(providers);
-        email.setRecipientList(recipientList);
-        email.setReplyTo(replyTo);
-        email.setSubject(subject);
-        email.setBody(body);
-        email.setAttachmentsPattern(attachmentsPattern);
-        email.setAttachBuildLog(attachBuildLog > 0);
-        email.setCompressBuildLog(attachBuildLog > 1);
-        email.setContentType(contentType);
-    }
-    
-    protected EmailTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, 
-            String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        email = new EmailType();
-        email.addRecipientProviders(recipientProviders);
-        email.setRecipientList(recipientList);
-        email.setReplyTo(replyTo);
-        email.setSubject(subject);
-        email.setBody(body);
-        email.setAttachmentsPattern(attachmentsPattern);
-        email.setAttachBuildLog(attachBuildLog > 0);
-        email.setCompressBuildLog(attachBuildLog > 1);
-        email.setContentType(contentType);
-    }
-    
-    protected EmailTrigger(JSONObject formData) {
-        
     }
 
     /**
