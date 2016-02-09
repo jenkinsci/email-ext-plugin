@@ -188,7 +188,6 @@ public class EmailRecipientUtils {
     
     public static String getRecipientList(ExtendedEmailPublisherContext context, String recipients)
         throws MessagingException {
-        final String recipientsTransformed = StringUtils.isBlank(recipients) ? "" : ContentBuilder.transformText(recipients, context, context.getPublisher().getRuntimeMacros(context));
-        return recipientsTransformed;
+        return StringUtils.isBlank(recipients) ? "" : ContentBuilder.transformText(recipients, context, context.getPublisher().getRuntimeMacros(context));
     }
 }
