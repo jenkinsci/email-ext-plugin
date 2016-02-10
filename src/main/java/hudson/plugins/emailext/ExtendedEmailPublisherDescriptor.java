@@ -416,7 +416,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
         debugMode = req.hasParameter("ext_mailer_debug_mode");
 
-        //enableWatching = req.getParameter("ext_mailer_enable_watching") != null;
         // convert the value into megabytes (1024 * 1024 bytes)
         maxAttachmentSize = nullify(req.getParameter("ext_mailer_max_attachment_size")) != null
                 ? (Long.parseLong(req.getParameter("ext_mailer_max_attachment_size")) * 1024 * 1024) : -1;

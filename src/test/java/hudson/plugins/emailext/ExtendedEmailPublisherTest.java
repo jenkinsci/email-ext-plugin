@@ -788,8 +788,6 @@ public class ExtendedEmailPublisherTest {
 
         assertThat("Access was done to Jenkins instance with security enabled, so we should see an error", build.getLog(100),
                 not(hasItem("Pre-send script tried to access secured objects: Use of 'jenkins' is disallowed by security policy")));
-
-        //f.set(ExtendedEmailPublisher.DESCRIPTOR, false);
     }
 
     @Test
@@ -822,7 +820,6 @@ public class ExtendedEmailPublisherTest {
 
         assertThat("Access was done to Jenkins instance with security enabled, so we should see an error", build.getLog(100),
                 hasItem("Pre-send script tried to access secured objects: Use of 'Jenkins' and 'Hudson' are disallowed by security policy"));
-        //f.set(ExtendedEmailPublisher.DESCRIPTOR, false);
     }
 
     @Test
