@@ -16,9 +16,12 @@ import java.util.Set;
 
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
 import org.junit.Rule;
 import org.junit.Test;
 
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 public class EmailRecipientUtilsTest {
@@ -35,6 +38,20 @@ public class EmailRecipientUtilsTest {
     
     private EmailRecipientUtils emailRecipientUtils;
     private EnvVars envVars;
+
+    @Test
+    @Issue("JENKINS-32889")
+    public void testDelimiters() throws Exception {
+        String[] testStrings = { "mickey@disney.com;donald@disney.com;goofy@disney.com;pluto@disney.com",
+                "mickey@disney.com donald@disney.com goofy@disney.com pluto@disney.com",
+                "mickey@disney.com,donald@disney.com,goofy@disney.com,pluto@disney.com" };
+        for(String testString : testStrings) {
+            Set<InternetAddress> addresses = emailRecipientUtils.convertRecipientString(testString, envVars, EmailRecipientUtils.TO);
+
+            assertFalse(addresses.isEmpty());
+            assertEquals(addresses.size(), 4);
+        }
+    }
 
     @Test
     public void testConvertRecipientList_emptyRecipientStringShouldResultInEmptyEmailList()

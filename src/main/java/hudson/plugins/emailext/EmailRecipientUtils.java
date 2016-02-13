@@ -1,20 +1,16 @@
 package hudson.plugins.emailext;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeUtility;
 
 import hudson.EnvVars;
 import hudson.model.TaskListener;
 import hudson.model.User;
-import hudson.plugins.emailext.ExtendedEmailPublisherContext;
-import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.tasks.Mailer;
 import hudson.util.FormValidation;
@@ -27,8 +23,6 @@ import org.apache.commons.lang.StringUtils;
 public class EmailRecipientUtils {
 
     private static final Logger LOGGER = Logger.getLogger(EmailRecipientUtils.class.getName());
-
-    public static final String COMMA_SEPARATED_SPLIT_REGEXP = "[,\\s]+";
 
     public static final int TO = 0;
     public static final int CC = 1;
@@ -43,7 +37,7 @@ public class EmailRecipientUtils {
         throws AddressException, UnsupportedEncodingException {
         final Set<InternetAddress> internetAddresses = new LinkedHashSet<InternetAddress>();
         if (!StringUtils.isBlank(recipientList)) {
-            final String expandedRecipientList = fixupSpaces(envVars.expand(recipientList));
+            final String expandedRecipientList = fixupDelimiters(envVars.expand(recipientList));
             InternetAddress[] all = InternetAddress.parse(expandedRecipientList.replace("bcc:", "").replace("cc:", ""));
             final Set<InternetAddress> to = new LinkedHashSet<InternetAddress>();
             final Set<InternetAddress> cc = new LinkedHashSet<InternetAddress>();
@@ -130,11 +124,13 @@ public class EmailRecipientUtils {
         }
     }
 
-    private static String fixupSpaces(String input) {
+    private static String fixupDelimiters(String input) {
         input = input.replaceAll("\\s+", " ");
         if(input.contains(" ") && !input.contains(",")) {
             input = input.replace(" ", ",");
         }
+
+        input = input.replace(';', ',');
         return input;
     }
     
