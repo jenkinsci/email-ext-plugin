@@ -103,7 +103,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
             fileName += extension;
         }        
         
-        inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(
+        inputStream = getClass().getClassLoader().getResourceAsStream(
                 "hudson/plugins/emailext/templates/" + fileName);
 
         if (inputStream == null) {
