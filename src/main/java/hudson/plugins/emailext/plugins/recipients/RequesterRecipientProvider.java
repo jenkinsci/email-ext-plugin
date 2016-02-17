@@ -27,8 +27,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
  */
 
 public class RequesterRecipientProvider extends RecipientProvider {
-    private static final Logger LOGGER = Logger.getLogger(RequesterRecipientProvider.class.getName());
-
     @DataBoundConstructor
     public RequesterRecipientProvider() {
         
