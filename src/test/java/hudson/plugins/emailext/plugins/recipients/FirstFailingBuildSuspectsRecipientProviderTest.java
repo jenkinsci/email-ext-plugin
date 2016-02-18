@@ -48,8 +48,6 @@ import jenkins.model.Jenkins;
 })
 public class FirstFailingBuildSuspectsRecipientProviderTest {
 
-    private static final String AT_DOMAIN = "@DOMAIN";
-
     @Before
     public void before() throws Exception {
         final Jenkins jenkins = PowerMockito.mock(Jenkins.class);
