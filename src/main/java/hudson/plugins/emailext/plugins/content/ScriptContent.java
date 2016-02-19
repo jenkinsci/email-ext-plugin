@@ -18,7 +18,6 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
-import org.kohsuke.groovy.sandbox.SandboxTransformer;
 
 import java.io.*;
 import java.lang.ref.Reference;

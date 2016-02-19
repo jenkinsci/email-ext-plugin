@@ -6,18 +6,15 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProvider;
-import java.util.ArrayList;
-import java.util.List;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
-import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.kohsuke.stapler.StaplerRequest;
+
+import java.util.List;
 
 public abstract class AbstractScriptTrigger extends EmailTrigger {
     protected String triggerScript;
