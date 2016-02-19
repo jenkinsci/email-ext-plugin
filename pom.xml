@@ -110,11 +110,6 @@
             <artifactId>token-macro</artifactId>
             <version>1.12.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>script-security</artifactId>
-            <version>1.6</version>
-        </dependency>
 
         <!-- workflow stuff -->
         <dependency>
