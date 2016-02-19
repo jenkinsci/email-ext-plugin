@@ -758,70 +758,6 @@ public class ExtendedEmailPublisherTest {
         assertEquals(1, Mailbox.get("slide.o.mix@xxx.com").size());
     }
 
-    
-    @Test
-    public void testPresendScriptNoSecurity() throws Exception {
-        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("enableSecurity");
-        f.setAccessible(true);
-        f.set(publisher.getDescriptor(), false);
-
-        publisher.presendScript = "for(it in Jenkins.instance.items) {\n\tSystem.out.println(it.name)\n}\n";
-        SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
-        successTrigger.setEmail(new EmailType() {
-            {
-                addRecipientProvider(new RequesterRecipientProvider());
-            }
-        });
-        publisher.getConfiguredTriggers().add(successTrigger);
-
-        User u = User.get("kutzi");
-        u.setFullName("Christoph Kutzinski");
-        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
-        u.addProperty(prop);
-
-        UserCause cause = new MockUserCause("kutzi");
-        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
-        j.assertBuildStatusSuccess(build);
-
-        assertEquals(1, Mailbox.get("kutzi@xxx.com").size());
-
-        assertThat("Access was done to Jenkins instance with security enabled, so we should see an error", build.getLog(100),
-                not(hasItem("Pre-send script tried to access secured objects: Use of 'jenkins' is disallowed by security policy")));
-    }
-
-    @Test
-    public void testPresendScriptSecurity() throws Exception {
-        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("enableSecurity");
-        f.setAccessible(true);
-        f.set(publisher.getDescriptor(), true);
-
-        publisher.presendScript = "for(it in Jenkins.instance.items) {\n\tSystem.out.println(it.name)\n}\n";
-        SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
-        successTrigger.setEmail(new EmailType() {
-            {
-                addRecipientProvider(new RequesterRecipientProvider());
-            }
-        });
-        publisher.getConfiguredTriggers().add(successTrigger);
-
-        User u = User.get("kutzi");
-        u.setFullName("Christoph Kutzinski");
-        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
-        u.addProperty(prop);
-
-        UserCause cause = new MockUserCause("kutzi");
-        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
-
-        j.assertBuildStatusSuccess(build);
-
-        assertEquals(1, Mailbox.get("kutzi@xxx.com").size());
-
-        assertThat("Access was done to Jenkins instance with security enabled, so we should see an error", build.getLog(100),
-                hasItem("Pre-send script tried to access secured objects: Use of 'Jenkins' and 'Hudson' are disallowed by security policy"));
-    }
-
     @Test
     public void testPostsendScriptModifiesMessageId() throws Exception {
         publisher.postsendScript = "msg.setHeader('Message-ID', '<12345@xxx.com>')";
@@ -951,52 +887,6 @@ public class ExtendedEmailPublisherTest {
         assertEquals(1, headers.length);
 
         assertEquals("<12345@xxx.com>", headers[0]);
-    }
-
-    @Test
-    public void testPostsendScriptNoSecurity() throws Exception {
-        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("enableSecurity");
-        f.setAccessible(true);
-        f.set(publisher.getDescriptor(), false);
-
-        publisher.postsendScript = "for(it in Jenkins.instance.items) {\n\tSystem.out.println(it.name)\n}\n";
-
-        project.getBuildersList().add(new FailureBuilder());
-        FailureTrigger trigger = new FailureTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
-        addEmailType(trigger);
-        publisher.getConfiguredTriggers().add(trigger);
-
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build);
-
-        assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
-
-        assertThat("Access was done to Jenkins instance with security enabled, so we should see an error", build.getLog(100),
-                not(hasItem("Post-send script tried to access secured objects: Use of 'jenkins' is disallowed by security policy")));
-    }
-
-    @Test
-    public void testPostsendScriptSecurity() throws Exception {
-        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("enableSecurity");
-        f.setAccessible(true);
-        f.set(publisher.getDescriptor(), true);
-
-        publisher.postsendScript = "for(it in Jenkins.instance.items) {\n\tSystem.out.println(it.name)\n}\n";
-
-        project.getBuildersList().add(new FailureBuilder());
-        FailureTrigger trigger = new FailureTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
-        addEmailType(trigger);
-        publisher.getConfiguredTriggers().add(trigger);
-
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build);
-
-        assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
-
-        assertThat("Access was done to Jenkins instance with security enabled, so we should see an error", build.getLog(100),
-                hasItem("Post-send script tried to access secured objects: Use of 'Jenkins' and 'Hudson' are disallowed by security policy"));
     }
 
     @Test

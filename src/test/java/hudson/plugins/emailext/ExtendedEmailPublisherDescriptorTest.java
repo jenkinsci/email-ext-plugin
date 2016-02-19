@@ -83,10 +83,6 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertNotNull("Debug mode should be present", debugMode);
         assertFalse("Debug mode should not be checked by default", debugMode.isChecked());
         
-        HtmlCheckBoxInput securityMode = page.getElementByName("ext_mailer_security_enabled");
-        assertNotNull("Security mode should be present", securityMode);
-        assertFalse("Security mode should not be checked by default", securityMode.isChecked());
-        
         try {
             page.getElementByName("defaultClasspath");
             fail("defaultClasspath section should not be present");

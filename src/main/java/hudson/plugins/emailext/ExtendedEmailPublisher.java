@@ -67,7 +67,6 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
-import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -493,7 +492,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         if (StringUtils.isNotBlank(script)) {
             debug(context.getListener().getLogger(), "Executing %s script", scriptName);
             ClassLoader cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
-            ScriptSandbox sandbox = null;
+
             CompilerConfiguration cc = new CompilerConfiguration();
             cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
             cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
@@ -503,11 +502,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     "hudson.model"));
 
             expandClasspath(context, cc);
-            if (getDescriptor().isSecurityEnabled()) {
-                debug(context.getListener().getLogger(), "Setting up sandbox for %s script", scriptName);
-                cc.addCompilationCustomizers(new SandboxTransformer());
-                sandbox = new ScriptSandbox();
-            }
 
             Binding binding = new Binding();
             binding.setVariable("build", context.getBuild());
@@ -528,10 +522,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             GroovyShell shell = new GroovyShell(cl, binding, cc);
             StringWriter out = new StringWriter();
             PrintWriter pw = new PrintWriter(out);
-
-            if (sandbox != null) {
-                sandbox.register();
-            }
 
             try {
                 shell.evaluate(script);

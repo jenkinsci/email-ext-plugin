@@ -146,7 +146,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     private boolean debugMode = false;
 
-    private boolean enableSecurity = false;
+    private transient boolean enableSecurity = false;
 
     /**
      * If true, then the 'Email Template Testing' link will only be displayed
@@ -166,7 +166,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             defaultBody = ExtendedEmailPublisher.DEFAULT_BODY_TEXT;
             defaultSubject = ExtendedEmailPublisher.DEFAULT_SUBJECT_TEXT;
             emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
-            enableSecurity = false;
         }
     }
 
@@ -325,7 +324,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public boolean isSecurityEnabled() {
-        return enableSecurity;
+        return false;
     }
 
     public boolean isAdminRequiredForTemplateTesting() {
@@ -423,7 +422,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                 ? req.getParameter("ext_mailer_default_recipients") : "";
 
         precedenceBulk = req.hasParameter("ext_mailer_add_precedence_bulk");
-        enableSecurity = req.hasParameter("ext_mailer_security_enabled");
 
         excludedCommitters = req.getParameter("ext_mailer_excluded_committers");
 
