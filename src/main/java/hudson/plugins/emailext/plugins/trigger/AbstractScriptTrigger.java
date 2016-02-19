@@ -5,7 +5,6 @@ import groovy.lang.GroovyShell;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.ScriptSandbox;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
@@ -69,7 +68,6 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
     
     private GroovyShell createEngine(AbstractBuild<?, ?> build, TaskListener listener) {
         ClassLoader cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
-        ScriptSandbox sandbox = null;
         CompilerConfiguration cc = new CompilerConfiguration();
         cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
                 "jenkins",
@@ -78,10 +76,6 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
                 "hudson.model"));
 
         ExtendedEmailPublisher publisher = build.getProject().getPublishersList().get(ExtendedEmailPublisher.class);
-        if (publisher.getDescriptor().isSecurityEnabled()) {
-            cc.addCompilationCustomizers(new SandboxTransformer());
-            sandbox = new ScriptSandbox();
-        }
 
         Binding binding = new Binding();
         binding.setVariable("build", build);
@@ -90,11 +84,6 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
         binding.setVariable("out", listener.getLogger());
 
         GroovyShell shell = new GroovyShell(cl, binding, cc);
-
-        if (sandbox != null) {
-            sandbox.register();
-        }
-
         return shell;
     }
 }

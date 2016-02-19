@@ -10,7 +10,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.GroovyTemplateConfig.GroovyTemplateConfigProvider;
-import hudson.plugins.emailext.ScriptSandbox;
 import hudson.plugins.emailext.plugins.EmailToken;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
@@ -179,7 +178,6 @@ public class ScriptContent extends AbstractEvalContent {
             throws FileNotFoundException, IOException {
 
         ClassLoader cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
-        ScriptSandbox sandbox = null;
         CompilerConfiguration cc = new CompilerConfiguration();
         cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName()); 
         cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
@@ -188,20 +186,12 @@ public class ScriptContent extends AbstractEvalContent {
                 "hudson",
                 "hudson.model"));
 
-        if (descriptor.isSecurityEnabled()) {
-            cc.addCompilationCustomizers(new SandboxTransformer());
-            sandbox = new ScriptSandbox();
-        }
-
         Binding binding = new Binding();
         for (Map.Entry<String, Object> e : variables.entrySet()) {
             binding.setVariable(e.getKey(), e.getValue());
         }
 
         GroovyShell shell = new GroovyShell(cl, binding, cc);
-        if (sandbox != null) {
-            sandbox.register();
-        }
         return shell;
     }
 
