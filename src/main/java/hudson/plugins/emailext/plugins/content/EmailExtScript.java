@@ -18,7 +18,7 @@ import java.util.Map;
 
 public abstract class EmailExtScript extends Script {
 
-    private void populateArgs(Object args, Map<String, String> map, ListMultimap<String, String> multiMap) {
+    private static void populateArgs(Object args, Map<String, String> map, ListMultimap<String, String> multiMap) {
         if(args instanceof Object[]) {
             Object[] argArray = (Object[])args;
             if(argArray.length > 0) {

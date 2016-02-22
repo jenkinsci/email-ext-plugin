@@ -25,7 +25,7 @@ public class StaticAnalysisUtilities {
      * @return The static analysis actions for the specified build. The returned
      * list might be empty if there are no such actions.
      */
-    public List<Action> getActions(AbstractBuild<?, ?> build) {
+    public static List<Action> getActions(AbstractBuild<?, ?> build) {
         ArrayList<Action> actions = new ArrayList<Action>();
         for (Action action : build.getActions()) {
             if (AbstractResultAction.class.isInstance(action) || MavenResultAction.class.isInstance(action)) {

@@ -465,7 +465,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return super.configure(req, formData);
     }
 
-    private String nullify(String v) {
+    private static String nullify(String v) {
         if (v != null && v.length() == 0) {
             v = null;
         }
