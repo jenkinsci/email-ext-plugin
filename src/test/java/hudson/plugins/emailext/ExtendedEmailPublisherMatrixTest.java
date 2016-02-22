@@ -44,7 +44,7 @@ public class ExtendedEmailPublisherMatrixTest {
             publisher.defaultContent = "%DEFAULT_CONTENT";
             publisher.attachBuildLog = false;
 
-            project = createMatrixProject();
+            project = j.jenkins.createProject(MatrixProject.class, "Foo");
             project.getPublishersList().add( publisher );
             slaves = new ArrayList<DumbSlave>(); 
             slaves.add(createOnlineSlave(new LabelAtom("success-slave1")));

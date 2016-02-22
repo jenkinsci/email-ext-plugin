@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define">
  <body style="font-family: Verdana, Helvetica, sans serif; font-size: 11px; color: black">
   <j:set var="spc" value="&amp;nbsp;&amp;nbsp;" />

@@ -3,6 +3,7 @@
 
   Since we don't really have anything dynamic here, let's just use static HTML. 
 -->
+<?jelly escape-by-default='true'?>
 <div>
   This plugin is a replacement for Jenkins's email publisher
 </div>
