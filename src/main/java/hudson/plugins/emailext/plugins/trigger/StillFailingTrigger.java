@@ -34,7 +34,7 @@ public class StillFailingTrigger extends EmailTrigger {
 
         if (buildResult == Result.FAILURE) {
             Run<?, ?> prevRun = ExtendedEmailPublisher.getPreviousRun(build, listener);
-            if (prevRun != null && (prevRun.getResult() == Result.FAILURE)) {
+            if (prevRun != null && prevRun.getResult() == Result.FAILURE) {
                 return true;
             }
         }

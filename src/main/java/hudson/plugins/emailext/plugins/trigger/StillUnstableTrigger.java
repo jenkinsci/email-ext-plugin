@@ -36,7 +36,7 @@ public class StillUnstableTrigger extends EmailTrigger {
 
         if (buildResult == Result.UNSTABLE) {
             Run<?,?> prevRun = ExtendedEmailPublisher.getPreviousRun(build, listener);
-            if (prevRun != null && (prevRun.getResult() == Result.UNSTABLE)) {
+            if (prevRun != null && prevRun.getResult() == Result.UNSTABLE) {
                 return true;
             }
         }

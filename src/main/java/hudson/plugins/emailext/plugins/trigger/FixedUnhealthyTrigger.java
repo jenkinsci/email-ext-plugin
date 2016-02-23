@@ -52,7 +52,7 @@ public class FixedUnhealthyTrigger extends EmailTrigger {
         Run<?, ?> prevBuild = ExtendedEmailPublisher.getPreviousRun(build, listener);
 
         // Skip ABORTED builds
-        if (prevBuild != null && (prevBuild.getResult() == Result.ABORTED)) {
+        if (prevBuild != null && prevBuild.getResult() == Result.ABORTED) {
             return getPreviousRun(prevBuild, listener);
         }
 

@@ -40,7 +40,7 @@ public class StatusChangedTrigger extends EmailTrigger {
                 return true;
             }
 
-            return (build.getResult() != prevRun.getResult());
+            return build.getResult() != prevRun.getResult();
         }
 
         return false;

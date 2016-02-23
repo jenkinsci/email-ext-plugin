@@ -49,7 +49,7 @@ public abstract class NthFailureTrigger extends EmailTrigger {
             run = ExtendedEmailPublisher.getPreviousRun(run, listener);
         }
 
-        return (run == null || run.getResult() == Result.SUCCESS || run.getResult() == Result.UNSTABLE);
+        return run == null || run.getResult() == Result.SUCCESS || run.getResult() == Result.UNSTABLE;
     }
 
     public abstract static class DescriptorImpl extends EmailTriggerDescriptor {

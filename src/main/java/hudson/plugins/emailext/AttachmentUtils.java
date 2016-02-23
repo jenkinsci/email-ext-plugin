@@ -137,7 +137,7 @@ public class AttachmentUtils implements Serializable {
 
             for (FilePath file : files) {
                 if (maxAttachmentSize > 0
-                        && (totalAttachmentSize + file.length()) >= maxAttachmentSize) {
+                        && totalAttachmentSize + file.length() >= maxAttachmentSize) {
                     context.getListener().getLogger().println("Skipping `" + file.getName()
                             + "' (" + file.length()
                             + " bytes) - too large for maximum attachments size");

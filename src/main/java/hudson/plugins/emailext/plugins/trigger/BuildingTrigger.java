@@ -35,7 +35,7 @@ public class BuildingTrigger extends EmailTrigger {
 
         if (buildResult == Result.UNSTABLE) {
             Run<?, ?> prevRun = ExtendedEmailPublisher.getPreviousRun(build, listener);
-            if (prevRun != null && (prevRun.getResult() == Result.FAILURE)) {
+            if (prevRun != null && prevRun.getResult() == Result.FAILURE) {
                 return true;
             }
         }
