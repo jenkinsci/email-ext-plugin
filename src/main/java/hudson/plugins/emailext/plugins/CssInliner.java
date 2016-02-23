@@ -57,7 +57,7 @@ public class CssInliner {
      * @param doc the html document
      * @return a string representing the stylesheet.
      */
-    private String fetchStyles(Document doc) {
+    private static String fetchStyles(Document doc) {
         Elements els = doc.select(STYLE_TAG);
         StringBuilder styles = new StringBuilder();
         for (Element e : els) {
@@ -102,7 +102,7 @@ public class CssInliner {
      *
      * @param doc the html document
      */
-    private void inlineImages(Document doc) {
+    private static void inlineImages(Document doc) {
         Elements allImages = doc.getElementsByTag(IMG_TAG);
         for (Element img : allImages) {
             if (img.attr(DATA_INLINE_ATTR).equals("true")) {
@@ -131,7 +131,7 @@ public class CssInliner {
      *
      * @param doc the html document
      */
-    private void applyStyles(Document doc) {
+    private static void applyStyles(Document doc) {
         Elements allStyledElements = doc.getElementsByAttribute(CSS_STYLE);
 
         for (Element e : allStyledElements) {

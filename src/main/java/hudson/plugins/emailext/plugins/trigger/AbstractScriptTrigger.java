@@ -63,7 +63,7 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
         return result;
     }
     
-    private GroovyShell createEngine(AbstractBuild<?, ?> build, TaskListener listener) {
+    private static GroovyShell createEngine(AbstractBuild<?, ?> build, TaskListener listener) {
         ClassLoader cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
         CompilerConfiguration cc = new CompilerConfiguration();
         cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(

@@ -49,7 +49,7 @@ public class EmailExtTemplateAction implements Action {
         return "templateTest";
     }   
     
-    private String renderError(Exception ex) {
+    private static String renderError(Exception ex) {
         StringBuilder builder = new StringBuilder();
         builder.append("<h3>An error occured trying to render the template:</h3><br/>")
                 .append("<span style=\"color:red; font-weight:bold\">")
@@ -77,7 +77,7 @@ public class EmailExtTemplateAction implements Action {
         return FormValidation.ok();
     }
     
-    private FormValidation checkForManagedFile(final String value) {
+    private static FormValidation checkForManagedFile(final String value) {
         Plugin plugin = Jenkins.getActiveInstance().getPlugin("config-file-provider");
         if(plugin != null) {
             Config config = null;

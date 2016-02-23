@@ -105,7 +105,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
      * @param env The build environment
      * @param listener The listener for logging
      */
-    private void addUserFromChangeSet(ChangeLogSet.Entry change, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener) {
+    private static void addUserFromChangeSet(ChangeLogSet.Entry change, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener) {
         User user = change.getAuthor();
         String email = user.getProperty(Mailer.UserProperty.class).getAddress();
         if (email != null) {

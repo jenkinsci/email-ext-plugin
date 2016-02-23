@@ -47,7 +47,7 @@ public class FixedUnhealthyTrigger extends EmailTrigger {
     /**
      * Find most recent previous build matching certain criteria.
      */
-    private Run<?, ?> getPreviousRun(Run<?, ?> build, TaskListener listener) {
+    private static Run<?, ?> getPreviousRun(Run<?, ?> build, TaskListener listener) {
 
         Run<?, ?> prevBuild = ExtendedEmailPublisher.getPreviousRun(build, listener);
 
