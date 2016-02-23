@@ -51,10 +51,9 @@ public class EmailExtTemplateAction implements Action {
     
     private String renderError(Exception ex) {
         StringBuilder builder = new StringBuilder();
-        builder.append("<h3>An error occured trying to render the template:</h3><br/>");
-        builder.append("<span style=\"color:red; font-weight:bold\">");
-        builder.append(ex.toString().replace("\n", "<br/>"));
-        builder.append("</span>");
+        builder.append("<h3>An error occured trying to render the template:</h3><br/>")
+                .append("<span style=\"color:red; font-weight:bold\">")
+                .append(ex.toString().replace("\n", "<br/>")).append("</span>");
         return builder.toString();
     }
     
