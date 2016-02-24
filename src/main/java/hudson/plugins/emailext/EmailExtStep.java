@@ -170,7 +170,7 @@ public class EmailExtStep extends AbstractStepImpl {
     }
 
 
-    @Extension
+    @Extension(optional=true)
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public static final String defaultMimeType = "text/plain";
