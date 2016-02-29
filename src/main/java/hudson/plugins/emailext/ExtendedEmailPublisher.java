@@ -68,7 +68,6 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
@@ -183,9 +182,21 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 project_save_output, project_triggers, matrixTriggerMode, false, Collections.<GroovyScriptPath>emptyList());
     }
 
-    @DataBoundConstructor
+    @Deprecated
     public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
             String project_default_content, String project_attachments, String project_presend_script,
+            int project_attach_buildlog, String project_replyto, boolean project_save_output,
+            List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode, boolean project_disabled,
+            List<GroovyScriptPath> classpath) {
+
+        this(project_recipient_list, project_content_type, project_default_subject, project_default_content,
+                project_attachments, project_presend_script, "$DEFAULT_POSTSEND_SCRIPT", project_attach_buildlog, project_replyto,
+                project_save_output, project_triggers, matrixTriggerMode, project_disabled, classpath);
+    }
+
+    @DataBoundConstructor
+    public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
+            String project_default_content, String project_attachments, String project_presend_script, String project_postsend_script,
             int project_attach_buildlog, String project_replyto, boolean project_save_output,
             List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode, boolean project_disabled,
             List<GroovyScriptPath> classpath) {
@@ -195,6 +206,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.defaultContent = project_default_content;
         this.attachmentsPattern = project_attachments;
         this.presendScript = project_presend_script;
+        this.postsendScript = project_postsend_script;
         this.attachBuildLog = project_attach_buildlog > 0;
         this.compressBuildLog = project_attach_buildlog > 1;
         this.replyTo = project_replyto;
@@ -205,11 +217,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.classpath = classpath;
     }
 
-    @DataBoundSetter
-    public void setPostsendScript(String project_postsend_script) {
-        this.postsendScript = project_postsend_script;
-    }
-    
     /**
      * Get the list of configured email theTriggers for this project.
      *
