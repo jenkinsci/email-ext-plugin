@@ -60,7 +60,7 @@ f.advanced(title: _("Advanced Settings")) {
     f.textarea(id: "project_presend_script", name: "project_presend_script", value: configured ? instance.presendScript : "\$DEFAULT_PRESEND_SCRIPT", class: "setting-input") 
   }
   f.entry(title: _("Post-send Script"), help: "/plugin/email-ext/help/projectConfig/postsendScript.html") {
-    f.textarea(id: "project_postsend_script", name: "project_postsend_script", value: configured ? instance.postsendScript : "\$DEFAULT_POSTSEND_SCRIPT", class: "setting-input")
+    f.textarea(id: "postsendScript", name: "postsendScript", value: configured ? instance.postsendScript : "\$DEFAULT_POSTSEND_SCRIPT", class: "setting-input")
   }
   f.entry(title: _("Additional groovy classpath"), help: "/plugin/help/projectConfig/defaultClasspath.html") {
     f.repeatable(field: "classpath") {
