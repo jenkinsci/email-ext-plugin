@@ -206,8 +206,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     @DataBoundSetter
-    public void setPostsendScript(String project_postsend_script) {
-        this.postsendScript = project_postsend_script;
+    public void setPostsendScript(String postsendScript) {
+        this.postsendScript = postsendScript;
     }
     
     /**

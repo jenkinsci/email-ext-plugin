@@ -998,7 +998,7 @@ public class ExtendedEmailPublisherTest {
                 form.put("project_default_content", "Give me a $1000 check and I'll mail you back $5000!!!");
                 form.put("project_attachments", "");
                 form.put("project_presend_script", "");
-                form.put("project_postsend_script", "");
+                form.put("postsendScript", "println 1");
                 form.put("project_replyto", "");
 
                 ExtendedEmailPublisherDescriptor descriptor = new ExtendedEmailPublisherDescriptor();
@@ -1010,6 +1010,7 @@ public class ExtendedEmailPublisherTest {
                 assertEquals("Give me a $1000 check and I'll mail you back $5000!!!", publisher.defaultContent);
                 assertEquals("", publisher.attachmentsPattern);
                 assertEquals("", publisher.replyTo);
+                assertEquals("println 1", publisher.postsendScript);
 
                 return null;
             }
