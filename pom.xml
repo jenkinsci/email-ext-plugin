@@ -170,6 +170,13 @@
             <version>3.18.1-GA</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.main</groupId>
+            <artifactId>jenkins-war</artifactId>
+            <type>war</type>
+            <version>${jenkins.version}</version>
+            <scope>test</scope>
+        </dependency>
 
 
         <!-- static analysys -->
