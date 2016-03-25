@@ -8,6 +8,7 @@ import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import jenkins.model.Jenkins;
+import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -72,12 +73,10 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
                 "hudson",
                 "hudson.model"));
 
-        ExtendedEmailPublisher publisher = build.getProject().getPublishersList().get(ExtendedEmailPublisher.class);
-
         Binding binding = new Binding();
         binding.setVariable("build", build);
         binding.setVariable("project", build.getParent());
-        binding.setVariable("rooturl", publisher.getDescriptor().getHudsonUrl());
+        binding.setVariable("rooturl", JenkinsLocationConfiguration.get().getUrl());
         binding.setVariable("out", listener.getLogger());
 
         GroovyShell shell = new GroovyShell(cl, binding, cc);

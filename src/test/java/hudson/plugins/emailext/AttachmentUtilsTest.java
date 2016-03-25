@@ -43,12 +43,13 @@ import org.jvnet.hudson.test.Issue;
 public class AttachmentUtilsTest {
     
     @Rule
-    public final JenkinsRule j = new JenkinsRule();
-    
-    @Before
-    public void setUp() {
-        Mailbox.clearAll();
-    }
+    public final JenkinsRule j = new JenkinsRule() {
+        @Override
+        public void before() throws Throwable {
+            Mailbox.clearAll();
+            super.before();
+        }
+    };
     
     @Test
     public void testAttachmentFromWorkspace() throws Exception {
@@ -197,7 +198,7 @@ public class AttachmentUtilsTest {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
                 build.getWorkspace().child("已使用红包.txt").write("test.property=success","UTF-8");
-                return true;
+                return build.getWorkspace().child("已使用红包.txt").exists();
             }
         });
 
