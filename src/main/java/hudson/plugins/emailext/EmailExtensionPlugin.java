@@ -38,7 +38,7 @@ import java.util.Arrays;
  */
 public class EmailExtensionPlugin extends Plugin {
     static {
-        for (String property: Arrays.asList("mail.smtp.sendpartial", "mail.smtps.sendpartial", "mail.mime.encodefilename")) {
+        for (String property: Arrays.asList("mail.smtp.sendpartial", "mail.smtps.sendpartial")) {
             if (System.getProperty(property) == null) {
                 System.setProperty(property, "true");
             }

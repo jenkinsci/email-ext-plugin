@@ -8,10 +8,7 @@ import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.User;
-import hudson.plugins.emailext.EmailRecipientUtils;
-import hudson.plugins.emailext.ExtendedEmailPublisherContext;
-import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.plugins.emailext.Messages;
+import hudson.plugins.emailext.*;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.scm.ChangeLogSet;
@@ -33,15 +30,15 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * Sends emails to committers of upstream builds which triggered this build.
  */
 public class UpstreamComitterRecipientProvider extends RecipientProvider {
-    private static final ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
     @DataBoundConstructor
     public UpstreamComitterRecipientProvider() {
+
     }
 
     @Override
     public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
-        descriptor.debug(context.getListener().getLogger(), "Sending email to upstream committer(s).");
+        ExtendedEmailPublisher.descriptor().debug(context.getListener().getLogger(), "Sending email to upstream committer(s).");
         Run<?, ?> cur;
         Cause.UpstreamCause upc = context.getRun().getCause(Cause.UpstreamCause.class);
         while (upc != null) {
@@ -67,7 +64,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
      * @param listener
      */
     private void addUpstreamCommittersTriggeringBuild(Run<?, ?> build, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener) {
-        descriptor.debug(listener.getLogger(), "Adding upstream committer from job %s with build number %s", build.getParent().getDisplayName(), build.getNumber());
+        ExtendedEmailPublisher.descriptor().debug(listener.getLogger(), "Adding upstream committer from job %s with build number %s", build.getParent().getDisplayName(), build.getNumber());
 
         List<ChangeLogSet<?>> changeSets = new ArrayList<ChangeLogSet<?>>();
         if(build instanceof AbstractBuild<?,?>) {
@@ -109,10 +106,10 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
         User user = change.getAuthor();
         String email = user.getProperty(Mailer.UserProperty.class).getAddress();
         if (email != null) {
-            descriptor.debug(listener.getLogger(), "Adding upstream committer %s to recipient list with email %s", user.getFullName(), email);
+            ExtendedEmailPublisher.descriptor().debug(listener.getLogger(), "Adding upstream committer %s to recipient list with email %s", user.getFullName(), email);
             EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, email, env, listener);
         } else {
-            descriptor.debug(listener.getLogger(), "The user %s does not have a configured email email, trying the user's id", user.getFullName());
+            ExtendedEmailPublisher.descriptor().debug(listener.getLogger(), "The user %s does not have a configured email email, trying the user's id", user.getFullName());
             EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, user.getId(), env, listener);
         }
     }

@@ -31,11 +31,8 @@ public class SuccessTrigger extends EmailTrigger {
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
         Result buildResult = build.getResult();
 
-        if (buildResult == Result.SUCCESS) {
-            return true;
-        }
+        return buildResult == Result.SUCCESS;
 
-        return false;
     }
 
     @Extension

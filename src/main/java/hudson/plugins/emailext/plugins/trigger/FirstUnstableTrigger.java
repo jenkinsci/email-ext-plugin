@@ -15,7 +15,7 @@ import java.util.List;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
- * @author Adrien Lecharpentier <adrien.lecharpentier@zenika.com>
+ * @author Adrien Lecharpentier &lt;adrien.lecharpentier@zenika.com&gt;
  */
 public class FirstUnstableTrigger extends EmailTrigger {
 

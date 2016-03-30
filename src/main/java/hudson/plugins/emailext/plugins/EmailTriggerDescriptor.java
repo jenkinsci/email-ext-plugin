@@ -20,7 +20,6 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
      * the work a plugin developer needs to do to make sure that only a single email is sent.
      *
      * @param triggerName is the name of a trigger that should be deactivated if it is specified.
-     * @see #getTriggerName()
      */
     public void addTriggerNameToReplace(String triggerName) {
         replacesList.add(triggerName);
@@ -72,4 +71,4 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
     public boolean getDefaultSendToRequester() {
         return false;
     }
-            }
+}

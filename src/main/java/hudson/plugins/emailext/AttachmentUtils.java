@@ -23,6 +23,7 @@ import javax.activation.DataSource;
 import javax.activation.MimetypesFileTypeMap;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.internet.MimeUtility;
 import javax.mail.internet.MimeBodyPart;
 import org.apache.commons.lang.StringUtils;
 
@@ -149,7 +150,7 @@ public class AttachmentUtils implements Serializable {
 
                 try {
                     attachmentPart.setDataHandler(new DataHandler(fileDataSource));
-                    attachmentPart.setFileName(file.getName());
+                    attachmentPart.setFileName(MimeUtility.encodeText(file.getName()));
                     attachmentPart.setContentID(String.format("<%s>", file.getName()));
                     attachments.add(attachmentPart);
                     totalAttachmentSize += file.length();

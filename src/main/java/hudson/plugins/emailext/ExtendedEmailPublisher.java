@@ -213,7 +213,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     /**
      * Get the list of configured email theTriggers for this project.
      *
-     * @return
+     * @return The list of triggers configure for this publisher instance
      */
     public List<EmailTrigger> getConfiguredTriggers() {
         if (configuredTriggers == null) {
@@ -283,7 +283,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         for (Object tName : triggered.keySet()) {
             String triggerName = (String) tName;
-            for (EmailTrigger trigger : (Collection<EmailTrigger>) triggered.get(triggerName)) {
+            for (EmailTrigger trigger : triggered.get(triggerName)) {
                 replacedTriggers.addAll(trigger.getDescriptor().getTriggerReplaceList());
             }
         }
@@ -316,7 +316,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
                         for (Object tName : triggered.keySet()) {
                             String triggerName = (String) tName;
-                            for (EmailTrigger trigger : (Collection<EmailTrigger>) triggered.get(triggerName)) {
+                            for (EmailTrigger trigger : triggered.get(triggerName)) {
                                 replacedTriggers.addAll(trigger.getDescriptor().getTriggerReplaceList());
                             }
                         }

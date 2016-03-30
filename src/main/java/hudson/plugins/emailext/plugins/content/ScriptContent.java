@@ -174,7 +174,7 @@ public class ScriptContent extends AbstractEvalContent {
      * @throws IOException
      */
     private GroovyShell createEngine(ExtendedEmailPublisherDescriptor descriptor, Map<String, Object> variables)
-            throws FileNotFoundException, IOException {
+            throws IOException {
 
         ClassLoader cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
         CompilerConfiguration cc = new CompilerConfiguration();

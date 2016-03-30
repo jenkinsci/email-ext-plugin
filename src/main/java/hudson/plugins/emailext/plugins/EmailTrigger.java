@@ -79,7 +79,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     }
 
     public static DescriptorExtensionList<EmailTrigger, EmailTriggerDescriptor> all() {
-        return Jenkins.getActiveInstance().<EmailTrigger, EmailTriggerDescriptor>getDescriptorList(EmailTrigger.class);
+        return Jenkins.getActiveInstance().getDescriptorList(EmailTrigger.class);
     }
 
     public static List<EmailTriggerDescriptor> allWatchable() {
@@ -137,7 +137,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     }
     
     protected EmailType createMailType(StaplerRequest req, JSONObject formData) {
-        return (EmailType)req.bindJSON(EmailType.class, formData);
+        return req.bindJSON(EmailType.class, formData);
     }
 
     /**
@@ -145,6 +145,9 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
      * aggregates downstream results, ignore contributed failures. This is
      * because at the time this trigger runs, the current build's aggregated
      * results aren't available yet, but those of the previous build may be.
+     *
+     * @param build The project run to get the number of test failures for.
+     * @return The number of test failures for the Run
      */
     protected int getNumFailures(Run<?, ?> build) {
         AbstractTestResultAction a = build.getAction(AbstractTestResultAction.class);

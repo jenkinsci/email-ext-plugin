@@ -17,7 +17,7 @@ import jenkins.model.Jenkins;
 public abstract class RecipientProvider extends AbstractDescribableImpl<RecipientProvider> implements ExtensionPoint {
     
     public static DescriptorExtensionList<RecipientProvider, RecipientProviderDescriptor> all() {
-        return Jenkins.getActiveInstance().<RecipientProvider, RecipientProviderDescriptor>getDescriptorList(RecipientProvider.class);
+        return Jenkins.getActiveInstance().getDescriptorList(RecipientProvider.class);
     }
 
     @Override

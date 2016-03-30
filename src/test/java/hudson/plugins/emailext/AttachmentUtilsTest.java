@@ -136,7 +136,7 @@ public class AttachmentUtilsTest {
     
     @Test
     @Issue("JENKINS-27062")
-    public void testHtmlMimeType() throws IOException, InterruptedException, ExecutionException, Exception {
+    public void testHtmlMimeType() throws Exception {
         URL url = this.getClass().getResource("/test.html");
         final File attachment = new File(url.getFile());
         

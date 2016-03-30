@@ -55,7 +55,7 @@ public class Util {
      * Implementing printSpec allows % escape sequences to be handled
      * in an individual way.
      */
-    public static interface PrintfSpec {
+    public interface PrintfSpec {
 
         /**
          * Specializes the behavior of printf for % escape characters.

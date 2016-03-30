@@ -54,7 +54,7 @@ import hudson.tasks.test.AbstractTestResultAction;
 
     public static User getUser(final String author) {
         final User user = PowerMockito.mock(User.class);
-        final Mailer.UserProperty mailProperty = new Mailer.UserProperty(((String) author) + AT_DOMAIN);
+        final Mailer.UserProperty mailProperty = new Mailer.UserProperty(author + AT_DOMAIN);
         PowerMockito.when(user.getProperty(Mailer.UserProperty.class)).thenReturn(mailProperty);
         return user;
     }

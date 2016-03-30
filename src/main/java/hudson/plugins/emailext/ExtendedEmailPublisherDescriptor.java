@@ -186,9 +186,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         this.defaultSuffix = defaultSuffix;
     }
 
-    /**
-     * JavaMail session.
-     */
     public Session createSession() {
         Properties props = new Properties(System.getProperties());
         if (smtpHost != null) {
@@ -357,7 +354,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                 defaultTriggerIds.clear();
                 for(EmailTriggerDescriptor t : this.defaultTriggers) {
                     // we have to do the below because a bunch of stuff is not serialized for the Descriptor
-                    EmailTriggerDescriptor d = (EmailTriggerDescriptor)Jenkins.getActiveInstance().getDescriptorByType(t.getClass());
+                    EmailTriggerDescriptor d = Jenkins.getActiveInstance().getDescriptorByType(t.getClass());
                     if(!defaultTriggerIds.contains(d.getId())) {
                         defaultTriggerIds.add(d.getId());
                     }
