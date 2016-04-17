@@ -213,11 +213,6 @@
 
     <build>
         <plugins>
-            <!--<plugin>-->
-                <!--<groupId>org.jenkins-ci.tools</groupId>-->
-                <!--<artifactId>maven-hpi-plugin</artifactId>-->
-                <!--<version>1.99</version>-->
-            <!--</plugin>-->
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>

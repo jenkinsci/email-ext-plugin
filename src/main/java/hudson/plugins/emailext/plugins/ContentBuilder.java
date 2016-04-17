@@ -77,6 +77,8 @@ public final class ContentBuilder {
                 macros.addAll(additionalMacros);
             if(context.getBuild() != null) {
                 newText = TokenMacro.expandAll(context.getBuild(), context.getListener(), newText, false, macros);
+            } else {
+                context.getListener().getLogger().println("Job type does not allow token replacement.");
             }
         } catch (MacroEvaluationException e) {
             context.getListener().getLogger().println("Error evaluating token: " + e.getMessage());
