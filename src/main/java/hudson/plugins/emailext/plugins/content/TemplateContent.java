@@ -41,7 +41,7 @@ public class TemplateContent extends AbstractEvalContent {
         
         try {
             if (!StringUtils.isEmpty(file)) {
-                result = IOUtils.toString(getFileInputStream(file, ".txt"));
+                result = IOUtils.toString(getFileInputStream(build.getWorkspace(), file, ".txt"));
             } 
         } catch (FileNotFoundException e) {
             String missingFileError = generateMissingFile("Plain Text", file);

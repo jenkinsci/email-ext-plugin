@@ -23,6 +23,7 @@
  */
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.FilePath;
 import hudson.Plugin;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
@@ -78,10 +79,10 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         return false;
     }
     
-    protected InputStream getFileInputStream(String fileName, String extension)
-            throws FileNotFoundException {
+    protected InputStream getFileInputStream(FilePath workspace, String fileName, String extension)
+            throws FileNotFoundException, IOException, InterruptedException {
         
-        InputStream inputStream;
+        InputStream inputStream = null;
         if(fileName.startsWith("managed:")) {
             String managedFileName = fileName.substring(8);
             try {
@@ -99,22 +100,33 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         String fileExt = FilenameUtils.getExtension(fileName);
         
         // add default extension if needed
-        if (fileExt.equals("")) {
+        if ("".equals(fileExt)) {
             fileName += extension;
-        }        
+        }    
         
-        inputStream = getClass().getClassLoader().getResourceAsStream(
-                "hudson/plugins/emailext/templates/" + fileName);
+        // next we look in the workspace, this means the filename is relative to the root of the workspace
+        if(workspace != null) {
+            FilePath file = workspace.child(fileName);
+            if(file.exists()) {
+                inputStream = file.read();
+            }
+        }
 
-        if (inputStream == null) {
-            File templateFile = new File(scriptsFolder(), fileName);
-            
-            // the file may have an extension, but not the correct one
-            if(!templateFile.exists()) {
-                fileName += extension;
-                templateFile = new File(scriptsFolder(), fileName);
-            }            
-            inputStream = new FileInputStream(templateFile);
+        if(inputStream == null) {        
+            inputStream = getClass().getClassLoader().getResourceAsStream(
+                    "hudson/plugins/emailext/templates/" + fileName);
+
+            if (inputStream == null) {
+                File templateFile = new File(scriptsFolder(), fileName);
+
+                // the file may have an extension, but not the correct one
+                if(!templateFile.exists()) {
+                    fileName += extension;
+                    templateFile = new File(scriptsFolder(), fileName);
+                }            
+
+                inputStream = new FileInputStream(templateFile);
+            }
         }
 
         return inputStream;
