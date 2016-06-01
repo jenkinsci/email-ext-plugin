@@ -35,6 +35,15 @@
 
     <developers>
         <developer>
+            <id>davidvanlaatum</id>
+            <name>David van Laatum</name>
+            <timezone>9.5</timezone>
+            <roles>
+                <role>developer</role>
+                <role>maintainer</role>
+            </roles>
+        </developer>
+        <developer>
             <id>slide</id>
             <name>Alex Earl</name>
             <email>slide.o.mix@gmail.com</email>
