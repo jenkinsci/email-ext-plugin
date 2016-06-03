@@ -1,5 +1,6 @@
 package hudson.plugins.emailext;
 
+import hudson.*;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.CulpritsRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
@@ -141,7 +142,7 @@ public class EmailType {
     }
 
     public void setRecipientList(String recipientList) {
-        this.recipientList = recipientList.trim();
+        this.recipientList = hudson.Util.fixEmptyAndTrim ( recipientList );
     }
 
     public String getReplyTo() {
@@ -149,7 +150,7 @@ public class EmailType {
     }
 
     public void setReplyTo(String replyTo) {
-        this.replyTo = replyTo.trim();
+        this.replyTo = hudson.Util.fixEmptyAndTrim ( replyTo );
     }
 
     public String getAttachmentsPattern() {
