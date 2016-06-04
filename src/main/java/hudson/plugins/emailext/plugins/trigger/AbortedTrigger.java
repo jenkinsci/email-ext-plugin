@@ -30,7 +30,7 @@ public class AbortedTrigger extends EmailTrigger {
     
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
-        return (build.getResult() == Result.ABORTED);
+        return build.getResult() == Result.ABORTED;
     }
 
     @Extension

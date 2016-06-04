@@ -392,8 +392,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                             break;
                         } catch (SendFailedException e) {
                             if (e.getNextException() != null
-                                    && ((e.getNextException() instanceof SocketException)
-                                    || (e.getNextException() instanceof ConnectException))) {
+                                    && (e.getNextException() instanceof SocketException
+                                    || e.getNextException() instanceof ConnectException)) {
                                 context.getListener().getLogger().println("Socket error sending email, retrying once more in 10 seconds...");
                                 transport.close();
                                 Thread.sleep(10000);
@@ -427,7 +427,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                 break;
                             }
                         } catch (MessagingException e) {
-                            if (e.getNextException() != null && (e.getNextException() instanceof ConnectException)) {
+                            if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
                                 context.getListener().getLogger().println("Connection error sending email, retrying once more in 10 seconds...");
                                 transport.close();
                                 Thread.sleep(10000);
@@ -525,7 +525,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
             try {
                 shell.evaluate(script);
-                cancel = ((Boolean) shell.getVariable("cancel"));
+                cancel = (Boolean) shell.getVariable("cancel");
                 debug(context.getListener().getLogger(), "%s script set cancel to %b", StringUtils.capitalize(scriptName), cancel);
             } catch (SecurityException e) {
                 context.getListener().getLogger().println(StringUtils.capitalize(scriptName) + " script tried to access secured objects: " + e.getMessage());
@@ -550,7 +550,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     private void expandClasspath(ExtendedEmailPublisherContext context, CompilerConfiguration cc) {
         List<String> classpathList = new ArrayList<String>();
 
-        if ((classpath != null) && !classpath.isEmpty()) {
+        if (classpath != null && !classpath.isEmpty()) {
             for (GroovyScriptPath path : classpath) {
                 classpathList.add(ContentBuilder.transformText(path.getPath(), context, getRuntimeMacros(context)));
             }
