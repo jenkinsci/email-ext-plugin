@@ -23,6 +23,7 @@
  */
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.ExtensionList;
 import hudson.FilePath;
 import hudson.Plugin;
 import hudson.model.AbstractBuild;
@@ -36,7 +37,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import jenkins.model.Jenkins;
 
 import org.apache.commons.io.FilenameUtils;
@@ -44,8 +44,6 @@ import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.lib.configprovider.model.Config;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
-
-import java.io.*;
 
 /**
  *
@@ -71,8 +69,8 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     public static File scriptsFolder() {
         return new File(Jenkins.getActiveInstance().getRootDir(), EMAIL_TEMPLATES_DIRECTORY);
     }
-    
-    protected abstract ConfigProvider getConfigProvider();
+
+    protected abstract Class<? extends ConfigProvider> getProviderClass();
     
     @Override
     public boolean hasNestedContent() {
@@ -137,7 +135,8 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         Plugin plugin = Jenkins.getActiveInstance().getPlugin("config-file-provider");
         if (plugin != null) {
             Config config = null;
-            ConfigProvider provider = getConfigProvider();
+            ExtensionList<ConfigProvider> providers = ConfigProvider.all();
+            ConfigProvider provider = providers.get(getProviderClass ());
             for (Config c : provider.getAllConfigs()) {
                 if (c.name.equalsIgnoreCase(fileName) && provider.isResponsibleFor(c.id)) {
                     config = c;

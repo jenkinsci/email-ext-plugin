@@ -52,14 +52,9 @@ public class TemplateContent extends AbstractEvalContent {
         }
         return result;
     }
-    
-    @Override
-    protected ConfigProvider getConfigProvider() {
-        if(configProvider == null) {
-            ExtensionList<ConfigProvider> providers = ConfigProvider.all();
-            configProvider = providers.get(CustomConfigProvider.class);
-        }
-        return (ConfigProvider)configProvider;
+
+    protected Class<? extends ConfigProvider> getProviderClass() {
+        return CustomConfigProvider.class;
     }
     
     @Override

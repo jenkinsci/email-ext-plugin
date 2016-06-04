@@ -84,12 +84,8 @@ public class ScriptContent extends AbstractEvalContent {
     }
 
     @Override
-    protected synchronized ConfigProvider getConfigProvider() {
-        if(configProvider == null) {
-            ExtensionList<ConfigProvider> providers = ConfigProvider.all();
-            configProvider = providers.get(GroovyTemplateConfigProvider.class);
-        }
-        return (ConfigProvider)configProvider;
+    protected Class<? extends ConfigProvider> getProviderClass () {
+        return GroovyTemplateConfigProvider.class;
     }
     
     /**

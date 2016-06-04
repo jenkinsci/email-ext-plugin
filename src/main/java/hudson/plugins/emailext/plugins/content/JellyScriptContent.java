@@ -50,15 +50,11 @@ public class JellyScriptContent extends AbstractEvalContent {
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
-    }    
+    }
 
     @Override
-    protected ConfigProvider getConfigProvider() {
-        if(configProvider == null) {
-            ExtensionList<ConfigProvider> providers = ConfigProvider.all();
-            configProvider = providers.get(JellyTemplateConfigProvider.class);
-        }
-        return (ConfigProvider)configProvider;
+    protected Class<? extends ConfigProvider> getProviderClass() {
+        return JellyTemplateConfigProvider.class;
     }
 
     private String renderContent(AbstractBuild<?, ?> build, InputStream inputStream, TaskListener listener)
