@@ -30,8 +30,6 @@ import java.util.logging.Logger;
 
 @EmailToken
 public class ScriptContent extends AbstractEvalContent {
-    
-    private static Object configProvider;
 
     private static final Logger LOGGER = Logger.getLogger(ScriptContent.class.getName());
     
