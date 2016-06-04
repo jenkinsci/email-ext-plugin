@@ -67,7 +67,7 @@ public class ScriptContentBuildWrapper {
     }
 
     public List<TestResult> getJUnitTestResult() {
-        List<TestResult> result = new ArrayList<TestResult>();
+        List<TestResult> result = new ArrayList<>();
         List<Action> actions = build.getActions();
         for (Action action : actions) {
             if (action instanceof hudson.tasks.test.AggregatedTestResultAction) {

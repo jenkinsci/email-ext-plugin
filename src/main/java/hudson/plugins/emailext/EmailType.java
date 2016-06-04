@@ -93,7 +93,7 @@ public class EmailType {
         compressBuildLog = false;
         replyTo = "";
         contentType = "project";
-        recipientProviders = new ArrayList<RecipientProvider>();
+        recipientProviders = new ArrayList<>();
     }
 
     public String getSubject() {
@@ -127,14 +127,14 @@ public class EmailType {
 
     public void addRecipientProvider(RecipientProvider provider) {
         if (recipientProviders == null) {
-            recipientProviders = new ArrayList<RecipientProvider>();
+            recipientProviders = new ArrayList<>();
         }
         recipientProviders.add(provider);
     }
 
     public void addRecipientProviders(List<RecipientProvider> providers) {
         if (recipientProviders == null) {
-            recipientProviders = new ArrayList<RecipientProvider>();
+            recipientProviders = new ArrayList<>();
         }
         if(providers != null) {
             recipientProviders.addAll(providers);
@@ -195,7 +195,7 @@ public class EmailType {
         }
         
         if(recipientProviders == null) {
-            recipientProviders = new ArrayList<RecipientProvider>();
+            recipientProviders = new ArrayList<>();
         }
 
         // upgrade the various fields to the new RecipientProvider method
