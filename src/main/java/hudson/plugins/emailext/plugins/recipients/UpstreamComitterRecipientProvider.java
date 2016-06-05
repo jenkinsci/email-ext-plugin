@@ -66,7 +66,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
     private void addUpstreamCommittersTriggeringBuild(Run<?, ?> build, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener) {
         ExtendedEmailPublisher.descriptor().debug(listener.getLogger(), "Adding upstream committer from job %s with build number %s", build.getParent().getDisplayName(), build.getNumber());
 
-        List<ChangeLogSet<?>> changeSets = new ArrayList<ChangeLogSet<?>>();
+        List<ChangeLogSet<?>> changeSets = new ArrayList<>();
         if(build instanceof AbstractBuild<?,?>) {
             AbstractBuild<?,?> b = (AbstractBuild<?,?>)build;
             changeSets.add(b.getChangeSet());

@@ -29,7 +29,7 @@ public class DevelopersRecipientProvider extends RecipientProvider {
     @Override
     public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        Set<User> users = new HashSet<User>();
+        Set<User> users = new HashSet<>();
 
         if (context.getRun() instanceof AbstractBuild) {
             AbstractBuild<?, ?> build = (AbstractBuild) context.getRun();

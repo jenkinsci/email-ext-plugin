@@ -72,7 +72,7 @@ public final class ContentBuilder {
                 DEFAULT_POSTSEND_SCRIPT, defaultPostsendScript);
         
         try {
-            List<TokenMacro> macros = new ArrayList<TokenMacro>(getPrivateMacros());
+            List<TokenMacro> macros = new ArrayList<>(getPrivateMacros());
             if(additionalMacros != null)
                 macros.addAll(additionalMacros);
             if(context.getBuild() != null) {
@@ -103,7 +103,7 @@ public final class ContentBuilder {
         if(privateMacros != null)
             return privateMacros;
         
-        privateMacros = new ArrayList<TokenMacro>();
+        privateMacros = new ArrayList<>();
         ClassLoader cl = Jenkins.getActiveInstance().pluginManager.uberClassLoader;
         for (final IndexItem<EmailToken, TokenMacro> item : Index.load(EmailToken.class, TokenMacro.class, cl)) {
             try {

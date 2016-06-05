@@ -10,8 +10,8 @@ import java.util.List;
 
 public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
 
-    protected List<String> replacesList = new ArrayList<String>();
-    protected List<RecipientProvider> defaultRecipientProviders = new ArrayList<RecipientProvider>();
+    protected List<String> replacesList = new ArrayList<>();
+    protected List<RecipientProvider> defaultRecipientProviders = new ArrayList<>();
 
     /**
      * You can add the name of a trigger that this trigger should override if both this

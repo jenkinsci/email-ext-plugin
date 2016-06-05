@@ -35,13 +35,13 @@ public class EmailRecipientUtils {
     
     public static Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars, int type)
         throws AddressException, UnsupportedEncodingException {
-        final Set<InternetAddress> internetAddresses = new LinkedHashSet<InternetAddress>();
+        final Set<InternetAddress> internetAddresses = new LinkedHashSet<>();
         if (!StringUtils.isBlank(recipientList)) {
             final String expandedRecipientList = fixupDelimiters(envVars.expand(recipientList));
             InternetAddress[] all = InternetAddress.parse(expandedRecipientList.replace("bcc:", "").replace("cc:", ""));
-            final Set<InternetAddress> to = new LinkedHashSet<InternetAddress>();
-            final Set<InternetAddress> cc = new LinkedHashSet<InternetAddress>();
-            final Set<InternetAddress> bcc = new LinkedHashSet<InternetAddress>();
+            final Set<InternetAddress> to = new LinkedHashSet<>();
+            final Set<InternetAddress> cc = new LinkedHashSet<>();
+            final Set<InternetAddress> bcc = new LinkedHashSet<>();
             final String defaultSuffix = ExtendedEmailPublisher.descriptor().getDefaultSuffix();
 
             for(InternetAddress address : all) {

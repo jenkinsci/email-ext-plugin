@@ -52,7 +52,7 @@ public final class RecipientProviderUtilities {
 
     public static Set<User> getChangeSetAuthors(final Collection<Run<?, ?>> runs, final IDebug debug) {
         debug.send("  Collecting change authors...");
-        final Set<User> users = new HashSet<User>();
+        final Set<User> users = new HashSet<>();
         for (final Run<?, ?> run : runs) {
             debug.send("    build: %d", run.getNumber());
             if (run instanceof AbstractBuild<?,?>) {
@@ -60,7 +60,7 @@ public final class RecipientProviderUtilities {
                 if (changeLogSet == null) {
                     debug.send("      changeLogSet was null");
                 } else {
-                    final Set<User> changeAuthors = new HashSet<User>();
+                    final Set<User> changeAuthors = new HashSet<>();
                     for (final ChangeLogSet.Entry change : changeLogSet) {
                         final User changeAuthor = change.getAuthor();
                         if (changeAuthors.add(changeAuthor)) {
@@ -76,7 +76,7 @@ public final class RecipientProviderUtilities {
 
     public static Set<User> getUsersTriggeringTheBuilds(final Collection<Run<?, ?>> runs, final IDebug debug) {
         debug.send("  Collecting build requestors...");
-        final Set<User> users = new HashSet<User>();
+        final Set<User> users = new HashSet<>();
         for (final Run<?, ?> run : runs) {
             debug.send("    build: %d", run.getNumber());
             final User buildRequestor = getUserTriggeringTheBuild(run);

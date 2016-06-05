@@ -78,9 +78,9 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
             if (!currentRun.getResult().equals(Result.FAILURE)) {
                 debug.send("currentBuild did not fail");
             } else {
-                users = new HashSet<User>();
+                users = new HashSet<>();
                 debug.send("Collecting builds with suspects...");
-                final HashSet<Run<?, ?>> buildsWithSuspects = new HashSet<Run<?, ?>>();
+                final HashSet<Run<?, ?>> buildsWithSuspects = new HashSet<>();
                 Run<?, ?> firstFailedBuild = currentRun;
                 Run<?, ?> candidate = currentRun;
                 while (candidate != null && candidate.getResult().isWorseOrEqualTo(Result.FAILURE)) {
