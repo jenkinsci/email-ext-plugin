@@ -6,6 +6,7 @@
 
 package hudson.plugins.emailext.plugins.recipients;
 
+import hudson.model.Job;
 import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
@@ -49,6 +50,11 @@ public class ListRecipientProvider extends RecipientProvider {
         @Override
         public String getDisplayName() {
             return "Recipient List";
+        }
+
+        @Override
+        public boolean isApplicable(Class<? extends Job> jobType) {
+            return !jobType.getName().equals("org.jenkinsci.plugins.workflow.job.WorkflowJob");
         }
     }
 }

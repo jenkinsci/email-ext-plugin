@@ -6,12 +6,14 @@ import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
 import jenkins.model.Jenkins;
-import hudson.Util;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
@@ -21,7 +23,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.CheckForNull;
-import javax.management.Descriptor;
+import java.util.List;
 
 /**
  * Created by acearl on 9/14/2015.
@@ -48,6 +50,8 @@ public class EmailExtStep extends AbstractStepImpl {
     private boolean attachLog;
 
     private boolean compressLog;
+
+    private List<RecipientProvider> recipientProviders;
 
     @DataBoundConstructor
     public EmailExtStep(String subject, String body) {
@@ -111,6 +115,15 @@ public class EmailExtStep extends AbstractStepImpl {
         this.compressLog = compressLog;
     }
 
+    @DataBoundSetter
+    public void setRecipientProviders(List<RecipientProvider> recipientProviders) {
+        this.recipientProviders = recipientProviders;
+    }
+
+    public List<? extends RecipientProvider> getRecipientProviders() {
+        return recipientProviders;
+    }
+
     public static class EmailExtStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
 
         private static final long serialVersionUID = 1L;
@@ -136,7 +149,11 @@ public class EmailExtStep extends AbstractStepImpl {
             publisher.configuredTriggers.clear();
 
             AlwaysTrigger.DescriptorImpl descriptor = Jenkins.getActiveInstance().getDescriptorByType(AlwaysTrigger.DescriptorImpl.class);
-            publisher.configuredTriggers.add(descriptor.createDefault());
+            EmailTrigger trigger = descriptor.createDefault();
+            if (step.recipientProviders != null) {
+                trigger.getEmail().addRecipientProviders(step.recipientProviders);
+            }
+            publisher.configuredTriggers.add(trigger);
 
             publisher.defaultSubject = step.subject;
             publisher.defaultContent = step.body;
@@ -187,6 +204,11 @@ public class EmailExtStep extends AbstractStepImpl {
         @Override
         public String getDisplayName() {
             return "Extended Email";
+        }
+
+        @SuppressWarnings("unused")
+        public List<RecipientProviderDescriptor> getRecipientProvidersDescriptors() {
+            return RecipientProvider.allSupporting("org.jenkinsci.plugins.workflow.job.WorkflowJob");
         }
     }
 }

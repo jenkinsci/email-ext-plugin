@@ -23,6 +23,8 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 import hudson.EnvVars;
 import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
@@ -33,8 +35,11 @@ import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.scm.ChangeLogSet;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -52,7 +57,7 @@ public final class RecipientProviderUtilities {
 
     public static Set<User> getChangeSetAuthors(final Collection<Run<?, ?>> runs, final IDebug debug) {
         debug.send("  Collecting change authors...");
-        final Set<User> users = new HashSet<User>();
+        final Set<User> users = new HashSet<>();
         for (final Run<?, ?> run : runs) {
             debug.send("    build: %d", run.getNumber());
             if (run instanceof AbstractBuild<?,?>) {
@@ -60,18 +65,37 @@ public final class RecipientProviderUtilities {
                 if (changeLogSet == null) {
                     debug.send("      changeLogSet was null");
                 } else {
-                    final Set<User> changeAuthors = new HashSet<User>();
-                    for (final ChangeLogSet.Entry change : changeLogSet) {
-                        final User changeAuthor = change.getAuthor();
-                        if (changeAuthors.add(changeAuthor)) {
-                            debug.send("      adding author: %s", changeAuthor.getFullName());
+                    addChangeSetUsers(changeLogSet, users, debug);
+                }
+            } else {
+                try {
+                    Method getChangeSets = run.getClass().getMethod("getChangeSets");
+                    if (List.class.isAssignableFrom(getChangeSets.getReturnType())) {
+                        @SuppressWarnings("unchecked")
+                        List<ChangeLogSet<ChangeLogSet.Entry>> sets = (List<ChangeLogSet<ChangeLogSet.Entry>>) getChangeSets.invoke(run);
+                        if (Iterables.all(sets, Predicates.instanceOf(ChangeLogSet.class))) {
+                            for (ChangeLogSet<ChangeLogSet.Entry> set : sets) {
+                                addChangeSetUsers(set, users, debug);
+                            }
                         }
                     }
-                    users.addAll(changeAuthors);
+                } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                    debug.send("Exception getting changesets for %s: %s", run, e);
                 }
             }
         }
         return users;
+    }
+
+    private static void addChangeSetUsers(ChangeLogSet<?> changeLogSet, Set<User> users, IDebug debug) {
+        final Set<User> changeAuthors = new HashSet<User>();
+        for (final ChangeLogSet.Entry change : changeLogSet) {
+            final User changeAuthor = change.getAuthor();
+            if (changeAuthors.add(changeAuthor)) {
+                debug.send("      adding author: %s", changeAuthor.getFullName());
+            }
+        }
+        users.addAll(changeAuthors);
     }
 
     public static Set<User> getUsersTriggeringTheBuilds(final Collection<Run<?, ?>> runs, final IDebug debug) {
