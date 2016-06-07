@@ -113,13 +113,17 @@ import hudson.tasks.test.AbstractTestResultAction;
 
     }
 
+    public static ChangeLogSet<ChangeLogSet.Entry> makeChangeSet(final Run<?, ?> build, final String... inAuthors) {
+        return new MockUtilitiesChangeSet(build, inAuthors);
+    }
+
     public static void addChangeSet(final WorkflowRun build, final String... inAuthors) {
-        MockUtilitiesChangeSet changeSet = new MockUtilitiesChangeSet(build, inAuthors);
+        ChangeLogSet<ChangeLogSet.Entry> changeSet = makeChangeSet(build, inAuthors);
         PowerMockito.when(build.getChangeSets()).thenReturn(Collections.<ChangeLogSet<? extends ChangeLogSet.Entry>>singletonList(changeSet));
     }
 
     public static void addChangeSet(final AbstractBuild<?, ?> build, final String... inAuthors) {
-        MockUtilitiesChangeSet changeSet = new MockUtilitiesChangeSet(build, inAuthors);
+        ChangeLogSet<ChangeLogSet.Entry> changeSet = makeChangeSet(build, inAuthors);
         PowerMockito.when(build.getChangeSet()).thenReturn((ChangeLogSet)changeSet);
     }
 

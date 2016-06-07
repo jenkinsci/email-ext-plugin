@@ -60,6 +60,7 @@ public class CulpritsRecipientProvider extends RecipientProvider {
             while (build != null) {
                 if (build.getResult() != null) {
                     if (build.getResult().isWorseThan(Result.SUCCESS)) {
+                        debug.send("Including build %s with status %s", build.getId(), build.getResult());
                         builds.add(build);
                     } else {
                         break;
