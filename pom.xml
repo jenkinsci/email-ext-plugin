@@ -5,6 +5,7 @@
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
         <version>2.3</version>
+        <relativePath/>
     </parent>
 
     <licenses>
@@ -19,6 +20,7 @@
     <packaging>hpi</packaging>
     <version>2.44-SNAPSHOT</version>
     <name>Email Extension Plugin</name>
+    <description>EMail Extension Plugin</description>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin</url>
     <issueManagement>
         <system>JIRA</system>
