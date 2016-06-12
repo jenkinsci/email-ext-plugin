@@ -38,6 +38,7 @@
             <id>davidvanlaatum</id>
             <name>David van Laatum</name>
             <timezone>9.5</timezone>
+            <email>david@vanlaatum.id.au</email>
             <roles>
                 <role>developer</role>
                 <role>maintainer</role>

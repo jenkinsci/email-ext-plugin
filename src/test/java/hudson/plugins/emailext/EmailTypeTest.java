@@ -18,7 +18,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 public class EmailTypeTest {
     
     @Rule
-    public static final JenkinsRule j = new JenkinsRule();
+    public final JenkinsRule j = new JenkinsRule();
 
     @Test
     public void testHasNoRecipients() {
