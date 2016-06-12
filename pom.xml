@@ -31,6 +31,7 @@
         <workflow.version>1.10</workflow.version>
         <jenkins.version>1.609.2</jenkins.version>
         <java.level>7</java.level>
+        <argLine/>
     </properties>
 
     <developers>
@@ -245,7 +246,7 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>-XX:MaxPermSize=512m -Dfile.encoding=${project.build.sourceEncoding}</argLine>
+                    <argLine>-XX:MaxPermSize=512m -Dfile.encoding=${project.build.sourceEncoding} ${argLine}</argLine>
                 </configuration>
             </plugin>
             <plugin>
