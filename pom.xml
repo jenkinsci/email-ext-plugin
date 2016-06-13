@@ -229,7 +229,7 @@
     <scm>
         <connection>scm:git:https://github.com/jenkinsci/email-ext-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/email-ext-plugin.git</developerConnection>
-        <tag>email-ext-2.41.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <repositories>
