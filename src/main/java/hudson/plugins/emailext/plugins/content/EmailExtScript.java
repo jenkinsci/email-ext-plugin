@@ -61,7 +61,7 @@ public abstract class EmailExtScript extends Script {
         }
 
         if (macro != null) {
-            Map<String, String> argsMap = new HashMap<String, String>();
+            Map<String, String> argsMap = new HashMap<>();
             ListMultimap<String, String> argsMultimap = ArrayListMultimap.create();
             populateArgs(args, argsMap, argsMultimap);
 

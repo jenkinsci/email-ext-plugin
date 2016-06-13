@@ -82,9 +82,9 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
                 if (testResultAction.getFailCount() <= 0) {
                     debug.send("getFailCount() returned <= 0");
                 } else {
-                    users = new HashSet<User>();
+                    users = new HashSet<>();
                     debug.send("Collecting builds where a test started failing...");
-                    final HashSet<Run<?, ?>> buildsWhereATestStartedFailing = new HashSet<Run<?, ?>>();
+                    final HashSet<Run<?, ?>> buildsWhereATestStartedFailing = new HashSet<>();
                     for (final TestResult caseResult : testResultAction.getFailedTests()) {
                         final Run<?, ?> runWhereTestStartedFailing = caseResult.getFailedSinceRun();
                         debug.send("  runWhereTestStartedFailing: %d", runWhereTestStartedFailing.getNumber());
@@ -93,7 +93,7 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
                     // For each build where a test started failing, walk backward looking for build results worse than
                     // UNSTABLE. All of those builds will be used to find suspects.
                     debug.send("Collecting builds with suspects...");
-                    final HashSet<Run<?, ?>> buildsWithSuspects = new HashSet<Run<?, ?>>();
+                    final HashSet<Run<?, ?>> buildsWithSuspects = new HashSet<>();
                     for (final Run<?, ?> buildWhereATestStartedFailing : buildsWhereATestStartedFailing) {
                         debug.send("  buildWhereATestStartedFailing: %d", buildWhereATestStartedFailing.getNumber());
                         buildsWithSuspects.add(buildWhereATestStartedFailing);

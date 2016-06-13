@@ -31,7 +31,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
 
     @Deprecated
     protected EmailTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        List<RecipientProvider> providers = new ArrayList<RecipientProvider>();
+        List<RecipientProvider> providers = new ArrayList<>();
         if(sendToList) {
             providers.add(new ListRecipientProvider());
         }
@@ -83,7 +83,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     }
 
     public static List<EmailTriggerDescriptor> allWatchable() {
-        List<EmailTriggerDescriptor> list = new ArrayList<EmailTriggerDescriptor>();
+        List<EmailTriggerDescriptor> list = new ArrayList<>();
         for(EmailTriggerDescriptor d : all()) {
             if(d.isWatchable()) {
                 list.add(d);

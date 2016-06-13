@@ -34,7 +34,7 @@ public class EmailExtWatchAction implements Action {
      * Per user property that contains 
      */
     public static class UserProperty extends hudson.model.UserProperty {
-        private List<EmailTrigger> triggers = new ArrayList<EmailTrigger>();
+        private List<EmailTrigger> triggers = new ArrayList<>();
 
         public UserProperty(List<EmailTrigger> triggers) {
             if(triggers != null) {
@@ -162,7 +162,7 @@ public class EmailExtWatchAction implements Action {
             Object json = req.getSubmittedForm().get("triggers");
             List<EmailTrigger> triggers = req.bindJSONToList(EmailTrigger.class, json);
 
-            List<EmailTrigger> unwatchable = new ArrayList<EmailTrigger>();
+            List<EmailTrigger> unwatchable = new ArrayList<>();
             for(EmailTrigger trigger : triggers) {
                 if(!trigger.getDescriptor().isWatchable()) {
                     unwatchable.add(trigger);

@@ -21,7 +21,7 @@ import org.kohsuke.stapler.StaplerRequest;
  */
 public class EmailExtWatchJobProperty extends JobProperty<Job<?, ?>> {
 
-    final List<String> watchers = new ArrayList<String>();
+    final List<String> watchers = new ArrayList<>();
 
     @Override
     public Collection<Action> getJobActions(Job<?, ?> job) {

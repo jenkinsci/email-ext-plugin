@@ -100,7 +100,7 @@ public final class RecipientProviderUtilities {
 
     public static Set<User> getUsersTriggeringTheBuilds(final Collection<Run<?, ?>> runs, final IDebug debug) {
         debug.send("  Collecting build requestors...");
-        final Set<User> users = new HashSet<User>();
+        final Set<User> users = new HashSet<>();
         for (final Run<?, ?> run : runs) {
             debug.send("    build: %d", run.getNumber());
             final User buildRequestor = getUserTriggeringTheBuild(run);

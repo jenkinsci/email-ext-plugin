@@ -132,7 +132,7 @@ public class AttachmentUtils implements Serializable {
         if (ws == null) {
             context.getListener().error("Error: No workspace found!");
         } else if (!StringUtils.isBlank(attachmentsPattern)) {
-            attachments = new ArrayList<MimeBodyPart>();
+            attachments = new ArrayList<>();
 
             FilePath[] files = ws.list(ContentBuilder.transformText(attachmentsPattern, context, null));
 
