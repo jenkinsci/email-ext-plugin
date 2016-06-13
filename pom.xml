@@ -294,6 +294,22 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>jenkins-release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <argLine>-XX:MaxPermSize=512m -Dfile.encoding=${project.build.sourceEncoding}</argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <reporting>
         <plugins>
             <plugin>
