@@ -15,6 +15,7 @@ import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
@@ -151,6 +152,7 @@ public class EmailExtStep extends AbstractStepImpl {
             AlwaysTrigger.DescriptorImpl descriptor = Jenkins.getActiveInstance().getDescriptorByType(AlwaysTrigger.DescriptorImpl.class);
             EmailTrigger trigger = descriptor.createDefault();
             if (step.recipientProviders != null) {
+                RecipientProvider.checkAllSupport(step.recipientProviders, run.getParent().getClass());
                 trigger.getEmail().addRecipientProviders(step.recipientProviders);
             }
             publisher.configuredTriggers.add(trigger);
@@ -208,7 +210,7 @@ public class EmailExtStep extends AbstractStepImpl {
 
         @SuppressWarnings("unused")
         public List<RecipientProviderDescriptor> getRecipientProvidersDescriptors() {
-            return RecipientProvider.allSupporting("org.jenkinsci.plugins.workflow.job.WorkflowJob");
+            return RecipientProvider.allSupporting(WorkflowJob.class);
         }
     }
 }

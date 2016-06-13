@@ -6,6 +6,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
@@ -31,6 +32,7 @@ public class EmailExtRecipientStep extends AbstractStepImpl {
         return recipientProviders;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static class Executor extends AbstractSynchronousNonBlockingStepExecution<String> {
         private static final long serialVersionUID = 1L;
 
@@ -48,9 +50,13 @@ public class EmailExtRecipientStep extends AbstractStepImpl {
 
         @Override
         protected String run() throws Exception {
+            if (step.recipientProviders == null || step.recipientProviders.isEmpty()) {
+                throw new IllegalArgumentException("You must provide at least one recipient provider");
+            }
             ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
             ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, run, null, null, listener);
             Set<InternetAddress> to = new HashSet<>();
+            RecipientProvider.checkAllSupport(step.recipientProviders, run.getParent().getClass());
             for (RecipientProvider provider : step.recipientProviders) {
                 provider.addRecipients(context, env, to, to, to);
             }
@@ -87,7 +93,7 @@ public class EmailExtRecipientStep extends AbstractStepImpl {
 
         @SuppressWarnings("unused")
         public List<RecipientProviderDescriptor> getRecipientProvidersDescriptors() {
-            return RecipientProvider.allSupporting("org.jenkinsci.plugins.workflow.job.WorkflowJob");
+            return RecipientProvider.allSupporting(WorkflowJob.class);
         }
     }
 }
