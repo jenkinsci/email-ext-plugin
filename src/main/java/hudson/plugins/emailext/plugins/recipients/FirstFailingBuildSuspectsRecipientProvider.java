@@ -25,18 +25,19 @@ package hudson.plugins.emailext.plugins.recipients;
 
 import java.io.PrintStream;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.mail.internet.InternetAddress;
 
-import org.kohsuke.stapler.DataBoundConstructor;
-
-import hudson.EnvVars;
-import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.User;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import hudson.EnvVars;
+import hudson.Extension;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
@@ -75,7 +76,7 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
         if (currentRun == null) {
             debug.send("currentRun was null");
         } else {
-            if (!currentRun.getResult().equals(Result.FAILURE)) {
+            if (!Objects.equals(currentRun.getResult(), Result.FAILURE)) {
                 debug.send("currentBuild did not fail");
             } else {
                 users = new HashSet<>();

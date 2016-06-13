@@ -57,10 +57,6 @@ import static org.mockito.Matchers.any;
 public class ScriptContentTest {
     private ScriptContent scriptContent;
 
-    private final String osName = System.getProperty("os.name");
-
-    private final boolean osIsDarwin = osName.equals("Mac OS X") || osName.equals("Darwin");
-
     private ExtendedEmailPublisher publisher;
     
     private AbstractBuild build;
@@ -71,7 +67,6 @@ public class ScriptContentTest {
     public JenkinsRule j = new JenkinsRule() {
         @Override
         public void before() throws Throwable {
-            assumeThat(osIsDarwin, is(false));
             super.before();
             Mailbox.clearAll();
             

@@ -24,6 +24,9 @@ THE SOFTWARE.
     <f:entry field="to" title="To">
         <f:textbox />
     </f:entry>
+    <f:entry field="recipientProviders" title="Recipient Providers">
+        <f:repeatableHeteroProperty field="recipientProviders" oneEach="true" hasHeader="true"/>
+    </f:entry>
     <f:entry field="subject" title="Subject">
         <f:textbox />
     </f:entry>

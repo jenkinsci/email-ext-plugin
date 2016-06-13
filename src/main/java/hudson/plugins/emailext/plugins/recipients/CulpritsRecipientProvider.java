@@ -7,15 +7,19 @@
 package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.model.AbstractBuild;
+import hudson.model.Result;
 import hudson.model.Run;
-import hudson.plugins.emailext.EmailRecipientUtils;
+import hudson.model.User;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
+
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
 import jenkins.model.Jenkins;
@@ -34,25 +38,41 @@ public class CulpritsRecipientProvider extends RecipientProvider {
     }
     
     @Override
-    public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+    public void addRecipients(final ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
+        final class Debug implements RecipientProviderUtilities.IDebug {
+            private final ExtendedEmailPublisherDescriptor descriptor
+                    = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+            private final PrintStream logger = context.getListener().getLogger();
+
+            public void send(final String format, final Object... args) {
+                descriptor.debug(logger, format, args);
+            }
+        }
+        final Debug debug = new Debug();
         Run<?,?> run = context.getRun();
         if (run instanceof AbstractBuild) {
             Set<User> users = ((AbstractBuild<?,?>)run).getCulprits();
-            for (User user : users) {
-                if (!EmailRecipientUtils.isExcludedRecipient(user, context.getListener())) {
-                    String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
-                    if (userAddress != null) {
-                        descriptor.debug(context.getListener().getLogger(), "Adding user address %s, they were not considered an excluded committer", userAddress);
-                        EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, userAddress, env, context.getListener());
+            RecipientProviderUtilities.addUsers(users, context.getListener(), env, to, cc, bcc, debug);
+        } else if (run.getResult() != null && run.getResult().isWorseThan(Result.SUCCESS)) {
+            List<Run<?, ?>> builds = new ArrayList<>();
+            Run<?, ?> build = run;
+            while (build != null) {
+                if (build.getResult() != null) {
+                    if (build.getResult().isWorseThan(Result.SUCCESS)) {
+                        debug.send("Including build %s with status %s", build.getId(), build.getResult());
+                        builds.add(build);
                     } else {
-                        context.getListener().getLogger().println("Failed to send e-mail to " + user.getFullName() + " because no e-mail address is known, and no default e-mail domain is configured");
+                        break;
                     }
                 }
+                build = build.getPreviousCompletedBuild();
             }
+            Set<User> users = RecipientProviderUtilities.getChangeSetAuthors(builds, debug);
+            RecipientProviderUtilities.addUsers(users, context.getListener(), env, to, cc, bcc, debug);
         }
     }
-    
+
     @Extension
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
         

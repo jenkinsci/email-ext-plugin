@@ -30,8 +30,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import hudson.model.Run;
 import org.apache.commons.collections.Transformer;
 import org.apache.commons.collections.iterators.TransformIterator;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -61,9 +63,9 @@ import hudson.tasks.test.AbstractTestResultAction;
 
     public static class MockUtilitiesChangeSet extends ChangeLogSet<ChangeLogSet.Entry> {
         final String[] authors;
-        final AbstractBuild<?, ?> build;
+        final Run<?, ?> build;
 
-        public MockUtilitiesChangeSet(AbstractBuild<?, ?> build, final String... authors) {
+        public MockUtilitiesChangeSet(Run<?, ?> build, final String... authors) {
             super(build, null);
             this.build = build;
             this.authors = authors;
@@ -111,8 +113,17 @@ import hudson.tasks.test.AbstractTestResultAction;
 
     }
 
+    public static ChangeLogSet<ChangeLogSet.Entry> makeChangeSet(final Run<?, ?> build, final String... inAuthors) {
+        return new MockUtilitiesChangeSet(build, inAuthors);
+    }
+
+    public static void addChangeSet(final WorkflowRun build, final String... inAuthors) {
+        ChangeLogSet<ChangeLogSet.Entry> changeSet = makeChangeSet(build, inAuthors);
+        PowerMockito.when(build.getChangeSets()).thenReturn(Collections.<ChangeLogSet<? extends ChangeLogSet.Entry>>singletonList(changeSet));
+    }
+
     public static void addChangeSet(final AbstractBuild<?, ?> build, final String... inAuthors) {
-        MockUtilitiesChangeSet changeSet = new MockUtilitiesChangeSet(build, inAuthors);
+        ChangeLogSet<ChangeLogSet.Entry> changeSet = makeChangeSet(build, inAuthors);
         PowerMockito.when(build.getChangeSet()).thenReturn((ChangeLogSet)changeSet);
     }
 
