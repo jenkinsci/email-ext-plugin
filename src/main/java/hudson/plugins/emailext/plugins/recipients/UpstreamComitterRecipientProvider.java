@@ -75,11 +75,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
                 // check for getChangeSets which WorkflowRun has
                 Method m = build.getClass().getMethod("getChangeSets");
                 changeSets = (List<ChangeLogSet<? extends ChangeLogSet.Entry>>)m.invoke(build);
-            } catch (NoSuchMethodException e) {
-                listener.getLogger().print("Could not add upstream committers, build type does not provide change set");
-            } catch (InvocationTargetException e) {
-                listener.getLogger().print("Could not add upstream committers, build type does not provide change set");
-            } catch (IllegalAccessException e) {
+            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
                 listener.getLogger().print("Could not add upstream committers, build type does not provide change set");
             }
         }
