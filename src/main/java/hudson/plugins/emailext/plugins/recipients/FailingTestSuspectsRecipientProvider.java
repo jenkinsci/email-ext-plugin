@@ -87,8 +87,12 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
                     final HashSet<Run<?, ?>> buildsWhereATestStartedFailing = new HashSet<>();
                     for (final TestResult caseResult : testResultAction.getFailedTests()) {
                         final Run<?, ?> runWhereTestStartedFailing = caseResult.getFailedSinceRun();
-                        debug.send("  runWhereTestStartedFailing: %d", runWhereTestStartedFailing.getNumber());
-                        buildsWhereATestStartedFailing.add(runWhereTestStartedFailing);
+                        if (runWhereTestStartedFailing != null) {
+                            debug.send("  runWhereTestStartedFailing: %d", runWhereTestStartedFailing.getNumber());
+                            buildsWhereATestStartedFailing.add(runWhereTestStartedFailing);
+                        } else {
+                            context.getListener().error("getFailedSinceRun returned null for %s", caseResult.getFullDisplayName());
+                        }
                     }
                     // For each build where a test started failing, walk backward looking for build results worse than
                     // UNSTABLE. All of those builds will be used to find suspects.
