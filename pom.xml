@@ -287,11 +287,22 @@
                     <plugin>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
-                            <argLine>-Djava.awt.headless=true -XX:MaxPermSize=512m @{argLine} @{jacoco.agent}</argLine>
+                            <argLine>-Djava.awt.headless=true -XX:MaxPermSize=512m @{jacoco.agent}</argLine>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>blank_jacoco</id>
+            <activation>
+                <property>
+                    <name>!jacoco.agent</name>
+                </property>
+            </activation>
+            <properties>
+                <jacoco.agent/>
+            </properties>
         </profile>
     </profiles>
 
