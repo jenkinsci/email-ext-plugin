@@ -1,5 +1,6 @@
 package hudson.plugins.emailext;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import hudson.EnvVars;
@@ -353,6 +354,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return true;
     }
 
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     boolean sendMail(ExtendedEmailPublisherContext context) {
         try {
             MimeMessage msg = createMail(context);
@@ -591,8 +593,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         // Set the contents of the email
         msg.addHeader("X-Jenkins-Job", context.getRun().getParent().getDisplayName());
-        if (context.getRun() != null && context.getRun().getResult() != null) {
-            msg.addHeader("X-Jenkins-Result", context.getRun().getResult().toString());
+        final Result result = context.getRun() != null ? context.getRun().getResult() : null;
+        if (result != null) {
+            msg.addHeader("X-Jenkins-Result", result.toString());
         }
         msg.setSentDate(new Date());
         setSubject(context, msg, charset);

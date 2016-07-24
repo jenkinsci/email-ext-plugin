@@ -51,16 +51,18 @@ public class CulpritsRecipientProvider extends RecipientProvider {
         }
         final Debug debug = new Debug();
         Run<?,?> run = context.getRun();
+        final Result runResult = run.getResult();
         if (run instanceof AbstractBuild) {
             Set<User> users = ((AbstractBuild<?,?>)run).getCulprits();
             RecipientProviderUtilities.addUsers(users, context.getListener(), env, to, cc, bcc, debug);
-        } else if (run.getResult() != null && run.getResult().isWorseThan(Result.SUCCESS)) {
+        } else if (runResult != null && runResult.isWorseThan(Result.SUCCESS)) {
             List<Run<?, ?>> builds = new ArrayList<>();
             Run<?, ?> build = run;
             while (build != null) {
-                if (build.getResult() != null) {
-                    if (build.getResult().isWorseThan(Result.SUCCESS)) {
-                        debug.send("Including build %s with status %s", build.getId(), build.getResult());
+                final Result buildResult = build.getResult();
+                if (buildResult != null) {
+                    if (buildResult.isWorseThan(Result.SUCCESS)) {
+                        debug.send("Including build %s with status %s", build.getId(), buildResult);
                         builds.add(build);
                     } else {
                         break;

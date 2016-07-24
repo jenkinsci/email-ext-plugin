@@ -84,7 +84,11 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
                 final HashSet<Run<?, ?>> buildsWithSuspects = new HashSet<>();
                 Run<?, ?> firstFailedBuild = currentRun;
                 Run<?, ?> candidate = currentRun;
-                while (candidate != null && candidate.getResult().isWorseOrEqualTo(Result.FAILURE)) {
+                while (candidate != null) {
+                    final Result candidateResult = candidate.getResult();
+                    if ( candidateResult == null || !candidateResult.isWorseOrEqualTo(Result.FAILURE) ) {
+                        break;
+                    }
                     firstFailedBuild = candidate;
                     candidate = candidate.getPreviousCompletedBuild();
                 }

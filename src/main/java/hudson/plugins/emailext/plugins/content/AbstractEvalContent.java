@@ -36,6 +36,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 import jenkins.model.Jenkins;
 
@@ -130,7 +131,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         return inputStream;
     }
     
-    private InputStream getManagedFile(String fileName) {
+    private InputStream getManagedFile(String fileName) throws UnsupportedEncodingException {
         InputStream stream = null;
         Plugin plugin = Jenkins.getActiveInstance().getPlugin("config-file-provider");
         if (plugin != null) {
@@ -145,7 +146,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
             }
 
             if (config != null) {
-               stream = new ByteArrayInputStream(config.content.getBytes());
+               stream = new ByteArrayInputStream(config.content.getBytes("UTF-8"));
             }
         }
         return stream;
