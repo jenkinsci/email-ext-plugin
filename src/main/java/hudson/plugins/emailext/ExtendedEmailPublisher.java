@@ -755,9 +755,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                         String.format("%s-%s%d%s", context.getTrigger().getDescriptor().getDisplayName(), context.getRun().getId(), random.nextInt(), extension));
                 savedOutput.write(text, charset);
             }
-        } catch (IOException e) {
-            context.getListener().getLogger().println("Error trying to save email output to file. " + e.getMessage());
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             context.getListener().getLogger().println("Error trying to save email output to file. " + e.getMessage());
         }
 

@@ -57,7 +57,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         if (failCount == 0) {
             buffer.append("All tests passed");
         } else {
-            buffer.append(failCount).append(" tests failed.").append('\n');
+            buffer.append(failCount).append(" tests failed.\n");
 
             boolean showOldFailures = !onlyRegressions;
             if(maxLength < Integer.MAX_VALUE) {
@@ -111,11 +111,11 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         local.append('.').append(failedTest.getDisplayName()).append('\n');
 
         if (showMessage) {
-            local.append('\n').append("Error Message:\n").append(failedTest.getErrorDetails()).append('\n');
+            local.append("\nError Message:\n").append(failedTest.getErrorDetails()).append('\n');
         }
         
         if (showStack) {
-            local.append('\n').append("Stack Trace:\n").append(failedTest.getErrorStackTrace()).append('\n');
+            local.append("\nStack Trace:\n").append(failedTest.getErrorStackTrace()).append('\n');
         }
 
         if (showMessage || showStack) {
