@@ -33,6 +33,8 @@
         <workflow.version>1.10</workflow.version>
         <jenkins.version>1.609.2</jenkins.version>
         <java.level>7</java.level>
+        <concurrency>2</concurrency>
+        <argLine/>
     </properties>
 
     <developers>
@@ -280,29 +282,15 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <configuration>
-                            <propertyName>jacoco.agent</propertyName>
-                        </configuration>
                     </plugin>
                     <plugin>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
-                            <argLine>-Djava.awt.headless=true -XX:MaxPermSize=512m @{jacoco.agent}</argLine>
+                            <argLine>-Djava.awt.headless=true -XX:MaxPermSize=512m @{argLine}</argLine>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <profile>
-            <id>blank_jacoco</id>
-            <activation>
-                <property>
-                    <name>!jacoco.agent</name>
-                </property>
-            </activation>
-            <properties>
-                <jacoco.agent/>
-            </properties>
         </profile>
     </profiles>
 
