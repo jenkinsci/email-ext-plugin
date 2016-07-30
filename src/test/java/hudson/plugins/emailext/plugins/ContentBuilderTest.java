@@ -13,6 +13,7 @@ import hudson.util.StreamTaskListener;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertEquals;
@@ -158,7 +159,9 @@ public class ContentBuilderTest {
     @Test
     public void testRuntimeMacro() throws IOException, InterruptedException {
         RuntimeContent content = new RuntimeContent("Hello, world");
-        assertEquals("Hello, world", ContentBuilder.transformText("${RUNTIME}", new ExtendedEmailPublisherContext(publisher, build, j.createLocalLauncher(), listener), Collections.singletonList((TokenMacro)content)));
+        assertEquals("Hello, world", ContentBuilder.transformText("${RUNTIME}",
+                new ExtendedEmailPublisherContext(publisher, build, build.getWorkspace(), j.createLocalLauncher(), listener),
+                Collections.singletonList((TokenMacro) content)));
     }
     
     public class RuntimeContent extends TokenMacro {
@@ -173,6 +176,11 @@ public class ContentBuilderTest {
         @Override
         public boolean acceptsMacroName(String name) {
             return name.equals(MACRO_NAME);
+        }
+
+        @Override
+        public List<String> getAcceptedMacroNames() {
+            return Collections.singletonList(MACRO_NAME);
         }
 
         @Override

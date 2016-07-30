@@ -75,8 +75,8 @@ public final class ContentBuilder {
             List<TokenMacro> macros = new ArrayList<>(getPrivateMacros());
             if(additionalMacros != null)
                 macros.addAll(additionalMacros);
-            if(context.getBuild() != null) {
-                newText = TokenMacro.expandAll(context.getBuild(), context.getListener(), newText, false, macros);
+            if(context.getRun() != null) {
+                newText = TokenMacro.expandAll(context.getRun(), context.getWorkspace(), context.getListener(), newText, false, macros);
             } else {
                 context.getListener().getLogger().println("Job type does not allow token replacement.");
             }

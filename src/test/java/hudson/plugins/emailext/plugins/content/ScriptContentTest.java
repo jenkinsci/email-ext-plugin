@@ -263,5 +263,6 @@ public class ScriptContentTest {
     private void mockChangeSet(final AbstractBuild build) {
         ScriptContentChangeLogSet changeLog = new ScriptContentChangeLogSet(build);
         Mockito.when(build.getChangeSet()).thenReturn(changeLog);
+        Mockito.when(build.getChangeSets()).thenReturn(Collections.singletonList(changeLog));
     }
 }

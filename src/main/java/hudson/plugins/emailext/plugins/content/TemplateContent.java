@@ -1,7 +1,8 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.ExtensionList;
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailToken;
 import org.apache.commons.io.IOUtils;
@@ -33,13 +34,17 @@ public class TemplateContent extends AbstractEvalContent {
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
+        return evaluate(build, build.getWorkspace(), listener, macroName);
+    }
 
+    @Override
+    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) throws MacroEvaluationException, IOException, InterruptedException {
         InputStream inputStream = null;
         String result = "";
         
         try {
             if (!StringUtils.isEmpty(file)) {
-                result = IOUtils.toString(getFileInputStream(build.getWorkspace(), file, ".txt"));
+                result = IOUtils.toString(getFileInputStream(workspace, file, ".txt"));
             } 
         } catch (FileNotFoundException e) {
             String missingFileError = generateMissingFile("Plain Text", file);
