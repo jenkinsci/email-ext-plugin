@@ -5,13 +5,12 @@ import hudson.model.Action;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.analysis.core.AbstractResultAction;
-import hudson.plugins.analysis.core.MavenResultAction;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertThat;
-import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.mockito.Mockito.mock;
 
 public class StaticAnalysisUtilitiesTest {
 
@@ -25,11 +24,6 @@ public class StaticAnalysisUtilitiesTest {
 
         build = new FreeStyleBuild(mock(FreeStyleProject.class));
         action = mock(AbstractResultAction.class);
-        build.addAction(action);
-        assertThat(utilities.getActions(build), hasItem(action));
-
-        build = new FreeStyleBuild(mock(FreeStyleProject.class));
-        action = mock(MavenResultAction.class);
         build.addAction(action);
         assertThat(utilities.getActions(build), hasItem(action));
     }
