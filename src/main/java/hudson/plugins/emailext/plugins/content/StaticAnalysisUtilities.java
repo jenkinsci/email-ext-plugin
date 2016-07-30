@@ -28,7 +28,7 @@ public class StaticAnalysisUtilities {
      */
     public List<Action> getActions(Run<?, ?> build) {
         ArrayList<Action> actions = new ArrayList<>();
-        for (Action action : build.getActions(ResultAction.class)) {
+        for (Action action : build.getActions(Action.class)) {
             if (AbstractResultAction.class.isInstance(action) || MavenResultAction.class.isInstance(action)) {
                 actions.add(action);
             }
