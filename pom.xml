@@ -221,13 +221,6 @@
             <version>2.7.1</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.codehaus.sonar-plugins.java</groupId>
-            <artifactId>sonar-jacoco-listeners</artifactId>
-            <version>3.2</version>
-            <scope>test</scope>
-        </dependency>
-
 
         <!-- static analysys -->
         <dependency>
