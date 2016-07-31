@@ -18,7 +18,7 @@
 
     <artifactId>email-ext</artifactId>
     <packaging>hpi</packaging>
-    <version>2.45-SNAPSHOT</version>
+    <version>2.45</version>
     <name>Email Extension Plugin</name>
     <description>EMail Extension Plugin</description>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin</url>
@@ -34,7 +34,7 @@
         <jenkins.version>1.609.2</jenkins.version>
         <java.level>7</java.level>
         <concurrency>2</concurrency>
-        <argLine/>
+        <argLine />
     </properties>
 
     <developers>
@@ -230,7 +230,7 @@
     <scm>
         <connection>scm:git:https://github.com/jenkinsci/email-ext-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/email-ext-plugin.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>email-ext-2.45</tag>
     </scm>
 
     <repositories>
