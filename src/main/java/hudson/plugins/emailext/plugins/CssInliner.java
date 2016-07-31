@@ -12,6 +12,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.MessageFormat;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import net.htmlparser.jericho.Source;
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -36,6 +39,7 @@ import org.apache.commons.lang.StringEscapeUtils;
  * @author <a href="https://github.com/rahulsom">Rahul Somasunderam</a>
  */
 public class CssInliner {
+    private final static Logger LOG = Logger.getLogger(CssInliner.class.getName());
 
     public static final String CSS_STYLE = "cssstyle";
     public static final String STYLE_ATTR = "style";
@@ -119,7 +123,7 @@ public class CssInliner {
 
                     img.attr(IMG_SRC_ATTR, MessageFormat.format("data:{0};base64,{1}", contentType, base64));
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOG.log(Level.WARNING, null, e);
                 }
             }
         }
