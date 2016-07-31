@@ -1,4 +1,7 @@
 <?jelly escape-by-default='true'?>
+<!DOCTYPE html [
+    <!ENTITY nbsp "&#38;#38;nbsp&#59;">
+]>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define">
 
 <STYLE>
@@ -18,7 +21,6 @@ TD.test_failed { color:red; }
 TD.console { font-family:Courier New; }
 </STYLE>
 <BODY>
-<j:set var="spc" value="&amp;nbsp;&amp;nbsp;" />
 
 
 <!-- GENERAL INFO -->
@@ -56,14 +58,14 @@ TD.console { font-family:Courier New; }
       <j:set var="hadChanges" value="true" />
       <j:set var="aUser" value="${cs.hudsonUser}"/>
       <TR>
-        <TD colspan="2" class="bg2">${spc}Revision <B>${cs.commitId?:cs.revision?:cs.changeNumber}</B> by
+        <TD colspan="2" class="bg2">&nbsp;&nbsp;Revision <B>${cs.commitId?:cs.revision?:cs.changeNumber}</B> by
           <B>${aUser!=null?aUser.displayName:cs.author.displayName}: </B>
           <B>(${cs.msgAnnotated})</B>
          </TD>
       </TR>
       <j:forEach var="p" items="${cs.affectedFiles}">
         <TR>
-          <TD width="10%">${spc}${p.editType.name}</TD>
+          <TD width="10%">&nbsp;&nbsp;${p.editType.name}</TD>
           <TD>${p.path}</TD>
         </TR>
       </j:forEach>
