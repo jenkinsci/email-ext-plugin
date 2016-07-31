@@ -1,6 +1,5 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.ExtensionList;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;

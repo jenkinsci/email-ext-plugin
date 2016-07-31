@@ -1,6 +1,5 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.ExtensionList;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailToken;
@@ -39,11 +38,12 @@ public class TemplateContent extends AbstractEvalContent {
         
         try {
             if (!StringUtils.isEmpty(file)) {
-                result = IOUtils.toString(getFileInputStream(build.getWorkspace(), file, ".txt"));
+                inputStream = getFileInputStream(build.getWorkspace(), file, ".txt");
+                result = IOUtils.toString(inputStream);
             } 
         } catch (FileNotFoundException e) {
             String missingFileError = generateMissingFile("Plain Text", file);
-            LOGGER.log(Level.SEVERE, missingFileError);
+            LOGGER.log(Level.SEVERE, missingFileError, e);
             result = missingFileError;
         } finally {
             IOUtils.closeQuietly(inputStream);

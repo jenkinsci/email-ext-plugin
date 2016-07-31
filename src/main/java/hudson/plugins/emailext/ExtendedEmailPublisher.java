@@ -487,8 +487,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     private boolean executeScript(String rawScript, String scriptName, ExtendedEmailPublisherContext context,
-            MimeMessage msg, Session session, Transport transport)
-            throws RuntimeException {
+            MimeMessage msg, Session session, Transport transport) {
         boolean cancel = false;
         String script = ContentBuilder.transformText(rawScript, context, getRuntimeMacros(context));
         if (StringUtils.isNotBlank(script)) {

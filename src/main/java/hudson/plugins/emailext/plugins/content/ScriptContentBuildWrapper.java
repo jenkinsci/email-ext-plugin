@@ -44,8 +44,7 @@ public class ScriptContentBuildWrapper {
     public List<Action> getStaticAnalysisActions() {
         if (isPluginInstalled("analysis-core")) {
             return new StaticAnalysisUtilities().getActions(build);
-        }
-        else {
+        } else {
             return Collections.emptyList();
         }
     }
@@ -68,16 +67,14 @@ public class ScriptContentBuildWrapper {
 
     public List<TestResult> getJUnitTestResult() {
         List<TestResult> result = new ArrayList<>();
-        List<Action> actions = build.getActions();
+        List<AggregatedTestResultAction> actions = build.getActions(AggregatedTestResultAction.class);
         for (Action action : actions) {
-            if (action instanceof hudson.tasks.test.AggregatedTestResultAction) {
-                /* Maven Project */
-                List<AggregatedTestResultAction.ChildReport> reportList =
-                        ((AggregatedTestResultAction) action).getChildReports();
-                for (AggregatedTestResultAction.ChildReport report : reportList) {
-                    if (report.result instanceof hudson.tasks.junit.TestResult) {
-                        result.add((TestResult) report.result);
-                    }
+            /* Maven Project */
+            List<AggregatedTestResultAction.ChildReport> reportList =
+                    ((AggregatedTestResultAction) action).getChildReports();
+            for (AggregatedTestResultAction.ChildReport report : reportList) {
+                if (report.result instanceof hudson.tasks.junit.TestResult) {
+                    result.add((TestResult) report.result);
                 }
             }
         }

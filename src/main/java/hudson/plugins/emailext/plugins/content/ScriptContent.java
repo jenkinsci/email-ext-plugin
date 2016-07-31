@@ -5,7 +5,6 @@ import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
-import hudson.ExtensionList;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
@@ -184,8 +183,7 @@ public class ScriptContent extends AbstractEvalContent {
             binding.setVariable(e.getKey(), e.getValue());
         }
 
-        GroovyShell shell = new GroovyShell(cl, binding, cc);
-        return shell;
+        return new GroovyShell(cl, binding, cc);
     }
 
     @Override
