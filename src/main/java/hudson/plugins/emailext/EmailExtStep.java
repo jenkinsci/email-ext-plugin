@@ -12,6 +12,7 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
+import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
@@ -151,6 +152,8 @@ public class EmailExtStep extends AbstractStepImpl {
 
             AlwaysTrigger.DescriptorImpl descriptor = Jenkins.getActiveInstance().getDescriptorByType(AlwaysTrigger.DescriptorImpl.class);
             EmailTrigger trigger = descriptor.createDefault();
+            trigger.getEmail().getRecipientProviders().clear();
+            trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
             if (step.recipientProviders != null) {
                 RecipientProvider.checkAllSupport(step.recipientProviders, run.getParent().getClass());
                 trigger.getEmail().addRecipientProviders(step.recipientProviders);
