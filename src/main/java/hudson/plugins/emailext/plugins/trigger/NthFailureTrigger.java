@@ -18,11 +18,18 @@ import java.util.List;
  */
 public abstract class NthFailureTrigger extends EmailTrigger {
 
+    @Deprecated
     protected int failureCount;
-    
+
+    /** @deprecated override getRequiredFailureCount instead of passing in failureCount */
+    @Deprecated
     public NthFailureTrigger(int failureCount, List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
         super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
         this.failureCount = failureCount;
+    }
+
+    public NthFailureTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
     
     @Deprecated
@@ -31,11 +38,17 @@ public abstract class NthFailureTrigger extends EmailTrigger {
         this.failureCount = failureCount;
     }
 
+    @SuppressWarnings("deprecation")
+    protected int getRequiredFailureCount() {
+        return failureCount;
+    }
+
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
         Run<?,?> run = build;
+        int count = getRequiredFailureCount();
         // Work back through the failed builds.
-        for (int i = 0; i < failureCount; i++) {
+        for (int i = 0; i < count; i++) {
             if (run == null) {
                 // We don't have enough history to have reached the failure count.
                 return false;

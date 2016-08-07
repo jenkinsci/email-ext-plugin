@@ -53,14 +53,4 @@ public class FirstFailureTriggerTest extends TriggerTestBase {
             throws IOException, InterruptedException {
         assertNotTriggered(Result.FAILURE, Result.FAILURE);
     }
-
-    @Test
-    public void testUpgrade()
-            throws IOException, InterruptedException {
-
-        XStream2 xs = new XStream2();
-        InputStream is = FirstFailureTriggerTest.class.getResourceAsStream("oldformat.xml");
-        FirstFailureTrigger t = (FirstFailureTrigger) xs.fromXML(is);
-        assertEquals(t.failureCount, 1);
-    }
 }

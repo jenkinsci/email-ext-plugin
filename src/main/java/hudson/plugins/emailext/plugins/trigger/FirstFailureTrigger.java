@@ -13,12 +13,17 @@ public class FirstFailureTrigger extends NthFailureTrigger {
 
     @DataBoundConstructor
     public FirstFailureTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(1, recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
     }
     
     @Deprecated
     public FirstFailureTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
         super(1, sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    }
+
+    @Override
+    protected int getRequiredFailureCount() {
+        return 1;
     }
 
     @Extension
@@ -32,17 +37,5 @@ public class FirstFailureTrigger extends NthFailureTrigger {
         public EmailTrigger createDefault() {
             return _createDefault();
         }
-    }
-
-    /**
-     * Maintaining backward compatibility
-     *
-     * @return this after checking for failureCount setting
-     */
-    public Object readResolve() {
-        if (this.failureCount == 0) {
-            this.failureCount = 1;
-        }
-        return this;
     }
 }
