@@ -43,7 +43,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -747,14 +746,13 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         try {
             if (saveOutput) {
-                Random random = new Random();
                 String extension = ".html";
                 if (messageContentType.startsWith("text/plain")) {
                     extension = ".txt";
                 }
 
                 FilePath savedOutput = new FilePath(context.getWorkspace(),
-                        String.format("%s-%s%d%s", context.getTrigger().getDescriptor().getDisplayName(), context.getRun().getId(), random.nextInt(), extension));
+                        String.format("%s-%s%s", context.getTrigger().getDescriptor().getDisplayName(), context.getRun().getId(), extension));
                 savedOutput.write(text, charset);
             }
         } catch (IOException | InterruptedException e) {
