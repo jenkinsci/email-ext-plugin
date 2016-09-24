@@ -5,6 +5,8 @@ import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
+import hudson.FilePath;
+import hudson.model.Run;
 import hudson.model.AbstractBuild;
 import hudson.FilePath;
 import hudson.model.Run;
