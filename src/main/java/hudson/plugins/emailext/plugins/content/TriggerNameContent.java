@@ -3,12 +3,11 @@ package hudson.plugins.emailext.plugins.content;
 import com.google.common.collect.ListMultimap;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import java.io.IOException;
-import java.util.Map;
-
-import hudson.plugins.emailext.plugins.EmailToken;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+
+import java.io.IOException;
+import java.util.Map;
 
 public class TriggerNameContent extends TokenMacro {
     private static final String MACRO_NAME = "TRIGGER_NAME";

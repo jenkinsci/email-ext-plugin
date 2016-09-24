@@ -19,14 +19,15 @@ import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.util.DescribableList;
 import hudson.util.StreamTaskListener;
 import jenkins.model.JenkinsLocationConfiguration;
-
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.mock_javamail.Mailbox;
 import org.mockito.Mockito;
 
+import javax.mail.Message;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,25 +35,11 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Scanner;
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeThat;
-import org.jvnet.hudson.test.TestBuilder;
-import org.jvnet.mock_javamail.Mailbox;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.any;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Matchers.any;
 
 public class ScriptContentTest {
     private ScriptContent scriptContent;

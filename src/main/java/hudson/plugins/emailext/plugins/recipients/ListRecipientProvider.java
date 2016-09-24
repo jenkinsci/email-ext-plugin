@@ -6,21 +6,22 @@
 
 package hudson.plugins.emailext.plugins.recipients;
 
-import hudson.model.Job;
-import hudson.plugins.emailext.EmailRecipientUtils;
-import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
-import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.EnvVars;
 import hudson.Extension;
+import hudson.model.Job;
+import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
+import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
+import jenkins.model.Jenkins;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
-import jenkins.model.Jenkins;
-import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  *

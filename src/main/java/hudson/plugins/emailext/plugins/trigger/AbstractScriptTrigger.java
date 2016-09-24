@@ -4,7 +4,6 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import jenkins.model.Jenkins;

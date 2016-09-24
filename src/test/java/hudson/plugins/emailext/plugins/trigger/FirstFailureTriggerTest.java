@@ -2,13 +2,9 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.util.XStream2;
+import org.junit.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
-
-import org.junit.Test;
-import static org.junit.Assert.assertEquals;
 
 public class FirstFailureTriggerTest extends TriggerTestBase {
 

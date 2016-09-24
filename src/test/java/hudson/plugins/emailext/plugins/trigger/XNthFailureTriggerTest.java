@@ -1,6 +1,5 @@
 package hudson.plugins.emailext.plugins.trigger;
 
-import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import org.junit.Test;
 
@@ -8,7 +7,6 @@ import java.io.IOException;
 
 import static hudson.model.Result.FAILURE;
 import static hudson.model.Result.SUCCESS;
-import static org.junit.Assert.*;
 
 /**
  * @author Kanstantsin Shautsou

@@ -1,11 +1,11 @@
 package hudson.plugins.emailext;
 
-import hudson.*;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.CulpritsRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
+
 import java.util.ArrayList;
 import java.util.List;
 

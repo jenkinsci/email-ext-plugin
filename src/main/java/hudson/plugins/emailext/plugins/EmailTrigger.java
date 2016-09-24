@@ -1,7 +1,7 @@
 package hudson.plugins.emailext.plugins;
 
-import hudson.ExtensionPoint;
 import hudson.DescriptorExtensionList;
+import hudson.ExtensionPoint;
 import hudson.model.AbstractBuild;
 import hudson.model.Describable;
 import hudson.model.Run;
@@ -16,14 +16,13 @@ import hudson.tasks.junit.TestResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction.ChildReport;
-import java.util.ArrayList;
-import java.util.List;
-
 import jenkins.model.Jenkins;
-
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class EmailTrigger implements Describable<EmailTrigger>, ExtensionPoint {
 

@@ -2,9 +2,8 @@ package hudson.plugins.emailext.plugins;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.Descriptor;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 

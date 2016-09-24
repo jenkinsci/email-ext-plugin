@@ -2,9 +2,8 @@ package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.Action;
 import hudson.model.Run;
-import hudson.plugins.analysis.core.MavenResultAction;
 import hudson.plugins.analysis.core.AbstractResultAction;
-import hudson.plugins.analysis.core.ResultAction;
+import hudson.plugins.analysis.core.MavenResultAction;
 
 import java.util.ArrayList;
 import java.util.List;

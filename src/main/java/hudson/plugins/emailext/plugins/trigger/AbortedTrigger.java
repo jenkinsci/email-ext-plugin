@@ -6,12 +6,12 @@ import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
-import hudson.plugins.emailext.plugins.RecipientProvider;
-import java.util.List;
-
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.util.List;
 
 
 public class AbortedTrigger extends EmailTrigger {

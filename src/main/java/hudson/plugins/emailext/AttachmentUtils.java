@@ -9,6 +9,15 @@ import hudson.model.BuildListener;
 import hudson.model.Run;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.ZipDataSource;
+import org.apache.commons.lang.StringUtils;
+
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.MimetypesFileTypeMap;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeUtility;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -18,14 +27,6 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.MimetypesFileTypeMap;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.internet.MimeUtility;
-import javax.mail.internet.MimeBodyPart;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * @author acearl

@@ -1,14 +1,13 @@
 package hudson.plugins.emailext;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import org.kohsuke.stapler.DataBoundConstructor;
-
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Model a classpath entry for Groovy pre script execution.

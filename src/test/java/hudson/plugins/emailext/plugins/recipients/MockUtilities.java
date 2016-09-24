@@ -23,14 +23,15 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
+import hudson.model.AbstractBuild;
+import hudson.model.Cause;
 import hudson.model.Run;
+import hudson.model.User;
+import hudson.scm.ChangeLogSet;
+import hudson.tasks.Mailer;
+import hudson.tasks.junit.CaseResult;
+import hudson.tasks.junit.TestResultAction;
+import hudson.tasks.test.AbstractTestResultAction;
 import org.apache.commons.collections.Transformer;
 import org.apache.commons.collections.iterators.TransformIterator;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -39,14 +40,12 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 
-import hudson.model.AbstractBuild;
-import hudson.model.Cause;
-import hudson.model.User;
-import hudson.scm.ChangeLogSet;
-import hudson.tasks.Mailer;
-import hudson.tasks.junit.CaseResult;
-import hudson.tasks.junit.TestResultAction;
-import hudson.tasks.test.AbstractTestResultAction;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /* package private */ final class MockUtilities {
     private static final String AT_DOMAIN = "@DOMAIN";

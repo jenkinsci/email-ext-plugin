@@ -6,11 +6,11 @@ import hudson.model.Run;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction;
+import jenkins.model.Jenkins;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import jenkins.model.Jenkins;
 
 public class ScriptContentBuildWrapper {
 

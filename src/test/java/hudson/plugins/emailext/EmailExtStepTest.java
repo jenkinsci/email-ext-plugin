@@ -1,22 +1,18 @@
 package hudson.plugins.emailext;
 
-import com.google.inject.Inject;
 import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.*;
-import hudson.plugins.emailext.plugins.RecipientProvider;
-import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
-import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
-import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
+import hudson.model.Run;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
+import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.TestBuilder;
 import org.jvnet.hudson.test.TestExtension;
 import org.jvnet.hudson.test.recipes.WithPlugin;
 import org.jvnet.mock_javamail.Mailbox;
@@ -26,16 +22,11 @@ import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.matchers.JUnitMatchers.hasItems;
 
 /**
  * Created by acearl on 9/15/2015.

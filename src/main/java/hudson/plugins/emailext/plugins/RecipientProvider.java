@@ -1,10 +1,16 @@
 package hudson.plugins.emailext.plugins;
 
+import hudson.DescriptorExtensionList;
 import hudson.EnvVars;
 import hudson.ExtensionPoint;
+import hudson.model.AbstractDescribableImpl;
 import hudson.model.Job;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
+import jenkins.model.Jenkins;
+import org.jsoup.helper.StringUtil;
 
+import javax.annotation.Nonnull;
+import javax.mail.internet.InternetAddress;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,13 +18,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
-import javax.mail.internet.InternetAddress;
-
-import hudson.DescriptorExtensionList;
-import hudson.model.AbstractDescribableImpl;
-import jenkins.model.Jenkins;
-import org.jsoup.helper.StringUtil;
 
 /**
  * Created by acearl on 12/24/13.
