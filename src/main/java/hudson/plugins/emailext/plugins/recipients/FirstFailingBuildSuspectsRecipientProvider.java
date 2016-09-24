@@ -23,26 +23,24 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
-import java.io.PrintStream;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
-import javax.mail.internet.InternetAddress;
-
+import hudson.EnvVars;
+import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.User;
-import org.kohsuke.stapler.DataBoundConstructor;
-
-import hudson.EnvVars;
-import hudson.Extension;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import jenkins.model.Jenkins;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import javax.mail.internet.InternetAddress;
+import java.io.PrintStream;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * A recipient provider that assigns ownership of a failing build to the set of developers (including any initiator)

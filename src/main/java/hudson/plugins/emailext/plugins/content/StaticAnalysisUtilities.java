@@ -1,9 +1,9 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.Action;
-import hudson.model.AbstractBuild;
-import hudson.plugins.analysis.core.MavenResultAction;
+import hudson.model.Run;
 import hudson.plugins.analysis.core.AbstractResultAction;
+import hudson.plugins.analysis.core.MavenResultAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +25,9 @@ public class StaticAnalysisUtilities {
      * @return The static analysis actions for the specified build. The returned
      * list might be empty if there are no such actions.
      */
-    public List<Action> getActions(AbstractBuild<?, ?> build) {
+    public List<Action> getActions(Run<?, ?> build) {
         ArrayList<Action> actions = new ArrayList<>();
-        for (Action action : build.getActions()) {
+        for (Action action : build.getActions(Action.class)) {
             if (AbstractResultAction.class.isInstance(action) || MavenResultAction.class.isInstance(action)) {
                 actions.add(action);
             }

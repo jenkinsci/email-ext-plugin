@@ -5,11 +5,11 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
-import java.io.IOException;
-
 import hudson.tasks.test.TestResult;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
+
+import java.io.IOException;
 
 /**
  * An EmailContent for failing tests. Only shows tests that have failed.

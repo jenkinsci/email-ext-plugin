@@ -1,11 +1,15 @@
 package hudson.plugins.emailext.recipients;
 
-import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.EnvVars;
 import hudson.model.User;
+import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.util.FormValidation;
 import hudson.tasks.Mailer;
+import hudson.util.FormValidation;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
+import org.jvnet.hudson.test.JenkinsRule;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -17,12 +21,6 @@ import java.util.Set;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-
-import org.junit.Rule;
-import org.junit.Test;
-
-import org.jvnet.hudson.test.Issue;
-import org.jvnet.hudson.test.JenkinsRule;
 
 public class EmailRecipientUtilsTest {
 

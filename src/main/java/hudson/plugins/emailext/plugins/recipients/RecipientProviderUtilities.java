@@ -26,14 +26,15 @@ package hudson.plugins.emailext.plugins.recipients;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import hudson.EnvVars;
-import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.scm.ChangeLogSet;
 
+import javax.mail.internet.InternetAddress;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -42,8 +43,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-
-import javax.mail.internet.InternetAddress;
 
 public final class RecipientProviderUtilities {
     private static final Logger LOGGER = Logger.getLogger(RecipientProviderUtilities.class.getName());

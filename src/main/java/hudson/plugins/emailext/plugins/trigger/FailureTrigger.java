@@ -2,16 +2,16 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
 import hudson.model.AbstractBuild;
-import jenkins.model.Jenkins;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProvider;
-import java.util.List;
-
+import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
+import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.util.List;
 
 
 public class FailureTrigger extends EmailTrigger {

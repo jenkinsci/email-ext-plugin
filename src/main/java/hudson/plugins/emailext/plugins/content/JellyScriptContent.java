@@ -1,13 +1,18 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.model.AbstractBuild;
+import hudson.FilePath;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.JellyTemplateConfig.JellyTemplateConfigProvider;
 import hudson.plugins.emailext.plugins.EmailToken;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.jelly.*;
+import org.apache.commons.jelly.JellyContext;
+import org.apache.commons.jelly.JellyException;
+import org.apache.commons.jelly.JellyTagException;
+import org.apache.commons.jelly.Script;
+import org.apache.commons.jelly.XMLOutput;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.xml.sax.InputSource;
@@ -31,15 +36,14 @@ public class JellyScriptContent extends AbstractEvalContent {
     public JellyScriptContent() {
         super(MACRO_NAME);
     }
-    
+
     @Override
-    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
-            throws MacroEvaluationException, IOException, InterruptedException {
+    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) throws MacroEvaluationException, IOException, InterruptedException {
         InputStream inputStream = null;
 
         try {
-            inputStream = getFileInputStream(build.getWorkspace(), template, JELLY_EXTENSION);
-            return renderContent(build, inputStream, listener);
+            inputStream = getFileInputStream(workspace, template, JELLY_EXTENSION);
+            return renderContent(run, inputStream, listener);
         } catch (JellyException e) {
             return "JellyException: " + e.getMessage();
         } catch (FileNotFoundException e) {
@@ -54,7 +58,7 @@ public class JellyScriptContent extends AbstractEvalContent {
         return JellyTemplateConfigProvider.class;
     }
 
-    private String renderContent(AbstractBuild<?, ?> build, InputStream inputStream, TaskListener listener)
+    private String renderContent(Run<?, ?> build, InputStream inputStream, TaskListener listener)
             throws JellyException, IOException {
         JellyContext context = createContext(new ScriptContentBuildWrapper(build), build, listener);
         Script script = context.compileScript(new InputSource(inputStream));
@@ -64,7 +68,7 @@ public class JellyScriptContent extends AbstractEvalContent {
         return null;
     }
 
-    private String convert(AbstractBuild<?, ?> build, JellyContext context, Script script)
+    private String convert(Run<?, ?> build, JellyContext context, Script script)
             throws JellyTagException, IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream(16 * 1024);
         XMLOutput xmlOutput = XMLOutput.createXMLOutput(output);
@@ -75,7 +79,7 @@ public class JellyScriptContent extends AbstractEvalContent {
         return output.toString(getCharset(build));
     }
 
-    private JellyContext createContext(Object it, AbstractBuild<?, ?> build, TaskListener listener) {
+    private JellyContext createContext(Object it, Run<?, ?> build, TaskListener listener) {
         JellyContext context = new JellyContext();
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         context.setVariable("it", it);

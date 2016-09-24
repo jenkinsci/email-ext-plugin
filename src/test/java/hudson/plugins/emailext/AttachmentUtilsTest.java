@@ -15,26 +15,25 @@ import hudson.model.FreeStyleProject;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.concurrent.ExecutionException;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.mock_javamail.Mailbox;
+
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collections;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.TestBuilder;
-
-import org.jvnet.mock_javamail.Mailbox;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.jvnet.hudson.test.Issue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *

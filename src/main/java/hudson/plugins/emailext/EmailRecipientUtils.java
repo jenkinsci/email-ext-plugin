@@ -1,24 +1,23 @@
 package hudson.plugins.emailext;
 
-import java.io.UnsupportedEncodingException;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.logging.Logger;
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-
 import hudson.EnvVars;
 import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.tasks.Mailer;
 import hudson.util.FormValidation;
-import java.util.StringTokenizer;
-import java.util.logging.Level;
-import javax.mail.MessagingException;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import java.io.UnsupportedEncodingException;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class EmailRecipientUtils {
 

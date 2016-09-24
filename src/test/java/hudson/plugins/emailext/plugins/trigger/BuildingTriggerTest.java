@@ -2,10 +2,9 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import org.junit.Test;
 
 import java.io.IOException;
-
-import org.junit.Test;
 
 /**
  *

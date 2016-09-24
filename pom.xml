@@ -114,6 +114,12 @@
             <artifactId>analysis-core</artifactId>
             <version>1.54</version>
             <optional>true</optional>
+            <exclusions>
+                <exclusion>
+                    <groupId>asm</groupId>
+                    <artifactId>asm</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -124,7 +130,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>token-macro</artifactId>
-            <version>1.12.1</version>
+            <version>2.0</version>
         </dependency>
 
         <!-- workflow stuff -->
@@ -215,7 +221,6 @@
             <version>2.0.7</version>
             <scope>test</scope>
         </dependency>
-
 
         <!-- static analysys -->
         <dependency>

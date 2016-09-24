@@ -2,29 +2,29 @@ package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.User;
-import hudson.plugins.emailext.*;
+import hudson.plugins.emailext.EmailRecipientUtils;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
+import hudson.plugins.emailext.ExtendedEmailPublisherContext;
+import hudson.plugins.emailext.Messages;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.Mailer;
+import jenkins.model.Jenkins;
+import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.mail.internet.InternetAddress;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import javax.mail.internet.InternetAddress;
-
-import jenkins.model.Jenkins;
-
-import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * Sends emails to committers of upstream builds which triggered this build.

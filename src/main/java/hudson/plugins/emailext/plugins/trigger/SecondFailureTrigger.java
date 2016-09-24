@@ -3,8 +3,9 @@ package hudson.plugins.emailext.plugins.trigger;
 import hudson.Extension;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
-import java.util.List;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.util.List;
 
 public class SecondFailureTrigger extends NthFailureTrigger {
 

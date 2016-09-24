@@ -27,8 +27,15 @@ import hudson.ExtensionList;
 import hudson.FilePath;
 import hudson.Plugin;
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
+import jenkins.model.Jenkins;
+import org.apache.commons.io.FilenameUtils;
+import org.jenkinsci.lib.configprovider.ConfigProvider;
+import org.jenkinsci.lib.configprovider.model.Config;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -37,14 +44,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-
-import jenkins.model.Jenkins;
-
-import org.apache.commons.io.FilenameUtils;
-import org.jenkinsci.lib.configprovider.ConfigProvider;
-import org.jenkinsci.lib.configprovider.model.Config;
-import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
-import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 /**
  *
@@ -60,7 +59,13 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     }
 
     @Override
-    public abstract String evaluate(AbstractBuild<?, ?> ab, TaskListener tl, String string) throws MacroEvaluationException, IOException, InterruptedException;
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
+        return evaluate(build, build.getWorkspace(), listener, macroName);
+    }
+
+    @Override
+    public abstract String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) throws MacroEvaluationException, IOException, InterruptedException;
 
     @Override
     public boolean acceptsMacroName(String macroName) {
@@ -156,7 +161,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         return type + " file [" + fileName + "] was not found in $JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ".";
     }
     
-    protected String getCharset(AbstractBuild<?, ?> build) {
+    protected String getCharset(Run<?, ?> build) {
         return ExtendedEmailPublisher.descriptor().getCharset();
     }    
 }

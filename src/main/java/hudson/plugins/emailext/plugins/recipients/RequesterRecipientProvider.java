@@ -2,25 +2,21 @@ package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.TaskListener;
 import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.tasks.Mailer;
-
-import java.util.Set;
-import java.util.logging.Logger;
+import jenkins.model.Jenkins;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.mail.internet.InternetAddress;
-
-import jenkins.model.Jenkins;
-
-import org.kohsuke.stapler.DataBoundConstructor;
+import java.util.Set;
 
 /**
  * Created by acearl on 12/25/13.

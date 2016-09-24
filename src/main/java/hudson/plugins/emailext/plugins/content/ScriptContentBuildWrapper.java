@@ -2,21 +2,21 @@ package hudson.plugins.emailext.plugins.content;
 
 import hudson.Functions;
 import hudson.model.Action;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction;
+import jenkins.model.Jenkins;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import jenkins.model.Jenkins;
 
 public class ScriptContentBuildWrapper {
 
-    private AbstractBuild<?, ?> build;
+    private Run<?, ?> build;
 
-    public ScriptContentBuildWrapper(AbstractBuild<?, ?> build) {
+    public ScriptContentBuildWrapper(Run<?, ?> build) {
         this.build = build;
     }
 

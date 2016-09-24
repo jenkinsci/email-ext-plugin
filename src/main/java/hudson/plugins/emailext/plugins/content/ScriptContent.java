@@ -5,7 +5,8 @@ import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
-import hudson.model.AbstractBuild;
+import hudson.FilePath;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.GroovyTemplateConfig.GroovyTemplateConfigProvider;
@@ -18,7 +19,12 @@ import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.util.Collections;
@@ -49,19 +55,17 @@ public class ScriptContent extends AbstractEvalContent {
     }
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> context, TaskListener listener, String macroName)
-            throws MacroEvaluationException, IOException, InterruptedException {
-
+    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) throws MacroEvaluationException, IOException, InterruptedException {
         InputStream inputStream = null;
         String result = "";
         
         try {
             if (!StringUtils.isEmpty(script)) {
-                inputStream = getFileInputStream(context.getWorkspace(), script, ".groovy");
-                result = executeScript(context, listener, inputStream);
+                inputStream = getFileInputStream(workspace, script, ".groovy");
+                result = executeScript(run, listener, inputStream);
             } else {
-                inputStream = getFileInputStream(context.getWorkspace(), template, ".template");
-                result = renderTemplate(context, listener, inputStream);
+                inputStream = getFileInputStream(workspace, template, ".template");
+                result = renderTemplate(run, listener, inputStream);
             }
         } catch (FileNotFoundException e) {
             String missingScriptError = "";
@@ -93,7 +97,7 @@ public class ScriptContent extends AbstractEvalContent {
      * @return the rendered template content
      * @throws IOException
      */
-    private String renderTemplate(AbstractBuild<?, ?> build, TaskListener listener, InputStream templateStream)
+    private String renderTemplate(Run<?, ?> build, TaskListener listener, InputStream templateStream)
             throws IOException {
         
         String result;
@@ -138,7 +142,7 @@ public class ScriptContent extends AbstractEvalContent {
      * @return a String containing the toString of the last item in the script
      * @throws IOException
      */
-    private String executeScript(AbstractBuild<?, ?> build, TaskListener listener, InputStream scriptStream)
+        private String executeScript(Run<?, ?> build, TaskListener listener, InputStream scriptStream)
             throws IOException {
         String result = "";
         Map binding = new HashMap<>();

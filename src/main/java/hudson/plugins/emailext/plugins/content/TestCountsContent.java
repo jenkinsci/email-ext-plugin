@@ -4,9 +4,10 @@ import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.tasks.test.AbstractTestResultAction;
-import java.io.IOException;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
+
+import java.io.IOException;
 
 /**
  * Displays the number of tests.
