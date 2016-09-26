@@ -1,7 +1,9 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
@@ -44,9 +46,15 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
+        return evaluate(build, build.getWorkspace(), listener, macroName);
+    }
+
+    @Override
+    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
 
         StringBuilder buffer = new StringBuilder();
-        AbstractTestResultAction<?> testResult = build.getAction(AbstractTestResultAction.class);
+        AbstractTestResultAction<?> testResult = run.getAction(AbstractTestResultAction.class);
 
         if (null == testResult) {
             return "No tests ran.";
@@ -90,8 +98,8 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     private int getTestAge(TestResult result) {
         if(result.isPassed())
             return 0;
-        else if (result.getOwner() != null) {
-            return result.getOwner().getNumber()-result.getFailedSince()+1;
+        else if (result.getRun() != null) {
+            return result.getRun().getNumber()-result.getFailedSince()+1;
         } else {
             return 0;
         }

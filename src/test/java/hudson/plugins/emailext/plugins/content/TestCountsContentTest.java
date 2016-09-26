@@ -41,6 +41,16 @@ public class TestCountsContentTest {
         assertEquals("", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
     }
 
+    /**
+     * Verifies that token expansion works for pipeline builds (JENKINS-38519).
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetContent_withWorkspaceAndNoTestResults() throws Exception {
+        target.var = "total";
+        assertEquals("", target.evaluate(build, build.getWorkspace(), listener, TestCountsContent.MACRO_NAME));
+    }
+
     @Test
     @SuppressWarnings("unchecked")
     public void testGetContent() throws Exception {

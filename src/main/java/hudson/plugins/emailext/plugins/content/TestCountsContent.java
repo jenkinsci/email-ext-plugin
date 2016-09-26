@@ -1,7 +1,9 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.test.AbstractTestResultAction;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
@@ -31,8 +33,14 @@ public class TestCountsContent extends DataBoundTokenMacro {
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
+        return evaluate(build, build.getWorkspace(), listener, macroName);
+    }
 
-        AbstractTestResultAction<?> action = build.getAction(AbstractTestResultAction.class);
+    @Override
+    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
+
+        AbstractTestResultAction<?> action = run.getAction(AbstractTestResultAction.class);
         if (action == null) {
             return "";
         }
