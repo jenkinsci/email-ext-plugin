@@ -50,6 +50,17 @@ public class FailedTestsContentTest
         assertEquals( "No tests ran.", content );
     }
 
+    /**
+     * Verifies that token expansion works for pipeline builds (JENKINS-38519).
+     */
+    @Test
+    public void testGetContent_withWorkspaceAndNoTestsRanShouldGiveAMeaningfulMessage()
+            throws Exception {
+        String content = failedTestContent.evaluate( build, build.getWorkspace(), listener, FailedTestsContent.MACRO_NAME );
+
+        assertEquals( "No tests ran.", content );
+    }
+
     @Test
     public void testGetContent_whenAllTestsPassedShouldGiveMeaningfulMessage()
             throws Exception {
