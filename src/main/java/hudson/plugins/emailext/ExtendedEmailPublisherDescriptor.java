@@ -245,6 +245,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return smtpHost;
     }
 
+    public void setSmtpServer(String smtpServer) {
+        this.smtpHost = smtpServer;
+    }
+
     public String getSmtpAuthUsername() {
         return smtpAuthUsername;
     }
