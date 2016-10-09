@@ -24,7 +24,7 @@ public class XNthFailureTrigger extends NthFailureTrigger {
     }
 
     @Override
-    protected int getRequiredFailureCount() {
+    public int getRequiredFailureCount() {
         return requiredFailureCount;
     }
 
