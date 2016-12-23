@@ -55,9 +55,11 @@ public class CulpritsRecipientProvider extends RecipientProvider {
         if (run instanceof AbstractBuild) {
             Set<User> users = ((AbstractBuild<?,?>)run).getCulprits();
             RecipientProviderUtilities.addUsers(users, context.getListener(), env, to, cc, bcc, debug);
-        } else if (runResult != null && runResult.isWorseThan(Result.SUCCESS)) {
+        } else if (runResult != null) {
             List<Run<?, ?>> builds = new ArrayList<>();
             Run<?, ?> build = run;
+            builds.add(build);
+            build = build.getPreviousCompletedBuild();
             while (build != null) {
                 final Result buildResult = build.getResult();
                 if (buildResult != null) {

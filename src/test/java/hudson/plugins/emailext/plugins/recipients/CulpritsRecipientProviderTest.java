@@ -44,7 +44,7 @@ public class CulpritsRecipientProviderTest {
     }
 
     @Test
-    public void testAddRecipients() throws Exception {
+    public void testAddRecipients1() throws Exception {
         final WorkflowRun build1 = PowerMockito.mock(WorkflowRun.class);
         PowerMockito.when(build1.getResult()).thenReturn(Result.UNSTABLE);
         MockUtilities.addChangeSet(build1, "X", "V");
@@ -65,5 +65,19 @@ public class CulpritsRecipientProviderTest {
         PowerMockito.when(build4.getPreviousCompletedBuild()).thenReturn(build3);
 
         TestUtilities.checkRecipients(build4, new CulpritsRecipientProvider(), "A", "B");
+    }
+
+    @Test
+    public void testAddRecipients2() throws Exception {
+        final WorkflowRun build1 = PowerMockito.mock(WorkflowRun.class);
+        PowerMockito.when(build1.getResult()).thenReturn(Result.UNSTABLE);
+        MockUtilities.addChangeSet(build1, "X", "V");
+
+        final WorkflowRun build2 = PowerMockito.mock(WorkflowRun.class);
+        PowerMockito.when(build2.getResult()).thenReturn(Result.SUCCESS);
+        MockUtilities.addChangeSet(build2, "Z", "V");
+        PowerMockito.when(build2.getPreviousCompletedBuild()).thenReturn(build1);
+
+        TestUtilities.checkRecipients(build2, new CulpritsRecipientProvider(), "X", "V", "Z");
     }
 }
