@@ -81,7 +81,7 @@ public class EmailExtTemplateAction implements Action {
             Collection<ConfigProvider> providers = getTemplateConfigProviders();
             for(ConfigProvider provider : providers) {
                 for(Config c : provider.getAllConfigs()) {
-                    if(c.name.equalsIgnoreCase(value) && provider.isResponsibleFor(c.id)) {
+                    if(c.name.equalsIgnoreCase(value)) {
                         return FormValidation.ok();
                     }                    
                 }            

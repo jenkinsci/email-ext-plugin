@@ -1066,7 +1066,6 @@ public class ExtendedEmailPublisherTest {
     
     @Test
     @Issue("JENKINS-15442")
-    @WithPlugin("config-file-provider.hpi")
     public void testConfiguredStateNoTriggers()
             throws Exception {
         FreeStyleProject prj = j.createFreeStyleProject("JENKINS-15442");

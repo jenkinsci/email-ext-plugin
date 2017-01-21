@@ -144,7 +144,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
             ExtensionList<ConfigProvider> providers = ConfigProvider.all();
             ConfigProvider provider = providers.get(getProviderClass ());
             for (Config c : provider.getAllConfigs()) {
-                if (c.name.equalsIgnoreCase(fileName) && provider.isResponsibleFor(c.id)) {
+                if (c.name.equalsIgnoreCase(fileName)) {
                     config = c;
                     break;
                 }

@@ -124,7 +124,9 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>config-file-provider</artifactId>
-            <version>2.7.1</version>
+            <version>2.15.4</version>
+            <!--<version>2.13</version>-->
+            <!--<version>2.7.1</version>-->
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -218,7 +220,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials</artifactId>
-            <version>2.0.7</version>
+            <version>2.1.4</version>
             <scope>test</scope>
         </dependency>
 

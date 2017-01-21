@@ -49,7 +49,6 @@ public class EmailExtStepTest {
     };
 
     @Test
-    @WithPlugin("config-file-provider.hpi")
     public void configRoundTrip() throws Exception {
         EmailExtStep step1 = new EmailExtStep("subject", "body");
         step1.setTo("mickeymouse@disney.com");
