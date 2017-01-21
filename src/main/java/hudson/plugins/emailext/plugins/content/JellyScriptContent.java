@@ -1,15 +1,11 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.ExtensionList;
-import hudson.model.AbstractBuild;
+import hudson.FilePath;
+import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.JellyTemplateConfig.JellyTemplateConfigProvider;
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import hudson.plugins.emailext.plugins.EmailToken;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.jelly.JellyContext;
@@ -21,12 +17,16 @@ import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.xml.sax.InputSource;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
 @EmailToken
 public class JellyScriptContent extends AbstractEvalContent {
 
     public static final String MACRO_NAME = "JELLY_SCRIPT";
     private static final String DEFAULT_HTML_TEMPLATE_NAME = "html";
-    private static final String DEFAULT_TEXT_TEMPLATE_NAME = "text";
     private static final String DEFAULT_TEMPLATE_NAME = DEFAULT_HTML_TEMPLATE_NAME;
     private static final String JELLY_EXTENSION = ".jelly";
     
@@ -36,35 +36,29 @@ public class JellyScriptContent extends AbstractEvalContent {
     public JellyScriptContent() {
         super(MACRO_NAME);
     }
-    
+
     @Override
-    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
-            throws MacroEvaluationException, IOException, InterruptedException {
+    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) throws MacroEvaluationException, IOException, InterruptedException {
         InputStream inputStream = null;
 
         try {
-            inputStream = getFileInputStream(template, JELLY_EXTENSION);
-            return renderContent(build, inputStream, listener);
+            inputStream = getFileInputStream(workspace, template, JELLY_EXTENSION);
+            return renderContent(run, inputStream, listener);
         } catch (JellyException e) {
             return "JellyException: " + e.getMessage();
         } catch (FileNotFoundException e) {
-            String missingTemplateError = generateMissingFile("Jelly", template);
-            return missingTemplateError;
+            return generateMissingFile("Jelly", template);
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
-    }    
-
-    @Override
-    protected ConfigProvider getConfigProvider() {
-        if(configProvider == null) {
-            ExtensionList<ConfigProvider> providers = ConfigProvider.all();
-            configProvider = providers.get(JellyTemplateConfigProvider.class);
-        }
-        return (ConfigProvider)configProvider;
     }
 
-    private String renderContent(AbstractBuild<?, ?> build, InputStream inputStream, TaskListener listener)
+    @Override
+    protected Class<? extends ConfigProvider> getProviderClass() {
+        return JellyTemplateConfigProvider.class;
+    }
+
+    private String renderContent(Run<?, ?> build, InputStream inputStream, TaskListener listener)
             throws JellyException, IOException {
         JellyContext context = createContext(new ScriptContentBuildWrapper(build), build, listener);
         Script script = context.compileScript(new InputSource(inputStream));
@@ -74,7 +68,7 @@ public class JellyScriptContent extends AbstractEvalContent {
         return null;
     }
 
-    private String convert(AbstractBuild<?, ?> build, JellyContext context, Script script)
+    private String convert(Run<?, ?> build, JellyContext context, Script script)
             throws JellyTagException, IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream(16 * 1024);
         XMLOutput xmlOutput = XMLOutput.createXMLOutput(output);
@@ -85,9 +79,9 @@ public class JellyScriptContent extends AbstractEvalContent {
         return output.toString(getCharset(build));
     }
 
-    private JellyContext createContext(Object it, AbstractBuild<?, ?> build, TaskListener listener) {
+    private JellyContext createContext(Object it, Run<?, ?> build, TaskListener listener) {
         JellyContext context = new JellyContext();
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         context.setVariable("it", it);
         context.setVariable("build", build);
         context.setVariable("project", build.getParent());

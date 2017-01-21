@@ -9,6 +9,15 @@ import hudson.model.BuildListener;
 import hudson.model.Run;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.ZipDataSource;
+import org.apache.commons.lang.StringUtils;
+
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.MimetypesFileTypeMap;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeUtility;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -18,13 +27,6 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.MimetypesFileTypeMap;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.internet.MimeBodyPart;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * @author acearl
@@ -125,19 +127,19 @@ public class AttachmentUtils implements Serializable {
     private List<MimeBodyPart> getAttachments(final ExtendedEmailPublisherContext context)
             throws MessagingException, InterruptedException, IOException {
         List<MimeBodyPart> attachments = null;
-        FilePath ws = context.getBuild().getWorkspace();
+        FilePath ws = context.getWorkspace();
         long totalAttachmentSize = 0;
         long maxAttachmentSize = context.getPublisher().getDescriptor().getMaxAttachmentSize();
         if (ws == null) {
             context.getListener().error("Error: No workspace found!");
         } else if (!StringUtils.isBlank(attachmentsPattern)) {
-            attachments = new ArrayList<MimeBodyPart>();
+            attachments = new ArrayList<>();
 
             FilePath[] files = ws.list(ContentBuilder.transformText(attachmentsPattern, context, null));
 
             for (FilePath file : files) {
                 if (maxAttachmentSize > 0
-                        && (totalAttachmentSize + file.length()) >= maxAttachmentSize) {
+                        && totalAttachmentSize + file.length() >= maxAttachmentSize) {
                     context.getListener().getLogger().println("Skipping `" + file.getName()
                             + "' (" + file.length()
                             + " bytes) - too large for maximum attachments size");
@@ -149,7 +151,7 @@ public class AttachmentUtils implements Serializable {
 
                 try {
                     attachmentPart.setDataHandler(new DataHandler(fileDataSource));
-                    attachmentPart.setFileName(file.getName());
+                    attachmentPart.setFileName(MimeUtility.encodeText(file.getName()));
                     attachmentPart.setContentID(String.format("<%s>", file.getName()));
                     attachments.add(attachmentPart);
                     totalAttachmentSize += file.length();
@@ -222,13 +224,13 @@ public class AttachmentUtils implements Serializable {
     }
     
     public static void attachBuildLog(ExtendedEmailPublisherContext context, Multipart multipart, boolean compress) {
-        if(context.getBuild() instanceof MatrixBuild) {
-            MatrixBuild build = (MatrixBuild)context.getBuild();
+        if (context.getRun() instanceof MatrixBuild) {
+            MatrixBuild build = (MatrixBuild)context.getRun();
             for(MatrixRun run : build.getExactRuns()) {
                 attachSingleLog(context, run, multipart, compress);
             }
         } else {
-            attachSingleLog(context, context.getBuild(), multipart, compress);
+            attachSingleLog(context, context.getRun(), multipart, compress);
         }
     }
 

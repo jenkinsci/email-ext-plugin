@@ -1,26 +1,26 @@
 package hudson.plugins.emailext.plugins.content;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.tasks.test.AbstractTestResultAction;
-import hudson.tasks.test.TestObject;
 import hudson.tasks.test.TestResult;
 import hudson.util.StreamTaskListener;
-
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import org.mockito.Mockito;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 @SuppressWarnings({"unchecked"})
@@ -46,6 +46,17 @@ public class FailedTestsContentTest
     public void testGetContent_noTestsRanShouldGiveAMeaningfulMessage()
             throws Exception {
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+
+        assertEquals( "No tests ran.", content );
+    }
+
+    /**
+     * Verifies that token expansion works for pipeline builds (JENKINS-38519).
+     */
+    @Test
+    public void testGetContent_withWorkspaceAndNoTestsRanShouldGiveAMeaningfulMessage()
+            throws Exception {
+        String content = failedTestContent.evaluate( build, build.getWorkspace(), listener, FailedTestsContent.MACRO_NAME );
 
         assertEquals( "No tests ran.", content );
     }

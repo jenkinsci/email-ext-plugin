@@ -72,6 +72,9 @@ f.section(title: _("Extended E-mail Notification")) {
   f.entry(help: "/plugin/email-ext/help/globalConfig/defaultPresendScript.html", title: _("Default Pre-send Script")) {
     f.textarea(class: "setting-input", value: descriptor.defaultPresendScript, name: "ext_mailer_default_presend_script")
   }
+  f.entry(help: "/plugin/email-ext/help/globalConfig/defaultPostsendScript.html", title: _("Default Post-send Script")) {
+    f.textarea(class: "setting-input", value: descriptor.defaultPostsendScript, name: "ext_mailer_default_postsend_script")
+  }
   f.entry(title: _("Additional groovy classpath"), help: "/plugin/email-ext/help/globalConfig/defaultClasspath.html") {
     f.repeatable(field: "defaultClasspath") {
       f.textbox(field: "path", name: "ext_mailer_default_classpath") 
@@ -81,14 +84,13 @@ f.section(title: _("Extended E-mail Notification")) {
     }
   }
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/debugMode.html", checked: descriptor.isDebugMode(), name: "ext_mailer_debug_mode", title: _("Enable Debug Mode")) 
-  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/security.html", checked: descriptor.isSecurityEnabled(), name: "ext_mailer_security_enabled", title: _("Enable Security")) 
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/requireAdmin.html", checked: descriptor.isAdminRequiredForTemplateTesting(), name: "ext_mailer_require_admin_for_template_testing", title: _("Require Administrator for Template Testing"))
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/watching.html", checked: descriptor.isWatchingEnabled(), name: "ext_mailer_watching_enabled", title: _("Enable watching for jobs"))
 
   f.advanced(title: _("Default Triggers")) {
     f.entry(title: _("Default Triggers"), help: "/plugin/email-ext/help/globalConfig/defaultTriggers.html") {
       hudson.plugins.emailext.plugins.EmailTrigger.all().each { t ->
-        f.checkbox(name: "defaultTriggers", title: t.displayName, checked: descriptor.defaultTriggers.contains(t), json: t.clazz.name)
+        f.checkbox(name: "defaultTriggers", title: t.displayName, checked: descriptor.defaultTriggerIds.contains(t.id), json: t.id)
         br()
       }
     }

@@ -63,7 +63,7 @@ public class ScriptContentBuildWrapperTest
     {
         final Action expectedAction = mock( Action.class );
         when( mockBuild.getActions() ).thenReturn( new LinkedList<Action>()
-        {{
+            {{
                 add( expectedAction );
             }} );
 
@@ -83,7 +83,7 @@ public class ScriptContentBuildWrapperTest
                     add( childReport2 );
                 }} );
 
-        when( mockBuild.getActions() ).thenReturn( new LinkedList<Action>()
+        when( mockBuild.getActions(AggregatedTestResultAction.class) ).thenReturn( new LinkedList<AggregatedTestResultAction>()
         {{
                 add( surefireAggregatedReport );
             }} );

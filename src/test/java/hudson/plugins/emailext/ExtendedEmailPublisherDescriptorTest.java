@@ -6,14 +6,15 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
-
 import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import static org.junit.Assert.*;
-
-import org.jvnet.hudson.test.Issue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 public class ExtendedEmailPublisherDescriptorTest {
     
@@ -82,10 +83,6 @@ public class ExtendedEmailPublisherDescriptorTest {
         HtmlCheckBoxInput debugMode = page.getElementByName("ext_mailer_debug_mode");
         assertNotNull("Debug mode should be present", debugMode);
         assertFalse("Debug mode should not be checked by default", debugMode.isChecked());
-        
-        HtmlCheckBoxInput securityMode = page.getElementByName("ext_mailer_security_enabled");
-        assertNotNull("Security mode should be present", securityMode);
-        assertFalse("Security mode should not be checked by default", securityMode.isChecked());
         
         try {
             page.getElementByName("defaultClasspath");

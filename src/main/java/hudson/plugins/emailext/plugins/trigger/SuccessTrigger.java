@@ -8,9 +8,9 @@ import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
-import java.util.List;
-
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.util.List;
 
 public class SuccessTrigger extends EmailTrigger {
 
@@ -31,11 +31,8 @@ public class SuccessTrigger extends EmailTrigger {
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
         Result buildResult = build.getResult();
 
-        if (buildResult == Result.SUCCESS) {
-            return true;
-        }
+        return buildResult == Result.SUCCESS;
 
-        return false;
     }
 
     @Extension

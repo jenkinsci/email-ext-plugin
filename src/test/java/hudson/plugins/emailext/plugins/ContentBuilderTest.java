@@ -9,22 +9,21 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.util.StreamTaskListener;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.Map;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertEquals;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
-import static org.mockito.Mockito.*;
+import static junit.framework.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ContentBuilderTest {
 
@@ -123,6 +122,17 @@ public class ContentBuilderTest {
     }
 
     @Test
+    public void testTransformText_shouldExpand_$DEFAULT_POSTSEND_SCRIPT()
+            throws IOException, InterruptedException {
+        assertEquals(publisher.getDescriptor().getDefaultPostsendScript(),
+                ContentBuilder.transformText("$DEFAULT_POSTSEND_SCRIPT", publisher,
+                build, listener));
+        assertEquals(publisher.getDescriptor().getDefaultPostsendScript(),
+                ContentBuilder.transformText("${DEFAULT_POSTSEND_SCRIPT}", publisher,
+                build, listener));
+    }
+
+    @Test
     public void testTransformText_noNPEWithNullDefaultSubjectBody() throws NoSuchFieldException, IllegalAccessException {
         Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultBody");
         f.setAccessible(true);
@@ -147,7 +157,9 @@ public class ContentBuilderTest {
     @Test
     public void testRuntimeMacro() throws IOException, InterruptedException {
         RuntimeContent content = new RuntimeContent("Hello, world");
-        assertEquals("Hello, world", ContentBuilder.transformText("${RUNTIME}", new ExtendedEmailPublisherContext(publisher, build, j.createLocalLauncher(), listener), Collections.singletonList((TokenMacro)content)));
+        assertEquals("Hello, world", ContentBuilder.transformText("${RUNTIME}",
+                new ExtendedEmailPublisherContext(publisher, build, build.getWorkspace(), j.createLocalLauncher(), listener),
+                Collections.singletonList((TokenMacro) content)));
     }
     
     public class RuntimeContent extends TokenMacro {
@@ -162,6 +174,11 @@ public class ContentBuilderTest {
         @Override
         public boolean acceptsMacroName(String name) {
             return name.equals(MACRO_NAME);
+        }
+
+        @Override
+        public List<String> getAcceptedMacroNames() {
+            return Collections.singletonList(MACRO_NAME);
         }
 
         @Override

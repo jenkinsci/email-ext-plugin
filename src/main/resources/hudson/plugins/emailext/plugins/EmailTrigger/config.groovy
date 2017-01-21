@@ -9,18 +9,29 @@ d = namespace("jelly:define")
 
 def providers = hudson.plugins.emailext.plugins.RecipientProvider.all()
 def recipientProviders = instance != null ? instance.email.recipientProviders : descriptor.defaultRecipientProviders
-f.entry(title: _("Send To")) {
-  f.hetero_list(name: "recipientProviders", hasHeader: true, descriptors: providers, items: recipientProviders, oneEach: true)
+
+if(showSendTo) {
+  f.entry(title: _("Send To")) {
+    f.hetero_list(name: "recipientProviders", hasHeader: true, descriptors: providers, items: recipientProviders, oneEach: true)
+  }
+} else {
+  f.invisibleEntry(name: "recipientProviders")
 }
 
 f.advanced() {
   st.include(it: instance, class: descriptor.clazz, page: "local-config", optional: true)
-  f.entry(title: _("Recipient List"), help: "/plugin/email-ext/help/projectConfig/mailType/recipientList.html") {
-    f.textbox(name: "recipientList", value: instance != null ? instance.email.recipientList : "")
+  if(showSendTo) {
+    f.entry(title: _("Recipient List"), help: "/plugin/email-ext/help/projectConfig/mailType/recipientList.html") {
+      f.textbox(name: "recipientList", value: instance != null ? instance.email.recipientList : "")
+    }
+    f.entry(title: _("Reply-To List"), help: "/plugin/email-ext/help/projectConfig/mailType/replyToList.html") {
+      f.textbox(name: "replyTo", value: instance != null ? instance.email.replyTo : "\$PROJECT_DEFAULT_REPLYTO")
+    }
+  } else {
+    f.invisibleEntry(name: "recipientList")
+    f.invisibleEntry(name: "replyTo")
   }
-  f.entry(title: _("Reply-To List"), help: "/plugin/email-ext/help/projectConfig/mailType/replyToList.html") {
-    f.textbox(name: "replyTo", value: instance != null ? instance.email.replyTo : "\$PROJECT_DEFAULT_REPLYTO")
-  }
+
   f.entry(title: _("Content Type"), help: "/plugin/email-ext/help/projectConfig/contentType.html") {
     select(name: "contentType", class: "setting-input") {
       f.option(selected: 'project'== (instance != null ? instance.email.contentType : ""), value: "project", _("Project Content Type")) 

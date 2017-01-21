@@ -1,23 +1,26 @@
 package hudson.plugins.emailext.watching;
 
 import hudson.Extension;
-import hudson.model.*;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
 import hudson.model.Descriptor.FormException;
-import hudson.plugins.emailext.*;
+import hudson.model.User;
+import hudson.model.UserPropertyDescriptor;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.tasks.Publisher;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 import hudson.tasks.Mailer;
-import java.util.ArrayList;
-import javax.servlet.ServletException;
-
+import hudson.tasks.Publisher;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.interceptor.RequirePOST;
+
+import javax.servlet.ServletException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  *
@@ -28,7 +31,7 @@ public class EmailExtWatchAction implements Action {
      * Per user property that contains 
      */
     public static class UserProperty extends hudson.model.UserProperty {
-        private List<EmailTrigger> triggers = new ArrayList<EmailTrigger>();
+        private List<EmailTrigger> triggers = new ArrayList<>();
 
         public UserProperty(List<EmailTrigger> triggers) {
             if(triggers != null) {
@@ -42,7 +45,7 @@ public class EmailExtWatchAction implements Action {
         }
         
         private void clearTriggers() {
-            triggers = Collections.EMPTY_LIST;
+            triggers = Collections.emptyList();
         }
 
         @Extension
@@ -92,7 +95,7 @@ public class EmailExtWatchAction implements Action {
     
     public boolean isWatching() {
         List<EmailTrigger> triggers = getTriggers();
-        return triggers != null && triggers.size() > 0;
+        return triggers != null && !triggers.isEmpty();
     }
     
     public List<EmailTrigger> getTriggers() {
@@ -156,7 +159,7 @@ public class EmailExtWatchAction implements Action {
             Object json = req.getSubmittedForm().get("triggers");
             List<EmailTrigger> triggers = req.bindJSONToList(EmailTrigger.class, json);
 
-            List<EmailTrigger> unwatchable = new ArrayList<EmailTrigger>();
+            List<EmailTrigger> unwatchable = new ArrayList<>();
             for(EmailTrigger trigger : triggers) {
                 if(!trigger.getDescriptor().isWatchable()) {
                     unwatchable.add(trigger);

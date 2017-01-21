@@ -25,7 +25,6 @@ package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.User;
@@ -33,15 +32,15 @@ import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
-import hudson.scm.ChangeLogSet;
-import hudson.tasks.test.TestResult;
 import hudson.tasks.test.AbstractTestResultAction;
+import hudson.tasks.test.TestResult;
+import jenkins.model.Jenkins;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import javax.mail.internet.InternetAddress;
 import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Set;
-import javax.mail.internet.InternetAddress;
-import jenkins.model.Jenkins;
-import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * A recipient provider that assigns ownership of a failing test to the set of developers (including any initiator)
@@ -59,7 +58,7 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
 
         final class Debug implements RecipientProviderUtilities.IDebug {
             private final ExtendedEmailPublisherDescriptor descriptor
-                = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+                = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 
@@ -71,38 +70,37 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
 
         Set<User> users = null;
 
-        final AbstractBuild<?, ?> currentBuild = context.getBuild();
-        if (currentBuild == null) {
-            debug.send("currentBuild was null");
+        final Run<?, ?> currentRun = context.getRun();
+        if (currentRun == null) {
+            debug.send("currentRun was null");
         } else {
-            final AbstractTestResultAction<?> testResultAction = currentBuild.getAction(AbstractTestResultAction.class);
+            final AbstractTestResultAction<?> testResultAction = currentRun.getAction(AbstractTestResultAction.class);
             if (testResultAction == null) {
                 debug.send("testResultAction was null");
             } else {
                 if (testResultAction.getFailCount() <= 0) {
                     debug.send("getFailCount() returned <= 0");
                 } else {
-                    users = new HashSet<User>();
+                    users = new HashSet<>();
                     debug.send("Collecting builds where a test started failing...");
-                    final HashSet<AbstractBuild<?, ?>> buildsWhereATestStartedFailing = new HashSet<AbstractBuild<?, ?>>();
+                    final HashSet<Run<?, ?>> buildsWhereATestStartedFailing = new HashSet<>();
                     for (final TestResult caseResult : testResultAction.getFailedTests()) {
                         final Run<?, ?> runWhereTestStartedFailing = caseResult.getFailedSinceRun();
-                        if (runWhereTestStartedFailing instanceof AbstractBuild) {
-                            final AbstractBuild<?, ?> buildWhereTestStartedFailing = (AbstractBuild<?, ?>) runWhereTestStartedFailing;
-                            debug.send("  buildWhereTestStartedFailing: %d", buildWhereTestStartedFailing.getNumber());
-                            buildsWhereATestStartedFailing.add(buildWhereTestStartedFailing);
+                        if (runWhereTestStartedFailing != null) {
+                            debug.send("  runWhereTestStartedFailing: %d", runWhereTestStartedFailing.getNumber());
+                            buildsWhereATestStartedFailing.add(runWhereTestStartedFailing);
                         } else {
-                            debug.send("  runWhereTestStartedFailing was not an instance of AbstractBuild");
+                            context.getListener().error("getFailedSinceRun returned null for %s", caseResult.getFullDisplayName());
                         }
                     }
                     // For each build where a test started failing, walk backward looking for build results worse than
                     // UNSTABLE. All of those builds will be used to find suspects.
                     debug.send("Collecting builds with suspects...");
-                    final HashSet<AbstractBuild<?, ?>> buildsWithSuspects = new HashSet<AbstractBuild<?, ?>>();
-                    for (final AbstractBuild<?, ?> buildWhereATestStartedFailing : buildsWhereATestStartedFailing) {
+                    final HashSet<Run<?, ?>> buildsWithSuspects = new HashSet<>();
+                    for (final Run<?, ?> buildWhereATestStartedFailing : buildsWhereATestStartedFailing) {
                         debug.send("  buildWhereATestStartedFailing: %d", buildWhereATestStartedFailing.getNumber());
                         buildsWithSuspects.add(buildWhereATestStartedFailing);
-                        AbstractBuild<?, ?> previousBuildToCheck = buildWhereATestStartedFailing.getPreviousCompletedBuild();
+                        Run<?, ?> previousBuildToCheck = buildWhereATestStartedFailing.getPreviousCompletedBuild();
                         if (previousBuildToCheck != null) {
                             debug.send("    previousBuildToCheck: %d", previousBuildToCheck.getNumber());
                         }

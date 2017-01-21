@@ -1,14 +1,16 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.tasks.test.AbstractTestResultAction;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
+import hudson.tasks.test.AbstractTestResultAction;
 import hudson.util.StreamTaskListener;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class for TestCountsContentTest.
@@ -37,6 +39,16 @@ public class TestCountsContentTest {
     public void testGetContent_NoTestResults() throws Exception {
         target.var = "total";
         assertEquals("", target.evaluate(build, listener, TestCountsContent.MACRO_NAME));
+    }
+
+    /**
+     * Verifies that token expansion works for pipeline builds (JENKINS-38519).
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testGetContent_withWorkspaceAndNoTestResults() throws Exception {
+        target.var = "total";
+        assertEquals("", target.evaluate(build, build.getWorkspace(), listener, TestCountsContent.MACRO_NAME));
     }
 
     @Test

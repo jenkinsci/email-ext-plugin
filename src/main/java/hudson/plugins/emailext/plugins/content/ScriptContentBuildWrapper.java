@@ -2,21 +2,21 @@ package hudson.plugins.emailext.plugins.content;
 
 import hudson.Functions;
 import hudson.model.Action;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction;
+import jenkins.model.Jenkins;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import jenkins.model.Jenkins;
 
 public class ScriptContentBuildWrapper {
 
-    private AbstractBuild<?, ?> build;
+    private Run<?, ?> build;
 
-    public ScriptContentBuildWrapper(AbstractBuild<?, ?> build) {
+    public ScriptContentBuildWrapper(Run<?, ?> build) {
         this.build = build;
     }
 
@@ -44,8 +44,7 @@ public class ScriptContentBuildWrapper {
     public List<Action> getStaticAnalysisActions() {
         if (isPluginInstalled("analysis-core")) {
             return new StaticAnalysisUtilities().getActions(build);
-        }
-        else {
+        } else {
             return Collections.emptyList();
         }
     }
@@ -59,11 +58,7 @@ public class ScriptContentBuildWrapper {
      *         <code>false</code> if not.
      */
     public static boolean isPluginInstalled(final String shortName) {
-        Jenkins instance = Jenkins.getInstance();
-        if (instance != null) {
-            return instance.getPlugin(shortName) != null;
-        }
-        return true;
+        return Jenkins.getActiveInstance().getPlugin(shortName) != null;
     }
 
     public Action getCoberturaAction() {
@@ -71,17 +66,15 @@ public class ScriptContentBuildWrapper {
     }
 
     public List<TestResult> getJUnitTestResult() {
-        List<TestResult> result = new ArrayList<TestResult>();
-        List<Action> actions = build.getActions();
+        List<TestResult> result = new ArrayList<>();
+        List<AggregatedTestResultAction> actions = build.getActions(AggregatedTestResultAction.class);
         for (Action action : actions) {
-            if (action instanceof hudson.tasks.test.AggregatedTestResultAction) {
-                /* Maven Project */
-                List<AggregatedTestResultAction.ChildReport> reportList =
-                        ((AggregatedTestResultAction) action).getChildReports();
-                for (AggregatedTestResultAction.ChildReport report : reportList) {
-                    if (report.result instanceof hudson.tasks.junit.TestResult) {
-                        result.add((TestResult) report.result);
-                    }
+            /* Maven Project */
+            List<AggregatedTestResultAction.ChildReport> reportList =
+                    ((AggregatedTestResultAction) action).getChildReports();
+            for (AggregatedTestResultAction.ChildReport report : reportList) {
+                if (report.result instanceof hudson.tasks.junit.TestResult) {
+                    result.add((TestResult) report.result);
                 }
             }
         }

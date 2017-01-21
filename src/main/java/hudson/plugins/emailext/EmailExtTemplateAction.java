@@ -9,17 +9,18 @@ import hudson.plugins.emailext.plugins.content.JellyScriptContent;
 import hudson.plugins.emailext.plugins.content.ScriptContent;
 import hudson.util.FormValidation;
 import hudson.util.StreamTaskListener;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.lib.configprovider.model.Config;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  *
@@ -48,10 +49,8 @@ public class EmailExtTemplateAction implements Action {
     
     private String renderError(Exception ex) {
         StringBuilder builder = new StringBuilder();
-        builder.append("<h3>An error occured trying to render the template:</h3><br/>");
-        builder.append("<span style=\"color:red; font-weight:bold\">");
-        builder.append(ex.toString().replace("\n", "<br/>"));
-        builder.append("</span>");
+        builder.append("<h3>An error occured trying to render the template:</h3><br/><span style=\"color:red; font-weight:bold\">")
+                .append(ex.toString().replace("\n", "<br/>")).append("</span>");
         return builder.toString();
     }
     
@@ -61,9 +60,10 @@ public class EmailExtTemplateAction implements Action {
                 return checkForManagedFile(value);
             } else {
                 // first check in the default resources area...
-                InputStream inputStream = getClass().getClassLoader().getResourceAsStream("hudson/plugins/emailext/templates/" + value);                
+                InputStream inputStream = Thread.currentThread().getContextClassLoader()
+                		.getResourceAsStream("hudson/plugins/emailext/templates/" + value);                
                 if(inputStream == null) {                
-                    final File scriptsFolder = new File(Jenkins.getInstance().getRootDir(), "email-templates");
+                    final File scriptsFolder = new File(Jenkins.getActiveInstance().getRootDir(), "email-templates");
                     final File scriptFile = new File(scriptsFolder, value);
                     if(!scriptFile.exists()) {
                         return FormValidation.error("The file '" + value + "' does not exist");
@@ -75,13 +75,13 @@ public class EmailExtTemplateAction implements Action {
     }
     
     private FormValidation checkForManagedFile(final String value) {
-        Plugin plugin = Jenkins.getInstance().getPlugin("config-file-provider");
+        Plugin plugin = Jenkins.getActiveInstance().getPlugin("config-file-provider");
         if(plugin != null) {
             Config config = null;
             Collection<ConfigProvider> providers = getTemplateConfigProviders();
             for(ConfigProvider provider : providers) {
                 for(Config c : provider.getAllConfigs()) {
-                    if(c.name.equalsIgnoreCase(value) && provider.isResponsibleFor(c.id)) {
+                    if(c.name.equalsIgnoreCase(value)) {
                         return FormValidation.ok();
                     }                    
                 }            
@@ -93,7 +93,7 @@ public class EmailExtTemplateAction implements Action {
     }
     
     private static Collection<ConfigProvider> getTemplateConfigProviders() {
-        Collection<ConfigProvider> providers = new ArrayList<ConfigProvider>();
+        Collection<ConfigProvider> providers = new ArrayList<>();
         ExtensionList<ConfigProvider> all = ConfigProvider.all();
         ConfigProvider p = all.get(GroovyTemplateConfig.GroovyTemplateConfigProvider.class);
         if(p != null) {

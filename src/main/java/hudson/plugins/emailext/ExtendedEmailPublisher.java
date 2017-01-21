@@ -3,8 +3,8 @@ package hudson.plugins.emailext;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Binding;
-import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import hudson.EnvVars;
 import hudson.FilePath;
@@ -13,7 +13,14 @@ import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixRun;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.CssInliner;
 import hudson.plugins.emailext.plugins.EmailTrigger;
@@ -24,18 +31,16 @@ import hudson.plugins.emailext.watching.EmailExtWatchAction;
 import hudson.plugins.emailext.watching.EmailExtWatchJobProperty;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.MailMessageIdAction;
-import hudson.tasks.Mailer;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.ConnectException;
-import java.net.SocketException;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.mail.Address;
@@ -49,15 +54,21 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimeUtility;
-import jenkins.model.Jenkins;
-import jenkins.model.JenkinsLocationConfiguration;
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
-import org.jenkinsci.plugins.tokenmacro.TokenMacro;
-import org.kohsuke.groovy.sandbox.SandboxTransformer;
-import org.kohsuke.stapler.DataBoundConstructor;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.ConnectException;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * {@link Publisher} that sends notification e-mail.
@@ -67,8 +78,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     private static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisher.class.getName());
 
     private static final String CONTENT_TRANSFER_ENCODING = System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
-
-    public static final String DEFAULT_RECIPIENTS_TEXT = "";
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
@@ -90,7 +99,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     /**
      * This is the list of email theTriggers that the project has configured
      */
-    public List<EmailTrigger> configuredTriggers = new ArrayList<EmailTrigger>();
+    public List<EmailTrigger> configuredTriggers = new ArrayList<>();
 
     /**
      * The contentType of the emails for this project (text/html, text/plain,
@@ -118,6 +127,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * The project's pre-send script.
      */
     public String presendScript;
+
+    /**
+     * The project's post-send script.
+     */
+    public String postsendScript;
 
     public List<GroovyScriptPath> classpath;
 
@@ -151,6 +165,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      */
     public MatrixTriggerMode matrixTriggerMode;
 
+    public ExtendedEmailPublisher() {
+    }
+
     @Deprecated
     public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
             String project_default_content, String project_attachments, String project_presend_script,
@@ -159,7 +176,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         this(project_recipient_list, project_content_type, project_default_subject, project_default_content,
                 project_attachments, project_presend_script, project_attach_buildlog, project_replyto,
-                project_save_output, project_triggers, matrixTriggerMode, false, Collections.EMPTY_LIST);
+                project_save_output, project_triggers, matrixTriggerMode, false, Collections.<GroovyScriptPath>emptyList());
     }
 
     @DataBoundConstructor
@@ -184,17 +201,19 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.classpath = classpath;
     }
 
-    public ExtendedEmailPublisher() {
+    @DataBoundSetter
+    public void setPostsendScript(String postsendScript) {
+        this.postsendScript = postsendScript;
     }
-
+    
     /**
      * Get the list of configured email theTriggers for this project.
      *
-     * @return
+     * @return The list of triggers configure for this publisher instance
      */
     public List<EmailTrigger> getConfiguredTriggers() {
         if (configuredTriggers == null) {
-            configuredTriggers = new ArrayList<EmailTrigger>();
+            configuredTriggers = new ArrayList<>();
         }
         return configuredTriggers;
     }
@@ -256,11 +275,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         //Go through and remove triggers that are replaced by others
-        List<String> replacedTriggers = new ArrayList<String>();
+        List<String> replacedTriggers = new ArrayList<>();
 
         for (Object tName : triggered.keySet()) {
             String triggerName = (String) tName;
-            for (EmailTrigger trigger : (Collection<EmailTrigger>) triggered.get(triggerName)) {
+            for (EmailTrigger trigger : triggered.get(triggerName)) {
                 replacedTriggers.addAll(trigger.getDescriptor().getTriggerReplaceList());
             }
         }
@@ -289,11 +308,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                         }
 
                         //Go through and remove triggers that are replaced by others
-                        replacedTriggers = new ArrayList<String>();
+                        replacedTriggers = new ArrayList<>();
 
                         for (Object tName : triggered.keySet()) {
                             String triggerName = (String) tName;
-                            for (EmailTrigger trigger : (Collection<EmailTrigger>) triggered.get(triggerName)) {
+                            for (EmailTrigger trigger : triggered.get(triggerName)) {
                                 replacedTriggers.addAll(trigger.getDescriptor().getTriggerReplaceList());
                             }
                         }
@@ -320,7 +339,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         for (String triggerName : triggered.keySet()) {
             for (EmailTrigger trigger : triggered.get(triggerName)) {
                 listener.getLogger().println("Sending email for trigger: " + triggerName);
-                final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build, launcher, listener);
+                final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build, build.getWorkspace(), launcher, listener);
                 context.setTriggered(triggered);
                 context.setTrigger(trigger);
                 sendMail(context);
@@ -330,7 +349,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return true;
     }
 
-    private boolean sendMail(ExtendedEmailPublisherContext context) {
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
+    boolean sendMail(ExtendedEmailPublisherContext context) {
         try {
             MimeMessage msg = createMail(context);
             debug(context.getListener().getLogger(), "Successfully created MimeMessage");
@@ -356,15 +376,23 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     }
                     context.getListener().getLogger().println(buf);
 
+                    ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
+                    Session session = descriptor.createSession();
+                    // emergency reroute might have modified recipients:
+                    allRecipients = msg.getAllRecipients();
+                    // all email addresses are of type "rfc822", so just take first one:
+                    Transport transport = session.getTransport(allRecipients[0]);
                     while (true) {
                         try {
-                            Transport.send(msg);
+                            transport.connect();
+                            transport.sendMessage(msg, allRecipients);
                             break;
                         } catch (SendFailedException e) {
                             if (e.getNextException() != null
-                                    && ((e.getNextException() instanceof SocketException)
-                                    || (e.getNextException() instanceof ConnectException))) {
+                                    && (e.getNextException() instanceof SocketException
+                                    || e.getNextException() instanceof ConnectException)) {
                                 context.getListener().getLogger().println("Socket error sending email, retrying once more in 10 seconds...");
+                                transport.close();
                                 Thread.sleep(10000);
                             } else {
                                 Address[] addresses = e.getValidSentAddresses();
@@ -396,8 +424,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                 break;
                             }
                         } catch (MessagingException e) {
-                            if (e.getNextException() != null && (e.getNextException() instanceof ConnectException)) {
+                            if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
                                 context.getListener().getLogger().println("Connection error sending email, retrying once more in 10 seconds...");
+                                transport.close();
                                 Thread.sleep(10000);
                             } else {
                                 debug(context.getListener().getLogger(), "MessagingException message: " + e.getMessage());
@@ -410,8 +439,13 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                             break;
                         }
                     }
-                    if (context.getBuild().getAction(MailMessageIdAction.class) == null) {
-                        context.getBuild().addAction(new MailMessageIdAction(msg.getMessageID()));
+
+                    executePostsendScript(context, msg, session, transport);
+                    // close transport after post-send script, so server response can be accessed:
+                    transport.close();
+
+                    if (context.getRun().getAction(MailMessageIdAction.class) == null) {
+                        context.getRun().addAction(new MailMessageIdAction(msg.getMessageID()));
                     }
                 } else {
                     context.getListener().getLogger().println("Email sending was cancelled"
@@ -432,19 +466,29 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     public List<TokenMacro> getRuntimeMacros(ExtendedEmailPublisherContext context) {
-        List<TokenMacro> macros = new ArrayList<TokenMacro>();
+        List<TokenMacro> macros = new ArrayList<>();
         macros.add(new TriggerNameContent(context.getTrigger().getDescriptor().getDisplayName()));
         return macros;
     }
 
     private boolean executePresendScript(ExtendedEmailPublisherContext context, MimeMessage msg)
             throws RuntimeException {
+        return executeScript(presendScript, "pre-send", context, msg, null, null);
+    }
+
+    private void executePostsendScript(ExtendedEmailPublisherContext context, MimeMessage msg, Session session, Transport transport)
+            throws RuntimeException {
+        executeScript(postsendScript, "post-send", context, msg, session, transport);
+    }
+
+    private boolean executeScript(String rawScript, String scriptName, ExtendedEmailPublisherContext context,
+            MimeMessage msg, Session session, Transport transport) {
         boolean cancel = false;
-        String script = ContentBuilder.transformText(presendScript, context, getRuntimeMacros(context));
+        String script = ContentBuilder.transformText(rawScript, context, getRuntimeMacros(context));
         if (StringUtils.isNotBlank(script)) {
-            debug(context.getListener().getLogger(), "Executing pre-send script");
-            ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
-            ScriptSandbox sandbox = null;
+            debug(context.getListener().getLogger(), "Executing %s script", scriptName);
+            ClassLoader cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
+
             CompilerConfiguration cc = new CompilerConfiguration();
             cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
             cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
@@ -453,16 +497,18 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     "hudson",
                     "hudson.model"));
 
-            cl = expandClassLoader(cl, cc);
-            if (getDescriptor().isSecurityEnabled()) {
-                debug(context.getListener().getLogger(), "Setting up sandbox for pre-send script");
-                cc.addCompilationCustomizers(new SandboxTransformer());
-                sandbox = new ScriptSandbox();
-            }
+            expandClasspath(context, cc);
 
             Binding binding = new Binding();
             binding.setVariable("build", context.getBuild());
+            binding.setVariable("run", context.getRun());
             binding.setVariable("msg", msg);
+            if (session != null) {
+                binding.setVariable("props", session.getProperties());
+            }
+            if (transport != null) {
+                binding.setVariable("transport", transport);
+            }
             binding.setVariable("listener", context.getListener());
             binding.setVariable("logger", context.getListener().getLogger());
             binding.setVariable("cancel", cancel);
@@ -473,16 +519,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             StringWriter out = new StringWriter();
             PrintWriter pw = new PrintWriter(out);
 
-            if (sandbox != null) {
-                sandbox.register();
-            }
-
             try {
                 shell.evaluate(script);
-                cancel = ((Boolean) shell.getVariable("cancel"));
-                debug(context.getListener().getLogger(), "Pre-send script set cancel to %b", cancel);
+                cancel = (Boolean) shell.getVariable("cancel");
+                debug(context.getListener().getLogger(), "%s script set cancel to %b", StringUtils.capitalize(scriptName), cancel);
             } catch (SecurityException e) {
-                context.getListener().getLogger().println("Pre-send script tried to access secured objects: " + e.getMessage());
+                context.getListener().getLogger().println(StringUtils.capitalize(scriptName) + " script tried to access secured objects: " + e.getMessage());
             } catch (Throwable t) {
                 t.printStackTrace(pw);
                 context.getListener().getLogger().println(out.toString());
@@ -501,27 +543,31 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * @param cc
      * @return the new expanded classloader
      */
-    private ClassLoader expandClassLoader(ClassLoader cl, CompilerConfiguration cc) {
-        if ((classpath != null) && classpath.size() > 0) {
-            cl = new GroovyClassLoader(cl, cc);
+    private void expandClasspath(ExtendedEmailPublisherContext context, CompilerConfiguration cc) {
+        List<String> classpathList = new ArrayList<>();
+
+        if (classpath != null && !classpath.isEmpty()) {
             for (GroovyScriptPath path : classpath) {
-                ((GroovyClassLoader) cl).addURL(path.asURL());
+                classpathList.add(ContentBuilder.transformText(path.getPath(), context, getRuntimeMacros(context)));
             }
         }
+
         List<GroovyScriptPath> globalClasspath = getDescriptor().getDefaultClasspath();
-        if ((globalClasspath != null) && (globalClasspath.size() > 0)) {
-            if (!(cl instanceof GroovyClassLoader)) {
-                cl = new GroovyClassLoader(cl, cc);
-            }
+        if (globalClasspath != null && !globalClasspath.isEmpty()) {
             for (GroovyScriptPath path : globalClasspath) {
-                ((GroovyClassLoader) cl).addURL(path.asURL());
+                classpathList.add(ContentBuilder.transformText(path.getPath(), context, getRuntimeMacros(context)));
             }
         }
-        return cl;
+        cc.setClasspathList(classpathList);
     }
 
     private MimeMessage createMail(ExtendedEmailPublisherContext context) throws MessagingException, IOException, InterruptedException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
+
+        if (!descriptor.getOverrideGlobalSettings()) {
+            descriptor.upgradeFromMailer();
+        }
+
         String charset = descriptor.getCharset();
 
         Session session = descriptor.createSession();
@@ -535,13 +581,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         msg.setFrom(from);
 
         if (descriptor.isDebugMode()) {
+            session.setDebug(true);
             session.setDebugOut(context.getListener().getLogger());
         }
 
         // Set the contents of the email
-        msg.addHeader("X-Jenkins-Job", context.getBuild().getProject().getDisplayName());
-        if (context.getBuild().getResult() != null) {
-            msg.addHeader("X-Jenkins-Result", context.getBuild().getResult().toString());
+        msg.addHeader("X-Jenkins-Job", context.getRun().getParent().getDisplayName());
+        final Result result = context.getRun() != null ? context.getRun().getResult() : null;
+        if (result != null) {
+            msg.addHeader("X-Jenkins-Result", result.toString());
         }
         msg.setSentDate(new Date());
         setSubject(context, msg, charset);
@@ -566,7 +614,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         EnvVars env = null;
         try {
-            env = context.getBuild().getEnvironment(context.getListener());
+            env = context.getRun().getEnvironment(context.getListener());
         } catch (Exception e) {
             context.getListener().getLogger().println("Error retrieving environment vars: " + e.getMessage());
             // create an empty set of env vars
@@ -574,9 +622,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         // Get the recipients from the global list of addresses
-        Set<InternetAddress> to = new LinkedHashSet<InternetAddress>();
-        Set<InternetAddress> cc = new LinkedHashSet<InternetAddress>();
-        Set<InternetAddress> bcc = new LinkedHashSet<InternetAddress>();
+        Set<InternetAddress> to = new LinkedHashSet<>();
+        Set<InternetAddress> cc = new LinkedHashSet<>();
+        Set<InternetAddress> bcc = new LinkedHashSet<>();
 
         String emergencyReroute = descriptor.getEmergencyReroute();
 
@@ -594,7 +642,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         // remove the excluded recipients
-        Set<InternetAddress> excludedRecipients = new LinkedHashSet<InternetAddress>();
+        Set<InternetAddress> excludedRecipients = new LinkedHashSet<>();
         for (InternetAddress recipient : to) {
             if (EmailRecipientUtils.isExcludedRecipient(recipient.getAddress(), context.getListener())) {
                 excludedRecipients.add(recipient);
@@ -605,14 +653,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         bcc.removeAll(excludedRecipients);
 
         msg.setRecipients(Message.RecipientType.TO, to.toArray(new InternetAddress[to.size()]));
-        if (cc.size() > 0) {
+        if (!cc.isEmpty()) {
             msg.setRecipients(Message.RecipientType.CC, cc.toArray(new InternetAddress[cc.size()]));
         }
-        if (bcc.size() > 0) {
+        if (!bcc.isEmpty()) {
             msg.setRecipients(Message.RecipientType.BCC, bcc.toArray(new InternetAddress[bcc.size()]));
         }
 
-        Set<InternetAddress> replyToAddresses = new LinkedHashSet<InternetAddress>();
+        Set<InternetAddress> replyToAddresses = new LinkedHashSet<>();
 
         if (StringUtils.isNotBlank(replyTo)) {
             EmailRecipientUtils.addAddressesFromRecipientList(replyToAddresses, null, null, EmailRecipientUtils.getRecipientList(context, replyTo), env, context.getListener());
@@ -622,11 +670,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             EmailRecipientUtils.addAddressesFromRecipientList(replyToAddresses, null, null, EmailRecipientUtils.getRecipientList(context, context.getTrigger().getEmail().getReplyTo()), env, context.getListener());
         }
 
-        if (replyToAddresses.size() > 0) {
+        if (!replyToAddresses.isEmpty()) {
             msg.setReplyTo(replyToAddresses.toArray(new InternetAddress[replyToAddresses.size()]));
         }
 
-        AbstractBuild<?, ?> pb = getPreviousBuild(context.getBuild(), context.getListener());
+        Run<?, ?> pb = getPreviousRun(context.getRun(), context.getListener());
         if (pb != null) {
             // Send mails as replies until next successful build
             MailMessageIdAction b = pb.getAction(MailMessageIdAction.class);
@@ -694,19 +742,16 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         try {
             if (saveOutput) {
-                Random random = new Random();
                 String extension = ".html";
                 if (messageContentType.startsWith("text/plain")) {
                     extension = ".txt";
                 }
 
-                FilePath savedOutput = new FilePath(context.getBuild().getWorkspace(),
-                        String.format("%s-%s%d%s", context.getTrigger().getDescriptor().getDisplayName(), context.getBuild().getId(), random.nextInt(), extension));
+                FilePath savedOutput = new FilePath(context.getWorkspace(),
+                        String.format("%s-%s%s", context.getTrigger().getDescriptor().getDisplayName(), context.getRun().getId(), extension));
                 savedOutput.write(text, charset);
             }
-        } catch (IOException e) {
-            context.getListener().getLogger().println("Error trying to save email output to file. " + e.getMessage());
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             context.getListener().getLogger().println("Error trying to save email output to file. " + e.getMessage());
         }
 
@@ -749,30 +794,30 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * behave sensibly when a later build actually finishes before an earlier
      * one.
      *
-     * @param build a build for which we may be sending mail
+     * @param run a run for which we may be sending mail
      * @param listener a listener to which we may print warnings in case the
      * actual previous build is still in progress
      * @return the previous build, or null if that build is missing, or is still
      * in progress
      */
     public static @CheckForNull
-    AbstractBuild<?, ?> getPreviousBuild(@Nonnull AbstractBuild<?, ?> build, TaskListener listener) {
-        AbstractBuild<?, ?> previousBuild = build.getPreviousBuild();
-        if (previousBuild != null && previousBuild.isBuilding()) {
-            listener.getLogger().println(Messages.ExtendedEmailPublisher__is_still_in_progress_ignoring_for_purpo(previousBuild.getDisplayName()));
+    Run<?, ?> getPreviousRun(@Nonnull Run<?, ?> run, TaskListener listener) {
+        Run<?, ?> previousRun = run.getPreviousBuild();
+        if (previousRun != null && previousRun.isBuilding()) {
+            listener.getLogger().println(Messages.ExtendedEmailPublisher__is_still_in_progress_ignoring_for_purpo(previousRun.getDisplayName()));
             return null;
         } else {
-            return previousBuild;
+            return previousRun;
         }
     }
 
     @Override
     public ExtendedEmailPublisherDescriptor getDescriptor() {
-        return (ExtendedEmailPublisherDescriptor) Jenkins.getInstance().getDescriptor(getClass());
+        return (ExtendedEmailPublisherDescriptor) Jenkins.getActiveInstance().getDescriptor(getClass());
     }
 
     public static ExtendedEmailPublisherDescriptor descriptor() {
-        return Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        return Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
     }
 
     public MatrixAggregator createAggregator(MatrixBuild matrixbuild,
@@ -792,7 +837,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             @Override
             public boolean startBuild() throws InterruptedException, IOException {
                 LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
-                // Will be run by parent so we check if needed to be executed by parent 
+                // Will be run by parent so we check if needed to be executed by parent
                 if (getMatrixTriggerMode().forParent) {
                     return ExtendedEmailPublisher.this._perform(this.build, this.launcher, this.listener, true);
                 }

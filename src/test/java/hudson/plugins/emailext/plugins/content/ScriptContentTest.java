@@ -1,45 +1,48 @@
 package hudson.plugins.emailext.plugins.content;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import hudson.EnvVars;
+import hudson.FilePath;
 import hudson.Functions;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.TaskListener;
-import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.scm.ChangeLogSet;
-import hudson.scm.EditType;
+import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
+import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.util.DescribableList;
 import hudson.util.StreamTaskListener;
-import java.io.File;
-
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Scanner;
 import jenkins.model.JenkinsLocationConfiguration;
 import org.apache.commons.io.FileUtils;
-
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.mock_javamail.Mailbox;
 import org.mockito.Mockito;
+
+import javax.mail.Message;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Scanner;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ScriptContentTest {
     private ScriptContent scriptContent;
-
-    private final String osName = System.getProperty("os.name");
-
-    private final boolean osIsDarwin = osName.equals("Mac OS X") || osName.equals("Darwin");
 
     private ExtendedEmailPublisher publisher;
     
@@ -48,50 +51,42 @@ public class ScriptContentTest {
     private TaskListener listener;
 
     @Rule
-    public JenkinsRule rule = new JenkinsRule() {
+    public JenkinsRule j = new JenkinsRule() {
         @Override
         public void before() throws Throwable {
-            assumeThat(osIsDarwin, is(false));
             super.before();
+            Mailbox.clearAll();
+            
+            scriptContent = new ScriptContent();
+            listener = StreamTaskListener.fromStdout();
+
+            JenkinsLocationConfiguration.get().setUrl("http://localhost");
+
+            publisher = new ExtendedEmailPublisher();
+            publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";
+            publisher.defaultSubject = "How would you like your very own AWESOME-O 4000?";
+            publisher.recipientList = "ashlux@gmail.com";
+
+            Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultBody" );
+            f.setAccessible( true );
+            f.set( publisher.getDescriptor(), "Give me $4000 and I'll mail you a check for $40,000!" );
+            f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultSubject" );
+            f.setAccessible( true );
+            f.set( publisher.getDescriptor(), "Nigerian needs your help!" );
+
+            f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "recipientList" );
+            f.setAccessible( true );
+            f.set( publisher.getDescriptor(), "ashlux@gmail.com" );
+
+            build =  mock(AbstractBuild.class);
+            AbstractProject project = mock(AbstractProject.class);
+            DescribableList publishers = mock(DescribableList.class);
+            when(publishers.get(ExtendedEmailPublisher.class)).thenReturn(publisher);
+            when(project.getPublishersList()).thenReturn(publishers);
+            when(build.getProject()).thenReturn(project);
         }
     };
     
-
-    @Before
-    public void setup() throws Throwable
-    {
-        assumeThat(osIsDarwin, is(false));
-        
-        scriptContent = new ScriptContent();
-        listener = StreamTaskListener.fromStdout();
-        
-        JenkinsLocationConfiguration.get().setUrl("http://localhost");
-
-        publisher = new ExtendedEmailPublisher();
-        publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";
-        publisher.defaultSubject = "How would you like your very own AWESOME-O 4000?";
-        publisher.recipientList = "ashlux@gmail.com";
-        
-        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultBody" );
-        f.setAccessible( true );
-        f.set( publisher.getDescriptor(), "Give me $4000 and I'll mail you a check for $40,000!" );
-        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "defaultSubject" );
-        f.setAccessible( true );
-        f.set( publisher.getDescriptor(), "Nigerian needs your help!" );
-
-        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField( "recipientList" );
-        f.setAccessible( true );
-        f.set( publisher.getDescriptor(), "ashlux@gmail.com" );
-        
-        build =  mock(AbstractBuild.class);
-        AbstractProject project = mock(AbstractProject.class);
-        DescribableList publishers = mock(DescribableList.class);
-        when(publishers.get(ExtendedEmailPublisher.class)).thenReturn(publisher);
-        when(project.getPublishersList()).thenReturn(publishers);
-        when(build.getProject()).thenReturn(project);
-    }
-
-
     @Test
     public void testShouldFindScriptOnClassPath()
             throws Exception
@@ -131,12 +126,16 @@ public class ScriptContentTest {
     public void testGroovyTemplateWithContentToken()
             throws Exception
     {
+        EnvVars env = new EnvVars();
+        env.put("BUILD_ID", "34");
+
         scriptContent.template = "content-token.template";
         
         // mock the build 
         when(build.getResult()).thenReturn(Result.SUCCESS);
         when(build.getUrl()).thenReturn("email-test/34");
         when(build.getId()).thenReturn("34");
+        when(build.getEnvironment(any(TaskListener.class))).thenReturn(env);
         
         // mock changeSet
         mockChangeSet(build);
@@ -146,7 +145,7 @@ public class ScriptContentTest {
 
         // read expected file in resource to easy compare
         String expectedFile = "hudson/plugins/emailext/templates/" + "content-token.result";
-        InputStream in = getClass().getClassLoader().getResourceAsStream(expectedFile);
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(expectedFile);
         String expected = new Scanner(in).useDelimiter("\\Z").next();
         
         // windows has a \r in each line, so make sure the comparison works correctly
@@ -165,11 +164,14 @@ public class ScriptContentTest {
     @Test
     public void testWithGroovyTemplate() throws Exception {
         scriptContent.template = "groovy-sample.template";
+        EnvVars env = new EnvVars();
+        env.put("BUILD_ID", "34");
 
         // mock the build 
         when(build.getResult()).thenReturn(Result.SUCCESS);
         when(build.getUrl()).thenReturn("email-test/34");
         when(build.getId()).thenReturn("34");
+        when(build.getEnvironment(any(TaskListener.class))).thenReturn(env);
         
         // mock changeSet
         mockChangeSet(build);
@@ -179,7 +181,7 @@ public class ScriptContentTest {
 
         // read expected file in resource to easy compare
         String expectedFile = "hudson/plugins/emailext/templates/" + "groovy-sample.result";
-        InputStream in = getClass().getClassLoader().getResourceAsStream(expectedFile);
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(expectedFile);
         String expected = new Scanner(in).useDelimiter("\\Z").next();
         
         // windows has a \r in each line, so make sure the comparison works correctly
@@ -208,9 +210,46 @@ public class ScriptContentTest {
         scriptContent.template = "testing1.template";
         assertEquals("2 + 2 = 4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
     }
+    
+    @Test public void templateInWorkspace() throws Exception {
+        URL url = this.getClass().getResource("/test.groovy");
+        final File script = new File(url.getFile());
+        
+        FreeStyleProject p = j.createFreeStyleProject("foo");
+        
+        ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
+        publisher.recipientList = "mickey@disney.com";
+        publisher.defaultSubject = "${SCRIPT, script=\"subdir/test.groovy\"}";
+        
+        SuccessTrigger trigger = new SuccessTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "", "$PROJECT_DEFAULT_SUBJECT", "", "", 0, "project");
+        
+        publisher.getConfiguredTriggers().add(trigger);
+        
+        p.getPublishersList().add(publisher);
+        
+        p.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+                FilePath p = build.getWorkspace().child("subdir");
+                p.mkdirs();
+                p = p.child("test.groovy");
+                p.copyFrom(new FilePath(script));
+                return p.exists();
+            }
+        });
+        FreeStyleBuild b = p.scheduleBuild2(0).get();     
+        j.assertBuildStatusSuccess(b);
+        
+        Mailbox mbox = Mailbox.get("mickey@disney.com");
+        assertEquals("Should have an email from success", 1, mbox.size());
+        
+        Message msg = mbox.get(0);
+        assertEquals("foo[3] = 4", msg.getSubject());
+    }
 
     private void mockChangeSet(final AbstractBuild build) {
         ScriptContentChangeLogSet changeLog = new ScriptContentChangeLogSet(build);
         Mockito.when(build.getChangeSet()).thenReturn(changeLog);
+        Mockito.when(build.getChangeSets()).thenReturn(Collections.singletonList(changeLog));
     }
 }

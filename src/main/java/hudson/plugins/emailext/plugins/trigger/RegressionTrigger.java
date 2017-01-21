@@ -1,8 +1,9 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
-import hudson.model.Result;
 import hudson.model.AbstractBuild;
+import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
@@ -10,11 +11,11 @@ import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
-import java.util.List;
-
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.util.List;
 
 
 public class RegressionTrigger extends EmailTrigger {
@@ -33,7 +34,7 @@ public class RegressionTrigger extends EmailTrigger {
     
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
-        AbstractBuild<?,?> previousBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+        Run<?,?> previousBuild = ExtendedEmailPublisher.getPreviousRun(build, listener);
         if (previousBuild == null)
             return build.getResult() == Result.FAILURE;
 

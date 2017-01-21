@@ -4,21 +4,17 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.ScriptSandbox;
 import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
-import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProvider;
-import java.util.ArrayList;
-import java.util.List;
 import jenkins.model.Jenkins;
+import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
-import org.kohsuke.groovy.sandbox.SandboxTransformer;
 import org.kohsuke.stapler.StaplerRequest;
+
+import java.util.List;
 
 public abstract class AbstractScriptTrigger extends EmailTrigger {
     protected String triggerScript;
@@ -68,9 +64,7 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
     }
     
     private GroovyShell createEngine(AbstractBuild<?, ?> build, TaskListener listener) {
-
-        ClassLoader cl = Jenkins.getInstance().getPluginManager().uberClassLoader;
-        ScriptSandbox sandbox = null;
+        ClassLoader cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
         CompilerConfiguration cc = new CompilerConfiguration();
         cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
                 "jenkins",
@@ -78,24 +72,13 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
                 "hudson",
                 "hudson.model"));
 
-        ExtendedEmailPublisher publisher = build.getProject().getPublishersList().get(ExtendedEmailPublisher.class);
-        if (publisher.getDescriptor().isSecurityEnabled()) {
-            cc.addCompilationCustomizers(new SandboxTransformer());
-            sandbox = new ScriptSandbox();
-        }
-
         Binding binding = new Binding();
         binding.setVariable("build", build);
         binding.setVariable("project", build.getParent());
-        binding.setVariable("rooturl", publisher.getDescriptor().getHudsonUrl());
+        binding.setVariable("rooturl", JenkinsLocationConfiguration.get().getUrl());
         binding.setVariable("out", listener.getLogger());
-        
+
         GroovyShell shell = new GroovyShell(cl, binding, cc);
-
-        if (sandbox != null) {
-            sandbox.register();
-        }
-
         return shell;
     }
 }

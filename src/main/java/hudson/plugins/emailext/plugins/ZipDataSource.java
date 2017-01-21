@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins;
 
+import javax.activation.DataSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -10,8 +11,6 @@ import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
-
-import javax.activation.DataSource;
 
 public class ZipDataSource implements DataSource {
 

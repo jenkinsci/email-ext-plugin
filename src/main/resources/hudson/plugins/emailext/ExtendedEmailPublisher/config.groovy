@@ -15,10 +15,10 @@ f.entry(title: _("Disable Extended Email Publisher"), help: "/plugin/email-ext/h
 }
 
 f.entry(title: _("Project Recipient List"), help: "/plugin/email-ext/help/projectConfig/globalRecipientList.html", description: _("Comma-separated list of email address that should receive notifications for this project.")) {
-  f.textbox(name: "project_recipient_list", value: configured ? instance.recipientList : "\$DEFAULT_RECIPIENTS", checkUrl: "'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)") 
+  f.textarea(name: "project_recipient_list", value: configured ? instance.recipientList : "\$DEFAULT_RECIPIENTS", checkUrl: "'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)")
 }
 f.entry(title: _("Project Reply-To List"), help: "/plugin/email-ext/help/projectConfig/replyToList.html", description: _("Comma-separated list of email address that should be in the Reply-To header for this project.")) {
-  f.textbox(name: "project_replyto", value: configured ? instance.replyTo : "\$DEFAULT_REPLYTO", checkUrl: "'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)") 
+  f.textarea(name: "project_replyto", value: configured ? instance.replyTo : "\$DEFAULT_REPLYTO", checkUrl: "'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)")
 }
 f.entry(title: _("Content Type"), help: "/plugin/email-ext/help/projectConfig/contentType.html") {
   select(name: "project_content_type", class: "setting-input") {
@@ -59,6 +59,9 @@ f.advanced(title: _("Advanced Settings")) {
   f.entry(title: _("Pre-send Script"), help: "/plugin/email-ext/help/projectConfig/presendScript.html") {
     f.textarea(id: "project_presend_script", name: "project_presend_script", value: configured ? instance.presendScript : "\$DEFAULT_PRESEND_SCRIPT", class: "setting-input") 
   }
+  f.entry(title: _("Post-send Script"), help: "/plugin/email-ext/help/projectConfig/postsendScript.html") {
+    f.textarea(id: "postsendScript", name: "postsendScript", value: configured ? instance.postsendScript : "\$DEFAULT_POSTSEND_SCRIPT", class: "setting-input")
+  }
   f.entry(title: _("Additional groovy classpath"), help: "/plugin/help/projectConfig/defaultClasspath.html") {
     f.repeatable(field: "classpath") {
       f.textbox(field: "path") 
@@ -76,14 +79,14 @@ f.advanced(title: _("Advanced Settings")) {
   if(instance != null) {
     configuredTriggers = instance.configuredTriggers
   } else {
-    jenkins.model.Jenkins.instance.getDescriptor(hudson.plugins.emailext.ExtendedEmailPublisher).defaultTriggers.each { t ->
-        configuredTriggers << t.createDefault()              
+    jenkins.model.Jenkins.instance.getDescriptor(hudson.plugins.emailext.ExtendedEmailPublisher).defaultTriggerIds.each { t ->
+        def desc = jenkins.model.Jenkins.instance.getDescriptor(t)
+        configuredTriggers << desc.createDefault()              
     }
   }
-  
-  //def configuredTriggers = instance != null ? instance.configuredTriggers : [jenkins.model.Jenkins.instance.getDescriptor(hudson.plugins.emailext.plugins.trigger.FailureTrigger.class).createDefault()]
-  
+
+  showSendTo = true
   f.entry(title: _("Triggers"), help: "/plugin/email-ext/help/projectConfig/addATrigger.html") {
-    f.hetero_list(name: "project_triggers", hasHeader: true, descriptors: triggers, items: configuredTriggers, addCaption:_("Add Trigger"), deleteCaption: _("Remove Trigger"))
+    f.hetero_list(name: "project_triggers", hasHeader: true, descriptors: triggers, items: configuredTriggers, addCaption:_("Add Trigger"), deleteCaption: _("Remove Trigger"), capture: "showSendTo")
   }
 }

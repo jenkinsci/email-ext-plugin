@@ -9,15 +9,16 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.content.FailedTestsContent;
 import hudson.tasks.junit.JUnitResultArchiver;
 import hudson.util.StreamTaskListener;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
 
 import java.io.IOException;
 import java.net.URL;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class OnlyRegressionsTest {
 
@@ -32,7 +33,7 @@ public class OnlyRegressionsTest {
         project.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> abstractBuild, Launcher launcher, BuildListener buildListener) throws InterruptedException, IOException {
-                final URL failedTestReport = OnlyRegressionsTest.class.getClassLoader().getResource("hudson/plugins/emailext/testreports/failed_test.xml");
+                final URL failedTestReport = Thread.currentThread().getContextClassLoader().getResource("hudson/plugins/emailext/testreports/failed_test.xml");
                 FilePath workspace = abstractBuild.getWorkspace();
 
                 FilePath testDir = workspace.child("target").child("testreports");

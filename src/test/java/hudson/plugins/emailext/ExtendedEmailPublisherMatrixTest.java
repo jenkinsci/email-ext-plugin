@@ -11,21 +11,25 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import hudson.slaves.DumbSlave;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.mock_javamail.Mailbox;
+
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import static org.junit.Assert.*;
-import org.junit.Rule;
-import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.matchers.JUnitMatchers.hasItems;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.mock_javamail.Mailbox;
 
 public class ExtendedEmailPublisherMatrixTest {
 
@@ -44,7 +48,7 @@ public class ExtendedEmailPublisherMatrixTest {
             publisher.defaultContent = "%DEFAULT_CONTENT";
             publisher.attachBuildLog = false;
 
-            project = createMatrixProject();
+            project = j.jenkins.createProject(MatrixProject.class, "Foo");
             project.getPublishersList().add( publisher );
             slaves = new ArrayList<DumbSlave>(); 
             slaves.add(createOnlineSlave(new LabelAtom("success-slave1")));

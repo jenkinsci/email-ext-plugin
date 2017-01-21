@@ -5,6 +5,7 @@ import hudson.plugins.emailext.plugins.recipients.CulpritsRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,7 +93,7 @@ public class EmailType {
         compressBuildLog = false;
         replyTo = "";
         contentType = "project";
-        recipientProviders = new ArrayList<RecipientProvider>();
+        recipientProviders = new ArrayList<>();
     }
 
     public String getSubject() {
@@ -126,14 +127,14 @@ public class EmailType {
 
     public void addRecipientProvider(RecipientProvider provider) {
         if (recipientProviders == null) {
-            recipientProviders = new ArrayList<RecipientProvider>();
+            recipientProviders = new ArrayList<>();
         }
         recipientProviders.add(provider);
     }
 
     public void addRecipientProviders(List<RecipientProvider> providers) {
         if (recipientProviders == null) {
-            recipientProviders = new ArrayList<RecipientProvider>();
+            recipientProviders = new ArrayList<>();
         }
         if(providers != null) {
             recipientProviders.addAll(providers);
@@ -141,7 +142,7 @@ public class EmailType {
     }
 
     public void setRecipientList(String recipientList) {
-        this.recipientList = recipientList.trim();
+        this.recipientList = hudson.Util.fixEmptyAndTrim ( recipientList );
     }
 
     public String getReplyTo() {
@@ -149,7 +150,7 @@ public class EmailType {
     }
 
     public void setReplyTo(String replyTo) {
-        this.replyTo = replyTo.trim();
+        this.replyTo = hudson.Util.fixEmptyAndTrim ( replyTo );
     }
 
     public String getAttachmentsPattern() {
@@ -194,7 +195,7 @@ public class EmailType {
         }
         
         if(recipientProviders == null) {
-            recipientProviders = new ArrayList<RecipientProvider>();
+            recipientProviders = new ArrayList<>();
         }
 
         // upgrade the various fields to the new RecipientProvider method

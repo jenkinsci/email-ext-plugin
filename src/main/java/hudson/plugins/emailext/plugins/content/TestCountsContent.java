@@ -1,19 +1,22 @@
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.Extension;
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.plugins.emailext.plugins.EmailToken;
 import hudson.tasks.test.AbstractTestResultAction;
-import java.io.IOException;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
+
+import java.io.IOException;
 
 /**
  * Displays the number of tests.
  *
  * @author Seiji Sogabe
  */
-@EmailToken
+@Extension
 public class TestCountsContent extends DataBoundTokenMacro {
 
     public static final String MACRO_NAME = "TEST_COUNTS";
@@ -26,28 +29,18 @@ public class TestCountsContent extends DataBoundTokenMacro {
     public boolean acceptsMacroName(String macroName) {
         return macroName.equals(MACRO_NAME);
     }
-
- /*
-    public String getHelpText() {
-        return "Displays the number of tests.\n"
-                + "<ul>\n"
-                + "<li><i>" + VAR_ARG_NAME + "</i> - Defaults to \"" + VAR_DEFAULT_VALUE + "\".\n"
-                + "  <ul>\n"
-                + "    <li>total - the number of all tests. </li>\n"
-                + "    <li>pass - the number of passed tests. </li>\n"
-                + "    <li>fail - the number of failed tests.</li>\n"
-                + "    <li>skip - the number of skipped tests.</li> \n"
-                + "  </ul>\n"
-                + "</li>\n"
-                + "</ul>\n";
-    }
-*/
-    
+   
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
+        return evaluate(build, build.getWorkspace(), listener, macroName);
+    }
 
-        AbstractTestResultAction<?> action = build.getAction(AbstractTestResultAction.class);
+    @Override
+    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
+
+        AbstractTestResultAction<?> action = run.getAction(AbstractTestResultAction.class);
         if (action == null) {
             return "";
         }

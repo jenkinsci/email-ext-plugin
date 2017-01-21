@@ -1,17 +1,18 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.Extension;
-import hudson.model.Result;
-import hudson.model.TaskListener;
 import hudson.model.AbstractBuild;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
-import java.util.List;
-
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.util.List;
 
 public class StatusChangedTrigger extends EmailTrigger {
 
@@ -32,14 +33,14 @@ public class StatusChangedTrigger extends EmailTrigger {
         final Result buildResult = build.getResult();
 
         if (buildResult != null) {
-            final AbstractBuild<?, ?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
+            final Run<?, ?> prevRun = ExtendedEmailPublisher.getPreviousRun(build, listener);
 
-            if (prevBuild == null) {
+            if (prevRun == null) {
                 // Notify at the first status defined
                 return true;
             }
 
-            return (build.getResult() != prevBuild.getResult());
+            return build.getResult() != prevRun.getResult();
         }
 
         return false;

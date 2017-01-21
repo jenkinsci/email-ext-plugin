@@ -3,15 +3,17 @@ package hudson.plugins.emailext.plugins.trigger;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
+import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
-import hudson.plugins.emailext.plugins.RecipientProvider;
-import java.util.List;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.util.List;
 
 public class BuildingTrigger extends EmailTrigger {
 
@@ -33,8 +35,8 @@ public class BuildingTrigger extends EmailTrigger {
         Result buildResult = build.getResult();
 
         if (buildResult == Result.UNSTABLE) {
-            AbstractBuild<?, ?> prevBuild = ExtendedEmailPublisher.getPreviousBuild(build, listener);
-            if (prevBuild != null && (prevBuild.getResult() == Result.FAILURE)) {
+            Run<?, ?> prevRun = ExtendedEmailPublisher.getPreviousRun(build, listener);
+            if (prevRun != null && prevRun.getResult() == Result.FAILURE) {
                 return true;
             }
         }

@@ -23,14 +23,6 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
-import java.io.PrintStream;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.mail.internet.InternetAddress;
-
-import org.kohsuke.stapler.DataBoundConstructor;
-
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
@@ -42,6 +34,13 @@ import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import jenkins.model.Jenkins;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import javax.mail.internet.InternetAddress;
+import java.io.PrintStream;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * A recipient provider that assigns ownership of a failing build to the set of developers (including any initiator)
@@ -59,7 +58,7 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
 
         final class Debug implements RecipientProviderUtilities.IDebug {
             private final ExtendedEmailPublisherDescriptor descriptor
-                = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+                = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 
@@ -71,24 +70,28 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
 
         Set<User> users = null;
 
-        final AbstractBuild<?, ?> currentBuild = context.getBuild();
-        if (currentBuild == null) {
-            debug.send("currentBuild was null");
+        final Run<?, ?> currentRun = context.getRun();
+        if (currentRun == null) {
+            debug.send("currentRun was null");
         } else {
-            if (!currentBuild.getResult().equals(Result.FAILURE)) {
+            if (!Objects.equals(currentRun.getResult(), Result.FAILURE)) {
                 debug.send("currentBuild did not fail");
             } else {
-                users = new HashSet<User>();
+                users = new HashSet<>();
                 debug.send("Collecting builds with suspects...");
-                final HashSet<AbstractBuild<?, ?>> buildsWithSuspects = new HashSet<AbstractBuild<?, ?>>();
-                Run<?, ?> firstFailedBuild = currentBuild;
-                Run<?, ?> candidate = currentBuild;
-                while (candidate != null && candidate.getResult().isWorseOrEqualTo(Result.FAILURE)) {
+                final HashSet<Run<?, ?>> buildsWithSuspects = new HashSet<>();
+                Run<?, ?> firstFailedBuild = currentRun;
+                Run<?, ?> candidate = currentRun;
+                while (candidate != null) {
+                    final Result candidateResult = candidate.getResult();
+                    if ( candidateResult == null || !candidateResult.isWorseOrEqualTo(Result.FAILURE) ) {
+                        break;
+                    }
                     firstFailedBuild = candidate;
                     candidate = candidate.getPreviousCompletedBuild();
                 }
                 if (firstFailedBuild instanceof AbstractBuild) {
-                    buildsWithSuspects.add((AbstractBuild<?, ?>) firstFailedBuild);
+                    buildsWithSuspects.add(firstFailedBuild);
                 } else {
                     debug.send("  firstFailedBuild was not an instance of AbstractBuild");
                 }

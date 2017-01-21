@@ -23,23 +23,27 @@
  */
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.ExtensionList;
+import hudson.FilePath;
 import hudson.Plugin;
 import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.tasks.Mailer;
+import jenkins.model.Jenkins;
+import org.apache.commons.io.FilenameUtils;
+import org.jenkinsci.lib.configprovider.ConfigProvider;
+import org.jenkinsci.lib.configprovider.model.Config;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import jenkins.model.Jenkins;
-import org.jenkinsci.lib.configprovider.ConfigProvider;
-import org.jenkinsci.lib.configprovider.model.Config;
-import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
-import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
+import java.io.UnsupportedEncodingException;
 
 /**
  *
@@ -47,7 +51,6 @@ import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
  */
 public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     
-    protected static Object configProvider;
     protected static final String EMAIL_TEMPLATES_DIRECTORY = "email-templates";
     protected final String macroName;
     
@@ -56,7 +59,13 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     }
 
     @Override
-    public abstract String evaluate(AbstractBuild<?, ?> ab, TaskListener tl, String string) throws MacroEvaluationException, IOException, InterruptedException;
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
+        return evaluate(build, build.getWorkspace(), listener, macroName);
+    }
+
+    @Override
+    public abstract String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) throws MacroEvaluationException, IOException, InterruptedException;
 
     @Override
     public boolean acceptsMacroName(String macroName) {
@@ -64,20 +73,20 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     }
     
     public static File scriptsFolder() {
-        return new File(Jenkins.getInstance().getRootDir(), EMAIL_TEMPLATES_DIRECTORY);
+        return new File(Jenkins.getActiveInstance().getRootDir(), EMAIL_TEMPLATES_DIRECTORY);
     }
-    
-    protected abstract ConfigProvider getConfigProvider();
+
+    protected abstract Class<? extends ConfigProvider> getProviderClass();
     
     @Override
     public boolean hasNestedContent() {
         return false;
     }
     
-    protected InputStream getFileInputStream(String fileName, String extension)
-            throws FileNotFoundException {
+    protected InputStream getFileInputStream(FilePath workspace, String fileName, String extension)
+            throws FileNotFoundException, IOException, InterruptedException {
         
-        InputStream inputStream;
+        InputStream inputStream = null;
         if(fileName.startsWith("managed:")) {
             String managedFileName = fileName.substring(8);
             try {
@@ -92,37 +101,57 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
             return inputStream;
         }
         
-        // add .jelly if needed
-        if (!fileName.endsWith(extension)) {
-            fileName += extension;
-        }
+        String fileExt = FilenameUtils.getExtension(fileName);
         
-        inputStream = getClass().getClassLoader().getResourceAsStream(
-                "hudson/plugins/emailext/templates/" + fileName);
+        // add default extension if needed
+        if ("".equals(fileExt)) {
+            fileName += extension;
+        }    
+        
+        // next we look in the workspace, this means the filename is relative to the root of the workspace
+        if(workspace != null) {
+            FilePath file = workspace.child(fileName);
+            if(file.exists()) {
+                inputStream = file.read();
+            }
+        }
 
-        if (inputStream == null) {
-            final File templateFile = new File(scriptsFolder(), fileName);
-            inputStream = new FileInputStream(templateFile);
+        if(inputStream == null) {        
+            inputStream = getClass().getClassLoader().getResourceAsStream(
+                    "hudson/plugins/emailext/templates/" + fileName);
+
+            if (inputStream == null) {
+                File templateFile = new File(scriptsFolder(), fileName);
+
+                // the file may have an extension, but not the correct one
+                if(!templateFile.exists()) {
+                    fileName += extension;
+                    templateFile = new File(scriptsFolder(), fileName);
+                }            
+
+                inputStream = new FileInputStream(templateFile);
+            }
         }
 
         return inputStream;
     }
     
-    private InputStream getManagedFile(String fileName) {
-        Plugin plugin = Jenkins.getInstance().getPlugin("config-file-provider");
+    private InputStream getManagedFile(String fileName) throws UnsupportedEncodingException {
         InputStream stream = null;
-        if(plugin != null) {
+        Plugin plugin = Jenkins.getActiveInstance().getPlugin("config-file-provider");
+        if (plugin != null) {
             Config config = null;
-            ConfigProvider provider = getConfigProvider();
-            for(Config c : provider.getAllConfigs()) {
-                if(c.name.equalsIgnoreCase(fileName) && provider.isResponsibleFor(c.id)) {
+            ExtensionList<ConfigProvider> providers = ConfigProvider.all();
+            ConfigProvider provider = providers.get(getProviderClass ());
+            for (Config c : provider.getAllConfigs()) {
+                if (c.name.equalsIgnoreCase(fileName)) {
                     config = c;
                     break;
-                }                    
+                }
             }
-            
-            if(config != null) {
-                stream = new ByteArrayInputStream(config.content.getBytes());
+
+            if (config != null) {
+               stream = new ByteArrayInputStream(config.content.getBytes("UTF-8"));
             }
         }
         return stream;
@@ -132,7 +161,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         return type + " file [" + fileName + "] was not found in $JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ".";
     }
     
-    protected String getCharset(AbstractBuild<?, ?> build) {
+    protected String getCharset(Run<?, ?> build) {
         return ExtendedEmailPublisher.descriptor().getCharset();
     }    
 }

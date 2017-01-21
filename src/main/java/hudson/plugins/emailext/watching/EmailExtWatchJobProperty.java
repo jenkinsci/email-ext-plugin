@@ -1,7 +1,11 @@
 package hudson.plugins.emailext.watching;
 
 import hudson.Extension;
-import hudson.model.*;
+import hudson.model.Action;
+import hudson.model.Job;
+import hudson.model.JobProperty;
+import hudson.model.JobPropertyDescriptor;
+import hudson.model.User;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -9,18 +13,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by acearl on 12/4/2014.
  */
 public class EmailExtWatchJobProperty extends JobProperty<Job<?, ?>> {
 
-    final List<String> watchers = new ArrayList<String>();
+    final List<String> watchers = new ArrayList<>();
 
     @Override
     public Collection<Action> getJobActions(Job<?, ?> job) {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     public List<String> getWatchers() {
@@ -51,7 +54,7 @@ public class EmailExtWatchJobProperty extends JobProperty<Job<?, ?>> {
         }
 
         if (remove != null) {
-            watchers.remove(user);
+            watchers.remove(user.getId());
         }
     }
 

@@ -1,17 +1,17 @@
 package hudson.plugins.emailext.plugins;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.Descriptor;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
 
-    protected List<String> replacesList = new ArrayList<String>();
-    protected List<RecipientProvider> defaultRecipientProviders = new ArrayList<RecipientProvider>();
+    protected List<String> replacesList = new ArrayList<>();
+    protected List<RecipientProvider> defaultRecipientProviders = new ArrayList<>();
 
     /**
      * You can add the name of a trigger that this trigger should override if both this
@@ -20,7 +20,6 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
      * the work a plugin developer needs to do to make sure that only a single email is sent.
      *
      * @param triggerName is the name of a trigger that should be deactivated if it is specified.
-     * @see #getTriggerName()
      */
     public void addTriggerNameToReplace(String triggerName) {
         replacesList.add(triggerName);
@@ -40,6 +39,7 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
     
     public abstract EmailTrigger createDefault();
     
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     protected EmailTrigger _createDefault() {
         EmailTrigger trigger;
         try {
@@ -72,4 +72,4 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
     public boolean getDefaultSendToRequester() {
         return false;
     }
-            }
+}

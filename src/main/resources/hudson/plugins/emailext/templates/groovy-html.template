@@ -19,10 +19,11 @@ TD.console { font-family:Courier New; }
 <TABLE>
   <TR><TD align="right"><IMG SRC="${rooturl}static/e59dfe28/images/32x32/<%= build.result.toString() == 'SUCCESS' ? "blue.gif" : build.result.toString() == 'FAILURE' ? 'red.gif' : 'yellow.gif' %>" />
   </TD><TD valign="center"><B style="font-size: 200%;">BUILD ${build.result}</B></TD></TR>
-  <TR><TD>Build URL</TD><TD><A href="${rooturl}${build.url}">${rooturl}${build.url}</A></TD></TR>
+  <TR><TD>URL</TD><TD><A href="${rooturl}${build.url}">${rooturl}${build.url}</A></TD></TR>
   <TR><TD>Project:</TD><TD>${project.name}</TD></TR>
-  <TR><TD>Date of build:</TD><TD>${it.timestampString}</TD></TR>
-  <TR><TD>Build duration:</TD><TD>${build.durationString}</TD></TR>
+  <TR><TD>Date:</TD><TD>${it.timestampString}</TD></TR>
+  <TR><TD>Duration:</TD><TD>${build.durationString}</TD></TR>
+  <TR><TD>Cause:</TD><TD><% build.causes.each() { cause -> %> ${cause.shortDescription} <%  } %></TD></TR>
 </TABLE>
 <BR/>
 
@@ -83,7 +84,7 @@ try {
       <TR><TD class="bg1"><B>BUILD ARTIFACTS</B></TD></TR>
 <% 
     try {  
-        mbuild.each() { m -> %>	  
+        mbuilds.each() { m -> %>	  
         <TR><TD class="bg2"><B>${m.key.displayName}</B></TD></TR>
 <%		m.value.each() { mvnbld ->
 			def artifactz = mvnbld.artifacts
@@ -115,20 +116,28 @@ try {
 <!-- JUnit TEMPLATE -->
 
 <% def junitResultList = it.JUnitTestResult
+try {
+ def cucumberTestResultAction = it.getAction("org.jenkinsci.plugins.cucumber.jsontestsupport.CucumberTestResultAction")
+ junitResultList.add(cucumberTestResultAction.getResult())
+} catch(e) {
+        //cucumberTestResultAction not exist in this build
+}
 if (junitResultList.size() > 0) { %>
-  <TABLE width="100%">
-    <TR><TD class="bg1" colspan="2"><B>JUnit Tests</B></TD></TR>
-    <% it.JUnitTestResult.each{ junitResult ->
-      junitResult.getChildren().each { packageResult -> %>
+ <TABLE width="100%">
+ <TR><TD class="bg1" colspan="2"><B>${junitResultList.first().displayName}</B></TD></TR>
+ <% junitResultList.each{
+  junitResult -> %>
+     <% junitResult.getChildren().each { packageResult -> %>
         <TR><TD class="bg2" colspan="2"> Name: ${packageResult.getName()} Failed: ${packageResult.getFailCount()} test(s), Passed: ${packageResult.getPassCount()} test(s), Skipped: ${packageResult.getSkipCount()} test(s), Total: ${packageResult.getPassCount()+packageResult.getFailCount()+packageResult.getSkipCount()} test(s)</TD></TR>
         <% packageResult.getFailedTests().each{ failed_test -> %>
           <TR bgcolor="white"><TD class="test_failed" colspan="2"><B><li>Failed: ${failed_test.getFullName()} </li></B></TD></TR>
         <% }
       }
-    }
+ } %>
+ </TABLE>
+ <BR/>
+<%
 } %>
-  </TABLE>
-<BR/>
 
 <!-- CONSOLE OUTPUT -->
 <% if(build.result==hudson.model.Result.FAILURE) { %>

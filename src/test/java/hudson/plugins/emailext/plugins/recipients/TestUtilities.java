@@ -23,23 +23,22 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import static org.junit.Assert.assertTrue;
-
 import hudson.EnvVars;
 import hudson.Launcher;
-import hudson.model.Build;
+import hudson.model.Run;
 import hudson.model.StreamBuildListener;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.util.StreamTaskListener;
+
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import java.nio.charset.Charset;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /* package private */ final class TestUtilities {
     private static final String AT_DOMAIN = "@DOMAIN";
@@ -48,24 +47,21 @@ import hudson.util.StreamTaskListener;
     }
 
     public static void checkRecipients(
-        final Build<?, ?> build,
-        final RecipientProvider provider,
-        final String... inAuthors) throws AddressException {
-        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(null, build, new Launcher.LocalLauncher(StreamTaskListener.fromStdout()), new StreamBuildListener(System.out, Charset.defaultCharset()));
+            final Run<?, ?> build,
+            final RecipientProvider provider,
+            final String... inAuthors) throws AddressException {
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(null, build, null, new Launcher.LocalLauncher(StreamTaskListener.fromStdout()), new StreamBuildListener(System.out, Charset.defaultCharset()));
         EnvVars envVars = new EnvVars();
         Set<InternetAddress> to = new HashSet<InternetAddress>();
         Set<InternetAddress> cc = new HashSet<InternetAddress>();
         Set<InternetAddress> bcc = new HashSet<InternetAddress>();
         provider.addRecipients(context, envVars, to, cc, bcc);
-        final List<InternetAddress> authors = new ArrayList<InternetAddress>();
+        final Set<InternetAddress> authors = new HashSet<>();
         for (final String author : inAuthors) {
             authors.add(new InternetAddress(author + AT_DOMAIN));
         }
-        // All of the authors should have received an email, so the list should be empty.
-        authors.removeAll(to);
-        assertTrue("Authors not receiving mail: " + authors.toString(), authors.isEmpty());
+        assertEquals(authors, to);
         assertTrue(cc.isEmpty());
         assertTrue(bcc.isEmpty());
     }
-
 }

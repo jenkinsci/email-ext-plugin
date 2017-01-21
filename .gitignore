@@ -3,6 +3,10 @@ target
 .settings
 .project
 .idea
+.gradle
+gradlew
+gradlew.bat
+settings.gradle
 *.iml
 *.ipr
 *.iws
@@ -12,3 +16,4 @@ work
 *.bak
 nbactions.xml
 .directory
+nb-configuration.xml

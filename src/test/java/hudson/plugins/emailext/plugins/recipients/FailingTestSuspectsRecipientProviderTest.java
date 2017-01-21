@@ -23,19 +23,18 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
 import hudson.model.FreeStyleBuild;
 import hudson.model.Result;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.tasks.Mailer;
 import jenkins.model.Jenkins;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -48,17 +47,16 @@ import jenkins.model.Jenkins;
 })
 public class FailingTestSuspectsRecipientProviderTest {
 
-    private static final String AT_DOMAIN = "@DOMAIN";
-
     @Before
     public void before() throws Exception {
         final Jenkins jenkins = PowerMockito.mock(Jenkins.class);
         final ExtendedEmailPublisherDescriptor extendedEmailPublisherDescriptor = PowerMockito.mock(ExtendedEmailPublisherDescriptor.class);
         extendedEmailPublisherDescriptor.setDebugMode(true);
+        PowerMockito.when(extendedEmailPublisherDescriptor.getExcludedCommitters()).thenReturn("");
 
         PowerMockito.when(jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class)).thenReturn(extendedEmailPublisherDescriptor);
         PowerMockito.mockStatic(Jenkins.class);
-        PowerMockito.doReturn(jenkins).when(Jenkins.class, "getInstance");
+        PowerMockito.doReturn(jenkins).when(Jenkins.class, "getActiveInstance");
 
         final Mailer.DescriptorImpl descriptor = PowerMockito.mock(Mailer.DescriptorImpl.class);
         PowerMockito.when(descriptor.getDefaultSuffix()).thenReturn("DOMAIN");

@@ -23,28 +23,29 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.apache.commons.collections.Transformer;
-import org.apache.commons.collections.iterators.TransformIterator;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
-
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
+import hudson.model.Run;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.Mailer;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AbstractTestResultAction;
+import org.apache.commons.collections.Transformer;
+import org.apache.commons.collections.iterators.TransformIterator;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.powermock.api.mockito.PowerMockito;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /* package private */ final class MockUtilities {
     private static final String AT_DOMAIN = "@DOMAIN";
@@ -54,16 +55,16 @@ import hudson.tasks.test.AbstractTestResultAction;
 
     public static User getUser(final String author) {
         final User user = PowerMockito.mock(User.class);
-        final Mailer.UserProperty mailProperty = new Mailer.UserProperty(((String) author) + AT_DOMAIN);
+        final Mailer.UserProperty mailProperty = new Mailer.UserProperty(author + AT_DOMAIN);
         PowerMockito.when(user.getProperty(Mailer.UserProperty.class)).thenReturn(mailProperty);
         return user;
     }
 
     public static class MockUtilitiesChangeSet extends ChangeLogSet<ChangeLogSet.Entry> {
         final String[] authors;
-        final AbstractBuild<?, ?> build;
+        final Run<?, ?> build;
 
-        public MockUtilitiesChangeSet(AbstractBuild<?, ?> build, final String... authors) {
+        public MockUtilitiesChangeSet(Run<?, ?> build, final String... authors) {
             super(build, null);
             this.build = build;
             this.authors = authors;
@@ -91,7 +92,7 @@ import hudson.tasks.test.AbstractTestResultAction;
 
                         @Override
                         public Collection<String> getAffectedPaths() {
-                            return Collections.EMPTY_SET;
+                            return Collections.emptySet();
                         }
 
                         @Override
@@ -101,7 +102,7 @@ import hudson.tasks.test.AbstractTestResultAction;
 
                         @Override
                         public Collection<? extends ChangeLogSet.AffectedFile> getAffectedFiles() {
-                            return Collections.EMPTY_SET;
+                            return Collections.emptySet();
                         }
                     };
                 }
@@ -111,8 +112,17 @@ import hudson.tasks.test.AbstractTestResultAction;
 
     }
 
+    public static ChangeLogSet<ChangeLogSet.Entry> makeChangeSet(final Run<?, ?> build, final String... inAuthors) {
+        return new MockUtilitiesChangeSet(build, inAuthors);
+    }
+
+    public static void addChangeSet(final WorkflowRun build, final String... inAuthors) {
+        ChangeLogSet<ChangeLogSet.Entry> changeSet = makeChangeSet(build, inAuthors);
+        PowerMockito.when(build.getChangeSets()).thenReturn(Collections.<ChangeLogSet<? extends ChangeLogSet.Entry>>singletonList(changeSet));
+    }
+
     public static void addChangeSet(final AbstractBuild<?, ?> build, final String... inAuthors) {
-        MockUtilitiesChangeSet changeSet = new MockUtilitiesChangeSet(build, inAuthors);
+        ChangeLogSet<ChangeLogSet.Entry> changeSet = makeChangeSet(build, inAuthors);
         PowerMockito.when(build.getChangeSet()).thenReturn((ChangeLogSet)changeSet);
     }
 

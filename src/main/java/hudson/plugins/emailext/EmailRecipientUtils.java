@@ -1,33 +1,27 @@
 package hudson.plugins.emailext;
 
-import java.io.UnsupportedEncodingException;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.logging.Logger;
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeUtility;
-
 import hudson.EnvVars;
 import hudson.model.TaskListener;
 import hudson.model.User;
-import hudson.plugins.emailext.ExtendedEmailPublisherContext;
-import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.tasks.Mailer;
 import hudson.util.FormValidation;
-import java.util.StringTokenizer;
-import java.util.logging.Level;
-import javax.mail.MessagingException;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import java.io.UnsupportedEncodingException;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class EmailRecipientUtils {
 
     private static final Logger LOGGER = Logger.getLogger(EmailRecipientUtils.class.getName());
-
-    public static final String COMMA_SEPARATED_SPLIT_REGEXP = "[,\\s]+";
 
     public static final int TO = 0;
     public static final int CC = 1;
@@ -40,13 +34,13 @@ public class EmailRecipientUtils {
     
     public static Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars, int type)
         throws AddressException, UnsupportedEncodingException {
-        final Set<InternetAddress> internetAddresses = new LinkedHashSet<InternetAddress>();
+        final Set<InternetAddress> internetAddresses = new LinkedHashSet<>();
         if (!StringUtils.isBlank(recipientList)) {
-            final String expandedRecipientList = fixupSpaces(envVars.expand(recipientList));
+            final String expandedRecipientList = fixupDelimiters(envVars.expand(recipientList));
             InternetAddress[] all = InternetAddress.parse(expandedRecipientList.replace("bcc:", "").replace("cc:", ""));
-            final Set<InternetAddress> to = new LinkedHashSet<InternetAddress>();
-            final Set<InternetAddress> cc = new LinkedHashSet<InternetAddress>();
-            final Set<InternetAddress> bcc = new LinkedHashSet<InternetAddress>();
+            final Set<InternetAddress> to = new LinkedHashSet<>();
+            final Set<InternetAddress> cc = new LinkedHashSet<>();
+            final Set<InternetAddress> bcc = new LinkedHashSet<>();
             final String defaultSuffix = ExtendedEmailPublisher.descriptor().getDefaultSuffix();
 
             for(InternetAddress address : all) {
@@ -129,29 +123,34 @@ public class EmailRecipientUtils {
         }
     }
 
-    private static String fixupSpaces(String input) {
+    private static String fixupDelimiters(String input) {
         input = input.replaceAll("\\s+", " ");
         if(input.contains(" ") && !input.contains(",")) {
             input = input.replace(" ", ",");
         }
+
+        input = input.replace(';', ',');
         return input;
     }
     
     public static boolean isExcludedRecipient(String userName, TaskListener listener) {
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        StringTokenizer tokens = new StringTokenizer(descriptor.getExcludedCommitters(), ",");
-        while (tokens.hasMoreTokens()) {
-            String check = tokens.nextToken().trim();
-            descriptor.debug(listener.getLogger(), "Checking '%s' against '%s' to see if they are excluded", userName, check);
-            if (check.equalsIgnoreCase(userName)) {
-                return true;
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        if(descriptor.getExcludedCommitters() != null) {
+            StringTokenizer tokens = new StringTokenizer(descriptor.getExcludedCommitters(), ", ");
+            while (tokens.hasMoreTokens()) {
+                String check = tokens.nextToken().trim();
+                descriptor.debug(listener.getLogger(), "Checking '%s' against '%s' to see if they are excluded", userName, check);
+                if (check.equalsIgnoreCase(userName)) {
+                    return true;
+                }
             }
         }
         return false;
     }
     
     public static boolean isExcludedRecipient(User user, TaskListener listener) {
-        String[] testValues = new String[] { user.getFullName(), user.getId(), user.getDisplayName() };
+        Mailer.UserProperty prop = user.getProperty(Mailer.UserProperty.class);
+        String[] testValues = new String[] { user.getFullName(), user.getId(), user.getDisplayName(), prop != null ? prop.getAddress() : null };
         for(String testValue : testValues) {
             if(testValue != null && isExcludedRecipient(testValue, listener)) {
                 return true;
@@ -184,7 +183,6 @@ public class EmailRecipientUtils {
     
     public static String getRecipientList(ExtendedEmailPublisherContext context, String recipients)
         throws MessagingException {
-        final String recipientsTransformed = StringUtils.isBlank(recipients) ? "" : ContentBuilder.transformText(recipients, context, context.getPublisher().getRuntimeMacros(context));
-        return recipientsTransformed;
+        return StringUtils.isBlank(recipients) ? "" : ContentBuilder.transformText(recipients, context, context.getPublisher().getRuntimeMacros(context));
     }
 }

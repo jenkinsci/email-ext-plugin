@@ -1,31 +1,28 @@
 package hudson.plugins.emailext.plugins.recipients;
 
-import hudson.plugins.emailext.EmailRecipientUtils;
-import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
-import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Cause;
+import hudson.model.Job;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.User;
+import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
+import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.tasks.Mailer;
-import java.lang.reflect.Field;
-import java.util.Set;
-import java.util.logging.Logger;
-import javax.mail.internet.InternetAddress;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import javax.mail.internet.InternetAddress;
+import java.util.Set;
 
 /**
  * Created by acearl on 12/25/13.
  */
 
 public class RequesterRecipientProvider extends RecipientProvider {
-    private static final Logger LOGGER = Logger.getLogger(RequesterRecipientProvider.class.getName());
-
     @DataBoundConstructor
     public RequesterRecipientProvider() {
         
@@ -34,12 +31,13 @@ public class RequesterRecipientProvider extends RecipientProvider {
     @Override
     public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
         // looking for Upstream build.
-        AbstractBuild<?, ?> cur = context.getBuild();
-        Cause.UpstreamCause upc = context.getBuild().getCause(Cause.UpstreamCause.class);
+        Run<?, ?> cur = context.getRun();
+        Cause.UpstreamCause upc = cur.getCause(Cause.UpstreamCause.class);
         while (upc != null) {
             // UpstreamCause.getUpStreamProject() returns the full name, so use getItemByFullName
-            AbstractProject<?, ?> p = (AbstractProject<?, ?>) Jenkins.getInstance().getItemByFullName(upc.getUpstreamProject());
+            Job<?, ?> p = (Job<?, ?>) Jenkins.getActiveInstance().getItemByFullName(upc.getUpstreamProject());
             if (p == null) {
+                context.getListener().getLogger().print("There is a break in the project linkage, could not retrieve upstream project information");
                 break;
             }
             cur = p.getBuildByNumber(upc.getUpstreamBuild());
@@ -48,18 +46,10 @@ public class RequesterRecipientProvider extends RecipientProvider {
         addUserTriggeringTheBuild(cur, to, cc, bcc, env, context.getListener());
     }
 
-    public static User getUserTriggeringTheBuild(final AbstractBuild<?, ?> build) {
-        User user = getByUserIdCause(build);
-        if (user == null) {
-            user = getByLegacyUserCause(build);
-        }
-        return user;
-    }
-
-    private static void addUserTriggeringTheBuild(AbstractBuild<?, ?> build, Set<InternetAddress> to,
+    private static void addUserTriggeringTheBuild(Run<?, ?> run, Set<InternetAddress> to,
         Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener) {
 
-        final User user = getUserTriggeringTheBuild(build);
+        final User user = RecipientProviderUtilities.getUserTriggeringTheBuild(run);
         if (user != null) {
             String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
             if (adrs != null) {
@@ -72,37 +62,7 @@ public class RequesterRecipientProvider extends RecipientProvider {
     }
 
     @SuppressWarnings("unchecked")
-    private static User getByUserIdCause(AbstractBuild<?, ?> build) {
-        try {
-            Cause.UserIdCause cause = build.getCause(Cause.UserIdCause.class);
-            if (cause != null) {
-                String id = cause.getUserId();
-                return User.get(id, false, null);
-            }
 
-        } catch (Exception e) {
-            LOGGER.info(e.getMessage());
-        }
-        return null;
-    }
-
-    @SuppressWarnings("deprecated")
-    private static User getByLegacyUserCause(AbstractBuild<?, ?> build) {
-        try {
-            Cause.UserCause userCause = build.getCause(Cause.UserCause.class);
-            // userCause.getUserName() returns displayName which may be different from authentication name
-            // Therefore use reflection to access the real authenticationName
-            if (userCause != null) {
-                Field authenticationName = Cause.UserCause.class.getDeclaredField("authenticationName");
-                authenticationName.setAccessible(true);
-                String name = (String) authenticationName.get(userCause);
-                return User.get(name, false, null);
-            }
-        } catch (Exception e) {
-            LOGGER.info(e.getMessage());
-        }
-        return null;
-    }
     
     @Extension
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
