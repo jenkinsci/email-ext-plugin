@@ -1,5 +1,10 @@
 <html>
 <body>
+<!-- Install/config:
+     Place testresult.groovy in the Email-Ext plugin script dir (perhaps /var/lib/jenkins/email-templates/).
+     Set content type in job Email-Ext plugin config to HTML or HTML and Plain Text,
+     and add call of script to email body like this: ${SCRIPT, template="test.groovy"}
+     -->
 <%
 
     import hudson.model.*
