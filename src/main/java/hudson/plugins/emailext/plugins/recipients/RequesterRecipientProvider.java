@@ -7,11 +7,12 @@ import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.User;
-import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
+import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
-import hudson.tasks.Mailer;
+import java.io.PrintStream;
+import java.util.Collections;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -29,7 +30,18 @@ public class RequesterRecipientProvider extends RecipientProvider {
     }
     
     @Override
-    public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
+    public void addRecipients(final ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
+        final class Debug implements RecipientProviderUtilities.IDebug {
+            private final ExtendedEmailPublisherDescriptor descriptor
+                    = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+            private final PrintStream logger = context.getListener().getLogger();
+
+            public void send(final String format, final Object... args) {
+                descriptor.debug(logger, format, args);
+            }
+        }
+        final Debug debug = new Debug();
         // looking for Upstream build.
         Run<?, ?> cur = context.getRun();
         Cause.UpstreamCause upc = cur.getCause(Cause.UpstreamCause.class);
@@ -43,21 +55,15 @@ public class RequesterRecipientProvider extends RecipientProvider {
             cur = p.getBuildByNumber(upc.getUpstreamBuild());
             upc = cur.getCause(Cause.UpstreamCause.class);
         }
-        addUserTriggeringTheBuild(cur, to, cc, bcc, env, context.getListener());
+        addUserTriggeringTheBuild(cur, to, cc, bcc, env, context.getListener(), debug);
     }
 
     private static void addUserTriggeringTheBuild(Run<?, ?> run, Set<InternetAddress> to,
-        Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener) {
+        Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener, RecipientProviderUtilities.IDebug debug) {
 
         final User user = RecipientProviderUtilities.getUserTriggeringTheBuild(run);
         if (user != null) {
-            String adrs = user.getProperty(Mailer.UserProperty.class).getAddress();
-            if (adrs != null) {
-                EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, adrs, env, listener);
-            } else {
-                listener.getLogger().println("The user does not have a configured email address, trying the user's id");
-                EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, user.getId(), env, listener);
-            }
+            RecipientProviderUtilities.addUsers(Collections.singleton(user), listener, env, to, cc, bcc, debug);
         }
     }
 
