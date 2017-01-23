@@ -55,15 +55,15 @@ public class RequesterRecipientProvider extends RecipientProvider {
             cur = p.getBuildByNumber(upc.getUpstreamBuild());
             upc = cur.getCause(Cause.UpstreamCause.class);
         }
-        addUserTriggeringTheBuild(cur, to, cc, bcc, env, context.getListener(), debug);
+        addUserTriggeringTheBuild(cur, to, cc, bcc, env, context, debug);
     }
 
     private static void addUserTriggeringTheBuild(Run<?, ?> run, Set<InternetAddress> to,
-        Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener, RecipientProviderUtilities.IDebug debug) {
+        Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, final ExtendedEmailPublisherContext context, RecipientProviderUtilities.IDebug debug) {
 
         final User user = RecipientProviderUtilities.getUserTriggeringTheBuild(run);
         if (user != null) {
-            RecipientProviderUtilities.addUsers(Collections.singleton(user), listener, env, to, cc, bcc, debug);
+            RecipientProviderUtilities.addUsers(Collections.singleton(user), context, env, to, cc, bcc, debug);
         }
     }
 

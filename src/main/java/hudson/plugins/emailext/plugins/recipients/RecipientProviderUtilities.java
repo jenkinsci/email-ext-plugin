@@ -28,11 +28,14 @@ import com.google.common.collect.Iterables;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
+import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.plugins.emailext.EmailRecipientUtils;
+import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.scm.ChangeLogSet;
+import hudson.tasks.MailSender;
 
 import javax.mail.internet.InternetAddress;
 import java.lang.reflect.Field;
@@ -43,6 +46,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import javax.annotation.CheckForNull;
+import org.acegisecurity.Authentication;
+import org.acegisecurity.userdetails.UsernameNotFoundException;
 
 public final class RecipientProviderUtilities {
     private static final Logger LOGGER = Logger.getLogger(RecipientProviderUtilities.class.getName());
@@ -153,7 +159,23 @@ public final class RecipientProviderUtilities {
         return user;
     }
 
+    @Deprecated
     public static void addUsers(final Set<User> users, final TaskListener listener, final EnvVars env,
+        final Set<InternetAddress> to, final Set<InternetAddress> cc, final Set<InternetAddress> bcc, final IDebug debug) {
+        addUsers(users, listener, null, env, to, cc, bcc, debug);
+    }
+
+    public static void addUsers(final Set<User> users, final ExtendedEmailPublisherContext context, final EnvVars env,
+        final Set<InternetAddress> to, final Set<InternetAddress> cc, final Set<InternetAddress> bcc, final IDebug debug) {
+        addUsers(users, context.getListener(), context.getRun(), env, to, cc, bcc, debug);
+    }
+
+    /** If set, send to known users who lack {@link Item#READ} access to the job. */
+    static /* not final */ boolean SEND_TO_USERS_WITHOUT_READ = Boolean.getBoolean(MailSender.class.getName() + ".SEND_TO_USERS_WITHOUT_READ");
+    /** If set, send to unknown users. */
+    static /* not final */ boolean SEND_TO_UNKNOWN_USERS = Boolean.getBoolean(MailSender.class.getName() + ".SEND_TO_UNKNOWN_USERS");
+
+    private static void addUsers(final Set<User> users, final TaskListener listener, @CheckForNull Run<?,?> run, final EnvVars env,
         final Set<InternetAddress> to, final Set<InternetAddress> cc, final Set<InternetAddress> bcc, final IDebug debug) {
         for (final User user : users) {
             if (EmailRecipientUtils.isExcludedRecipient(user, listener)) {
@@ -161,6 +183,24 @@ public final class RecipientProviderUtilities {
             } else {
                 final String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
                 if (userAddress != null) {
+                    try {
+                        Authentication auth = user.impersonate();
+                        if (run != null && !run.getACL().hasPermission(auth, Item.READ)) {
+                            if (SEND_TO_USERS_WITHOUT_READ) {
+                                listener.getLogger().printf("Warning: user %s has no permission to view %s, but sending mail anyway%n", userAddress, run.getFullDisplayName());
+                            } else {
+                                listener.getLogger().printf("Not sending mail to user %s with no permission to view %s", userAddress, run.getFullDisplayName());
+                                continue;
+                            }
+                        }
+                    } catch (UsernameNotFoundException x) {
+                        if (SEND_TO_UNKNOWN_USERS) {
+                            listener.getLogger().printf("Warning: %s is not a recognized user, but sending mail anyway%n", userAddress);
+                        } else {
+                            listener.getLogger().printf("Not sending mail to unregistered user %s%n", userAddress);
+                            continue;
+                        }
+                    }
                     debug.send("Adding %s with address %s", user.getFullName(), userAddress);
                     EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, userAddress, env, listener);
                 } else {

@@ -6,7 +6,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Run;
-import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
@@ -60,7 +59,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
             }
             cur = p.getBuildByNumber(upc.getUpstreamBuild());
             upc = cur.getCause(Cause.UpstreamCause.class);
-            addUpstreamCommittersTriggeringBuild(cur, to, cc, bcc, env, context.getListener(), debug);
+            addUpstreamCommittersTriggeringBuild(cur, to, cc, bcc, env, context, debug);
         }
     }
 
@@ -74,7 +73,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
      * @param env
      * @param listener
      */
-    private void addUpstreamCommittersTriggeringBuild(Run<?, ?> build, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener, RecipientProviderUtilities.IDebug debug) {
+    private void addUpstreamCommittersTriggeringBuild(Run<?, ?> build, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, final ExtendedEmailPublisherContext context, RecipientProviderUtilities.IDebug debug) {
         debug.send("Adding upstream committer from job %s with build number %s", build.getParent().getDisplayName(), build.getNumber());
 
         List<ChangeLogSet<?>> changeSets = new ArrayList<>();
@@ -87,14 +86,14 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
                 Method m = build.getClass().getMethod("getChangeSets");
                 changeSets = (List<ChangeLogSet<? extends ChangeLogSet.Entry>>)m.invoke(build);
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                listener.getLogger().print("Could not add upstream committers, build type does not provide change set");
+                context.getListener().getLogger().print("Could not add upstream committers, build type does not provide change set");
             }
         }
 
         if(!changeSets.isEmpty()) {
             for(ChangeLogSet<? extends ChangeLogSet.Entry> changeSet : changeSets) {
                 for(ChangeLogSet.Entry change : changeSet) {
-                    addUserFromChangeSet(change, to, cc, bcc, env, listener, debug);
+                    addUserFromChangeSet(change, to, cc, bcc, env, context, debug);
                 }
             }
         }
@@ -109,9 +108,9 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
      * @param env The build environment
      * @param listener The listener for logging
      */
-    private void addUserFromChangeSet(ChangeLogSet.Entry change, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener, RecipientProviderUtilities.IDebug debug) {
+    private void addUserFromChangeSet(ChangeLogSet.Entry change, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, final ExtendedEmailPublisherContext context, RecipientProviderUtilities.IDebug debug) {
         User user = change.getAuthor();
-        RecipientProviderUtilities.addUsers(Collections.singleton(user), listener, env, to, cc, bcc, debug);
+        RecipientProviderUtilities.addUsers(Collections.singleton(user), context, env, to, cc, bcc, debug);
     }
 
     @Extension
