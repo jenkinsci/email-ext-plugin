@@ -50,6 +50,7 @@ public class FailingTestSuspectsRecipientProviderTest {
     @Before
     public void before() throws Exception {
         final Jenkins jenkins = PowerMockito.mock(Jenkins.class);
+        PowerMockito.when(jenkins.isUseSecurity()).thenReturn(false);
         final ExtendedEmailPublisherDescriptor extendedEmailPublisherDescriptor = PowerMockito.mock(ExtendedEmailPublisherDescriptor.class);
         extendedEmailPublisherDescriptor.setDebugMode(true);
         PowerMockito.when(extendedEmailPublisherDescriptor.getExcludedCommitters()).thenReturn("");

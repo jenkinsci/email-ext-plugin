@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.CheckForNull;
+import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
 import org.acegisecurity.userdetails.UsernameNotFoundException;
 
@@ -183,22 +184,24 @@ public final class RecipientProviderUtilities {
             } else {
                 final String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
                 if (userAddress != null) {
-                    try {
-                        Authentication auth = user.impersonate();
-                        if (run != null && !run.getACL().hasPermission(auth, Item.READ)) {
-                            if (SEND_TO_USERS_WITHOUT_READ) {
-                                listener.getLogger().printf("Warning: user %s has no permission to view %s, but sending mail anyway%n", userAddress, run.getFullDisplayName());
+                    if (Jenkins.getActiveInstance().isUseSecurity()) {
+                        try {
+                            Authentication auth = user.impersonate();
+                            if (run != null && !run.getACL().hasPermission(auth, Item.READ)) {
+                                if (SEND_TO_USERS_WITHOUT_READ) {
+                                    listener.getLogger().printf("Warning: user %s has no permission to view %s, but sending mail anyway%n", userAddress, run.getFullDisplayName());
+                                } else {
+                                    listener.getLogger().printf("Not sending mail to user %s with no permission to view %s", userAddress, run.getFullDisplayName());
+                                    continue;
+                                }
+                            }
+                        } catch (UsernameNotFoundException x) {
+                            if (SEND_TO_UNKNOWN_USERS) {
+                                listener.getLogger().printf("Warning: %s is not a recognized user, but sending mail anyway%n", userAddress);
                             } else {
-                                listener.getLogger().printf("Not sending mail to user %s with no permission to view %s", userAddress, run.getFullDisplayName());
+                                listener.getLogger().printf("Not sending mail to unregistered user %s%n", userAddress);
                                 continue;
                             }
-                        }
-                    } catch (UsernameNotFoundException x) {
-                        if (SEND_TO_UNKNOWN_USERS) {
-                            listener.getLogger().printf("Warning: %s is not a recognized user, but sending mail anyway%n", userAddress);
-                        } else {
-                            listener.getLogger().printf("Not sending mail to unregistered user %s%n", userAddress);
-                            continue;
                         }
                     }
                     debug.send("Adding %s with address %s", user.getFullName(), userAddress);

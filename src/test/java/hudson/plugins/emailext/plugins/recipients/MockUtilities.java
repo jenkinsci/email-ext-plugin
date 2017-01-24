@@ -28,8 +28,6 @@ import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
-import hudson.security.ACL;
-import hudson.security.Permission;
 import hudson.tasks.Mailer;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.TestResultAction;
@@ -48,7 +46,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import org.acegisecurity.Authentication;
 
 /* package private */ final class MockUtilities {
     private static final String AT_DOMAIN = "@DOMAIN";
@@ -122,19 +119,11 @@ import org.acegisecurity.Authentication;
     public static void addChangeSet(final WorkflowRun build, final String... inAuthors) {
         ChangeLogSet<ChangeLogSet.Entry> changeSet = makeChangeSet(build, inAuthors);
         PowerMockito.when(build.getChangeSets()).thenReturn(Collections.<ChangeLogSet<? extends ChangeLogSet.Entry>>singletonList(changeSet));
-        allowUsers(build);
     }
 
     public static void addChangeSet(final AbstractBuild<?, ?> build, final String... inAuthors) {
         ChangeLogSet<ChangeLogSet.Entry> changeSet = makeChangeSet(build, inAuthors);
         PowerMockito.when(build.getChangeSet()).thenReturn((ChangeLogSet)changeSet);
-        allowUsers(build);
-    }
-
-    private static void allowUsers(Run<?,?> build) {
-        ACL acl = PowerMockito.mock(ACL.class);
-        PowerMockito.when(acl.hasPermission(Mockito.any(Authentication.class), Mockito.any(Permission.class))).thenReturn(true);
-        PowerMockito.when(build.getACL()).thenReturn(acl);
     }
 
     public static void addRequestor(final AbstractBuild<?, ?> build, final String requestor) throws Exception {
@@ -149,7 +138,6 @@ import org.acegisecurity.Authentication;
         final Cause.UserIdCause cause = PowerMockito.mock(Cause.UserIdCause.class);
         PowerMockito.when(cause.getUserId()).thenReturn(requestor);
         PowerMockito.when(build.getCause(Cause.UserIdCause.class)).thenReturn(cause);
-        allowUsers(build);
     }
 
     public static void addTestResultAction(final AbstractBuild<?, ?> build, final AbstractBuild<?, ?>... failedSinces) {

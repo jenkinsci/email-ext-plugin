@@ -95,8 +95,6 @@ public class ExtendedEmailPublisherTest {
 
             recProviders = Collections.emptyList();
             Mailbox.clearAll();
-
-            jenkins.setSecurityRealm(createDummySecurityRealm());
         }
 
         @Override
