@@ -39,5 +39,10 @@ public class JellyTemplateConfig extends Config {
         public Config newConfig(@Nonnull String id) {
             return new JellyTemplateConfig(id, "Jelly Email Template", "", "");
         }
-    }    
+
+        @Override
+        protected String getXmlFileName() {
+            return "email-ext-jelly-config-files.xml";
+        }
+    }
 }

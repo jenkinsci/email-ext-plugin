@@ -40,5 +40,10 @@ public class GroovyTemplateConfig extends Config {
         public Config newConfig(@Nonnull String id) {
             return new GroovyTemplateConfig(id, "Groovy Email Template", "", "");
         }
+
+        @Override
+        protected String getXmlFileName() {
+            return "email-ext-groovy-config-files.xml";
+        }
     }
 }
