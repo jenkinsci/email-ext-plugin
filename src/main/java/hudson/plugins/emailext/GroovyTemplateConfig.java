@@ -25,6 +25,10 @@ public class GroovyTemplateConfig extends Config {
     @Extension(optional=true)
     public static final class GroovyTemplateConfigProvider extends AbstractConfigProviderImpl {
 
+        public GroovyTemplateConfigProvider() {
+            load();
+        }
+
         @Override
         public ContentType getContentType() {
             return ContentType.DefinedType.GROOVY;

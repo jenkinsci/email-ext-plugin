@@ -24,6 +24,10 @@ public class JellyTemplateConfig extends Config {
     @Extension(optional=true)
     public static final class JellyTemplateConfigProvider extends AbstractConfigProviderImpl {
 
+        public JellyTemplateConfigProvider() {
+            load();
+        }
+
         @Override
         public ContentType getContentType() {
             return ContentType.DefinedType.XML;
