@@ -32,6 +32,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <workflow.version>1.10</workflow.version>
         <jenkins.version>1.609.2</jenkins.version>
+        <jenkins-test-harness.version>2.18</jenkins-test-harness.version>
         <java.level>7</java.level>
         <concurrency>2</concurrency>
         <argLine />
@@ -124,7 +125,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>config-file-provider</artifactId>
-            <version>2.15.4</version>
+            <version>2.15.6</version>
             <optional>true</optional>
         </dependency>
         <dependency>

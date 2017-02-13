@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hudson.plugins.emailext.JellyTemplateConfig_-JellyTemplateConfigProvider plugin="email-ext@2.51">
+  <configs>
+    <entry>
+      <string>extmail_jelly____01AAA1</string>
+      <org.jenkinsci.lib.configprovider.model.Config plugin="config-file-provider@2.13">
+        <id>extmail_jelly____01AAA1</id>
+        <name>xml_name_01_2</name>
+        <comment>comment_01_2</comment>
+        <content>jelly script</content>
+        <providerId>hudson.plugins.emailext.JellyTemplateConfig</providerId>
+      </org.jenkinsci.lib.configprovider.model.Config>
+    </entry>
+  </configs>
+</hudson.plugins.emailext.JellyTemplateConfig_-JellyTemplateConfigProvider>
