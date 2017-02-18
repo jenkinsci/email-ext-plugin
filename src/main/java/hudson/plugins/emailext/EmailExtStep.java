@@ -137,13 +137,7 @@ public class EmailExtStep extends AbstractStepImpl {
         private transient TaskListener listener;
 
         @StepContextParameter
-        private transient Launcher launcher;
-
-        @StepContextParameter
         private transient Run<?,?> run;
-
-        @StepContextParameter
-        private transient FilePath workspace;
 
         @Override
         protected Void run() throws Exception {
@@ -181,7 +175,8 @@ public class EmailExtStep extends AbstractStepImpl {
                 publisher.contentType = step.mimeType;
             }
 
-            final ExtendedEmailPublisherContext ctx = new ExtendedEmailPublisherContext(publisher, run, workspace, launcher, listener);
+            final ExtendedEmailPublisherContext ctx = new ExtendedEmailPublisherContext(publisher, run,
+                    getContext().get(FilePath.class), getContext().get(Launcher.class), listener);
             final Multimap<String, EmailTrigger> triggered = ArrayListMultimap.create();
             triggered.put(AlwaysTrigger.TRIGGER_NAME, publisher.configuredTriggers.get(0));
             ctx.setTrigger(publisher.configuredTriggers.get(0));

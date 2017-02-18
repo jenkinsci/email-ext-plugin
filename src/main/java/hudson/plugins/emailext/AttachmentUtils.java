@@ -130,35 +130,37 @@ public class AttachmentUtils implements Serializable {
         FilePath ws = context.getWorkspace();
         long totalAttachmentSize = 0;
         long maxAttachmentSize = context.getPublisher().getDescriptor().getMaxAttachmentSize();
-        if (ws == null) {
-            context.getListener().error("Error: No workspace found!");
-        } else if (!StringUtils.isBlank(attachmentsPattern)) {
-            attachments = new ArrayList<>();
+        if (!StringUtils.isBlank(attachmentsPattern)) {
+            if (ws == null) {
+                context.getListener().error("Error: No workspace found!");
+            } else {
+                attachments = new ArrayList<>();
 
-            FilePath[] files = ws.list(ContentBuilder.transformText(attachmentsPattern, context, null));
+                FilePath[] files = ws.list(ContentBuilder.transformText(attachmentsPattern, context, null));
 
-            for (FilePath file : files) {
-                if (maxAttachmentSize > 0
-                        && totalAttachmentSize + file.length() >= maxAttachmentSize) {
-                    context.getListener().getLogger().println("Skipping `" + file.getName()
-                            + "' (" + file.length()
-                            + " bytes) - too large for maximum attachments size");
-                    continue;
-                }
+                for (FilePath file : files) {
+                    if (maxAttachmentSize > 0
+                            && totalAttachmentSize + file.length() >= maxAttachmentSize) {
+                        context.getListener().getLogger().println("Skipping `" + file.getName()
+                                + "' (" + file.length()
+                                + " bytes) - too large for maximum attachments size");
+                        continue;
+                    }
 
-                MimeBodyPart attachmentPart = new MimeBodyPart();
-                FilePathDataSource fileDataSource = new FilePathDataSource(file);
+                    MimeBodyPart attachmentPart = new MimeBodyPart();
+                    FilePathDataSource fileDataSource = new FilePathDataSource(file);
 
-                try {
-                    attachmentPart.setDataHandler(new DataHandler(fileDataSource));
-                    attachmentPart.setFileName(MimeUtility.encodeText(file.getName()));
-                    attachmentPart.setContentID(String.format("<%s>", file.getName()));
-                    attachments.add(attachmentPart);
-                    totalAttachmentSize += file.length();
-                } catch (MessagingException e) {
-                    context.getListener().getLogger().println("Error adding `"
-                            + file.getName() + "' as attachment - "
-                            + e.getMessage());
+                    try {
+                        attachmentPart.setDataHandler(new DataHandler(fileDataSource));
+                        attachmentPart.setFileName(MimeUtility.encodeText(file.getName()));
+                        attachmentPart.setContentID(String.format("<%s>", file.getName()));
+                        attachments.add(attachmentPart);
+                        totalAttachmentSize += file.length();
+                    } catch (MessagingException e) {
+                        context.getListener().getLogger().println("Error adding `"
+                                + file.getName() + "' as attachment - "
+                                + e.getMessage());
+                    }
                 }
             }
         }

@@ -747,9 +747,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     extension = ".txt";
                 }
 
-                FilePath savedOutput = new FilePath(context.getWorkspace(),
-                        String.format("%s-%s%s", context.getTrigger().getDescriptor().getDisplayName(), context.getRun().getId(), extension));
-                savedOutput.write(text, charset);
+                FilePath workspace = context.getWorkspace();
+                if (workspace != null) {
+                    FilePath savedOutput = new FilePath(workspace,
+                            String.format("%s-%s%s", context.getTrigger().getDescriptor().getDisplayName(), context.getRun().getId(), extension));
+                    savedOutput.write(text, charset);
+                } else {
+                    context.getListener().getLogger().println("No workspace to save the email to");
+                }
             }
         } catch (IOException | InterruptedException e) {
             context.getListener().getLogger().println("Error trying to save email output to file. " + e.getMessage());

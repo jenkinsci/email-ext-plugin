@@ -49,31 +49,49 @@
                 <role>maintainer</role>
             </roles>
         </developer>
-        <developer>
-            <id>slide</id>
+    </developers>
+
+    <contributors>
+        <contributor>
+            <!--<id>slide</id>-->
             <name>Alex Earl</name>
             <email>slide.o.mix@gmail.com</email>
-        </developer>
-        <developer>
-            <id>ashlux</id>
+            <roles>
+                <role>Past Maintainer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <!--<id>ashlux</id>-->
             <name>Ash Lux</name>
             <email>ashlux@gmail.com</email>
-        </developer>
-        <developer>
-            <id>kdsweeney</id>
+            <roles>
+                <role>Past Maintainer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <!--<id>kdsweeney</id>-->
             <name>Kyle Sweeney</name>
-        </developer>
-        <developer>
-            <id>krwalker</id>
+            <roles>
+                <role>Past Maintainer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <!--<id>krwalker</id>-->
             <name>K. R. Walker</name>
             <email>krwalker@stellarscience.com</email>
-        </developer>
-        <developer>
-            <id>ssogabe</id>
+            <roles>
+                <role>Past Maintainer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <!--<id>ssogabe</id>-->
             <name>Seiji Sogabe</name>
             <email>s.sogabe@gmail.com</email>
-        </developer>
-    </developers>
+            <roles>
+                <role>Past Maintainer</role>
+            </roles>
+        </contributor>
+    </contributors>
 
     <dependencies>
         <!-- libraries -->
