@@ -5,5 +5,5 @@
 -->
 <?jelly escape-by-default='true'?>
 <div>
-  This plugin is a replacement for Jenkins's email publisher
+  This plugin is a replacement for Jenkins's email publisher. It allows to configure every aspect of email notifications: when an email is sent, who should receive it and what the email says
 </div>

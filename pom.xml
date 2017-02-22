@@ -20,7 +20,7 @@
     <packaging>hpi</packaging>
     <version>2.58-SNAPSHOT</version>
     <name>Email Extension Plugin</name>
-    <description>EMail Extension Plugin</description>
+    <description>Allows to configure every aspect of email notifications: when an email is sent, who should receive it and what the email says</description>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin</url>
     <issueManagement>
         <system>JIRA</system>
