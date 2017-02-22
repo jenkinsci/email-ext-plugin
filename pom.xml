@@ -21,10 +21,10 @@
     <version>2.58-SNAPSHOT</version>
     <name>Email Extension Plugin</name>
     <description>Allows to configure every aspect of email notifications: when an email is sent, who should receive it and what the email says</description>
-    <url>http://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin</url>
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin</url>
     <issueManagement>
         <system>JIRA</system>
-        <url>http://issues.jenkins-ci.org/secure/IssueNavigator.jspa?reset=true&amp;jqlQuery=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+%27email-ext-plugin%27</url>
+        <url>https://issues.jenkins-ci.org/secure/IssueNavigator.jspa?reset=true&amp;jqlQuery=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+%27email-ext-plugin%27</url>
     </issueManagement>
 
     <properties>
@@ -260,7 +260,7 @@
     <repositories>
         <repository>
             <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
+            <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
         <repository>
             <id>powermock-repo</id>
@@ -346,7 +346,7 @@
     <pluginRepositories>
         <pluginRepository>
             <id>repo.jenkins-ci.org</id>
-            <url>http://repo.jenkins-ci.org/public/</url>
+            <url>https://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
 
