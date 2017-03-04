@@ -31,7 +31,7 @@
         <powermock.version>1.6.4</powermock.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <workflow.version>1.10</workflow.version>
-        <jenkins.version>1.609.2</jenkins.version>
+        <jenkins.version>2.0</jenkins.version>
         <jenkins-test-harness.version>2.18</jenkins-test-harness.version>
         <java.level>7</java.level>
         <concurrency>2</concurrency>
