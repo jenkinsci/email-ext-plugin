@@ -137,7 +137,7 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
         }
 
         if (users != null) {
-            RecipientProviderUtilities.addUsers(users, context.getListener(), env, to, cc, bcc, debug);
+            RecipientProviderUtilities.addUsers(users, context, env, to, cc, bcc, debug);
         }
     }
 

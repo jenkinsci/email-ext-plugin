@@ -6,16 +6,14 @@ import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Run;
-import hudson.model.TaskListener;
 import hudson.model.User;
-import hudson.plugins.emailext.EmailRecipientUtils;
-import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
+import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.Messages;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.scm.ChangeLogSet;
-import hudson.tasks.Mailer;
+import java.io.PrintStream;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -23,6 +21,7 @@ import javax.mail.internet.InternetAddress;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -37,8 +36,19 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
     }
 
     @Override
-    public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
-        ExtendedEmailPublisher.descriptor().debug(context.getListener().getLogger(), "Sending email to upstream committer(s).");
+    public void addRecipients(final ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
+        final class Debug implements RecipientProviderUtilities.IDebug {
+            private final ExtendedEmailPublisherDescriptor descriptor
+                    = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+            private final PrintStream logger = context.getListener().getLogger();
+
+            public void send(final String format, final Object... args) {
+                descriptor.debug(logger, format, args);
+            }
+        }
+        final Debug debug = new Debug();
+        debug.send("Sending email to upstream committer(s).");
         Run<?, ?> cur;
         Cause.UpstreamCause upc = context.getRun().getCause(Cause.UpstreamCause.class);
         while (upc != null) {
@@ -49,7 +59,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
             }
             cur = p.getBuildByNumber(upc.getUpstreamBuild());
             upc = cur.getCause(Cause.UpstreamCause.class);
-            addUpstreamCommittersTriggeringBuild(cur, to, cc, bcc, env, context.getListener());
+            addUpstreamCommittersTriggeringBuild(cur, to, cc, bcc, env, context, debug);
         }
     }
 
@@ -63,8 +73,8 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
      * @param env
      * @param listener
      */
-    private void addUpstreamCommittersTriggeringBuild(Run<?, ?> build, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener) {
-        ExtendedEmailPublisher.descriptor().debug(listener.getLogger(), "Adding upstream committer from job %s with build number %s", build.getParent().getDisplayName(), build.getNumber());
+    private void addUpstreamCommittersTriggeringBuild(Run<?, ?> build, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, final ExtendedEmailPublisherContext context, RecipientProviderUtilities.IDebug debug) {
+        debug.send("Adding upstream committer from job %s with build number %s", build.getParent().getDisplayName(), build.getNumber());
 
         List<ChangeLogSet<?>> changeSets = new ArrayList<>();
         if(build instanceof AbstractBuild<?,?>) {
@@ -76,14 +86,14 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
                 Method m = build.getClass().getMethod("getChangeSets");
                 changeSets = (List<ChangeLogSet<? extends ChangeLogSet.Entry>>)m.invoke(build);
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                listener.getLogger().print("Could not add upstream committers, build type does not provide change set");
+                context.getListener().getLogger().print("Could not add upstream committers, build type does not provide change set");
             }
         }
 
         if(!changeSets.isEmpty()) {
             for(ChangeLogSet<? extends ChangeLogSet.Entry> changeSet : changeSets) {
                 for(ChangeLogSet.Entry change : changeSet) {
-                    addUserFromChangeSet(change, to, cc, bcc, env, listener);
+                    addUserFromChangeSet(change, to, cc, bcc, env, context, debug);
                 }
             }
         }
@@ -98,16 +108,9 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
      * @param env The build environment
      * @param listener The listener for logging
      */
-    private void addUserFromChangeSet(ChangeLogSet.Entry change, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, TaskListener listener) {
+    private void addUserFromChangeSet(ChangeLogSet.Entry change, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, final ExtendedEmailPublisherContext context, RecipientProviderUtilities.IDebug debug) {
         User user = change.getAuthor();
-        String email = user.getProperty(Mailer.UserProperty.class).getAddress();
-        if (email != null) {
-            ExtendedEmailPublisher.descriptor().debug(listener.getLogger(), "Adding upstream committer %s to recipient list with email %s", user.getFullName(), email);
-            EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, email, env, listener);
-        } else {
-            ExtendedEmailPublisher.descriptor().debug(listener.getLogger(), "The user %s does not have a configured email email, trying the user's id", user.getFullName());
-            EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, user.getId(), env, listener);
-        }
+        RecipientProviderUtilities.addUsers(Collections.singleton(user), context, env, to, cc, bcc, debug);
     }
 
     @Extension

@@ -40,7 +40,7 @@ public class DevelopersRecipientProvider extends RecipientProvider {
         }
         final Debug debug = new Debug();
         Set<User> users = RecipientProviderUtilities.getChangeSetAuthors(Collections.<Run<?, ?>>singleton(context.getRun()), debug);
-        RecipientProviderUtilities.addUsers(users, context.getListener(), env, to, cc, bcc, debug);
+        RecipientProviderUtilities.addUsers(users, context, env, to, cc, bcc, debug);
     }
 
     @Extension
