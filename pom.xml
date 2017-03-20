@@ -292,12 +292,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <configuration>
-                    <arguments>-DskipTests=true</arguments>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
