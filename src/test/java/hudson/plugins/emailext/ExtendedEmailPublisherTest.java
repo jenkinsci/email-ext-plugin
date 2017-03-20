@@ -62,11 +62,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import org.junit.ClassRule;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.junit.matchers.JUnitMatchers.hasItem;
 import static org.junit.matchers.JUnitMatchers.hasItems;
+import org.jvnet.hudson.test.BuildWatcher;
 
 public class ExtendedEmailPublisherTest {
+
+    @ClassRule
+    public static BuildWatcher buildWatcher = new BuildWatcher();
 
     private ExtendedEmailPublisher publisher;
     private FreeStyleProject project;
