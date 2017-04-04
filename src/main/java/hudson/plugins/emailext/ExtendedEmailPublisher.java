@@ -149,6 +149,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * Reply-To value for the e-mail
      */
     public String replyTo;
+    
+    /**
+     * From value for the e-mail
+     */
+    public String from;
 
     /**
      * If true, save the generated email content to email-ext-message.[txt|html]
@@ -171,18 +176,18 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     @Deprecated
     public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
             String project_default_content, String project_attachments, String project_presend_script,
-            int project_attach_buildlog, String project_replyto, boolean project_save_output,
+            int project_attach_buildlog, String project_replyto, String project_from, boolean project_save_output,
             List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode) {
 
         this(project_recipient_list, project_content_type, project_default_subject, project_default_content,
-                project_attachments, project_presend_script, project_attach_buildlog, project_replyto,
+                project_attachments, project_presend_script, project_attach_buildlog, project_replyto, project_from,
                 project_save_output, project_triggers, matrixTriggerMode, false, Collections.<GroovyScriptPath>emptyList());
     }
 
     @DataBoundConstructor
     public ExtendedEmailPublisher(String project_recipient_list, String project_content_type, String project_default_subject,
             String project_default_content, String project_attachments, String project_presend_script,
-            int project_attach_buildlog, String project_replyto, boolean project_save_output,
+            int project_attach_buildlog, String project_replyto,String project_from, boolean project_save_output,
             List<EmailTrigger> project_triggers, MatrixTriggerMode matrixTriggerMode, boolean project_disabled,
             List<GroovyScriptPath> classpath) {
         this.recipientList = project_recipient_list;
@@ -194,6 +199,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.attachBuildLog = project_attach_buildlog > 0;
         this.compressBuildLog = project_attach_buildlog > 1;
         this.replyTo = project_replyto;
+        this.from = project_from;
         this.saveOutput = project_save_output;
         this.configuredTriggers = project_triggers;
         this.matrixTriggerMode = matrixTriggerMode;
@@ -573,12 +579,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         Session session = descriptor.createSession();
         MimeMessage msg = new MimeMessage(session);
 
-        InternetAddress from = new InternetAddress(descriptor.getAdminAddress());
-        if (from.getPersonal() != null) {
-            from.setPersonal(from.getPersonal(), charset);
+        InternetAddress fromAddress = new InternetAddress(descriptor.getAdminAddress());
+        if (fromAddress.getPersonal() != null) {
+            fromAddress.setPersonal(fromAddress.getPersonal(), charset);
+        }
+        if (StringUtils.isNotBlank(from)) {
+            fromAddress = new InternetAddress(from);
         }
 
-        msg.setFrom(from);
+        msg.setFrom(fromAddress);
 
         if (descriptor.isDebugMode()) {
             session.setDebug(true);

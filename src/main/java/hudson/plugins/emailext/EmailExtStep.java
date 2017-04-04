@@ -45,6 +45,9 @@ public class EmailExtStep extends AbstractStepImpl {
 
     @CheckForNull
     private String replyTo;
+    
+    @CheckForNull
+    private String from;
 
     @CheckForNull
     private String mimeType;
@@ -81,6 +84,15 @@ public class EmailExtStep extends AbstractStepImpl {
         this.to = Util.fixNull(to);
     }
 
+    public @CheckForNull String getFrom() {
+        return from == null ? "" : from;
+    }
+
+    @DataBoundSetter
+    public void setFrom(@CheckForNull String from) {
+        this.from = Util.fixNull(from);
+    }
+    
     public @CheckForNull String getReplyTo() {
         return replyTo == null ? "" : replyTo;
     }
@@ -166,7 +178,11 @@ public class EmailExtStep extends AbstractStepImpl {
             if (StringUtils.isNotBlank(step.replyTo)) {
                 publisher.replyTo = step.replyTo;
             }
-
+            
+            if (StringUtils.isNotBlank(step.from)) {
+                publisher.from = step.from;
+            }
+            
             if (StringUtils.isNotBlank(step.attachmentsPattern)) {
                 publisher.attachmentsPattern = step.attachmentsPattern;
             }
