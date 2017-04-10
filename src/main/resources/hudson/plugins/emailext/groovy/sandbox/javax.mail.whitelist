@@ -1,0 +1,3 @@
+staticField javax.mail.Message$RecipientType BCC
+staticField javax.mail.Message$RecipientType CC
+staticField javax.mail.Message$RecipientType TO

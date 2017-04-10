@@ -86,8 +86,7 @@ public final class ContentBuilder {
         } catch (Exception e) {
             Logger.getLogger(ContentBuilder.class.getName()).log(Level.SEVERE, null, e);
         }
-
-        return newText;
+        return newText != null ? newText.trim() : "";
     }
 
     @Deprecated
