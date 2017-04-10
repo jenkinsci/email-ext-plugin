@@ -7,6 +7,7 @@ import hudson.tasks.junit.TestResult;
 import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,12 +21,13 @@ public class ScriptContentBuildWrapper {
         this.build = build;
     }
 
+    @Whitelisted
     public String getTimestampString() {
         return Functions.rfc822Date(build.getTimestamp());
     }
 
     public Action getAction(String className) {
-        for (Action a : build.getActions()) {
+        for (Action a : build.getAllActions()) {
             if (a.getClass().getName().equals(className)) {
                 return a;
             }
@@ -41,6 +43,7 @@ public class ScriptContentBuildWrapper {
      * @return The static analysis actions for the current build. The returned
      *         list might be empty if there are no such actions.
      */
+    @Whitelisted
     public List<Action> getStaticAnalysisActions() {
         if (isPluginInstalled("analysis-core")) {
             return new StaticAnalysisUtilities().getActions(build);
@@ -61,10 +64,12 @@ public class ScriptContentBuildWrapper {
         return Jenkins.getActiveInstance().getPlugin(shortName) != null;
     }
 
+    @Whitelisted
     public Action getCoberturaAction() {
         return getAction("hudson.plugins.cobertura.CoberturaBuildAction");
     }
 
+    @Whitelisted
     public List<TestResult> getJUnitTestResult() {
         List<TestResult> result = new ArrayList<>();
         List<AggregatedTestResultAction> actions = build.getActions(AggregatedTestResultAction.class);

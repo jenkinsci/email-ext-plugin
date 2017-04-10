@@ -1,10 +1,12 @@
 package hudson.plugins.emailext;
 
 import hudson.ExtensionList;
+import hudson.FilePath;
 import hudson.Plugin;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.plugins.emailext.plugins.content.AbstractEvalContent;
 import hudson.plugins.emailext.plugins.content.JellyScriptContent;
 import hudson.plugins.emailext.plugins.content.ScriptContent;
 import hudson.util.FormValidation;
@@ -18,6 +20,7 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,8 +68,13 @@ public class EmailExtTemplateAction implements Action {
                 if(inputStream == null) {                
                     final File scriptsFolder = new File(Jenkins.getActiveInstance().getRootDir(), "email-templates");
                     final File scriptFile = new File(scriptsFolder, value);
-                    if(!scriptFile.exists()) {
-                        return FormValidation.error("The file '" + value + "' does not exist");
+                    try {
+                        if(!scriptFile.exists() || !AbstractEvalContent.isChildOf(new FilePath(scriptFile), new FilePath(scriptsFolder))) {
+                            return FormValidation.error("The file '" + value + "' does not exist");
+                        }
+                    } catch (IOException | InterruptedException e) {
+                        //Don't want to expose too much info to a potential file fishing attempt
+                        return FormValidation.error("I/O Error.");
                     }
                 }
             }

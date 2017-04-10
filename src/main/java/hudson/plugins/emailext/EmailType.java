@@ -5,6 +5,7 @@ import hudson.plugins.emailext.plugins.recipients.CulpritsRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,27 +97,33 @@ public class EmailType {
         recipientProviders = new ArrayList<>();
     }
 
+    @Whitelisted
     public String getSubject() {
         return subject;
     }
 
+    @Whitelisted
     public void setSubject(String subject) {
         this.subject = subject;
     }
 
+    @Whitelisted
     public String getBody() {
         return body;
     }
 
+    @Whitelisted
     public void setBody(String body) {
         this.body = body;
     }
 
+    @Whitelisted
     public boolean getHasRecipients() {
         return (recipientProviders != null && !recipientProviders.isEmpty())
                 || (recipientList != null && recipientList.trim().length() != 0);
     }
 
+    @Whitelisted
     public String getRecipientList() {
         return recipientList != null ? recipientList.trim() : recipientList;
     }
@@ -141,42 +148,52 @@ public class EmailType {
         }
     }
 
+    @Whitelisted
     public void setRecipientList(String recipientList) {
         this.recipientList = hudson.Util.fixEmptyAndTrim ( recipientList );
     }
 
+    @Whitelisted
     public String getReplyTo() {
         return replyTo != null ? replyTo.trim() : replyTo;
     }
 
+    @Whitelisted
     public void setReplyTo(String replyTo) {
         this.replyTo = hudson.Util.fixEmptyAndTrim ( replyTo );
     }
 
+    @Whitelisted
     public String getAttachmentsPattern() {
         return attachmentsPattern != null ? attachmentsPattern.trim() : attachmentsPattern;
     }
 
+    @Whitelisted
     public void setAttachmentsPattern(String attachmentsPattern) {
         this.attachmentsPattern = attachmentsPattern;
     }
 
+    @Whitelisted
     public boolean getAttachBuildLog() {
         return attachBuildLog;
     }
 
+    @Whitelisted
     public boolean getCompressBuildLog() {
         return compressBuildLog;
     }
 
+    @Whitelisted
     public void setAttachBuildLog(boolean attachBuildLog) {
         this.attachBuildLog = attachBuildLog;
     }
 
+    @Whitelisted
     public void setCompressBuildLog(boolean compressBuildLog) {
         this.compressBuildLog = compressBuildLog;
     }
 
+    @Whitelisted
     public String getContentType() {
         if (contentType == null) {
             contentType = "project";
@@ -184,6 +201,7 @@ public class EmailType {
         return contentType;
     }
 
+    @Whitelisted
     public void setContentType(String contentType) {
         this.contentType = contentType;
     }

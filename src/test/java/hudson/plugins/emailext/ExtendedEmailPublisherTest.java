@@ -1,4 +1,4 @@
-package hudson.plugins.emailext;
+ package hudson.plugins.emailext;
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
@@ -9,11 +9,13 @@ import hudson.model.Cause.UserCause;
 import hudson.model.Descriptor;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
+import hudson.plugins.emailext.plugins.recipients.RecipientProviderUtilities;
 import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
@@ -26,16 +28,23 @@ import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
+import hudson.security.AuthorizationStrategy;
+import hudson.security.SecurityRealm;
 import hudson.tasks.Builder;
+import hudson.tasks.MailSender;
 import hudson.tasks.Mailer;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
-import org.junit.Rule;
-import org.junit.Test;
+import org.hamcrest.collection.IsEmptyCollection;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
+import org.jenkinsci.plugins.scriptsecurity.scripts.UnapprovedClasspathException;
+import org.junit.*;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
+import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.MockBuilder;
 import org.jvnet.hudson.test.SleepBuilder;
 import org.jvnet.hudson.test.TestBuilder;
@@ -52,14 +61,17 @@ import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import org.junit.ClassRule;
@@ -77,32 +89,76 @@ public class ExtendedEmailPublisherTest {
     private FreeStyleProject project;
     private List<RecipientProvider> recProviders;
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule() {
-        @Override
-        public void before() throws Throwable {
-            super.before();
-            publisher = new ExtendedEmailPublisher();
-            publisher.defaultSubject = "%DEFAULT_SUBJECT";
-            publisher.defaultContent = "%DEFAULT_CONTENT";
-            publisher.attachmentsPattern = "";
-            publisher.recipientList = "%DEFAULT_RECIPIENTS";
-            publisher.presendScript = "";
-            publisher.postsendScript = "";
+    @ClassRule
+    public static JenkinsRule j = new JenkinsRule();
+    private AuthorizationStrategy oldAuthorizationStrategy;
+    private SecurityRealm oldSecurityRealm;
 
-            project = createFreeStyleProject();
-            project.getPublishersList().add(publisher);
+    @Before
+    public void before() throws Throwable {
+        publisher = new ExtendedEmailPublisher();
+        publisher.defaultSubject = "%DEFAULT_SUBJECT";
+        publisher.defaultContent = "%DEFAULT_CONTENT";
+        publisher.attachmentsPattern = "";
+        publisher.recipientList = "%DEFAULT_RECIPIENTS";
+        publisher.setPresendScript("");
+        publisher.setPostsendScript("");
 
-            recProviders = Collections.emptyList();
-            Mailbox.clearAll();
+        project = j.createFreeStyleProject();
+        project.getPublishersList().add(publisher);
+
+        recProviders = Collections.emptyList();
+        Mailbox.clearAll();
+
+        publisher.getDescriptor().setDefaultClasspath(Collections.<GroovyScriptPath>emptyList());
+        oldAuthorizationStrategy = j.jenkins.getAuthorizationStrategy();
+        oldSecurityRealm = j.jenkins.getSecurityRealm();
+    }
+
+    @After
+    public void after() throws Exception {
+        Mailbox.clearAll();
+        j.jenkins.setAuthorizationStrategy(oldAuthorizationStrategy);
+        j.jenkins.setSecurityRealm(oldSecurityRealm);
+        ScriptApproval approval = ScriptApproval.get();
+        approval.clearApprovedClasspathEntries();
+        approval.clearApprovedScripts();
+    }
+
+    private void setUpSecurity() {
+        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
+
+        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+                                          // otherwise we would need to create users for each email address tested, to bypass SECURITY-372 fix:
+                                          .grant(Jenkins.READ, Item.READ).everywhere().toAuthenticated()
+                                          // TODO I had plans for tests where bob would approve scripts written by alice
+                                          .grant(Jenkins.ADMINISTER).everywhere().to("bob")
+                                          .grant(Item.EXTENDED_READ).everywhere().to("alice"));
+    }
+
+    private void setupApprovedClassPath(String resource) throws IOException {
+        GroovyScriptPath path = new GroovyScriptPath(resource);
+        publisher.setClasspath(Collections.singletonList(path));
+        ScriptApproval approval = ScriptApproval.get();
+        List<ScriptApproval.PendingClasspathEntry> entries = approval.getPendingClasspathEntries();
+        assertThat(entries, not(empty()));
+        for (ScriptApproval.PendingClasspathEntry entry : entries) {
+            approval.approveClasspathEntry(entry.getHash());
         }
+        assertThat(approval.getPendingClasspathEntries(), empty());
+    }
 
-        @Override
-        public void after() throws Exception {
-            super.after();
-            Mailbox.clearAll();
+    private void setupApprovedGlobalClassPath(String resource) throws IOException, Descriptor.FormException {
+        GroovyScriptPath path = new GroovyScriptPath(resource);
+        publisher.getDescriptor().setDefaultClasspath(Collections.singletonList(path));
+        ScriptApproval approval = ScriptApproval.get();
+        List<ScriptApproval.PendingClasspathEntry> entries = approval.getPendingClasspathEntries();
+        assertThat(entries, not(empty()));
+        for (ScriptApproval.PendingClasspathEntry entry : entries) {
+            approval.approveClasspathEntry(entry.getHash());
         }
-    };
+        assertThat(approval.getPendingClasspathEntries(), empty());
+    }
 
     @Test
     public void testShouldNotSendEmailWhenNoTriggerEnabled()
@@ -129,6 +185,12 @@ public class ExtendedEmailPublisherTest {
         assertThat("Email should have been triggered, so we should see it in the logs.", build.getLog(100),
                 hasItems("Email was triggered for: " + PreBuildTrigger.TRIGGER_NAME));
         assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
+    }
+
+    @Test
+    public void testPreBuildTriggerShouldAlwaysSendEmailSecured() throws Exception {
+        setUpSecurity();
+        testPreBuildTriggerShouldAlwaysSendEmail();
     }
 
     @Test
@@ -520,7 +582,7 @@ public class ExtendedEmailPublisherTest {
 
     @Test
     public void testCancelFromPresendScriptCausesNoEmail() throws Exception {
-        publisher.presendScript = "cancel = true";
+        publisher.setPresendScript("cancel = true");
         SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
@@ -542,11 +604,17 @@ public class ExtendedEmailPublisherTest {
 
         assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
     }
+
+    @Test
+    public void testCancelFromPresendScriptCausesNoEmailSecured() throws Exception {
+        setUpSecurity();
+        testCancelFromPresendScriptCausesNoEmail();
+    }
     
     @Test
     @Issue("JENKINS-27448")
     public void testCancelFromPresendScriptCausesNoEmailWithCodeAfter() throws Exception {
-        publisher.presendScript = "cancel = true\nlogger.println('You are here')";
+        publisher.setPresendScript("cancel = true\nlogger.println('You are here')");
         SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
@@ -565,16 +633,23 @@ public class ExtendedEmailPublisherTest {
 
         FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
         j.assertBuildStatusSuccess(build);
-
+        j.assertLogContains("You are here", build);
         assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
+    }
+
+    @Test
+    @Issue("JENKINS-27448")
+    public void testCancelFromPresendScriptCausesNoEmailWithCodeAfterSecured() throws Exception {
+        setUpSecurity();
+        testCancelFromPresendScriptCausesNoEmailWithCodeAfter();
     }
 
     @Test
     @Issue("JENKINS-22777")
     public void testEmergencyRerouteOverridesPresendScript() throws Exception {
         publisher.getDescriptor().setEmergencyReroute("emergency@foo.com");
-        publisher.presendScript = "import javax.mail.Message.RecipientType\n"
-                + "msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')";
+        publisher.setPresendScript("import javax.mail.Message.RecipientType\n"
+                + "msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')");
         SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
@@ -603,7 +678,7 @@ public class ExtendedEmailPublisherTest {
 
     @Test
     public void testNoCancelFromPresendScriptCausesEmail() throws Exception {
-        publisher.presendScript = "def hello = 'world'\n";
+        publisher.setPresendScript("def hello = 'world'\n");
         SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
@@ -627,9 +702,15 @@ public class ExtendedEmailPublisherTest {
     }
 
     @Test
+    public void testNoCancelFromPresendScriptCausesEmailSecure() throws Exception {
+        setUpSecurity();
+        testNoCancelFromPresendScriptCausesEmail();
+    }
+
+    @Test
     public void testPresendScriptModifiesTo() throws Exception {
-        publisher.presendScript = "import javax.mail.Message.RecipientType\n"
-                + "msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')";
+        publisher.setPresendScript("import javax.mail.Message.RecipientType\n"
+                + "msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')");
         SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
@@ -651,17 +732,34 @@ public class ExtendedEmailPublisherTest {
 
         assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
         assertEquals(1, Mailbox.get("slide.o.mix@xxx.com").size());
+    }
+
+    @Test
+    public void testPresendScriptModifiesToSecured() throws Exception {
+        setUpSecurity();
+        testPresendScriptModifiesTo();
     }
 
     @Test
     public void testPresendScriptModifiesToUsingProjectExternalScript() throws Exception {
-        publisher.presendScript = "import javax.mail.Message.RecipientType\n"
+        publisher.setClasspath(Collections.singletonList(new GroovyScriptPath("src/test/presend")));
+        verifyPresendScriptModifiesToUsingProjectExternalScript();
+    }
+
+    @Test
+    public void testPresendScriptModifiesToUsingProjectExternalScriptSecured() throws Exception {
+        setUpSecurity();
+        setupApprovedClassPath("src/test/resources/email-ext-test-helper-0.1.jar");
+        verifyPresendScriptModifiesToUsingProjectExternalScript();
+    }
+
+    private void verifyPresendScriptModifiesToUsingProjectExternalScript() throws Exception {
+        publisher.setPresendScript("import javax.mail.Message.RecipientType\n"
                 + "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n"
-                + "msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())";
-        publisher.classpath = new ArrayList<GroovyScriptPath>();
-        publisher.classpath.add(new GroovyScriptPath("src/test/presend"));
+                + "msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())");
         SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
+                                                           "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT",
+                                                           "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
             {
                 addRecipientProvider(new RequesterRecipientProvider());
@@ -682,66 +780,28 @@ public class ExtendedEmailPublisherTest {
         assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
         assertEquals(1, Mailbox.get("slide.o.mix@xxx.com").size());
     }
+
 
     @Test
     public void testPresendScriptModifiesToUsingGlobalExternalScript() throws Exception {
-        publisher.presendScript = "import javax.mail.Message.RecipientType\n"
-                + "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n"
-                + "msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())";
-        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultClasspath");
-        f.setAccessible(true);
-        List<GroovyScriptPath> classpath = new ArrayList<GroovyScriptPath>();
-        classpath.add(new GroovyScriptPath("src/test/presend"));
-        f.set(publisher.getDescriptor(), classpath);
-        SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
-        successTrigger.setEmail(new EmailType() {
-            {
-                addRecipientProvider(new RequesterRecipientProvider());
-            }
-        });
-        publisher.getConfiguredTriggers().add(successTrigger);
-
-        User u = User.get("kutzi");
-        u.setFullName("Christoph Kutzinski");
-        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
-        u.addProperty(prop);
-
-        UserCause cause = new MockUserCause("kutzi");
-
-        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
-        j.assertBuildStatusSuccess(build);
-
-        assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
-        assertEquals(1, Mailbox.get("slide.o.mix@xxx.com").size());
+        publisher.getDescriptor().setDefaultClasspath(Collections.singletonList(new GroovyScriptPath("src/test/presend")));
+        verifyPresendScriptModifiesToUsingGlobalExternalScript();
     }
 
     @Test
-    @Issue("JENKINS-28145")
-    public void testPresendScriptExternalScriptWithVariablePath() throws Exception {
-        publisher.presendScript = "import javax.mail.Message.RecipientType\n"
-                + "import ExtendedEmailPublisherTestHelper\n"
-                + "msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())";
-        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultClasspath");
-        f.setAccessible(true);
-        List<GroovyScriptPath> classpath = new ArrayList<GroovyScriptPath>();
-        classpath.add(new GroovyScriptPath("${WORKSPACE}"));
-        f.set(publisher.getDescriptor(), classpath);
-        project.getBuildersList().add(new TestBuilder() {
-            @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-                build.getWorkspace().child("ExtendedEmailPublisherTestHelper.groovy").write(
-                        "class ExtendedEmailPublisherTestHelper {\n" +
-                        "  static def to() {\n" +
-                        "    \"slide.o.mix@xxx.com\"\n" +
-                        "  }\n" +
-                        "}", "UTF-8");
-                return true;
-            }
-        });
-        
+    public void testPresendScriptModifiesToUsingGlobalExternalScriptSecure() throws Exception {
+        setUpSecurity();
+        setupApprovedGlobalClassPath("src/test/resources/email-ext-test-helper-0.1.jar");
+        verifyPresendScriptModifiesToUsingGlobalExternalScript();
+    }
+
+    private void verifyPresendScriptModifiesToUsingGlobalExternalScript() throws Exception {
+        publisher.setPresendScript("import javax.mail.Message.RecipientType\n"
+                + "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n"
+                + "msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())");
         SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
+                                                           "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT",
+                                                           "$DEFAULT_CONTENT", "", 0, "project");
         successTrigger.setEmail(new EmailType() {
             {
                 addRecipientProvider(new RequesterRecipientProvider());
@@ -765,40 +825,35 @@ public class ExtendedEmailPublisherTest {
 
     @Test
     public void testPostsendScriptModifiesMessageId() throws Exception {
-        publisher.postsendScript = "msg.setHeader('Message-ID', '<12345@xxx.com>')";
+        publisher.setPostsendScript("msg.setHeader('Message-ID', '<12345@xxx.com>')");
 
-        project.getBuildersList().add(new FailureBuilder());
-        FailureTrigger trigger = new FailureTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
-        addEmailType(trigger);
-        publisher.getConfiguredTriggers().add(trigger);
-
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build);
-
-        FreeStyleBuild build2 = project.scheduleBuild2(1).get();
-        j.assertBuildStatus(Result.FAILURE, build2);
-
-        Mailbox mailbox = Mailbox.get("ashlux@gmail.com");
-        assertEquals(2, mailbox.size());
-
-        Message msg = mailbox.get(1);
-        String[] headers = msg.getHeader("In-Reply-To");
-        assertEquals(1, headers.length);
-
-        assertEquals("<12345@xxx.com>", headers[0]);
+        verifyPostsendScriptModifiesMessageId();
     }
 
     @Test
     public void testPostsendScriptModifiesMessageIdUsingProjectExternalScript() throws Exception {
-        publisher.postsendScript = "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n"
-                + "msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())";
-        publisher.classpath = new ArrayList<GroovyScriptPath>();
-        publisher.classpath.add(new GroovyScriptPath("src/test/postsend"));
+        publisher.setClasspath(Collections.singletonList(new GroovyScriptPath("src/test/postsend")));
+        verifyPostsendScriptModifiesMessageIdUsingProjectExternalScript();
+    }
 
+    @Test
+    public void testPostsendScriptModifiesMessageIdUsingProjectExternalScriptSecure() throws Exception {
+        setUpSecurity();
+        setupApprovedClassPath("src/test/resources/email-ext-test-helper-0.1.jar");
+        verifyPostsendScriptModifiesMessageIdUsingProjectExternalScript();
+    }
+
+    private void verifyPostsendScriptModifiesMessageIdUsingProjectExternalScript() throws Exception {
+        publisher.setPostsendScript("import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n"
+                + "msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())");
+        verifyPostsendScriptModifiesMessageId();
+    }
+
+    private void verifyPostsendScriptModifiesMessageId() throws Exception {
         project.getBuildersList().add(new FailureBuilder());
         FailureTrigger trigger = new FailureTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
+                                                    "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT",
+                                                    "$DEFAULT_CONTENT", "", 0, "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
@@ -813,6 +868,7 @@ public class ExtendedEmailPublisherTest {
 
         Message msg = mailbox.get(1);
         String[] headers = msg.getHeader("In-Reply-To");
+        assertNotNull(headers);
         assertEquals(1, headers.length);
 
         assertEquals("<12345@xxx.com>", headers[0]);
@@ -820,78 +876,15 @@ public class ExtendedEmailPublisherTest {
 
     @Test
     public void testPostsendScriptModifiesToUsingGlobalExternalScript() throws Exception {
-        publisher.postsendScript = "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n"
-                + "msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())";
+        publisher.setPostsendScript("import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n"
+                + "msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())");
         Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultClasspath");
         f.setAccessible(true);
         List<GroovyScriptPath> classpath = new ArrayList<GroovyScriptPath>();
         classpath.add(new GroovyScriptPath("src/test/postsend"));
         f.set(publisher.getDescriptor(), classpath);
 
-        project.getBuildersList().add(new FailureBuilder());
-        FailureTrigger trigger = new FailureTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
-        addEmailType(trigger);
-        publisher.getConfiguredTriggers().add(trigger);
-
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build);
-
-        FreeStyleBuild build2 = project.scheduleBuild2(1).get();
-        j.assertBuildStatus(Result.FAILURE, build2);
-
-        Mailbox mailbox = Mailbox.get("ashlux@gmail.com");
-        assertEquals(2, mailbox.size());
-
-        Message msg = mailbox.get(1);
-        String[] headers = msg.getHeader("In-Reply-To");
-        assertEquals(1, headers.length);
-
-        assertEquals("<12345@xxx.com>", headers[0]);
-    }
-
-    @Test
-    public void testPostsendScriptExternalScriptWithVariablePath() throws Exception {
-        publisher.postsendScript = "import ExtendedEmailPublisherTestHelper\n"
-                + "msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())";
-        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultClasspath");
-        f.setAccessible(true);
-        List<GroovyScriptPath> classpath = new ArrayList<GroovyScriptPath>();
-        classpath.add(new GroovyScriptPath("${WORKSPACE}"));
-        f.set(publisher.getDescriptor(), classpath);
-        project.getBuildersList().add(new TestBuilder() {
-            @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-                build.getWorkspace().child("ExtendedEmailPublisherTestHelper.groovy").write(
-                        "class ExtendedEmailPublisherTestHelper {\n" +
-                        "  static def messageid() {\n" +
-                        "    \"<12345@xxx.com>\"\n" +
-                        "  }\n" +
-                        "}", "UTF-8");
-                return true;
-            }
-        });
-
-        project.getBuildersList().add(new FailureBuilder());
-        FailureTrigger trigger = new FailureTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
-        addEmailType(trigger);
-        publisher.getConfiguredTriggers().add(trigger);
-
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build);
-
-        FreeStyleBuild build2 = project.scheduleBuild2(1).get();
-        j.assertBuildStatus(Result.FAILURE, build2);
-
-        Mailbox mailbox = Mailbox.get("ashlux@gmail.com");
-        assertEquals(2, mailbox.size());
-
-        Message msg = mailbox.get(1);
-        String[] headers = msg.getHeader("In-Reply-To");
-        assertEquals(1, headers.length);
-
-        assertEquals("<12345@xxx.com>", headers[0]);
+        verifyPostsendScriptModifiesMessageId();
     }
 
     @Test
@@ -1015,7 +1008,7 @@ public class ExtendedEmailPublisherTest {
                 assertEquals("Give me a $1000 check and I'll mail you back $5000!!!", publisher.defaultContent);
                 assertEquals("", publisher.attachmentsPattern);
                 assertEquals("", publisher.replyTo);
-                assertEquals("println 1", publisher.postsendScript);
+                assertEquals("println 1", publisher.getPostsendScript());
 
                 return null;
             }

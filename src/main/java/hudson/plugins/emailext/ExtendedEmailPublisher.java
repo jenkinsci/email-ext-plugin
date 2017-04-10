@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import groovy.lang.Binding;
+import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import hudson.EnvVars;
 import hudson.FilePath;
@@ -17,14 +18,21 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
+import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.User;
+import hudson.plugins.emailext.groovy.sandbox.EmailExtScriptTokenMacroWhitelist;
+import hudson.plugins.emailext.groovy.sandbox.MimeMessageInstanceWhitelist;
+import hudson.plugins.emailext.groovy.sandbox.PrintStreamInstanceWhitelist;
+import hudson.plugins.emailext.groovy.sandbox.PropertiesInstanceWhitelist;
+import hudson.plugins.emailext.groovy.sandbox.TaskListenerInstanceWhitelist;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.CssInliner;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.plugins.content.AbstractEvalContent;
 import hudson.plugins.emailext.plugins.content.EmailExtScript;
 import hudson.plugins.emailext.plugins.content.TriggerNameContent;
 import hudson.plugins.emailext.watching.EmailExtWatchAction;
@@ -37,9 +45,20 @@ import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.Whitelist;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.GroovySandbox;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.ProxyWhitelist;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
+import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+import org.kohsuke.stapler.Ancestor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.Stapler;
+import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -59,13 +78,16 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.ConnectException;
+import java.net.MalformedURLException;
 import java.net.SocketException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -126,14 +148,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     /**
      * The project's pre-send script.
      */
-    public String presendScript;
+    private String presendScript;
 
     /**
      * The project's post-send script.
      */
-    public String postsendScript;
+    private String postsendScript;
 
-    public List<GroovyScriptPath> classpath;
+    private List<GroovyScriptPath> classpath;
 
     /**
      * True to attach the log from the build to the email.
@@ -195,7 +217,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.defaultSubject = project_default_subject;
         this.defaultContent = project_default_content;
         this.attachmentsPattern = project_attachments;
-        this.presendScript = project_presend_script;
+        setPresendScript(project_presend_script);
         this.attachBuildLog = project_attach_buildlog > 0;
         this.compressBuildLog = project_attach_buildlog > 1;
         this.replyTo = project_replyto;
@@ -204,14 +226,82 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.configuredTriggers = project_triggers;
         this.matrixTriggerMode = matrixTriggerMode;
         this.disabled = project_disabled;
+        setClasspath(classpath);
+    }
+
+    public List<GroovyScriptPath> getClasspath() {
+        return classpath;
+    }
+
+    public void setClasspath(List<GroovyScriptPath> classpath) {
+        if (classpath != null && !classpath.isEmpty() && Jenkins.getActiveInstance().isUseSecurity()) {
+            //Prepare the classpath for approval
+            ScriptApproval scriptApproval = ScriptApproval.get();
+            ApprovalContext context = ApprovalContext.create().withCurrentUser();
+            StaplerRequest request = Stapler.getCurrentRequest();
+            if (request != null) {
+                context = context.withItem(request.findAncestorObject(Item.class));
+            }
+
+            for (GroovyScriptPath path : classpath) {
+                URL pUrl = path.asURL();
+                if (pUrl != null) {
+                    //At least we can try to catch some of them, but some might need token expansion
+                    try {
+                        scriptApproval.configuring(new ClasspathEntry(pUrl.toString()), context);
+                    } catch (MalformedURLException e) {
+                        //At least we tried, but we shouldn't end up here since path.asURL() would have returned null
+                        assert false : e;
+                    }
+                }
+            }
+        }
         this.classpath = classpath;
+    }
+
+    public void setPresendScript(String presendScript) {
+        presendScript = StringUtils.trim(presendScript);
+        if (!StringUtils.isBlank(presendScript) && !"$DEFAULT_PRESEND_SCRIPT".equals(presendScript)) {
+            ScriptApproval scriptApproval = ScriptApproval.get();
+            ApprovalContext context = ApprovalContext.create().withCurrentUser();
+            StaplerRequest request = Stapler.getCurrentRequest();
+            if (request != null) {
+                Ancestor ancestor = request.findAncestor(Item.class);
+                if (ancestor != null) {
+                    context = context.withItem((Item)ancestor.getObject());
+                }
+            }
+            scriptApproval.configuring(presendScript, GroovyLanguage.get(), context);
+        }
+        this.presendScript = presendScript;
     }
 
     @DataBoundSetter
     public void setPostsendScript(String postsendScript) {
+        postsendScript = StringUtils.trim(postsendScript);
+        if (!StringUtils.isBlank(postsendScript) && !"$DEFAULT_POSTSEND_SCRIPT".equals(postsendScript)) {
+            ScriptApproval scriptApproval = ScriptApproval.get();
+            ApprovalContext context = ApprovalContext.create().withCurrentUser();
+            StaplerRequest request = Stapler.getCurrentRequest();
+            if (request != null) {
+                Ancestor ancestor = request.findAncestor(Item.class);
+                if (ancestor != null) {
+                    context = context.withItem((Item)ancestor.getObject());
+                }
+            }
+            scriptApproval.configuring(postsendScript, GroovyLanguage.get(), context);
+        }
         this.postsendScript = postsendScript;
     }
-    
+
+    public String getPresendScript() {
+        return presendScript;
+    }
+
+    public String getPostsendScript() {
+        return postsendScript;
+    }
+
     /**
      * Get the list of configured email theTriggers for this project.
      *
@@ -492,10 +582,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         boolean cancel = false;
         String script = ContentBuilder.transformText(rawScript, context, getRuntimeMacros(context));
         if (StringUtils.isNotBlank(script)) {
-            debug(context.getListener().getLogger(), "Executing %s script", scriptName);
-            ClassLoader cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
+            TaskListener listener = context.getListener();
+            PrintStream logger = listener.getLogger();
+            debug(logger, "Executing %s script", scriptName);
 
-            CompilerConfiguration cc = new CompilerConfiguration();
+            CompilerConfiguration cc = GroovySandbox.createSecureCompilerConfiguration();
             cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
             cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
                     "jenkins",
@@ -503,40 +594,57 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     "hudson",
                     "hudson.model"));
 
-            expandClasspath(context, cc);
-
             Binding binding = new Binding();
             binding.setVariable("build", context.getBuild());
             binding.setVariable("run", context.getRun());
             binding.setVariable("msg", msg);
+            Properties props = null;
             if (session != null) {
-                binding.setVariable("props", session.getProperties());
+                props = session.getProperties();
+                binding.setVariable("props", props);
             }
             if (transport != null) {
-                binding.setVariable("transport", transport);
+                binding.setVariable("transport", transport); //Can't really figure out what to whitelist in this object
             }
-            binding.setVariable("listener", context.getListener());
-            binding.setVariable("logger", context.getListener().getLogger());
+            binding.setVariable("listener", listener);
+            binding.setVariable("logger", logger);
             binding.setVariable("cancel", cancel);
             binding.setVariable("trigger", context.getTrigger());
-            binding.setVariable("triggered", ImmutableMultimap.copyOf(context.getTriggered()));
+            binding.setVariable("triggered", ImmutableMultimap.copyOf(context.getTriggered())); //TODO static whitelist?
 
-            GroovyShell shell = new GroovyShell(cl, binding, cc);
             StringWriter out = new StringWriter();
             PrintWriter pw = new PrintWriter(out);
 
             try {
-                shell.evaluate(script);
-                cancel = (Boolean) shell.getVariable("cancel");
-                debug(context.getListener().getLogger(), "%s script set cancel to %b", StringUtils.capitalize(scriptName), cancel);
+                ClassLoader cl = expandClasspath(context, Jenkins.getActiveInstance().getPluginManager().uberClassLoader);
+                GroovyShell shell = new GroovyShell(cl, binding, cc);
+                if (AbstractEvalContent.isApprovedScript(script, GroovyLanguage.get()) || !Jenkins.getActiveInstance().isUseSecurity()) {
+                    shell.parse(script).run();
+                } else {
+
+                    try {
+                        GroovySandbox.run(shell.parse(script), new ProxyWhitelist(
+                                Whitelist.all(),
+                                new MimeMessageInstanceWhitelist(msg),
+                                new PropertiesInstanceWhitelist(props),
+                                new TaskListenerInstanceWhitelist(listener),
+                                new PrintStreamInstanceWhitelist(logger),
+                                new EmailExtScriptTokenMacroWhitelist()));
+                    } catch (RejectedAccessException x) {
+                        throw ScriptApproval.get().accessRejected(x, ApprovalContext.create());
+                    }
+                }
+                cancel = (Boolean)shell.getVariable("cancel");
+                debug(logger, "%s script set cancel to %b", StringUtils.capitalize(scriptName), cancel);
             } catch (SecurityException e) {
-                context.getListener().getLogger().println(StringUtils.capitalize(scriptName) + " script tried to access secured objects: " + e.getMessage());
+                logger.println(StringUtils.capitalize(scriptName) + " script tried to access secured objects: " + e.getMessage());
+                throw e;
             } catch (Throwable t) {
                 t.printStackTrace(pw);
-                context.getListener().getLogger().println(out.toString());
+                logger.println(out.toString());
                 // should we cancel the sending of the email???
             }
-            debug(context.getListener().getLogger(), out.toString());
+            debug(logger, out.toString());
         }
         return !cancel;
     }
@@ -545,26 +653,52 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * Expand the plugin class loader with URL taken from the project descriptor
      * and the global configuration.
      *
-     * @param cl the original plugin classloader
-     * @param cc
+     * @param context the current email context
+     * @param loader the class loader to expand
      * @return the new expanded classloader
      */
-    private void expandClasspath(ExtendedEmailPublisherContext context, CompilerConfiguration cc) {
-        List<String> classpathList = new ArrayList<>();
-
+    private ClassLoader expandClasspath(ExtendedEmailPublisherContext context, ClassLoader loader) throws IOException {
+        List<ClasspathEntry> classpathList = new ArrayList<>();
         if (classpath != null && !classpath.isEmpty()) {
-            for (GroovyScriptPath path : classpath) {
-                classpathList.add(ContentBuilder.transformText(path.getPath(), context, getRuntimeMacros(context)));
-            }
+            transformToClasspathEntries(classpath, context, classpathList);
         }
 
         List<GroovyScriptPath> globalClasspath = getDescriptor().getDefaultClasspath();
         if (globalClasspath != null && !globalClasspath.isEmpty()) {
-            for (GroovyScriptPath path : globalClasspath) {
-                classpathList.add(ContentBuilder.transformText(path.getPath(), context, getRuntimeMacros(context)));
+            transformToClasspathEntries(globalClasspath, context, classpathList);
+        }
+
+        boolean useSecurity = Jenkins.getActiveInstance().isUseSecurity();
+        if (!classpathList.isEmpty()) {
+            GroovyClassLoader gloader = new GroovyClassLoader(loader);
+            gloader.setShouldRecompile(true);
+            for (ClasspathEntry entry : classpathList) {
+                if (useSecurity) {
+                    ScriptApproval.get().using(entry);
+                }
+                gloader.addURL(entry.getURL());
+            }
+            loader = gloader;
+        }
+        if (useSecurity) {
+            return GroovySandbox.createSecureClassLoader(loader);
+        } else {
+            return loader;
+        }
+    }
+
+    private void transformToClasspathEntries(List<GroovyScriptPath> input, ExtendedEmailPublisherContext context, List<ClasspathEntry> output) {
+        for (GroovyScriptPath path : input) {
+            URL url = path.asURL();
+            if (url != null) {
+                try {
+                    ClasspathEntry entry = new ClasspathEntry(url.toString());
+                    output.add(entry);
+                } catch (MalformedURLException e) {
+                    context.getListener().getLogger().printf("[email-ext] Warning: Ignoring classpath: [%s] as it could not be transformed into a valid URL%n", path.getPath());
+                }
             }
         }
-        cc.setClasspathList(classpathList);
     }
 
     private MimeMessage createMail(ExtendedEmailPublisherContext context) throws MessagingException, IOException, InterruptedException {
@@ -858,5 +992,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 return true;
             }
         };
+    }
+
+    public Object readResolve() {
+        if (Jenkins.getActiveInstance().isUseSecurity()
+                && (!StringUtils.isBlank(this.postsendScript) || !StringUtils.isBlank(this.presendScript))) {
+            setPostsendScript(this.postsendScript);
+            setPresendScript(this.presendScript);
+            setClasspath(this.classpath);
+        }
+        return this;
     }
 }

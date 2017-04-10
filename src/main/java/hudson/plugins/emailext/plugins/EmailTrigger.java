@@ -18,6 +18,7 @@ import hudson.tasks.test.AggregatedTestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction.ChildReport;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -108,10 +109,12 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
      *
      * @return the email
      */
+    @Whitelisted
     public EmailType getEmail() {
         return email;
     }
-    
+
+    @Whitelisted
     public void setEmail(EmailType email) {
         if (email == null) {
             email = new EmailType();

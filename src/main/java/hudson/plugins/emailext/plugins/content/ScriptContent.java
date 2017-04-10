@@ -3,13 +3,19 @@ package hudson.plugins.emailext.plugins.content;
 import groovy.lang.Binding;
 import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
+import groovy.lang.Script;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
 import hudson.FilePath;
+import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.GroovyTemplateConfig.GroovyTemplateConfigProvider;
+import hudson.plugins.emailext.groovy.sandbox.EmailExtScriptTokenMacroWhitelist;
+import hudson.plugins.emailext.groovy.sandbox.PrintStreamInstanceWhitelist;
+import hudson.plugins.emailext.groovy.sandbox.StaticProxyInstanceWhitelist;
+import hudson.plugins.emailext.groovy.sandbox.TaskListenerInstanceWhitelist;
 import hudson.plugins.emailext.plugins.EmailToken;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
@@ -17,12 +23,19 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.Whitelist;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.GroovySandbox;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.ProxyWhitelist;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.StaticWhitelist;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
+import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.Reference;
@@ -30,6 +43,7 @@ import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -102,19 +116,26 @@ public class ScriptContent extends AbstractEvalContent {
         
         String result;
         
-        Map<String, Object> binding = new HashMap<>();
+        final Map<String, Object> binding = new HashMap<>();
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         binding.put("build", build);
         binding.put("listener", listener);
         binding.put("it", new ScriptContentBuildWrapper(build));
         binding.put("rooturl", descriptor.getHudsonUrl());
         binding.put("project", build.getParent());
-        
-        // we add the binding to the SimpleTemplateEngine instead of the shell
-        GroovyShell shell = createEngine(descriptor, Collections.<String, Object>emptyMap());
-        SimpleTemplateEngine engine = new SimpleTemplateEngine(shell);
+
         try {
             String text = IOUtils.toString(templateStream);
+            boolean approvedScript = false;
+            if (templateStream instanceof UserProvidedContentInputStream && !AbstractEvalContent.isApprovedScript(text, GroovyLanguage.get())) {
+                approvedScript = false;
+                ScriptApproval.get().configuring(text, GroovyLanguage.get(), ApprovalContext.create().withItem(build.getParent()));
+            } else {
+                approvedScript = true;
+            }
+            // we add the binding to the SimpleTemplateEngine instead of the shell
+            GroovyShell shell = createEngine(descriptor, Collections.<String, Object>emptyMap(), !approvedScript);
+            SimpleTemplateEngine engine = new SimpleTemplateEngine(shell);
             Template tmpl;
             synchronized (templateCache) {
                 Reference<Template> templateR = templateCache.get(text);
@@ -124,7 +145,26 @@ public class ScriptContent extends AbstractEvalContent {
                     templateCache.put(text, new SoftReference<>(tmpl));
                 }
             }
-            result = tmpl.make(binding).toString();
+            final Template tmplR = tmpl;
+            if (approvedScript) {
+                //The script has been approved by an admin, so run it as is
+                result = tmplR.make(binding).toString();
+            } else {
+                //unapproved script, so run in sandbox
+                StaticProxyInstanceWhitelist whitelist = new StaticProxyInstanceWhitelist(build, "templates-instances.whitelist");
+                result = GroovySandbox.runInSandbox(new Callable<String>() {
+                    @Override
+                    public String call() throws Exception {
+                        return tmplR.make(binding).toString(); //TODO there is a PrintWriter instance created in make and bound to out
+                    }
+                }, new ProxyWhitelist(
+                        Whitelist.all(),
+                        new TaskListenerInstanceWhitelist(listener),
+                        new PrintStreamInstanceWhitelist(listener.getLogger()),
+                        new EmailExtScriptTokenMacroWhitelist(),
+                        whitelist));
+            }
+
         } catch(Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
@@ -133,32 +173,61 @@ public class ScriptContent extends AbstractEvalContent {
         }
         return result;
     }
-    
-        /**
+
+    /**
      * Executes a script and returns the last value as a String
      *
-     * @param build the build to act on
+     * @param build        the build to act on
      * @param scriptStream the script input stream
      * @return a String containing the toString of the last item in the script
      * @throws IOException
      */
-        private String executeScript(Run<?, ?> build, TaskListener listener, InputStream scriptStream)
+    private String executeScript(Run<?, ?> build, TaskListener listener, InputStream scriptStream)
             throws IOException {
         String result = "";
         Map binding = new HashMap<>();
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        
+        Item parent = build.getParent();
+
         binding.put("build", build);
         binding.put("it", new ScriptContentBuildWrapper(build));
-        binding.put("project", build.getParent());
+        binding.put("project", parent);
         binding.put("rooturl", descriptor.getHudsonUrl());
-        binding.put("logger", listener.getLogger());
+        PrintStream logger = listener.getLogger();
+        binding.put("logger", logger);
 
-        GroovyShell shell = createEngine(descriptor, binding);
-        Object res = shell.evaluate(new InputStreamReader(scriptStream, descriptor.getCharset()));
-        if (res != null) {
-            result = res.toString();
+        String scriptContent = IOUtils.toString(scriptStream, descriptor.getCharset());
+
+        if (scriptStream instanceof UserProvidedContentInputStream) {
+            ScriptApproval.get().configuring(scriptContent, GroovyLanguage.get(), ApprovalContext.create().withItem(parent));
         }
+
+        if (scriptStream instanceof UserProvidedContentInputStream && !AbstractEvalContent.isApprovedScript(scriptContent, GroovyLanguage.get())) {
+            //Unapproved script, run it in the sandbox
+            GroovyShell shell = createEngine(descriptor, binding, true);
+            Script script = shell.parse(scriptContent);
+            Object res = GroovySandbox.run(script, new ProxyWhitelist(
+                    Whitelist.all(),
+                    new PrintStreamInstanceWhitelist(logger),
+                    new EmailExtScriptTokenMacroWhitelist()
+
+            ));
+            if (res != null) {
+                result = res.toString();
+            }
+        } else {
+            if (scriptStream instanceof UserProvidedContentInputStream) {
+                ScriptApproval.get().using(scriptContent, GroovyLanguage.get());
+            }
+            //Pre approved script, so run as is
+            GroovyShell shell = createEngine(descriptor, binding, false);
+            Script script = shell.parse(scriptContent);
+            Object res = script.run();
+            if (res != null) {
+                result = res.toString();
+            }
+        }
+
         return result;
     }
 
@@ -170,11 +239,18 @@ public class ScriptContent extends AbstractEvalContent {
      * @throws FileNotFoundException
      * @throws IOException
      */
-    private GroovyShell createEngine(ExtendedEmailPublisherDescriptor descriptor, Map<String, Object> variables)
+    private GroovyShell createEngine(ExtendedEmailPublisherDescriptor descriptor, Map<String, Object> variables, boolean secure)
             throws IOException {
 
-        ClassLoader cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
-        CompilerConfiguration cc = new CompilerConfiguration();
+        ClassLoader cl;
+        CompilerConfiguration cc;
+        if (secure) {
+            cl = GroovySandbox.createSecureClassLoader(Jenkins.getActiveInstance().getPluginManager().uberClassLoader);
+            cc = GroovySandbox.createSecureCompilerConfiguration();
+        } else {
+            cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
+            cc = new CompilerConfiguration();
+        }
         cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName()); 
         cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
                 "jenkins",

@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>2.21</version>
+        <version>2.23</version>
         <relativePath />
     </parent>
 
@@ -32,7 +32,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <workflow.version>1.10</workflow.version>
         <jenkins.version>2.0</jenkins.version>
-        <jenkins-test-harness.version>2.18</jenkins-test-harness.version>
         <java.level>7</java.level>
         <concurrency>2</concurrency>
         <argLine />
@@ -178,6 +177,11 @@
             <version>${workflow.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>script-security</artifactId>
+            <version>1.27</version>
+        </dependency>
 
         <!-- testing -->
         <dependency>
@@ -296,6 +300,14 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
                     <arguments>-DskipTests=true</arguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jenkins-ci.tools</groupId>
+                <artifactId>maven-hpi-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <compatibleSinceVersion>2.57.2</compatibleSinceVersion>
                 </configuration>
             </plugin>
         </plugins>

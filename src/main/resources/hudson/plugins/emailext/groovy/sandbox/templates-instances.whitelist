@@ -1,0 +1,3 @@
+field hudson.model.Run result
+method hudson.model.Run getUrl
+field hudson.model.AbstractBuild changeSet

@@ -33,10 +33,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Scanner;
 
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -120,6 +125,28 @@ public class ScriptContentTest {
         scriptContent.template = "template-does-not-exist";
         assertEquals("Groovy Template file [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.", 
             scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+    }
+
+    @Test
+    public void testWhenScriptOutsideScriptsFolderThrowFileNotFoundException()
+            throws Exception
+    {
+        File f = File.createTempFile("does-exist-but-wrong-place", ".groovy");
+        assertTrue(f.exists());
+        scriptContent.script = f.getAbsolutePath();
+        assertThat(scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME),
+                stringContainsInOrder(Arrays.asList("Groovy Script file [", "] was not found in $JENKINS_HOME/email-templates.")));
+    }
+
+    @Test
+    public void testWhenTemplateOutsideScriptsFolderThrowFileNotFoundException()
+            throws Exception
+    {
+        File f = File.createTempFile("does-exist-but-wrong-place", ".jelly");
+        assertTrue(f.exists());
+        scriptContent.template = f.getAbsolutePath();
+        assertThat(scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME),
+                stringContainsInOrder(Arrays.asList("Groovy Template file [", "] was not found in $JENKINS_HOME/email-templates.")));
     }
     
     @Test
@@ -210,9 +237,17 @@ public class ScriptContentTest {
         scriptContent.template = "testing1.template";
         assertEquals("2 + 2 = 4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
     }
-    
+
     @Test public void templateInWorkspace() throws Exception {
-        URL url = this.getClass().getResource("/test.groovy");
+        templateInWorkspace("/test.groovy");
+    }
+
+    @Test public void templateInWorkspaceUnsafe() throws Exception {
+        templateInWorkspace("/testUnsafe.groovy");
+    }
+    
+    public void templateInWorkspace(String scriptResource) throws Exception {
+        URL url = this.getClass().getResource(scriptResource);
         final File script = new File(url.getFile());
         
         FreeStyleProject p = j.createFreeStyleProject("foo");

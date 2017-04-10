@@ -14,6 +14,10 @@ import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
+import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -25,9 +29,13 @@ import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * These settings are global configurations
@@ -35,6 +43,7 @@ import java.util.Properties;
 @Extension
 public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publisher> {
 
+    public static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisherDescriptor.class.getName());
     /**
      * The default e-mail address suffix appended to the user name found from
      * changelog, to send e-mails. Null if not configured.
@@ -168,6 +177,34 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             defaultSubject = ExtendedEmailPublisher.DEFAULT_SUBJECT_TEXT;
             emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
         }
+
+        if (Jenkins.getActiveInstance().isUseSecurity()
+                && (!StringUtils.isBlank(this.defaultPostsendScript)) || !StringUtils.isBlank(this.defaultPresendScript)) {
+            setDefaultPostsendScript(this.defaultPostsendScript);
+            setDefaultPresendScript(this.defaultPresendScript);
+            try {
+                setDefaultClasspath(this.defaultClasspath);
+            } catch (FormException e) {
+                //Some of the old configured classpaths probably used some environment variable, let's clean those out
+                List<GroovyScriptPath> newList = new ArrayList<>();
+                for (GroovyScriptPath path : defaultClasspath) {
+                    URL u = path.asURL();
+                    if (u != null) {
+                        try {
+                            new ClasspathEntry(u.toString());
+                            newList.add(path);
+                        } catch (MalformedURLException mfue) {
+                            LOGGER.log(Level.WARNING, "The default classpath contained a malformed url, will be ignored.", mfue);
+                        }
+                    }
+                }
+                try {
+                    setDefaultClasspath(newList);
+                } catch (FormException e1) {
+                    assert false : e1;
+                }
+            }
+        }
     }
 
     @Override
@@ -176,7 +213,9 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public String getAdminAddress() {
-        return JenkinsLocationConfiguration.get().getAdminAddress();
+        JenkinsLocationConfiguration configuration = JenkinsLocationConfiguration.get();
+        assert configuration != null;
+        return configuration.getAdminAddress();
     }
 
     public String getDefaultSuffix() {
@@ -457,7 +496,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     @SuppressWarnings("unused")
     public void setDefaultPresendScript(String script) {
-        this.defaultPresendScript = ((script == null) ? "" : script);
+        script = StringUtils.trim(script);
+        this.defaultPresendScript = ScriptApproval.get().configuring(((script == null) ? "" : script),
+                                                                     GroovyLanguage.get(),
+                                                                     ApprovalContext.create().withCurrentUser());
     }
 
     public String getDefaultPostsendScript() {
@@ -466,11 +508,32 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     @SuppressWarnings("unused")
     public void setDefaultPostsendScript(String script) {
-        this.defaultPostsendScript = ((script == null) ? "" : script);
+        script = StringUtils.trim(script);
+        this.defaultPostsendScript = ScriptApproval.get().configuring(((script == null) ? "" : script),
+                                                                      GroovyLanguage.get(),
+                                                                      ApprovalContext.create().withCurrentUser());
     }
 
     public List<GroovyScriptPath> getDefaultClasspath() {
         return defaultClasspath;
+    }
+
+    public void setDefaultClasspath(List<GroovyScriptPath> defaultClasspath) throws FormException {
+        if (Jenkins.getActiveInstance().isUseSecurity()) {
+            ScriptApproval approval = ScriptApproval.get();
+            ApprovalContext context = ApprovalContext.create().withCurrentUser();
+            for (GroovyScriptPath path : defaultClasspath) {
+                URL u = path.asURL();
+                if (u != null) {
+                    try {
+                        approval.configuring(new ClasspathEntry(u.toString()), context);
+                    } catch (MalformedURLException e) {
+                        throw new FormException(e, "ext_mailer_default_classpath");
+                    }
+                }
+            }
+        }
+        this.defaultClasspath = defaultClasspath;
     }
 
     public List<String> getDefaultTriggerIds() {
@@ -525,15 +588,16 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         emergencyReroute = nullify(req.getParameter("ext_mailer_emergency_reroute"));
         defaultReplyTo = nullify(req.getParameter("ext_mailer_default_replyto")) != null
                 ? req.getParameter("ext_mailer_default_replyto") : "";
-        defaultPresendScript = nullify(req.getParameter("ext_mailer_default_presend_script")) != null
-                ? req.getParameter("ext_mailer_default_presend_script") : "";
-        defaultPostsendScript = nullify(req.getParameter("ext_mailer_default_postsend_script")) != null
-                ? req.getParameter("ext_mailer_default_postsend_script") : "";
+        setDefaultPresendScript(nullify(req.getParameter("ext_mailer_default_presend_script")) != null
+                ? req.getParameter("ext_mailer_default_presend_script") : "");
+        setDefaultPostsendScript(nullify(req.getParameter("ext_mailer_default_postsend_script")) != null
+                ? req.getParameter("ext_mailer_default_postsend_script") : "");
         if (req.hasParameter("ext_mailer_default_classpath")) {
-            defaultClasspath.clear();
+            List<GroovyScriptPath> cp = new ArrayList<>();
             for (String s : req.getParameterValues("ext_mailer_default_classpath")) {
-                defaultClasspath.add(new GroovyScriptPath(s));
+                cp.add(new GroovyScriptPath(s));
             }
+            setDefaultClasspath(cp);
         }
         debugMode = req.hasParameter("ext_mailer_debug_mode");
 

@@ -7,6 +7,9 @@ import org.jenkinsci.lib.configprovider.AbstractConfigProviderImpl;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.lib.configprovider.model.Config;
 import org.jenkinsci.lib.configprovider.model.ContentType;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
+import org.jenkinsci.plugins.scriptsecurity.scripts.languages.JellyLanguage;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.annotation.Nonnull;
@@ -19,6 +22,12 @@ public class JellyTemplateConfig extends Config {
     @DataBoundConstructor
     public JellyTemplateConfig(String id, String name, String comment, String content) {
         super(id, name, comment, content);
+        ScriptApproval.get().configuring(content, JellyLanguage.get(), ApprovalContext.create().withCurrentUser());
+    }
+
+    public Object readResolve() {
+        ScriptApproval.get().configuring(content, JellyLanguage.get(), ApprovalContext.create());
+        return this;
     }
     
     @Extension(optional=true)
