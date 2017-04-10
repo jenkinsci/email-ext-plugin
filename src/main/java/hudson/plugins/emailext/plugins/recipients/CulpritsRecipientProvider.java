@@ -51,7 +51,6 @@ public class CulpritsRecipientProvider extends RecipientProvider {
         }
         final Debug debug = new Debug();
         Run<?,?> run = context.getRun();
-        final Result runResult = run.getResult();
         if (run instanceof AbstractBuild) {
             Set<User> users = ((AbstractBuild<?,?>)run).getCulprits();
             RecipientProviderUtilities.addUsers(users, context, env, to, cc, bcc, debug);
