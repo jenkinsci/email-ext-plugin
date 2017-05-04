@@ -1,11 +1,13 @@
 package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.tasks.Mailer;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +24,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
         Mailer.class,
         Mailer.DescriptorImpl.class,
         User.class,
-        WorkflowRun.class
+        WorkflowRun.class,
+        WorkflowJob.class,
+        FreeStyleProject.class
 })
 public class DevelopersRecipientProviderTest {
 
@@ -46,14 +50,16 @@ public class DevelopersRecipientProviderTest {
 
     @Test
     public void testAddRecipients() throws Exception {
-        final FreeStyleBuild build1 = PowerMockito.mock(FreeStyleBuild.class);
-        PowerMockito.when(build1.getResult()).thenReturn(Result.UNSTABLE);
+        final FreeStyleProject p = PowerMockito.mock(FreeStyleProject.class);
+        final FreeStyleBuild build1 = PowerMockito.spy(new FreeStyleBuild(p));
+        PowerMockito.doReturn(Result.UNSTABLE).when(build1).getResult();
         MockUtilities.addRequestor(build1, "A");
         MockUtilities.addChangeSet(build1, "X", "V");
         TestUtilities.checkRecipients(build1, new DevelopersRecipientProvider(), "X", "V");
 
-        final WorkflowRun build2 = PowerMockito.mock(WorkflowRun.class);
-        PowerMockito.when(build2.getResult()).thenReturn(Result.UNSTABLE);
+        final WorkflowJob j = PowerMockito.mock(WorkflowJob.class);
+        final WorkflowRun build2 = PowerMockito.spy(new WorkflowRun(j));
+        PowerMockito.doReturn(Result.UNSTABLE).when(build2).getResult();
         MockUtilities.addChangeSet(build2, "X", "V");
         TestUtilities.checkRecipients(build2, new DevelopersRecipientProvider(), "X", "V");
     }

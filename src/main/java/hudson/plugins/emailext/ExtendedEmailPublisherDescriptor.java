@@ -543,12 +543,15 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                 for(EmailTriggerDescriptor t : this.defaultTriggers) {
                     // we have to do the below because a bunch of stuff is not serialized for the Descriptor
                     EmailTriggerDescriptor d = Jenkins.getActiveInstance().getDescriptorByType(t.getClass());
-                    if(!defaultTriggerIds.contains(d.getId())) {
+                    if(d != null && !defaultTriggerIds.contains(d.getId())) {
                         defaultTriggerIds.add(d.getId());
                     }
                 }
             } else {
-                defaultTriggerIds.add(Jenkins.getActiveInstance().getDescriptor(FailureTrigger.class).getId());
+                FailureTrigger.DescriptorImpl f = Jenkins.getActiveInstance().getDescriptorByType(FailureTrigger.DescriptorImpl.class);
+                if (f != null) {
+                    defaultTriggerIds.add(f.getId());
+                }
             }
             save();
         }
