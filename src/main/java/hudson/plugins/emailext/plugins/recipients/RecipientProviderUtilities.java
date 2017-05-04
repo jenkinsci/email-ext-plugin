@@ -26,7 +26,6 @@ package hudson.plugins.emailext.plugins.recipients;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import hudson.EnvVars;
-import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Item;
 import hudson.model.Run;
@@ -48,6 +47,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.CheckForNull;
 import jenkins.model.Jenkins;
+import jenkins.scm.RunWithSCM;
 import org.acegisecurity.Authentication;
 import org.acegisecurity.userdetails.UsernameNotFoundException;
 
@@ -66,11 +66,8 @@ public final class RecipientProviderUtilities {
         final Set<User> users = new HashSet<>();
         for (final Run<?, ?> run : runs) {
             debug.send("    build: %d", run.getNumber());
-            if (run instanceof AbstractBuild<?,?>) {
-                final ChangeLogSet<?> changeLogSet = ((AbstractBuild<?,?>)run).getChangeSet();
-                if (changeLogSet == null) {
-                    debug.send("      changeLogSet was null");
-                } else {
+            if (run instanceof RunWithSCM<?,?>) {
+                for (ChangeLogSet<? extends ChangeLogSet.Entry> changeLogSet : ((RunWithSCM<?,?>)run).getChangeSets()) {
                     addChangeSetUsers(changeLogSet, users, debug);
                 }
             } else {

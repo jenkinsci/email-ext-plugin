@@ -8,7 +8,6 @@ package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.User;
@@ -17,6 +16,7 @@ import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import jenkins.model.Jenkins;
+import jenkins.scm.RunWithSCM;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.mail.internet.InternetAddress;
@@ -51,8 +51,8 @@ public class CulpritsRecipientProvider extends RecipientProvider {
         }
         final Debug debug = new Debug();
         Run<?,?> run = context.getRun();
-        if (run instanceof AbstractBuild) {
-            Set<User> users = ((AbstractBuild<?,?>)run).getCulprits();
+        if (run instanceof RunWithSCM) {
+            Set<User> users = ((RunWithSCM<?,?>)run).getCulprits();
             RecipientProviderUtilities.addUsers(users, context, env, to, cc, bcc, debug);
         } else {
             List<Run<?, ?>> builds = new ArrayList<>();
