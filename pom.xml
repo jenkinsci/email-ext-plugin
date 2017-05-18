@@ -32,9 +32,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <workflow-step-api.version>2.9</workflow-step-api.version>
         <workflow-aggregator.version>2.5</workflow-aggregator.version>
-        <workflow-job.version>2.11-20170504.162002-1</workflow-job.version> <!-- TODO: switch to release once https://github.com/jenkinsci/workflow-job-plugin/pull/35 is merged and released -->
-        <jenkins-core.version>2.58-20170502.192524-8</jenkins-core.version> <!-- TODO: Switch to release once https://github.com/jenkinsci/jenkins/pull/2730 is merged and released -->
-        <jenkins-war.version>2.58-20170502.192544-8</jenkins-war.version> <!-- TODO: Switch to release once https://github.com/jenkinsci/jenkins/pull/2730 is merged and released -->
+        <workflow-job.version>2.12</workflow-job.version>
+        <jenkins.version>2.60</jenkins.version>
         <workflow-api.version>2.11</workflow-api.version>
         <workflow-cps.version>2.29</workflow-cps.version>
         <workflow-durable-task-step.version>2.11</workflow-durable-task-step.version>
