@@ -26,6 +26,7 @@ package hudson.plugins.emailext.plugins.recipients;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import hudson.EnvVars;
+import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Item;
 import hudson.model.Run;
@@ -36,6 +37,7 @@ import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.MailSender;
 
+import javax.mail.MethodNotSupportedException;
 import javax.mail.internet.InternetAddress;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -47,7 +49,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 import javax.annotation.CheckForNull;
 import jenkins.model.Jenkins;
-import jenkins.scm.RunWithSCM;
 import org.acegisecurity.Authentication;
 import org.acegisecurity.userdetails.UsernameNotFoundException;
 
@@ -66,11 +67,16 @@ public final class RecipientProviderUtilities {
         final Set<User> users = new HashSet<>();
         for (final Run<?, ?> run : runs) {
             debug.send("    build: %d", run.getNumber());
-            if (run instanceof RunWithSCM<?,?>) {
-                for (ChangeLogSet<? extends ChangeLogSet.Entry> changeLogSet : ((RunWithSCM<?,?>)run).getChangeSets()) {
+            // TODO: core 2.60+, workflow-job 2.12+: Switch to checking if run is an instance of RunWithSCM and call getChangeSets directly.
+            if (run instanceof AbstractBuild<?,?>) {
+                final ChangeLogSet<?> changeLogSet = ((AbstractBuild<?,?>)run).getChangeSet();
+                if (changeLogSet == null) {
+                    debug.send("      changeLogSet was null");
+                } else {
                     addChangeSetUsers(changeLogSet, users, debug);
                 }
             } else {
+                // TODO: core 2.60+, workflow-job 2.12+: Decide whether to remove this logic since it won't be needed for Pipelines any more.
                 try {
                     Method getChangeSets = run.getClass().getMethod("getChangeSets");
                     if (List.class.isAssignableFrom(getChangeSets.getReturnType())) {
