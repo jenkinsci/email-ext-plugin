@@ -58,6 +58,10 @@ public class EmailExtStep extends AbstractStepImpl {
 
     private List<RecipientProvider> recipientProviders;
 
+    private String presendScript;
+
+    private String postsendScript;
+
     @DataBoundConstructor
     public EmailExtStep(String subject, String body) {
         this.subject = subject;
@@ -138,6 +142,24 @@ public class EmailExtStep extends AbstractStepImpl {
         return recipientProviders;
     }
 
+    @DataBoundSetter
+    public void setPresendScript(String presendScript) {
+        this.presendScript = presendScript;
+    }
+
+    public String getPresendScript() {
+        return presendScript == null ? "" : presendScript;
+    }
+
+    @DataBoundSetter
+    public void setPostsendScript(String postsendScript) {
+        this.postsendScript = postsendScript;
+    }
+
+    public String getPostsendScript() {
+        return postsendScript == null ? "" : postsendScript;
+    }
+
     public static class EmailExtStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
 
         private static final long serialVersionUID = 1L;
@@ -170,6 +192,8 @@ public class EmailExtStep extends AbstractStepImpl {
             publisher.defaultContent = step.body;
             publisher.attachBuildLog = step.attachLog;
             publisher.compressBuildLog = step.compressLog;
+            publisher.setPresendScript(step.presendScript);
+            publisher.setPostsendScript(step.postsendScript);
 
             if (StringUtils.isNotBlank(step.to)) {
                 publisher.recipientList = step.to;
