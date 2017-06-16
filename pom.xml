@@ -38,6 +38,7 @@
         <workflow-cps.version>2.29</workflow-cps.version>
         <workflow-durable-task-step.version>2.11</workflow-durable-task-step.version>
         <workflow-basic-steps.version>2.4</workflow-basic-steps.version>
+        <workflow-support.version>2.13</workflow-support.version>
         <scm-api.version>2.0.7</scm-api.version>
         <java.level>7</java.level>
         <concurrency>2</concurrency>
@@ -180,6 +181,19 @@
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-api</artifactId>
             <version>${workflow-api.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-support</artifactId>
+            <version>${workflow-support.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-support</artifactId>
+            <version>${workflow-support.version}</version>
+            <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
