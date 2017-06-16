@@ -49,5 +49,11 @@ THE SOFTWARE.
         <f:entry field="compressLog" title="Compress Build Log">
             <f:checkbox />
         </f:entry>
+        <f:entry field="presendScript" title="Pre-send Script">
+            <f:textarea />
+        </f:entry>
+        <f:entry field="postsendScript" title="Post-send Script">
+            <f:textarea />
+        </f:entry>
     </f:advanced>
 </j:jelly>

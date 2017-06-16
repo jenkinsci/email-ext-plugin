@@ -456,92 +456,93 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 if (executePresendScript(context, msg)) {
                     // presend script might have modified recipients:
                     allRecipients = msg.getAllRecipients();
+                    if (allRecipients != null) {
+                        if (StringUtils.isNotBlank(getDescriptor().getEmergencyReroute())) {
+                            // clear out all the existing recipients
+                            msg.setRecipients(Message.RecipientType.TO, (Address[]) null);
+                            msg.setRecipients(Message.RecipientType.CC, (Address[]) null);
+                            msg.setRecipients(Message.RecipientType.BCC, (Address[]) null);
+                            // and set the emergency reroute
+                            msg.setRecipients(Message.RecipientType.TO, getDescriptor().getEmergencyReroute());
+                        }
 
-                    if (StringUtils.isNotBlank(getDescriptor().getEmergencyReroute())) {
-                        // clear out all the existing recipients
-                        msg.setRecipients(Message.RecipientType.TO, (Address[]) null);
-                        msg.setRecipients(Message.RecipientType.CC, (Address[]) null);
-                        msg.setRecipients(Message.RecipientType.BCC, (Address[]) null);
-                        // and set the emergency reroute
-                        msg.setRecipients(Message.RecipientType.TO, getDescriptor().getEmergencyReroute());
-                    }
+                        StringBuilder buf = new StringBuilder("Sending email to:");
+                        for (Address a : allRecipients) {
+                            buf.append(' ').append(a);
+                        }
+                        context.getListener().getLogger().println(buf);
 
-                    StringBuilder buf = new StringBuilder("Sending email to:");
-                    for (Address a : allRecipients) {
-                        buf.append(' ').append(a);
-                    }
-                    context.getListener().getLogger().println(buf);
-
-                    ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
-                    Session session = descriptor.createSession();
-                    // emergency reroute might have modified recipients:
-                    allRecipients = msg.getAllRecipients();
-                    // all email addresses are of type "rfc822", so just take first one:
-                    Transport transport = session.getTransport(allRecipients[0]);
-                    while (true) {
-                        try {
-                            transport.connect();
-                            transport.sendMessage(msg, allRecipients);
-                            break;
-                        } catch (SendFailedException e) {
-                            if (e.getNextException() != null
-                                    && (e.getNextException() instanceof SocketException
-                                    || e.getNextException() instanceof ConnectException)) {
-                                context.getListener().getLogger().println("Socket error sending email, retrying once more in 10 seconds...");
-                                transport.close();
-                                Thread.sleep(10000);
-                            } else {
-                                Address[] addresses = e.getValidSentAddresses();
-                                if (addresses != null && addresses.length > 0) {
-                                    buf = new StringBuilder("Successfully sent to the following addresses:");
-                                    for (Address a : addresses) {
-                                        buf.append(' ').append(a);
-                                    }
-                                    context.getListener().getLogger().println(buf);
-                                }
-                                addresses = e.getValidUnsentAddresses();
-                                if (addresses != null && addresses.length > 0) {
-                                    buf = new StringBuilder("Error sending to the following VALID addresses:");
-                                    for (Address a : addresses) {
-                                        buf.append(' ').append(a);
-                                    }
-                                    context.getListener().getLogger().println(buf);
-                                }
-                                addresses = e.getInvalidAddresses();
-                                if (addresses != null && addresses.length > 0) {
-                                    buf = new StringBuilder("Error sending to the following INVALID addresses:");
-                                    for (Address a : addresses) {
-                                        buf.append(' ').append(a);
-                                    }
-                                    context.getListener().getLogger().println(buf);
-                                }
-
-                                debug(context.getListener().getLogger(), "SendFailedException message: " + e.getMessage());
+                        ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
+                        Session session = descriptor.createSession();
+                        // emergency reroute might have modified recipients:
+                        allRecipients = msg.getAllRecipients();
+                        // all email addresses are of type "rfc822", so just take first one:
+                        Transport transport = session.getTransport(allRecipients[0]);
+                        while (true) {
+                            try {
+                                transport.connect();
+                                transport.sendMessage(msg, allRecipients);
                                 break;
+                            } catch (SendFailedException e) {
+                                if (e.getNextException() != null
+                                        && (e.getNextException() instanceof SocketException
+                                        || e.getNextException() instanceof ConnectException)) {
+                                    context.getListener().getLogger().println("Socket error sending email, retrying once more in 10 seconds...");
+                                    transport.close();
+                                    Thread.sleep(10000);
+                                } else {
+                                    Address[] addresses = e.getValidSentAddresses();
+                                    if (addresses != null && addresses.length > 0) {
+                                        buf = new StringBuilder("Successfully sent to the following addresses:");
+                                        for (Address a : addresses) {
+                                            buf.append(' ').append(a);
+                                        }
+                                        context.getListener().getLogger().println(buf);
+                                    }
+                                    addresses = e.getValidUnsentAddresses();
+                                    if (addresses != null && addresses.length > 0) {
+                                        buf = new StringBuilder("Error sending to the following VALID addresses:");
+                                        for (Address a : addresses) {
+                                            buf.append(' ').append(a);
+                                        }
+                                        context.getListener().getLogger().println(buf);
+                                    }
+                                    addresses = e.getInvalidAddresses();
+                                    if (addresses != null && addresses.length > 0) {
+                                        buf = new StringBuilder("Error sending to the following INVALID addresses:");
+                                        for (Address a : addresses) {
+                                            buf.append(' ').append(a);
+                                        }
+                                        context.getListener().getLogger().println(buf);
+                                    }
+
+                                    debug(context.getListener().getLogger(), "SendFailedException message: " + e.getMessage());
+                                    break;
+                                }
+                            } catch (MessagingException e) {
+                                if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
+                                    context.getListener().getLogger().println("Connection error sending email, retrying once more in 10 seconds...");
+                                    transport.close();
+                                    Thread.sleep(10000);
+                                } else {
+                                    debug(context.getListener().getLogger(), "MessagingException message: " + e.getMessage());
+                                    break;
+                                }
                             }
-                        } catch (MessagingException e) {
-                            if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
-                                context.getListener().getLogger().println("Connection error sending email, retrying once more in 10 seconds...");
-                                transport.close();
-                                Thread.sleep(10000);
-                            } else {
-                                debug(context.getListener().getLogger(), "MessagingException message: " + e.getMessage());
+                            retries++;
+                            if (retries > 1) {
+                                context.getListener().getLogger().println("Failed after second try sending email");
                                 break;
                             }
                         }
-                        retries++;
-                        if (retries > 1) {
-                            context.getListener().getLogger().println("Failed after second try sending email");
-                            break;
+
+                        executePostsendScript(context, msg, session, transport);
+                        // close transport after post-send script, so server response can be accessed:
+                        transport.close();
+
+                        if (context.getRun().getAction(MailMessageIdAction.class) == null) {
+                            context.getRun().addAction(new MailMessageIdAction(msg.getMessageID()));
                         }
-                    }
-
-                    executePostsendScript(context, msg, session, transport);
-                    // close transport after post-send script, so server response can be accessed:
-                    transport.close();
-
-                    if (context.getRun().getAction(MailMessageIdAction.class) == null) {
-                        context.getRun().addAction(new MailMessageIdAction(msg.getMessageID()));
                     }
                 } else {
                     context.getListener().getLogger().println("Email sending was cancelled"
