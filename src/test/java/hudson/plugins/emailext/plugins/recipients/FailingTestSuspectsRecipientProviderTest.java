@@ -23,6 +23,7 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
+import hudson.PluginManager;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
@@ -37,6 +38,7 @@ import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -46,7 +48,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
     Mailer.class,
     Mailer.DescriptorImpl.class,
     User.class,
-    FreeStyleProject.class
+    FreeStyleProject.class,
+    PluginManager.class
 })
 public class FailingTestSuspectsRecipientProviderTest {
 
@@ -59,8 +62,15 @@ public class FailingTestSuspectsRecipientProviderTest {
         PowerMockito.when(extendedEmailPublisherDescriptor.getExcludedCommitters()).thenReturn("");
 
         PowerMockito.when(jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class)).thenReturn(extendedEmailPublisherDescriptor);
+
+        final PluginManager pluginManager = PowerMockito.mock(PluginManager.class);
+        Whitebox.setInternalState(pluginManager, "uberClassLoader", this.getClass().getClassLoader());
+
+        PowerMockito.when(jenkins.getPluginManager()).thenReturn(pluginManager);
+
         PowerMockito.mockStatic(Jenkins.class);
         PowerMockito.doReturn(jenkins).when(Jenkins.class, "getActiveInstance");
+        PowerMockito.doReturn(jenkins).when(Jenkins.class, "getInstance");
 
         final Mailer.DescriptorImpl descriptor = PowerMockito.mock(Mailer.DescriptorImpl.class);
         PowerMockito.when(descriptor.getDefaultSuffix()).thenReturn("DOMAIN");
