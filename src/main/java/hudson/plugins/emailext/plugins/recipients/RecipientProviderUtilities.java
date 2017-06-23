@@ -36,7 +36,11 @@ import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.MailSender;
+import jenkins.model.Jenkins;
+import org.acegisecurity.Authentication;
+import org.acegisecurity.userdetails.UsernameNotFoundException;
 
+import javax.annotation.CheckForNull;
 import javax.mail.internet.InternetAddress;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -46,10 +50,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.annotation.CheckForNull;
-import jenkins.model.Jenkins;
-import org.acegisecurity.Authentication;
-import org.acegisecurity.userdetails.UsernameNotFoundException;
 
 public final class RecipientProviderUtilities {
     private static final Logger LOGGER = Logger.getLogger(RecipientProviderUtilities.class.getName());
@@ -199,7 +199,10 @@ public final class RecipientProviderUtilities {
                             if (SEND_TO_UNKNOWN_USERS) {
                                 listener.getLogger().printf("Warning: %s is not a recognized user, but sending mail anyway%n", userAddress);
                             } else {
-                                listener.getLogger().printf("Not sending mail to unregistered user %s%n", userAddress);
+                                listener.getLogger().printf("Not sending mail to unregistered user %s because your SCM"
+                                                + " claimed this was associated with a user ID ‘%s’ which your security realm"
+                                                + " does not recognize; you may need changes in your SCM plugin%n", userAddress,
+                                        user.getId());
                                 continue;
                             }
                         }
