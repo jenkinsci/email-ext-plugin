@@ -42,6 +42,7 @@ import org.acegisecurity.userdetails.UsernameNotFoundException;
 
 import javax.annotation.CheckForNull;
 import javax.mail.internet.InternetAddress;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -200,9 +201,13 @@ public final class RecipientProviderUtilities {
                                 listener.getLogger().printf("Warning: %s is not a recognized user, but sending mail anyway%n", userAddress);
                             } else {
                                 listener.getLogger().printf("Not sending mail to unregistered user %s because your SCM"
-                                                + " claimed this was associated with a user ID ‘%s’ which your security realm"
-                                                + " does not recognize; you may need changes in your SCM plugin%n", userAddress,
-                                        user.getId());
+                                        + " claimed this was associated with a user ID ‘", userAddress);
+                                try {
+                                    listener.hyperlink('/' + user.getUrl(), user.getDisplayName());
+                                } catch (IOException ignored) {
+                                }
+                                listener.getLogger().printf("' which your security realm does not recognize; you may need" +
+                                        " changes in your SCM plugin%n");
                                 continue;
                             }
                         }
