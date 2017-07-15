@@ -53,6 +53,10 @@ public class RequesterRecipientProvider extends RecipientProvider {
                 break;
             }
             cur = p.getBuildByNumber(upc.getUpstreamBuild());
+            if (cur == null) {
+                context.getListener().getLogger().print("There is a break in the build linkage, could not retrieve upstream build information");
+                break;
+            }
             upc = cur.getCause(Cause.UpstreamCause.class);
         }
         addUserTriggeringTheBuild(cur, to, cc, bcc, env, context, debug);
