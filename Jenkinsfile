@@ -1,1 +1,1 @@
-buildPlugin()
+buildPlugin(failFast: false)
