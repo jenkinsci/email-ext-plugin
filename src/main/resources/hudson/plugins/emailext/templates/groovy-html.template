@@ -17,8 +17,8 @@ TD.console { font-family:Courier New; }
 <BODY>
 
 <TABLE>
-  <TR><TD align="right"><IMG SRC="${rooturl}static/e59dfe28/images/32x32/<%= build.result.toString() == 'SUCCESS' ? "blue.gif" : build.result.toString() == 'FAILURE' ? 'red.gif' : 'yellow.gif' %>" />
-  </TD><TD valign="center"><B style="font-size: 200%;">BUILD ${build.result}</B></TD></TR>
+  <TR><TD align="right"><IMG SRC="${rooturl}static/e59dfe28/images/32x32/<%= (build.result == null || build.result.toString() == 'SUCCESS') ? "blue.gif" : build.result.toString() == 'FAILURE' ? 'red.gif' : 'yellow.gif' %>" />
+  </TD><TD valign="center"><B style="font-size: 200%;">BUILD ${build.result ?: 'SUCCESSFUL'}</B></TD></TR>
   <TR><TD>URL</TD><TD><A href="${rooturl}${build.url}">${rooturl}${build.url}</A></TD></TR>
   <TR><TD>Project:</TD><TD>${project.name}</TD></TR>
   <TR><TD>Date:</TD><TD>${it.timestampString}</TD></TR>
@@ -28,29 +28,32 @@ TD.console { font-family:Courier New; }
 <BR/>
 
 <!-- CHANGE SET -->
-<% def changeSet = build.changeSet
-if(changeSet != null) {
+<% def changeSets = build.changeSets
+if(changeSets != null) {
 	def hadChanges = false %>
 	<TABLE width="100%">
     <TR><TD class="bg1" colspan="2"><B>CHANGES</B></TD></TR>
-<% 	changeSet.each() { cs ->
-		hadChanges = true %>		
-      <TR>
-        <TD colspan="2" class="bg2">&nbsp;&nbsp;Revision <B><%= cs.metaClass.hasProperty('commitId') ? cs.commitId : cs.metaClass.hasProperty('revision') ? cs.revision : 
-        cs.metaClass.hasProperty('changeNumber') ? cs.changeNumber : "" %></B> by
-          <B><%= cs.author %>: </B>
-          <B>(${cs.msgAnnotated})</B>
-         </TD>
-      </TR>
+
+<% 	changeSets.each() { cs_list ->
+      cs_list.each() { cs ->
+		  hadChanges = true %>
+        <TR>
+          <TD colspan="2" class="bg2">&nbsp;&nbsp;Revision <B><%= cs.metaClass.hasProperty('commitId') ? cs.commitId : cs.metaClass.hasProperty('revision') ? cs.revision :
+          cs.metaClass.hasProperty('changeNumber') ? cs.changeNumber : "" %></B> by
+            <B><%= cs.author %>: </B>
+            <B>(${cs.msgAnnotated})</B>
+           </TD>
+        </TR>
 <%		cs.affectedFiles.each() { p -> %>
         <TR>
           <TD width="10%">&nbsp;&nbsp;${p.editType.name}</TD>
           <TD>${p.path}</TD>
         </TR>
 <%		}
-	}
-	
-	if(!hadChanges) { %>	
+	  }
+  }
+
+	if(!hadChanges) { %>
         <TR><TD colspan="2">No Changes</TD></TR>
 <%	} %>
   </TABLE>
@@ -64,7 +67,7 @@ if(artifacts != null && artifacts.size() > 0) { %>
     <TR><TD class="bg1"><B>BUILD ARTIFACTS</B></TD></TR>
     <TR>
       <TD>
-<% 		artifacts.each() { f -> %>		
+<% 		artifacts.each() { f -> %>
       	  <li>
       	    <a href="${rooturl}${build.url}artifact/${f}">${f}</a>
       	  </li>
@@ -72,41 +75,41 @@ if(artifacts != null && artifacts.size() > 0) { %>
       </TD>
     </TR>
   </TABLE>
-<BR/>  
+<BR/>
 <% } %>
 
 <!-- MAVEN ARTIFACTS -->
-<% 
+<%
 try {
   def mbuilds = build.moduleBuilds
   if(mbuilds != null) { %>
   <TABLE width="100%">
       <TR><TD class="bg1"><B>BUILD ARTIFACTS</B></TD></TR>
-<% 
-    try {  
-        mbuilds.each() { m -> %>	  
+<%
+    try {
+        mbuilds.each() { m -> %>
         <TR><TD class="bg2"><B>${m.key.displayName}</B></TD></TR>
 <%		m.value.each() { mvnbld ->
 			def artifactz = mvnbld.artifacts
-			if(artifactz != null && artifactz.size() > 0) { %>			
+			if(artifactz != null && artifactz.size() > 0) { %>
       <TR>
         <TD>
-<%				artifactz.each() { f -> %>			
+<%				artifactz.each() { f -> %>
       	    <li>
       	      <a href="${rooturl}${mvnbld.url}artifact/${f}">${f}</a>
       	    </li>
-<%				} %>		
+<%				} %>
       	</TD>
       </TR>
-<%			} 
+<%			}
 		}
        }
     } catch(e) {
 	// we don't do anything
-    }  %>      
+    }  %>
   </TABLE>
 <BR/>
-<% } 
+<% }
 
 }catch(e) {
 	// we don't do anything
@@ -151,4 +154,3 @@ if (junitResultList.size() > 0) { %>
 <% } %>
 
 </BODY>
-
