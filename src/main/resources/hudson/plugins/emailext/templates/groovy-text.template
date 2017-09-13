@@ -1,23 +1,25 @@
 GENERAL INFO
 
-BUILD ${build.result}
+BUILD ${build.result ?: 'SUCCESSFUL'}
 Build URL: ${rooturl}${build.url}
 Project: ${project.name}
 Date of build: ${it.timestampString}
 Build duration: ${build.durationString}
 
-<% 
-def changeSet = build.changeSet
-if(changeSet != null) {
+<%
+def changeSets = build.changeSets
+if(changeSets != null) {
   def hadChanges = false %>
 CHANGE SET
-<% changeSet.each() { cs ->
+<% 	changeSets.each() { cs_list ->
+      cs_list.each() { cs ->
      hadChanges = true %>
-  	 Revision <%= cs.metaClass.hasProperty('commitId') ? cs.commitId : cs.metaClass.hasProperty('revision') ? cs.revision : 
+  	 Revision <%= cs.metaClass.hasProperty('commitId') ? cs.commitId : cs.metaClass.hasProperty('revision') ? cs.revision :
         cs.metaClass.hasProperty('changeNumber') ? cs.changeNumber : "" %> by <%= cs.author %>: (<%= cs.msgAnnotated %>)
 <%	 cs.affectedFiles.each() { p -> %>
 	 change: <%= p.editType.name %> <%= p.path %>
-<%   }	 	    
+<%     }
+     }
    }
   if(!hadChanges) { %>
   No changes
