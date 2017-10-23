@@ -123,7 +123,7 @@ import java.util.List;
 
     public static void addChangeSet(final AbstractBuild<?, ?> build, final String... inAuthors) {
         ChangeLogSet<ChangeLogSet.Entry> changeSet = makeChangeSet(build, inAuthors);
-        PowerMockito.when(build.getChangeSet()).thenReturn((ChangeLogSet)changeSet);
+        PowerMockito.doReturn(changeSet).when(build).getChangeSet();
     }
 
     public static void addRequestor(final AbstractBuild<?, ?> build, final String requestor) throws Exception {
@@ -137,7 +137,7 @@ import java.util.List;
         }).when(User.class, "get", Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap());
         final Cause.UserIdCause cause = PowerMockito.mock(Cause.UserIdCause.class);
         PowerMockito.when(cause.getUserId()).thenReturn(requestor);
-        PowerMockito.when(build.getCause(Cause.UserIdCause.class)).thenReturn(cause);
+        PowerMockito.doReturn(cause).when(build).getCause(Cause.UserIdCause.class);
     }
 
     public static void addTestResultAction(final AbstractBuild<?, ?> build, final AbstractBuild<?, ?>... failedSinces) {
@@ -150,7 +150,7 @@ import java.util.List;
         final TestResultAction testResultAction = PowerMockito.mock(TestResultAction.class);
         PowerMockito.when(testResultAction.getFailedTests()).thenReturn(failedTests);
         PowerMockito.when(testResultAction.getFailCount()).thenReturn(failedTests.size());
-        PowerMockito.when(build.getAction(AbstractTestResultAction.class)).thenReturn(testResultAction);
+        PowerMockito.doReturn(testResultAction).when(build).getAction(AbstractTestResultAction.class);
     }
 
 }

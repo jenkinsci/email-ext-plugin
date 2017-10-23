@@ -67,6 +67,7 @@ public final class RecipientProviderUtilities {
         final Set<User> users = new HashSet<>();
         for (final Run<?, ?> run : runs) {
             debug.send("    build: %d", run.getNumber());
+            // TODO: core 2.60+, workflow-job 2.12+: Switch to checking if run is an instance of RunWithSCM and call getChangeSets directly.
             if (run instanceof AbstractBuild<?,?>) {
                 final ChangeLogSet<?> changeLogSet = ((AbstractBuild<?,?>)run).getChangeSet();
                 if (changeLogSet == null) {
@@ -75,6 +76,7 @@ public final class RecipientProviderUtilities {
                     addChangeSetUsers(changeLogSet, users, debug);
                 }
             } else {
+                // TODO: core 2.60+, workflow-job 2.12+: Decide whether to remove this logic since it won't be needed for Pipelines any more.
                 try {
                     Method getChangeSets = run.getClass().getMethod("getChangeSets");
                     if (List.class.isAssignableFrom(getChangeSets.getReturnType())) {
