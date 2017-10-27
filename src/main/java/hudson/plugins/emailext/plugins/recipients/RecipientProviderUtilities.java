@@ -28,11 +28,13 @@ import com.google.common.collect.Iterables;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
+import hudson.model.Descriptor;
 import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.plugins.emailext.EmailRecipientUtils;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.MailSender;
@@ -199,7 +201,8 @@ public final class RecipientProviderUtilities {
                                 }
                             }
                         } catch (UsernameNotFoundException x) {
-                            if (SEND_TO_UNKNOWN_USERS) {
+                            
+                            if (SEND_TO_UNKNOWN_USERS || ExtendedEmailPublisher.descriptor().isAllowUnregisteredEnabled() ) {
                                 listener.getLogger().printf("Warning: %s is not a recognized user, but sending mail anyway%n", userAddress);
                             } else {
                                 listener.getLogger().printf("Not sending mail to unregistered user %s because your SCM"

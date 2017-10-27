@@ -86,7 +86,8 @@ f.section(title: _("Extended E-mail Notification")) {
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/debugMode.html", checked: descriptor.isDebugMode(), name: "ext_mailer_debug_mode", title: _("Enable Debug Mode")) 
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/requireAdmin.html", checked: descriptor.isAdminRequiredForTemplateTesting(), name: "ext_mailer_require_admin_for_template_testing", title: _("Require Administrator for Template Testing"))
   f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/watching.html", checked: descriptor.isWatchingEnabled(), name: "ext_mailer_watching_enabled", title: _("Enable watching for jobs"))
-
+  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/allowUnregistered.html", checked: descriptor.isAllowUnregisteredEnabled(), name: "ext_mailer_allow_unregistered_enabled", title: _("Allow sending to unregistered users"))
+  
   f.advanced(title: _("Default Triggers")) {
     f.entry(title: _("Default Triggers"), help: "/plugin/email-ext/help/globalConfig/defaultTriggers.html") {
       hudson.plugins.emailext.plugins.EmailTrigger.all().each { t ->
