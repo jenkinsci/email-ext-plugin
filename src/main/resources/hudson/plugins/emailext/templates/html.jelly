@@ -135,8 +135,13 @@ TD.console { font-family:Courier New; }
     <j:forEach var="junitResult" items="${it.JUnitTestResult}">
       <j:forEach var="packageResult" items="${junitResult.getChildren()}">
         <TR><TD class="bg2" colspan="2"> Name: ${packageResult.getName()} Failed: ${packageResult.getFailCount()} test(s), Passed: ${packageResult.getPassCount()} test(s), Skipped: ${packageResult.getSkipCount()} test(s), Total: ${packageResult.getPassCount()+packageResult.getFailCount()+packageResult.getSkipCount()} test(s)</TD></TR>
+        <j:forEach var="test" items="${packageResult.getPassedTests()}">
+          <j:if test="${test.status == 'FIXED'}">
+            <TR bgcolor="white"><TD class="test_passed" colspan="2"><B><li>Fixed: ${test.getFullName()} (${test.getAge()})</li></B></TD></TR>
+          </j:if>
+        </j:forEach>
         <j:forEach var="failed_test" items="${packageResult.getFailedTests()}">
-          <TR bgcolor="white"><TD class="test_failed" colspan="2"><B><li>Failed: ${failed_test.getFullName()} </li></B></TD></TR>
+          <TR bgcolor="white"><TD class="test_failed" colspan="2"><B><li>Failed: ${failed_test.getFullName()} (${failed_test.getAge()})</li></B></TD></TR>
         </j:forEach>
       </j:forEach> 
     </j:forEach>  
