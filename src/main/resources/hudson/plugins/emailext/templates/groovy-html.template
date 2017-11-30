@@ -1,156 +1,238 @@
 <STYLE>
-BODY, TABLE, TD, TH, P {
-  font-family:Verdana,Helvetica,sans serif;
-  font-size:11px;
-  color:black;
-}
-h1 { color:black; }
-h2 { color:black; }
-h3 { color:black; }
-TD.bg1 { color:white; background-color:#0000C0; font-size:120% }
-TD.bg2 { color:white; background-color:#4040FF; font-size:110% }
-TD.bg3 { color:white; background-color:#8080FF; }
-TD.test_passed { color:blue; }
-TD.test_failed { color:red; }
-TD.console { font-family:Courier New; }
+  BODY, TABLE, TD, TH, P {
+    font-family: Calibri, Verdana, Helvetica, sans serif;
+    font-size: 12px;
+    color: black;
+  }
+  .console {
+    font-family: Courier New;
+  }
+  .filesChanged {
+    width: 10%;
+    padding-left: 10px;
+  }
+  .section {
+    width: 100%;
+    border: thin black dotted;
+  }
+  .td-title-main {
+    color: white;
+    font-size: 200%;
+    padding-left: 5px;
+    font-weight: bold;
+  }
+  .td-title {
+    color: white;
+    font-size: 120%;
+    font-weight: bold;
+    padding-left: 5px;
+    text-transform: uppercase;
+  }
+  .td-title-tests {
+    font-weight: bold;
+    font-size: 120%;
+  }
+  .tr-title {
+    background-color: <%= (build.result == null || build.result.toString() == 'SUCCESS') ? 'green' : build.result.toString() == 'FAILURE' ? 'red' : 'yellow' %>;
+  }
+  .test-failed {
+    padding-left: 20px;
+  }
 </STYLE>
 <BODY>
+  <!-- BUILD RESULT -->
+  <table class="section">
+    <tr class="tr-title">
+      <td class="td-title-main" colspan=2>
+        BUILD ${build.result ?: 'COMPLETED'}
+      </td>
+    </tr>
+    <tr>
+      <td>URL:</td>
+      <td><A href="${rooturl}${build.url}">${rooturl}${build.url}</A></td>
+    </tr>
+    <tr>
+      <td>Project:</td>
+      <td>${project.name}</td>
+    </tr>
+    <tr>
+      <td>Date:</td>
+      <td>${it.timestampString}</td>
+    </tr>
+    <tr>
+      <td>Duration:</td>
+      <td>${build.durationString}</td>
+    </tr>
+    <tr>
+      <td>Cause:</td>
+      <td><% build.causes.each() { cause -> %> ${cause.shortDescription} <%  } %></td>
+    </tr>
+  </table>
+  <br/>
 
-<TABLE>
-  <TR><TD align="right"><IMG SRC="${rooturl}static/e59dfe28/images/32x32/<%= (build.result == null || build.result.toString() == 'SUCCESS') ? "blue.gif" : build.result.toString() == 'FAILURE' ? 'red.gif' : 'yellow.gif' %>" />
-  </TD><TD valign="center"><B style="font-size: 200%;">BUILD ${build.result ?: 'SUCCESSFUL'}</B></TD></TR>
-  <TR><TD>URL</TD><TD><A href="${rooturl}${build.url}">${rooturl}${build.url}</A></TD></TR>
-  <TR><TD>Project:</TD><TD>${project.name}</TD></TR>
-  <TR><TD>Date:</TD><TD>${it.timestampString}</TD></TR>
-  <TR><TD>Duration:</TD><TD>${build.durationString}</TD></TR>
-  <TR><TD>Cause:</TD><TD><% build.causes.each() { cause -> %> ${cause.shortDescription} <%  } %></TD></TR>
-</TABLE>
-<BR/>
-
-<!-- CHANGE SET -->
-<% def changeSets = build.changeSets
-if(changeSets != null) {
-	def hadChanges = false %>
-	<TABLE width="100%">
-    <TR><TD class="bg1" colspan="2"><B>CHANGES</B></TD></TR>
-
-<% 	changeSets.each() { cs_list ->
-      cs_list.each() { cs ->
-		  hadChanges = true %>
-        <TR>
-          <TD colspan="2" class="bg2">&nbsp;&nbsp;Revision <B><%= cs.metaClass.hasProperty('commitId') ? cs.commitId : cs.metaClass.hasProperty('revision') ? cs.revision :
-          cs.metaClass.hasProperty('changeNumber') ? cs.changeNumber : "" %></B> by
-            <B><%= cs.author %>: </B>
-            <B>(${cs.msgAnnotated})</B>
-           </TD>
-        </TR>
-<%		cs.affectedFiles.each() { p -> %>
-        <TR>
-          <TD width="10%">&nbsp;&nbsp;${p.editType.name}</TD>
-          <TD>${p.path}</TD>
-        </TR>
-<%		}
-	  }
-  }
-
-	if(!hadChanges) { %>
-        <TR><TD colspan="2">No Changes</TD></TR>
-<%	} %>
-  </TABLE>
-<BR/>
-<% } %>
+  <!-- CHANGE SET -->
+  <%
+  def changeSets = build.changeSets
+  if(changeSets != null) {
+    def hadChanges = false %>
+  <table class="section">
+    <tr class="tr-title">
+      <td class="td-title" colspan="2">CHANGES</td>
+    </tr>
+    <% changeSets.each() { 
+      cs_list -> cs_list.each() { 
+        cs -> hadChanges = true %>
+    <tr>
+      <td>
+        Revision
+        <%= cs.metaClass.hasProperty('commitId') ? cs.commitId : cs.metaClass.hasProperty('revision') ? cs.revision : cs.metaClass.hasProperty('changeNumber') ? cs.changeNumber : "" %>
+        by <B><%= cs.author %></B>
+      </td>
+      <td>${cs.msgAnnotated}</td>
+    </tr>
+        <% cs.affectedFiles.each() {
+          p -> %>
+    <tr>
+      <td class="filesChanged">${p.editType.name}</td>
+      <td>${p.path}</td>
+    </tr>
+        <% }
+      }
+    }
+    if ( !hadChanges ) { %>
+    <tr>
+      <td colspan="2">No Changes</td>
+    </tr>
+    <% } %>
+  </table>
+  <br/>
+  <% } %>
 
 <!-- ARTIFACTS -->
-<% def artifacts = build.artifacts
-if(artifacts != null && artifacts.size() > 0) { %>
-  <TABLE width="100%">
-    <TR><TD class="bg1"><B>BUILD ARTIFACTS</B></TD></TR>
-    <TR>
-      <TD>
-<% 		artifacts.each() { f -> %>
-      	  <li>
-      	    <a href="${rooturl}${build.url}artifact/${f}">${f}</a>
-      	  </li>
-<%		} %>
-      </TD>
-    </TR>
-  </TABLE>
-<BR/>
-<% } %>
+  <% 
+  def artifacts = build.artifacts
+  if ( artifacts != null && artifacts.size() > 0 ) { %>
+  <table class="section">
+    <tr class="tr-title">
+      <td class="td-title">BUILD ARTIFACTS</td>
+    </tr>
+    <tr>
+      <td>
+    <% artifacts.each() {
+      f -> %>
+        <li>
+          <a href="${rooturl}${build.url}artifact/${f}">${f}</a>
+        </li>
+    <% } %>
+      </td>
+    </tr>
+  </table>
+  <br/>
+  <% } %>
 
 <!-- MAVEN ARTIFACTS -->
-<%
-try {
-  def mbuilds = build.moduleBuilds
-  if(mbuilds != null) { %>
-  <TABLE width="100%">
-      <TR><TD class="bg1"><B>BUILD ARTIFACTS</B></TD></TR>
-<%
-    try {
-        mbuilds.each() { m -> %>
-        <TR><TD class="bg2"><B>${m.key.displayName}</B></TD></TR>
-<%		m.value.each() { mvnbld ->
-			def artifactz = mvnbld.artifacts
-			if(artifactz != null && artifactz.size() > 0) { %>
-      <TR>
-        <TD>
-<%				artifactz.each() { f -> %>
-      	    <li>
-      	      <a href="${rooturl}${mvnbld.url}artifact/${f}">${f}</a>
-      	    </li>
-<%				} %>
-      	</TD>
-      </TR>
-<%			}
-		}
-       }
-    } catch(e) {
-	// we don't do anything
-    }  %>
-  </TABLE>
-<BR/>
-<% }
-
-}catch(e) {
-	// we don't do anything
-}
-%>
+  <%
+  try {
+    def mbuilds = build.moduleBuilds
+    if(mbuilds != null) { %>
+  <table class="section">
+    <tr class="tr-title">
+      <td class="td-title">BUILD ARTIFACTS</td>
+    </tr>
+      <%
+      try {
+        mbuilds.each() {
+          m -> %>
+    <tr>
+      <td><B>${m.key.displayName}</B></td>
+    </tr>
+          <%
+          m.value.each() { 
+            mvnbld -> def artifactz = mvnbld.artifacts
+            if ( artifactz != null && artifactz.size() > 0) { %>
+    <tr>
+      <td>
+              <% artifactz.each() {
+                f -> %>
+        <li>
+          <a href="${rooturl}${mvnbld.url}artifact/${f}">${f}</a>
+        </li>
+              <% } %>
+      </td>
+    </tr>
+            <% }
+          }
+        }
+      } catch(e) {
+        // we don't do anything
+      } %>
+  </table>
+  <br/>
+    <% }
+  } catch(e) {
+    // we don't do anything
+  } %>
 
 <!-- JUnit TEMPLATE -->
 
-<% def junitResultList = it.JUnitTestResult
-try {
- def cucumberTestResultAction = it.getAction("org.jenkinsci.plugins.cucumber.jsontestsupport.CucumberTestResultAction")
- junitResultList.add(cucumberTestResultAction.getResult())
-} catch(e) {
-        //cucumberTestResultAction not exist in this build
-}
-if (junitResultList.size() > 0) { %>
- <TABLE width="100%">
- <TR><TD class="bg1" colspan="2"><B>${junitResultList.first().displayName}</B></TD></TR>
- <% junitResultList.each{
-  junitResult -> %>
-     <% junitResult.getChildren().each { packageResult -> %>
-        <TR><TD class="bg2" colspan="2"> Name: ${packageResult.getName()} Failed: ${packageResult.getFailCount()} test(s), Passed: ${packageResult.getPassCount()} test(s), Skipped: ${packageResult.getSkipCount()} test(s), Total: ${packageResult.getPassCount()+packageResult.getFailCount()+packageResult.getSkipCount()} test(s)</TD></TR>
-        <% packageResult.getFailedTests().each{ failed_test -> %>
-          <TR bgcolor="white"><TD class="test_failed" colspan="2"><B><li>Failed: ${failed_test.getFullName()} </li></B></TD></TR>
+  <%
+  def junitResultList = it.JUnitTestResult
+  try {
+    def cucumberTestResultAction = it.getAction("org.jenkinsci.plugins.cucumber.jsontestsupport.CucumberTestResultAction")
+    junitResultList.add( cucumberTestResultAction.getResult() )
+  } catch(e) {
+    //cucumberTestResultAction not exist in this build
+  }
+  if ( junitResultList.size() > 0 ) { %>
+  <table class="section">
+    <tr class="tr-title">
+      <td class="td-title" colspan="5">${junitResultList.first().displayName}</td>
+    </tr>
+    <tr>
+        <td class="td-title-tests">Name</td>
+        <td class="td-title-tests">Failed</td>
+        <td class="td-title-tests">Passed</td>
+        <td class="td-title-tests">Skipped</td>
+        <td class="td-title-tests">Total</td>
+      </tr>
+    <% junitResultList.each {
+      junitResult -> junitResult.getChildren().each {
+        packageResult -> %>
+    <tr>
+      <td>${packageResult.getName()}</td>
+      <td>${packageResult.getFailCount()}</td>
+      <td>${packageResult.getPassCount()}</td>
+      <td>${packageResult.getSkipCount()}</td>
+      <td>${packageResult.getPassCount() + packageResult.getFailCount() + packageResult.getSkipCount()}</td>
+    </tr>
+        <% packageResult.getFailedTests().each{
+          failed_test -> %>
+    <tr>
+      <td class="test-failed" colspan="5">
+        Failed: ${failed_test.getFullName()}
+      </td>
+    </tr>
         <% }
       }
- } %>
- </TABLE>
- <BR/>
-<%
-} %>
+    } %>
+  </table>
+  <br/>
+  <% } %>
 
 <!-- CONSOLE OUTPUT -->
-<% if(build.result==hudson.model.Result.FAILURE) { %>
-<TABLE width="100%" cellpadding="0" cellspacing="0">
-<TR><TD class="bg1"><B>CONSOLE OUTPUT</B></TD></TR>
-<% 	build.getLog(100).each() { line -> %>
-	<TR><TD class="console">${org.apache.commons.lang.StringEscapeUtils.escapeHtml(line)}</TD></TR>
-<% 	} %>
-</TABLE>
-<BR/>
-<% } %>
-
+  <%
+  if ( build.result == hudson.model.Result.FAILURE ) { %>
+  <table class="section" cellpadding="0" cellspacing="0">
+    <tr class="tr-title">
+      <td class="td-title">CONSOLE OUTPUT</td>
+    </tr>
+    <% 	build.getLog(100).each() {
+      line -> %>
+	  <tr>
+      <td class="console">${org.apache.commons.lang.StringEscapeUtils.escapeHtml(line)}</td>
+    </tr>
+    <% } %>
+  </table>
+  <br/>
+  <% } %>
 </BODY>
