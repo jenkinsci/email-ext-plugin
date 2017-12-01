@@ -32,8 +32,15 @@
     font-weight: bold;
     font-size: 120%;
   }
+  .td-header-maven-module {
+    font-weight: bold;
+    font-size: 120%;    
+  }
+  .td-maven-artifact {
+    padding-left: 5px;
+  }
   .tr-title {
-    background-color: <%= (build.result == null || build.result.toString() == 'SUCCESS') ? 'green' : build.result.toString() == 'FAILURE' ? 'red' : 'yellow' %>;
+    background-color: <%= (build.result == null || build.result.toString() == 'SUCCESS') ? 'green' : build.result.toString() == 'FAILURE' ? 'red' : '#f4e242' %>;
   }
   .test-failed {
     padding-left: 20px;
@@ -116,16 +123,14 @@
     <tr class="tr-title">
       <td class="td-title">BUILD ARTIFACTS</td>
     </tr>
-    <tr>
-      <td>
     <% artifacts.each() {
       f -> %>
-        <li>
+      <tr>
+        <td>
           <a href="${rooturl}${build.url}artifact/${f}">${f}</a>
-        </li>
-    <% } %>
       </td>
     </tr>
+    <% } %>
   </table>
   <br/>
   <% } %>
@@ -134,7 +139,7 @@
   <%
   try {
     def mbuilds = build.moduleBuilds
-    if(mbuilds != null) { %>
+    if ( mbuilds != null ) { %>
   <table class="section">
     <tr class="tr-title">
       <td class="td-title">BUILD ARTIFACTS</td>
@@ -144,19 +149,17 @@
         mbuilds.each() {
           m -> %>
     <tr>
-      <td><B>${m.key.displayName}</B></td>
+      <td class="td-header-maven-module">${m.key.displayName}</td>
     </tr>
           <%
           m.value.each() { 
             mvnbld -> def artifactz = mvnbld.artifacts
             if ( artifactz != null && artifactz.size() > 0) { %>
     <tr>
-      <td>
+      <td class="td-maven-artifact">
               <% artifactz.each() {
                 f -> %>
-        <li>
-          <a href="${rooturl}${mvnbld.url}artifact/${f}">${f}</a>
-        </li>
+        <a href="${rooturl}${mvnbld.url}artifact/${f}">${f}</a><br/>
               <% } %>
       </td>
     </tr>
@@ -209,7 +212,7 @@
           failed_test -> %>
     <tr>
       <td class="test-failed" colspan="5">
-        Failed: ${failed_test.getFullName()}
+        ${failed_test.getFullName()} (Age: ${failed_test.getAge()})
       </td>
     </tr>
         <% }
