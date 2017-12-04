@@ -42,8 +42,14 @@
   .tr-title {
     background-color: <%= (build.result == null || build.result.toString() == 'SUCCESS') ? 'green' : build.result.toString() == 'FAILURE' ? 'red' : '#f4e242' %>;
   }
-  .test-failed {
+  .test {
     padding-left: 20px;
+  }
+  .test-fixed {
+    color: green;
+  }
+  .test-failed {
+    color: red;
   }
 </STYLE>
 <BODY>
@@ -208,10 +214,18 @@
       <td>${packageResult.getSkipCount()}</td>
       <td>${packageResult.getPassCount() + packageResult.getFailCount() + packageResult.getSkipCount()}</td>
     </tr>
-        <% packageResult.getFailedTests().each{
+    <% packageResult.getPassedTests().findAll({it.getStatus().toString() == "FIXED";}).each{
+        test -> %>
+            <tr>
+              <td class="test test-fixed" colspan="5">
+                ${test.getFullName()} ${test.getStatus()}
+              </td>
+            </tr>
+        <% } %>
+        <% packageResult.getFailedTests().sort({a,b -> a.getAge() <=> b.getAge()}).each{
           failed_test -> %>
     <tr>
-      <td class="test-failed" colspan="5">
+      <td class="test test-failed" colspan="5">
         ${failed_test.getFullName()} (Age: ${failed_test.getAge()})
       </td>
     </tr>
