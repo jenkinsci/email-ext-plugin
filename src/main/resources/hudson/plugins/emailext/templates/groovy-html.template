@@ -40,16 +40,16 @@
     padding-left: 5px;
   }
   .tr-title {
-    background-color: <%= (build.result == null || build.result.toString() == 'SUCCESS') ? 'green' : build.result.toString() == 'FAILURE' ? 'red' : '#f4e242' %>;
+    background-color: <%= (build.result == null || build.result.toString() == 'SUCCESS') ? '#27AE60' : build.result.toString() == 'FAILURE' ? '#E74C3C' : '#f4e242' %>;
   }
   .test {
     padding-left: 20px;
   }
   .test-fixed {
-    color: green;
+    color: #27AE60;
   }
   .test-failed {
-    color: red;
+    color: #E74C3C;
   }
 </STYLE>
 <BODY>
