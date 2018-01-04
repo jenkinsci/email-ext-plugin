@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>2.27</version>
+        <version>3.2</version>
         <relativePath />
     </parent>
 
@@ -33,7 +33,7 @@
         <workflow-step-api.version>2.9</workflow-step-api.version>
         <workflow-aggregator.version>2.5</workflow-aggregator.version>
         <workflow-job.version>2.11</workflow-job.version>
-        <jenkins.version>2.0</jenkins.version>
+        <jenkins.version>2.7.3</jenkins.version>
         <workflow-api.version>2.11</workflow-api.version>
         <workflow-cps.version>2.29</workflow-cps.version>
         <workflow-durable-task-step.version>2.11</workflow-durable-task-step.version>
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
-            <version>1.4</version>
+            <version>1.4.4</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -273,13 +273,6 @@
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
             <version>3.20.0-GA</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.main</groupId>
-            <artifactId>jenkins-war</artifactId>
-            <type>war</type>
-            <version>${jenkins-war.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
