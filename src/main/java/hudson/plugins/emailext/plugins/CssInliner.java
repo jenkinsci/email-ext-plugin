@@ -96,7 +96,7 @@ public class CssInliner {
         applyStyles(doc);
         inlineImages(doc);
 
-        doc.outputSettings(doc.outputSettings().prettyPrint(false).escapeMode(Entities.EscapeMode.xhtml));
+        doc.outputSettings(doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml).prettyPrint(false).escapeMode(Entities.EscapeMode.extended));
         return StringEscapeUtils.unescapeHtml(doc.outerHtml());
     }
 
