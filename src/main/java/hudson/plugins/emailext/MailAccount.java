@@ -57,8 +57,8 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
         return smtpUsername;
     }
 
-    public String getSmtpPassword(){
-        return Secret.toString(smtpPassword);
+    public Secret getSmtpPassword(){
+        return smtpPassword;
     }
 
     public boolean isUseSsl(){

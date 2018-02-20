@@ -293,7 +293,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(acc.getSmtpUsername(), acc.getSmtpPassword());
+                return new PasswordAuthentication(acc.getSmtpUsername(), Secret.toString(acc.getSmtpPassword()));
             }
         };
     }
@@ -314,29 +314,29 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         mailAccount.setSmtpHost(smtpServer);
     }
 
-    public String getSmtpAuthUsername() {
+    public String getSmtpUsername() {
         return mailAccount.getSmtpUsername();
     }
 
     @SuppressWarnings("unused")
-    public void setSmtpAuthUsername(String username) {
+    public void setSmtpUsername(String username) {
         mailAccount.setSmtpUsername(username);
     }
 
-    public String getSmtpAuthPassword() {
+    public Secret getSmtpPassword() {
         return mailAccount.getSmtpPassword();
     }
 
     @SuppressWarnings("unused")
-    public void setSmtpAuthPassword(String password) {
+    public void setSmtpPassword(String password) {
         mailAccount.setSmtpPassword(password);
     }
 
     // Make API match Mailer plugin
     @SuppressWarnings("unused")
     public void setSmtpAuth(String userName, String password) {
-        setSmtpAuthUsername(userName);
-        setSmtpAuthPassword(password);
+        setSmtpUsername(userName);
+        setSmtpPassword(password);
     }
 
     public boolean getUseSsl() {

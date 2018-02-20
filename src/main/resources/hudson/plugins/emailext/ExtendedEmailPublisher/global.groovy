@@ -15,11 +15,11 @@ f.section(title: _("Extended E-mail Notification")) {
   }
   f.advanced() {
     f.optionalBlock(help: "/help/tasks/mailer/smtpAuth.html", checked: descriptor.mailAccount.smtpUsername!=null, name: "ext_mailer_use_smtp_auth", title: _("Use SMTP Authentication")) {
-      f.entry(title: _("User Name")) {
-        input(type: "text", class: "setting-input", value: descriptor.mailAccount.smtpUsername, name: "ext_mailer_smtp_username")
+      f.entry(field: "smtpUsername", title: _("User Name")) {
+        f.textbox(name: "ext_mailer_smtp_username")
       }
-      f.entry(title: _("Password")) {
-        input(type: "password", class: "setting-input", value: descriptor.mailAccount.smtpPassword, name: "ext_mailer_smtp_password")
+      f.entry(field: "smtpPassword", title: _("Password")) {
+        f.password(name: "ext_mailer_smtp_password")
       }
     }
     f.entry(title: _("Advanced Email Properties")) {
