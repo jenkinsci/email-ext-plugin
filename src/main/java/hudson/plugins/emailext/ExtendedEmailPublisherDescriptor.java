@@ -29,6 +29,7 @@ import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -36,6 +37,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * These settings are global configurations
@@ -49,6 +52,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      * changelog, to send e-mails. Null if not configured.
      */
     private String defaultSuffix;
+
+    private String customScript;
 
     /**
      * Jenkins's own URL, to put into the e-mail.
@@ -263,6 +268,14 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         // avoid hang by setting some timeout.
         props.put("mail.smtp.timeout", "60000");
         props.put("mail.smtp.connectiontimeout", "60000");
+
+        try{
+            if(customScript != null && !isBlank(customScript.trim())){
+                props.load(new StringReader(customScript));
+            }
+        }catch(IOException e){
+            LOGGER.log(Level.WARNING, "Parameters parse fail.", e);
+        }
 
         return Session.getInstance(props, getAuthenticator());
     }
@@ -579,6 +592,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         // Configure the smtp server
         smtpHost = nullify(req.getParameter("ext_mailer_smtp_server"));
         defaultSuffix = nullify(req.getParameter("ext_mailer_default_suffix"));
+
+        customScript = nullify(req.getParameter("ext_mailer_custom_script"));
 
         // specify authentication information
         if (req.hasParameter("ext_mailer_use_smtp_auth")) {
