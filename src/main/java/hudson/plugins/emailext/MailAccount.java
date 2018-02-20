@@ -11,22 +11,22 @@ import static hudson.Util.nullify;
 
 public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     private String address;
-    private String smtp_host;
-    private String smtp_port;
-    private String smtp_username;
-    private Secret smtp_password;
-    private boolean use_ssl;
-    private String adv_properties;
+    private String smtpHost;
+    private String smtpPort;
+    private String smtpUsername;
+    private Secret smtpPassword;
+    private boolean useSsl;
+    private String advProperties;
 
     @DataBoundConstructor
     public MailAccount(JSONObject jo){
         address = nullify(jo.optString("address", null));
-        smtp_host = nullify(jo.optString("smtp_host", null));
-        smtp_port = nullify(jo.optString("smtp_port", null));
-        smtp_username = nullify(jo.optString("smtp_username", null));
-        smtp_password = Secret.fromString(nullify(jo.optString("smtp_password", null)));
-        use_ssl = jo.optBoolean("use_ssl", false);
-        adv_properties = nullify(jo.optString("adv_properties", null));
+        smtpHost = nullify(jo.optString("smtpHost", null));
+        smtpPort = nullify(jo.optString("smtpPort", null));
+        smtpUsername = nullify(jo.optString("smtpUsername", null));
+        smtpPassword = Secret.fromString(nullify(jo.optString("smtpPassword", null)));
+        useSsl = jo.optBoolean("useSsl", false);
+        advProperties = nullify(jo.optString("advProperties", null));
     }
 
     public MailAccount(){
@@ -45,55 +45,55 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
         return address;
     }
 
-    public String getSmtp_host(){
-        return smtp_host;
+    public String getSmtpHost(){
+        return smtpHost;
     }
 
-    public String getSmtp_port(){
-        return smtp_port;
+    public String getSmtpPort(){
+        return smtpPort;
     }
 
-    public String getSmtp_username(){
-        return smtp_username;
+    public String getSmtpUsername(){
+        return smtpUsername;
     }
 
-    public String getSmtp_password(){
-        return Secret.toString(smtp_password);
+    public String getSmtpPassword(){
+        return Secret.toString(smtpPassword);
     }
 
-    public boolean isUse_ssl(){
-        return use_ssl;
+    public boolean isUseSsl(){
+        return useSsl;
     }
 
-    public String getAdv_properties(){
-        return adv_properties;
+    public String getAdvProperties(){
+        return advProperties;
     }
 
     public void setAddress(String address){
         this.address = address;
     }
 
-    public void setSmtp_host(String smtp_host){
-        this.smtp_host = smtp_host;
+    public void setSmtpHost(String smtpHost){
+        this.smtpHost = smtpHost;
     }
 
-    public void setSmtp_port(String smtp_port){
-        this.smtp_port = smtp_port;
+    public void setSmtpPort(String smtpPort){
+        this.smtpPort = smtpPort;
     }
 
-    public void setSmtp_username(String smtp_username){
-        this.smtp_username = smtp_username;
+    public void setSmtpUsername(String smtpUsername){
+        this.smtpUsername = smtpUsername;
     }
 
-    public void setSmtp_password(String smtp_password){
-        this.smtp_password = Secret.fromString(smtp_password);;
+    public void setSmtpPassword(String smtpPassword){
+        this.smtpPassword = Secret.fromString(smtpPassword);;
     }
 
-    public void setUse_ssl(boolean use_ssl){
-        this.use_ssl = use_ssl;
+    public void setUseSsl(boolean useSsl){
+        this.useSsl = useSsl;
     }
 
-    public void setAdv_properties(String adv_properties){
-        this.adv_properties = adv_properties;
+    public void setAdvProperties(String advProperties){
+        this.advProperties = advProperties;
     }
 }

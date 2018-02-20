@@ -8,28 +8,28 @@ t = namespace("/lib/hudson")
 
 f.section(title: _("Extended E-mail Notification")) {
   f.entry(help: "/descriptor/hudson.tasks.Mailer/help/smtpServer", title: _("SMTP server")) {
-    input(type: "text", class: "setting-input", value: descriptor.mailAccount.smtp_host, name: "ext_mailer_smtp_server")
+    input(type: "text", class: "setting-input", value: descriptor.mailAccount.smtpHost, name: "ext_mailer_smtp_server")
   }
   f.entry(help: "/descriptor/hudson.tasks.Mailer/help/defaultSuffix", title: _("Default user E-mail suffix")) {
     input(type: "text", class: "setting-input", value: descriptor.defaultSuffix, name: "ext_mailer_default_suffix")
   }
   f.advanced() {
-    f.optionalBlock(help: "/help/tasks/mailer/smtpAuth.html", checked: descriptor.mailAccount.smtp_username!=null, name: "ext_mailer_use_smtp_auth", title: _("Use SMTP Authentication")) {
+    f.optionalBlock(help: "/help/tasks/mailer/smtpAuth.html", checked: descriptor.mailAccount.smtpUsername!=null, name: "ext_mailer_use_smtp_auth", title: _("Use SMTP Authentication")) {
       f.entry(title: _("User Name")) {
-        input(type: "text", class: "setting-input", value: descriptor.mailAccount.smtp_username, name: "ext_mailer_smtp_username")
+        input(type: "text", class: "setting-input", value: descriptor.mailAccount.smtpUsername, name: "ext_mailer_smtp_username")
       }
       f.entry(title: _("Password")) {
-        input(type: "password", class: "setting-input", value: descriptor.mailAccount.smtp_password, name: "ext_mailer_smtp_password")
+        input(type: "password", class: "setting-input", value: descriptor.mailAccount.smtpPassword, name: "ext_mailer_smtp_password")
       }
     }
     f.entry(title: _("Advanced Email Properties")) {
-      f.textarea(class: "setting-input", value: descriptor.mailAccount.adv_properties, name: "ext_mailer_adv_properties")
+      f.textarea(class: "setting-input", value: descriptor.mailAccount.advProperties, name: "ext_mailer_adv_properties")
     }
     f.entry(help: "/descriptor/hudson.tasks.Mailer/help/useSsl", title: _("Use SSL")) {
-      f.checkbox(checked: descriptor.mailAccount.use_ssl, name: "ext_mailer_smtp_use_ssl")
+      f.checkbox(checked: descriptor.mailAccount.useSsl, name: "ext_mailer_smtp_use_ssl")
     }
     f.entry(help: "/descriptor/hudson.tasks.Mailer/help/smtpPort", title: _("SMTP port")) {
-      input(type: "text", class: "setting-input", value: descriptor.mailAccount.smtp_port, name: "ext_mailer_smtp_port")
+      input(type: "text", class: "setting-input", value: descriptor.mailAccount.smtpPort, name: "ext_mailer_smtp_port")
     }
     f.entry(title: _("Charset")) {
       input(type: "text", class: "setting-input", value: descriptor.charset, name: "ext_mailer_charset")
@@ -41,22 +41,22 @@ f.section(title: _("Extended E-mail Notification")) {
                   f.entry(field: "address", title: _("E-mail address")) {
                       f.textbox()
                   }
-                  f.entry(field: "smtp_host", title: _("SMTP Server")) {
+                  f.entry(field: "smtpHost", title: _("SMTP Server")) {
                       f.textbox()
                   }
-                  f.entry(field: "smtp_port", title: _("SMTP Port")) {
+                  f.entry(field: "smtpPort", title: _("SMTP Port")) {
                       f.textbox()
                   }
-                  f.entry(field: "smtp_username", title: _("User Name")) {
+                  f.entry(field: "smtpUsername", title: _("User Name")) {
                       f.textbox()
                   }
-                  f.entry(field: "smtp_password", title: _("Password")) {
+                  f.entry(field: "smtpPassword", title: _("Password")) {
                       f.password()
                   }
-                  f.entry(field: "use_ssl", title: _("Use SSL")) {
+                  f.entry(field: "useSsl", title: _("Use SSL")) {
                       f.checkbox()
                   }
-                  f.entry(field: "adv_properties", title: _("Advanced Email Properties")) {
+                  f.entry(field: "advProperties", title: _("Advanced Email Properties")) {
                       f.textarea()
                   }
               }

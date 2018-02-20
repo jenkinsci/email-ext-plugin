@@ -9,7 +9,6 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
-import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONArray;
@@ -227,13 +226,13 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             }
         }
 
-        if (acc.getSmtp_host() != null) {
-            props.put("mail.smtp.host", acc.getSmtp_host());
+        if (acc.getSmtpHost() != null) {
+            props.put("mail.smtp.host", acc.getSmtpHost());
         }
-        if (acc.getSmtp_port() != null) {
-            props.put("mail.smtp.port", acc.getSmtp_port());
+        if (acc.getSmtpPort() != null) {
+            props.put("mail.smtp.port", acc.getSmtpPort());
         }
-        if (acc.isUse_ssl()) {
+        if (acc.isUseSsl()) {
             /* This allows the user to override settings by setting system properties but
              * also allows us to use the default SMTPs port of 465 if no port is already set.
              * It would be cleaner to use smtps, but that's done by calling session.getTransport()...
@@ -241,7 +240,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
              * coordinate, and we can make it work through setting mail.smtp properties.
              */
             if (props.getProperty("mail.smtp.socketFactory.port") == null) {
-                String port = acc.getSmtp_port() == null ? "465" : mailAccount.getSmtp_port();
+                String port = acc.getSmtpPort() == null ? "465" : mailAccount.getSmtpPort();
                 props.put("mail.smtp.port", port);
                 props.put("mail.smtp.socketFactory.port", port);
             }
@@ -250,7 +249,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             }
             props.put("mail.smtp.socketFactory.fallback", "false");
         }
-        if (acc.getSmtp_username() != null) {
+        if (acc.getSmtpUsername() != null) {
             props.put("mail.smtp.auth", "true");
         }
 
@@ -259,7 +258,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         props.put("mail.smtp.connectiontimeout", "60000");
 
         try {
-            String ap = acc.getAdv_properties();
+            String ap = acc.getAdvProperties();
             if (ap != null && !isBlank(ap.trim())) {
                 props.load(new StringReader(ap));
             }
@@ -271,14 +270,14 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     private Authenticator getAuthenticator(final MailAccount acc) {
-        if (acc == null || acc.getSmtp_username() == null) {
+        if (acc == null || acc.getSmtpUsername() == null) {
             return null;
         }
         return new Authenticator() {
 
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(acc.getSmtp_username(), acc.getSmtp_password());
+                return new PasswordAuthentication(acc.getSmtpUsername(), acc.getSmtpPassword());
             }
         };
     }
@@ -292,29 +291,29 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public String getSmtpServer() {
-        return mailAccount.getSmtp_host();
+        return mailAccount.getSmtpHost();
     }
 
     public void setSmtpServer(String smtpServer) {
-        mailAccount.setSmtp_host(smtpServer);
+        mailAccount.setSmtpHost(smtpServer);
     }
 
     public String getSmtpAuthUsername() {
-        return mailAccount.getSmtp_username();
+        return mailAccount.getSmtpUsername();
     }
 
     @SuppressWarnings("unused")
     public void setSmtpAuthUsername(String username) {
-        mailAccount.setSmtp_username(username);
+        mailAccount.setSmtpUsername(username);
     }
 
     public String getSmtpAuthPassword() {
-        return mailAccount.getSmtp_password();
+        return mailAccount.getSmtpPassword();
     }
 
     @SuppressWarnings("unused")
     public void setSmtpAuthPassword(String password) {
-        mailAccount.setSmtp_password(password);
+        mailAccount.setSmtpPassword(password);
     }
 
     // Make API match Mailer plugin
@@ -325,21 +324,21 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public boolean getUseSsl() {
-        return mailAccount.isUse_ssl();
+        return mailAccount.isUseSsl();
     }
 
     @SuppressWarnings("unused")
     public void setUseSsl(boolean useSsl) {
-        mailAccount.setUse_ssl(useSsl);
+        mailAccount.setUseSsl(useSsl);
     }
 
     public String getSmtpPort() {
-        return mailAccount.getSmtp_port();
+        return mailAccount.getSmtpPort();
     }
 
     @SuppressWarnings("unused")
     public void setSmtpPort(String port) {
-        mailAccount.setSmtp_port(nullify(port));
+        mailAccount.setSmtpPort(nullify(port));
     }
 
     public String getCharset() {
@@ -583,10 +582,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             throws FormException {
 
         // Configure the smtp server
-        mailAccount.setSmtp_host(nullify(req.getParameter("ext_mailer_smtp_server")));
+        mailAccount.setSmtpHost(nullify(req.getParameter("ext_mailer_smtp_server")));
         defaultSuffix = nullify(req.getParameter("ext_mailer_default_suffix"));
 
-        mailAccount.setAdv_properties(nullify(req.getParameter("ext_mailer_adv_properties")));
+        mailAccount.setAdvProperties(nullify(req.getParameter("ext_mailer_adv_properties")));
 
         addAccounts.clear();
         Object addacc = formData.opt("addAccounts");
@@ -601,18 +600,18 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
         // specify authentication information
         if (req.hasParameter("ext_mailer_use_smtp_auth")) {
-            mailAccount.setSmtp_username(nullify(req.getParameter("ext_mailer_smtp_username")));
-            mailAccount.setSmtp_password(nullify(req.getParameter("ext_mailer_smtp_password")));
+            mailAccount.setSmtpUsername(nullify(req.getParameter("ext_mailer_smtp_username")));
+            mailAccount.setSmtpPassword(nullify(req.getParameter("ext_mailer_smtp_password")));
         } else {
-            mailAccount.setSmtp_username(null);
-            mailAccount.setSmtp_password(null);
+            mailAccount.setSmtpUsername(null);
+            mailAccount.setSmtpPassword(null);
         }
 
         // specify if the mail server uses ssl for authentication
-        mailAccount.setUse_ssl(req.hasParameter("ext_mailer_smtp_use_ssl"));
+        mailAccount.setUseSsl(req.hasParameter("ext_mailer_smtp_use_ssl"));
 
         // specify custom smtp port
-        mailAccount.setSmtp_port(nullify(req.getParameter("ext_mailer_smtp_port")));
+        mailAccount.setSmtpPort(nullify(req.getParameter("ext_mailer_smtp_port")));
 
         charset = nullify(req.getParameter("ext_mailer_charset"));
 
@@ -698,13 +697,13 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         // get the data from Mailer and then set override to true
         this.defaultSuffix = Mailer.descriptor().getDefaultSuffix();
         this.defaultReplyTo = Mailer.descriptor().getReplyToAddress();
-        mailAccount.setUse_ssl(Mailer.descriptor().getUseSsl());
+        mailAccount.setUseSsl(Mailer.descriptor().getUseSsl());
         if (StringUtils.isNotBlank(Mailer.descriptor().getSmtpAuthUserName())) {
-            mailAccount.setSmtp_username(Mailer.descriptor().getSmtpAuthUserName());
-            mailAccount.setSmtp_password(Mailer.descriptor().getSmtpAuthPassword());
+            mailAccount.setSmtpUsername(Mailer.descriptor().getSmtpAuthUserName());
+            mailAccount.setSmtpPassword(Mailer.descriptor().getSmtpAuthPassword());
         }
-        mailAccount.setSmtp_host(Mailer.descriptor().getSmtpServer());
-        mailAccount.setSmtp_port(Mailer.descriptor().getSmtpPort());
+        mailAccount.setSmtpHost(Mailer.descriptor().getSmtpServer());
+        mailAccount.setSmtpPort(Mailer.descriptor().getSmtpPort());
         this.charset = Mailer.descriptor().getCharset();
         this.overrideGlobalSettings = true;
     }
