@@ -473,7 +473,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                         context.getListener().getLogger().println(buf);
 
                         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
-                        Session session = descriptor.createSession();
+                        Session session = descriptor.createSession(from);
                         // emergency reroute might have modified recipients:
                         allRecipients = msg.getAllRecipients();
                         // all email addresses are of type "rfc822", so just take first one:
@@ -711,7 +711,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         String charset = descriptor.getCharset();
 
-        Session session = descriptor.createSession();
+        Session session = descriptor.createSession(from);
         MimeMessage msg = new MimeMessage(session);
 
         InternetAddress fromAddress = new InternetAddress(descriptor.getAdminAddress());
