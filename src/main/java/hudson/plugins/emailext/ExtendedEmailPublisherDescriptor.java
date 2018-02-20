@@ -9,6 +9,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONArray;
@@ -155,6 +156,21 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      * Enables the "Allow Unregistered Emails" feature
      */
     private boolean enableAllowUnregistered;
+
+    private transient String smtpHost;
+    private transient String smtpPort;
+    private transient String smtpAuthUsername;
+    private transient Secret smtpAuthPassword;
+    private transient boolean useSsl = false;
+
+    private Object readResolve(){
+        if(smtpHost != null) mailAccount.setSmtpHost(smtpHost);
+        if(smtpPort != null) mailAccount.setSmtpPort(smtpPort);
+        if(smtpAuthUsername != null) mailAccount.setSmtpUsername(smtpAuthUsername);
+        if(smtpAuthPassword != null) mailAccount.setSmtpPassword(smtpAuthPassword);
+        if(useSsl) mailAccount.setUseSsl(useSsl);
+        return this;
+    }
 
     public ExtendedEmailPublisherDescriptor() {
         super(ExtendedEmailPublisher.class);
@@ -604,7 +620,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             mailAccount.setSmtpPassword(nullify(req.getParameter("ext_mailer_smtp_password")));
         } else {
             mailAccount.setSmtpUsername(null);
-            mailAccount.setSmtpPassword(null);
+            mailAccount.setSmtpPassword((Secret)null);
         }
 
         // specify if the mail server uses ssl for authentication

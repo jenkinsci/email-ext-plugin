@@ -86,7 +86,11 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     }
 
     public void setSmtpPassword(String smtpPassword){
-        this.smtpPassword = Secret.fromString(smtpPassword);;
+        this.smtpPassword = Secret.fromString(smtpPassword);
+    }
+
+    public void setSmtpPassword(Secret smtpPassword){
+        this.smtpPassword = smtpPassword;
     }
 
     public void setUseSsl(boolean useSsl){
