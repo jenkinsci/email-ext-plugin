@@ -1,11 +1,7 @@
 package hudson.plugins.emailext;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
-import com.gargoylesoftware.htmlunit.html.HtmlCheckBoxInput;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlSelect;
-import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
-import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+import com.gargoylesoftware.htmlunit.html.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -127,5 +123,16 @@ public class ExtendedEmailPublisherDescriptorTest {
         j.submit(page.getFormByName("config"));
 
         assertEquals("hammer", descriptor.getListId());
+    }
+
+    @Test
+    public void testAdvancedProperties() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        HtmlPage page = j.createWebClient().goTo("configure");
+        HtmlTextArea advProperties = page.getElementByName("ext_mailer_adv_properties");
+        advProperties.setText("mail.smtp.starttls.enable=true");
+        j.submit(page.getFormByName("config"));
+
+        assertEquals("mail.smtp.starttls.enable=true", descriptor.getAdvProperties());
     }
 }

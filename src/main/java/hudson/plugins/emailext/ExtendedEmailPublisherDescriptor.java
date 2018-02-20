@@ -60,7 +60,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      */
     private transient String hudsonUrl;
 
-    MailAccount mailAccount = new MailAccount();
+    private MailAccount mailAccount = new MailAccount();
 
     private List<MailAccount> addAccounts = new ArrayList<>();
 
@@ -355,6 +355,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @SuppressWarnings("unused")
     public void setSmtpPort(String port) {
         mailAccount.setSmtpPort(nullify(port));
+    }
+
+    public String getAdvProperties() {
+        return mailAccount.getAdvProperties();
     }
 
     public String getCharset() {
