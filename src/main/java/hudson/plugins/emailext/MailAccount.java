@@ -10,21 +10,23 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import static hudson.Util.nullify;
 
 public class MailAccount extends AbstractDescribableImpl<MailAccount>{
-    private String address;
-    private String smtpHost;
-    private String smtpPort;
-    private String smtpUsername;
-    private Secret smtpPassword;
-    private boolean useSsl;
-    private String advProperties;
+    private String address = null;
+    private String smtpHost = null;
+    private String smtpPort = null;
+    private String smtpUsername = null;
+    private Secret smtpPassword = null;
+    private boolean useSsl = false;
+    private String advProperties = null;
 
     @DataBoundConstructor
     public MailAccount(JSONObject jo){
         address = nullify(jo.optString("address", null));
         smtpHost = nullify(jo.optString("smtpHost", null));
         smtpPort = nullify(jo.optString("smtpPort", null));
-        smtpUsername = nullify(jo.optString("smtpUsername", null));
-        smtpPassword = Secret.fromString(nullify(jo.optString("smtpPassword", null)));
+        if(jo.optBoolean("auth", false)){
+            smtpUsername = nullify(jo.optString("smtpUsername", null));
+            smtpPassword = Secret.fromString(jo.optString("smtpPassword", null));
+        }
         useSsl = jo.optBoolean("useSsl", false);
         advProperties = nullify(jo.optString("advProperties", null));
     }
@@ -39,6 +41,10 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
         public String getDisplayName(){
             return "";
         }
+    }
+
+    public boolean isAuth(){
+        return smtpUsername != null;
     }
 
     public String getAddress(){

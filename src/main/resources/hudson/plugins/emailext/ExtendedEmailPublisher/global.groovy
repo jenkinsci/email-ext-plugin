@@ -47,11 +47,13 @@ f.section(title: _("Extended E-mail Notification")) {
                   f.entry(field: "smtpPort", title: _("SMTP Port")) {
                       f.textbox()
                   }
-                  f.entry(field: "smtpUsername", title: _("User Name")) {
-                      f.textbox()
-                  }
-                  f.entry(field: "smtpPassword", title: _("Password")) {
-                      f.password()
+                  f.optionalBlock(field: "auth", title: _("Use SMTP Authentication"), inline: true) {
+                      f.entry(field: "smtpUsername", title: _("User Name")) {
+                          f.textbox()
+                      }
+                      f.entry(field: "smtpPassword", title: _("Password")) {
+                          f.password()
+                      }
                   }
                   f.entry(field: "useSsl", title: _("Use SSL")) {
                       f.checkbox()
