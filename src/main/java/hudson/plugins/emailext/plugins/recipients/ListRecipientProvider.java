@@ -15,6 +15,7 @@ import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import jenkins.model.Jenkins;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.mail.MessagingException;
@@ -46,6 +47,7 @@ public class ListRecipientProvider extends RecipientProvider {
     }
     
     @Extension
+    @Symbol("recipients")
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
         
         @Override

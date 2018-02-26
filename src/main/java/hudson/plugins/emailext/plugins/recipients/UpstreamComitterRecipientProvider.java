@@ -15,6 +15,7 @@ import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.scm.ChangeLogSet;
 import java.io.PrintStream;
 import jenkins.model.Jenkins;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.mail.internet.InternetAddress;
@@ -114,6 +115,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
     }
 
     @Extension
+    @Symbol("upstreamDevelopers")
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
 
         @Override

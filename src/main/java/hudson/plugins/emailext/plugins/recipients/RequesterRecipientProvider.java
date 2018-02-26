@@ -14,6 +14,7 @@ import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import java.io.PrintStream;
 import java.util.Collections;
 import jenkins.model.Jenkins;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.mail.internet.InternetAddress;
@@ -75,6 +76,7 @@ public class RequesterRecipientProvider extends RecipientProvider {
 
     
     @Extension
+    @Symbol("requestor")
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
 
         @Override

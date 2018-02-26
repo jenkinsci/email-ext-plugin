@@ -18,6 +18,7 @@ import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import jenkins.model.Jenkins;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -96,6 +97,7 @@ public class CulpritsRecipientProvider extends RecipientProvider {
     }
 
     @Extension
+    @Symbol("culprits")
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
         
         @Override

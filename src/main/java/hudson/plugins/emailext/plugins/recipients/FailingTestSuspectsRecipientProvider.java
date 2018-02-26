@@ -35,6 +35,7 @@ import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import jenkins.model.Jenkins;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.mail.internet.InternetAddress;
@@ -142,6 +143,7 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
     }
 
     @Extension
+    @Symbol("brokenTestsSuspects")
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
         @Override
         public String getDisplayName() {
