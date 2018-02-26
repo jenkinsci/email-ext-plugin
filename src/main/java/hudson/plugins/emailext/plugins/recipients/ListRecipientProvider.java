@@ -17,6 +17,7 @@ import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import jenkins.model.Jenkins;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
@@ -32,7 +33,13 @@ public class ListRecipientProvider extends RecipientProvider {
 
     @DataBoundConstructor
     public ListRecipientProvider() {
-        
+    }
+
+    private String recipientList;
+    
+    @DataBoundSetter
+    public void setRecipientList(String recipientList){
+         this.recipientList = recipientList;
     }
     
     @Override
@@ -40,7 +47,11 @@ public class ListRecipientProvider extends RecipientProvider {
         try {
             ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
             descriptor.debug(context.getListener().getLogger(), "Adding recipients from project recipient list");
-            EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, EmailRecipientUtils.getRecipientList(context, context.getPublisher().recipientList), env, context.getListener());
+            String recipients = recipientList;
+            if(recipients == null ){
+                recipientList = EmailRecipientUtils.getRecipientList(context, context.getPublisher().recipientList);
+            }
+            EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc,recipients , env, context.getListener());
         } catch (MessagingException ex) {
             Logger.getLogger(ListRecipientProvider.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -54,10 +65,11 @@ public class ListRecipientProvider extends RecipientProvider {
         public String getDisplayName() {
             return "Recipient List";
         }
-
+        /*
         @Override
         public boolean isApplicable(Class<? extends Job> jobType) {
             return !jobType.getName().equals("org.jenkinsci.plugins.workflow.job.WorkflowJob");
         }
+        */
     }
 }
