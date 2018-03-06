@@ -79,17 +79,15 @@ public class AttachmentUtils implements Serializable {
             return file.getName();
         }
     }
-    
-    private static class LogFileDataSource implements DataSource {
-        
+
+    private static class LogFileDataSource implements SizedDataSource {
+
         private static final String DATA_SOURCE_NAME = "build.log";
         
         private final Run<?,?> run;
-        private final boolean compress;
-        
-        public LogFileDataSource(Run<?,?> run, boolean compress) {
+
+        public LogFileDataSource(Run<?, ?> run) {
             this.run = run;
-            this.compress = compress;
         }
         
         public InputStream getInputStream() throws IOException {
@@ -103,10 +101,6 @@ public class AttachmentUtils implements Serializable {
             }            
             
             res = new ByteArrayInputStream(bao.toByteArray());
-            if(compress) {
-                ZipDataSource z = new ZipDataSource(getName(), res);
-                res = z.getInputStream();            
-            }
             return res;
         }
         
@@ -121,6 +115,11 @@ public class AttachmentUtils implements Serializable {
         
         public String getName() {
             return DATA_SOURCE_NAME;
+        }
+
+        @Override
+        public long getSize() {
+            return run.getLogText().length();
         }
     }
 
@@ -201,26 +200,30 @@ public class AttachmentUtils implements Serializable {
             File logFile = run.getLogFile();
             long maxAttachmentSize = context.getPublisher().getDescriptor().getMaxAttachmentSize();
 
-            if (maxAttachmentSize > 0 && logFile.length() >= maxAttachmentSize) {
-                context.getListener().getLogger().println("Skipping build log attachment - "
-                        + " too large for maximum attachments size");
-                return;
-            }
-            
-            DataSource fileSource;
+            SizedDataSource fileSource;
             MimeBodyPart attachment = new MimeBodyPart();
             if (compress) {
                 context.getListener().getLogger().println("Request made to compress build log");
             }
-            
-            fileSource = new LogFileDataSource(run, compress);
+
+            fileSource = new LogFileDataSource(run);
+            if (compress) {
+                fileSource = new ZipDataSource(fileSource.getName(), fileSource.getInputStream());
+            }
+
+            if (maxAttachmentSize > 0 && fileSource.getSize() >= maxAttachmentSize) {
+                context.getListener().getLogger().println("Skipping build log attachment - "
+                        + " too large for maximum attachments size");
+                return;
+            }
+
             if(run instanceof MatrixRun)
                 attachment.setFileName("build" + "-" + ((MatrixRun)run).getParent().getCombination().toString('-', '-') +  "." + (compress ? "zip" : "log"));
             else
                 attachment.setFileName("build." + (compress ? "zip" : "log"));
             attachment.setDataHandler(new DataHandler(fileSource));
             multipart.addBodyPart(attachment);
-        } catch(MessagingException e) {
+        } catch (MessagingException | IOException e) {
             context.getListener().error("Error attaching build log to message: " + e.getMessage());
         }
     }

@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins;
 
-import javax.activation.DataSource;
+import hudson.plugins.emailext.SizedDataSource;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -12,7 +13,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
 
-public class ZipDataSource implements DataSource {
+public class ZipDataSource implements SizedDataSource {
 
     private final static String MIME_TYPE = "application/zip";
     private final static String FILE_EXTENSION = ".zip";
@@ -57,5 +58,10 @@ public class ZipDataSource implements DataSource {
 
     public OutputStream getOutputStream() throws IOException {
         throw new ZipException("This zip file " + name + " is not modifiable");
+    }
+
+    @Override
+    public long getSize() {
+        return contents.length;
     }
 }

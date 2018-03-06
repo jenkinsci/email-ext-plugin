@@ -15,6 +15,8 @@ import hudson.model.FreeStyleProject;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
+import org.apache.commons.io.IOUtils;
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -32,7 +34,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -49,6 +57,77 @@ public class AttachmentUtilsTest {
             super.before();
         }
     };
+
+    @Test
+    public void testBuildLogAttachment() throws Exception {
+        FreeStyleProject project = j.createFreeStyleProject("foo");
+        ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
+        publisher.attachBuildLog = true;
+        publisher.recipientList = "mickey@disney.com";
+        SuccessTrigger trigger = new SuccessTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        publisher.getConfiguredTriggers().add(trigger);
+        project.getPublishersList().add(publisher);
+        FreeStyleBuild b = j.buildAndAssertSuccess(project);
+
+        Mailbox mbox = Mailbox.get("mickey@disney.com");
+        assertEquals("Should have an email from success", 1, mbox.size());
+
+        Message msg = mbox.get(0);
+        assertThat(msg, instanceOf(MimeMessage.class));
+        assertThat(msg.getContent(), instanceOf(MimeMultipart.class));
+
+        MimeMultipart part = (MimeMultipart) msg.getContent();
+
+        assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
+
+        BodyPart attach = part.getBodyPart(1);
+        assertThat(attach.getSize(), greaterThan(0));
+        assertThat(IOUtils.toString(attach.getInputStream()), containsString("mickey@disney.com"));
+        assertEquals("build.log", attach.getFileName());
+    }
+
+    @Test
+    public void testBuildLogZipAttachment() throws Exception {
+        // check the size limit applies to the compressed size
+        j.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class).setMaxAttachmentSize(80000);
+        FreeStyleProject project = j.createFreeStyleProject("foo");
+        ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
+        publisher.attachBuildLog = true;
+        publisher.compressBuildLog = true;
+        publisher.recipientList = "mickey@disney.com";
+        SuccessTrigger trigger = new SuccessTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        publisher.getConfiguredTriggers().add(trigger);
+        project.getPublishersList().add(publisher);
+        project.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+                for (int i = 0; i < 1000; i++) // Pad out the build log so the zip has something to compress
+                    listener.getLogger().println("Oh Mickey, you're so fine\n" +
+                            "You're so fine you blow my mind, hey Mickey,\n" +
+                            "Hey Mickey\n");
+                return true;
+            }
+        });
+
+        FreeStyleBuild b = j.buildAndAssertSuccess(project);
+
+        Mailbox mbox = Mailbox.get("mickey@disney.com");
+        assertEquals("Should have an email from success", 1, mbox.size());
+
+        Message msg = mbox.get(0);
+        assertThat(msg, instanceOf(MimeMessage.class));
+        assertThat(msg.getContent(), instanceOf(MimeMultipart.class));
+
+        MimeMultipart part = (MimeMultipart) msg.getContent();
+
+        assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
+
+        BodyPart attach = part.getBodyPart(1);
+        assertThat(attach.getSize(), allOf(greaterThan(0),
+                lessThanOrEqualTo((new Long(b.getLogFile().length()).intValue()))));
+        assertEquals("build.zip", attach.getFileName());
+        assertThat(IOUtils.toString(attach.getInputStream()), containsString("build.log")); // zips have plain text filename in them
+    }
 
     @Test
     public void testAttachmentFromWorkspace() throws Exception {
