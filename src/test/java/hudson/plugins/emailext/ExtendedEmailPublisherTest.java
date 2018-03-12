@@ -52,9 +52,7 @@ import org.jvnet.hudson.test.recipes.WithPlugin;
 import org.jvnet.mock_javamail.Mailbox;
 import org.kohsuke.stapler.Stapler;
 
-import javax.mail.Address;
-import javax.mail.BodyPart;
-import javax.mail.Message;
+import javax.mail.*;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -1158,6 +1156,58 @@ public class ExtendedEmailPublisherTest {
 
         BodyPart attach = part.getBodyPart(1);
         assertTrue("There should be a log named \"build.log\" attached", "build.log".equalsIgnoreCase(attach.getFileName()));
+    }
+
+    @Test
+    public void testAdditionalAccounts() throws Exception {
+        j.createWebClient().executeOnServer(new Callable<Object>() {
+            public Void call() throws Exception {
+                ExtendedEmailPublisherDescriptor descriptor = new ExtendedEmailPublisherDescriptor();
+                descriptor.setSmtpServer("smtp.test0.com");
+                descriptor.setSmtpPort("587");
+                descriptor.setAdvProperties("mail.smtp.ssl.trust=test0.com");
+
+                JSONObject form = new JSONObject();
+                form.put("project_from", "mail@test1.com");
+                publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest(), form);
+                assertEquals("mail@test1.com", publisher.from);
+                Session session = descriptor.createSession(publisher.from);
+                assertEquals("smtp.test0.com", session.getProperty("mail.smtp.host"));
+                assertEquals("587", session.getProperty("mail.smtp.port"));
+                assertEquals("test0.com", session.getProperty("mail.smtp.ssl.trust"));
+
+                List<MailAccount> addaccs = new ArrayList<>();
+                JSONObject dform = new JSONObject();
+                dform.put("address", "mail@test1.com");
+                dform.put("smtpHost", "smtp.test1.com");
+                dform.put("smtpPort", "25");
+                dform.put("advProperties", "mail.smtp.ssl.trust=test1.com");
+                addaccs.add(new MailAccount(dform));
+                dform.put("address", "mail@test2.com");
+                dform.put("smtpHost", "smtp.test2.com");
+                dform.put("smtpPort", "465");
+                dform.put("advProperties", "mail.smtp.ssl.trust=test2.com");
+                addaccs.add(new MailAccount(dform));
+                descriptor.setAddAccounts(addaccs);
+
+                publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest(), form);
+                assertEquals("mail@test1.com", publisher.from);
+                session = descriptor.createSession(publisher.from);
+                assertEquals("smtp.test1.com", session.getProperty("mail.smtp.host"));
+                assertEquals("25", session.getProperty("mail.smtp.port"));
+                assertEquals("test1.com", session.getProperty("mail.smtp.ssl.trust"));
+
+                form.put("project_from", "mail@test2.com");
+                publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest(), form);
+                assertEquals("mail@test2.com", publisher.from);
+                session = descriptor.createSession(publisher.from);
+                assertEquals("smtp.test2.com", session.getProperty("mail.smtp.host"));
+                assertEquals("465", session.getProperty("mail.smtp.port"));
+                assertEquals("test2.com", session.getProperty("mail.smtp.ssl.trust"));
+
+                return null;
+            }
+        });
     }
 
     /**

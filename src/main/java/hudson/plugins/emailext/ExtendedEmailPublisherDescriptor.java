@@ -306,6 +306,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return addAccounts;
     }
 
+    public void setAddAccounts(List<MailAccount> addAccounts) {
+        this.addAccounts = addAccounts;
+    }
+
     public String getSmtpServer() {
         return mailAccount.getSmtpHost();
     }
@@ -359,6 +363,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     public String getAdvProperties() {
         return mailAccount.getAdvProperties();
+    }
+
+    public void setAdvProperties(String advProperties) {
+        mailAccount.setAdvProperties(advProperties);
     }
 
     public String getCharset() {
