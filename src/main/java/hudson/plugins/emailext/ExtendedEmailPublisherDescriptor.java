@@ -124,6 +124,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private String defaultReplyTo = "";
 
     /*
+     * This is a global list of domains where we can send emails to 
+     */
+    private String allowedDomains = null;
+
+    /*
      * This is a global excluded committers list for not sending commit emails.
      */
     private String excludedCommitters = "";
@@ -462,6 +467,15 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         this.recipientList = ((recipients == null) ? "" : recipients);
     }
 
+    public String getAllowedDomains() {
+        return allowedDomains;
+    }
+
+    @SuppressWarnings("unused")
+    public void setAllowedDomains(String allowed) {
+        this.allowedDomains = ((allowed == null) ? "" : allowed);
+    }
+
     public String getExcludedCommitters() {
         return excludedCommitters;
     }
@@ -671,6 +685,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                 ? req.getParameter("ext_mailer_default_recipients") : "";
 
         precedenceBulk = req.hasParameter("ext_mailer_add_precedence_bulk");
+
+        allowedDomains = req.getParameter("ext_mailer_allowed_domains");
 
         excludedCommitters = req.getParameter("ext_mailer_excluded_committers");
 

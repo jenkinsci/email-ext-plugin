@@ -702,6 +702,18 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
     }
 
+    private void excludeNotAllowedDomains(ExtendedEmailPublisherContext context, Set<InternetAddress> to) {
+        Set<InternetAddress> excludedRecipients = new LinkedHashSet<>();
+
+        for (InternetAddress recipient : to) {
+            if (!EmailRecipientUtils.isAllowedDomain(recipient.getAddress(), context.getListener())) {
+                excludedRecipients.add(recipient);
+            }
+        }
+        to.removeAll(excludedRecipients);
+    }
+
+
     private MimeMessage createMail(ExtendedEmailPublisherContext context) throws MessagingException, IOException, InterruptedException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
 
@@ -796,6 +808,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         cc.removeAll(excludedRecipients);
         bcc.removeAll(excludedRecipients);
 
+        // remove not allowed domains
+        excludeNotAllowedDomains(context, to);
+        excludeNotAllowedDomains(context, cc);
+        excludeNotAllowedDomains(context, bcc);
+
+        //
         msg.setRecipients(Message.RecipientType.TO, to.toArray(new InternetAddress[to.size()]));
         if (!cc.isEmpty()) {
             msg.setRecipients(Message.RecipientType.CC, cc.toArray(new InternetAddress[cc.size()]));

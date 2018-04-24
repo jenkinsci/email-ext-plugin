@@ -109,6 +109,7 @@ public class ExtendedEmailPublisherTest {
         Mailbox.clearAll();
 
         publisher.getDescriptor().setDefaultClasspath(Collections.<GroovyScriptPath>emptyList());
+        publisher.getDescriptor().setAllowedDomains(null);
         oldAuthorizationStrategy = j.jenkins.getAuthorizationStrategy();
         oldSecurityRealm = j.jenkins.getSecurityRealm();
     }
@@ -1209,6 +1210,60 @@ public class ExtendedEmailPublisherTest {
             }
         });
     }
+
+    @Test
+    public void testAllowedDomains1() throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject();
+        prj.getPublishersList().add(publisher);
+
+        publisher.getDescriptor().setAllowedDomains("x1x.com,x2x.com");
+        publisher.recipientList = "user1@x1x.com,user2@x2x.com,user3@foo.com,cc:user4@info.x1x.com,cc:user5@foo3.com,bcc:user6@foo1.com,bcc:user7@info.x2x.com";
+        publisher.configuredTriggers.add(new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project"));
+
+        for (EmailTrigger trigger : publisher.configuredTriggers) {
+            trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
+        }
+
+        FreeStyleBuild build = prj.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(1, Mailbox.get("user1@x1x.com").size());
+        assertEquals(1, Mailbox.get("user2@x2x.com").size());
+        assertEquals(0, Mailbox.get("user3@foo.com").size());
+        assertEquals(1, Mailbox.get("user4@info.x1x.com").size());
+        assertEquals(0, Mailbox.get("user5@foo3.com").size());
+        assertEquals(0, Mailbox.get("user6@foo1.com").size());
+        assertEquals(1, Mailbox.get("user7@info.x2x.com").size());
+    }
+
+
+    @Test
+    public void testAllowedDomains2() throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject();
+        prj.getPublishersList().add(publisher);
+
+        publisher.getDescriptor().setAllowedDomains("@x1x.com,@x2x.com");
+        publisher.recipientList = "user1@x1x.com,user2@x2x.com,user3@foo.com,cc:user4@info.x1x.com,cc:user5@foo3.com,bcc:user6@foo1.com,bcc:user7@info.x2x.com";
+        publisher.configuredTriggers.add(new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
+            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project"));
+
+        for (EmailTrigger trigger : publisher.configuredTriggers) {
+            trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
+        }
+
+        FreeStyleBuild build = prj.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(1, Mailbox.get("user1@x1x.com").size());
+        assertEquals(1, Mailbox.get("user2@x2x.com").size());
+        assertEquals(0, Mailbox.get("user3@foo.com").size());
+        assertEquals(0, Mailbox.get("user4@info.x1x.com").size());
+        assertEquals(0, Mailbox.get("user5@foo3.com").size());
+        assertEquals(0, Mailbox.get("user6@foo1.com").size());
+        assertEquals(0, Mailbox.get("user7@info.x2x.com").size());
+    }
+
 
     /**
      * Similar to {@link SleepBuilder} but only on the first build. (Removing
