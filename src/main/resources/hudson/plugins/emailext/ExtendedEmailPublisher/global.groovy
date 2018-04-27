@@ -91,7 +91,7 @@ f.section(title: _("Extended E-mail Notification")) {
     input(type: "text", class: "setting-input", value: descriptor.emergencyReroute, name: "ext_mailer_emergency_reroute")
   }
   f.entry(help: "/plugin/email-ext/help/globalConfig/allowedDomains.html", title: _("Allowed Domains")) {
-    input(type: "text", class: "setting-input", value: descriptor.excludedCommitters, name: "ext_mailer_allowed_domains")
+    input(type: "text", class: "setting-input", value: descriptor.allowedDomains, name: "ext_mailer_allowed_domains")
   }
   f.entry(help: "/plugin/email-ext/help/globalConfig/excludedRecipients.html", title: _("Excluded Recipients")) {
     input(type: "text", class: "setting-input", value: descriptor.excludedCommitters, name: "ext_mailer_excluded_committers")
