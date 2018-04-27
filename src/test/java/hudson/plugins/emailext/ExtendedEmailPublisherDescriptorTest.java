@@ -54,6 +54,11 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("Emergency Reroute should be blank by default", 
                 "", emergencyReroute.getText());
         
+        HtmlTextInput allowedDomains = page.getElementByName("ext_mailer_allowed_domains");
+        assertNotNull("Allowed Domains should be present", allowedDomains);
+        assertEquals("Allowed Domains should be blang by default", 
+                "", allowedDomains.getText());
+
         HtmlTextInput excludedRecipients = page.getElementByName("ext_mailer_excluded_committers");
         assertNotNull("Excluded Recipients should be present", excludedRecipients);
         assertEquals("Excluded Recipients should be blank by default",

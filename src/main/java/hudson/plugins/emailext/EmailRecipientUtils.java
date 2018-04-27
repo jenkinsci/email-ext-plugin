@@ -133,6 +133,23 @@ public class EmailRecipientUtils {
         return input;
     }
     
+    public static boolean isAllowedDomain(String userName, TaskListener listener) {
+        boolean result = true;
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        if(descriptor.getAllowedDomains() != null) {
+            StringTokenizer tokens = new StringTokenizer(descriptor.getAllowedDomains(), ", ");
+            result = !tokens.hasMoreTokens();
+            while (tokens.hasMoreTokens()) {
+                String check = tokens.nextToken().trim();
+                descriptor.debug(listener.getLogger(), "Checking '%s' against '%s' to see if they are allowed", userName, check);
+                if (userName.endsWith(check)) {
+                    return true;
+                }
+            }
+        }
+        return result;
+    }
+
     public static boolean isExcludedRecipient(String userName, TaskListener listener) {
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if(descriptor.getExcludedCommitters() != null) {
