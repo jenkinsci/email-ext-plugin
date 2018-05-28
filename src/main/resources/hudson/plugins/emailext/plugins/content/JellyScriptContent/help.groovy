@@ -6,4 +6,4 @@ dd(_("Custom message content generated from a Jelly script template. "
     +"should be used for the \"template\" argument. "
     +"You may also use the Config File Provider plugin to manage your templates. "
     +"Prefix the managed file NAME with \"managed:\" for the template "
-    +"parameter. Example: <tt>\${JELLY_SCRIPT, template=\"managed:ManagedFileName\"}</tt>"))
+    +"parameter. (Example: <tt>\${JELLY_SCRIPT, template=\"managed:ManagedFileName\"}</tt>)"))

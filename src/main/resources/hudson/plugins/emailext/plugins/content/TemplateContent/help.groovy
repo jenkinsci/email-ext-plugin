@@ -8,7 +8,7 @@ dd() {
      "You may also use the Config File Provider plugin to manage your templates. " +
      "Use the \"Custom File\" config type for the template. " + 
      "Prefix the managed file NAME with \"managed:\" for the file " +
-     "parameter. Example: <tt>\${TEMPLATE, file=\"managed:ManagedFileName\"}</tt>"))
+     "parameter. (Example: <tt>\${TEMPLATE, file=\"managed:ManagedFileName\"}</tt>)"))
   
   dl() {
     dt("file")
