@@ -7,7 +7,7 @@ dd() {
      "directory. No other directories will be searched." +
      "You may also use the Config File Provider plugin to manage your scripts. " +
      "Prefix the managed file NAME with <tt>managed:</tt> for the template or script " +
-     "parameter. Example: <tt>\${SCRIPT, template=\"managed:ManagedFileName\"}</tt>"))
+     "parameter. (Example: <tt>\${SCRIPT, template=\"managed:ManagedFileName\"}</tt>)"))
 
   dl() {
     dt("script")
