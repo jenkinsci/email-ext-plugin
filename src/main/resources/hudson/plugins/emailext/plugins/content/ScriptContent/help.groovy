@@ -1,6 +1,6 @@
 dt("\${SCRIPT}")
 dd() {
-  span(_("Custom message content generated from a Groovy script." +
+  span(_("Custom message content generated from a Groovy script. " +
      "Custom scripts should be placed in \"\$JENKINS_HOME/email-templates\". "+
      "When using a custom script the plugin will look in the resources for" +
      "the email-ext plugin first, and then in the \$JENKINS_HOME/email-templates" +
