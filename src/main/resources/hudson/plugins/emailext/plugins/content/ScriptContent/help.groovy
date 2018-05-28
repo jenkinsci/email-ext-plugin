@@ -4,7 +4,7 @@ dd() {
      "Custom scripts should be placed in <tt>\$JENKINS_HOME/email-templates</tt>. "+
      "When using a custom script the plugin will look in the resources for" +
      "the email-ext plugin first, and then in the <tt>\$JENKINS_HOME/email-templates</tt>" +
-     "directory. No other directories will be searched." +
+     "directory. No other directories will be searched. " +
      "You may also use the Config File Provider plugin to manage your scripts. " +
      "Prefix the managed file NAME with <tt>managed:</tt> for the template or script " +
      "parameter. (Example: <tt>\${SCRIPT, template=\"managed:ManagedFileName\"}</tt>)"))
