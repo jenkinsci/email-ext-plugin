@@ -246,4 +246,12 @@ public class EmailRecipientUtilsTest {
         assertEquals(1, internetAddresses.size());
         assertTrue(internetAddresses.contains(new InternetAddress("slide.o.mix@gmail.com")));
     }
+
+    @Test
+    public void testBackwardsNames() throws Exception {
+        envVars.put("EMAIL_LIST", "\"Mouse, Mickey\" <mickey@disney.com>, minnie@disney.com");
+
+        Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars);
+        assertEquals(2, internetAddresses.size());
+    }
 }
