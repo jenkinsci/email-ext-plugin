@@ -38,28 +38,26 @@ public class EmailRecipientUtils {
         if (!StringUtils.isBlank(recipientList)) {
             final String expandedRecipientList = fixupDelimiters(envVars.expand(recipientList));
             InternetAddress[] all = InternetAddress.parse(expandedRecipientList.replace("bcc:", "").replace("cc:", ""));
+            // Based upon "Parse the given comma separated sequence of addresses..." from:
+            //   https://javaee.github.io/javamail/docs/api/javax/mail/internet/InternetAddress.html#parse-java.lang.String-
+            String[] recipients = StringUtils.stripAll(expandedRecipientList.split(","));
+            if (recipients.length != all.length) {
+                throw new IllegalArgumentException("Unsupported format in expanded recipient list string: " + expandedRecipientList);
+            }
             final Set<InternetAddress> to = new LinkedHashSet<>();
             final Set<InternetAddress> cc = new LinkedHashSet<>();
             final Set<InternetAddress> bcc = new LinkedHashSet<>();
             final String defaultSuffix = ExtendedEmailPublisher.descriptor().getDefaultSuffix();
 
-            for(InternetAddress address : all) {
-                if(address.getPersonal() != null) {
-                    if(expandedRecipientList.contains("bcc:" + address.getPersonal()) || expandedRecipientList.contains("bcc:\"" + address.toString() + "\"")) {
-                        bcc.add(address);
-                    } else if(expandedRecipientList.contains("cc:" + address.getPersonal()) || expandedRecipientList.contains("cc:\"" + address.toString() + "\"")) {
-                        cc.add(address);
-                    } else {
-                        to.add(address);
-                    }
+            for (int i = 0; i < recipients.length; i++) {
+                String recipient = recipients[i];
+                InternetAddress address = all[i];
+                if (recipient.startsWith("bcc:")) {
+                    bcc.add(address);
+                } else if (recipient.startsWith("cc:")) {
+                    cc.add(address);
                 } else {
-                    if(expandedRecipientList.contains("bcc:" + address.toString())) {
-                        bcc.add(address);
-                    } else if(expandedRecipientList.contains("cc:" + address.toString())) {
-                        cc.add(address);
-                    } else {
-                        to.add(address);
-                    }
+                    to.add(address);
                 }
             }
 
@@ -124,6 +122,7 @@ public class EmailRecipientUtils {
     }
 
     private static String fixupDelimiters(String input) {
+        input = input.trim();
         input = input.replaceAll("\\s+", " ");
         if(input.contains(" ") && !input.contains(",")) {
             input = input.replace(" ", ",");

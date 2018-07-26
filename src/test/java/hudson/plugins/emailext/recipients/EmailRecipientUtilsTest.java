@@ -18,9 +18,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Set;
 
-import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class EmailRecipientUtilsTest {
 
@@ -226,6 +226,27 @@ public class EmailRecipientUtilsTest {
 
         assertEquals(1, internetAddresses.size());
         assertTrue(internetAddresses.contains(new InternetAddress("example@gmail.com")));
+    }
+
+    @Test
+    public void testSameRecipientInTOandCCandBCC_ShouldNotBeFilteredFromTOandCC()
+            throws Exception {
+        String recipientListString = "user@gmail.com, bcc:user@gmail.com, cc:user@gmail.com";
+
+        Set<InternetAddress> toInternetAddresses = EmailRecipientUtils.convertRecipientString(recipientListString, envVars);
+
+        assertEquals(1, toInternetAddresses.size());
+        assertTrue(toInternetAddresses.contains(new InternetAddress("user@gmail.com")));
+
+        Set<InternetAddress> ccInternetAddresses = EmailRecipientUtils.convertRecipientString(recipientListString, envVars, EmailRecipientUtils.CC);
+
+        assertEquals(1, ccInternetAddresses.size());
+        assertTrue(ccInternetAddresses.contains(new InternetAddress("user@gmail.com")));
+
+        Set<InternetAddress> bccInternetAddresses = EmailRecipientUtils.convertRecipientString(recipientListString, envVars, EmailRecipientUtils.BCC);
+
+        assertEquals(1, bccInternetAddresses.size());
+        assertTrue(bccInternetAddresses.contains(new InternetAddress("user@gmail.com")));
     }
 
     @Test
