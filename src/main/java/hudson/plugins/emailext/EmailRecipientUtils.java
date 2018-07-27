@@ -124,6 +124,7 @@ public class EmailRecipientUtils {
     }
 
     private static String fixupDelimiters(String input) {
+        input = input.trim();
         input = input.replaceAll("\\s+", " ");
         if(input.contains(" ") && !input.contains(",")) {
             input = input.replace(" ", ",");
