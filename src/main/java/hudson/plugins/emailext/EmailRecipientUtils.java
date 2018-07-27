@@ -37,6 +37,7 @@ public class EmailRecipientUtils {
         final Set<InternetAddress> internetAddresses = new LinkedHashSet<>();
         if (!StringUtils.isBlank(recipientList)) {
             final String expandedRecipientList = fixupDelimiters(envVars.expand(recipientList));
+            RecipientListStringAnalyser recipientsAnalyser = new RecipientListStringAnalyser(expandedRecipientList);
             InternetAddress[] all = InternetAddress.parse(expandedRecipientList.replace("bcc:", "").replace("cc:", ""));
             final Set<InternetAddress> to = new LinkedHashSet<>();
             final Set<InternetAddress> cc = new LinkedHashSet<>();
@@ -44,22 +45,16 @@ public class EmailRecipientUtils {
             final String defaultSuffix = ExtendedEmailPublisher.descriptor().getDefaultSuffix();
 
             for(InternetAddress address : all) {
-                if(address.getPersonal() != null) {
-                    if(expandedRecipientList.contains("bcc:" + address.getPersonal()) || expandedRecipientList.contains("bcc:\"" + address.toString() + "\"")) {
+                int typeForAddress = recipientsAnalyser.getType(address);
+                switch (typeForAddress) {
+                    case BCC:
                         bcc.add(address);
-                    } else if(expandedRecipientList.contains("cc:" + address.getPersonal()) || expandedRecipientList.contains("cc:\"" + address.toString() + "\"")) {
+                        break;
+                    case CC:
                         cc.add(address);
-                    } else {
+                        break;
+                    default:
                         to.add(address);
-                    }
-                } else {
-                    if(expandedRecipientList.contains("bcc:" + address.toString())) {
-                        bcc.add(address);
-                    } else if(expandedRecipientList.contains("cc:" + address.toString())) {
-                        cc.add(address);
-                    } else {
-                        to.add(address);
-                    }
                 }
             }
 
