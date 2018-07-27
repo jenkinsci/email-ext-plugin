@@ -6,6 +6,7 @@ import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.tasks.Mailer;
 import hudson.util.FormValidation;
+import org.apache.commons.collections.CollectionUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -13,14 +14,15 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeUtility;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 public class EmailRecipientUtilsTest {
 
@@ -46,8 +48,7 @@ public class EmailRecipientUtilsTest {
         for(String testString : testStrings) {
             Set<InternetAddress> addresses = EmailRecipientUtils.convertRecipientString(testString, envVars, EmailRecipientUtils.TO);
 
-            assertFalse(addresses.isEmpty());
-            assertEquals(addresses.size(), 4);
+            assertEquals(setOf("mickey@disney.com", "donald@disney.com", "goofy@disney.com", "pluto@disney.com"), addresses);
         }
     }
 
@@ -56,7 +57,7 @@ public class EmailRecipientUtilsTest {
             throws AddressException, UnsupportedEncodingException {
         Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("", envVars);
 
-        assertTrue(internetAddresses.isEmpty());
+        assertThat(internetAddresses, is(empty()));
     }
 
     @Test
@@ -64,7 +65,7 @@ public class EmailRecipientUtilsTest {
             throws AddressException, UnsupportedEncodingException {
         Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("   ", envVars);
 
-        assertTrue(internetAddresses.isEmpty());
+        assertThat(internetAddresses, is(empty()));
     }
 
     @Test
@@ -73,8 +74,7 @@ public class EmailRecipientUtilsTest {
         Set<InternetAddress> internetAddresses =
                 EmailRecipientUtils.convertRecipientString("ashlux@gmail.com", envVars);
 
-        assertEquals(1, internetAddresses.size());
-        assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
+        assertEquals(setOf("ashlux@gmail.com"), internetAddresses);
     }
 
     @Test
@@ -83,8 +83,7 @@ public class EmailRecipientUtilsTest {
         Set<InternetAddress> internetAddresses =
                 EmailRecipientUtils.convertRecipientString(" ashlux@gmail.com ", envVars);
 
-        assertEquals(1, internetAddresses.size());
-        assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
+        assertEquals(setOf("ashlux@gmail.com"), internetAddresses);
     }
 
     @Test
@@ -93,9 +92,7 @@ public class EmailRecipientUtilsTest {
         Set<InternetAddress> internetAddresses =
                 EmailRecipientUtils.convertRecipientString("ashlux@gmail.com, mickeymouse@disney.com", envVars);
 
-        assertEquals(2, internetAddresses.size());
-        assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
-        assertTrue(internetAddresses.contains(new InternetAddress("mickeymouse@disney.com")));
+        assertEquals(setOf("ashlux@gmail.com", "mickeymouse@disney.com"), internetAddresses);
     }
 
     @Test
@@ -104,9 +101,7 @@ public class EmailRecipientUtilsTest {
         Set<InternetAddress> internetAddresses =
                 EmailRecipientUtils.convertRecipientString("ashlux@gmail.com mickeymouse@disney.com", envVars);
 
-        assertEquals(2, internetAddresses.size());
-        assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
-        assertTrue(internetAddresses.contains(new InternetAddress("mickeymouse@disney.com")));
+        assertEquals(setOf("ashlux@gmail.com", "mickeymouse@disney.com"), internetAddresses);
     }
 
     @Test
@@ -115,9 +110,7 @@ public class EmailRecipientUtilsTest {
         Set<InternetAddress> internetAddresses =
                 EmailRecipientUtils.convertRecipientString("ashlux@gmail.com, mickeymouse@disney.com, ashlux@gmail.com", envVars);
 
-        assertEquals(2, internetAddresses.size());
-        assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
-        assertTrue(internetAddresses.contains(new InternetAddress("mickeymouse@disney.com")));
+        assertEquals(setOf("ashlux@gmail.com", "mickeymouse@disney.com"), internetAddresses);
     }
 
     @Test
@@ -127,8 +120,7 @@ public class EmailRecipientUtilsTest {
 
         Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars);
 
-        assertEquals(1, internetAddresses.size());
-        assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
+        assertEquals(setOf("ashlux@gmail.com"), internetAddresses);
     }
 
     @Test
@@ -151,10 +143,9 @@ public class EmailRecipientUtilsTest {
     public void testConvertRecipientList_defaultSuffix()
             throws AddressException, UnsupportedEncodingException {
         ExtendedEmailPublisher.descriptor().setDefaultSuffix("@gmail.com");
-        InternetAddress[] internetAddresses = EmailRecipientUtils.convertRecipientString("ashlux", envVars).toArray(new InternetAddress[0]);
+        Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("ashlux", envVars);
 
-        assertEquals(1, internetAddresses.length);
-        assertEquals("ashlux@gmail.com", internetAddresses[0].getAddress());
+        assertEquals(setOf("ashlux@gmail.com"), internetAddresses);
     }
 
     @Test
@@ -166,10 +157,9 @@ public class EmailRecipientUtilsTest {
         Mailer.UserProperty prop = new Mailer.UserProperty("advantiss@xxx.com");
         u.addProperty(prop);
 
-        InternetAddress[] internetAddresses = EmailRecipientUtils.convertRecipientString("advantiss", envVars).toArray(new InternetAddress[0]);
+        Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("advantiss", envVars);
 
-        assertEquals(1, internetAddresses.length);
-        assertEquals("advantiss@xxx.com", internetAddresses[0].getAddress());
+        assertEquals(setOf("advantiss@xxx.com"), internetAddresses);
     }
 
     @Test
@@ -179,14 +169,11 @@ public class EmailRecipientUtilsTest {
 
         Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars);
 
-        assertEquals(2, internetAddresses.size());
-        assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
-        assertTrue(internetAddresses.contains(new InternetAddress("another@gmail.com")));
+        assertEquals(setOf("ashlux@gmail.com", "another@gmail.com"), internetAddresses);
 
         internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars, EmailRecipientUtils.CC);
 
-        assertEquals(1, internetAddresses.size());
-        assertTrue(internetAddresses.contains(new InternetAddress("slide.o.mix@gmail.com")));
+        assertEquals(setOf("slide.o.mix@gmail.com"), internetAddresses);
     }
 
     @Test
@@ -196,14 +183,11 @@ public class EmailRecipientUtilsTest {
 
         Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars);
 
-        assertEquals(2, internetAddresses.size());
-        assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
-        assertTrue(internetAddresses.contains(new InternetAddress("another@gmail.com")));
+        assertEquals(setOf("ashlux@gmail.com", "another@gmail.com"), internetAddresses);
 
         internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars, EmailRecipientUtils.BCC);
 
-        assertEquals(1, internetAddresses.size());
-        assertTrue(internetAddresses.contains(new InternetAddress("slide.o.mix@gmail.com")));
+        assertEquals(setOf("slide.o.mix@gmail.com"), internetAddresses);
     }
 
     @Test
@@ -213,19 +197,15 @@ public class EmailRecipientUtilsTest {
 
         Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars);
 
-        assertEquals(2, internetAddresses.size());
-        assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
-        assertTrue(internetAddresses.contains(new InternetAddress("another@gmail.com")));
+        assertEquals(setOf("ashlux@gmail.com", "another@gmail.com"), internetAddresses);
 
         internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars, EmailRecipientUtils.BCC);
 
-        assertEquals(1, internetAddresses.size());
-        assertTrue(internetAddresses.contains(new InternetAddress("slide.o.mix@gmail.com")));
+        assertEquals(setOf("slide.o.mix@gmail.com"), internetAddresses);
 
         internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars, EmailRecipientUtils.CC);
 
-        assertEquals(1, internetAddresses.size());
-        assertTrue(internetAddresses.contains(new InternetAddress("example@gmail.com")));
+        assertEquals(setOf("example@gmail.com"), internetAddresses);
     }
 
     @Test
@@ -235,18 +215,15 @@ public class EmailRecipientUtilsTest {
 
         Set<InternetAddress> toInternetAddresses = EmailRecipientUtils.convertRecipientString(recipientListString, envVars);
 
-        assertEquals(1, toInternetAddresses.size());
-        assertTrue(toInternetAddresses.contains(new InternetAddress("user@gmail.com")));
+        assertEquals(setOf("user@gmail.com"), toInternetAddresses);
 
         Set<InternetAddress> ccInternetAddresses = EmailRecipientUtils.convertRecipientString(recipientListString, envVars, EmailRecipientUtils.CC);
 
-        assertEquals(1, ccInternetAddresses.size());
-        assertTrue(ccInternetAddresses.contains(new InternetAddress("user@gmail.com")));
+        assertEquals(setOf("user@gmail.com"), ccInternetAddresses);
 
         Set<InternetAddress> bccInternetAddresses = EmailRecipientUtils.convertRecipientString(recipientListString, envVars, EmailRecipientUtils.BCC);
 
-        assertEquals(1, bccInternetAddresses.size());
-        assertTrue(bccInternetAddresses.contains(new InternetAddress("user@gmail.com")));
+        assertEquals(setOf("user@gmail.com"), bccInternetAddresses);
     }
 
     @Test
@@ -255,17 +232,13 @@ public class EmailRecipientUtilsTest {
         envVars.put("EMAIL_LIST", "ashlux@gmail.com, cc:slide.o.mix@gmail.com, 愛嬋 <another@gmail.com>");
 
         Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars);
-        assertEquals(2, internetAddresses.size());
 
-        assertTrue(internetAddresses.contains(new InternetAddress("ashlux@gmail.com")));
-        InternetAddress addr = new InternetAddress("another@gmail.com");
-        addr.setPersonal(MimeUtility.encodeWord("愛嬋", "UTF-8", "B"));
-        assertTrue(internetAddresses.contains(addr));
+        assertEquals(setOf("ashlux@gmail.com", "another@gmail.com"), internetAddresses);
+        assertEquals("愛嬋", ((InternetAddress) CollectionUtils.get(internetAddresses, 1)).getPersonal());
 
         internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars, EmailRecipientUtils.CC);
 
-        assertEquals(1, internetAddresses.size());
-        assertTrue(internetAddresses.contains(new InternetAddress("slide.o.mix@gmail.com")));
+        assertEquals(setOf("slide.o.mix@gmail.com"), internetAddresses);
     }
 
     @Test
@@ -273,6 +246,18 @@ public class EmailRecipientUtilsTest {
         envVars.put("EMAIL_LIST", "\"Mouse, Mickey\" <mickey@disney.com>, minnie@disney.com");
 
         Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars);
-        assertEquals(2, internetAddresses.size());
+        assertEquals(setOf("mickey@disney.com", "minnie@disney.com"), internetAddresses);
+        assertEquals("Mouse, Mickey", ((InternetAddress) CollectionUtils.get(internetAddresses, 0)).getPersonal());
     }
+
+    // Test helper:
+
+    private Set<InternetAddress> setOf(String ... emailAddresses) throws AddressException {
+        final Set<InternetAddress> addresses = new LinkedHashSet<>();
+        for (String emailAddress : emailAddresses) {
+            addresses.add(new InternetAddress(emailAddress));
+        }
+        return addresses;
+    }
+
 }
