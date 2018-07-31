@@ -33,7 +33,7 @@ class RecipientListStringAnalyser {
         if (firstFoundIdx != Integer.MAX_VALUE) {
             LOG.log(Level.FINE, MessageFormat.format("firstFoundIdx-substring: {0}", recipients.substring(firstFoundIdx)));
             type = getType(firstFoundIdx);
-            idx += address.toString().length() + 1 + lengthOfTypePrefix(type) + adaptLengthForOptionalPersonal(address);
+            idx = firstFoundIdx + address.toString().length() + 1 + lengthOfTypePrefix(type) + adaptLengthForOptionalPersonal(address);
         }
         return type;
     }
@@ -72,14 +72,17 @@ class RecipientListStringAnalyser {
         return type;
     }
 
+    /**
+     * Mind: Include ':' suffix, e.g. for "bcc:<email address>" it is "bcc" + ":", i.e. 3 + 1 = 4
+     */
     private int lengthOfTypePrefix(int type) {
         int length;
         switch (type) {
             case EmailRecipientUtils.BCC:
-                length = 3;
+                length = 4;
                 break;
             case EmailRecipientUtils.CC:
-                length = 2;
+                length = 3;
                 break;
             case EmailRecipientUtils.TO:
                 length = 0;
