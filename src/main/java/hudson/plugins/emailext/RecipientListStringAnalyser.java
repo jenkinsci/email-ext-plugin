@@ -33,7 +33,8 @@ class RecipientListStringAnalyser {
         if (firstFoundIdx != Integer.MAX_VALUE) {
             LOG.log(Level.FINE, MessageFormat.format("firstFoundIdx-substring: {0}", recipients.substring(firstFoundIdx)));
             type = getType(firstFoundIdx);
-            idx = firstFoundIdx + address.toString().length() + 1 + lengthOfTypePrefix(type) + adaptLengthForOptionalPersonal(address);
+            idx = firstFoundIdx + lengthOfTypePrefix(type) + address.toString().length()
+                    + adaptLengthForOptionalPersonal(address) + 1;
         }
         return type;
     }
