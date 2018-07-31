@@ -53,8 +53,14 @@ public class EmailRecipientUtils {
                     case CC:
                         cc.add(address);
                         break;
-                    default:
+                    case RecipientListStringAnalyser.NOT_FOUND:
+                        // Fallback: Treat NOT_FOUND like TO in case RecipientListStringAnalyser fails due to whatever
+                        // reason (maybe encoding of personal?)
+                    case TO:
                         to.add(address);
+                        break;
+                    default:
+                        throw new IllegalStateException("Got unsupported recipient type: " + typeForAddress);
                 }
             }
 
