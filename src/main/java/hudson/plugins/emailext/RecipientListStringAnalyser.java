@@ -1,8 +1,13 @@
 package hudson.plugins.emailext;
 
 import javax.mail.internet.InternetAddress;
+import java.text.MessageFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class RecipientListStringAnalyser {
+
+    private static final Logger LOG = Logger.getLogger(RecipientListStringAnalyser.class.getName());
 
     static final int NOT_FOUND = -1;
 
@@ -12,8 +17,7 @@ class RecipientListStringAnalyser {
 
     RecipientListStringAnalyser(String recipientsListString) {
         this.recipients = recipientsListString;
-        System.out.println("Analyzing:");
-        System.out.println(recipients);
+        LOG.log(Level.FINE, MessageFormat.format("Analyzing: {0} ", recipients));
     }
 
     /**
@@ -22,12 +26,12 @@ class RecipientListStringAnalyser {
      */
     int getType(InternetAddress address) {
         int type = NOT_FOUND;
-        System.out.println("Looking for: " + address);
-        System.out.println("...starting at: " + idx);
+        LOG.log(Level.FINE, MessageFormat.format("Looking for: {0}", address));
+        LOG.log(Level.FINE, MessageFormat.format("...starting at: {0}", idx));
         int firstFoundIdx = findFirst(address);
-        System.out.println("firstFoundIdx: " + firstFoundIdx);
+        LOG.log(Level.FINE, MessageFormat.format("firstFoundIdx: {0}", firstFoundIdx));
         if (firstFoundIdx != Integer.MAX_VALUE) {
-            System.out.println("firstFoundIdx-substring: " + recipients.substring(firstFoundIdx));
+            LOG.log(Level.FINE, MessageFormat.format("firstFoundIdx-substring: {0}", recipients.substring(firstFoundIdx)));
             type = getType(firstFoundIdx);
             idx += address.toString().length() + 1 + lengthOfTypePrefix(type) + adaptLengthForOptionalPersonal(address);
         }
