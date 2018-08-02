@@ -29,15 +29,20 @@ public class EmailRecipientUtils {
     
     public static Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars)
             throws AddressException, UnsupportedEncodingException {
-        return convertRecipientString(recipientList, envVars, TO);
+        return convertRecipientString(recipientList, envVars, TO, null);
     }
-    
+
     public static Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars, int type)
+            throws AddressException, UnsupportedEncodingException {
+        return convertRecipientString(recipientList, envVars, type, null);
+    }
+
+    private static Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars, int type, TaskListener listener)
         throws AddressException, UnsupportedEncodingException {
         final Set<InternetAddress> internetAddresses = new LinkedHashSet<>();
         if (!StringUtils.isBlank(recipientList)) {
             final String expandedRecipientList = fixupDelimiters(envVars.expand(recipientList));
-            RecipientListStringAnalyser recipientsAnalyser = new RecipientListStringAnalyser(expandedRecipientList);
+            RecipientListStringAnalyser recipientsAnalyser = RecipientListStringAnalyser.newInstance(listener, expandedRecipientList);
             InternetAddress[] all = InternetAddress.parse(expandedRecipientList.replace("bcc:", "").replace("cc:", ""));
             final Set<InternetAddress> to = new LinkedHashSet<>();
             final Set<InternetAddress> cc = new LinkedHashSet<>();
@@ -181,14 +186,14 @@ public class EmailRecipientUtils {
     public static void addAddressesFromRecipientList(Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, String recipientList,
             EnvVars envVars, TaskListener listener) {
         try {
-            Set<InternetAddress> internetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.TO);
+            Set<InternetAddress> internetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.TO, listener);
             to.addAll(internetAddresses);
             if(bcc != null) {
-                Set<InternetAddress> bccInternetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.BCC);
+                Set<InternetAddress> bccInternetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.BCC, listener);
                 bcc.addAll(bccInternetAddresses);
             }
             if(cc != null) {
-                Set<InternetAddress> ccInternetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.CC);
+                Set<InternetAddress> ccInternetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.CC, listener);
                 cc.addAll(ccInternetAddresses);
             }
         } catch (AddressException ae) {

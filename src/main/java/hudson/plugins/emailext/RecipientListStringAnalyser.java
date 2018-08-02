@@ -1,23 +1,42 @@
 package hudson.plugins.emailext;
 
+import hudson.model.TaskListener;
+import jenkins.model.Jenkins;
+
 import javax.mail.internet.InternetAddress;
-import java.text.MessageFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 class RecipientListStringAnalyser {
 
-    private static final Logger LOG = Logger.getLogger(RecipientListStringAnalyser.class.getName());
-
     static final int NOT_FOUND = -1;
+
+    // Needed for debug logging according to configure system settings; both may be null
+    private final TaskListener listener;
+    private final ExtendedEmailPublisherDescriptor descriptor;
 
     private final String recipients;
 
     private int idx = 0;
 
+    /**
+     * Only for testing.
+     */
     RecipientListStringAnalyser(String recipientsListString) {
+        this(null, null, recipientsListString);
+    }
+
+    private RecipientListStringAnalyser(TaskListener listener, ExtendedEmailPublisherDescriptor descriptor,
+                                        String recipientsListString) {
+        this.listener = listener;
+        this.descriptor = descriptor;
         this.recipients = recipientsListString;
-        LOG.log(Level.FINE, MessageFormat.format("Analyzing: {0} ", recipients));
+
+        debug("Analyzing: %s", recipients);
+    }
+
+    static RecipientListStringAnalyser newInstance(TaskListener listener, String recipientsListString) {
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(
+                ExtendedEmailPublisherDescriptor.class);
+        return new RecipientListStringAnalyser(listener, descriptor, recipientsListString);
     }
 
     /**
@@ -26,12 +45,12 @@ class RecipientListStringAnalyser {
      */
     int getType(InternetAddress address) {
         int type = NOT_FOUND;
-        LOG.log(Level.FINE, MessageFormat.format("Looking for: {0}", address));
-        LOG.log(Level.FINE, MessageFormat.format("...starting at: {0}", idx));
+        debug("Looking for: %s", address);
+        debug("...starting at: %d", idx);
         int firstFoundIdx = findFirst(address);
-        LOG.log(Level.FINE, MessageFormat.format("firstFoundIdx: {0}", firstFoundIdx));
+        debug("firstFoundIdx: %d", firstFoundIdx);
         if (firstFoundIdx != Integer.MAX_VALUE) {
-            LOG.log(Level.FINE, MessageFormat.format("firstFoundIdx-substring: {0}", recipients.substring(firstFoundIdx)));
+            debug("firstFoundIdx-substring: %s", recipients.substring(firstFoundIdx));
             type = getType(firstFoundIdx);
             idx = firstFoundIdx + lengthOfTypePrefix(type) + address.toString().length()
                     + adaptLengthForOptionalPersonal(address) + 1;
@@ -96,6 +115,12 @@ class RecipientListStringAnalyser {
 
     private int adaptLengthForOptionalPersonal(InternetAddress address) {
         return address.getPersonal() != null ? -4 : 0; // This may not be precise! Quotes around personal name + '<' and '>' around email address...
+    }
+
+    private void debug(final String format, final Object... args) {
+        if (descriptor != null && listener != null) {
+            descriptor.debug(listener.getLogger(), format, args);
+        }
     }
 
 }
