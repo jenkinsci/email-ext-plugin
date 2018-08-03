@@ -46,14 +46,17 @@ class RecipientListStringAnalyser {
     int getType(InternetAddress address) {
         int type = NOT_FOUND;
         debug("Looking for: %s", address);
-        debug("...starting at: %d", idx);
+        debug("\tstarting at: %d", idx);
         int firstFoundIdx = findFirst(address);
-        debug("firstFoundIdx: %d", firstFoundIdx);
+        debug("\tfirstFoundIdx: %d", firstFoundIdx);
         if (firstFoundIdx != Integer.MAX_VALUE) {
-            debug("firstFoundIdx-substring: %s", recipients.substring(firstFoundIdx));
+            debug("\tfirstFoundIdx-substring: %s", recipients.substring(firstFoundIdx));
             type = getType(firstFoundIdx);
+            debug("\t=> found type: %d", type);
             idx = firstFoundIdx + lengthOfTypePrefix(type) + address.toString().length()
                     + adaptLengthForOptionalPersonal(address) + 1;
+        } else {
+            debug("\t=> type not found");
         }
         return type;
     }
