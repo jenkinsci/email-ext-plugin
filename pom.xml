@@ -41,7 +41,7 @@
         <workflow-support.version>2.13</workflow-support.version>
         <scm-api.version>2.0.7</scm-api.version>
         <java.level>7</java.level>
-        <concurrency>2</concurrency>
+        <concurrency>1</concurrency>
         <argLine />
     </properties>
 
