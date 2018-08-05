@@ -29,14 +29,20 @@ public class EmailRecipientUtils {
     
     public static Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars)
             throws AddressException, UnsupportedEncodingException {
-        return convertRecipientString(recipientList, envVars, TO);
+        return convertRecipientString(recipientList, envVars, TO, null);
     }
-    
+
     public static Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars, int type)
+            throws AddressException, UnsupportedEncodingException {
+        return convertRecipientString(recipientList, envVars, type, null);
+    }
+
+    private static Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars, int type, TaskListener listener)
         throws AddressException, UnsupportedEncodingException {
         final Set<InternetAddress> internetAddresses = new LinkedHashSet<>();
         if (!StringUtils.isBlank(recipientList)) {
             final String expandedRecipientList = fixupDelimiters(envVars.expand(recipientList));
+            RecipientListStringAnalyser recipientsAnalyser = RecipientListStringAnalyser.newInstance(listener, expandedRecipientList);
             InternetAddress[] all = InternetAddress.parse(expandedRecipientList.replace("bcc:", "").replace("cc:", ""));
             final Set<InternetAddress> to = new LinkedHashSet<>();
             final Set<InternetAddress> cc = new LinkedHashSet<>();
@@ -44,22 +50,22 @@ public class EmailRecipientUtils {
             final String defaultSuffix = ExtendedEmailPublisher.descriptor().getDefaultSuffix();
 
             for(InternetAddress address : all) {
-                if(address.getPersonal() != null) {
-                    if(expandedRecipientList.contains("bcc:" + address.getPersonal()) || expandedRecipientList.contains("bcc:\"" + address.toString() + "\"")) {
+                int typeForAddress = recipientsAnalyser.getType(address);
+                switch (typeForAddress) {
+                    case BCC:
                         bcc.add(address);
-                    } else if(expandedRecipientList.contains("cc:" + address.getPersonal()) || expandedRecipientList.contains("cc:\"" + address.toString() + "\"")) {
+                        break;
+                    case CC:
                         cc.add(address);
-                    } else {
+                        break;
+                    case RecipientListStringAnalyser.NOT_FOUND:
+                        // Fallback: Treat NOT_FOUND like TO in case RecipientListStringAnalyser fails due to whatever
+                        // reason (maybe encoding of personal?)
+                    case TO:
                         to.add(address);
-                    }
-                } else {
-                    if(expandedRecipientList.contains("bcc:" + address.toString())) {
-                        bcc.add(address);
-                    } else if(expandedRecipientList.contains("cc:" + address.toString())) {
-                        cc.add(address);
-                    } else {
-                        to.add(address);
-                    }
+                        break;
+                    default:
+                        throw new IllegalStateException("Got unsupported recipient type: " + typeForAddress);
                 }
             }
 
@@ -124,6 +130,7 @@ public class EmailRecipientUtils {
     }
 
     private static String fixupDelimiters(String input) {
+        input = input.trim();
         input = input.replaceAll("\\s+", " ");
         if(input.contains(" ") && !input.contains(",")) {
             input = input.replace(" ", ",");
@@ -179,14 +186,14 @@ public class EmailRecipientUtils {
     public static void addAddressesFromRecipientList(Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, String recipientList,
             EnvVars envVars, TaskListener listener) {
         try {
-            Set<InternetAddress> internetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.TO);
+            Set<InternetAddress> internetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.TO, listener);
             to.addAll(internetAddresses);
             if(bcc != null) {
-                Set<InternetAddress> bccInternetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.BCC);
+                Set<InternetAddress> bccInternetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.BCC, listener);
                 bcc.addAll(bccInternetAddresses);
             }
             if(cc != null) {
-                Set<InternetAddress> ccInternetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.CC);
+                Set<InternetAddress> ccInternetAddresses = convertRecipientString(recipientList, envVars, EmailRecipientUtils.CC, listener);
                 cc.addAll(ccInternetAddresses);
             }
         } catch (AddressException ae) {
