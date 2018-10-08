@@ -76,10 +76,10 @@ public class ScriptContent extends AbstractEvalContent {
         try {
             if (!StringUtils.isEmpty(script)) {
                 inputStream = getFileInputStream(workspace, script, ".groovy");
-                result = executeScript(run, listener, inputStream);
+                result = executeScript(run, workspace, listener, inputStream);
             } else {
                 inputStream = getFileInputStream(workspace, template, ".template");
-                result = renderTemplate(run, listener, inputStream);
+                result = renderTemplate(run, workspace, listener, inputStream);
             }
         } catch (FileNotFoundException e) {
             String missingScriptError = "";
@@ -111,7 +111,7 @@ public class ScriptContent extends AbstractEvalContent {
      * @return the rendered template content
      * @throws IOException
      */
-    private String renderTemplate(Run<?, ?> build, TaskListener listener, InputStream templateStream)
+    private String renderTemplate(Run<?, ?> build, FilePath workspace, TaskListener listener, InputStream templateStream)
             throws IOException {
         
         String result;
@@ -123,6 +123,7 @@ public class ScriptContent extends AbstractEvalContent {
         binding.put("it", new ScriptContentBuildWrapper(build));
         binding.put("rooturl", descriptor.getHudsonUrl());
         binding.put("project", build.getParent());
+        binding.put("workspace", workspace);
 
         try {
             String text = IOUtils.toString(templateStream);
@@ -182,7 +183,7 @@ public class ScriptContent extends AbstractEvalContent {
      * @return a String containing the toString of the last item in the script
      * @throws IOException
      */
-    private String executeScript(Run<?, ?> build, TaskListener listener, InputStream scriptStream)
+    private String executeScript(Run<?, ?> build, FilePath workspace, TaskListener listener, InputStream scriptStream)
             throws IOException {
         String result = "";
         Map binding = new HashMap<>();
@@ -193,6 +194,7 @@ public class ScriptContent extends AbstractEvalContent {
         binding.put("it", new ScriptContentBuildWrapper(build));
         binding.put("project", parent);
         binding.put("rooturl", descriptor.getHudsonUrl());
+        binding.put("workspace", workspace);
         PrintStream logger = listener.getLogger();
         binding.put("logger", logger);
 
