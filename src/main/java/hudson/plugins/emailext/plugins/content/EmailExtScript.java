@@ -4,6 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import groovy.lang.Script;
 import hudson.EnvVars;
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -65,11 +66,12 @@ public abstract class EmailExtScript extends Script {
             ListMultimap<String, String> argsMultimap = ArrayListMultimap.create();
             populateArgs(args, argsMap, argsMultimap);
 
-            // Get the build and listener from the binding.
-            AbstractBuild<?, ?> build = (AbstractBuild<?, ?>)this.getBinding().getVariable("build");
+            // Get the build, workspace and listener from the binding.
+            Run<?, ?> build = (Run<?, ?>)this.getBinding().getVariable("build");
+            FilePath workspace = (FilePath)this.getBinding().getVariable("workspace");
             TaskListener listener = (TaskListener)this.getBinding().getVariable("listener");
 
-            return macro.evaluate(build, listener, name, argsMap, argsMultimap);
+            return macro.evaluate(build, workspace, listener, name, argsMap, argsMultimap);
         } else {
             // try environment variables
 
