@@ -4,7 +4,8 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.32</version>
+        <!-- TODO: use the release asap -->
+        <version>3.33-SNAPSHOT</version>
         <relativePath />
     </parent>
 
@@ -28,7 +29,6 @@
     </issueManagement>
 
     <properties>
-        <powermock.version>1.6.4</powermock.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <workflow-step-api.version>2.9</workflow-step-api.version>
         <workflow-aggregator.version>2.5</workflow-aggregator.version>
