@@ -134,7 +134,7 @@ import java.util.List;
                 Object[] args = invocation.getArguments();
                 return getUser((String) args[0]);
             }
-        }).when(User.class, "get", Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap());
+        }).when(User.class, "get", Mockito.anyString(), Mockito.anyBoolean(), Mockito.any());
         final Cause.UserIdCause cause = PowerMockito.mock(Cause.UserIdCause.class);
         PowerMockito.when(cause.getUserId()).thenReturn(requestor);
         PowerMockito.doReturn(cause).when(build).getCause(Cause.UserIdCause.class);
