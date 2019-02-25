@@ -70,6 +70,7 @@ import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import org.junit.ClassRule;
@@ -1264,6 +1265,44 @@ public class ExtendedEmailPublisherTest {
         assertEquals(0, Mailbox.get("user7@info.x2x.com").size());
     }
 
+    @Issue("SECURITY-1340")
+    @Test
+    public void testScriptConstructorsAreNotExecutedOutsideOfSandbox() throws Exception {
+        setUpSecurity();
+
+        publisher.setPresendScript("class DoNotRunConstructor {\n" +
+            "  static void main(String[] args) {}\n" +
+            "  DoNotRunConstructor() {\n" +
+            "    assert jenkins.model.Jenkins.instance.createProject(hudson.model.FreeStyleProject, 'should-not-exist1')\n" +
+            "  }\n" +
+            "}\n");
+        publisher.setPostsendScript("class DoNotRunConstructor {\n" +
+            "  static void main(String[] args) {}\n" +
+            "  DoNotRunConstructor() {\n" +
+            "    assert jenkins.model.Jenkins.instance.createProject(hudson.model.FreeStyleProject, 'should-not-exist2')\n" +
+            "  }\n" +
+            "}\n");
+        SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
+        successTrigger.setEmail(new EmailType() {
+            {
+                addRecipientProvider(new RequesterRecipientProvider());
+            }
+        });
+        publisher.getConfiguredTriggers().add(successTrigger);
+
+        User u = User.get("kutzi");
+        u.setFullName("Christoph Kutzinski");
+        Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
+        u.addProperty(prop);
+        UserCause cause = new MockUserCause("kutzi");
+
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
+        j.assertBuildStatus(Result.SUCCESS, build);
+        j.assertLogContains("staticMethod jenkins.model.Jenkins getInstance", build);
+        assertNull(j.jenkins.getItem("should-not-exist1"));
+        assertNull(j.jenkins.getItem("should-not-exist2"));
+    }
 
     /**
      * Similar to {@link SleepBuilder} but only on the first build. (Removing

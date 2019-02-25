@@ -624,7 +624,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 } else {
 
                     try {
-                        GroovySandbox.run(shell.parse(script), new ProxyWhitelist(
+                        GroovySandbox.run(shell, script, new ProxyWhitelist(
                                 Whitelist.all(),
                                 new MimeMessageInstanceWhitelist(msg),
                                 new PropertiesInstanceWhitelist(props),

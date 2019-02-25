@@ -109,6 +109,40 @@ public class AbstractScriptTriggerTest {
         checkTrigger(ScriptTrigger.class, "After", Result.SUCCESS, UnapprovedUsageException.class, true);
     }
 
+    @Test
+    @Issue("SECURITY-1340")
+    public void doNotExecuteConstructorsOutsideOfSandbox() throws Exception {
+        ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
+        publisher.defaultSubject = "%DEFAULT_SUBJECT";
+        publisher.defaultContent = "%DEFAULT_CONTENT";
+        publisher.attachmentsPattern = "";
+        publisher.recipientList = "%DEFAULT_RECIPIENTS";
+        publisher.setPresendScript("");
+        publisher.setPostsendScript("");
+        String script = "class DoNotRunConstructor {\n" +
+            "  static void main(String[] args) {}\n" +
+            "  DoNotRunConstructor() {\n" +
+            "    assert jenkins.model.Jenkins.instance.createProject(hudson.model.FreeStyleProject, 'should-not-exist')\n" +
+            "  }\n" +
+            "}\n";
+        publisher.getConfiguredTriggers().add(new PreBuildScriptTrigger(
+                Collections.<RecipientProvider>emptyList(),
+                "recipientList",
+                "replyTo",
+                "subject",
+                "body",
+                "attachmentsPattern",
+                0,
+                "text/plain",
+                new SecureGroovyScript(script, true, null)));
+
+        FreeStyleProject p = j.createFreeStyleProject("p1");
+        p.getPublishersList().add(publisher);
+
+        checkTrigger(PreBuildScriptTrigger.class, "p1", Result.FAILURE, RejectedAccessException.class, false);
+        assertNull(j.jenkins.getItem("should-not-exist"));
+    }
+
     private <T> T checkTrigger(Class<T> clazz, String name, Result firstStatus, Class<? extends Exception> expected, boolean approveSignature) throws Exception {
         FreeStyleProject project = j.jenkins.getItemByFullName(name, FreeStyleProject.class);
         assertNotNull(project);

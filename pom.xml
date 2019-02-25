@@ -217,7 +217,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>script-security</artifactId>
-            <version>1.27</version>
+            <version>1.54</version>
         </dependency>
 
         <!-- testing -->

@@ -147,7 +147,7 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
 
             if (secureTriggerScript.isSandbox()) {
                 try {
-                    return GroovySandbox.run(shell.parse(secureTriggerScript.getScript()), new ProxyWhitelist(
+                    return GroovySandbox.run(shell, secureTriggerScript.getScript(), new ProxyWhitelist(
                             Whitelist.all(),
                             new PrintStreamInstanceWhitelist(logger)));
                 } catch (RejectedAccessException x) {

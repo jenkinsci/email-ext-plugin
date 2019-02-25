@@ -29,8 +29,12 @@ import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.junit.Before;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -67,14 +71,28 @@ public class ScriptContentSecureTest extends ScriptContentTest {
     @Test
     public void templateInWorkspaceUnsafe() throws Exception {
         ScriptApproval.get().clearApprovedScripts();
-        boolean allIsWell = false;
         try {
             super.templateInWorkspaceUnsafe();
+            fail("Templates in the workspace should use the Groovy sandbox");
         } catch (AssertionError e) {
-            //As expected
-            allIsWell = true;
+            // Error message is a TokenMacro parse error and does not contain a script security warning, perhaps due to
+            // EmailExtScript#methodMissing? The message looks like:
+            // Error processing tokens: Error while parsing action 'Text/ZeroOrMore/FirstOf/Token/DelimitedToken/DelimitedToken_Action3' at input position (line 1, pos 39)
         }
-        assertTrue("Loading a template from the workspace should not be permitted.", allIsWell);
+        assertNull(j.jenkins.getItem("should-not-exist"));
+    }
+
+    @Issue("SECURITY-1340")
+    @Test
+    public void templateInWorkspaceWithConstructor() throws Exception {
+        ScriptApproval.get().clearApprovedScripts();
+        try {
+            super.templateInWorkspace("/testConstructor.groovy");
+            fail("Templates in the workspace should use the Groovy sandbox");
+        } catch (AssertionError e) {
+            assertThat(e.getMessage(), containsString("staticMethod jenkins.model.Jenkins getInstance"));
+        }
+        assertNull(j.jenkins.getItem("should-not-exist"));
     }
 
     @Test

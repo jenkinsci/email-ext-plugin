@@ -207,8 +207,7 @@ public class ScriptContent extends AbstractEvalContent {
         if (scriptStream instanceof UserProvidedContentInputStream && !AbstractEvalContent.isApprovedScript(scriptContent, GroovyLanguage.get())) {
             //Unapproved script, run it in the sandbox
             GroovyShell shell = createEngine(descriptor, binding, true);
-            Script script = shell.parse(scriptContent);
-            Object res = GroovySandbox.run(script, new ProxyWhitelist(
+            Object res = GroovySandbox.run(shell, scriptContent, new ProxyWhitelist(
                     Whitelist.all(),
                     new PrintStreamInstanceWhitelist(logger),
                     new EmailExtScriptTokenMacroWhitelist()
