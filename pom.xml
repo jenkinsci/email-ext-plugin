@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.32</version>
+        <version>3.39</version>
         <relativePath />
     </parent>
 
@@ -29,17 +29,17 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <workflow-step-api.version>2.9</workflow-step-api.version>
+        <workflow-step-api.version>2.19</workflow-step-api.version>
         <workflow-aggregator.version>2.5</workflow-aggregator.version>
         <workflow-job.version>2.11</workflow-job.version>
-        <jenkins.version>2.7.3</jenkins.version>
-        <workflow-api.version>2.11</workflow-api.version>
+        <jenkins.version>2.121.1</jenkins.version>
+        <workflow-api.version>2.30</workflow-api.version>
         <workflow-cps.version>2.29</workflow-cps.version>
         <workflow-durable-task-step.version>2.11</workflow-durable-task-step.version>
         <workflow-basic-steps.version>2.4</workflow-basic-steps.version>
-        <workflow-support.version>2.13</workflow-support.version>
-        <scm-api.version>2.0.7</scm-api.version>
-        <java.level>7</java.level>
+        <workflow-support.version>3.2</workflow-support.version>
+        <scm-api.version>2.2.6</scm-api.version>
+        <java.level>8</java.level>
         <concurrency>1</concurrency>
         <argLine />
     </properties>
@@ -160,7 +160,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>structs</artifactId>
-            <version>1.6</version>
+            <version>1.17</version>
         </dependency>
 
         <!-- workflow stuff -->
