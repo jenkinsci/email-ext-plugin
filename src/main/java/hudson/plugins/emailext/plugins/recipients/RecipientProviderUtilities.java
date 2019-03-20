@@ -49,6 +49,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -72,11 +73,7 @@ public final class RecipientProviderUtilities {
             // TODO: core 2.60+, workflow-job 2.12+: Switch to checking if run is an instance of RunWithSCM and call getChangeSets directly.
             if (run instanceof AbstractBuild<?,?>) {
                 final ChangeLogSet<?> changeLogSet = ((AbstractBuild<?,?>)run).getChangeSet();
-                if (changeLogSet == null) {
-                    debug.send("      changeLogSet was null");
-                } else {
-                    addChangeSetUsers(changeLogSet, users, debug);
-                }
+                addChangeSetUsers(changeLogSet, users, debug);
             } else {
                 // TODO: core 2.60+, workflow-job 2.12+: Decide whether to remove this logic since it won't be needed for Pipelines any more.
                 try {
@@ -130,7 +127,7 @@ public final class RecipientProviderUtilities {
             Cause.UserIdCause cause = run.getCause(Cause.UserIdCause.class);
             if (cause != null) {
                 String id = cause.getUserId();
-                return User.get(id, false, null);
+                return User.get(id, false, Collections.emptyMap());
             }
 
         } catch (Exception e) {
@@ -149,7 +146,7 @@ public final class RecipientProviderUtilities {
                 Field authenticationName = Cause.UserCause.class.getDeclaredField("authenticationName");
                 authenticationName.setAccessible(true);
                 String name = (String) authenticationName.get(userCause);
-                return User.get(name, false, null);
+                return User.get(name, false, Collections.emptyMap());
             }
         } catch (Exception e) {
             LOGGER.info(e.getMessage());
