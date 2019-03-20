@@ -75,12 +75,12 @@ f.section(title: _("Extended E-mail Notification")) {
       f.option(selected: 'text/html'==descriptor.defaultContentType, value: "text/html", _("contentType.html"))
     }
   }
-  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/listId.html", checked: descriptor.listId!=null, name: "ext_mailer_use_list_id", title: _("Use List-ID Email Header")) {
+  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/listId.html", checked: descriptor.listId!=null, name: "ext_mailer_use_list_id", title: _("Use List-ID E-mail Header")) {
     f.entry(title: _("List ID")) {
       input(type: "text", class: "setting-input", value: descriptor.listId, name: "ext_mailer_list_id")
     }
   }
-  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/precedenceBulk.html", checked: descriptor.precedenceBulk, name: "ext_mailer_add_precedence_bulk", title: _("Add 'Precedence: bulk' Email Header"))
+  f.optionalBlock(help: "/plugin/email-ext/help/globalConfig/precedenceBulk.html", checked: descriptor.precedenceBulk, name: "ext_mailer_add_precedence_bulk", title: _("Add 'Precedence: bulk' E-mail Header"))
   f.entry(field: "recipients", help: "/plugin/email-ext/help/globalConfig/defaultRecipients.html", title: _("Default Recipients")) {
     input(type: "text", class: "setting-input", value: descriptor.defaultRecipients, name: "ext_mailer_default_recipients")
   }
