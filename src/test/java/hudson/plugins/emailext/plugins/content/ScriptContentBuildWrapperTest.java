@@ -11,6 +11,7 @@ import hudson.tasks.test.AggregatedTestResultAction.ChildReport;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -27,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith( PowerMockRunner.class )
 @PrepareForTest( value = { AggregatedTestResultAction.class, AggregatedTestResultAction.ChildReport.class } )
+@PowerMockIgnore({"javax.xml.*"}) // workaround inspired by https://github.com/powermock/powermock/issues/864#issuecomment-410182836
 public class ScriptContentBuildWrapperTest
 {
     private ScriptContentBuildWrapper buildWrapper;
