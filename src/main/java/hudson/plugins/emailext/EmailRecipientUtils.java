@@ -13,6 +13,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -79,7 +80,7 @@ public class EmailRecipientUtils {
 
             for(InternetAddress address : internetAddresses) {
                 if(!address.getAddress().contains("@")) {
-                    User u = User.get(address.getAddress(), false, null);
+                    User u = User.get(address.getAddress(), false, Collections.emptyMap());
                     String userEmail;
                     if(u != null) {
                         userEmail = getUserConfiguredEmail(u);

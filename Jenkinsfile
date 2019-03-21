@@ -1,1 +1,4 @@
-buildPlugin(failFast: false, jdkVersions: [8, 11])
+buildPlugin(
+    failFast: false,
+    configurations: buildPlugin.recommendedConfigurations()
+)
