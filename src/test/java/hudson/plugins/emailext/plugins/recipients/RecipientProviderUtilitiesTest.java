@@ -9,6 +9,7 @@ import org.hamcrest.collection.IsCollectionWithSize;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -26,6 +27,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @PrepareForTest({
         WorkflowRun.class
 })
+@PowerMockIgnore({"javax.xml.*"}) // workaround inspired by https://github.com/powermock/powermock/issues/864#issuecomment-410182836
 public class RecipientProviderUtilitiesTest {
     public class Debug implements RecipientProviderUtilities.IDebug {
 
