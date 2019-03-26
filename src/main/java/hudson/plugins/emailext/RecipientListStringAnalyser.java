@@ -85,9 +85,9 @@ class RecipientListStringAnalyser {
 
     private int getType(int firstFoundIdx) {
         int type;
-        if (recipients.indexOf("bcc", firstFoundIdx) == firstFoundIdx) {
+        if (recipients.indexOf("bcc:", firstFoundIdx) == firstFoundIdx) {
             type = EmailRecipientUtils.BCC;
-        } else if (recipients.indexOf("cc", firstFoundIdx) == firstFoundIdx) {
+        } else if (recipients.indexOf("cc:", firstFoundIdx) == firstFoundIdx) {
             type = EmailRecipientUtils.CC;
         } else {
             type = EmailRecipientUtils.TO;

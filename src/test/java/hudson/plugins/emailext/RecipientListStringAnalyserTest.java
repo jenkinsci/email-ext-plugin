@@ -25,6 +25,12 @@ public class RecipientListStringAnalyserTest {
         RecipientListStringAnalyser analyser = new RecipientListStringAnalyser("cc:mickey@disney.com");
         assertEquals(EmailRecipientUtils.CC, analyser.getType(new InternetAddress("mickey@disney.com")));
     }
+    
+    @Test
+    public void getTypeForEmailAddressStartingWithCCReturnsTo() throws Exception {
+        RecipientListStringAnalyser analyser = new RecipientListStringAnalyser("ccmickey@disney.com");
+        assertEquals(EmailRecipientUtils.TO, analyser.getType(new InternetAddress("ccmickey@disney.com")));
+    }
 
     @Test
     public void getTypeForBccPrefixedEmailAddressReturnsBCC() throws Exception {
