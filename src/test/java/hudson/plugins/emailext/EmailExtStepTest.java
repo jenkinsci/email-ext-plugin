@@ -120,6 +120,24 @@ public class EmailExtStepTest {
         assertTrue("There should be a PDF named \"test.pdf\" attached", "test.pdf".equalsIgnoreCase(attach.getFileName()));
     }
 
+    @Test
+    public void saveOutput() throws Exception {
+        WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");
+        job.setDefinition(new CpsFlowDefinition(
+                "node {\n" +
+                        "  emailext(to: 'mickeymouse@disney.com', subject: 'Boo', saveOutput: true)\n" +
+                        "  archiveArtifacts '*.*'\n" +
+                        "}", false));
+        Run<?,?> run = job.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(run);
+
+        Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
+        assertEquals(1, mbox.size());
+        Message msg = mbox.get(0);
+        assertEquals("Boo", msg.getSubject());
+        j.assertLogContains("Archiving artifacts", run);
+    }
+
     public static class FileCopyStep extends AbstractStepImpl {
 
         private final String file;

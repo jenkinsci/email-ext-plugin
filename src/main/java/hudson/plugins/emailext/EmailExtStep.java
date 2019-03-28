@@ -62,6 +62,8 @@ public class EmailExtStep extends AbstractStepImpl {
 
     private String postsendScript;
 
+    private boolean saveOutput;
+
     @DataBoundConstructor
     public EmailExtStep(String subject, String body) {
         this.subject = subject;
@@ -160,6 +162,15 @@ public class EmailExtStep extends AbstractStepImpl {
         return postsendScript == null ? "" : postsendScript;
     }
 
+    public boolean getSaveOutput() {
+        return saveOutput;
+    }
+
+    @DataBoundSetter
+    public void setSaveOutput(boolean saveOutput) {
+        this.saveOutput = saveOutput;
+    }
+
     public static class EmailExtStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
 
         private static final long serialVersionUID = 1L;
@@ -188,6 +199,7 @@ public class EmailExtStep extends AbstractStepImpl {
             }
             publisher.configuredTriggers.add(trigger);
 
+            publisher.saveOutput = step.saveOutput;
             publisher.defaultSubject = step.subject;
             publisher.defaultContent = step.body;
             publisher.attachBuildLog = step.attachLog;
