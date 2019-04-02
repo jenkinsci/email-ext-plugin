@@ -109,8 +109,7 @@ public class AttachmentUtils implements Serializable {
         }
         
         public String getContentType() {
-            return MimetypesFileTypeMap.getDefaultFileTypeMap()
-                    .getContentType(run.getLogFile());
+            return "text/plain";
         }
         
         public String getName() {
@@ -197,7 +196,6 @@ public class AttachmentUtils implements Serializable {
     
     private static void attachSingleLog(ExtendedEmailPublisherContext context, Run<?,?> run, Multipart multipart, boolean compress) {
         try {
-            File logFile = run.getLogFile();
             long maxAttachmentSize = context.getPublisher().getDescriptor().getMaxAttachmentSize();
 
             SizedDataSource fileSource;
