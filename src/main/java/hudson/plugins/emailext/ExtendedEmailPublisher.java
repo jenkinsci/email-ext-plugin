@@ -814,12 +814,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         excludeNotAllowedDomains(context, bcc);
 
         //
-        msg.setRecipients(Message.RecipientType.TO, to.toArray(new InternetAddress[to.size()]));
+        msg.setRecipients(Message.RecipientType.TO, to.toArray(new InternetAddress[0]));
         if (!cc.isEmpty()) {
-            msg.setRecipients(Message.RecipientType.CC, cc.toArray(new InternetAddress[cc.size()]));
+            msg.setRecipients(Message.RecipientType.CC, cc.toArray(new InternetAddress[0]));
         }
         if (!bcc.isEmpty()) {
-            msg.setRecipients(Message.RecipientType.BCC, bcc.toArray(new InternetAddress[bcc.size()]));
+            msg.setRecipients(Message.RecipientType.BCC, bcc.toArray(new InternetAddress[0]));
         }
 
         Set<InternetAddress> replyToAddresses = new LinkedHashSet<>();
@@ -833,7 +833,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         }
 
         if (!replyToAddresses.isEmpty()) {
-            msg.setReplyTo(replyToAddresses.toArray(new InternetAddress[replyToAddresses.size()]));
+            msg.setReplyTo(replyToAddresses.toArray(new InternetAddress[0]));
         }
 
         Run<?, ?> pb = getPreviousRun(context.getRun(), context.getListener());
