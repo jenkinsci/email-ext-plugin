@@ -152,7 +152,7 @@ public class EmailRecipientUtilsTest {
     public void testConvertRecipientList_userName()
             throws AddressException, IOException {
         ExtendedEmailPublisher.descriptor().setDefaultSuffix("@gmail.com");
-        User u = User.get("advantiss");
+        User u = User.getById("advantiss", true);
         u.setFullName("Peter Samoshkin");
         Mailer.UserProperty prop = new Mailer.UserProperty("advantiss@xxx.com");
         u.addProperty(prop);

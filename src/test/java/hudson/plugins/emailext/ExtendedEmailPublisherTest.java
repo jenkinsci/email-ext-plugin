@@ -592,7 +592,7 @@ public class ExtendedEmailPublisherTest {
         });
         publisher.getConfiguredTriggers().add(successTrigger);
 
-        User u = User.get("kutzi");
+        User u = User.getById("kutzi", true);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -624,7 +624,7 @@ public class ExtendedEmailPublisherTest {
         });
         publisher.getConfiguredTriggers().add(successTrigger);
 
-        User u = User.get("kutzi");
+        User u = User.getById("kutzi", true);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -659,7 +659,7 @@ public class ExtendedEmailPublisherTest {
         });
         publisher.getConfiguredTriggers().add(successTrigger);
 
-        User u = User.get("kutzi");
+        User u = User.getById("kutzi", true);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -688,7 +688,7 @@ public class ExtendedEmailPublisherTest {
         });
         publisher.getConfiguredTriggers().add(successTrigger);
 
-        User u = User.get("kutzi");
+        User u = User.getById("kutzi", true);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -720,7 +720,7 @@ public class ExtendedEmailPublisherTest {
         });
         publisher.getConfiguredTriggers().add(successTrigger);
 
-        User u = User.get("kutzi");
+        User u = User.getById("kutzi", true);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -767,7 +767,7 @@ public class ExtendedEmailPublisherTest {
         });
         publisher.getConfiguredTriggers().add(successTrigger);
 
-        User u = User.get("kutzi");
+        User u = User.getById("kutzi", true);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -809,7 +809,7 @@ public class ExtendedEmailPublisherTest {
         });
         publisher.getConfiguredTriggers().add(successTrigger);
 
-        User u = User.get("kutzi");
+        User u = User.getById("kutzi", true);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -898,7 +898,7 @@ public class ExtendedEmailPublisherTest {
         });
         publisher.getConfiguredTriggers().add(successTrigger);
 
-        User u = User.get("kutzi");
+        User u = User.getById("kutzi", true);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -923,7 +923,7 @@ public class ExtendedEmailPublisherTest {
         publisher.getConfiguredTriggers().add(successTrigger);
         publisher.replyTo = "ashlux@gmail.com";
 
-        User u = User.get("kutzi");
+        User u = User.getById("kutzi", true);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -954,7 +954,7 @@ public class ExtendedEmailPublisherTest {
         });
         publisher.getConfiguredTriggers().add(successTrigger);
 
-        User u = User.get("kutzi");
+        User u = User.getById("kutzi", true);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -1291,7 +1291,7 @@ public class ExtendedEmailPublisherTest {
         });
         publisher.getConfiguredTriggers().add(successTrigger);
 
-        User u = User.get("kutzi");
+        User u = User.getById("kutzi", true);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
