@@ -141,7 +141,7 @@ import java.util.List;
     }
 
     public static void addTestResultAction(final AbstractBuild<?, ?> build, final AbstractBuild<?, ?>... failedSinces) {
-        final List<CaseResult> failedTests = new LinkedList<CaseResult>();
+        final List<CaseResult> failedTests = new LinkedList<>();
         for (final AbstractBuild failedSince : failedSinces) {
             final CaseResult caseResult = PowerMockito.mock(CaseResult.class);
             PowerMockito.when(caseResult.getFailedSinceRun()).thenReturn(failedSince);

@@ -95,7 +95,7 @@ public final class RecipientProviderUtilities {
     }
 
     private static void addChangeSetUsers(ChangeLogSet<?> changeLogSet, Set<User> users, IDebug debug) {
-        final Set<User> changeAuthors = new HashSet<User>();
+        final Set<User> changeAuthors = new HashSet<>();
         for (final ChangeLogSet.Entry change : changeLogSet) {
             final User changeAuthor = change.getAuthor();
             if (changeAuthors.add(changeAuthor)) {

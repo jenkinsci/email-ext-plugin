@@ -50,7 +50,7 @@ public class ExtendedEmailPublisherMatrixTest {
 
             project = j.jenkins.createProject(MatrixProject.class, "Foo");
             project.getPublishersList().add( publisher );
-            slaves = new ArrayList<DumbSlave>(); 
+            slaves = new ArrayList<>();
             slaves.add(createOnlineSlave(new LabelAtom("success-slave1")));
             slaves.add(createOnlineSlave(new LabelAtom("success-slave2")));
             slaves.add(createOnlineSlave(new LabelAtom("success-slave3"))); 
@@ -159,7 +159,7 @@ public class ExtendedEmailPublisherMatrixTest {
 
     private void addSlaveToProject(int ... slaveInxes ) throws IOException {
         AxisList list = new AxisList();
-        List<String> values = new LinkedList<String>();
+        List<String> values = new LinkedList<>();
         for (int slaveInx : slaveInxes) {
             values.add(slaves.get(slaveInx).getLabelString());
         }

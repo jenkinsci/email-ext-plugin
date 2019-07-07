@@ -55,7 +55,7 @@ public class ScriptContentBuildWrapperTest
     @Test
     public void testGetAction_whenActionNotFoundThenReturnNull()
     {
-        when( mockBuild.getActions() ).thenReturn( new LinkedList<Action>() );
+        when( mockBuild.getActions() ).thenReturn(new LinkedList<>() );
 
         assertNull( buildWrapper.getAction( "class.not.found" ) );
     }

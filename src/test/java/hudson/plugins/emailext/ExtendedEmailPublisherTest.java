@@ -872,7 +872,7 @@ public class ExtendedEmailPublisherTest {
                 + "msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())");
         Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultClasspath");
         f.setAccessible(true);
-        List<GroovyScriptPath> classpath = new ArrayList<GroovyScriptPath>();
+        List<GroovyScriptPath> classpath = new ArrayList<>();
         classpath.add(new GroovyScriptPath("src/test/postsend"));
         f.set(publisher.getDescriptor(), classpath);
 

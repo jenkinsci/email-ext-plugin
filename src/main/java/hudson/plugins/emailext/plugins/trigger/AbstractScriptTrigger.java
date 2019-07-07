@@ -113,7 +113,7 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
         URLClassLoader urlcl = null;
         List<ClasspathEntry> cp = secureTriggerScript.getClasspath();
         if (!cp.isEmpty()) {
-            List<URL> urlList = new ArrayList<URL>(cp.size());
+            List<URL> urlList = new ArrayList<>(cp.size());
 
             for (ClasspathEntry entry : cp) {
                 ScriptApproval.get().using(entry);
