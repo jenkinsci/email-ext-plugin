@@ -76,7 +76,7 @@ public class EmailTypeTest {
     }
     
     @Test
-    public void testUpgadeToRecipientProvider() throws IOException {
+    public void testUpgradeToRecipientProvider() throws IOException {
         URL url = this.getClass().getResource("/recipient-provider-upgrade.xml");
         File jobConfig = new File(url.getFile());    
 

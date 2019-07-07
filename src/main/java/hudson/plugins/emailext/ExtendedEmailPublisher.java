@@ -558,7 +558,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             e.printStackTrace(context.getListener().error("Could not send email as a part of the post-build publishers."));
         }
 
-        debug(context.getListener().getLogger(), "Some error occured trying to send the email...check the Jenkins log");
+        debug(context.getListener().getLogger(), "Some error occurred trying to send the email...check the Jenkins log");
         return false;
     }
 
