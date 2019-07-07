@@ -23,10 +23,10 @@ import org.jvnet.hudson.test.recipes.LocalData;
 import java.util.Collections;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.hamcrest.text.IsEmptyString.*;
 import static org.junit.Assert.*;
 
 /**

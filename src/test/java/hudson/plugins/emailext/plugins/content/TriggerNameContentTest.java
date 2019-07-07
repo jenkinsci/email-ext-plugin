@@ -16,9 +16,9 @@ import javax.mail.Message;
 import java.util.Collections;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.hasItems;
 
 /**
  *
