@@ -5,7 +5,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
-import hudson.model.Cause.UserCause;
+import hudson.model.Cause.UserIdCause;
 import hudson.model.Descriptor;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -597,7 +597,7 @@ public class ExtendedEmailPublisherTest {
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
 
-        UserCause cause = new MockUserCause("kutzi");
+        UserIdCause cause = new UserIdCause("kutzi");
 
         FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
         j.assertBuildStatusSuccess(build);
@@ -629,7 +629,7 @@ public class ExtendedEmailPublisherTest {
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
 
-        UserCause cause = new MockUserCause("kutzi");
+        UserIdCause cause = new UserIdCause("kutzi");
 
         FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
         j.assertBuildStatusSuccess(build);
@@ -664,7 +664,7 @@ public class ExtendedEmailPublisherTest {
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
 
-        UserCause cause = new MockUserCause("kutzi");
+        UserIdCause cause = new UserIdCause("kutzi");
 
         FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
         j.assertBuildStatusSuccess(build);
@@ -693,7 +693,7 @@ public class ExtendedEmailPublisherTest {
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
 
-        UserCause cause = new MockUserCause("kutzi");
+        UserIdCause cause = new UserIdCause("kutzi");
 
         FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
         j.assertBuildStatusSuccess(build);
@@ -725,7 +725,7 @@ public class ExtendedEmailPublisherTest {
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
 
-        UserCause cause = new MockUserCause("kutzi");
+        UserIdCause cause = new UserIdCause("kutzi");
 
         FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
         j.assertBuildStatusSuccess(build);
@@ -772,7 +772,7 @@ public class ExtendedEmailPublisherTest {
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
 
-        UserCause cause = new MockUserCause("kutzi");
+        UserIdCause cause = new UserIdCause("kutzi");
 
         FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
         j.assertBuildStatusSuccess(build);
@@ -814,7 +814,7 @@ public class ExtendedEmailPublisherTest {
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
 
-        UserCause cause = new MockUserCause("kutzi");
+        UserIdCause cause = new UserIdCause("kutzi");
 
         FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
         j.assertBuildStatusSuccess(build);
@@ -903,7 +903,7 @@ public class ExtendedEmailPublisherTest {
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
 
-        UserCause cause = new MockUserCause("kutzi");
+        UserIdCause cause = new UserIdCause("kutzi");
 
         FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
         j.assertBuildStatusSuccess(build);
@@ -928,7 +928,7 @@ public class ExtendedEmailPublisherTest {
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
 
-        UserCause cause = new MockUserCause("kutzi");
+        UserIdCause cause = new UserIdCause("kutzi");
 
         FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
         j.assertBuildStatusSuccess(build);
@@ -959,7 +959,7 @@ public class ExtendedEmailPublisherTest {
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
 
-        UserCause cause = new MockUserCause("kutzi");
+        UserIdCause cause = new UserIdCause("kutzi");
 
         FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
         j.assertBuildStatusSuccess(build);
@@ -972,16 +972,6 @@ public class ExtendedEmailPublisherTest {
         assertEquals(1, replyTo.length);
 
         assertEquals("address not configured yet <nobody@nowhere>", replyTo[0].toString());
-    }
-
-    private static class MockUserCause extends UserCause {
-
-        public MockUserCause(String userName) throws Exception {
-            super();
-            Field f = UserCause.class.getDeclaredField("authenticationName");
-            f.setAccessible(true);
-            f.set(this, userName);
-        }
     }
 
     @Test
@@ -1295,7 +1285,8 @@ public class ExtendedEmailPublisherTest {
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
-        UserCause cause = new MockUserCause("kutzi");
+
+        UserIdCause cause = new UserIdCause("kutzi");
 
         FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
         j.assertBuildStatus(Result.SUCCESS, build);
