@@ -107,7 +107,7 @@ public class FailingTestSuspectsRecipientProviderTest {
         MockUtilities.addTestResultAction(build2, build1, build1, build2);
         TestUtilities.checkRecipients(build2, new FailingTestSuspectsRecipientProvider(), "A", "U", "V");
 
-        /**
+        /*
          * Requestor: (none)
          * Committers {X,V}.
          * Tests {c,d} fail.
@@ -119,7 +119,7 @@ public class FailingTestSuspectsRecipientProviderTest {
         MockUtilities.addTestResultAction(build3, build2, build3);
         TestUtilities.checkRecipients(build3, new FailingTestSuspectsRecipientProvider(), "U", "V", "X");
 
-        /**
+        /*
          * Requestor: (none)
          * Committers {K}
          * No tests were performed. The build failed.
@@ -130,7 +130,7 @@ public class FailingTestSuspectsRecipientProviderTest {
         MockUtilities.addChangeSet(build4, "K");
         TestUtilities.checkRecipients(build4, new FailingTestSuspectsRecipientProvider());
 
-        /**
+        /*
          * Requestor: (none)
          * Committers {X,U,V}.
          * No tests were performed. The build failed.
@@ -141,7 +141,7 @@ public class FailingTestSuspectsRecipientProviderTest {
         MockUtilities.addChangeSet(build5, "U", "W");
         TestUtilities.checkRecipients(build5, new FailingTestSuspectsRecipientProvider());
 
-        /**
+        /*
          * Requestor: A
          * Committers {W}.
          * Tests {a,e (new test)} fail.
