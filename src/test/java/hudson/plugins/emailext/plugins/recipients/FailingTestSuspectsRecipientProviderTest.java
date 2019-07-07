@@ -71,8 +71,7 @@ public class FailingTestSuspectsRecipientProviderTest {
         PowerMockito.when(jenkins.getPluginManager()).thenReturn(pluginManager);
 
         PowerMockito.mockStatic(Jenkins.class);
-        PowerMockito.doReturn(jenkins).when(Jenkins.class, "getActiveInstance");
-        PowerMockito.doReturn(jenkins).when(Jenkins.class, "getInstance");
+        PowerMockito.doReturn(jenkins).when(Jenkins.class, "get");
 
         final Mailer.DescriptorImpl descriptor = PowerMockito.mock(Mailer.DescriptorImpl.class);
         PowerMockito.when(descriptor.getDefaultSuffix()).thenReturn("DOMAIN");

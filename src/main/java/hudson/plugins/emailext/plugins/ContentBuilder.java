@@ -104,7 +104,7 @@ public final class ContentBuilder {
             return privateMacros;
         
         privateMacros = new ArrayList<>();
-        ClassLoader cl = Jenkins.getActiveInstance().pluginManager.uberClassLoader;
+        ClassLoader cl = Jenkins.get().pluginManager.uberClassLoader;
         for (final IndexItem<EmailToken, TokenMacro> item : Index.load(EmailToken.class, TokenMacro.class, cl)) {
             try {
                 privateMacros.add(item.instance());

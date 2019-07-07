@@ -106,7 +106,7 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
     }
     
     private Object evaluate(AbstractBuild<?, ?> build, TaskListener listener) throws IOException {
-        ClassLoader loader = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
+        ClassLoader loader = Jenkins.get().getPluginManager().uberClassLoader;
         JenkinsLocationConfiguration configuration = JenkinsLocationConfiguration.get();
         assert configuration != null;
 

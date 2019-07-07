@@ -189,7 +189,7 @@ public class EmailExtStep extends AbstractStepImpl {
             ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
             publisher.configuredTriggers.clear();
 
-            AlwaysTrigger.DescriptorImpl descriptor = Jenkins.getActiveInstance().getDescriptorByType(AlwaysTrigger.DescriptorImpl.class);
+            AlwaysTrigger.DescriptorImpl descriptor = Jenkins.get().getDescriptorByType(AlwaysTrigger.DescriptorImpl.class);
             EmailTrigger trigger = descriptor.createDefault();
             trigger.getEmail().getRecipientProviders().clear();
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());

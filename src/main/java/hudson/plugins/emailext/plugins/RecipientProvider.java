@@ -26,7 +26,7 @@ public abstract class RecipientProvider extends AbstractDescribableImpl<Recipien
     private static final Logger LOG = Logger.getLogger(RecipientProvider.class.getName());
     
     public static DescriptorExtensionList<RecipientProvider, RecipientProviderDescriptor> all() {
-        return Jenkins.getActiveInstance().getDescriptorList(RecipientProvider.class);
+        return Jenkins.get().getDescriptorList(RecipientProvider.class);
     }
 
     public static List<RecipientProviderDescriptor> allSupporting(Class<? extends Job> clazz) {

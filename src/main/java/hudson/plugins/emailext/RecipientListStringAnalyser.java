@@ -34,7 +34,7 @@ class RecipientListStringAnalyser {
     }
 
     static RecipientListStringAnalyser newInstance(TaskListener listener, String recipientsListString) {
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.get().getDescriptorByType(
                 ExtendedEmailPublisherDescriptor.class);
         return new RecipientListStringAnalyser(listener, descriptor, recipientsListString);
     }

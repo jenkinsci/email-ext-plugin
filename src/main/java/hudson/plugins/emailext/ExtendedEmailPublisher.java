@@ -234,7 +234,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     public void setClasspath(List<GroovyScriptPath> classpath) {
-        if (classpath != null && !classpath.isEmpty() && Jenkins.getActiveInstance().isUseSecurity()) {
+        if (classpath != null && !classpath.isEmpty() && Jenkins.get().isUseSecurity()) {
             //Prepare the classpath for approval
             ScriptApproval scriptApproval = ScriptApproval.get();
             ApprovalContext context = ApprovalContext.create().withCurrentUser();
@@ -617,9 +617,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             PrintWriter pw = new PrintWriter(out);
 
             try {
-                ClassLoader cl = expandClasspath(context, Jenkins.getActiveInstance().getPluginManager().uberClassLoader);
+                ClassLoader cl = expandClasspath(context, Jenkins.get().getPluginManager().uberClassLoader);
                 GroovyShell shell = new GroovyShell(cl, binding, cc);
-                if (AbstractEvalContent.isApprovedScript(script, GroovyLanguage.get()) || !Jenkins.getActiveInstance().isUseSecurity()) {
+                if (AbstractEvalContent.isApprovedScript(script, GroovyLanguage.get()) || !Jenkins.get().isUseSecurity()) {
                     shell.parse(script).run();
                 } else {
 
@@ -669,7 +669,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             transformToClasspathEntries(globalClasspath, context, classpathList);
         }
 
-        boolean useSecurity = Jenkins.getActiveInstance().isUseSecurity();
+        boolean useSecurity = Jenkins.get().isUseSecurity();
         if (!classpathList.isEmpty()) {
             GroovyClassLoader gloader = new GroovyClassLoader(loader);
             gloader.setShouldRecompile(true);
@@ -980,11 +980,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     @Override
     public ExtendedEmailPublisherDescriptor getDescriptor() {
-        return (ExtendedEmailPublisherDescriptor) Jenkins.getActiveInstance().getDescriptor(getClass());
+        return (ExtendedEmailPublisherDescriptor) Jenkins.get().getDescriptor(getClass());
     }
 
     public static ExtendedEmailPublisherDescriptor descriptor() {
-        return Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        return Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
     }
 
     public MatrixAggregator createAggregator(MatrixBuild matrixbuild,
@@ -1014,7 +1014,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     public Object readResolve() {
-        if (Jenkins.getActiveInstance().isUseSecurity()
+        if (Jenkins.get().isUseSecurity()
                 && (!StringUtils.isBlank(this.postsendScript) || !StringUtils.isBlank(this.presendScript))) {
             setPostsendScript(this.postsendScript);
             setPresendScript(this.presendScript);

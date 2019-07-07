@@ -40,7 +40,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
     public void addRecipients(final ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
         final class Debug implements RecipientProviderUtilities.IDebug {
             private final ExtendedEmailPublisherDescriptor descriptor
-                    = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+                    = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 
@@ -53,7 +53,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
         Run<?, ?> cur;
         Cause.UpstreamCause upc = context.getRun().getCause(Cause.UpstreamCause.class);
         while (upc != null) {
-            Job<?, ?> p = (Job<?, ?>) Jenkins.getActiveInstance().getItemByFullName(upc.getUpstreamProject());
+            Job<?, ?> p = (Job<?, ?>) Jenkins.get().getItemByFullName(upc.getUpstreamProject());
             if(p == null) {
                 context.getListener().getLogger().print("There is a break in the project linkage, could not retrieve upstream project information");
                 break;

@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
 public class JellyTemplateConfig extends Config {
     @Override
     public ConfigProvider getDescriptor() {
-        return Jenkins.getActiveInstance().getDescriptorByType(JellyTemplateConfigProvider.class);
+        return Jenkins.get().getDescriptorByType(JellyTemplateConfigProvider.class);
     }
     @DataBoundConstructor
     public JellyTemplateConfig(String id, String name, String comment, String content) {
