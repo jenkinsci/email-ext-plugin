@@ -2,13 +2,11 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.FreeStyleProject;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import java.io.IOException;
 import java.util.Collections;
 
 import static org.hamcrest.Matchers.is;

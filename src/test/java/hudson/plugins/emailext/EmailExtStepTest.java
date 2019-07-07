@@ -14,7 +14,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestExtension;
-import org.jvnet.hudson.test.recipes.WithPlugin;
 import org.jvnet.mock_javamail.Mailbox;
 import org.kohsuke.stapler.DataBoundConstructor;
 

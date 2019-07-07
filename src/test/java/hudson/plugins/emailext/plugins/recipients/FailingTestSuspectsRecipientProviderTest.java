@@ -27,7 +27,6 @@ import hudson.PluginManager;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
-import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.tasks.Mailer;

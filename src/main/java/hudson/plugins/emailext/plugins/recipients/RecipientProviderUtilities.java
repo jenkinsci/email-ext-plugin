@@ -28,7 +28,6 @@ import com.google.common.collect.Iterables;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
-import hudson.model.Descriptor;
 import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;

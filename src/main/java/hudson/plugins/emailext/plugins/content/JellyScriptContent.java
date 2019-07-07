@@ -17,7 +17,6 @@ import org.apache.commons.jelly.XMLOutput;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
-import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
 import org.jenkinsci.plugins.scriptsecurity.scripts.languages.JellyLanguage;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.xml.sax.InputSource;
@@ -28,7 +27,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.nio.file.attribute.UserDefinedFileAttributeView;
 
 @EmailToken
 public class JellyScriptContent extends AbstractEvalContent {
