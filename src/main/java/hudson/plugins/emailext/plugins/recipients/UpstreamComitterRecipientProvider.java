@@ -2,7 +2,6 @@ package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Run;
@@ -15,13 +14,11 @@ import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.scm.ChangeLogSet;
 import java.io.PrintStream;
 import jenkins.model.Jenkins;
+import jenkins.scm.RunWithSCM;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.mail.internet.InternetAddress;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -67,33 +64,20 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
     /**
      * Adds for the given upstream build the committers to the recipient list for each commit in the upstream build.
      *
-     * @param build the upstream build
+     * @param run the upstream build
      * @param to the to recipient list
      * @param cc the cc recipient list
      * @param bcc the bcc recipient list
-     * @param env
-     * @param listener
+     * @param env the build environment
      */
-    private void addUpstreamCommittersTriggeringBuild(Run<?, ?> build, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, final ExtendedEmailPublisherContext context, RecipientProviderUtilities.IDebug debug) {
-        debug.send("Adding upstream committer from job %s with build number %s", build.getParent().getDisplayName(), build.getNumber());
+    private void addUpstreamCommittersTriggeringBuild(Run<?, ?> run, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, final ExtendedEmailPublisherContext context, RecipientProviderUtilities.IDebug debug) {
+        debug.send("Adding upstream committer from job %s with build number %s", run.getParent().getDisplayName(), run.getNumber());
 
-        List<ChangeLogSet<?>> changeSets = new ArrayList<>();
-        if(build instanceof AbstractBuild<?,?>) {
-            AbstractBuild<?,?> b = (AbstractBuild<?,?>)build;
-            changeSets.add(b.getChangeSet());
-        } else {
-            try {
-                // check for getChangeSets which WorkflowRun has
-                Method m = build.getClass().getMethod("getChangeSets");
-                changeSets = (List<ChangeLogSet<? extends ChangeLogSet.Entry>>)m.invoke(build);
-            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                context.getListener().getLogger().print("Could not add upstream committers, build type does not provide change set");
-            }
-        }
+        if (run instanceof RunWithSCM) {
+            List<ChangeLogSet<? extends ChangeLogSet.Entry>> changeSets = ((RunWithSCM<?, ?>) run).getChangeSets();
 
-        if(!changeSets.isEmpty()) {
-            for(ChangeLogSet<? extends ChangeLogSet.Entry> changeSet : changeSets) {
-                for(ChangeLogSet.Entry change : changeSet) {
+            for (ChangeLogSet<? extends ChangeLogSet.Entry> changeSet : changeSets) {
+                for (ChangeLogSet.Entry change : changeSet) {
                     addUserFromChangeSet(change, to, cc, bcc, env, context, debug);
                 }
             }
@@ -107,7 +91,6 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
      * @param cc The list of cc addresses to add to
      * @param bcc The list of bcc addresses to add to
      * @param env The build environment
-     * @param listener The listener for logging
      */
     private void addUserFromChangeSet(ChangeLogSet.Entry change, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, final ExtendedEmailPublisherContext context, RecipientProviderUtilities.IDebug debug) {
         User user = change.getAuthor();

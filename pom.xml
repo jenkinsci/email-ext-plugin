@@ -31,7 +31,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <workflow-step-api.version>2.19</workflow-step-api.version>
         <workflow-aggregator.version>2.5</workflow-aggregator.version>
-        <workflow-job.version>2.11</workflow-job.version>
+        <workflow-job.version>2.12</workflow-job.version>
         <jenkins.version>2.121.1</jenkins.version>
         <workflow-api.version>2.30</workflow-api.version>
         <workflow-cps.version>2.29</workflow-cps.version>
