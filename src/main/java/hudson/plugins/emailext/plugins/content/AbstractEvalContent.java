@@ -85,7 +85,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     }
     
     public static File scriptsFolder() {
-        return new File(Jenkins.getActiveInstance().getRootDir(), EMAIL_TEMPLATES_DIRECTORY);
+        return new File(Jenkins.get().getRootDir(), EMAIL_TEMPLATES_DIRECTORY);
     }
 
     protected abstract Class<? extends ConfigProvider> getProviderClass();
@@ -161,7 +161,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
 
     private InputStream getManagedFile(String fileName) throws UnsupportedEncodingException {
         InputStream stream = null;
-        Plugin plugin = Jenkins.getActiveInstance().getPlugin("config-file-provider");
+        Plugin plugin = Jenkins.get().getPlugin("config-file-provider");
         if (plugin != null) {
             Config config = null;
             ExtensionList<ConfigProvider> providers = ConfigProvider.all();

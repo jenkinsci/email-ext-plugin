@@ -117,7 +117,7 @@ public class ScriptContent extends AbstractEvalContent {
         String result;
         
         final Map<String, Object> binding = new HashMap<>();
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         binding.put("build", build);
         binding.put("listener", listener);
         binding.put("it", new ScriptContentBuildWrapper(build));
@@ -187,7 +187,7 @@ public class ScriptContent extends AbstractEvalContent {
             throws IOException {
         String result = "";
         Map binding = new HashMap<>();
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.getActiveInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         Item parent = build.getParent();
 
         binding.put("build", build);
@@ -246,10 +246,10 @@ public class ScriptContent extends AbstractEvalContent {
         ClassLoader cl;
         CompilerConfiguration cc;
         if (secure) {
-            cl = GroovySandbox.createSecureClassLoader(Jenkins.getActiveInstance().getPluginManager().uberClassLoader);
+            cl = GroovySandbox.createSecureClassLoader(Jenkins.get().getPluginManager().uberClassLoader);
             cc = GroovySandbox.createSecureCompilerConfiguration();
         } else {
-            cl = Jenkins.getActiveInstance().getPluginManager().uberClassLoader;
+            cl = Jenkins.get().getPluginManager().uberClassLoader;
             cc = new CompilerConfiguration();
         }
         cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName()); 

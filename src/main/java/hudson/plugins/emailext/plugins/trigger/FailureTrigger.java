@@ -32,7 +32,7 @@ public class FailureTrigger extends EmailTrigger {
 
     @Deprecated
     public static FailureTrigger createDefault() {
-        DescriptorImpl descriptor = (DescriptorImpl) Jenkins.getActiveInstance().getDescriptor(FailureTrigger.class);
+        DescriptorImpl descriptor = (DescriptorImpl) Jenkins.get().getDescriptor(FailureTrigger.class);
         if (descriptor != null) {
             return (FailureTrigger) descriptor.createDefault();
         } else {

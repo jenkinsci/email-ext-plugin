@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
 public class GroovyTemplateConfig extends Config {
     @Override
     public ConfigProvider getDescriptor() {
-        return Jenkins.getActiveInstance().getDescriptorByType(GroovyTemplateConfigProvider.class);
+        return Jenkins.get().getDescriptorByType(GroovyTemplateConfigProvider.class);
     }
 
     @DataBoundConstructor

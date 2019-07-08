@@ -186,7 +186,7 @@ public final class RecipientProviderUtilities {
             } else {
                 final String userAddress = EmailRecipientUtils.getUserConfiguredEmail(user);
                 if (userAddress != null) {
-                    if (Jenkins.getActiveInstance().isUseSecurity()) {
+                    if (Jenkins.get().isUseSecurity()) {
                         try {
                             Authentication auth = user.impersonate();
                             if (run != null && !run.getACL().hasPermission(auth, Item.READ)) {

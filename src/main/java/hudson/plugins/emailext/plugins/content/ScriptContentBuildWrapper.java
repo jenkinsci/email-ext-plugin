@@ -61,7 +61,7 @@ public class ScriptContentBuildWrapper {
      *         <code>false</code> if not.
      */
     public static boolean isPluginInstalled(final String shortName) {
-        return Jenkins.getActiveInstance().getPlugin(shortName) != null;
+        return Jenkins.get().getPlugin(shortName) != null;
     }
 
     @Whitelisted
