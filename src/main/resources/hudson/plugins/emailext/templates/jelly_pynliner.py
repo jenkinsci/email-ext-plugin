@@ -17,6 +17,7 @@ class JellyPynliner(pynliner.Pynliner):
         self.soup = BeautifulStoneSoup(self.source_string, selfClosingTags=['j:set', 'j:getstatic', 'br'],
                                        convertEntities=BeautifulStoneSoup.XML_ENTITIES)
 
+
 if __name__ == "__main__":
     p = JellyPynliner(case_sensitive=False).from_string(open("html.jelly", "r").read())
     open("html_gmail.jelly", "w").write(p.run(prettify=True))
@@ -39,6 +40,3 @@ if __name__ == "__main__":
         for (orig, new) in subs:
             line = re.sub(orig, new, line)
     open("html_gmail.jelly", "w").write(line)
-
-
-

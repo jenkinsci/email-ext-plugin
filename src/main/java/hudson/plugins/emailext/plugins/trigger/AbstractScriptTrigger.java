@@ -113,14 +113,14 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
         URLClassLoader urlcl = null;
         List<ClasspathEntry> cp = secureTriggerScript.getClasspath();
         if (!cp.isEmpty()) {
-            List<URL> urlList = new ArrayList<URL>(cp.size());
+            List<URL> urlList = new ArrayList<>(cp.size());
 
             for (ClasspathEntry entry : cp) {
                 ScriptApproval.get().using(entry);
                 urlList.add(entry.getURL());
             }
 
-            loader = urlcl = new URLClassLoader(urlList.toArray(new URL[urlList.size()]), loader);
+            loader = urlcl = new URLClassLoader(urlList.toArray(new URL[0]), loader);
         }
         try {
             loader = GroovySandbox.createSecureClassLoader(loader);

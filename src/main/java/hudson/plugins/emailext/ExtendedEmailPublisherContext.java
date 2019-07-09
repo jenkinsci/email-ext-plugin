@@ -43,10 +43,10 @@ public class ExtendedEmailPublisherContext {
         this.publisher = publisher;
     }
 
-    @Deprecated
     /**
      * @see ExtendedEmailPublisherContext#getRun()
      */
+    @Deprecated
     public AbstractBuild<?, ?> getBuild() {
         if(run instanceof AbstractBuild) {
             return (AbstractBuild)run;

@@ -52,9 +52,9 @@ import static org.junit.Assert.assertTrue;
             final String... inAuthors) throws AddressException {
         ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(null, build, null, new Launcher.LocalLauncher(StreamTaskListener.fromStdout()), new StreamBuildListener(System.out, Charset.defaultCharset()));
         EnvVars envVars = new EnvVars();
-        Set<InternetAddress> to = new HashSet<InternetAddress>();
-        Set<InternetAddress> cc = new HashSet<InternetAddress>();
-        Set<InternetAddress> bcc = new HashSet<InternetAddress>();
+        Set<InternetAddress> to = new HashSet<>();
+        Set<InternetAddress> cc = new HashSet<>();
+        Set<InternetAddress> bcc = new HashSet<>();
         provider.addRecipients(context, envVars, to, cc, bcc);
         final Set<InternetAddress> authors = new HashSet<>();
         for (final String author : inAuthors) {

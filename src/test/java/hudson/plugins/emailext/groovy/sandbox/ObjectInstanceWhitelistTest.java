@@ -2,7 +2,6 @@ package hudson.plugins.emailext.groovy.sandbox;
 
 import org.junit.Test;
 
-import javax.annotation.CheckForNull;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;

@@ -96,7 +96,7 @@ public class FailedTestsContentTest
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 2 );
 
-        List<TestResult> failedTests = new ArrayList<TestResult>();
+        List<TestResult> failedTests = new ArrayList<>();
         for(int i = 0; i < 2; i++) {
             TestResult result = mock( TestResult.class );
             when( result.isPassed() ).thenReturn( false );
@@ -128,7 +128,7 @@ public class FailedTestsContentTest
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 2 );
 
-        List<TestResult> failedTests = new ArrayList<TestResult>();
+        List<TestResult> failedTests = new ArrayList<>();
         for(int i = 0; i < 2; i++) {
             TestResult result = mock( TestResult.class );
             when( result.isPassed() ).thenReturn( false );
@@ -159,7 +159,7 @@ public class FailedTestsContentTest
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 2 );
 
-        List<TestResult> failedTests = new ArrayList<TestResult>();
+        List<TestResult> failedTests = new ArrayList<>();
         for(int i = 0; i < 2; i++) {
             TestResult result = mock( TestResult.class );
             when( result.isPassed() ).thenReturn( false );
@@ -190,7 +190,7 @@ public class FailedTestsContentTest
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 2 );
 
-        List<TestResult> failedTests = new ArrayList<TestResult>();
+        List<TestResult> failedTests = new ArrayList<>();
         for(int i = 0; i < 2; i++) {
             TestResult result = mock( TestResult.class );
             when( result.isPassed() ).thenReturn( false );
@@ -221,7 +221,7 @@ public class FailedTestsContentTest
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 5 );
 
-        List<TestResult> failedTests = new ArrayList<TestResult>();
+        List<TestResult> failedTests = new ArrayList<>();
         for(int i = 0; i < 5; i++) {
             TestResult result = mock( TestResult.class );
             when( result.isPassed() ).thenReturn( false );

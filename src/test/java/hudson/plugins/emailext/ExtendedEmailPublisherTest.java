@@ -15,7 +15,6 @@ import hudson.model.User;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
-import hudson.plugins.emailext.plugins.recipients.RecipientProviderUtilities;
 import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
@@ -31,15 +30,13 @@ import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.security.AuthorizationStrategy;
 import hudson.security.SecurityRealm;
 import hudson.tasks.Builder;
-import hudson.tasks.MailSender;
 import hudson.tasks.Mailer;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.collection.IsEmptyCollection;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
-import org.jenkinsci.plugins.scriptsecurity.scripts.UnapprovedClasspathException;
 import org.junit.*;
+import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -47,8 +44,6 @@ import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.MockBuilder;
 import org.jvnet.hudson.test.SleepBuilder;
-import org.jvnet.hudson.test.TestBuilder;
-import org.jvnet.hudson.test.recipes.WithPlugin;
 import org.jvnet.mock_javamail.Mailbox;
 import org.kohsuke.stapler.Stapler;
 
@@ -59,7 +54,6 @@ import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -76,8 +70,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import org.junit.ClassRule;
-import org.jvnet.hudson.test.BuildWatcher;
 
 public class ExtendedEmailPublisherTest {
 
@@ -880,7 +872,7 @@ public class ExtendedEmailPublisherTest {
                 + "msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())");
         Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultClasspath");
         f.setAccessible(true);
-        List<GroovyScriptPath> classpath = new ArrayList<GroovyScriptPath>();
+        List<GroovyScriptPath> classpath = new ArrayList<>();
         classpath.add(new GroovyScriptPath("src/test/postsend"));
         f.set(publisher.getDescriptor(), classpath);
 

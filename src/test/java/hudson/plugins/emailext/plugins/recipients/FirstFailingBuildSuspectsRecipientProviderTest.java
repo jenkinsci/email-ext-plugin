@@ -103,7 +103,7 @@ public class FirstFailingBuildSuspectsRecipientProviderTest {
         MockUtilities.addRequestor(build2, "A");
         TestUtilities.checkRecipients(build2, new FirstFailingBuildSuspectsRecipientProvider());
 
-        /**
+        /*
          * Requestor: A
          * Committers {X,V}.
          * Failed.
@@ -115,7 +115,7 @@ public class FirstFailingBuildSuspectsRecipientProviderTest {
         MockUtilities.addChangeSet(build3, "X", "V");
         TestUtilities.checkRecipients(build3, new FirstFailingBuildSuspectsRecipientProvider(), "X", "V", "A");
 
-        /**
+        /*
          * Requestor: B
          * Committers {X}.
          * Aborted.
@@ -127,7 +127,7 @@ public class FirstFailingBuildSuspectsRecipientProviderTest {
         MockUtilities.addChangeSet(build4, "X");
         TestUtilities.checkRecipients(build4, new FirstFailingBuildSuspectsRecipientProvider());
 
-        /**
+        /*
          * Requestor: B
          * Committers {U,V}.
          * Failed.
@@ -139,7 +139,7 @@ public class FirstFailingBuildSuspectsRecipientProviderTest {
         MockUtilities.addChangeSet(build5, "U", "V");
         TestUtilities.checkRecipients(build5, new FirstFailingBuildSuspectsRecipientProvider(), "X", "V", "A");
 
-        /**
+        /*
          * Requestor: A
          * Committers {W}.
          * Success.

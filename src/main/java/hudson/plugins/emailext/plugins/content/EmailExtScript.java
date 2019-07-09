@@ -5,7 +5,6 @@ import com.google.common.collect.ListMultimap;
 import groovy.lang.Script;
 import hudson.EnvVars;
 import hudson.FilePath;
-import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.ContentBuilder;

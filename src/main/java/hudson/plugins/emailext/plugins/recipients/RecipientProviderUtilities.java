@@ -28,7 +28,6 @@ import com.google.common.collect.Iterables;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
-import hudson.model.Descriptor;
 import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -96,7 +95,7 @@ public final class RecipientProviderUtilities {
     }
 
     private static void addChangeSetUsers(ChangeLogSet<?> changeLogSet, Set<User> users, IDebug debug) {
-        final Set<User> changeAuthors = new HashSet<User>();
+        final Set<User> changeAuthors = new HashSet<>();
         for (final ChangeLogSet.Entry change : changeLogSet) {
             final User changeAuthor = change.getAuthor();
             if (changeAuthors.add(changeAuthor)) {
