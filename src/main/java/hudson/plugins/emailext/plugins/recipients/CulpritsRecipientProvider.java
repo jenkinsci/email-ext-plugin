@@ -6,8 +6,6 @@
 
 package hudson.plugins.emailext.plugins.recipients;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.Result;
@@ -19,14 +17,12 @@ import hudson.plugins.emailext.Messages;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import jenkins.model.Jenkins;
+import jenkins.scm.RunWithSCM;
 import org.jenkinsci.Symbol;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.mail.internet.InternetAddress;
 import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -55,27 +51,14 @@ public class CulpritsRecipientProvider extends RecipientProvider {
                 descriptor.debug(logger, format, args);
             }
         }
+
         final Debug debug = new Debug();
         Run<?,?> run = context.getRun();
 
-        boolean runHasGetCulprits = false;
-
-        // TODO: core 2.60+, workflow-job 2.12+: Switch to checking if run is RunWithSCM and make catch an else block
-        try {
-            Method getCulprits = run.getClass().getMethod("getCulprits");
-            runHasGetCulprits = true;
-            if (Set.class.isAssignableFrom(getCulprits.getReturnType())) {
-                @SuppressWarnings("unchecked")
-                Set<User> users = (Set<User>) getCulprits.invoke(run);
-                if (Iterables.all(users, Predicates.instanceOf(User.class))) {
-                    RecipientProviderUtilities.addUsers(users, context, env, to, cc, bcc, debug);
-                }
-            }
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            // Only log a debug message if the exception is not due to an older WorkflowRun without getCulprits...
-            if (!(run instanceof WorkflowRun && !runHasGetCulprits)) {
-                debug.send("Exception getting culprits for %s: %s", run, e);
-            }
+        if (run instanceof RunWithSCM) {
+            Set<User> culprits = ((RunWithSCM<?, ?>) run).getCulprits();
+            RecipientProviderUtilities.addUsers(culprits, context, env, to, cc, bcc, debug);
+        } else {
             List<Run<?, ?>> builds = new ArrayList<>();
             Run<?, ?> build = run;
             builds.add(build);

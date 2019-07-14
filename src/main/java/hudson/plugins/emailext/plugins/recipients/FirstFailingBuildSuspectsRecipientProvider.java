@@ -25,7 +25,6 @@ package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.User;
@@ -92,11 +91,7 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
                     firstFailedBuild = candidate;
                     candidate = candidate.getPreviousCompletedBuild();
                 }
-                if (firstFailedBuild instanceof AbstractBuild) {
-                    buildsWithSuspects.add(firstFailedBuild);
-                } else {
-                    debug.send("  firstFailedBuild was not an instance of AbstractBuild");
-                }
+                buildsWithSuspects.add(firstFailedBuild);
                 debug.send("Collecting suspects...");
                 users.addAll(RecipientProviderUtilities.getChangeSetAuthors(buildsWithSuspects, debug));
                 users.addAll(RecipientProviderUtilities.getUsersTriggeringTheBuilds(buildsWithSuspects, debug));
