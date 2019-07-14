@@ -8,6 +8,7 @@ import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
+import hudson.plugins.emailext.Messages;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import java.io.PrintStream;
@@ -24,11 +25,12 @@ import java.util.Set;
  */
 
 public class RequesterRecipientProvider extends RecipientProvider {
+
     @DataBoundConstructor
     public RequesterRecipientProvider() {
-        
+
     }
-    
+
     @Override
     public void addRecipients(final ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
         final class Debug implements RecipientProviderUtilities.IDebug {
@@ -71,17 +73,13 @@ public class RequesterRecipientProvider extends RecipientProvider {
         }
     }
 
-    @SuppressWarnings("unchecked")
-
-    
     @Extension
     @Symbol("requestor")
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
 
         @Override
         public String getDisplayName() {
-            return "Requestor";
+            return Messages.RequesterRecipientProvider_DisplayName();
         }
-        
     }
 }

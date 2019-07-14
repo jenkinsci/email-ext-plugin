@@ -31,6 +31,7 @@ import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
+import hudson.plugins.emailext.Messages;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import jenkins.model.Jenkins;
@@ -109,10 +110,10 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
     @Extension
     @Symbol("brokenBuildSuspects")
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
+
         @Override
         public String getDisplayName() {
-            return "Suspects Causing the Build to Begin Failing";
+            return Messages.FirstFailingBuildSuspectsRecipientProvider_DisplayName();
         }
     }
-
 }

@@ -6,6 +6,7 @@ import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
+import hudson.plugins.emailext.Messages;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import jenkins.model.Jenkins;
@@ -21,12 +22,12 @@ import java.util.Set;
  * Created by acearl on 12/25/13.
  */
 public class DevelopersRecipientProvider extends RecipientProvider {
-    
+
     @DataBoundConstructor
     public DevelopersRecipientProvider() {
-        
+
     }
-    
+
     @Override
     public void addRecipients(final ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
         final class Debug implements RecipientProviderUtilities.IDebug {
@@ -47,9 +48,10 @@ public class DevelopersRecipientProvider extends RecipientProvider {
     @Extension
     @Symbol("developers")
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
+
         @Override
         public String getDisplayName() {
-            return "Developers";
+            return Messages.DevelopersRecipientProvider_DisplayName();
         }
     }
 }
