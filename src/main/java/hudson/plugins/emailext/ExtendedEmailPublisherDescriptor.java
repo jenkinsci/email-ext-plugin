@@ -240,8 +240,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         MailAccount acc = mailAccount;
         if(StringUtils.isNotBlank(from)){
             InternetAddress fromAddress = new InternetAddress(from);
-            for(MailAccount ma : addAccounts){
-                if(!ma.getAddress().equalsIgnoreCase(fromAddress.getAddress())) continue;
+            for(MailAccount ma : addAccounts) {
+                if(ma == null || !ma.isValid() || !ma.getAddress().equalsIgnoreCase(fromAddress.getAddress())) continue;
                 acc = ma;
                 break;
             }
@@ -633,10 +633,17 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         Object addacc = formData.opt("addAccounts");
         if(addacc != null){
             if(addacc instanceof JSONArray){
-                for(Object obj : (JSONArray)addacc) addAccounts.add(new MailAccount((JSONObject)obj));
-            }
-            else if(addacc instanceof JSONObject){
-                addAccounts.add(new MailAccount((JSONObject)addacc));
+                for(Object obj : (JSONArray)addacc) {
+                    MailAccount account = new MailAccount((JSONObject)obj);
+                    if(account.isValid()) {
+                        addAccounts.add(account);
+                    }
+                }
+            } else if(addacc instanceof JSONObject){
+                MailAccount account = new MailAccount((JSONObject)addacc);
+                if(account.isValid()) {
+                    addAccounts.add(account);
+                }
             }
         }
 

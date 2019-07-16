@@ -5,6 +5,7 @@ import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.util.Secret;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import static hudson.Util.nullify;
@@ -25,7 +26,10 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
         smtpPort = nullify(jo.optString("smtpPort", null));
         if(jo.optBoolean("auth", false)){
             smtpUsername = nullify(jo.optString("smtpUsername", null));
-            smtpPassword = Secret.fromString(jo.optString("smtpPassword", null));
+            String pass = nullify(jo.optString("smtpPassword", null));
+            if(pass != null) {
+                smtpPassword = Secret.fromString(pass);
+            }
         }
         useSsl = jo.optBoolean("useSsl", false);
         advProperties = nullify(jo.optString("advProperties", null));
@@ -33,6 +37,10 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
 
     public MailAccount(){
 
+    }
+
+    public boolean isValid() {
+        return StringUtils.isNotBlank(address) && StringUtils.isNotBlank(smtpHost) && (!isAuth() || (StringUtils.isNotBlank(smtpUsername) && smtpPassword != null));
     }
 
     @Extension
