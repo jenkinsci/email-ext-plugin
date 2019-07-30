@@ -17,8 +17,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -243,5 +246,30 @@ public class FailedTestsContentTest
         failedTestContent.showStack = true;
         content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
         assertTrue( content.length() >= (3 * 1024 * 5) );
+    }
+
+    @Test
+    public void testGetContent_withMessage_withStack_htmlEscaped() throws Exception {
+        AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+        when( testResults.getFailCount() ).thenReturn( 2 );
+
+        TestResult result = mock( TestResult.class );
+        when( result.isPassed() ).thenReturn( false );
+        when( result.getFullName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
+        when( result.getDisplayName() ).thenReturn( "Test" );
+        when( result.getErrorDetails() ).thenReturn( "expected:<ABORTED> but was:<COMPLETED> " );
+        when( result.getErrorStackTrace() ).thenReturn( "at org.nexusformat.NexusFile.<clinit>(NexusFile.java:99)" );
+
+        Mockito.<List<? extends TestResult>>when( testResults.getFailedTests() ).thenReturn( singletonList(result) );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
+
+        failedTestContent.showMessage = true;
+        failedTestContent.showStack = true;
+        failedTestContent.escapeHtml = true;
+        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+
+        assertThat( content, containsString("FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test") );
+        assertThat( content, containsString("expected:&lt;ABORTED&gt; but was:&lt;COMPLETED&gt;") );
+        assertThat( content, containsString("Stack Trace:\nat org.nexusformat.NexusFile.&lt;clinit&gt;(NexusFile.java:99)") );
     }
 }

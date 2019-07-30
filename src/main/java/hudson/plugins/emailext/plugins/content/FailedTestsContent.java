@@ -13,9 +13,11 @@ import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 import java.io.IOException;
 
+import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
+
 /**
  * An EmailContent for failing tests. Only shows tests that have failed.
- * 
+ *
  * @author markltbaker
  */
 @Extension
@@ -35,6 +37,9 @@ public class FailedTestsContent extends DataBoundTokenMacro {
 
     @Parameter
     public int maxLength = Integer.MAX_VALUE;
+
+    @Parameter
+    public boolean escapeHtml = false;
 
     public static final String MACRO_NAME = "FAILED_TESTS";
 
@@ -108,9 +113,9 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     private int outputTest(StringBuilder buffer, TestResult failedTest,
             boolean showStack, boolean showMessage, int lengthLeft) {
         StringBuilder local = new StringBuilder();
-        
+
         local.append(failedTest.isPassed() ? "PASSED" : "FAILED").append(":  ");
-        
+
         if(failedTest instanceof CaseResult) {
             local.append(((CaseResult)failedTest).getClassName());
         } else {
@@ -119,11 +124,13 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         local.append('.').append(failedTest.getDisplayName()).append('\n');
 
         if (showMessage) {
-            local.append("\nError Message:\n").append(failedTest.getErrorDetails()).append('\n');
+            String errorDetails = escapeHtml ? escapeHtml(failedTest.getErrorDetails()) : failedTest.getErrorDetails();
+            local.append("\nError Message:\n").append(errorDetails).append('\n');
         }
-        
+
         if (showStack) {
-            local.append("\nStack Trace:\n").append(failedTest.getErrorStackTrace()).append('\n');
+            String stackTrace = escapeHtml ? escapeHtml(failedTest.getErrorStackTrace()) : failedTest.getErrorStackTrace();
+            local.append("\nStack Trace:\n").append(stackTrace).append('\n');
         }
 
         if (showMessage || showStack) {

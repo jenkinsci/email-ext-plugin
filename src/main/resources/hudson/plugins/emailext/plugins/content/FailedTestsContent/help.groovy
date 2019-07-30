@@ -13,5 +13,8 @@ dd() {
 
     dt("onlyRegressions")
     dd("Display only the failing tests that are different from previous builds. Defaults to false.")
+
+    dt("escapeHtml")
+    dd("If set to true escapes characters in errors details and stack traces using HTML entities. Defaults to false.")
   }
 }
