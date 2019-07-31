@@ -18,10 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
-import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -249,9 +247,9 @@ public class FailedTestsContentTest
     }
 
     @Test
-    public void testGetContent_withMessage_withStack_htmlEscaped() throws Exception {
+    public void testGetContent_withMessage_withStack_htmlEscaped() {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
-        when( testResults.getFailCount() ).thenReturn( 2 );
+        when( testResults.getFailCount() ).thenReturn( 1 );
 
         TestResult result = mock( TestResult.class );
         when( result.isPassed() ).thenReturn( false );
@@ -268,8 +266,11 @@ public class FailedTestsContentTest
         failedTestContent.escapeHtml = true;
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
 
-        assertThat( content, containsString("FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test") );
-        assertThat( content, containsString("expected:&lt;ABORTED&gt; but was:&lt;COMPLETED&gt;") );
-        assertThat( content, containsString("Stack Trace:\nat org.nexusformat.NexusFile.&lt;clinit&gt;(NexusFile.java:99)") );
+        assertEquals(content, "1 tests failed.<br/>" +
+            "FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test<br/><br/>" +
+            "Error Message:<br/>" +
+            "expected:&lt;ABORTED&gt; but was:&lt;COMPLETED&gt; <br/><br/>" +
+            "Stack Trace:<br/>" +
+            "at org.nexusformat.NexusFile.&lt;clinit&gt;(NexusFile.java:99)<br/><br/>");
     }
 }

@@ -9,9 +9,6 @@ import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
-import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
-
-import java.io.IOException;
 
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 
@@ -49,15 +46,12 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     }
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
-            throws MacroEvaluationException, IOException, InterruptedException {
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName) {
         return evaluate(build, build.getWorkspace(), listener, macroName);
     }
 
     @Override
-    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName)
-            throws MacroEvaluationException, IOException, InterruptedException {
-
+    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) {
         StringBuilder buffer = new StringBuilder();
         AbstractTestResultAction<?> testResult = run.getAction(AbstractTestResultAction.class);
 
@@ -70,7 +64,8 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         if (failCount == 0) {
             buffer.append("All tests passed");
         } else {
-            buffer.append(failCount).append(" tests failed.\n");
+            String lineBreak = getLineBreak();
+            buffer.append(failCount).append(" tests failed.").append(lineBreak);
 
             boolean showOldFailures = !onlyRegressions;
             if(maxLength < Integer.MAX_VALUE) {
@@ -89,10 +84,11 @@ public class FailedTestsContent extends DataBoundTokenMacro {
                     }
                 }
                 if (failCount > printedTests) {
-                    buffer.append("... and ").append(failCount - printedTests).append(" other failed tests.\n\n");
+                    buffer.append("... and ").append(failCount - printedTests).append(" other failed tests.")
+                        .append(lineBreak);
                 }
                 if (printedLength >= maxLength) {
-                    buffer.append("\n\n... output truncated.\n\n");
+                    buffer.append(lineBreak).append("... output truncated.").append(lineBreak);
                 }
             }
         }
@@ -113,6 +109,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     private int outputTest(StringBuilder buffer, TestResult failedTest,
             boolean showStack, boolean showMessage, int lengthLeft) {
         StringBuilder local = new StringBuilder();
+        String lineBreak = getLineBreak();
 
         local.append(failedTest.isPassed() ? "PASSED" : "FAILED").append(":  ");
 
@@ -121,20 +118,20 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         } else {
             local.append(failedTest.getFullName());
         }
-        local.append('.').append(failedTest.getDisplayName()).append('\n');
+        local.append('.').append(failedTest.getDisplayName()).append(lineBreak);
 
         if (showMessage) {
             String errorDetails = escapeHtml ? escapeHtml(failedTest.getErrorDetails()) : failedTest.getErrorDetails();
-            local.append("\nError Message:\n").append(errorDetails).append('\n');
+            local.append(lineBreak).append("Error Message:").append(lineBreak).append(errorDetails).append(lineBreak);
         }
 
         if (showStack) {
             String stackTrace = escapeHtml ? escapeHtml(failedTest.getErrorStackTrace()) : failedTest.getErrorStackTrace();
-            local.append("\nStack Trace:\n").append(stackTrace).append('\n');
+            local.append(lineBreak).append("Stack Trace:").append(lineBreak).append(stackTrace).append(lineBreak);
         }
 
         if (showMessage || showStack) {
-            local.append('\n');
+            local.append(lineBreak);
         }
 
         if(local.length() > lengthLeft) {
@@ -143,5 +140,9 @@ public class FailedTestsContent extends DataBoundTokenMacro {
 
         buffer.append(local.toString());
         return local.length();
+    }
+
+    private String getLineBreak() {
+        return escapeHtml ? "<br/>" : "\n";
     }
 }
