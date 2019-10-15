@@ -28,6 +28,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
         <workflow-step-api.version>2.19</workflow-step-api.version>
         <workflow-aggregator.version>2.5</workflow-aggregator.version>
         <workflow-job.version>2.12</workflow-job.version>
@@ -352,14 +353,6 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
                     <arguments>-DskipTests=true</arguments>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.jenkins-ci.tools</groupId>
-                <artifactId>maven-hpi-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <compatibleSinceVersion>2.57.2</compatibleSinceVersion>
                 </configuration>
             </plugin>
         </plugins>
