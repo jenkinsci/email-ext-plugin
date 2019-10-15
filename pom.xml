@@ -358,29 +358,6 @@
         </plugins>
     </build>
 
-    <profiles>
-        <profile>
-            <id>permgen</id>
-            <activation>
-                <jdk>[,1.8)</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <argLine>-Djava.awt.headless=true -XX:MaxPermSize=512m -Dfile.encoding=UTF-8 @{argLine}</argLine>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
     <reporting>
         <plugins>
             <plugin>
