@@ -27,18 +27,18 @@
     </issueManagement>
 
     <properties>
+        <java.level>8</java.level>
+        <jenkins.version>2.121.1</jenkins.version>
         <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
         <workflow-step-api.version>2.19</workflow-step-api.version>
         <workflow-aggregator.version>2.5</workflow-aggregator.version>
         <workflow-job.version>2.12</workflow-job.version>
-        <jenkins.version>2.121.1</jenkins.version>
         <workflow-api.version>2.30</workflow-api.version>
         <workflow-cps.version>2.29</workflow-cps.version>
         <workflow-durable-task-step.version>2.11</workflow-durable-task-step.version>
         <workflow-basic-steps.version>2.4</workflow-basic-steps.version>
         <workflow-support.version>3.2</workflow-support.version>
         <scm-api.version>2.2.6</scm-api.version>
-        <java.level>8</java.level>
         <concurrency>1</concurrency>
         <argLine>-Dfile.encoding=UTF-8</argLine>
     </properties>
