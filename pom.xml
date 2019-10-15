@@ -27,7 +27,6 @@
     </issueManagement>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
         <workflow-step-api.version>2.19</workflow-step-api.version>
         <workflow-aggregator.version>2.5</workflow-aggregator.version>
