@@ -23,7 +23,7 @@
     <url>https://wiki.jenkins.io/display/JENKINS/Email-ext+plugin</url>
     <issueManagement>
         <system>JIRA</system>
-        <url>https://issues.jenkins-ci.org/secure/IssueNavigator.jspa?reset=true&amp;jqlQuery=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+%27email-ext-plugin%27</url>
+        <url>https://issues.jenkins-ci.org/issues/?jql=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+email-ext-plugin</url>
     </issueManagement>
 
     <properties>
