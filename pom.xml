@@ -44,14 +44,14 @@
     </properties>
 
     <developers>
-        <contributor>
+        <developer>
             <id>slide</id>
             <name>Alex Earl</name>
             <email>slide.o.mix@gmail.com</email>
             <roles>
                 <role>maintainer</role>
             </roles>
-        </contributor>
+        </developer>
         <developer>
             <id>davidvanlaatum</id>
             <name>David van Laatum</name>
@@ -64,8 +64,7 @@
         </developer>
     </developers>
 
-    <contributors>
-        
+    <contributors>        
         <contributor>
             <!--<id>ashlux</id>-->
             <name>Ash Lux</name>
