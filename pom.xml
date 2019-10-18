@@ -20,7 +20,7 @@
     <version>2.69-SNAPSHOT</version>
     <name>Email Extension Plugin</name>
     <description>Allows to configure every aspect of email notifications: when an email is sent, who should receive it and what the email says</description>
-    <url>https://wiki.jenkins.io/display/JENKINS/Email-ext+plugin</url>
+    <url>https://github.com/jenkinsci/email-ext-plugin</url>
     <issueManagement>
         <system>JIRA</system>
         <url>https://issues.jenkins-ci.org/issues/?jql=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+email-ext-plugin</url>
@@ -44,6 +44,14 @@
     </properties>
 
     <developers>
+        <contributor>
+            <id>slide</id>
+            <name>Alex Earl</name>
+            <email>slide.o.mix@gmail.com</email>
+            <roles>
+                <role>maintainer</role>
+            </roles>
+        </contributor>
         <developer>
             <id>davidvanlaatum</id>
             <name>David van Laatum</name>
@@ -57,14 +65,7 @@
     </developers>
 
     <contributors>
-        <contributor>
-            <!--<id>slide</id>-->
-            <name>Alex Earl</name>
-            <email>slide.o.mix@gmail.com</email>
-            <roles>
-                <role>Past Maintainer</role>
-            </roles>
-        </contributor>
+        
         <contributor>
             <!--<id>ashlux</id>-->
             <name>Ash Lux</name>
