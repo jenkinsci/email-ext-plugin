@@ -4,14 +4,13 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.39</version>
-        <relativePath />
+        <version>3.50</version>
     </parent>
 
     <licenses>
         <license>
             <name>The MIT License (MIT)</name>
-            <url>http://opensource.org/licenses/MIT</url>
+            <url>https://opensource.org/licenses/MIT</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -21,27 +20,27 @@
     <version>2.69-SNAPSHOT</version>
     <name>Email Extension Plugin</name>
     <description>Allows to configure every aspect of email notifications: when an email is sent, who should receive it and what the email says</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Email-ext+plugin</url>
+    <url>https://wiki.jenkins.io/display/JENKINS/Email-ext+plugin</url>
     <issueManagement>
         <system>JIRA</system>
-        <url>https://issues.jenkins-ci.org/secure/IssueNavigator.jspa?reset=true&amp;jqlQuery=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+%27email-ext-plugin%27</url>
+        <url>https://issues.jenkins-ci.org/issues/?jql=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+email-ext-plugin</url>
     </issueManagement>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.level>8</java.level>
+        <jenkins.version>2.121.1</jenkins.version>
+        <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
         <workflow-step-api.version>2.19</workflow-step-api.version>
         <workflow-aggregator.version>2.5</workflow-aggregator.version>
         <workflow-job.version>2.12</workflow-job.version>
-        <jenkins.version>2.121.1</jenkins.version>
         <workflow-api.version>2.30</workflow-api.version>
         <workflow-cps.version>2.29</workflow-cps.version>
         <workflow-durable-task-step.version>2.11</workflow-durable-task-step.version>
         <workflow-basic-steps.version>2.4</workflow-basic-steps.version>
         <workflow-support.version>3.2</workflow-support.version>
         <scm-api.version>2.2.6</scm-api.version>
-        <java.level>8</java.level>
         <concurrency>1</concurrency>
-        <argLine />
+        <argLine>-Dfile.encoding=UTF-8</argLine>
     </properties>
 
     <developers>
@@ -311,27 +310,10 @@
             <id>repo.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
-        <repository>
-            <id>powermock-repo</id>
-            <url>http://powermock.googlecode.com/svn/repo/</url>
-        </repository>
-        <repository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net repository for Maven2</name>
-            <url>http://download.java.net/maven/2/</url>
-        </repository>
     </repositories>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.15</version>
-                <configuration>
-                    <argLine>-Dfile.encoding=UTF-8</argLine>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>clirr-maven-plugin</artifactId>
@@ -355,39 +337,8 @@
                     <arguments>-DskipTests=true</arguments>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.jenkins-ci.tools</groupId>
-                <artifactId>maven-hpi-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <compatibleSinceVersion>2.57.2</compatibleSinceVersion>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>permgen</id>
-            <activation>
-                <jdk>[,1.8)</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <argLine>-Djava.awt.headless=true -XX:MaxPermSize=512m -Dfile.encoding=UTF-8 @{argLine}</argLine>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <reporting>
         <plugins>
