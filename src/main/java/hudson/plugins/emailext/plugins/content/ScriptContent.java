@@ -74,10 +74,10 @@ public class ScriptContent extends AbstractEvalContent {
         
         try {
             if (!StringUtils.isEmpty(script)) {
-                inputStream = getFileInputStream(workspace, script, ".groovy");
+                inputStream = getFileInputStream(run, workspace, script, ".groovy");
                 result = executeScript(run, workspace, listener, inputStream);
             } else {
-                inputStream = getFileInputStream(workspace, template, ".template");
+                inputStream = getFileInputStream(run, workspace, template, ".template");
                 result = renderTemplate(run, workspace, listener, inputStream);
             }
         } catch (FileNotFoundException e) {
