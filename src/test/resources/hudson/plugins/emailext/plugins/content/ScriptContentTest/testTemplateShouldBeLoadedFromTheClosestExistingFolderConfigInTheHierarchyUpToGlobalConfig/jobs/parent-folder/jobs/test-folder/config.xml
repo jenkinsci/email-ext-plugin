@@ -1,0 +1,16 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<com.cloudbees.hudson.plugins.folder.Folder plugin="cloudbees-folder@6.5.1">
+  <properties>
+    <org.jenkinsci.plugins.configfiles.folder.FolderConfigFileProperty plugin="config-file-provider@2.15.6">
+      <configs class="sorted-set">
+        <comparator class="org.jenkinsci.plugins.configfiles.folder.FolderConfigFileProperty$1"/>
+		    <hudson.plugins.emailext.GroovyTemplateConfig plugin="email-ext@2.68">
+		      <id>email-ext-template-defined-at-global-and-parent-folder-and-test-folders-levels</id>
+		      <name>email-ext-template-defined-at-global-and-parent-folder-and-test-folders-levels.template</name>
+		      <comment></comment>
+		      <content>HELLO WORLD from test-folder config (template defined at global and parent folder and test folder levels)!</content>
+		    </hudson.plugins.emailext.GroovyTemplateConfig>
+      </configs>
+    </org.jenkinsci.plugins.configfiles.folder.FolderConfigFileProperty>
+  </properties>
+</com.cloudbees.hudson.plugins.folder.Folder>
