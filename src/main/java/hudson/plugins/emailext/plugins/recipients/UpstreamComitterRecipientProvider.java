@@ -19,7 +19,9 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.mail.internet.InternetAddress;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -47,17 +49,9 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
         }
         final Debug debug = new Debug();
         debug.send("Sending email to upstream committer(s).");
-        Run<?, ?> cur;
-        Cause.UpstreamCause upc = context.getRun().getCause(Cause.UpstreamCause.class);
-        while (upc != null) {
-            Job<?, ?> p = (Job<?, ?>) Jenkins.get().getItemByFullName(upc.getUpstreamProject());
-            if(p == null) {
-                context.getListener().getLogger().print("There is a break in the project linkage, could not retrieve upstream project information");
-                break;
-            }
-            cur = p.getBuildByNumber(upc.getUpstreamBuild());
-            upc = cur.getCause(Cause.UpstreamCause.class);
-            addUpstreamCommittersTriggeringBuild(cur, to, cc, bcc, env, context, debug);
+
+        for ( Run<?, ?> run : getUniqueUpstreamRuns() ) {
+            addUpstreamCommittersTriggeringBuild(run, to, cc, bcc, env, context, debug);
         }
     }
 
@@ -95,6 +89,35 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
     private void addUserFromChangeSet(ChangeLogSet.Entry change, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, final ExtendedEmailPublisherContext context, RecipientProviderUtilities.IDebug debug) {
         User user = change.getAuthor();
         RecipientProviderUtilities.addUsers(Collections.singleton(user), context, env, to, cc, bcc, debug);
+    }
+
+    private Set<Run<?, ?>> getUniqueUpstreamRuns() {
+        List<Run<?, ?>> upstreamRuns = new ArrayList<Run<?, ?>>();
+        collectUpstreamRuns(context, upstreamRuns);
+        return new HashSet<Run<?, ?>>(upstreamRuns);
+    }
+
+    private void collectUpstreamRuns(Context context, List<Run<?, ?>> runs) {
+        Run<?, ?> currentRun = runs.isEmpty() ?
+            context.getRun() :
+            runs.get( runs.size() - 1 );
+
+        for ( Cause cause : currentRun.getCauses() ) {
+            if ( ! (cause instanceof Cause.UpstreamCause) ) {
+                continue;
+            }
+
+            Cause.UpstreamCause upc = (Cause.UpstreamCause) cause;
+
+            Job<?, ?> job = (Job<?, ?>) Jenkins.get().getItemByFullName( upc.getUpstreamProject() );
+
+            if (job == null) {
+                continue;
+            }
+
+            runs.add( job.getBuildByNumber(upc.getUpstreamBuild()) );
+            collectUpstreamRuns(context, runs);
+        }
     }
 
     @Extension
