@@ -17,6 +17,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -243,5 +244,33 @@ public class FailedTestsContentTest
         failedTestContent.showStack = true;
         content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
         assertTrue( content.length() >= (3 * 1024 * 5) );
+    }
+
+    @Test
+    public void testGetContent_withMessage_withStack_htmlEscaped() {
+        AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+        when( testResults.getFailCount() ).thenReturn( 1 );
+
+        TestResult result = mock( TestResult.class );
+        when( result.isPassed() ).thenReturn( false );
+        when( result.getFullName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
+        when( result.getDisplayName() ).thenReturn( "Test" );
+        when( result.getErrorDetails() ).thenReturn( "expected:<ABORTED> but was:<COMPLETED> " );
+        when( result.getErrorStackTrace() ).thenReturn( "at org.nexusformat.NexusFile.<clinit>(NexusFile.java:99)" );
+
+        Mockito.<List<? extends TestResult>>when( testResults.getFailedTests() ).thenReturn( singletonList(result) );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
+
+        failedTestContent.showMessage = true;
+        failedTestContent.showStack = true;
+        failedTestContent.escapeHtml = true;
+        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+
+        assertEquals(content, "1 tests failed.<br/>" +
+            "FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test<br/><br/>" +
+            "Error Message:<br/>" +
+            "expected:&lt;ABORTED&gt; but was:&lt;COMPLETED&gt; <br/><br/>" +
+            "Stack Trace:<br/>" +
+            "at org.nexusformat.NexusFile.&lt;clinit&gt;(NexusFile.java:99)<br/><br/>");
     }
 }
