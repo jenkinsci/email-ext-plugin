@@ -111,7 +111,8 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
 
             Cause.UpstreamCause upc = (Cause.UpstreamCause) cause;
 
-            Job<?, ?> job = (Job<?, ?>) Jenkins.get().getItemByFullName( upc.getUpstreamProject() );
+            Job<?, ?> job = (Job<?, ?>) Jenkins.get()
+                .getItemByFullName( upc.getUpstreamProject() );
 
             if (job == null) {
                 continue;
