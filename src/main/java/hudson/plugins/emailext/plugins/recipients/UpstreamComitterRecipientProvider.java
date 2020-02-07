@@ -97,7 +97,9 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
         return new HashSet<Run<?, ?>>(upstreamRuns);
     }
 
-    private void collectUpstreamRuns(Context context, List<Run<?, ?>> runs) {
+    private void collectUpstreamRuns(ExtendedEmailPublisher context,
+                                     List<Run<?, ?>> runs) {
+
         Run<?, ?> currentRun = runs.isEmpty() ?
             context.getRun() :
             runs.get( runs.size() - 1 );
