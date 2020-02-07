@@ -50,7 +50,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
         final Debug debug = new Debug();
         debug.send("Sending email to upstream committer(s).");
 
-        for ( Run<?, ?> run : getUniqueUpstreamRuns() ) {
+        for ( Run<?, ?> run : getUniqueUpstreamRuns(context) ) {
             addUpstreamCommittersTriggeringBuild(run, to, cc, bcc, env, context, debug);
         }
     }
@@ -91,7 +91,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
         RecipientProviderUtilities.addUsers(Collections.singleton(user), context, env, to, cc, bcc, debug);
     }
 
-    private Set<Run<?, ?>> getUniqueUpstreamRuns() {
+    private Set<Run<?, ?>> getUniqueUpstreamRuns(ExtendedEmailPublisherContext context) {
         List<Run<?, ?>> upstreamRuns = new ArrayList<Run<?, ?>>();
         collectUpstreamRuns(context, upstreamRuns);
         return new HashSet<Run<?, ?>>(upstreamRuns);
