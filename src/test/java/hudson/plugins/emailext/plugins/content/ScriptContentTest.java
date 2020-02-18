@@ -10,6 +10,7 @@ import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
@@ -24,8 +25,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.recipes.LocalData;
 import org.jvnet.mock_javamail.Mailbox;
 import org.mockito.Mockito;
+
+import com.cloudbees.hudson.plugins.folder.Folder;
 
 import javax.mail.Message;
 import java.io.File;
@@ -106,6 +110,50 @@ public class ScriptContentTest {
         scriptContent.template = "empty-groovy-template-on-classpath.template";
         // the template adds a newline
         assertEquals("HELLO WORLD!\n", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
+    }
+
+    @Test
+    @LocalData
+    public void testTemplateShouldBeLoadedFromTheClosestExistingFolderConfigInTheHierarchyUpToGlobalConfig()
+        throws Exception
+    {
+        // create project and launch a job execution just to pass the contextual build object
+        // (knowing location within folder/job/item tree) to the content processing method
+        FreeStyleProject globalJob = j.jenkins.createProject(FreeStyleProject.class, "test-job");
+        Run<?,?> globalRun = globalJob.scheduleBuild2(0).get();
+  
+        scriptContent.template = "managed:email-ext-template-defined-at-global-and-parent-folder-and-test-folders-levels.template";
+        assertEquals("HELLO WORLD from global config (template defined at global and parent folder and test folder levels)!",
+            scriptContent.evaluate((AbstractBuild<?, ?>) globalRun, listener, ScriptContent.MACRO_NAME));
+        scriptContent.template = "managed:email-ext-template-defined-at-global-and-parent-folder-levels-but-not-test-folder-level.template";
+        assertEquals("HELLO WORLD from global config (template defined at global and parent folder levels but not test folder level)!",
+            scriptContent.evaluate((AbstractBuild<?, ?>) globalRun, listener, ScriptContent.MACRO_NAME));
+
+        // create project and launch a job execution just to pass the contextual build object
+        // (knowing location within folder/job/item tree) to the content processing method
+        FreeStyleProject parentFolderJob = ((Folder) j.jenkins.getItemByFullName("parent-folder"))
+            .createProject(FreeStyleProject.class, "test-job");
+        Run<?,?> parentFolderRun = parentFolderJob.scheduleBuild2(0).get();
+
+        scriptContent.template = "managed:email-ext-template-defined-at-global-and-parent-folder-and-test-folders-levels.template";
+        assertEquals("HELLO WORLD from parent-folder config (template defined at global and parent folder and test folder levels)!",
+            scriptContent.evaluate((AbstractBuild<?, ?>) parentFolderRun, listener, ScriptContent.MACRO_NAME));
+        scriptContent.template = "managed:email-ext-template-defined-at-global-and-parent-folder-levels-but-not-test-folder-level.template";
+        assertEquals("HELLO WORLD from parent-folder config (template defined at global and parent folder levels but not test folder level)!",
+            scriptContent.evaluate((AbstractBuild<?, ?>) parentFolderRun, listener, ScriptContent.MACRO_NAME));
+
+        // create project and launch a job execution just to pass the contextual build object
+        // (knowing location within folder/job/item tree) to the content processing method
+        FreeStyleProject testFolderJob = ((Folder) ((Folder) j.jenkins.getItemByFullName("parent-folder")).getItem("test-folder"))
+            .createProject(FreeStyleProject.class, "test-job");
+        Run<?,?> testFolderRun = testFolderJob.scheduleBuild2(0).get();
+
+        scriptContent.template = "managed:email-ext-template-defined-at-global-and-parent-folder-and-test-folders-levels.template";
+        assertEquals("HELLO WORLD from test-folder config (template defined at global and parent folder and test folder levels)!",
+            scriptContent.evaluate((AbstractBuild<?, ?>) testFolderRun, listener, ScriptContent.MACRO_NAME));
+        scriptContent.template = "managed:email-ext-template-defined-at-global-and-parent-folder-levels-but-not-test-folder-level.template";
+        assertEquals("HELLO WORLD from parent-folder config (template defined at global and parent folder levels but not test folder level)!",
+            scriptContent.evaluate((AbstractBuild<?, ?>) testFolderRun, listener, ScriptContent.MACRO_NAME));
     }
 
     @Test

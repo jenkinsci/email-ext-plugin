@@ -48,7 +48,7 @@ public class JellyScriptContent extends AbstractEvalContent {
         InputStream inputStream = null;
 
         try {
-            inputStream = getFileInputStream(workspace, template, JELLY_EXTENSION);
+            inputStream = getFileInputStream(run, workspace, template, JELLY_EXTENSION);
             return renderContent(run, inputStream, listener);
         } catch (JellyException e) {
             return "JellyException: " + e.getMessage();

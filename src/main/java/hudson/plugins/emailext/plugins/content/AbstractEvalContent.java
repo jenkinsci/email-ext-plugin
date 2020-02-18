@@ -24,7 +24,6 @@
 package hudson.plugins.emailext.plugins.content;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import hudson.ExtensionList;
 import hudson.FilePath;
 import hudson.Plugin;
 import hudson.model.AbstractBuild;
@@ -40,6 +39,7 @@ import jenkins.security.NotReallyRoleSensitiveCallable;
 import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.lib.configprovider.model.Config;
+import org.jenkinsci.plugins.configfiles.ConfigFiles;
 import org.jenkinsci.plugins.scriptsecurity.scripts.Language;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
@@ -54,6 +54,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -95,14 +96,14 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         return false;
     }
     
-    protected InputStream getFileInputStream(FilePath workspace, String fileName, String extension)
+    protected InputStream getFileInputStream(Run<?, ?> run, FilePath workspace, String fileName, String extension)
             throws FileNotFoundException, IOException, InterruptedException {
         
         InputStream inputStream = null;
         if(fileName.startsWith("managed:")) {
             String managedFileName = fileName.substring(8);
             try {
-                inputStream = getManagedFile(managedFileName);
+                inputStream = getManagedFile(run, managedFileName);
             } catch(NoClassDefFoundError e) {
                 inputStream = null;
             }
@@ -159,15 +160,13 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         return parent.act(new IsChildFileCallable(potentialChild));
     }
 
-    private InputStream getManagedFile(String fileName) throws UnsupportedEncodingException {
+    private InputStream getManagedFile(Run<?, ?> run, String fileName) throws UnsupportedEncodingException {
         InputStream stream = null;
         Plugin plugin = Jenkins.get().getPlugin("config-file-provider");
         if (plugin != null) {
             Config config = null;
-            ExtensionList<ConfigProvider> providers = ConfigProvider.all();
-            ConfigProvider provider = providers.get(getProviderClass());
-            assert provider != null;
-            for (Config c : provider.getAllConfigs()) {
+            List<Config> configs = ConfigFiles.getConfigsInContext(run.getParent().getParent(), getProviderClass());
+            for (Config c : configs) {
                 if (c.name.equalsIgnoreCase(fileName)) {
                     config = c;
                     break;

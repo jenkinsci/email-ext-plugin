@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<org.jenkinsci.plugins.configfiles.GlobalConfigFiles plugin="config-file-provider@2.15.6">
+  <configs class="sorted-set">
+    <comparator class="org.jenkinsci.plugins.configfiles.GlobalConfigFiles$1"/>
+    <hudson.plugins.emailext.GroovyTemplateConfig plugin="email-ext@2.68">
+      <id>email-ext-template-defined-at-global-and-parent-folder-and-test-folders-levels</id>
+      <name>email-ext-template-defined-at-global-and-parent-folder-and-test-folders-levels.template</name>
+      <comment></comment>
+      <content>HELLO WORLD from global config (template defined at global and parent folder and test folder levels)!</content>
+    </hudson.plugins.emailext.GroovyTemplateConfig>
+    <hudson.plugins.emailext.GroovyTemplateConfig plugin="email-ext@2.68">
+      <id>email-ext-template-defined-at-global-and-parent-folder-levels-but-not-test-folder-level</id>
+      <name>email-ext-template-defined-at-global-and-parent-folder-levels-but-not-test-folder-level.template</name>
+      <comment></comment>
+      <content>HELLO WORLD from global config (template defined at global and parent folder levels but not test folder level)!</content>
+    </hudson.plugins.emailext.GroovyTemplateConfig>
+  </configs>
+</org.jenkinsci.plugins.configfiles.GlobalConfigFiles>
