@@ -106,7 +106,7 @@ conditions must be met for it to send an email.
 -   **Send to Recipient List** - Check this checkbox if you would like
     to have the email sent to the "Global Recipient List" configured
     above.
--   **Send to Developers ** - Check this checkbox to send the email to
+-   **Send to Developers** - Check this checkbox to send the email to
     anyone who checked in code for the last build.  The plugin will
     generate an email address based on the committer's id and an
     appended "default email suffix" from Jenkins's global configuration
@@ -170,23 +170,23 @@ build.logFile.text.readLines().any { it =~ /.*ERROR.*/ }
 
 The email-ext plugin uses ***tokens*** to allow dynamic data to be
 inserted into recipient list, email subject line or body.   A
-***token*** is a string that starts with a $ (dollar sign) and is
+***token*** is a string that starts with a `$` (dollar sign) and is
 terminated by whitespace.  When an email is triggered, any tokens in the
 subject or content fields will be replaced dynamically by the actual
 value that it represents.  Also, the "value" of a token can contain
 other tokens, that will themselves be replaced by actual content.  For
-instance, the $DEFAULT\_SUBJECT token is replaced by the text (and other
+instance, the `$DEFAULT_SUBJECT` token is replaced by the text (and other
 tokens) that is in the Default Subject field from the **global
-configuration page**.  Similarly, the $PROJECT\_DEFAULT\_SUBJECT token
+configuration page**.  Similarly, the `$PROJECT_DEFAULT_SUBJECT` token
 will be replaced by the value of the Default Subject field from the
 **project configuration page**. 
 
 The email-ext plugin sets the email content fields with default values
 when you enable it for your project.  The Default Subject and Default
-Content fields on the project config page default to $DEFAULT\_SUBJECT
-and $DEFAULT\_CONTENT (respectively), so that it will automatically use
+Content fields on the project config page default to `$DEFAULT_SUBJECT`
+and `$DEFAULT_CONTENT` (respectively), so that it will automatically use
 the global configuration.  Similarly, the per-trigger content fields
-default to $PROJECT\_DEFAULT\_SUBJECT and $PROJECT\_DEFAULT\_CONTENT, so
+default to `$PROJECT_DEFAULT_SUBJECT` and `$PROJECT_DEFAULT_CONTENT`, so
 that they will automatically use the project's configuration.  Since the
 value of a token can contain other tokens, this provides different
 points of configuration that can allow you to quickly make changes at
@@ -209,9 +209,9 @@ configuration screen.
 
 #### Jelly content
 
-![](docs/images/html.jpg){width="227" height="216"}
+![](docs/images/html.jpg)
 
-![](docs/images/txt.jpg){width="218" height="213"}
+![](docs/images/txt.jpg)
 
 New to version 2.9 is the ability to use Jelly scripts. Jelly scripts
 are powerful in that you can hook into the Jenkins API itself to get any
@@ -244,9 +244,9 @@ the cooperation of your Hudson administrator. The steps are relatively
 simple:
 
 1.  Create the Jelly script. The name of the script should be
-    *\<name\>.jelly*. It is important the name ends in *.jelly*.
+    `<name>.jelly`. It is important the name ends in `.jelly`.
 2.  Have your Jenkins administrator place the script inside
-    $JENKINS\_HOME*email-templates*.
+    `$JENKINS_HOME/email-templates/`.
 3.  Use the Jelly token with the template parameter equal to your script
     filename without the .jelly extension. For example, if the script
     filename is foobar.jelly, the email content would look like this
@@ -256,7 +256,7 @@ Jelly script tips:
 
 -   You get object of other plugin actions by querying build actions
     like:
-    ${it.getAction('hudson.plugins.fitnesse.FitnesseResultsAction')}
+    `${it.getAction('hudson.plugins.fitnesse.FitnesseResultsAction')}`
 -   Then you need to know what all functions are allowed by this action
     object and traverse through result.
 
@@ -276,8 +276,8 @@ template file using the \_template* argument. Further, you can also
 include an init script that does some initialization using the *init*
 argument. The usage for each script is the following:
 
--   Text only template: ${SCRIPT, template="groovy-text.template"}
--   HTML template: ${SCRIPT, template="groovy-html.template"}
+-   Text only template: `${SCRIPT, template="groovy-text.template"}`
+-   HTML template: `${SCRIPT, template="groovy-html.template"}`
 
 You can also write your own scripts and templates. The scripts are
 particularly powerful since they provide a hook into the Jenkins API
@@ -293,7 +293,7 @@ simple:
     standard extension for the language (.groovy). The template can be
     named anything
 2.  Have your Jenkins administrator place the script inside
-    JENKINS\_*HOME\\email-templates*.
+    `$JENKINS_HOME\email-templates`.
 3.  Use the script token with the template parameter equal to your
     template filename, or in addition the script parameter equal to the
     custom script name. For example, if the template filename is
@@ -305,9 +305,8 @@ simple:
 These are some useful examples for doing various things with the
 email-ext groovy templates.
 
-[jenkins-matrix-email-html.template](/docs/templates/jenkins-matrix-email-html.template)
-
-[jenkins-generic-matrix-email-html.template](/docs/templates/jenkins-generic-matrix-email-html.template)
+* [jenkins-matrix-email-html.template](/docs/templates/jenkins-matrix-email-html.template)
+* [jenkins-generic-matrix-email-html.template](/docs/templates/jenkins-generic-matrix-email-html.template)
 
 ### Pipeline Examples
 
@@ -317,17 +316,21 @@ command signatures
 Notify Culprits and Requester via default EMail plugin
 
 ``` groovy
-step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: emailextrecipients([[$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']])])
+step([$class: 'Mailer', notifyEveryUnstableBuild: true, 
+    recipients: emailextrecipients([[$class: 'CulpritsRecipientProvider'],
+                                    [$class: 'RequesterRecipientProvider']])])
 ```
 
-Send an email to abc plus any addresses returned by the providers
+Send an email to `abc` plus any addresses returned by the providers
 
 ``` groovy
-emailext body: 'A Test EMail', recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: 'Test', to: 'abc'
+emailext body: 'A Test EMail', 
+    recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']],
+    subject: 'Test', to: 'abc'
 ```
 
   
-Attachments
+### Attachments
 
 New to version 2.15 is the ability to add attachments using the Ant
 pattern matching syntax used in many places in Jenkins. You can set a
@@ -379,19 +382,20 @@ GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
 
 ## Contributing to Email-Ext plugin
 
- Make sure you have installed [Maven 3](http://maven.apache.org/) 
+Make sure you have installed [Maven 3](http://maven.apache.org/) 
 and JDK 8.0 or later. Make also sure you have properly configured your
-`~/.m2/settings.xml` as explained in the [Plugin
-Tutorial](https://jenkins.io/doc/developer/tutorial/). This
-is needed to build properly any Jenkins plugin.
+`~/.m2/settings.xml` as explained in the [Plugin Tutorial](https://jenkins.io/doc/developer/tutorial/).
+Those are needed to build properly any Jenkins plugin.
 
 ### Check out and build
 
 How to check out the source and build:
 
--   git clone git@github.com:jenkinsci/email-ext-plugin.git
--   cd email-ext-plugin
--   mvn clean install
+``` sh
+git clone git@github.com:jenkinsci/email-ext-plugin.git
+cd email-ext-plugin
+mvn clean install
+```
 
 ## Version History
 
