@@ -1,0 +1,416 @@
+<title>${project.name}</title>
+
+<STYLE>
+          body table, td, th, p, h1, h2 {
+          margin:0;
+          font:normal normal 100% Georgia, Serif;
+          background-color: #ffffff;
+          }
+          h1, h2 {
+          border-bottom:dotted 1px #999999;
+          padding:5px;
+          margin-top:10px;
+          margin-bottom:10px;
+          color: #000000;
+          font: normal bold 130% Georgia,Serif;
+          background-color:#f0f0f0;
+          }
+          tr.gray {
+          background-color:#f0f0f0;
+          }
+          h2 {
+          padding:5px;
+          margin-top:5px;
+          margin-bottom:5px;
+          font: italic bold 110% Georgia,Serif;
+          }
+          .bg2 {
+          color:black;
+          background-color:#E0E0E0;
+          font-size:110%
+          }
+          th {
+          font-weight: bold;
+          }
+          tr, td, th {
+          padding:2px;
+          }
+          td.test_passed {
+          color:blue;
+          }
+          td.test_failed {
+          color:red;
+          }
+          td.test_skipped {
+          color:grey;
+          }
+          .console {
+          font: normal normal 90% Courier New, monotype;
+          padding:0px;
+          margin:0px;
+          }
+          div.content, div.header {
+          background: #ffffff;
+          border: dotted
+          1px #666;
+          margin: 2px;
+          content: 2px;
+          padding: 2px;
+          }
+          table.border, th.border, td.border {
+          border: 1px solid black;
+          border-collapse:collapse;
+          }
+</STYLE>
+<BODY>
+<%
+
+import  hudson.Util
+import  hudson.Functions
+import  hudson.model.Result;
+import  hudson.matrix.MatrixBuild
+import  hudson.matrix.MatrixRun
+import  hudson.matrix.MatrixConfiguration
+import  hudson.matrix.MatrixProject
+import  hudson.matrix.Combination
+
+if (build.result == Result.SUCCESS) {
+	result_img = "static/e59dfe28/images/32x32/blue.gif"
+} else if (build.result == Result.FAILURE) {
+	result_img = "static/e59dfe28/images/32x32/red.gif"
+} else {
+	result_img = "static/e59dfe28/images/32x32/yellow.gif"
+}
+
+if (build.builtOnStr == '') {
+	built_on = 'master'
+} else {
+	built_on = build.builtOnStr
+}
+
+def healthIconSize = "16x16"
+def healthReports = project.buildHealthReports
+
+Integer total_builds = 0
+Integer total_failed = 0
+
+Map<String,hudson.model.Result> toolchain_status = new HashMap<String,hudson.model.Result>();
+Map<String,Integer> toolchain_total_builds = new HashMap<String,Integer>();
+Map<String,Integer> toolchain_total_failed = new HashMap<String,Integer>();
+
+Map<String,hudson.model.Result> architecture_status = new HashMap<String,hudson.model.Result>();
+Map<String,Integer> architecture_total_builds = new HashMap<String,Integer>();
+Map<String,Integer> architecture_total_failed = new HashMap<String,Integer>();
+
+def matrix_build = build
+def runs = matrix_build.getExactRuns()
+
+hudson.matrix.MatrixProject matrix_project = project
+def matrix_axis = matrix_project.getAxes()
+
+def toolchain_axis = matrix_axis.find('AXIS1')
+def architecture_axis = matrix_axis.find('AXIS2')
+
+String toolchain
+String architecture
+
+Boolean something_failed = false
+
+// We want to initial all status maps to SUCCESS
+// We use runs to get actual matrix values because matrix_axis keeps a record of all 
+// matrix/values. So, if you remove things they can still show up there.
+
+for (hudson.matrix.MatrixRun run : runs) {
+	run_configuration = run.getParent()
+	configuration_combination = run_configuration.getCombination()
+	toolchain = configuration_combination.get(toolchain_axis)
+	architecture = configuration_combination.get(architecture_axis)
+	toolchain_status.put(toolchain,Result.SUCCESS)
+	toolchain_total_builds.put(toolchain,0)
+	toolchain_total_failed.put(toolchain,0)
+
+	total_builds = total_builds + 1
+
+	architecture_status.put(architecture,Result.SUCCESS)
+	architecture_total_builds.put(architecture,0)
+	architecture_total_failed.put(architecture,0)
+}
+
+// OK, now run thru runs and set anything that FAILED.
+for (hudson.matrix.MatrixRun run : runs) {
+	run_configuration = run.getParent()
+	configuration_combination = run_configuration.getCombination()
+	toolchain = configuration_combination.get(toolchain_axis)
+	architecture = configuration_combination.get(architecture_axis)
+
+	cnt = toolchain_total_builds.get(toolchain)
+	cnt = cnt + 1
+	toolchain_total_builds.put(toolchain,cnt)
+	cnt = architecture_total_builds.get(architecture)
+	cnt = cnt + 1
+	architecture_total_builds.put(architecture,cnt)
+
+	if (run.getResult() != Result.SUCCESS) {
+
+		total_failed = total_failed + 1
+		toolchain_status.put(toolchain,Result.FAILURE)
+		architecture_status.put(architecture,Result.FAILURE)
+		something_failed = true
+		cnt = toolchain_total_failed.get(toolchain)
+		cnt = cnt + 1
+		toolchain_total_failed.put(toolchain,cnt)
+		cnt = architecture_total_failed.get(architecture)
+		cnt = cnt + 1
+		architecture_total_failed.put(architecture,cnt)
+	}
+}
+
+%>
+    <div class="header">
+      <!-- GENERAL INFO -->
+      <table>
+        <tr class="gray">
+          <td align="right">
+                <img src="${rooturl}${result_img}" />
+          </td>
+          <td valign="center">
+            <b style="font-size: 200%;">BUILD ${build.result}</b>
+          </td>
+        </tr>
+        <tr>
+          <td>Build URL</td>
+          <td>
+            <a href="${rooturl}${build.url}">${rooturl}${build.url}</a>
+          </td>
+        </tr>
+        <tr>
+          <td>Project:</td>
+          <td>${project.name}</td>
+        </tr>
+        <tr>
+          <td>Date of build:</td>
+          <td>${it.timestampString}</td>
+        </tr>
+        <tr>
+          <td>Build duration:</td>
+          <td>${build.durationString}</td>
+        </tr>
+        <tr>
+          <td>Build cause:</td>
+          <td>
+<%
+		for (hudson.model.Cause cause : build.causes) {
+%>
+			${cause.shortDescription}
+<%
+		}
+%>
+          </td>
+        </tr>
+<%
+		if (build.description != null) {
+%>
+        		<tr>
+          		<td>Build description:</td>
+          		<td>${build.description}</td>
+        		</tr>
+<%
+		}
+%>
+        <tr>
+          <td>Built on:</td>
+          <td>
+		${built_on}
+          </td>
+        </tr>
+        <tr>
+          <td>Total Builds:</td>
+          <td>
+		${total_builds}
+          </td>
+        </tr>
+<%
+	if (total_failed != 0) {
+%>
+          <tr>
+		<td>FAILURES:</td>
+          	<td>
+			${total_failed} out of ${total_builds} builds FAILED!
+          	</td>
+	</tr>
+<%
+	}
+%>
+        </tr>
+      </table>
+    </div>
+
+
+<!-- HEALTH TEMPLATE -->
+<div class="content">
+<%
+if (healthReports != null) {
+%>
+        <h1>Health Report</h1>
+        <table>
+          <tr>
+            <th>W</th>
+            <th>Description</th>
+            <th>Score</th>
+          </tr>
+<%
+		for (hudson.model.HealthReport healthReport : healthReports) {
+                	__url = healthReport.getIconUrl(healthIconSize)
+%>
+            		<tr>
+              		<td>
+                		<img src="${rooturl}${__url}" />
+              		</td>
+              		<td>${healthReport.description}</td>
+              		<td>${healthReport.score}</td>
+            		</tr>
+
+<%
+		}
+%>
+        </table>
+        <br />
+<%
+}
+%>
+</div>
+
+<!-- CHANGES TEMPLATE -->
+<div class="content">
+<%
+if (build.changeSet != null) {
+	boolean hadChanges = false
+	hudson.scm.ChangeLogSet cs = build.getChangeSet()
+%>
+	<a href="${rooturl}${build.url}/changes">
+          <h1>Changes</h1>
+        </a>
+<%
+	for (hudson.scm.ChangeLogSet.Entry entry : cs) {
+		hadChanges = true
+%>
+          	<h2>${entry.msgAnnotated}</h2>
+          	<p>by <em>${entry.author}</em></p>
+          	<table>
+<%
+			for (hudson.scm.ChangeLogSet.AffectedFile p : entry.affectedFiles) {
+%>
+              			<tr>
+                			<td width="10%"> ${p.editType.name}</td>
+                			<td>
+                  				<tt>${p.path}</tt>
+                			</td>
+              			</tr>
+<%
+			}
+%>
+          	</table>
+<%
+	}
+	if (hadChanges == false) {
+%>
+		<p>No Changes</p>
+<%
+	}
+}
+%>
+</div>
+
+<div class="content">
+<h1>Architecture Summary</h1>
+<table>
+<%
+for (String __val : architecture_status.keySet()) {
+	Integer _total_cnt = architecture_total_builds.get(__val)
+	Integer _failed_cnt = architecture_total_failed.get(__val)
+	hudson.model.Result __result = architecture_status.get(__val)
+	if (__result == Result.SUCCESS) {
+%>
+                <TR><TD colspan="2" class="test_passed">${__val} - OK</TD></TR>
+<%
+        } else {
+%>
+                <TR><TD colspan="2" class="test_failed">${__val} - FAILED. ${_failed_cnt} out of ${_total_cnt} failed to build!</TD></TR>
+<%
+        }
+}
+%>
+</table>
+<div class="content">
+<h1>Toolchain Summary</h1>
+<table>
+<%
+for (String __val : toolchain_status.keySet()) {
+	hudson.model.Result __result = toolchain_status.get(__val)
+	Integer _total_cnt = toolchain_total_builds.get(__val)
+	Integer _failed_cnt = toolchain_total_failed.get(__val)
+	if (__result == Result.SUCCESS) {
+%>
+                <TR><TD colspan="2" class="test_passed">${__val} - OK</TD></TR>
+<%
+        } else {
+%>
+                <TR><TD colspan="2" class="test_failed">${__val} - FAILED. ${_failed_cnt} out of ${_total_cnt} failed to build!</TD></TR>
+<%
+        }
+}
+%>
+</table>
+
+<%
+if (something_failed == true) {
+%>
+<div class="content">
+<h1>Information</h1>
+A change you committed to a source repository <b>MAY</b> be responsible for breaking a build.
+<br>Review the data below or follow the link below to review the output of the build.
+<br>If your change was responsible for the build failure, <b>fix ASAP</b>.
+<br>If your change is not responsible, there is no need to respond to this email.
+<br><b>All developers with changes</b> associated with this build failure will continue to be notified until the build succeeds.
+<br><b>All developers that are notified</b> of a build failure will be informed by email when the build is once again successful.
+<br>Instructions to reproduce the build failure will follow.
+</div>
+<%
+for (hudson.matrix.MatrixRun run : runs) {
+	if (run.getResult() != Result.SUCCESS) {
+		String toolchain_val
+		run_configuration = run.getParent()
+		url = run.getUrl()
+		configuration_combination = run_configuration.getCombination()
+		toolchain = configuration_combination.get(toolchain_axis)
+		architecture = configuration_combination.get(architecture_axis)
+
+		toolchain_val = toolchain
+%>
+		<div class="content">
+		<h1>${toolchain_val} - ${architecture} Build Details</h1>
+		<table>
+        		<tr>
+          			<td>Build Output:</td>
+          			<td>
+            				<a href="${rooturl}${url}/console">${rooturl}${url}/console</a>
+          			</td>
+        		</tr>
+        		<tr>
+          			<td>Reproduce:</td>
+          			<td>
+					ARCH=${architecture} XENV=${toolchain_val} make
+          			</td>
+        		</tr>
+		</table>
+		</table>
+		</div>
+<%
+	}
+}
+}
+
+%>
+
+</BODY>
+
