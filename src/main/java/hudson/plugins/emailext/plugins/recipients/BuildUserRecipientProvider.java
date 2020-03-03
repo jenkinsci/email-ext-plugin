@@ -2,10 +2,7 @@ package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.Cause;
-import hudson.model.Job;
-import hudson.model.Run;
-import hudson.model.User;
+import hudson.model.*;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.Messages;
@@ -50,7 +47,7 @@ public class BuildUserRecipientProvider extends RecipientProvider {
         // Difference between this and RequesterRecipientProvider is that we send emails to the
         // user triggering ex. a rebuild and not the original upstream user.
         Run<?, ?> cur = context.getRun();
-        Cause.UserIdCause upc = cur.getCause(Cause.UserIdCause);
+        Cause.UserIdCause upc = cur.getCause(hudson.model.Cause.UserIdCause.class);
         if(upc == null){
             context.getListener().getLogger().print("The build was not caused by a user!");
         }
