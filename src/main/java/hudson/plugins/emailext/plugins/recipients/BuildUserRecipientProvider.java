@@ -69,7 +69,7 @@ public class BuildUserRecipientProvider extends RecipientProvider {
 
         @Override
         public String getDisplayName() {
-            return Messages.RequesterRecipientProvider_DisplayName();
+            return Messages.BuildUserRecipientProvider_DisplayName();
         }
     }
 }
