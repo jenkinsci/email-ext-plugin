@@ -10,6 +10,9 @@ import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 
 /**
@@ -38,12 +41,17 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     @Parameter
     public boolean escapeHtml = false;
 
+    @Parameter
+    public String testSuiteName = "";
+
     public static final String MACRO_NAME = "FAILED_TESTS";
 
     @Override
     public boolean acceptsMacroName(String macroName) {
         return macroName.equals(MACRO_NAME);
     }
+
+
 
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName) {
@@ -59,7 +67,11 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             return "No tests ran.";
         }
 
-        int failCount = testResult.getFailCount();
+        List<TestResult> failedTests = testResult.getFailedTests().stream().collect(Collectors.toList());
+
+        failedTests = testSuiteName.length() == 0 ? failedTests : failedTests.stream().filter(t -> t.getFullName().contains(testSuiteName)).collect(Collectors.toList());
+
+        int failCount = failedTests.size();
 
         if (failCount == 0) {
             buffer.append("All tests passed");
@@ -75,7 +87,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             if (maxTests > 0) {
                 int printedTests = 0;
                 int printedLength = 0;
-                for (TestResult failedTest : testResult.getFailedTests()) {
+                for (TestResult failedTest : failedTests) {
                     if (showOldFailures || getTestAge(failedTest) == 1) {
                         if (printedTests < maxTests && printedLength <= maxLength) {
                             printedLength += outputTest(buffer, failedTest, showStack, showMessage, maxLength-printedLength);
