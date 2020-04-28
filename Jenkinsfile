@@ -16,6 +16,6 @@ static List<Map<String, String>> recommendedConfigurations() {
 
 buildPlugin(
     failFast: false,
-    useAci: false
+    useAci: false,
     configurations: recommendedConfigurations()
 )
