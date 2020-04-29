@@ -308,7 +308,7 @@ public class FailedTestsContentTest
         failedTestContent.maxTests = 4;
         failedTestContent.showMessage = true;
         failedTestContent.showStack = true;
-        failedTestContent.testNameRegexPattern = ".*ExtendedEmailPublisherTest.*";
+        failedTestContent.testNamePattern = ".*ExtendedEmailPublisherTest.*";
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
 
         assertTrue( content.contains(2 + " tests failed"));
@@ -354,7 +354,7 @@ public class FailedTestsContentTest
         failedTestContent.maxTests = 4;
         failedTestContent.showMessage = true;
         failedTestContent.showStack = true;
-        failedTestContent.testNameRegexPattern = ".*ExtendedEmailPublisherTest.*|.*OtherPackageTest.*";
+        failedTestContent.testNamePattern = ".*ExtendedEmailPublisherTest.*|.*OtherPackageTest.*";
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
 
         assertTrue( content.contains(4 + " tests failed"));

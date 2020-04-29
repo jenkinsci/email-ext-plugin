@@ -43,7 +43,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     public boolean escapeHtml = false;
 
     @Parameter
-    public String testNameRegexPattern = "";
+    public String testNamePattern = "";
 
     public static final String MACRO_NAME = "FAILED_TESTS";
 
@@ -69,8 +69,8 @@ public class FailedTestsContent extends DataBoundTokenMacro {
 
         int failCount = testResult.getFailCount();
 
-        List<TestResult> failedAndFilteredTests = filterTests(testResult.getFailedTests(), testNameRegexPattern);
-        failCount = testNameRegexPattern.length() == 0 ? failCount : failedAndFilteredTests.size();
+        List<TestResult> failedAndFilteredTests = filterTests(testResult.getFailedTests(), testNamePattern);
+        failCount = testNamePattern.length() == 0 ? failCount : failedAndFilteredTests.size();
 
         if (failCount == 0) {
             buffer.append("All tests passed");
