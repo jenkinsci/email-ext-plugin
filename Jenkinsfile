@@ -9,6 +9,7 @@ static List<Map<String, String>> recommendedConfigurations() {
     def recentLTS = "2.222.3"
     def configurations = [
         [ platform: "s390x", jdk: "11", jenkins: recentLTS, javaLevel: "8" ],
+        [ platform: "s390x", jdk: "8", jenkins: null ],
     ]
     return configurations
 }
