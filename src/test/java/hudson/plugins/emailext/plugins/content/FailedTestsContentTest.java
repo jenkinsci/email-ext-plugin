@@ -68,7 +68,7 @@ public class FailedTestsContentTest
     public void testGetContent_whenAllTestsPassedShouldGiveMeaningfulMessage()
             throws Exception {
         AbstractTestResultAction testResults = mock( AbstractTestResultAction.class );
-
+        when( testResults.getFailCount() ).thenReturn( 0 );
         when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
@@ -80,14 +80,7 @@ public class FailedTestsContentTest
     public void testGetContent_whenSomeTestsFailedShouldGiveMeaningfulMessage()
             throws Exception {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
-        List<TestResult> failedTests = new ArrayList<>();
-        for(int i = 0; i < 123; i++) {
-            TestResult result = mock( TestResult.class );
-            when( result.isPassed() ).thenReturn( false );
-            failedTests.add(result);
-        }
-
-        Mockito.<List<? extends TestResult>>when( testResults.getFailedTests() ).thenReturn( failedTests );
+        when( testResults.getFailCount() ).thenReturn( 123 );
         when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxTests = 0;
@@ -100,6 +93,7 @@ public class FailedTestsContentTest
     public void testGetContent_withMessage_withStack()
             throws Exception {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+        when( testResults.getFailCount() ).thenReturn( 2 );
 
         List<TestResult> failedTests = new ArrayList<>();
         for(int i = 0; i < 2; i++) {
@@ -131,6 +125,7 @@ public class FailedTestsContentTest
     public void testGetContent_noMessage_withStack()
             throws Exception {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+        when( testResults.getFailCount() ).thenReturn( 2 );
 
         List<TestResult> failedTests = new ArrayList<>();
         for(int i = 0; i < 2; i++) {
@@ -161,6 +156,7 @@ public class FailedTestsContentTest
     public void testGetContent_withMessage_noStack()
             throws Exception {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+        when( testResults.getFailCount() ).thenReturn( 2 );
 
         List<TestResult> failedTests = new ArrayList<>();
         for(int i = 0; i < 2; i++) {
@@ -191,6 +187,7 @@ public class FailedTestsContentTest
     public void testGetContent_noMessage_noStack()
             throws Exception {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+        when( testResults.getFailCount() ).thenReturn( 2 );
 
         List<TestResult> failedTests = new ArrayList<>();
         for(int i = 0; i < 2; i++) {
@@ -221,6 +218,7 @@ public class FailedTestsContentTest
     public void testGetContent_whenContentLargerThanMaxLengthShouldTruncate()
             throws Exception {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+        when( testResults.getFailCount() ).thenReturn( 5 );
 
         List<TestResult> failedTests = new ArrayList<>();
         for(int i = 0; i < 5; i++) {
@@ -249,6 +247,7 @@ public class FailedTestsContentTest
     @Test
     public void testGetContent_withMessage_withStack_htmlEscaped() {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+        when( testResults.getFailCount() ).thenReturn( 1 );
 
         TestResult result = mock( TestResult.class );
         when( result.isPassed() ).thenReturn( false );
@@ -277,6 +276,7 @@ public class FailedTestsContentTest
     public void testGetContent_withMessage_withStack_specificTestSuit()
             throws Exception {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+        when( testResults.getFailCount() ).thenReturn( 4 );
 
         List<TestResult> failedTests = new ArrayList<>();
 
@@ -306,7 +306,7 @@ public class FailedTestsContentTest
         failedTestContent.maxTests = 4;
         failedTestContent.showMessage = true;
         failedTestContent.showStack = true;
-        failedTestContent.testSuiteName = "ExtendedEmailPublisherTest";
+        failedTestContent.testNameRegexPattern = ".*ExtendedEmailPublisherTest.*";
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
 
         assertTrue( content.contains(2 + " tests failed"));
@@ -352,6 +352,7 @@ public class FailedTestsContentTest
         failedTestContent.maxTests = 4;
         failedTestContent.showMessage = true;
         failedTestContent.showStack = true;
+        failedTestContent.testNameRegexPattern = ".*ExtendedEmailPublisherTest.*|.*OtherPackageTest.*";
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
 
         assertTrue( content.contains(4 + " tests failed"));

@@ -11,6 +11,7 @@ import hudson.tasks.test.TestResult;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
@@ -42,7 +43,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     public boolean escapeHtml = false;
 
     @Parameter
-    public String testSuiteName = "";
+    public String testNameRegexPattern = "";
 
     public static final String MACRO_NAME = "FAILED_TESTS";
 
@@ -67,11 +68,10 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             return "No tests ran.";
         }
 
-        List<TestResult> failedTests = testResult.getFailedTests().stream().collect(Collectors.toList());
+        int failCount = testResult.getFailCount();
 
-        failedTests = testSuiteName.length() == 0 ? failedTests : failedTests.stream().filter(t -> t.getFullName().contains(testSuiteName)).collect(Collectors.toList());
-
-        int failCount = failedTests.size();
+        List<TestResult> failedAndFilteredTests = filterTests(testResult.getFailedTests(), testNameRegexPattern);
+        failCount = testNameRegexPattern.length() == 0 ? failCount : failedAndFilteredTests.size();
 
         if (failCount == 0) {
             buffer.append("All tests passed");
@@ -87,7 +87,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             if (maxTests > 0) {
                 int printedTests = 0;
                 int printedLength = 0;
-                for (TestResult failedTest : failedTests) {
+                for (TestResult failedTest : failedAndFilteredTests) {
                     if (showOldFailures || getTestAge(failedTest) == 1) {
                         if (printedTests < maxTests && printedLength <= maxLength) {
                             printedLength += outputTest(buffer, failedTest, showStack, showMessage, maxLength-printedLength);
@@ -156,5 +156,14 @@ public class FailedTestsContent extends DataBoundTokenMacro {
 
     private String getLineBreak() {
         return escapeHtml ? "<br/>" : "\n";
+    }
+
+    private List<TestResult> filterTests(List<? extends TestResult> failedTests, String regexPattern) {
+        List<TestResult> filteredTests = failedTests.stream().collect(Collectors.toList());
+        if(regexPattern.length() != 0) {
+            Pattern pattern = Pattern.compile(regexPattern);
+            filteredTests = filteredTests.stream().filter(t -> pattern.matcher(t.getFullName()).matches()).collect(Collectors.toList());
+        }
+        return filteredTests;
     }
 }
