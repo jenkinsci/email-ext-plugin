@@ -28,17 +28,8 @@
 
     <properties>
         <java.level>8</java.level>
-        <jenkins.version>2.138.4</jenkins.version>
+        <jenkins.version>2.164.3</jenkins.version>
         <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
-        <workflow-step-api.version>2.19</workflow-step-api.version>
-        <workflow-aggregator.version>2.5</workflow-aggregator.version>
-        <workflow-job.version>2.12</workflow-job.version>
-        <workflow-api.version>2.30</workflow-api.version>
-        <workflow-cps.version>2.29</workflow-cps.version>
-        <workflow-durable-task-step.version>2.11</workflow-durable-task-step.version>
-        <workflow-basic-steps.version>2.4</workflow-basic-steps.version>
-        <workflow-support.version>3.2</workflow-support.version>
-        <scm-api.version>2.2.6</scm-api.version>
         <concurrency>1</concurrency>
         <argLine>-Dfile.encoding=UTF-8</argLine>
     </properties>
@@ -98,6 +89,18 @@
         </contributor>
     </contributors>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.jenkins.tools.bom</groupId>
+                <artifactId>bom-2.164.x</artifactId>
+                <version>4</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- libraries -->
         <dependency>
@@ -121,17 +124,14 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>junit</artifactId>
-            <version>1.2</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>matrix-project</artifactId>
-            <version>1.4</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>mailer</artifactId>
-            <version>1.13</version>
         </dependency>
         <dependency>
             <groupId>org.jvnet.hudson.plugins</groupId>
@@ -154,75 +154,63 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>cloudbees-folder</artifactId>
-            <version>6.5.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>token-macro</artifactId>
-            <version>2.3</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>structs</artifactId>
-            <version>1.17</version>
         </dependency>
 
         <!-- workflow stuff -->
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <version>${workflow-step-api.version}</version>
             <artifactId>workflow-step-api</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-job</artifactId>
-            <version>${workflow-job.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-api</artifactId>
-            <version>${workflow-api.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-support</artifactId>
-            <version>${workflow-support.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-support</artifactId>
-            <version>${workflow-support.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>scm-api</artifactId>
-            <version>${scm-api.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency> <!-- StepConfigTester -->
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
             <classifier>tests</classifier>
-            <version>${workflow-step-api.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
-            <version>${workflow-cps.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>script-security</artifactId>
-            <version>1.54</version>
         </dependency>
 
         <!-- testing -->
@@ -279,19 +267,16 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials</artifactId>
-            <version>2.1.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-durable-task-step</artifactId>
-            <version>${workflow-durable-task-step.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-basic-steps</artifactId>
-            <version>${workflow-basic-steps.version}</version>
             <scope>test</scope>
         </dependency>
 
