@@ -53,7 +53,6 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     }
 
 
-
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName) {
         return evaluate(build, build.getWorkspace(), listener, macroName);

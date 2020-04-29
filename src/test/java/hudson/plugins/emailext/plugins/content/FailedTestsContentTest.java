@@ -69,6 +69,7 @@ public class FailedTestsContentTest
             throws Exception {
         AbstractTestResultAction testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 0 );
+
         when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
@@ -81,6 +82,7 @@ public class FailedTestsContentTest
             throws Exception {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 123 );
+
         when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxTests = 0;
