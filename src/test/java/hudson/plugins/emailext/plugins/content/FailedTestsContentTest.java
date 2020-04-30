@@ -275,10 +275,9 @@ public class FailedTestsContentTest
     }
 
     @Test
-    public void testGetContent_withMessage_withStack_specificTestSuit()
+    public void testGetContent_withMessage_withStack_specificTestSuite()
             throws Exception {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
-        when( testResults.getFailCount() ).thenReturn( 4 );
 
         List<TestResult> failedTests = new ArrayList<>();
 
@@ -323,7 +322,7 @@ public class FailedTestsContentTest
     }
 
     @Test
-    public void testGetContent_withMessage_withStack_allTestSuit()
+    public void testGetContent_withMessage_withStack_allTestSuites()
             throws Exception {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
 
@@ -354,7 +353,7 @@ public class FailedTestsContentTest
         failedTestContent.maxTests = 4;
         failedTestContent.showMessage = true;
         failedTestContent.showStack = true;
-        failedTestContent.testNamePattern = ".*ExtendedEmailPublisherTest.*|.*OtherPackageTest.*";
+        failedTestContent.testNamePattern = ".*";
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
 
         assertTrue( content.contains(4 + " tests failed"));

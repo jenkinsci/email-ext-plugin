@@ -69,7 +69,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
 
         int failCount = testResult.getFailCount();
 
-        List<TestResult> failedAndFilteredTests = filterTests(testResult.getFailedTests(), testNamePattern);
+        List<? extends TestResult> failedAndFilteredTests = filterTests(testResult.getFailedTests(), testNamePattern);
         failCount = testNamePattern.length() == 0 ? failCount : failedAndFilteredTests.size();
 
         if (failCount == 0) {
@@ -157,11 +157,11 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         return escapeHtml ? "<br/>" : "\n";
     }
 
-    private List<TestResult> filterTests(List<? extends TestResult> failedTests, String regexPattern) {
+    private List<? extends TestResult> filterTests(List<? extends TestResult> failedTests, String regexPattern) {
         if(regexPattern.length() != 0) {
             Pattern pattern = Pattern.compile(regexPattern);
             failedTests = failedTests.stream().filter(t -> pattern.matcher(t.getFullName()).matches()).collect(Collectors.toList());
         }
-        return (List<TestResult>)failedTests;
+        return failedTests;
     }
 }
