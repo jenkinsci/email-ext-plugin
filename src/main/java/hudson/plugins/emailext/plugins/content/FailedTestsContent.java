@@ -158,11 +158,10 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     }
 
     private List<TestResult> filterTests(List<? extends TestResult> failedTests, String regexPattern) {
-        List<TestResult> filteredTests = failedTests.stream().collect(Collectors.toList());
         if(regexPattern.length() != 0) {
             Pattern pattern = Pattern.compile(regexPattern);
-            filteredTests = filteredTests.stream().filter(t -> pattern.matcher(t.getFullName()).matches()).collect(Collectors.toList());
+            failedTests = failedTests.stream().filter(t -> pattern.matcher(t.getFullName()).matches()).collect(Collectors.toList());
         }
-        return filteredTests;
+        return (List<TestResult>)failedTests;
     }
 }
