@@ -219,6 +219,11 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             this.name = name;
             this.stackTrace = stackTrace;
         }
+
+        @Override
+        public String toString() {
+            return String.format("Name:%s, Error message: %s, Stack trace:%s", this.name, this.errorMessage, this.stackTrace);
+        }
     }
 
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -245,6 +250,16 @@ public class FailedTestsContent extends DataBoundTokenMacro {
 
         public void addTest(FailedTest t) {
             this.tests.add(t);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder b = new StringBuilder();
+            for(FailedTest t: this.tests) {
+                b.append(t.toString()).append("\n");
+            }
+            return String.format("Summary:%s, Tests: %s, Other failed tests:%s, Output truncated: %s",
+                    this.summary, b.toString(), this.otherFailedTests, this.truncatedOutput);
         }
     }
 }
