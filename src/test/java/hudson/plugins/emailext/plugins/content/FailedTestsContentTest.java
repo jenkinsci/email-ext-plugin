@@ -18,9 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -237,6 +236,7 @@ public class FailedTestsContentTest
         when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxLength = 10;
+        //failedTestContent.outputYaml = true;
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
         assertTrue( content.length() < (3 * 1024 * 5) );
 
@@ -272,5 +272,34 @@ public class FailedTestsContentTest
             "expected:&lt;ABORTED&gt; but was:&lt;COMPLETED&gt; <br/><br/>" +
             "Stack Trace:<br/>" +
             "at org.nexusformat.NexusFile.&lt;clinit&gt;(NexusFile.java:99)<br/><br/>");
+    }
+
+    @Test
+    public void testGetContent_withMessage_withStack_outputYaml() {
+        AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+        when( testResults.getFailCount() ).thenReturn( 1 );
+
+        TestResult result = mock( TestResult.class );
+        when( result.isPassed() ).thenReturn( false );
+        when( result.getFullName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
+        when( result.getDisplayName() ).thenReturn( "Test" );
+        when( result.getErrorDetails() ).thenReturn( "expected:<ABORTED> but was:<COMPLETED> " );
+        when( result.getErrorStackTrace() ).thenReturn( "at org.nexusformat.NexusFile.<clinit>(NexusFile.java:99)" );
+
+        Mockito.<List<? extends TestResult>>when( testResults.getFailedTests() ).thenReturn( singletonList(result) );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
+
+        failedTestContent.showMessage = true;
+        failedTestContent.showStack = true;
+        failedTestContent.outputYaml = true;
+        String content = failedTestContent.evaluate(build, listener, failedTestContent.MACRO_NAME);
+        assertEquals(content, "summary: \"1 tests failed\"\n" +
+                "tests:\n" +
+                "- name: \"hudson.plugins.emailext.ExtendedEmailPublisherTest.Test\"\n" +
+                "  errorMessage: \"expected:<ABORTED> but was:<COMPLETED> \"\n" +
+                "  stackTrace: \"at org.nexusformat.NexusFile.<clinit>(NexusFile.java:99)\"\n" +
+                "otherFailedTests: false\n" +
+                "truncatedOutPut: false\n");
+
     }
 }

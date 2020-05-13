@@ -3,6 +3,7 @@ package hudson.plugins.emailext.plugins.content;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
@@ -13,6 +14,8 @@ import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
@@ -49,8 +52,6 @@ public class FailedTestsContent extends DataBoundTokenMacro {
 
     public static final String MACRO_NAME = "FAILED_TESTS";
 
-    public static ObjectMapper om = new ObjectMapper(new YAMLFactory());
-
     @Override
     public boolean acceptsMacroName(String macroName) {
         return macroName.equals(MACRO_NAME);
@@ -67,8 +68,13 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         AbstractTestResultAction<?> testResult = run.getAction(AbstractTestResultAction.class);
 
         if(outputYaml) {
-            prepareYamlString(buffer, testResult, showStack, showMessage);
-            return buffer.toString();
+            try {
+                return prepareYamlString(testResult, showStack, showMessage);
+            } catch (Exception e) {
+                //Could not convert to YAML
+                e.printStackTrace();
+            }
+            return "BadTestFormat";
         }
         if (null == testResult) {
             return "No tests ran.";
@@ -82,16 +88,13 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             String lineBreak = getLineBreak();
             buffer.append(failCount).append(" tests failed.").append(lineBreak);
 
-            boolean showOldFailures = !onlyRegressions;
-            if(maxLength < Integer.MAX_VALUE) {
-                maxLength *= 1024;
-            }
+            setMaxLength();
 
             if (maxTests > 0) {
                 int printedTests = 0;
                 int printedLength = 0;
                 for (TestResult failedTest : testResult.getFailedTests()) {
-                    if (showOldFailures || getTestAge(failedTest) == 1) {
+                    if (regressionFilter(failedTest)) {
                         if (printedTests < maxTests && printedLength <= maxLength) {
                             printedLength += outputTest(buffer, failedTest, showStack, showMessage, maxLength-printedLength);
                             printedTests++;
@@ -111,6 +114,16 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         return buffer.toString();
     }
 
+    private boolean regressionFilter(TestResult failedTest) {
+        return !onlyRegressions || getTestAge(failedTest) == 1;
+    }
+
+    private void setMaxLength() {
+        if(maxLength < Integer.MAX_VALUE) {
+            maxLength *= 1024;
+        }
+    }
+
     private int getTestAge(TestResult result) {
         if(result.isPassed())
             return 0;
@@ -118,12 +131,6 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             return result.getRun().getNumber()-result.getFailedSince()+1;
         } else {
             return 0;
-        }
-    }
-
-    private void getSummaryText(StringBuilder buffer, AbstractTestResultAction<?> testResult) {
-        if(testResult == null) {
-
         }
     }
 
@@ -163,38 +170,50 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         return local.length();
     }
 
-    private void prepareYamlString(StringBuilder buffer, AbstractTestResultAction<?> testResult, boolean showStack, boolean showMessage){
+    private String prepareYamlString(AbstractTestResultAction<?> testResult, boolean showStack, boolean showMessage) throws JsonProcessingException {
+        ObjectMapper om = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         SummarizedTestResult result = new SummarizedTestResult();
         if(null == testResult) {
-            result.summaryString = "No Tests ran";
-            buffer.append(getYamlString(result));
-            return;
+            result.summary = "No Tests ran";
+            return om.writeValueAsString(result);
         }
         int failCount = testResult.getFailCount();
         if(failCount == 0) {
-            result.summaryString = "All tests passed";
+            result.summary = "All tests passed";
         }
         else {
-
+            result.summary = String.format("%d tests failed", failCount);
+            setMaxLength();
+            if(maxTests == 0) return om.writeValueAsString(result);
+            int printSize = 0;
+            for (TestResult failedTest : testResult.getFailedTests()) {
+                if (regressionFilter(failedTest)) {
+                    String stackTrace = showStack ? (escapeHtml ? escapeHtml(failedTest.getErrorStackTrace()) : failedTest.getErrorStackTrace()) : null;
+                    String errorDetails = showMessage ? (escapeHtml ? escapeHtml(failedTest.getErrorDetails()) : failedTest.getErrorDetails()) : null;
+                    String name = String.format( "%s.%s", (failedTest instanceof CaseResult) ? ((CaseResult)failedTest).getClassName() : failedTest.getFullName(),
+                            failedTest.getDisplayName());
+                    FailedTest t = new FailedTest(name, errorDetails, stackTrace);
+                    String testYaml = om.writeValueAsString(t);
+                    if(printSize <= maxLength && result.tests.size() < maxTests) {
+                        result.tests.add(t);
+                        printSize += testYaml.length();
+                    }
+                }
+            }
+            result.otherFailedTests = failCount > result.tests.size();
+            result.truncatedOutput = printSize > maxLength;
         }
+        return om.writeValueAsString(result);
     }
     private String getLineBreak() {
         return escapeHtml ? "<br/>" : "\n";
     }
 
-    private String getYamlString(Object o) {
-        try {
-            return om.writeValueAsString(o);
-        } catch (JsonProcessingException e) {
-            //Return an empty string
-        }
-        return "";
-    }
-
     private class FailedTest {
-        String name;
-        String errorMessage;
-        String stackTrace;
+        public String name;
+        public String errorMessage;
+        public String stackTrace;
+        public FailedTest() {}
         public FailedTest(String name, String errorMessage, String stackTrace){
             this.errorMessage = errorMessage;
             this.name = name;
@@ -202,14 +221,12 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         }
     }
     private class SummarizedTestResult {
-        public String summaryString;
+        public String summary;
         public List<FailedTest> tests;
         public boolean otherFailedTests;
-        public boolean truncatedOutPut;
+        public boolean truncatedOutput;
         public SummarizedTestResult() {
-            this.tests.clear();
-            this.truncatedOutPut = false;
-            this. otherFailedTests = false;
+            this.tests = new ArrayList<FailedTest>();
         }
     }
 }

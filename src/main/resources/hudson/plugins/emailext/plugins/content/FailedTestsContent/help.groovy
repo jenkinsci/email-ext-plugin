@@ -16,5 +16,8 @@ dd() {
 
     dt("escapeHtml")
     dd("If set to true escapes characters in errors details and stack traces using HTML entities. Defaults to false.")
+
+    dt("outputYaml")
+    dd("If set to true outputs the failed tests in a YAML format")
   }
 }
