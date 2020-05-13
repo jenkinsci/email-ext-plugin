@@ -212,7 +212,6 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         public String name;
         public String errorMessage;
         public String stackTrace;
-        public FailedTest() {}
         public FailedTest(String name, String errorMessage, String stackTrace){
             this.errorMessage = errorMessage;
             this.name = name;

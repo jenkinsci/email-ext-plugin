@@ -298,7 +298,7 @@ public class FailedTestsContentTest
                 "  errorMessage: \"expected:<ABORTED> but was:<COMPLETED> \"\n" +
                 "  stackTrace: \"at org.nexusformat.NexusFile.<clinit>(NexusFile.java:99)\"\n" +
                 "otherFailedTests: false\n" +
-                "truncatedOutPut: false\n");
+                "truncatedOutput: false\n");
 
     }
 }
