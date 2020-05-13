@@ -1,5 +1,8 @@
 package hudson.plugins.emailext.plugins.content;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
@@ -10,7 +13,10 @@ import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 
+import java.util.List;
+
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
+
 
 /**
  * An EmailContent for failing tests. Only shows tests that have failed.
@@ -38,7 +44,12 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     @Parameter
     public boolean escapeHtml = false;
 
+    @Parameter
+    public boolean outputYaml = false;
+
     public static final String MACRO_NAME = "FAILED_TESTS";
+
+    public static ObjectMapper om = new ObjectMapper(new YAMLFactory());
 
     @Override
     public boolean acceptsMacroName(String macroName) {
@@ -55,6 +66,10 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         StringBuilder buffer = new StringBuilder();
         AbstractTestResultAction<?> testResult = run.getAction(AbstractTestResultAction.class);
 
+        if(outputYaml) {
+            prepareYamlString(buffer, testResult, showStack, showMessage);
+            return buffer.toString();
+        }
         if (null == testResult) {
             return "No tests ran.";
         }
@@ -106,6 +121,12 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         }
     }
 
+    private void getSummaryText(StringBuilder buffer, AbstractTestResultAction<?> testResult) {
+        if(testResult == null) {
+
+        }
+    }
+
     private int outputTest(StringBuilder buffer, TestResult failedTest,
             boolean showStack, boolean showMessage, int lengthLeft) {
         StringBuilder local = new StringBuilder();
@@ -142,7 +163,53 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         return local.length();
     }
 
+    private void prepareYamlString(StringBuilder buffer, AbstractTestResultAction<?> testResult, boolean showStack, boolean showMessage){
+        SummarizedTestResult result = new SummarizedTestResult();
+        if(null == testResult) {
+            result.summaryString = "No Tests ran";
+            buffer.append(getYamlString(result));
+            return;
+        }
+        int failCount = testResult.getFailCount();
+        if(failCount == 0) {
+            result.summaryString = "All tests passed";
+        }
+        else {
+
+        }
+    }
     private String getLineBreak() {
         return escapeHtml ? "<br/>" : "\n";
+    }
+
+    private String getYamlString(Object o) {
+        try {
+            return om.writeValueAsString(o);
+        } catch (JsonProcessingException e) {
+            //Return an empty string
+        }
+        return "";
+    }
+
+    private class FailedTest {
+        String name;
+        String errorMessage;
+        String stackTrace;
+        public FailedTest(String name, String errorMessage, String stackTrace){
+            this.errorMessage = errorMessage;
+            this.name = name;
+            this.stackTrace = stackTrace;
+        }
+    }
+    private class SummarizedTestResult {
+        public String summaryString;
+        public List<FailedTest> tests;
+        public boolean otherFailedTests;
+        public boolean truncatedOutPut;
+        public SummarizedTestResult() {
+            this.tests.clear();
+            this.truncatedOutPut = false;
+            this. otherFailedTests = false;
+        }
     }
 }
