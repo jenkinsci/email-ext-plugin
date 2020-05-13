@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins.content;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -173,15 +174,15 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         ObjectMapper om = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         SummarizedTestResult result = new SummarizedTestResult();
         if(null == testResult) {
-            result.summary = "No Tests ran";
+            result.setSummary("No Tests ran");
             return om.writeValueAsString(result);
         }
         int failCount = testResult.getFailCount();
         if(failCount == 0) {
-            result.summary = "All tests passed";
+            result.setSummary("All tests passed");
         }
         else {
-            result.summary = String.format("%d tests failed", failCount);
+            result.setSummary(String.format("%d tests failed", failCount));
             setMaxLength();
             if(maxTests == 0) return om.writeValueAsString(result);
             int printSize = 0;
@@ -194,13 +195,13 @@ public class FailedTestsContent extends DataBoundTokenMacro {
                     FailedTest t = new FailedTest(name, errorDetails, stackTrace);
                     String testYaml = om.writeValueAsString(t);
                     if(printSize <= maxLength && result.tests.size() < maxTests) {
-                        result.tests.add(t);
+                        result.addTest(t);
                         printSize += testYaml.length();
                     }
                 }
             }
-            result.otherFailedTests = failCount > result.tests.size();
-            result.truncatedOutput = printSize > maxLength;
+            result.setOtherFailedTests(failCount > result.tests.size());
+            result.setTruncatedOutput(printSize > maxLength);
         }
         return om.writeValueAsString(result);
     }
@@ -208,23 +209,42 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         return escapeHtml ? "<br/>" : "\n";
     }
 
-    private class FailedTest {
-        public String name;
-        public String errorMessage;
-        public String stackTrace;
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+    private static class FailedTest {
+        String name;
+        String errorMessage;
+        String stackTrace;
         public FailedTest(String name, String errorMessage, String stackTrace){
             this.errorMessage = errorMessage;
             this.name = name;
             this.stackTrace = stackTrace;
         }
     }
-    private class SummarizedTestResult {
-        public String summary;
-        public List<FailedTest> tests;
-        public boolean otherFailedTests;
-        public boolean truncatedOutput;
+
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+    private static class SummarizedTestResult {
+        String summary;
+        List<FailedTest> tests;
+        boolean otherFailedTests;
+        boolean truncatedOutput;
+
         public SummarizedTestResult() {
             this.tests = new ArrayList<FailedTest>();
+        }
+        public void setSummary(String summary) {
+            this.summary = summary;
+        }
+
+        public void setOtherFailedTests(boolean otherFailedTests) {
+            this.otherFailedTests = otherFailedTests;
+        }
+
+        public void setTruncatedOutput(boolean truncatedOutput) {
+            this.truncatedOutput = truncatedOutput;
+        }
+
+        public void addTest(FailedTest t) {
+            this.tests.add(t);
         }
     }
 }
