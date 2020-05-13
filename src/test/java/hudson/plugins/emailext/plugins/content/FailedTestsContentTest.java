@@ -236,7 +236,6 @@ public class FailedTestsContentTest
         when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
 
         failedTestContent.maxLength = 10;
-        //failedTestContent.outputYaml = true;
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
         assertTrue( content.length() < (3 * 1024 * 5) );
 
