@@ -124,7 +124,7 @@ public class ExtendedEmailPublisherTest {
                                           // otherwise we would need to create users for each email address tested, to bypass SECURITY-372 fix:
                                           .grant(Jenkins.READ, Item.READ).everywhere().toAuthenticated()
                                           // TODO I had plans for tests where bob would approve scripts written by alice
-                                          .grant(Jenkins.ADMINISTER).everywhere().to("bob")
+                                          .grant(Jenkins.MANAGE).everywhere().to("bob")
                                           .grant(Item.EXTENDED_READ).everywhere().to("alice"));
     }
 

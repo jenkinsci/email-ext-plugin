@@ -1,10 +1,12 @@
 package hudson.plugins.emailext;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
+import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
@@ -811,5 +813,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             logger.format(format, args);
             logger.println();
         }
+    }
+
+    @NonNull
+    @Override
+    public Permission getRequiredGlobalConfigPagePermission() {
+        return Jenkins.MANAGE;
     }
 }

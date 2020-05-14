@@ -47,7 +47,7 @@ public class ScriptContentSecureTest extends ScriptContentTest {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
 
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
-                                                   .grant(Jenkins.ADMINISTER).everywhere().to("bob")
+                                                   .grant(Jenkins.MANAGE).everywhere().to("bob")
                                                    .grant(Jenkins.READ, Item.READ, Item.EXTENDED_READ).everywhere().to("alice"));
     }
 

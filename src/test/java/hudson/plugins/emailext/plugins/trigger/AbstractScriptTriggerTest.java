@@ -43,7 +43,7 @@ public class AbstractScriptTriggerTest {
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                 // otherwise we would need to create users for each email address tested, to bypass SECURITY-372 fix:
                 .grant(Jenkins.READ, Item.READ, Item.DISCOVER, Item.CONFIGURE).everywhere().toAuthenticated()
-                .grant(Jenkins.ADMINISTER).everywhere().to("bob"));
+                .grant(Jenkins.MANAGE).everywhere().to("bob"));
     }
 
     @Test
