@@ -10,6 +10,10 @@ import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 
 /**
@@ -38,12 +42,16 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     @Parameter
     public boolean escapeHtml = false;
 
+    @Parameter
+    public String testNamePattern = "";
+
     public static final String MACRO_NAME = "FAILED_TESTS";
 
     @Override
     public boolean acceptsMacroName(String macroName) {
         return macroName.equals(MACRO_NAME);
     }
+
 
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName) {
@@ -61,6 +69,9 @@ public class FailedTestsContent extends DataBoundTokenMacro {
 
         int failCount = testResult.getFailCount();
 
+        List<? extends TestResult> failedAndFilteredTests = filterTests(testResult.getFailedTests(), testNamePattern);
+        failCount = testNamePattern.length() == 0 ? failCount : failedAndFilteredTests.size();
+
         if (failCount == 0) {
             buffer.append("All tests passed");
         } else {
@@ -75,7 +86,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             if (maxTests > 0) {
                 int printedTests = 0;
                 int printedLength = 0;
-                for (TestResult failedTest : testResult.getFailedTests()) {
+                for (TestResult failedTest : failedAndFilteredTests) {
                     if (showOldFailures || getTestAge(failedTest) == 1) {
                         if (printedTests < maxTests && printedLength <= maxLength) {
                             printedLength += outputTest(buffer, failedTest, showStack, showMessage, maxLength-printedLength);
@@ -144,5 +155,13 @@ public class FailedTestsContent extends DataBoundTokenMacro {
 
     private String getLineBreak() {
         return escapeHtml ? "<br/>" : "\n";
+    }
+
+    private List<? extends TestResult> filterTests(List<? extends TestResult> failedTests, String regexPattern) {
+        if(regexPattern.length() != 0) {
+            Pattern pattern = Pattern.compile(regexPattern);
+            failedTests = failedTests.stream().filter(t -> pattern.matcher(t.getFullName()).matches()).collect(Collectors.toList());
+        }
+        return failedTests;
     }
 }

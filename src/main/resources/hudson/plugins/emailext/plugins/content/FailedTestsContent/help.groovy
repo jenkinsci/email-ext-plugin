@@ -16,5 +16,8 @@ dd() {
 
     dt("escapeHtml")
     dd("If set to true escapes characters in errors details and stack traces using HTML entities. Defaults to false.")
+
+    dt("testNamePattern")
+    dd("Display failed tests of the modules whose name match the regex given. Defaults to showing all failed tests")
   }
 }
