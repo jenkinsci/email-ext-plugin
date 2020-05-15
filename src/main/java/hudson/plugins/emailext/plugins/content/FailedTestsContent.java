@@ -99,12 +99,13 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     }
 
     private SummarizedTestResult prepareSummarizedTestResult(AbstractTestResultAction<?> testResult, boolean showStack, boolean showMessage) {
-        SummarizedTestResult result = new SummarizedTestResult();
         if(null == testResult) {
+            SummarizedTestResult result = new SummarizedTestResult(0);
             result.setSummary("No tests ran.");
             return result;
         }
         int failCount = testResult.getFailCount();
+        SummarizedTestResult result = new SummarizedTestResult(failCount);
         if(failCount == 0) {
             result.setSummary("All tests passed");
         }
@@ -122,13 +123,13 @@ public class FailedTestsContent extends DataBoundTokenMacro {
                     FailedTest t = new FailedTest(name, failedTest.isPassed(), errorDetails, stackTrace);
                     String testYaml = t.toString();
                     if(printSize <= maxLength && result.tests.size() < maxTests) {
-                        result.addTest(t);
+                        result.tests.add(t);
                         printSize += testYaml.length();
                     }
                 }
             }
-            result.setOtherFailedTests(failCount > result.tests.size());
-            result.setTruncatedOutput(printSize > maxLength);
+            result.otherFailedTests = (failCount > result.tests.size());
+            result.truncatedOutput = (printSize > maxLength);
         }
         return result;
     }
@@ -155,30 +156,19 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         }
     }
 
-    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
     private static class SummarizedTestResult {
-        String summary;
-        List<FailedTest> tests;
-        boolean otherFailedTests;
-        boolean truncatedOutput;
+        public String summary;
+        public List<FailedTest> tests;
+        public boolean otherFailedTests;
+        public boolean truncatedOutput;
+        private int totalFailCount;
 
-        public SummarizedTestResult() {
+        public SummarizedTestResult(int failCount) {
             this.tests = new ArrayList<FailedTest>();
+            this.totalFailCount = failCount;
         }
         public void setSummary(String summary) {
             this.summary = summary;
-        }
-
-        public void setOtherFailedTests(boolean otherFailedTests) {
-            this.otherFailedTests = otherFailedTests;
-        }
-
-        public void setTruncatedOutput(boolean truncatedOutput) {
-            this.truncatedOutput = truncatedOutput;
-        }
-
-        public void addTest(FailedTest t) {
-            this.tests.add(t);
         }
 
         public String toString(String lineBreak, boolean showStack, boolean showMessage) {
@@ -189,6 +179,14 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             for(FailedTest t: this.tests) {
                 outputTest(builder, lineBreak, t, showStack, showMessage);
             }
+            if (this.otherFailedTests) {
+                builder.append("... and ").append(totalFailCount - tests.size()).append(" other failed tests.")
+                        .append(lineBreak);
+            }
+            if (this.truncatedOutput) {
+                builder.append(lineBreak).append("... output truncated.").append(lineBreak);
+            }
+
             return builder.toString();
         }
 
