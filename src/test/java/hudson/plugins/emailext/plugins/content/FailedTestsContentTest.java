@@ -89,7 +89,7 @@ public class FailedTestsContentTest
         failedTestContent.maxTests = 0;
         String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
 
-        assertEquals( "123 tests failed.\n", content );
+        assertEquals( "123 tests failed.", content );
     }
 
     @Test
@@ -294,9 +294,10 @@ public class FailedTestsContentTest
         failedTestContent.showStack = true;
         failedTestContent.outputYaml = true;
         String content = failedTestContent.evaluate(build, listener, failedTestContent.MACRO_NAME);
-        assertEquals(content, "summary: \"1 tests failed\"\n" +
+        assertEquals(content, "summary: \"1 tests failed.\"\n" +
                 "tests:\n" +
                 "- name: \"hudson.plugins.emailext.ExtendedEmailPublisherTest.Test\"\n" +
+                "  status: \"FAILED\"\n" +
                 "  errorMessage: \"expected:<ABORTED> but was:<COMPLETED> \"\n" +
                 "  stackTrace: \"at org.nexusformat.NexusFile.<clinit>(NexusFile.java:99)\"\n" +
                 "otherFailedTests: false\n" +
