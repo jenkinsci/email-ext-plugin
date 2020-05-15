@@ -65,7 +65,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     @Override
     public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) {
         AbstractTestResultAction<?> testResult = run.getAction(AbstractTestResultAction.class);
-        SummarizedTestResult result = prepareSummarizedTestResult(testResult, showStack, showMessage);
+        SummarizedTestResult result = prepareSummarizedTestResult(testResult);
 
         if(outputYaml) {
             try {
@@ -75,7 +75,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             }
             return "Bad format";
         }
-        return result.toString(getLineBreak(), showStack, showMessage);
+        return result.toString();
     }
 
     private boolean regressionFilter(TestResult failedTest) {
@@ -98,19 +98,19 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         }
     }
 
-    private SummarizedTestResult prepareSummarizedTestResult(AbstractTestResultAction<?> testResult, boolean showStack, boolean showMessage) {
+    private SummarizedTestResult prepareSummarizedTestResult(AbstractTestResultAction<?> testResult) {
         if(null == testResult) {
-            SummarizedTestResult result = new SummarizedTestResult(0);
-            result.setSummary("No tests ran.");
+            SummarizedTestResult result = new SummarizedTestResult(0, getLineBreak());
+            result.summary = "No tests ran.";
             return result;
         }
         int failCount = testResult.getFailCount();
-        SummarizedTestResult result = new SummarizedTestResult(failCount);
+        SummarizedTestResult result = new SummarizedTestResult(failCount, getLineBreak());
         if(failCount == 0) {
-            result.setSummary("All tests passed");
+            result.summary = "All tests passed";
         }
         else {
-            result.setSummary(String.format("%d tests failed.", failCount));
+            result.summary = String.format("%d tests failed.", failCount);
             setMaxLength();
             if(maxTests == 0) return result;
             int printSize = 0;
@@ -133,7 +133,8 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         }
         return result;
     }
-    private String getLineBreak() {
+
+    public String getLineBreak() {
         return escapeHtml ? "<br/>" : "\n";
     }
 
@@ -162,24 +163,24 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         public boolean otherFailedTests;
         public boolean truncatedOutput;
         private int totalFailCount;
+        private String lineBreak;
 
-        public SummarizedTestResult(int failCount) {
+        public SummarizedTestResult(int failCount, String lineBreak) {
             this.tests = new ArrayList<FailedTest>();
             this.totalFailCount = failCount;
-        }
-        public void setSummary(String summary) {
-            this.summary = summary;
+            this.lineBreak = lineBreak;
         }
 
-        public String toString(String lineBreak, boolean showStack, boolean showMessage) {
+        @Override
+        public String toString() {
             StringBuilder builder = new StringBuilder();
             builder.append(this.summary);
-            if(this.tests.size() == 0) return builder.toString();
+            if(tests.size() == 0) return builder.toString();
             builder.append(lineBreak);
-            for(FailedTest t: this.tests) {
-                outputTest(builder, lineBreak, t, showStack, showMessage);
+            for(FailedTest t: tests) {
+                outputTest(builder, lineBreak, t);
             }
-            if (this.otherFailedTests) {
+            if (otherFailedTests) {
                 builder.append("... and ").append(totalFailCount - tests.size()).append(" other failed tests.")
                         .append(lineBreak);
             }
@@ -195,25 +196,25 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             return om.writeValueAsString(this);
         }
 
-        private void outputTest(StringBuilder buffer, String lineBreak, FailedTest failedTest,
-                               boolean showStack, boolean showMessage) {
+        private void outputTest(StringBuilder buffer, String lineBreak, FailedTest failedTest) {
             StringBuilder local = new StringBuilder();
             local.append(failedTest.status).append(":  ");
 
             local.append(failedTest.name).append(lineBreak);
 
-            if (showMessage) {
+            if (failedTest.errorMessage != null) {
                 local.append(lineBreak).append("Error Message:").append(lineBreak).append(failedTest.errorMessage).append(lineBreak);
             }
 
-            if (showStack) {
+            if (failedTest.stackTrace != null) {
                 local.append(lineBreak).append("Stack Trace:").append(lineBreak).append(failedTest.stackTrace).append(lineBreak);
             }
 
-            if (showMessage || showStack) {
+            if (failedTest.stackTrace != null || failedTest.errorMessage != null) {
                 local.append(lineBreak);
             }
             buffer.append(local.toString());
         }
+
     }
 }
