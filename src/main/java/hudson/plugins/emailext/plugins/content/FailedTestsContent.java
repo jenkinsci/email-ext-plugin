@@ -112,24 +112,25 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         else {
             result.summary = String.format("%d tests failed.", failCount);
             setMaxLength();
-            if(maxTests == 0) return result;
-            int printSize = 0;
-            for (TestResult failedTest : testResult.getFailedTests()) {
-                if (regressionFilter(failedTest)) {
-                    String stackTrace = showStack ? (escapeHtml ? escapeHtml(failedTest.getErrorStackTrace()) : failedTest.getErrorStackTrace()) : null;
-                    String errorDetails = showMessage ? (escapeHtml ? escapeHtml(failedTest.getErrorDetails()) : failedTest.getErrorDetails()) : null;
-                    String name = String.format( "%s.%s", (failedTest instanceof CaseResult) ? ((CaseResult)failedTest).getClassName() : failedTest.getFullName(),
-                            failedTest.getDisplayName());
-                    FailedTest t = new FailedTest(name, failedTest.isPassed(), errorDetails, stackTrace);
-                    String testYaml = t.toString();
-                    if(printSize <= maxLength && result.tests.size() < maxTests) {
-                        result.tests.add(t);
-                        printSize += testYaml.length();
+            if(maxTests > 0) {
+                int printSize = 0;
+                for (TestResult failedTest : testResult.getFailedTests()) {
+                    if (regressionFilter(failedTest)) {
+                        String stackTrace = showStack ? (escapeHtml ? escapeHtml(failedTest.getErrorStackTrace()) : failedTest.getErrorStackTrace()) : null;
+                        String errorDetails = showMessage ? (escapeHtml ? escapeHtml(failedTest.getErrorDetails()) : failedTest.getErrorDetails()) : null;
+                        String name = String.format("%s.%s", (failedTest instanceof CaseResult) ? ((CaseResult) failedTest).getClassName() : failedTest.getFullName(),
+                                failedTest.getDisplayName());
+                        FailedTest t = new FailedTest(name, failedTest.isPassed(), errorDetails, stackTrace);
+                        String testYaml = t.toString();
+                        if (printSize <= maxLength && result.tests.size() < maxTests) {
+                            result.tests.add(t);
+                            printSize += testYaml.length();
+                        }
                     }
                 }
+                result.otherFailedTests = (failCount > result.tests.size());
+                result.truncatedOutput = (printSize > maxLength);
             }
-            result.otherFailedTests = (failCount > result.tests.size());
-            result.truncatedOutput = (printSize > maxLength);
         }
         return result;
     }
@@ -175,8 +176,9 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         public String toString() {
             StringBuilder builder = new StringBuilder();
             builder.append(this.summary);
-            if(tests.size() == 0) return builder.toString();
-            builder.append(lineBreak);
+            if(tests.size() != 0) {
+                builder.append(lineBreak);
+            }
             for(FailedTest t: tests) {
                 outputTest(builder, lineBreak, t);
             }
