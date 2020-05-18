@@ -17,6 +17,8 @@ import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 
@@ -50,12 +52,16 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     @Parameter
     public boolean outputYaml = false;
 
+    @Parameter
+    public String testNamePattern = "";
+
     public static final String MACRO_NAME = "FAILED_TESTS";
 
     @Override
     public boolean acceptsMacroName(String macroName) {
         return macroName.equals(MACRO_NAME);
     }
+
 
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName) {
@@ -105,6 +111,8 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             return result;
         }
         int failCount = testResult.getFailCount();
+        List<? extends TestResult> failedAndFilteredTests = filterTests(testResult.getFailedTests(), testNamePattern);
+        failCount = testNamePattern.length() == 0 ? failCount : failedAndFilteredTests.size();
         SummarizedTestResult result = new SummarizedTestResult(failCount, getLineBreak());
         if(failCount == 0) {
             result.summary = "All tests passed";
@@ -114,7 +122,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             setMaxLength();
             if(maxTests > 0) {
                 int printSize = 0;
-                for (TestResult failedTest : testResult.getFailedTests()) {
+                for (TestResult failedTest : failedAndFilteredTests) {
                     if (regressionFilter(failedTest)) {
                         String stackTrace = showStack ? (escapeHtml ? escapeHtml(failedTest.getErrorStackTrace()) : failedTest.getErrorStackTrace()) : null;
                         String errorDetails = showMessage ? (escapeHtml ? escapeHtml(failedTest.getErrorDetails()) : failedTest.getErrorDetails()) : null;
@@ -218,5 +226,13 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             buffer.append(local.toString());
         }
 
+    }
+
+    private List<? extends TestResult> filterTests(List<? extends TestResult> failedTests, String regexPattern) {
+        if(regexPattern.length() != 0) {
+            Pattern pattern = Pattern.compile(regexPattern);
+            failedTests = failedTests.stream().filter(t -> pattern.matcher(t.getFullName()).matches()).collect(Collectors.toList());
+        }
+        return failedTests;
     }
 }

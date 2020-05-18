@@ -19,5 +19,8 @@ dd() {
 
     dt("outputYaml")
     dd("If set to true outputs the failed tests in a YAML format")
+
+    dt("testNamePattern")
+    dd("Display failed tests of the modules whose name match the regex given. Defaults to showing all failed tests")
   }
 }

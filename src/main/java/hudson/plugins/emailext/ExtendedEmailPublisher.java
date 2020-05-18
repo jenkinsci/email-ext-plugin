@@ -452,7 +452,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             debug(context.getListener().getLogger(), "Successfully created MimeMessage");
             Address[] allRecipients = msg.getAllRecipients();
             int retries = 0;
-            if (allRecipients != null) {
                 if (executePresendScript(context, msg)) {
                     // presend script might have modified recipients:
                     allRecipients = msg.getAllRecipients();
@@ -543,16 +542,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                         if (context.getRun().getAction(MailMessageIdAction.class) == null) {
                             context.getRun().addAction(new MailMessageIdAction(msg.getMessageID()));
                         }
+                    } else {
+                        context.getListener().getLogger().println("An attempt to send an e-mail"
+                                + " to empty list of recipients, ignored.");
                     }
                 } else {
                     context.getListener().getLogger().println("Email sending was cancelled"
                             + " by user script.");
                 }
                 return true;
-            } else {
-                context.getListener().getLogger().println("An attempt to send an e-mail"
-                        + " to empty list of recipients, ignored.");
-            }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Could not send email.", e);
             e.printStackTrace(context.getListener().error("Could not send email as a part of the post-build publishers."));

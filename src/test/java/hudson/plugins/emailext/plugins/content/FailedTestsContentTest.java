@@ -277,18 +277,18 @@ public class FailedTestsContentTest
 
     @Test
     public void testGetContent_withMessage_withStack_outputYaml() {
-        AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
-        when( testResults.getFailCount() ).thenReturn( 1 );
+        AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
+        when(testResults.getFailCount()).thenReturn(1);
 
-        TestResult result = mock( TestResult.class );
-        when( result.isPassed() ).thenReturn( false );
-        when( result.getFullName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
-        when( result.getDisplayName() ).thenReturn( "Test" );
-        when( result.getErrorDetails() ).thenReturn( "expected:<ABORTED> but was:<COMPLETED> " );
-        when( result.getErrorStackTrace() ).thenReturn( "at org.nexusformat.NexusFile.<clinit>(NexusFile.java:99)" );
+        TestResult result = mock(TestResult.class);
+        when(result.isPassed()).thenReturn(false);
+        when(result.getFullName()).thenReturn("hudson.plugins.emailext.ExtendedEmailPublisherTest");
+        when(result.getDisplayName()).thenReturn("Test");
+        when(result.getErrorDetails()).thenReturn("expected:<ABORTED> but was:<COMPLETED> ");
+        when(result.getErrorStackTrace()).thenReturn("at org.nexusformat.NexusFile.<clinit>(NexusFile.java:99)");
 
-        Mockito.<List<? extends TestResult>>when( testResults.getFailedTests() ).thenReturn( singletonList(result) );
-        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
+        Mockito.<List<? extends TestResult>>when(testResults.getFailedTests()).thenReturn(singletonList(result));
+        when(build.getAction(AbstractTestResultAction.class)).thenReturn(testResults);
 
         failedTestContent.showMessage = true;
         failedTestContent.showStack = true;
@@ -302,6 +302,98 @@ public class FailedTestsContentTest
                 "  stackTrace: \"at org.nexusformat.NexusFile.<clinit>(NexusFile.java:99)\"\n" +
                 "otherFailedTests: false\n" +
                 "truncatedOutput: false\n");
+    }
 
+    @Test
+    public void testGetContent_withMessage_withStack_specificTestSuite()
+            throws Exception {
+        AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+
+        List<TestResult> failedTests = new ArrayList<>();
+
+        for(int i = 0; i < 2; i++) {
+            TestResult result = mock( TestResult.class );
+            when( result.isPassed() ).thenReturn( false );
+            when( result.getFullName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
+            when( result.getDisplayName() ).thenReturn( "Test" + i );
+            when( result.getErrorDetails() ).thenReturn( "Error" + i );
+            when( result.getErrorStackTrace() ).thenReturn( "Stack" + i );
+            failedTests.add(result);
+        }
+
+        for(int i = 0; i < 2; i++) {
+            TestResult result = mock( TestResult.class );
+            when( result.isPassed() ).thenReturn( false );
+            when( result.getFullName() ).thenReturn( "hudson.plugins.emailext.OtherPackageTest" );
+            when( result.getDisplayName() ).thenReturn( "Test" + i );
+            when( result.getErrorDetails() ).thenReturn( "Error" + i );
+            when( result.getErrorStackTrace() ).thenReturn( "Stack" + i );
+            failedTests.add(result);
+        }
+
+        Mockito.<List<? extends TestResult>>when( testResults.getFailedTests() ).thenReturn( failedTests );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
+
+        failedTestContent.maxTests = 4;
+        failedTestContent.showMessage = true;
+        failedTestContent.showStack = true;
+        failedTestContent.testNamePattern = ".*ExtendedEmailPublisherTest.*";
+        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+
+        assertTrue( content.contains(2 + " tests failed"));
+        for(int i = 0; i < 2; i++) {
+            assertTrue( content.contains("FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test" + i) );
+            assertTrue( content.contains("Error Message:\nError" + i) );
+            assertTrue( content.contains("Stack Trace:\nStack" + i) );
+        }
+        for(int i = 0; i < 2; i++) {
+            assertFalse( content.contains("FAILED:  hudson.plugins.emailext.OtherPackageTest.Test" + i) );
+        }
+    }
+
+    @Test
+    public void testGetContent_withMessage_withStack_allTestSuites()
+            throws Exception {
+        AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
+
+        List<TestResult> failedTests = new ArrayList<>();
+        for(int i = 0; i < 2; i++) {
+            TestResult result = mock( TestResult.class );
+            when( result.isPassed() ).thenReturn( false );
+            when( result.getFullName() ).thenReturn( "hudson.plugins.emailext.ExtendedEmailPublisherTest" );
+            when( result.getDisplayName() ).thenReturn( "Test" + i );
+            when( result.getErrorDetails() ).thenReturn( "Error" + i );
+            when( result.getErrorStackTrace() ).thenReturn( "Stack" + i );
+            failedTests.add(result);
+        }
+
+        for(int i = 0; i < 2; i++) {
+            TestResult result = mock( TestResult.class );
+            when( result.isPassed() ).thenReturn( false );
+            when( result.getFullName() ).thenReturn( "hudson.plugins.emailext.OtherPackageTest" );
+            when( result.getDisplayName() ).thenReturn( "Test" + i );
+            when( result.getErrorDetails() ).thenReturn( "Error" + i );
+            when( result.getErrorStackTrace() ).thenReturn( "Stack" + i );
+            failedTests.add(result);
+        }
+
+        Mockito.<List<? extends TestResult>>when( testResults.getFailedTests() ).thenReturn( failedTests );
+        when( build.getAction(AbstractTestResultAction.class) ).thenReturn( testResults );
+
+        failedTestContent.maxTests = 4;
+        failedTestContent.showMessage = true;
+        failedTestContent.showStack = true;
+        failedTestContent.testNamePattern = ".*";
+        String content = failedTestContent.evaluate( build, listener, FailedTestsContent.MACRO_NAME );
+
+        assertTrue( content.contains(4 + " tests failed"));
+        for(int i = 0; i < 2; i++) {
+            assertTrue( content.contains("FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test" + i) );
+            assertTrue( content.contains("Error Message:\nError" + i) );
+            assertTrue( content.contains("Stack Trace:\nStack" + i) );
+        }
+        for(int i = 0; i < 2; i++) {
+            assertTrue( content.contains("FAILED:  hudson.plugins.emailext.OtherPackageTest.Test" + i) );
+        }
     }
 }
