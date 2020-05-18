@@ -2,10 +2,22 @@ package hudson.plugins.emailext;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.html.*;
+import hudson.Functions;
+import hudson.model.Descriptor;
+import hudson.model.Item;
+import hudson.model.User;
+import hudson.security.ACL;
+import hudson.security.ACLContext;
+import jenkins.model.Jenkins;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.MockAuthorizationStrategy;
+
+import java.util.Collection;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -139,5 +151,29 @@ public class ExtendedEmailPublisherDescriptorTest {
         j.submit(page.getFormByName("config"));
 
         assertEquals("mail.smtp.starttls.enable=true", descriptor.getAdvProperties());
+    }
+
+    @Test
+    public void managePermissionShouldAccess() {
+        final String USER = "user";
+        final String MANAGER = "manager";
+        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
+        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+                // Read access
+                .grant(Jenkins.READ).everywhere().to(USER)
+
+                // Read and Manage
+                .grant(Jenkins.READ).everywhere().to(MANAGER)
+                .grant(Jenkins.MANAGE).everywhere().to(MANAGER)
+        );
+        try (ACLContext c = ACL.as(User.getById(USER, true))) {
+            Collection<Descriptor> descriptors = Functions.getSortedDescriptorsForGlobalConfigUnclassified();
+            Assert.assertTrue("Global configuration should not be accessible to READ users", descriptors.size() == 0);
+        }
+        try (ACLContext c = ACL.as(User.getById(MANAGER, true))) {
+            Collection<Descriptor> descriptors = Functions.getSortedDescriptorsForGlobalConfigUnclassified();
+            Optional<Descriptor> found = descriptors.stream().filter(descriptor -> descriptor instanceof ExtendedEmailPublisherDescriptor).findFirst();
+            Assert.assertTrue("Global configuration should be accessible to MANAGE users", found.isPresent());
+        }
     }
 }
