@@ -28,12 +28,10 @@
 
     <properties>
         <java.level>8</java.level>
-        <jenkins.version>2.222.1</jenkins.version>
+        <jenkins.version>2.164.3</jenkins.version>
         <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
         <concurrency>1</concurrency>
         <argLine>-Dfile.encoding=UTF-8</argLine>
-        <!-- To be removed once Jenkins.MANAGE gets out of beta -->
-        <useBeta>true</useBeta>
     </properties>
 
     <developers>
