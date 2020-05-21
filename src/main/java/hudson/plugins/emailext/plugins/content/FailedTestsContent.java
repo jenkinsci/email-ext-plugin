@@ -50,7 +50,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     public boolean escapeHtml = false;
 
     @Parameter
-    public boolean outputYaml = false;
+    public String outputYaml = "";
 
     @Parameter
     public String testNamePattern = "";
@@ -73,15 +73,15 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         AbstractTestResultAction<?> testResult = run.getAction(AbstractTestResultAction.class);
         SummarizedTestResult result = prepareSummarizedTestResult(testResult);
 
-        if(outputYaml) {
-            try {
-                return result.toYamlString();
-            } catch (Exception e) {
-
-            }
-            return "Bad format";
+        switch (outputYaml) {
+            case "yaml":
+                try {
+                    return result.toYamlString();
+                } catch (Exception e) { }
+                return "Bad format";
+            default:
+                return result.toString();
         }
-        return result.toString();
     }
 
     private boolean regressionFilter(TestResult failedTest) {
@@ -124,16 +124,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
                 int printSize = 0;
                 for (TestResult failedTest : failedAndFilteredTests) {
                     if (regressionFilter(failedTest)) {
-                        String stackTrace = showStack ? (escapeHtml ? escapeHtml(failedTest.getErrorStackTrace()) : failedTest.getErrorStackTrace()) : null;
-                        String errorDetails = showMessage ? (escapeHtml ? escapeHtml(failedTest.getErrorDetails()) : failedTest.getErrorDetails()) : null;
-                        String name = String.format("%s.%s", (failedTest instanceof CaseResult) ? ((CaseResult) failedTest).getClassName() : failedTest.getFullName(),
-                                failedTest.getDisplayName());
-                        FailedTest t = new FailedTest(name, failedTest.isPassed(), errorDetails, stackTrace);
-                        String testYaml = t.toString();
-                        if (printSize <= maxLength && result.tests.size() < maxTests) {
-                            result.tests.add(t);
-                            printSize += testYaml.length();
-                        }
+                        printSize = addTest(result, printSize, failedTest);
                     }
                 }
                 result.otherFailedTests = (failCount > result.tests.size());
@@ -141,6 +132,20 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             }
         }
         return result;
+    }
+
+    private int addTest(SummarizedTestResult result, int printSize, TestResult failedTest) {
+        String stackTrace = showStack ? (escapeHtml ? escapeHtml(failedTest.getErrorStackTrace()) : failedTest.getErrorStackTrace()) : null;
+        String errorDetails = showMessage ? (escapeHtml ? escapeHtml(failedTest.getErrorDetails()) : failedTest.getErrorDetails()) : null;
+        String name = String.format("%s.%s", (failedTest instanceof CaseResult) ? ((CaseResult) failedTest).getClassName() : failedTest.getFullName(),
+                failedTest.getDisplayName());
+        FailedTest t = new FailedTest(name, failedTest.isPassed(), errorDetails, stackTrace);
+        String testYaml = t.toString();
+        if (printSize <= maxLength && result.tests.size() < maxTests) {
+            result.tests.add(t);
+            printSize += testYaml.length();
+        }
+        return printSize;
     }
 
     public String getLineBreak() {
@@ -202,7 +207,8 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         }
 
         public String toYamlString() throws JsonProcessingException {
-            ObjectMapper om = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
+            ObjectMapper om = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+                    .configure(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE, true));
             return om.writeValueAsString(this);
         }
 
