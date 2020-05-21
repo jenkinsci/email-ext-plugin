@@ -17,8 +17,8 @@ dd() {
     dt("escapeHtml")
     dd("If set to true escapes characters in errors details and stack traces using HTML entities. Defaults to false.")
 
-    dt("outputYaml")
-    dd("If set to true outputs the failed tests in a YAML format")
+    dt("outputFormat")
+    dd("Outputs the test reports in yaml if set to \"yaml\". Defaults to empty string which would print the tests in plain text format")
 
     dt("testNamePattern")
     dd("Display failed tests of the modules whose name match the regex given. Defaults to showing all failed tests")

@@ -354,7 +354,7 @@ public class FailedTestsContentTest
 
         failedTestContent.showMessage = true;
         failedTestContent.showStack = true;
-        failedTestContent.outputYaml = "yaml";
+        failedTestContent.outputFormat = "yaml";
         String content = failedTestContent.evaluate(build, listener, failedTestContent.MACRO_NAME);
         assertEquals(content, "summary: \"1 tests failed.\"\n" +
                 "tests:\n" +

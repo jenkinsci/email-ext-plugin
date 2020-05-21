@@ -50,7 +50,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     public boolean escapeHtml = false;
 
     @Parameter
-    public String outputYaml = "";
+    public String outputFormat = "";
 
     @Parameter
     public String testNamePattern = "";
@@ -73,7 +73,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         AbstractTestResultAction<?> testResult = run.getAction(AbstractTestResultAction.class);
         SummarizedTestResult result = prepareSummarizedTestResult(testResult);
 
-        switch (outputYaml) {
+        switch (outputFormat) {
             case "yaml":
                 try {
                     return result.toYamlString();
