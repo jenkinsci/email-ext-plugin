@@ -14,6 +14,7 @@ import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,12 +65,12 @@ public class FailedTestsContent extends DataBoundTokenMacro {
 
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName) {
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName) throws MacroEvaluationException{
         return evaluate(build, build.getWorkspace(), listener, macroName);
     }
 
     @Override
-    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) {
+    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) throws MacroEvaluationException {
         AbstractTestResultAction<?> testResult = run.getAction(AbstractTestResultAction.class);
         SummarizedTestResult result = prepareSummarizedTestResult(testResult);
 
@@ -77,8 +78,9 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             case "yaml":
                 try {
                     return result.toYamlString();
-                } catch (Exception e) { }
-                return "Bad format";
+                } catch (Exception e) {
+                    throw new MacroEvaluationException("Bad format", MACRO_NAME, e.getCause());
+                }
             default:
                 return result.toString();
         }
