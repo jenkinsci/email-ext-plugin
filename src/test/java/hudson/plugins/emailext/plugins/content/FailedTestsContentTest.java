@@ -248,7 +248,7 @@ public class FailedTestsContentTest
     }
 
     @Test
-    public void testGetContent_withMessage_withStack_htmlEscaped() {
+    public void testGetContent_withMessage_withStack_htmlEscaped() throws Exception {
         AbstractTestResultAction<?> testResults = mock( AbstractTestResultAction.class );
         when( testResults.getFailCount() ).thenReturn( 1 );
 
@@ -276,7 +276,7 @@ public class FailedTestsContentTest
     }
 
     @Test
-    public void testGetContent_withMessage_withStack_outputYaml() {
+    public void testGetContent_withMessage_withStack_outputYaml() throws Exception {
         AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
         when(testResults.getFailCount()).thenReturn(1);
         String testStackTrace = "javax.servlet.ServletException: Something bad happened\n" +
