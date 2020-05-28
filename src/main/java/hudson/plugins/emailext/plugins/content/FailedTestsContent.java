@@ -1,5 +1,10 @@
 package hudson.plugins.emailext.plugins.content;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
@@ -9,12 +14,15 @@ import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
+
 
 /**
  * An EmailContent for failing tests. Only shows tests that have failed.
@@ -43,6 +51,9 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     public boolean escapeHtml = false;
 
     @Parameter
+    public String outputFormat = "";
+
+    @Parameter
     public String testNamePattern = "";
 
     public static final String MACRO_NAME = "FAILED_TESTS";
@@ -54,57 +65,37 @@ public class FailedTestsContent extends DataBoundTokenMacro {
 
 
     @Override
-    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName) {
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName) throws MacroEvaluationException{
         return evaluate(build, build.getWorkspace(), listener, macroName);
     }
 
     @Override
-    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) {
-        StringBuilder buffer = new StringBuilder();
+    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) throws MacroEvaluationException {
         AbstractTestResultAction<?> testResult = run.getAction(AbstractTestResultAction.class);
+        SummarizedTestResult result = prepareSummarizedTestResult(testResult);
 
-        if (null == testResult) {
-            return "No tests ran.";
+        switch (outputFormat) {
+            case "yaml":
+                try {
+                    return result.toYamlString();
+                } catch (JsonProcessingException e) {
+                    throw new MacroEvaluationException("Unable to serialize to yaml", MACRO_NAME, e.getCause());
+                } catch (Exception e) {
+                    throw e;
+                }
+            default:
+                return result.toString();
         }
+    }
 
-        int failCount = testResult.getFailCount();
+    private boolean regressionFilter(TestResult failedTest) {
+        return !onlyRegressions || getTestAge(failedTest) == 1;
+    }
 
-        List<? extends TestResult> failedAndFilteredTests = filterTests(testResult.getFailedTests(), testNamePattern);
-        failCount = testNamePattern.length() == 0 ? failCount : failedAndFilteredTests.size();
-
-        if (failCount == 0) {
-            buffer.append("All tests passed");
-        } else {
-            String lineBreak = getLineBreak();
-            buffer.append(failCount).append(" tests failed.").append(lineBreak);
-
-            boolean showOldFailures = !onlyRegressions;
-            if(maxLength < Integer.MAX_VALUE) {
-                maxLength *= 1024;
-            }
-
-            if (maxTests > 0) {
-                int printedTests = 0;
-                int printedLength = 0;
-                for (TestResult failedTest : failedAndFilteredTests) {
-                    if (showOldFailures || getTestAge(failedTest) == 1) {
-                        if (printedTests < maxTests && printedLength <= maxLength) {
-                            printedLength += outputTest(buffer, failedTest, showStack, showMessage, maxLength-printedLength);
-                            printedTests++;
-                        }
-                    }
-                }
-                if (failCount > printedTests) {
-                    buffer.append("... and ").append(failCount - printedTests).append(" other failed tests.")
-                        .append(lineBreak);
-                }
-                if (printedLength >= maxLength) {
-                    buffer.append(lineBreak).append("... output truncated.").append(lineBreak);
-                }
-            }
+    private void setMaxLength() {
+        if(maxLength < Integer.MAX_VALUE) {
+            maxLength *= 1024;
         }
-
-        return buffer.toString();
     }
 
     private int getTestAge(TestResult result) {
@@ -117,44 +108,134 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         }
     }
 
-    private int outputTest(StringBuilder buffer, TestResult failedTest,
-            boolean showStack, boolean showMessage, int lengthLeft) {
-        StringBuilder local = new StringBuilder();
-        String lineBreak = getLineBreak();
-
-        local.append(failedTest.isPassed() ? "PASSED" : "FAILED").append(":  ");
-
-        if(failedTest instanceof CaseResult) {
-            local.append(((CaseResult)failedTest).getClassName());
-        } else {
-            local.append(failedTest.getFullName());
+    private SummarizedTestResult prepareSummarizedTestResult(AbstractTestResultAction<?> testResult) {
+        if(null == testResult) {
+            SummarizedTestResult result = new SummarizedTestResult(0, getLineBreak());
+            result.summary = "No tests ran.";
+            return result;
         }
-        local.append('.').append(failedTest.getDisplayName()).append(lineBreak);
-
-        if (showMessage) {
-            String errorDetails = escapeHtml ? escapeHtml(failedTest.getErrorDetails()) : failedTest.getErrorDetails();
-            local.append(lineBreak).append("Error Message:").append(lineBreak).append(errorDetails).append(lineBreak);
+        int failCount = testResult.getFailCount();
+        List<? extends TestResult> failedAndFilteredTests = filterTests(testResult.getFailedTests(), testNamePattern);
+        failCount = testNamePattern.length() == 0 ? failCount : failedAndFilteredTests.size();
+        SummarizedTestResult result = new SummarizedTestResult(failCount, getLineBreak());
+        if(failCount == 0) {
+            result.summary = "All tests passed";
         }
-
-        if (showStack) {
-            String stackTrace = escapeHtml ? escapeHtml(failedTest.getErrorStackTrace()) : failedTest.getErrorStackTrace();
-            local.append(lineBreak).append("Stack Trace:").append(lineBreak).append(stackTrace).append(lineBreak);
+        else {
+            result.summary = String.format("%d tests failed.", failCount);
+            setMaxLength();
+            if(maxTests > 0) {
+                int printSize = 0;
+                for (TestResult failedTest : failedAndFilteredTests) {
+                    if (regressionFilter(failedTest)) {
+                        printSize = addTest(result, printSize, failedTest);
+                    }
+                }
+                result.otherFailedTests = (failCount > result.tests.size());
+                result.truncatedOutput = (printSize > maxLength);
+            }
         }
-
-        if (showMessage || showStack) {
-            local.append(lineBreak);
-        }
-
-        if(local.length() > lengthLeft) {
-            local.setLength(lengthLeft);
-        }
-
-        buffer.append(local.toString());
-        return local.length();
+        return result;
     }
 
-    private String getLineBreak() {
+    private int addTest(SummarizedTestResult result, int printSize, TestResult failedTest) {
+        String stackTrace = showStack ? (escapeHtml ? escapeHtml(failedTest.getErrorStackTrace()) : failedTest.getErrorStackTrace()) : null;
+        String errorDetails = showMessage ? (escapeHtml ? escapeHtml(failedTest.getErrorDetails()) : failedTest.getErrorDetails()) : null;
+        String name = String.format("%s.%s", (failedTest instanceof CaseResult) ? ((CaseResult) failedTest).getClassName() : failedTest.getFullName(),
+                failedTest.getDisplayName());
+        FailedTest t = new FailedTest(name, failedTest.isPassed(), errorDetails, stackTrace);
+        String testYaml = t.toString();
+        if (printSize <= maxLength && result.tests.size() < maxTests) {
+            result.tests.add(t);
+            printSize += testYaml.length();
+        }
+        return printSize;
+    }
+
+    public String getLineBreak() {
         return escapeHtml ? "<br/>" : "\n";
+    }
+
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+    private static class FailedTest {
+        String name;
+        String status;
+        String errorMessage;
+        String stackTrace;
+        public FailedTest(String name, boolean status, String errorMessage, String stackTrace){
+            this.errorMessage = errorMessage;
+            this.name = name;
+            this.stackTrace = stackTrace;
+            this.status = status ? "PASSED" : "FAILED";
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Name:%s, Status:%s, Error message: %s, Stack trace:%s", this.name, this.status, this.errorMessage, this.stackTrace);
+        }
+    }
+
+    private static class SummarizedTestResult {
+        public String summary;
+        public List<FailedTest> tests;
+        public boolean otherFailedTests;
+        public boolean truncatedOutput;
+        private int totalFailCount;
+        private String lineBreak;
+
+        public SummarizedTestResult(int failCount, String lineBreak) {
+            this.tests = new ArrayList<FailedTest>();
+            this.totalFailCount = failCount;
+            this.lineBreak = lineBreak;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append(this.summary);
+            if(tests.size() != 0) {
+                builder.append(lineBreak);
+            }
+            for(FailedTest t: tests) {
+                outputTest(builder, lineBreak, t);
+            }
+            if (otherFailedTests) {
+                builder.append("... and ").append(totalFailCount - tests.size()).append(" other failed tests.")
+                        .append(lineBreak);
+            }
+            if (this.truncatedOutput) {
+                builder.append(lineBreak).append("... output truncated.").append(lineBreak);
+            }
+
+            return builder.toString();
+        }
+
+        public String toYamlString() throws JsonProcessingException {
+            ObjectMapper om = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+                    .configure(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE, true));
+            return om.writeValueAsString(this);
+        }
+
+        private void outputTest(StringBuilder buffer, String lineBreak, FailedTest failedTest) {
+            StringBuilder local = new StringBuilder();
+            local.append(failedTest.status).append(":  ");
+
+            local.append(failedTest.name).append(lineBreak);
+
+            if (failedTest.errorMessage != null) {
+                local.append(lineBreak).append("Error Message:").append(lineBreak).append(failedTest.errorMessage).append(lineBreak);
+            }
+
+            if (failedTest.stackTrace != null) {
+                local.append(lineBreak).append("Stack Trace:").append(lineBreak).append(failedTest.stackTrace).append(lineBreak);
+            }
+
+            if (failedTest.stackTrace != null || failedTest.errorMessage != null) {
+                local.append(lineBreak);
+            }
+            buffer.append(local.toString());
+        }
+
     }
 
     private List<? extends TestResult> filterTests(List<? extends TestResult> failedTests, String regexPattern) {
