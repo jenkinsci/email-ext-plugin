@@ -78,8 +78,10 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             case "yaml":
                 try {
                     return result.toYamlString();
+                } catch (JsonProcessingException e) {
+                    throw new MacroEvaluationException("Unable to serialize to yaml", MACRO_NAME, e.getCause());
                 } catch (Exception e) {
-                    throw new MacroEvaluationException("Bad format", MACRO_NAME, e.getCause());
+                    throw e;
                 }
             default:
                 return result.toString();
