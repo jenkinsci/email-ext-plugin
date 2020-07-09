@@ -4,7 +4,6 @@ import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.html.*;
 import hudson.Functions;
 import hudson.model.Descriptor;
-import hudson.model.Item;
 import hudson.model.User;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
@@ -19,18 +18,21 @@ import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.oneOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+
 public class ExtendedEmailPublisherDescriptorTest {
-    
+
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
@@ -41,82 +43,109 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("Should be at the Configure System page",
                 "Configure System [Jenkins]", page.getTitleText());
 
+        HtmlTextInput smtpHost = page.getElementByName("_.smtpHost");
+        assertNotNull("SMTP Server should be present", smtpHost);
+        assertEquals("SMTP Server should be blank by default", "", smtpHost.getText());
+
+        HtmlNumberInput smtpPort = page.getElementByName("_.smtpPort");
+        assertNotNull("SMTP Server should be present", smtpPort);
+        assertEquals("SMTP Server should be blank by default", "25", smtpPort.getText());
+
+        HtmlTextInput defaultSuffix = page.getElementByName("_.defaultSuffix");
+        assertNotNull("Default suffix should be present", defaultSuffix);
+        assertEquals("Default suffix should be blank by default", "", defaultSuffix.getText());
+
         // default content type select control
-        HtmlSelect contentType = page.getElementByName("ext_mailer_default_content_type");
+        HtmlSelect contentType = page.getElementByName("_.defaultContentType");
         assertNotNull("Content type selection should be present", contentType);
         assertEquals("Plain text should be selected by default",
                 "text/plain", contentType.getSelectedOptions().get(0).getValueAttribute());
 
-        HtmlCheckBoxInput useListId = page.getElementByName("ext_mailer_use_list_id");
-        assertNotNull("Use List ID should be present", useListId);
-        assertFalse("Use List ID should not be checked by default", useListId.isChecked());
-
-        HtmlCheckBoxInput precedenceBulk = page.getElementByName("ext_mailer_add_precedence_bulk");
+        HtmlCheckBoxInput precedenceBulk = page.getElementByName("_.precedenceBulk");
         assertNotNull("Precedence Bulk should be present", precedenceBulk);
         assertFalse("Add precedence bulk should not be checked by default",
                 precedenceBulk.isChecked());
 
-        HtmlTextInput defaultRecipients = page.getElementByName("ext_mailer_default_recipients");
+        HtmlTextInput defaultRecipients = page.getElementByName("_.defaultRecipients");
         assertNotNull("Default Recipients should be present", defaultRecipients);
-        assertEquals("Default recipients should be blank by default", 
+        assertEquals("Default recipients should be blank by default",
                 "", defaultRecipients.getText());
 
-        HtmlTextInput defaultReplyTo = page.getElementByName("ext_mailer_default_replyto");
+        HtmlTextInput defaultReplyTo = page.getElementByName("_.defaultReplyTo");
         assertNotNull("Default Reply-to should be present", defaultReplyTo);
-        assertEquals("Default Reply-To should be blank by default", 
+        assertEquals("Default Reply-To should be blank by default",
                 "", defaultReplyTo.getText());
 
-        HtmlTextInput emergencyReroute = page.getElementByName("ext_mailer_emergency_reroute");
+        HtmlTextInput emergencyReroute = page.getElementByName("_.emergencyReroute");
         assertNotNull("Emergency Reroute should be present", emergencyReroute);
-        assertEquals("Emergency Reroute should be blank by default", 
+        assertEquals("Emergency Reroute should be blank by default",
                 "", emergencyReroute.getText());
-        
-        HtmlTextInput allowedDomains = page.getElementByName("ext_mailer_allowed_domains");
+
+        HtmlTextInput allowedDomains = page.getElementByName("_.allowedDomains");
         assertNotNull("Allowed Domains should be present", allowedDomains);
-        assertEquals("Allowed Domains should be blang by default", 
+        assertEquals("Allowed Domains should be blang by default",
                 "", allowedDomains.getText());
 
-        HtmlTextInput excludedRecipients = page.getElementByName("ext_mailer_excluded_committers");
+        HtmlTextInput excludedRecipients = page.getElementByName("_.excludedCommitters");
         assertNotNull("Excluded Recipients should be present", excludedRecipients);
         assertEquals("Excluded Recipients should be blank by default",
                 "", excludedRecipients.getText());
 
-        HtmlTextInput defaultSubject = page.getElementByName("ext_mailer_default_subject");
+        HtmlTextInput defaultSubject = page.getElementByName("_.defaultSubject");
         assertNotNull("Default Subject should be present", defaultSubject);
-        assertEquals("Default Subject should be set", 
-                "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!", 
+        assertEquals("Default Subject should be set",
+                "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!",
                 defaultSubject.getText());
-        
-        HtmlTextInput maxAttachmentSize = page.getElementByName("ext_mailer_max_attachment_size");
+
+        HtmlNumberInput maxAttachmentSize = page.getElementByName("_.maxAttachmentSizeMb");
         assertNotNull("Max attachment size should be present", maxAttachmentSize);
-        assertEquals("Max attachment size should be blank by default",
-                "", maxAttachmentSize.getText());
-        
-        HtmlTextArea defaultContent = page.getElementByName("ext_mailer_default_body");
+        assertThat("Max attachment size should be blank or -1 by default", maxAttachmentSize.getText(), is(oneOf("", "-1")));
+
+        HtmlTextArea defaultContent = page.getElementByName("_.defaultBody");
         assertNotNull("Default content should be present", defaultContent);
         assertEquals("Default content should be set by default",
                 "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:\n\nCheck console output at $BUILD_URL to view the results.",
                 defaultContent.getText());
-        
-        HtmlCheckBoxInput debugMode = page.getElementByName("ext_mailer_debug_mode");
+
+        HtmlTextArea defaultPresendScript = page.getElementByName("_.defaultPresendScript");
+        assertNotNull("Default presend script should be present", defaultPresendScript);
+        assertEquals("Default presend script should be blank by default", "", defaultPresendScript.getText());
+
+        HtmlTextArea defaultPostsendScript = page.getElementByName("_.defaultPostsendScript");
+        assertNotNull("Default postsend script should be present", defaultPostsendScript);
+        assertEquals("Default postsend script should be blank by default", "", defaultPostsendScript.getText());
+
+        HtmlCheckBoxInput debugMode = page.getElementByName("_.debugMode");
         assertNotNull("Debug mode should be present", debugMode);
         assertFalse("Debug mode should not be checked by default", debugMode.isChecked());
-        
+
+        HtmlCheckBoxInput adminRequiredForTemplateTesting = page.getElementByName("_.adminRequiredForTemplateTesting");
+        assertNotNull("Admin required for template testing should be present", adminRequiredForTemplateTesting);
+        assertFalse("Admin required for template testing should be unchecked by default", adminRequiredForTemplateTesting.isChecked());
+
+        HtmlCheckBoxInput watchingEnabled = page.getElementByName("_.watchingEnabled");
+        assertNotNull("Watching enable should be present", watchingEnabled);
+        assertFalse("Watching enable should be unchecked by default", watchingEnabled.isChecked());
+
+        HtmlCheckBoxInput allowUnregisteredEnabled = page.getElementByName("_.allowUnregisteredEnabled");
+        assertNotNull("Allow unregistered should be present", allowUnregisteredEnabled);
+        assertFalse("Allow unregistered should be unchecked by default", allowUnregisteredEnabled.isChecked());
+
         try {
             page.getElementByName("defaultClasspath");
             fail("defaultClasspath section should not be present");
         } catch (ElementNotFoundException e) {}
     }
-    
+
     @Test
     @Issue("JENKINS-20030")
     public void testGlobalConfigSimpleRoundTrip() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);        
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
-        HtmlTextInput defaultRecipients = page.getElementByName("ext_mailer_default_recipients");
+        HtmlTextInput defaultRecipients = page.getElementByName("_.defaultRecipients");
         defaultRecipients.setValueAttribute("mickey@disney.com");
-        j.submit(page.getFormByName("config"));       
-        
+        j.submit(page.getFormByName("config"));
+
         assertEquals("mickey@disney.com", descriptor.getDefaultRecipients());
     }
 
@@ -125,7 +154,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     public void testPrecedenceBulkSettingRoundTrip() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
-        HtmlCheckBoxInput addPrecedenceBulk = page.getElementByName("ext_mailer_add_precedence_bulk");
+        HtmlCheckBoxInput addPrecedenceBulk = page.getElementByName("_.precedenceBulk");
         addPrecedenceBulk.setChecked(true);
         j.submit(page.getFormByName("config"));
 
@@ -137,9 +166,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     public void testListIDRoundTrip() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
-        HtmlCheckBoxInput useListId = page.getElementByName("ext_mailer_use_list_id");
-        useListId.setChecked(true);
-        HtmlTextInput listId = page.getElementByName("ext_mailer_list_id");
+        HtmlTextInput listId = page.getElementByName("_.listId");
         listId.setValueAttribute("hammer");
 
         j.submit(page.getFormByName("config"));
@@ -151,7 +178,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     public void testAdvancedProperties() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
-        HtmlTextArea advProperties = page.getElementByName("ext_mailer_adv_properties");
+        HtmlTextArea advProperties = page.getElementByName("_.advProperties");
         advProperties.setText("mail.smtp.starttls.enable=true");
         j.submit(page.getFormByName("config"));
 

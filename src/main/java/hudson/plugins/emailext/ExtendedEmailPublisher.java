@@ -715,10 +715,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     private MimeMessage createMail(ExtendedEmailPublisherContext context) throws MessagingException, IOException, InterruptedException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
 
-        if (!descriptor.getOverrideGlobalSettings()) {
-            descriptor.upgradeFromMailer();
-        }
-
         String charset = descriptor.getCharset();
 
         Session session = descriptor.createSession(from);

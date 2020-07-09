@@ -17,3 +17,6 @@ work
 nbactions.xml
 .directory
 nb-configuration.xml
+
+/.vscode/*
+/.factorypath
