@@ -266,6 +266,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             }
         }
 
+        if(!acc.isValid()) {
+            // what do we want to do here?
+        }
+
         if (acc.getSmtpHost() != null) {
             props.put("mail.smtp.host", acc.getSmtpHost());
         }
@@ -656,7 +660,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                     try {
                         approval.configuring(new ClasspathEntry(u.toString()), context);
                     } catch (MalformedURLException e) {
-                        throw new FormException(e, "ext_mailer_default_classpath");
+                        throw new FormException(e, "defaultClasspath");
                     }
                 }
             }
@@ -687,10 +691,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     @DataBoundSetter
-    public void setDefaultTriggerIds(List<String> defaultTriggerIds) {
-        if (defaultTriggerIds != null && !defaultTriggerIds.isEmpty()) {
-            this.defaultTriggerIds = defaultTriggerIds;
-        }
+    public void setDefaultTriggerIds(List<String> triggerIds) {
+        defaultTriggerIds = triggerIds;
     }
 
     @SuppressWarnings("unused")

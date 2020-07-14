@@ -92,7 +92,7 @@ f.section(title: _("Extended E-mail Notification")) {
   f.advanced(title: _("Default Triggers")) {
     f.entry(title: _("Default Triggers"), help: "/plugin/email-ext/help/globalConfig/defaultTriggers.html") {
       hudson.plugins.emailext.plugins.EmailTrigger.all().each { t ->
-        f.checkbox(name: "defaultTriggers", title: t.displayName, checked: descriptor.defaultTriggerIds.contains(t.id), json: t.id)
+        f.checkbox(name: "_.defaultTriggerIds", title: t.displayName, checked: descriptor.defaultTriggerIds.contains(t.id), json: t.id)
         br()
       }
     }
