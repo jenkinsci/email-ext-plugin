@@ -1,0 +1,39 @@
+unclassified:
+  email-ext:
+    defaultSuffix: "@domain.extension"
+    addAccounts:
+      - address: "foo.bar"
+        smtpHost: "smtp-host"
+        smtpPort: "1234"
+        smtpUsername: "smtp-username"
+        smtpPassword: "smtp-password"
+        useSsl: true
+        advProperties: "avd-properties"
+    charset: "UTF-8"
+    defaultContentType: "text/html"
+    defaultSubject: "DEFAULT EMAIL SUBJECT"
+    defaultBody: "DEFAULT BODY"
+    emergencyReroute: "emergency-reroute"
+    maxAttachmentSize: 42
+    mailAccount:
+      address: "foo.bar.xyz"
+      smtpHost: "smtp-host-xyz"
+      smtpPort: "9876"
+      smtpUsername: "smtp-username-xyz"
+      smtpPassword: "smtp-password-xyz"
+      advProperties: "adv-properties-xyz"
+      useSsl: true
+    defaultRecipients: "first-account@domain.extension"
+    allowedDomains: "@domain.extension"
+    excludedCommitters: "not-this-committer"
+    listId: "list-id"
+    precedenceBulk: true
+    defaultReplyTo: "no-reply@domain.extension"
+    adminRequiredForTemplateTesting: true
+    watchingEnabled: true
+    allowUnregisteredEnabled: true
+    defaultPresendScript: "default-presend-script"
+    defaultPostsendScript: "defaultpostsend-script"
+    defaultClasspath: []
+    defaultTriggerIds: []
+    debugMode: true
