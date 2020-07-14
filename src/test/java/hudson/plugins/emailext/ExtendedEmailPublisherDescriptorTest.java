@@ -10,7 +10,6 @@ import hudson.security.ACLContext;
 import hudson.security.Permission;
 import hudson.util.ReflectionUtils;
 import jenkins.model.Jenkins;
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,16 +19,19 @@ import org.jvnet.hudson.test.MockAuthorizationStrategy;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.oneOf;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 
 public class ExtendedEmailPublisherDescriptorTest {
 
@@ -186,6 +188,114 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
+    public void defaultTriggers() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        HtmlPage page = j.createWebClient().goTo("configure");
+
+        assertEquals("Should be at the Configure System page",
+                "Configure System [Jenkins]", page.getTitleText());
+
+        List<DomElement> settings = page.getByXPath(".//div[@class='advancedLink' and span[starts-with(@id, 'yui-gen')]/span[@class='first-child']/button[./text()='Default Triggers...']]");
+        assertTrue(settings.size() == 1);
+        DomNode div = settings.get(0);
+        DomNode table = div.getNextSibling();
+        assertTrue(table.getLocalName().equals("table"));
+        DomNode tbody = table.getFirstChild();
+        assertTrue(tbody.getLocalName().equals("tbody"));
+        assertFalse(tbody.getChildNodes().isEmpty());
+
+        List<DomNode> nodes = div.getByXPath(".//button[./text()='Default Triggers...']");
+        assertTrue(nodes.size() == 1);
+        HtmlButton defaultTriggers = (HtmlButton)nodes.get(0);
+        defaultTriggers.click();
+
+        String[] selectedTriggers = {
+                "hudson.plugins.emailext.plugins.trigger.AbortedTrigger",
+                "hudson.plugins.emailext.plugins.trigger.PreBuildTrigger",
+                "hudson.plugins.emailext.plugins.trigger.FixedTrigger",
+                "hudson.plugins.emailext.plugins.trigger.RegressionTrigger",
+        };
+
+        List<DomNode> failureTrigger = page.getByXPath(".//input[@json='hudson.plugins.emailext.plugins.trigger.FailureTrigger']");
+        assertTrue(failureTrigger.size() == 1);
+        HtmlCheckBoxInput failureTriggerCheckBox = (HtmlCheckBoxInput)failureTrigger.get(0);
+        assertTrue(failureTriggerCheckBox.isChecked());
+        failureTriggerCheckBox.setChecked(false);
+
+        for(String selectedTrigger : selectedTriggers) {
+            List<DomNode> triggerItems = page.getByXPath(".//input[@name='_.defaultTriggerIds' and @json='"+selectedTrigger+"']");
+            assertEquals(1, triggerItems.size());
+            HtmlCheckBoxInput checkBox = (HtmlCheckBoxInput)triggerItems.get(0);
+            checkBox.setChecked(true);
+        }
+
+        j.submit(page.getFormByName("config"));
+        assertArrayEquals(selectedTriggers, descriptor.getDefaultTriggerIds().toArray(new String[0]));
+    }
+
+    @Test
+    public void groovyClassPath() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        HtmlPage page = j.createWebClient().goTo("configure");
+
+        assertEquals("Should be at the Configure System page",
+                "Configure System [Jenkins]", page.getTitleText());
+
+        List<DomElement> nodes = page.getByXPath(".//td[@class='setting-name' and ./text()='Additional groovy classpath']");
+        assertEquals(1, nodes.size());
+        HtmlTableCell settingName = (HtmlTableCell)nodes.get(0);
+
+        nodes = settingName.getByXPath("../td[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath']");
+        assertTrue("Should not have any class path setup by default", nodes.size() == 0);
+
+        nodes = settingName.getByXPath("../td[@class='setting-main']/div[@class='repeated-container' and span[starts-with(@id, 'yui-gen')]/span[@class='first-child']/button[./text()='Add']]");
+        assertEquals(1, nodes.size());
+        HtmlDivision div = (HtmlDivision)nodes.get(0);
+        nodes = div.getByXPath(".//button[./text()='Add']");
+        HtmlButton addButton = (HtmlButton)nodes.get(0);
+        addButton.click();
+
+        nodes = settingName.getByXPath("../td[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath']");
+        assertTrue(nodes.size() == 1);
+        div = (HtmlDivision) nodes.get(0);
+        String divClass = div.getAttribute("class");
+        assertTrue(divClass.contains("first") && divClass.contains("last") && divClass.contains("only"));
+
+        nodes = div.getByXPath(".//input[@name='_.path' and @type='text']");
+        assertEquals(1, nodes.size());
+
+        HtmlTextInput path = (HtmlTextInput)nodes.get(0);
+        path.setText("/path/to/classes");
+
+        addButton.click();
+
+        nodes = settingName.getByXPath("../td[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath' and contains(@class, 'last')]");
+        assertTrue(nodes.size() == 1);
+        div = (HtmlDivision) nodes.get(0);
+        divClass = div.getAttribute("class");
+        assertTrue(divClass.contains("last"));
+        assertFalse(divClass.contains("first") || divClass.contains("only"));
+
+        nodes = div.getByXPath(".//input[@name='_.path' and @type='text']");
+        assertEquals(1, nodes.size());
+        path = (HtmlTextInput)nodes.get(0);
+        path.setText("/other/path/to/classes");
+
+        j.submit(page.getFormByName("config"));
+
+        String[] classpath = {
+                "/path/to/classes",
+                "/other/path/to/classes",
+        };
+
+        assertArrayEquals(classpath, descriptor.getDefaultClasspath()
+                .stream()
+                .map(GroovyScriptPath::getPath)
+                .collect(Collectors.toList())
+                .toArray(new String[0]));
+    }
+
+    @Test
     public void managePermissionShouldAccess() {
         Permission jenkinsManage;
         try {
@@ -207,12 +317,12 @@ public class ExtendedEmailPublisherDescriptorTest {
         );
         try (ACLContext c = ACL.as(User.getById(USER, true))) {
             Collection<Descriptor> descriptors = Functions.getSortedDescriptorsForGlobalConfigUnclassified();
-            Assert.assertTrue("Global configuration should not be accessible to READ users", descriptors.size() == 0);
+            assertTrue("Global configuration should not be accessible to READ users", descriptors.size() == 0);
         }
         try (ACLContext c = ACL.as(User.getById(MANAGER, true))) {
             Collection<Descriptor> descriptors = Functions.getSortedDescriptorsForGlobalConfigUnclassified();
             Optional<Descriptor> found = descriptors.stream().filter(descriptor -> descriptor instanceof ExtendedEmailPublisherDescriptor).findFirst();
-            Assert.assertTrue("Global configuration should be accessible to MANAGE users", found.isPresent());
+            assertTrue("Global configuration should be accessible to MANAGE users", found.isPresent());
         }
     }
 
