@@ -19,6 +19,7 @@ import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
@@ -54,6 +55,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
  * These settings are global configurations
  */
 @Extension
+@Symbol("email-ext")
 public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publisher> {
 
     public static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisherDescriptor.class.getName());
