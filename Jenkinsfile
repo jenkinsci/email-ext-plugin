@@ -2,7 +2,7 @@
 // The jenkins-infra/pipeline-library repo
 
 buildPlugin(
-    forceAci: true, // this uses Azure Container Instances for the build
+    useAci: true,
     failFast: false,
     configurations: buildPlugin.recommendedConfigurations()
 )
