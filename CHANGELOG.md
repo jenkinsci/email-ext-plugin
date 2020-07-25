@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.71 (July 24, 2020)
+-  Added BuilderUserRecipientProvider (thanks srasmussen)
+-  [Fix issue with pre-send script timing](https://issues.jenkins-ci.org/browse/JENKINS-61379) (thanks srasmussen)
+-  Added filtering for testSuiteName (thanks [DivyeshChandra](https://github.com/DivyeshChandra))
+-  Users with Jenkins.MANAGE permission have access to manage settings (thanks [escoem](https://github.com/escoem))
+-  Added yaml output for test failure information (thanks [DivyeshChandra](https://github.com/DivyeshChandra))
+
+## 2.69 (February 26, 2020)
+-  Added `escapeHtml` flag to FAILED_TESTS macro (thanks Lukasz Kostrzewa)
+-  [Fix issue with config-file-provider not loading folder level files](https://issues.jenkins-ci.org/browse/JENKINS-60911) (thanks [gcernier-amadeus](https://github.com/gcernier-amadeus))
+
+## 2.67 (October 2, 2019)
+-  [Fix issue with CC parsing](https://issues.jenkins-ci.org/browse/JENKINS-55128) 
+-  Support `saveOutput` parameter in pipeline (thanks [v1v](https://github.com/v1v))
+-  [Fix deprecated calls to getLogFile](https://issues.jenkins-ci.org/browse/JENKINS-54997)
+-  Upgrade dependency on jsoup for XXS in older versions (thanks [madchap](https://github.com/madchap)
+-  Several code clean up improvements (thanks [darxriggs](https://github.com/darxriggs)
+-  [Fix issue with invalid mail account handling ](https://issues.jenkins-ci.org/browse/JENKINS-54363)
+
+
 ## 2.66 (March 21, 2019)
 
 -   Fix some usages of "email" to "e-mail" to be consistent (thanks
