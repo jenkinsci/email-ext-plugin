@@ -61,7 +61,8 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
         assertTrue(descriptor.isAllowUnregisteredEnabled());
         assertEquals("default-presend-script", descriptor.getDefaultPresendScript());
         assertEquals("defaultpostsend-script", descriptor.getDefaultPostsendScript());
-        // TODO defaultClasspath
+
+        assertEquals(0, descriptor.getDefaultClasspath().size());
         assertEquals(1, descriptor.getDefaultTriggerIds().size());
         assertEquals("hudson.plugins.emailext.plugins.trigger.FailureTrigger", descriptor.getDefaultTriggerIds().get(0));
 
