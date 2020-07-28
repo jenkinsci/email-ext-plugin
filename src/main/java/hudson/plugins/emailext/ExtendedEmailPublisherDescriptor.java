@@ -2,6 +2,8 @@ package hudson.plugins.emailext;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import hudson.init.InitMilestone;
+import hudson.init.Initializer;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
@@ -187,11 +189,16 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     public ExtendedEmailPublisherDescriptor() {
         super(ExtendedEmailPublisher.class);
         load();
+
         if (defaultBody == null && defaultSubject == null && emergencyReroute == null) {
             defaultBody = ExtendedEmailPublisher.DEFAULT_BODY_TEXT;
             defaultSubject = ExtendedEmailPublisher.DEFAULT_SUBJECT_TEXT;
             emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
         }
+    }
+    @Initializer(after = InitMilestone.EXTENSIONS_AUGMENTED, before = InitMilestone.JOB_LOADED)
+    public static void autoConfigure() {
+        ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
 
         if(mailAccount == null) {
             mailAccount = new MailAccount();
@@ -201,15 +208,15 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         mailAccount.setDefaultAccount(true);
 
         if (Jenkins.get().isUseSecurity()
-                && (!StringUtils.isBlank(this.defaultPostsendScript)) || !StringUtils.isBlank(this.defaultPresendScript)) {
-            setDefaultPostsendScript(this.defaultPostsendScript);
-            setDefaultPresendScript(this.defaultPresendScript);
+                && (!StringUtils.isBlank(descriptor.getDefaultPostsendScript())) || !StringUtils.isBlank(descriptor.getDefaultPresendScript())) {
+            descriptor.setDefaultPostsendScript(descriptor.getDefaultPostsendScript());
+            descriptor.setDefaultPresendScript(descriptor.getDefaultPresendScript());
             try {
-                setDefaultClasspath(this.defaultClasspath);
+                descriptor.setDefaultClasspath(descriptor.getDefaultClasspath());
             } catch (FormException e) {
                 //Some of the old configured classpaths probably used some environment variable, let's clean those out
                 List<GroovyScriptPath> newList = new ArrayList<>();
-                for (GroovyScriptPath path : defaultClasspath) {
+                for (GroovyScriptPath path : descriptor.getDefaultClasspath()) {
                     URL u = path.asURL();
                     if (u != null) {
                         try {
@@ -221,7 +228,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                     }
                 }
                 try {
-                    setDefaultClasspath(newList);
+                    descriptor.setDefaultClasspath(newList);
                 } catch (FormException e1) {
                     assert false : e1;
                 }
