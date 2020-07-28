@@ -1,10 +1,21 @@
 package hudson.plugins.emailext;
 
 import hudson.ExtensionList;
+import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
+import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
+import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
 import io.jenkins.plugins.casc.misc.ConfiguredWithCode;
 import io.jenkins.plugins.casc.misc.JenkinsConfiguredWithCodeRule;
+import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.hamcrest.core.IsIterableContaining;
 import org.junit.Rule;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -66,5 +77,24 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
         assertEquals("hudson.plugins.emailext.plugins.trigger.FailureTrigger", descriptor.getDefaultTriggerIds().get(0));
 
         assertTrue(descriptor.isDebugMode());
+    }
+
+    @Test
+    @ConfiguredWithCode("configuration-as-code-with-triggers.yml")
+    public void shouldBeAbleToConfigureTriggers() throws Exception {
+        final ExtendedEmailPublisherDescriptor descriptor =
+              ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
+        assertNotNull(descriptor);
+
+        final List<String> expectedTriggers = Arrays.asList(
+              RegressionTrigger.class.getName(),
+              AbortedTrigger.class.getName(),
+              FixedTrigger.class.getName()
+        );
+
+        MatcherAssert.assertThat(
+              descriptor.getDefaultTriggerIds(),
+              Matchers.contains(expectedTriggers.stream().map(Matchers::equalTo).collect(Collectors.toList()))
+        );
     }
 }
