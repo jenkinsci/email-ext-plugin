@@ -160,7 +160,7 @@ public class CssInliner {
         String styleRules = trimmedStylesheet.trim(), delims = "{}";
         StringTokenizer st = new StringTokenizer(styleRules, delims);
         while (st.countTokens() > 1) {
-            String selector = st.nextToken(), properties = st.nextToken();
+            String selector = st.nextToken().trim(), properties = st.nextToken().trim();
             Elements selectedElements = doc.select(selector);
             for (Element selElem : selectedElements) {
                 String oldProperties = selElem.attr(CSS_STYLE);

@@ -43,7 +43,7 @@ public class BuildUserRecipientProvider extends RecipientProvider {
 
         final Debug debug = new Debug();
 
-        // Dont look upstream, find cause of current build
+        // Don't look upstream, find cause of current build
         // Difference between this and RequesterRecipientProvider is that we send emails to the
         // user triggering ex. a rebuild and not the original upstream user.
         Run<?, ?> cur = context.getRun();

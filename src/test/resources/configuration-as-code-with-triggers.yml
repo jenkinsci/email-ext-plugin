@@ -1,0 +1,6 @@
+unclassified:
+  email-ext:
+    defaultTriggerIds:
+      - hudson.plugins.emailext.plugins.trigger.RegressionTrigger
+      - hudson.plugins.emailext.plugins.trigger.AbortedTrigger
+      - hudson.plugins.emailext.plugins.trigger.FixedTrigger
