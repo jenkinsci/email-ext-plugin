@@ -203,6 +203,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
         mailAccount.setDefaultAccount(true);
     }
+    
     @Initializer(after = InitMilestone.EXTENSIONS_AUGMENTED, before = InitMilestone.JOB_LOADED)
     public static void autoConfigure() {
         ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
