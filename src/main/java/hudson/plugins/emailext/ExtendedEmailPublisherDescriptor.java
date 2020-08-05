@@ -301,7 +301,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             }
             props.put("mail.smtp.socketFactory.fallback", "false");
         }
-        if (acc.getSmtpUsername() != null) {
+        if (!StringUtils.isBlank(acc.getSmtpUsername())) {
             props.put("mail.smtp.auth", "true");
         }
 
@@ -322,7 +322,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     private Authenticator getAuthenticator(final MailAccount acc) {
-        if (acc == null || acc.getSmtpUsername() == null) {
+        if (acc == null || !StringUtils.isBlank(acc.getSmtpUsername())) {
             return null;
         }
         return new Authenticator() {
