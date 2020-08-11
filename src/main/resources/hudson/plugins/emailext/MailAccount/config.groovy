@@ -24,7 +24,7 @@ f.advanced {
         f.textbox()
     }
     f.entry(field: "smtpPassword", title: _("SMTP Password")) {
-        f.textbox()
+        f.password()
     }
     f.entry(field: "useSsl", title: _("Use SSL")) {
         f.checkbox()
