@@ -16,7 +16,7 @@ f.entry(field: "smtpHost", title: _("SMTP Server")) {
     f.textbox()
 }
 f.entry(field: "smtpPort", title: _("SMTP Port")) {
-    f.number(value: 25)
+    f.number(default: "25")
 }
 
 f.advanced {

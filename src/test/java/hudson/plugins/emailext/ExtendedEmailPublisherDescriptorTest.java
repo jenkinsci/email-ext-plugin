@@ -50,8 +50,8 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("SMTP Server should be blank by default", "", smtpHost.getText());
 
         HtmlNumberInput smtpPort = page.getElementByName("_.smtpPort");
-        assertNotNull("SMTP Server should be present", smtpPort);
-        assertEquals("SMTP Server should be blank by default", "25", smtpPort.getText());
+        assertNotNull("SMTP Port should be present", smtpPort);
+        assertEquals("SMTP Port should be 25 by default", "25", smtpPort.getText());
 
         HtmlTextInput defaultSuffix = page.getElementByName("_.defaultSuffix");
         assertNotNull("Default suffix should be present", defaultSuffix);
@@ -149,6 +149,23 @@ public class ExtendedEmailPublisherDescriptorTest {
         j.submit(page.getFormByName("config"));
 
         assertEquals("mickey@disney.com", descriptor.getDefaultRecipients());
+    }
+
+    @Test
+    @Issue("JENKINS-63367")
+    public void testSmtpPortRetainsSetValue() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        JenkinsRule.WebClient client = j.createWebClient();
+        HtmlPage page = client.goTo("configure");
+        HtmlNumberInput smtpPort = page.getElementByName("_.smtpPort");
+        smtpPort.setValueAttribute("587");
+        j.submit(page.getFormByName("config"));
+
+        assertEquals("587", descriptor.getMailAccount().getSmtpPort());
+
+        page = client.goTo("configure");
+        smtpPort = page.getElementByName("_.smtpPort");
+        assertEquals("587", smtpPort.getValueAttribute());
     }
 
     @Test
