@@ -38,7 +38,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     }
 
     @DataBoundConstructor
-    public MailAccount(){
+    public MailAccount() {
 
     }
 
