@@ -322,7 +322,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     private Authenticator getAuthenticator(final MailAccount acc) {
-        if (acc == null || !StringUtils.isBlank(acc.getSmtpUsername())) {
+        if (acc == null || StringUtils.isBlank(acc.getSmtpUsername())) {
             return null;
         }
         return new Authenticator() {
