@@ -45,6 +45,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -176,6 +177,16 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private transient String smtpAuthUsername;
     private transient Secret smtpAuthPassword;
     private transient boolean useSsl = false;
+
+    private Function<MailAccount, Authenticator> authenticatorProvider = (acc) -> {
+      return new Authenticator() {
+
+        @Override
+        protected PasswordAuthentication getPasswordAuthentication() {
+            return new PasswordAuthentication(acc.getSmtpUsername(), Secret.toString(acc.getSmtpPassword()));
+        }
+    };
+    };
 
     private Object readResolve(){
         if(smtpHost != null) mailAccount.setSmtpHost(smtpHost);
@@ -325,13 +336,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if (acc == null || StringUtils.isBlank(acc.getSmtpUsername())) {
             return null;
         }
-        return new Authenticator() {
-
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(acc.getSmtpUsername(), Secret.toString(acc.getSmtpPassword()));
-            }
-        };
+        return authenticatorProvider.apply(acc);
     }
 
     public String getHudsonUrl() {
@@ -797,5 +802,14 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             manage = Jenkins.ADMINISTER;
         }
         return manage;
+    }
+
+    Function<MailAccount, Authenticator> getAuthenticatorProvider() {
+      return authenticatorProvider;
+    }
+
+    void setAuthenticatorProvider(
+        Function<MailAccount, Authenticator> authenticatorProvider) {
+      this.authenticatorProvider = authenticatorProvider;
     }
 }
