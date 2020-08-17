@@ -195,7 +195,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             defaultSubject = ExtendedEmailPublisher.DEFAULT_SUBJECT_TEXT;
             emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
         }
-        
+
         if(mailAccount == null) {
             mailAccount = new MailAccount();
             mailAccount.setAddress(getAdminAddress());
@@ -203,7 +203,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
         mailAccount.setDefaultAccount(true);
     }
-    
+
     @Initializer(after = InitMilestone.EXTENSIONS_AUGMENTED, before = InitMilestone.JOB_LOADED)
     public static void autoConfigure() {
         ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
@@ -623,6 +623,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         this.enableAllowUnregistered = enabled;
     }
 
+    @Override
     public boolean isApplicable(Class<? extends AbstractProject> jobType) {
         return true;
     }
