@@ -88,7 +88,7 @@ public class ExtendedEmailPublisherMatrixTest {
     }
 
     @Test
-    public void testPreBuildMatrixBuildSendAgentssOnly() throws Exception{
+    public void testPreBuildMatrixBuildSendAgentsOnly() throws Exception{
         addAgentToProject(0,1,2);
         List<RecipientProvider> recProviders = Collections.emptyList();
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_CONFIGURATIONS);
@@ -164,11 +164,11 @@ public class ExtendedEmailPublisherMatrixTest {
         }} );
     }
 
-    private void addAgentToProject(int ... agentInxes ) throws IOException {
+    private void addAgentToProject(int ... agentInxes) throws IOException {
         AxisList list = new AxisList();
         List<String> values = new LinkedList<>();
-        for (int slaveInx : agentInxes) {
-            values.add(agents.get(slaveInx).getLabelString());
+        for (int agentInx : agentInxes) {
+            values.add(agents.get(agentInx).getLabelString());
         }
         list.add(new Axis("label",values));
         project.setAxes(list);
