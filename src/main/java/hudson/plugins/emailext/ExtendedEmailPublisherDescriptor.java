@@ -178,14 +178,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private transient Secret smtpAuthPassword;
     private transient boolean useSsl = false;
 
-    private Function<MailAccount, Authenticator> authenticatorProvider = (acc) -> {
-      return new Authenticator() {
-
+    private Function<MailAccount, Authenticator> authenticatorProvider = (acc) -> new Authenticator() {
         @Override
         protected PasswordAuthentication getPasswordAuthentication() {
             return new PasswordAuthentication(acc.getSmtpUsername(), Secret.toString(acc.getSmtpPassword()));
         }
-    };
     };
 
     private Object readResolve(){
@@ -286,7 +283,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
 
         if(!acc.isValid()) {
-            // what do we want to do here?
+            return null;
         }
 
         if (acc.getSmtpHost() != null) {
@@ -805,11 +802,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     Function<MailAccount, Authenticator> getAuthenticatorProvider() {
-      return authenticatorProvider;
+        return authenticatorProvider;
     }
 
-    void setAuthenticatorProvider(
-        Function<MailAccount, Authenticator> authenticatorProvider) {
-      this.authenticatorProvider = authenticatorProvider;
+    void setAuthenticatorProvider(Function<MailAccount, Authenticator> authenticatorProvider) {
+        this.authenticatorProvider = authenticatorProvider;
     }
 }

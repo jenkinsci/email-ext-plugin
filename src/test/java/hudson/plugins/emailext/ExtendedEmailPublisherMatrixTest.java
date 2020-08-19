@@ -35,13 +35,20 @@ public class ExtendedEmailPublisherMatrixTest {
 
     private ExtendedEmailPublisher publisher;
     private MatrixProject project;
-    private List<DumbSlave> slaves;    
+    private List<DumbSlave> agents;
  
     @Rule
     public JenkinsRule j = new JenkinsRule() { 
         @Override
         public void before() throws Throwable {
             super.before();
+
+            ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
+            descriptor.setMailAccount(new MailAccount() {
+                {
+                    setSmtpHost("smtp.notreal.com");
+                }
+            });
 
             publisher = new ExtendedEmailPublisher();
             publisher.defaultSubject = "%DEFAULT_SUBJECT";
@@ -50,16 +57,16 @@ public class ExtendedEmailPublisherMatrixTest {
 
             project = j.jenkins.createProject(MatrixProject.class, "Foo");
             project.getPublishersList().add( publisher );
-            slaves = new ArrayList<>();
-            slaves.add(createOnlineSlave(new LabelAtom("success-slave1")));
-            slaves.add(createOnlineSlave(new LabelAtom("success-slave2")));
-            slaves.add(createOnlineSlave(new LabelAtom("success-slave3"))); 
+            agents = new ArrayList<>();
+            agents.add(createOnlineSlave(new LabelAtom("success-agent1")));
+            agents.add(createOnlineSlave(new LabelAtom("success-agent2")));
+            agents.add(createOnlineSlave(new LabelAtom("success-agent3")));
         }
         
         @Override
         public void after() throws Exception {
             super.after();
-            slaves.clear();
+            agents.clear();
             Mailbox.clearAll();
         }
     };
@@ -81,8 +88,8 @@ public class ExtendedEmailPublisherMatrixTest {
     }
 
     @Test
-    public void testPreBuildMatrixBuildSendSlavesOnly() throws Exception{    
-        addSlaveToProject(0,1,2);
+    public void testPreBuildMatrixBuildSendAgentssOnly() throws Exception{
+        addAgentToProject(0,1,2);
         List<RecipientProvider> recProviders = Collections.emptyList();
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_CONFIGURATIONS);
         PreBuildTrigger trigger = new PreBuildTrigger(recProviders, "$DEFAULT_RECIPIENTS",
@@ -97,8 +104,8 @@ public class ExtendedEmailPublisherMatrixTest {
     }
 
     @Test
-    public void testPreBuildMatrixBuildSendSlavesAndParent() throws Exception {    
-        addSlaveToProject(0,1);
+    public void testPreBuildMatrixBuildSendAgentsAndParent() throws Exception {
+        addAgentToProject(0,1);
         List<RecipientProvider> recProviders = Collections.emptyList();
         publisher.setMatrixTriggerMode(MatrixTriggerMode.BOTH);
         PreBuildTrigger trigger = new PreBuildTrigger(recProviders, "$DEFAULT_RECIPIENTS",
@@ -116,7 +123,7 @@ public class ExtendedEmailPublisherMatrixTest {
     public void testAttachBuildLogForAllAxes() throws Exception { 
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_PARENT);
         publisher.attachBuildLog = true;
-        addSlaveToProject(0,1,2);
+        addAgentToProject(0,1,2);
         List<RecipientProvider> recProviders = Collections.emptyList();
         AlwaysTrigger trigger = new AlwaysTrigger(recProviders, "$DEFAULT_RECIPIENTS",
             "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
@@ -157,11 +164,11 @@ public class ExtendedEmailPublisherMatrixTest {
         }} );
     }
 
-    private void addSlaveToProject(int ... slaveInxes ) throws IOException {
+    private void addAgentToProject(int ... agentInxes ) throws IOException {
         AxisList list = new AxisList();
         List<String> values = new LinkedList<>();
-        for (int slaveInx : slaveInxes) {
-            values.add(slaves.get(slaveInx).getLabelString());
+        for (int slaveInx : agentInxes) {
+            values.add(agents.get(slaveInx).getLabelString());
         }
         list.add(new Axis("label",values));
         project.setAxes(list);

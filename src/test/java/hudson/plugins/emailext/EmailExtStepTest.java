@@ -37,6 +37,12 @@ public class EmailExtStepTest {
         @Override
         public void before() throws Throwable {
             super.before();
+            ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
+            descriptor.setMailAccount(new MailAccount() {
+                {
+                    setSmtpHost("smtp.notreal.com");
+                }
+            });
             Mailbox.clearAll();
         }
 

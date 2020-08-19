@@ -65,5 +65,4 @@ public class MailAccountTest {
         MailAccount account = new MailAccount(obj);
         assertTrue(account.isValid());
     }
-
 }

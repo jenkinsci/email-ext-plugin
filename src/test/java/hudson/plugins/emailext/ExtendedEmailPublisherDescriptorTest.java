@@ -1,6 +1,5 @@
 package hudson.plugins.emailext;
 
-import static org.mockito.Mockito.*;
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.html.*;
 import hudson.Functions;
@@ -29,7 +28,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.mail.Authenticator;
-import javax.mail.Session;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -93,7 +91,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
         HtmlTextInput allowedDomains = page.getElementByName("_.allowedDomains");
         assertNotNull("Allowed Domains should be present", allowedDomains);
-        assertEquals("Allowed Domains should be blang by default",
+        assertEquals("Allowed Domains should be blank by default",
                 "", allowedDomains.getText());
 
         HtmlTextInput excludedRecipients = page.getElementByName("_.excludedCommitters");
@@ -370,11 +368,11 @@ public class ExtendedEmailPublisherDescriptorTest {
         ma.setSmtpPassword("smtpPassword");
         assertTrue(ma.isValid());
         descriptor.setAddAccounts(Collections.singletonList(ma));
-        Function<MailAccount, Authenticator> authenticatorProvider = mock(Function.class);
+        Function<MailAccount, Authenticator> authenticatorProvider = Mockito.mock(Function.class);
         descriptor.setAuthenticatorProvider(authenticatorProvider);
         descriptor.createSession(from);
         ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
-        verify(authenticatorProvider, times(1)).apply(mailAccountCaptor.capture());
+        Mockito.verify(authenticatorProvider, Mockito.times(1)).apply(mailAccountCaptor.capture());
         assertNotNull(mailAccountCaptor.getValue());
     }
 
@@ -390,11 +388,11 @@ public class ExtendedEmailPublisherDescriptorTest {
         ma.setSmtpUsername("mail_user");
         ma.setSmtpPassword((String) null);
         descriptor.setAddAccounts(Collections.singletonList(ma));
-        Function<MailAccount, Authenticator> authenticatorProvider = mock(Function.class);
+        Function<MailAccount, Authenticator> authenticatorProvider = Mockito.mock(Function.class);
         descriptor.setAuthenticatorProvider(authenticatorProvider);
         descriptor.createSession(from);
         ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
-        verify(authenticatorProvider, times(1)).apply(mailAccountCaptor.capture());
+        Mockito.verify(authenticatorProvider, Mockito.times(1)).apply(mailAccountCaptor.capture());
         assertNotNull(mailAccountCaptor.getValue());
     }
 
@@ -410,11 +408,11 @@ public class ExtendedEmailPublisherDescriptorTest {
         ma.setSmtpUsername(" ");
         ma.setSmtpPassword("smtpPassword");
         descriptor.setAddAccounts(Collections.singletonList(ma));
-        Function<MailAccount, Authenticator> authenticatorProvider = mock(Function.class);
+        Function<MailAccount, Authenticator> authenticatorProvider = Mockito.mock(Function.class);
         descriptor.setAuthenticatorProvider(authenticatorProvider);
         descriptor.createSession(from);
         ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
-        verify(authenticatorProvider, never()).apply(mailAccountCaptor.capture());
+        Mockito.verify(authenticatorProvider, Mockito.never()).apply(mailAccountCaptor.capture());
     }
 
 }
