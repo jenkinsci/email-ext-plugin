@@ -23,16 +23,12 @@ the email says.
 
 == Questions and bug reports
 
-If you need help, please post on the mailing
-lists https://jenkins.io/mailing-lists/, stack overflow or if you have
-found a bug log an issue
-at https://issues.jenkins-ci.org/ (no
-support tickets please).
+If you need help, please post on the mailing lists https://jenkins.io/mailing-lists/, stack overflow or if you have
+found a bug log an issue at https://issues.jenkins-ci.org/ (no support tickets please).
 
 == Recipes
 
-Additional recipes for email-ext can be found
-xref:/docs/Recipes.adoc[here].
+Additional recipes for email-ext can be found xref:/docs/recipes.adoc[here].
 
 == General
 
