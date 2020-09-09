@@ -15,11 +15,11 @@ image:https://img.shields.io/github/release/jenkinsci/email-ext-plugin.svg?label
 image:https://img.shields.io/jenkins/plugin/i/email-ext.svg?color=blue[Jenkins Plugin Installs,link=https://plugins.jenkins.io/email-ext]
 image:https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/master/badge/icon[Build Status,link=https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/master/]
 
-toc::[]
-
 This plugin allows you to configure every aspect of email notifications.
 You can customize when an email is sent, who should receive it, and what
 the email says.
+
+toc::[]
 
 == Questions and bug reports
 
