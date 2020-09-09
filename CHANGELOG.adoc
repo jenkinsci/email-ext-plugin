@@ -1,0 +1,938 @@
+[[email-ext-plugin-changelog]]
+= email-ext-plugin Changelog
+:toc:
+
+== 2.71 (July 24, 2020)
+
+* Added BuilderUserRecipientProvider (thanks srasmussen)
+* https://issues.jenkins-ci.org/browse/JENKINS-61379[Fix issue with pre-send script timing] (thanks srasmussen)
+* Added filtering for testSuiteName (thanks https://github.com/DivyeshChandra[DivyeshChandra])
+* Users with Jenkins.MANAGE permission have access to manage settings (thanks https://github.com/escoem[escoem])
+* Added yaml output for test failure information (thanks https://github.com/DivyeshChandra[DivyeshChandra])
+
+== 2.69 (February 26, 2020)
+
+* Added `escapeHtml` flag to FAILED_TESTS macro (thanks Lukasz Kostrzewa)
+* https://issues.jenkins-ci.org/browse/JENKINS-60911[Fix issue with config-file-provider not loading folder level files] (thanks https://github.com/gcernier-amadeus[gcernier-amadeus])
+
+== 2.67 (October 2, 2019)
+
+* https://issues.jenkins-ci.org/browse/JENKINS-55128[Fix issue with CC parsing]
+* Support `saveOutput` parameter in pipeline (thanks https://github.com/v1v[v1v])
+* https://issues.jenkins-ci.org/browse/JENKINS-54997[Fix deprecated calls to getLogFile]
+* Upgrade dependency on jsoup for XXS in older versions (thanks https://github.com/madchap[madchap]
+* Several code clean up improvements (thanks https://github.com/darxriggs[darxriggs]
+* https://issues.jenkins-ci.org/browse/JENKINS-54363[Fix issue with invalid mail account handling]
+
+== 2.66 (March 21, 2019)
+
+* Fix some usages of "email" to "e-mail" to be consistent (thanks
+https://github.com/VirtualTim[VirtualTim])
+* Update plugin to build and test with JDK11
+(thanks https://github.com/batmat[batmat])
+
+== 2.65 (March 6, 2019)
+
+* https://jenkins.io/security/advisory/2019-03-06/#SECURITY-1340[Fix]
+https://jenkins.io/security/advisory/2019-03-06/#SECURITY-1340[security
+issue]
+
+== 2.63 (August 5, 2018)
+
+* allow filtering email domains we send emails to (https://github.com/jenkinsci/email-ext-plugin/pull/167[pull
+167])
+* Help markup (https://github.com/jenkinsci/email-ext-plugin/pull/169[pull
+169]) 
+* Same recipient in CC or BCC removes it from TO  https://issues.jenkins-ci.org/browse/JENKINS-52748[JENKINS-52748] -
+Getting issue details... STATUS
+
+== 2.62 (March 23, 2018)
+
+* Styling changes + change in test results table + code alignment
+(https://github.com/jenkinsci/email-ext-plugin/pull/162[pull 162])
+* Fix link for RFC-2919 in help (https://github.com/jenkinsci/email-ext-plugin/pull/164[pull
+164])
+* Update some libraries for some feature additions. (https://github.com/jenkinsci/email-ext-plugin/pull/165[pull
+165])
+* The email-ext-plugin Pipeline integration is not very ergonomic  https://issues.jenkins-ci.org/browse/JENKINS-49733[JENKINS-49733] -
+Getting issue details... STATUS
+* Check for attachment size does not consider compression  https://issues.jenkins-ci.org/browse/JENKINS-49913[JENKINS-49913] -
+Getting issue details... STATUS
+* Add additional accounts (https://github.com/jenkinsci/email-ext-plugin/pull/166[pull
+166])
+
+== 2.61 (October 27, 2017)
+
+* Add global checkbox to allow sending emails to unregistered users
+(https://github.com/jenkinsci/email-ext-plugin/pull/161[pull 161])
+* Switch to using RunWithSCM for getCulprits logic  https://issues.jenkins-ci.org/browse/JENKINS-24141[JENKINS-24141] -
+Getting issue details... STATUS
+
+== 2.60 (September 19, 2017)
+
+* groovy-text.template: use of member changeSet instead of changeSets
+(https://issues.jenkins-ci.org/browse/JENKINS-38968[JENKINS-38968])
+
+== 2.59 (September 12, 2017)
+
+* NullPointerException when calling addRecipients
+(https://issues.jenkins-ci.org/browse/JENKINS-45529[JENKINS-45529])
+* groovy-html.template: use of member changeSet instead of changeSets
+(https://issues.jenkins-ci.org/browse/JENKINS-38968[JENKINS-38968])
+
+== 2.58 (Jun 29, 2017)
+
+* Make message clearer added in SECURITY-372
+* Add presend and postsend script support in pipeline
+(https://github.com/jenkinsci/email-ext-plugin/pull/157[#157])
+* allRecipients could be null if presend script remove all of them
+(https://github.com/jenkinsci/email-ext-plugin/pull/156[#156])
+
+== 2.57.2 (April 10, 2017)
+
+* SECURITY-257(https://jenkins.io/security/advisory/2017-04-10/[advisory])
+ Run Groovy and Jelly scripts only if approved or in secure sandbox
+
+Jenkins administrators may need to approve scripts used by this plugin.
+Administrators can either proactively review all job configurations for
+Groovy scripts or they can wait for the jobs to run and fail. Approval
+is performed via the https://plugins.jenkins.io/script-security/[Script Security Plugin].
+
+== 2.57.1 (March 20, 2017)
+
+* SECURITY-372
+(https://jenkins.io/security/advisory/2017-03-20/[advisory])
+Emails were sent to addresses not associated with actual users of
+Jenkins.
+
+If the security fix is undesirable in a particular instance, it can be
+disabled with either or both of the following two system properties:
+
+* `-Dhudson.tasks.MailSender.SEND_TO_UNKNOWN_USERS=true`: send mail to
+build culprits even if they do not seem to be associated with a
+valid Jenkins login.
+* `-Dhudson.tasks.MailSender.SEND_TO_USERS_WITHOUT_READ=true`: send
+mail to build culprits associated with a valid Jenkins login even if
+they would not otherwise have read access to the job.
+
+== 2.57 (February 18, 2017)
+
+* Allow using 'emailext' step in pipeline without 'node'/workspace
+context
+(https://issues.jenkins-ci.org/browse/JENKINS-42140[JENKINS-42140])
+
+== 2.56 (February 14, 2017)
+
+* Take 2 on previous
+
+== 2.55 (February 11, 2017)
+
+* Bring back functions removed in JENKINS-40964 that are required for
+upgrade of existing config
+
+== 2.54 (January 22, 2017)
+
+* update to latest config-file-provider
+(https://issues.jenkins-ci.org/browse/JENKINS-40964[JENKINS-40964])
+
+== 2.53 (December 23, 2016)
+
+* CulpritsRecipientProvider does not work with pipeline
+(https://issues.jenkins-ci.org/browse/JENKINS-40653[JENKINS-40653])
+
+== 2.52 (October 23, 2016)
+
+* enable setter for smtpHost in descriptor (PR-142)
+* Fix getter value in UI
+(https://issues.jenkins-ci.org/browse/JENKINS-37995[JENKINS-37995])
+* Add API to programmatically configure global settings
+(https://issues.jenkins-ci.org/browse/JENKINS-39147[JENKINS-39147])
+
+== 2.51 (September 28, 2016)
+
+* Pipeline Support - Failed
+Tests (https://issues.jenkins-ci.org/browse/JENKINS-38519[JENKINS-38519])
+
+== 2.50 (September 24, 2016)
+
+* Template support in pipelines
+(https://issues.jenkins-ci.org/browse/JENKINS-35367[JENKINS-35367])
+* X failure trigger
+(https://issues.jenkins-ci.org/browse/JENKINS-37995[JENKINS-37995])
+* Don't use random for filename in Save to Workspace option
+(https://issues.jenkins-ci.org/browse/JENKINS-37350[JENKINS-37350])
+
+== 2.48 & 2.49 Failed releases
+
+== 2.47 (August 7, 2016)
+
+* 2nd failure emails being sent even when build is successful with
+job-dsl-plugin
+(https://issues.jenkins-ci.org/browse/JENKINS-37188[JENKINS-37188])
+
+== 2.46 (August 4, 2016)
+
+* emailext Pipeline step sends mails to irrelevant people
+(https://issues.jenkins-ci.org/browse/JENKINS-37163[JENKINS-37163])
+
+== 2.45 (July 31, 2016)
+
+* Non breaking spaces being double escaped - Thanks https://issues.jenkins-ci.org/secure/ViewProfile.jspa?name=pgmillon[Pierre-Gildas
+MILLON]
+(https://issues.jenkins-ci.org/browse/JENKINS-35669[JENKINS-35669])
+* NPE in email-ext FailingTestSuspectsRecipientProvider
+(https://issues.jenkins-ci.org/browse/JENKINS-36402[JENKINS-36402])
+* Fix of findbugs reported issues
+* Upgrade to plugin pom 2.7
+
+== 2.44 (June 13, 2016)
+
+* Extended Pipeline support
+(https://issues.jenkins-ci.org/browse/JENKINS-35365[JENKINS-35365])
+
+== 2.43 (June 4, 2016)
+
+* Fixed Content Token Reference throwing error if Config File Provider
+plugin is not installed (https://issues.jenkins-ci.org/browse/JENKINS-35289[issue
+35289])
+* Fixed NPE when watching a job (https://issues.jenkins-ci.org/browse/JENKINS-33717[Issue
+33717])
+* Merged pull request
+https://github.com/jenkinsci/email-ext-plugin/pull/130[130]
+* Merged pull request
+https://github.com/jenkinsci/email-ext-plugin/pull/133[133] Fix
+for https://issues.jenkins-ci.org/browse/JENKINS-34785[issue
+34785]
+* Added ability to use a template from the workspace.
+
+== 2.42 (April 17, 2016)
+
+* Fixed issue with post-send script not saving (https://issues.jenkins-ci.org/browse/JENKINS-33205[issue
+33205] thanks
+to https://github.com/weisslj[weisslj])
+* Fixed issue with non-English characters in file names for
+attachments (https://issues.jenkins-ci.org/browse/JENKINS-33574[issue
+33574])
+* Fixed NPE issue when using groovy script (https://issues.jenkins-ci.org/browse/JENKINS-33690[issue
+33690])
+* Added a license file
+* Moved to new parent pom version
+* Fixed up some tests
+
+== 2.41.3 (Feb 23, 2016)
+
+* Fixed issue when workflow is not installed (https://issues.jenkins-ci.org/browse/JENKINS-33035[issue
+33035])
+
+== 2.41.2 (Feb 18, 2016)
+
+* Fixed issue with wrong class loader for templates
+(https://issues.jenkins-ci.org/browse/JENKINS-32910[issue 32910])
+* Allow semicolon for address separator
+(https://issues.jenkins-ci.org/browse/JENKINS-32889[issue 32889])
+
+== 2.41 (Feb 07, 2016)
+
+* Cleaned up dependencies
+* Removed several tokens that were moved to token-macro
+* Fixed several items flagged by PMD (thanks Mohammed Ezzat**)**
+* Added post-send script feature similar to pre-send script.
+(Thanks https://github.com/weisslj[weisslj])
+* Fixed issue with non-AbstractProject/Build items (https://issues.jenkins-ci.org/browse/JENKINS-29970[issue
+29970]https://issues.jenkins-ci.org/browse/JENKINS-29970)
+* Fixed watching so it doesn't show recipient fields (issue 29449)
+
+== 2.40.5 (Jun 08, 2015)
+
+* Whitespace and import cleanup
+* DefaultTriggers refactoring
+
+== 2.40.4 (May 24, 2015)
+
+* Fix issue where the wrong config provider would be cached if using
+multiple types of managed templates.
+
+== 2.40.3 (May 20, 2015)
+
+* Fix issue with incorrect handling of cc and bcc recipients (https://issues.jenkins-ci.org/browse/JENKINS-28444[issue
+#28444])
+* Fix issue with readResolve including Mailer components (https://issues.jenkins-ci.org/browse/JENKINS-28402[issue
+#28402])
+* Fix issue where default extension was not added to template name if
+there was something that looked like an extension in the name
+(https://issues.jenkins-ci.org/browse/JENKINS-28357[issue
+#28357])
+
+== 2.40.2 (May 13, 2015)
+
+* Set the debug mode for JavaMail correctly when debug mode is enabled
+in global configuration
+* Fixed issue where the deserialization was not working correctly for
+descriptors (https://issues.jenkins-ci.org/browse/JENKINS-28212[issue
+#28212])
+
+== 2.40.1 (May 4, 2015)
+
+* Fixed issue with classpath entries that have environment variables
+(https://issues.jenkins-ci.org/browse/JENKINS-28145[issue
+#28145])
+* Fixed issue with check of the extension for templates on the file
+system (https://issues.jenkins-ci.org/browse/JENKINS-28202[issue
+#28202])
+
+== 2.40 (April 28, 2015)
+
+* Thanks to https://github.com/krwalker[K.R. Walker], https://github.com/CedricLevasseur[Cédric
+Levasseur]
+* Fixed issue with pre-send scripts not using 'cancel' correctly
+(https://issues.jenkins-ci.org/browse/JENKINS-27448[issue
+#27448])
+* Added ability to send email in HTML and plaintext with plaintext
+being a stripped version of the HTML (https://issues.jenkins-ci.org/browse/JENKINS-23126[issue
+#23126])
+* Added ability to configure the set of triggers that is setup by
+default when adding email-ext to a project (https://issues.jenkins-ci.org/browse/JENKINS-27856[issue
+#27856])
+* Moved away from using the Mailer plugin to create a session.
+* Added new TEMPLATE token that can be used to pull normal content
+from a file (https://issues.jenkins-ci.org/browse/JENKINS-26478[issue
+#26478])
+* Allow use of content tokens in the pre-send script (https://issues.jenkins-ci.org/browse/JENKINS-26286[issue
+#26286])
+* Allow sending console logs for all nodes in matrix build (https://issues.jenkins-ci.org/browse/JENKINS-21861[issue
+#21861])
+* Added ability for users to watch jobs (https://issues.jenkins-ci.org/browse/JENKINS-18567[issue
+#18567])
+* Removed admin email address since it should be set in the Jenkins
+Location area (https://issues.jenkins-ci.org/browse/JENKINS-25926[issue
+#25926])
+* Fixed output from CSSInliner that was escaping entities (https://issues.jenkins-ci.org/browse/JENKINS-25719[issue
+#25719])
+* Added FirstFailingBuildSuspectsRecipientProvider
+
+== 2.39.2 (January 30, 2015)
+
+* Thanks to https://github.com/Everspace[Everspace]
+* Add workaround for
+https://issues.jenkins-ci.org/browse/JENKINS-25940[JENKINS-25940]
+* Added new SCRIPT_CONTENT macro that can be used with pre-send
+scripts.
+* Added uberClassLoader to JellyContext
+
+== 2.39 (November 16, 2014)
+
+* Thanks to https://github.com/christiangalsterer[Christian
+Galsterer], https://github.com/alexouzounis[Alex
+Ouzounis], https://github.com/gssiyankai[Gregory
+SSI-YAN-KAI], https://github.com/jglick[Jesse
+Glick], https://github.com/jeffmaury[Jeff
+Maury],
+https://github.com/robin-knight[robin-knight], https://github.com/krwalker[K.R.
+Walker]
+* Updated to 1.554.1 as parent pom version
+* Added a recipient provider for upstream committers (https://issues.jenkins-ci.org/browse/JENKINS-17742[issue
+#17742])
+* Fixed issue with template testing not supporting managed files
+(https://issues.jenkins-ci.org/browse/JENKINS-23619[issue
+#23619])
+* Fixed typo in help file for CHANGES_SINCE_LAST_BUILD
+* Added support of regex to replace/change the messages in CHANGES
+token (https://issues.jenkins-ci.org/browse/JENKINS-23691[issue
+#23691])
+* Fixed issue that attached build log is not complete (https://issues.jenkins-ci.org/browse/JENKINS-23660[issue
+#23660])
+* Added disable at the project level (https://issues.jenkins-ci.org/browse/JENKINS-22154[issue
+#22154])
+* Added caching of the templates to improve performance
+* Added parameter to CHANGES tokens to allow user to show a specific
+message when there are no changes (https://issues.jenkins-ci.org/browse/JENKINS-20324[issue
+#20324])
+* Added classpath support for the pre-send script (https://issues.jenkins-ci.org/browse/JENKINS-21672[issue
+#21672])
+* Added SMTP timeout so that jobs won't hang indefinitely 
+* Added retry for ConnectionExceptions (https://issues.jenkins-ci.org/browse/JENKINS-16181[issue
+#16181])
+* Added console output for template testing (https://issues.jenkins-ci.org/browse/JENKINS-24063[issue
+#24063])
+* Added check for test failure age in regression trigger (https://issues.jenkins-ci.org/browse/JENKINS-22041[issue
+#22041])
+* Added FailingTestSuspectsRecipientProvider
+
+== 2.38.2 (August 26, 2014)
+
+* Switch to using getAction instead of getTestResultAction to work
+with newer versions of core.
+
+== 2.38.1 (June 2, 2014)
+
+* Fix for NPE when no recipient providers are selected in a trigger.
+
+== 2.38 (May 24, 2014)
+
+* Implemented new extension point for recipient providers
+(RecipientProvider) this changes the way that recipient types are
+added 
+ ** There are no longer checkboxes for "Requestor" "Recipients" etc,
+each is provided by an implementation of a RecipientProvider
+* Fixed log zipping to remove annotations (https://issues.jenkins-ci.org/browse/JENKINS-21180[issue
+#21180])
+* Added help information for TRIGGER_NAME token (https://issues.jenkins-ci.org/browse/JENKINS-21912[issue
+#21912])
+* Added support for managed files using the Config File Provider
+plugin, prefix managed file name with "managed:"
+* Removed dependency on the Maven plugin
+* Added more help and updated help messages to be more clear (https://issues.jenkins-ci.org/browse/JENKINS-20384[issue
+#20384])
+* Added bcc support (https://issues.jenkins-ci.org/browse/JENKINS-21730[issue
+#21730])
+* Added showMessage parameter to FAILED_TESTS to allow turning off
+error messages
+* Cleaned up template to remove duplicate sections (https://issues.jenkins-ci.org/browse/JENKINS-22592[issue
+#22592])
+* Added %a and %d for pathFormat parameter of the CHANGES_SINCE*
+tokens (https://issues.jenkins-ci.org/browse/JENKINS-20692[issue
+#20692])
+
+== 2.37.2.2 (March 8, 2014)
+
+* Added caching to the private macros to reduce time (https://issues.jenkins-ci.org/browse/JENKINS-20078[issue
+#20078])
+
+== 2.37.2 (January 26, 2014)
+
+* Marked the Config subclass Extensions as optional, so the plugin
+doesn't cause issues if the Config File Provider plugin is not
+installed. (https://issues.jenkins-ci.org/browse/JENKINS-21326[issue
+#21326])
+
+== 2.37.1 (January 11, 2014)
+
+* Fix issue with missing dependency on maven-plugin in  pom.xml
+
+== 2.37 (January 8, 2014)
+
+* Updated parent pom version to 1.532.1 LTS
+* Allow use of managed scripts for Jelly or Groovy content. Use prefix
+"managed:" before name of managed script (https://issues.jenkins-ci.org/browse/JENKINS-18203[issue
+#18203])
+* Added new "Status Changed" trigger (thanks francois_ritaly)
+* Added fileNotFoundMessage to FILE token (https://issues.jenkins-ci.org/browse/JENKINS-20325[issue
+#20325])
+* Added inline help for triggers that was missing (https://issues.jenkins-ci.org/browse/JENKINS-20170[issue
+#20170])
+* Changed BuildStepMonitor.NONE to allow concurrent builds (thanks
+jglick) (https://issues.jenkins-ci.org/browse/JENKINS-16376[issue
+#16376])**
+You must take care when using content or triggers that look at
+previous builds if you enable concurrent builds for your project
+* Added TRIGGER_NAME token so users can determine what trigger caused
+the email (https://issues.jenkins-ci.org/browse/JENKINS-20265[issue
+#20265])
+* Changed to Mutlimap so that you can add multiple triggers of the
+same type and have them work correctly (https://issues.jenkins-ci.org/browse/JENKINS-20524[issue
+#20524])
+* Fixed issue where pre-send script would get expanded and remain
+expanded (https://issues.jenkins-ci.org/browse/JENKINS-20770[issue
+#20770])
+* Added First Unstable trigger
+* Added helper script for emailing Jive community (thanks Dan Barker)
+
+== 2.36 (October 26, 2013)
+
+* Fixed issue with mismatch between form field name and what was
+parsed in the backend (https://issues.jenkins-ci.org/browse/JENKINS-20133[issue
+#20133])
+* Fixed issue with NPE on 1.535 (thanks to
+https://github.com/agudian[agudian] for the PR)
+* Added ability to customize the date format for the CHANGES_SINCE
+tokens (https://issues.jenkins-ci.org/browse/JENKINS-20151[issue
+#20151])
+* Added help files for all the built-in triggers (https://issues.jenkins-ci.org/browse/JENKINS-20170[issue
+#20170])
+* By default when you add the email-ext publisher, an Always trigger
+will be added (https://issues.jenkins-ci.org/browse/JENKINS-20013[issue
+#20013])
+* Fixed issue with template project plugin based jobs and Jelly script
+content. (https://issues.jenkins-ci.org/browse/JENKINS-20117[issue
+#20117])
+* If user doesn't have a Mailer.UserProperty, just add the user id and
+see if the system can resolve it (https://issues.jenkins-ci.org/browse/JENKINS-20215[issue
+#20215])
+* Fixed issue with newInstance method for EmailTrigger causing an
+exception on 1.536 (https://issues.jenkins-ci.org/browse/JENKINS-20198[issue
+#20198])
+
+== 2.35.1 (October 14, 2013)
+
+* Fixed issue introduced by new parameter parsing in global config
+(https://issues.jenkins-ci.org/browse/JENKINS-20030[issue
+#20030])
+* Update descriptor usage in triggers
+* Fixed command line to not max out PermGen during testing
+
+== 2.35 (October 12, 2013)
+
+* Refactored descriptor to follow recommended method
+* Added tests for global config default values
+* Updated to latest LTS for parent version
+* Updated exclusion list to be for full email list, not just
+committers
+* Fixed issue with email-ext not restoring values for some fields if
+no triggers were configured (https://issues.jenkins-ci.org/browse/JENKINS-15442[issue
+#15442])
+* Fixed issue where the project could be null (https://issues.jenkins-ci.org/browse/JENKINS-14338[issue
+#14338])
+
+== 2.34 (September 15, 2013)
+
+* Started adding HtmlUnit tests for UI interaction and round trip
+testing
+* Added more debug for excluded committers feature
+* Reverted field name to includeCulprits
+* Fixed issue where PROJECT_DEFAULT_RECIPIENTS was being added to
+triggers (https://issues.jenkins-ci.org/browse/JENKINS-19583[issue
+#19583])
+* Fixed issue that stopped users from being able to add triggers
+(https://issues.jenkins-ci.org/browse/JENKINS-19585[issue
+#19585])
+
+== 2.33 (September 12, 2013)
+
+* Fixed issue with triggers for matrix projects not saving the value
+correctly (https://issues.jenkins-ci.org/browse/JENKINS-19291[issue
+#19291])
+* Added ability to set content type at the trigger level
+* Added back send to culprits
+* Fixed missing dependency for Mailer plugin in pom.xml
+* Added setting debug mode for JavaMail when debug mode for email-ext
+is set
+
+== 2.32 (August 13, 2013)
+
+* Fix issue with matrix project (https://issues.jenkins-ci.org/browse/JENKINS-19190[issue
+#19190])
+* Added "Fixed Unhealthy" trigger
+
+== 2.31 (August 12, 2013)
+
+* Changed way that triggers work so that you can add multiple triggers
+of the same type
+* Changed triggers into extension points so that other plugins can
+provide email triggers
+* Migrated all tokens to use the Token Macro plugin
+* Fixed issue with using template testing with Jelly scripts (https://issues.jenkins-ci.org/browse/JENKINS-18157[issue
+#18157])
+* General clean-up of sources to remove unused imports and so forth
+* Added JUnit report into groovy html template (thanks
+https://github.com/praagii[praagii])
+* Fixed issue with wrong StringUtils being imported thanks to NetBeans
+(https://issues.jenkins-ci.org/browse/JENKINS-19089[issue
+#19089])
+
+== 2.30.2 (May 23, 2013)
+
+* Fix issue with escaping tokens by using a more groovy like method
+(double dollar $$) (https://issues.jenkins-ci.org/browse/JENKINS-18014[issue
+#18014])
+* Fix issue with metaClass for Script (thanks to Geoff Cummings for
+patch) (https://issues.jenkins-ci.org/browse/JENKINS-17910[issue
+#17910])
+* Added ability to test Groovy and Jelly templates via a link on the
+project page. (https://issues.jenkins-ci.org/browse/JENKINS-9594[issue
+#9594])
+
+== 2.29 (May 6, 2013)
+
+* Refixed typo in email template.
+* Updated to latest LTS release for base (1.509.1)
+* Added global user exclusion list (https://issues.jenkins-ci.org/browse/JENKINS-17503[issue
+#17503])
+* Added expansion of environment variable in the FILE token's path
+argument (https://issues.jenkins-ci.org/browse/JENKINS-16716[issue
+#16716])
+* Added trigger and triggered variables to pre-send script object
+model (https://issues.jenkins-ci.org/browse/JENKINS-17577[issue
+#17577])
+* Added DEFAULT_PRESEND_SCRIPT token (https://issues.jenkins-ci.org/browse/JENKINS-14508[issue
+#14508])
+* Added option to save the output of the generated email into the
+workspace (https://issues.jenkins-ci.org/browse/JENKINS-13302[issue
+#13302])
+* Added new trigger for broken \-> compiling state
+(https://issues.jenkins-ci.org/browse/JENKINS-17546[17546])
+* Fixed default value for ReplyTo (https://issues.jenkins-ci.org/browse/JENKINS-17733[issue
+#17733])
+* Turned off pretty-printing for the CssInliner (https://issues.jenkins-ci.org/browse/JENKINS-17759[issue
+#17759])
+
+== 2.28 (April 4, 2013)
+
+* Fixed token macro help in projects
+* Added additional Chinese translations
+* Improved help text for `BUILD_LOG_EXCERPT` token
+* Added support for inlining CSS and images into emails
+* Fixed regression in attaching build log (https://issues.jenkins-ci.org/browse/JENKINS-17296[issue
+#17296])
+* Fixed regression in 1st Failure Trigger (https://issues.jenkins-ci.org/browse/JENKINS-17307[issue
+#17307])
+* Updated docs for Improvement trigger (https://issues.jenkins-ci.org/browse/JENKINS-17074[issue
+#17074])
+* Fixed class loading inside Groovy templates (https://issues.jenkins-ci.org/browse/JENKINS-16990[issue
+#16990]))
+* Removed script that created and used template usage
+* Cleaned up unused files
+
+== 2.27.1 (March 5, 2013)
+
+* Fix issue with matrix configurations (https://issues.jenkins-ci.org/browse/JENKINS-17064[issue
+#17064])
+* Add 1st Failure and 2nd Failure Triggers
+
+== 2.27 (March 2, 2013)
+
+* Re-added ability to use tokens in attachment areas
+* Allow a default string if regex match is not found for
+BUILD_LOG_REGEX (https://issues.jenkins-ci.org/browse/JENKINS-16269[issue
+#16269])
+* Fixed message layout if attachments are present (https://issues.jenkins-ci.org/browse/JENKINS-16281[issue
+#16281])
+* Added info to the help on using the CC: mechanism
+* Fixed an issue with regression triggers (https://issues.jenkins-ci.org/browse/JENKINS-16404[issue
+#16404])
+* Added a single retry if a SocketException occurs, in case the
+network issue was temporary (https://issues.jenkins-ci.org/browse/JENKINS-16181[issue
+#16181])
+* Fixed attaching build log from a trigger.
+* Made default send to lists less verbose for certain triggers (https://issues.jenkins-ci.org/browse/JENKINS-8642[issue
+#8642])
+* Added support for personal portions of email addresses ("Some Name"
+<username@email.com>) including support for unicode
+* Added check of return values from SendFailedException (https://issues.jenkins-ci.org/browse/JENKINS-16919[issue
+#16919])
+* Made it much easier to use content tokens from groovy templates
+(https://issues.jenkins-ci.org/browse/JENKINS-16916[issue
+#16916])
+* Fixed a typo in the html template (https://issues.jenkins-ci.org/browse/JENKINS-16975[issue
+#16975])
+* Fixed groovy html template when Maven artifacts cause an exception
+(https://issues.jenkins-ci.org/browse/JENKINS-16983[issue
+#16983])
+* Include Jacoco output in the default Jelly HTML template.
+
+== 2.25 (December 12, 2012)
+
+* Fixed test failures on Mac OS
+* Fixed issue with NullReferenceException if the file doesn't exist
+for the FILE token (https://issues.jenkins-ci.org/browse/JENKINS-15008[issue
+#15008])
+* Improved address resolution if the user is setup in the Jenkins
+system
+* Added a debug mode that will add extra log messages to the build log
+when enabled in the global config.
+* Updated to core 1.480
+* Added ability to add attachments at the trigger level (https://issues.jenkins-ci.org/browse/JENKINS-13672[issue
+#13672])
+* Added option to attach the build log at either the project level, or
+at the trigger level (https://issues.jenkins-ci.org/browse/JENKINS-13848[issue
+#13848])
+* Improved capture of failed email addresses (https://issues.jenkins-ci.org/browse/JENKINS-16076[issue
+#16076])
+* Added ability to set Reply-To header value at global, project and
+trigger level. (https://issues.jenkins-ci.org/browse/JENKINS-3324[issue
+#3324])* Added
+ability to set Reply-To header value at global, project and trigger
+level. (https://issues.jenkins-ci.org/browse/JENKINS-3324[issue
+#3324])
+* Added parameter (maxLength) to FAILED_TESTS content token to allow
+truncating the test information. The maxLength is the number of KB
+allowed (https://issues.jenkins-ci.org/browse/JENKINS-5949[issue
+#5949])* Added
+parameter (maxLength) to FAILED_TESTS content token to allow
+truncating the test information. The maxLength is the number of KB
+allowed (https://issues.jenkins-ci.org/browse/JENKINS-5949[issue
+#5949])
+* Added ability to secure the pre-send script by adding a sandbox when
+enabled in the global config. (https://issues.jenkins-ci.org/browse/JENKINS-15213[issue
+#15213])
+
+== 2.24.1 (July 20, 2012)
+
+* Fixed a few tests which were erroring on Windows.
+* Fixed issue with very long token strings causing SOE (https://issues.jenkins-ci.org/browse/JENKINS-14132[issue
+#14132])
+* Updated TEST_COUNTS token to include passing tests.
+* Fixed charset issue when using Jelly templates (https://issues.jenkins-ci.org/browse/JENKINS-7997[issue
+#7997])
+* Allow nested content in JELLEY_SCRIPT tag (https://issues.jenkins-ci.org/browse/JENKINS-14210[issue
+#14210])
+* Added onlyRegressions parameter to FAILED_TESTS token
+* Allow disable of newlines after each regex match (https://issues.jenkins-ci.org/browse/JENKINS-14320[issue
+#14320])
+* Removed token macro error messages from logs (https://issues.jenkins-ci.org/browse/JENKINS-9364[issue
+#9364])
+* Fixed issue when token-macro was older than expected (https://issues.jenkins-ci.org/browse/JENKINS-14224[issue
+#14224])
+* Fixed changeset author issue with text template
+* Added new trigger for when a job first fails (https://issues.jenkins-ci.org/browse/JENKINS-7859[issue
+#7859])
+* Allow specifying CC addresses (https://issues.jenkins-ci.org/browse/JENKINS-6703[issue
+#6703])
+* Updated improvement trigger to only fire if there are failures, but
+less than previous build (https://issues.jenkins-ci.org/browse/JENKINS-14500[issue
+#14500])
+
+== 2.22 (June 15, 2012)
+
+* Added pre-send groovy script for modifying the MimeMessage and even
+cancelling the email altogether. (https://issues.jenkins-ci.org/browse/JENKINS-12421[issue
+#12421])
+* Added support for the token-macro plugin (https://issues.jenkins-ci.org/browse/JENKINS-9364[issue
+#9364])
+* Added try/catch around user email resolution (https://issues.jenkins-ci.org/browse/JENKINS-13102[issue
+#13102])
+* Attachment file path now supports content tokens (https://issues.jenkins-ci.org/browse/JENKINS-13563[issue
+#13563])
+* Fixed issues with tests causing OutOfMemory exception
+* Added `BUILD_LOG_MULTILINE_REGEX` that allows regexes to match even
+newlines
+
+== 2.21 (May 16, 2012)
+
+* Fix issue with new drop down list for post-build (https://issues.jenkins-ci.org/browse/JENKINS-13737[issue
+#13737])
+* Added a https://github.com/jenkinsci/email-ext-plugin/blob/master/src/main/resources/hudson/plugins/emailext/templates/static-analysis.jelly[new jelly
+template]
+that shows the https://plugins.jenkins.io/analysis-core/[static analysis results]
+
+== 2.20 (April 12, 2012)
+
+* Fix issue with hierarchical projects
+(see [https://wiki.jenkins.io/display/JENKINS/Hierarchical+projects+support[Hierarchical+projects+support]|])
+* Updated html_gmail.jelly file to updated fields
+* Updated maven pom to use repo.jenkins-ci.org repository
+* Added scripts for regenerating html.jelly for inline CSS styles
+* Fix issue with Jenkins URL overriding (https://issues.jenkins-ci.org/browse/JENKINS-13242[issue
+#13242])
+* Fix groovy template for git usage (https://issues.jenkins-ci.org/browse/JENKINS-13192[issue
+#13192])
+* Fix NPE that causes build to hang (https://issues.jenkins-ci.org/browse/JENKINS-12577[issue
+#12577])
+
+== 2.19 ( Mar 24, 2012 )
+
+* Reimplement default (global) recipient list
+* Fixed default suffix lookup (https://issues.jenkins-ci.org/browse/JENKINS-11731[issue
+#11731])
+* Added JOB_DESCRIPTION token (https://issues.jenkins-ci.org/browse/JENKINS-4100[issue
+#4100])
+* Added BUILD_ID token (https://issues.jenkins-ci.org/browse/JENKINS-11895[issue
+#11895])
+* Groovy template now correctly determines SUCCESS and FAILURE (https://issues.jenkins-ci.org/browse/JENKINS-13191[issue
+#13191])
+* CHANGES now allows nested content (https://issues.jenkins-ci.org/browse/JENKINS-5376[issue
+#5376])
+* Fixed NRE when recipientList is not in the saved config (https://issues.jenkins-ci.org/browse/JENKINS-12047[issue
+#12047])
+* Emails now send when one or more of the recipients is an invalid
+recipient (https://issues.jenkins-ci.org/browse/JENKINS-9006[issue
+#9006])
+* Fixed issues with default recipients (https://issues.jenkins-ci.org/browse/JENKINS-11665[issue
+#11665])
+
+== 2.18 ( Jan 31, 2012 )
+
+* Add maximum size limit to $\{FAILED_TESTS}
+(https://issues.jenkins-ci.org/browse/JENKINS-11413[JENKINS-11413])
+* Added improvement and regression triggers
+* Added $\{BUILD_LOG_EXCERPT} token (https://issues.jenkins-ci.org/browse/JENKINS-10924[issue
+#10924])
+* Added emergency reroute option
+* Made compatible with LTS 1.424
+* Email to requester is now correct (https://issues.jenkins-ci.org/browse/JENKINS-9160[issue
+#9160])
+* Fixed configuration with promoted builds (https://issues.jenkins-ci.org/browse/JENKINS-10812[issue
+#10812])
+* Only include the stack trace if showStacks is true (https://issues.jenkins-ci.org/browse/JENKINS-3430[issue
+#3430])
+
+== 2.16 (Nov 07, 2011)
+
+* More flexible firing control for matrix projects
+(https://issues.jenkins-ci.org/browse/JENKINS-8590[JENKINS-8590])
+* E-mail trigger for aborted and "not built" results
+(https://issues.jenkins-ci.org/browse/JENKINS-10990[JENKINS-10990])
+
+== 2.15 (Sep 05, 2011)
+
+* Allow email-ext to attach files to emails
+(https://issues.jenkins-ci.org/browse/JENKINS-9018[JENKINS-9018]).
+* Default Recipients list does not appear in Jenkins global
+settings(https://issues.jenkins-ci.org/browse/JENKINS-10783[JENKINS-10783]).
+* Email to requester uses wrong email address
+(https://issues.jenkins-ci.org/browse/JENKINS-9160[JENKINS-9160]).
+* Allow using Groovy (or other JSR223 languages) to generate the email
+content.
+
+== 2.14.1 (Jul 01, 2011)
+
+* Added option for adding 'Precedence: bulk' header according to
+http://tools.ietf.org/search/rfc3834 to prevent out-of-office
+replies.
+
+== 2.14 (Apr 21, 2011)
+
+* Improved the portability of the default Jelly templates across
+different SCM implementations (whereas previously some of the
+information was only displayed for Subversion)
+* Send the "still unstable" email rather than the "unstable" email,
+when the previous status was fail, and the status before that was
+unstable.
+(https://issues.jenkins-ci.org/browse/JENKINS-5411[JENKINS-5411])
+
+== 2.13 (Mar 23 2011)
+
+* Fixed a bug where the html/text Jelly template fail to report the
+change log correctly for all SCMs but Subversion.
+* If an e-mail is supposed to be sent to the requester, follow the
+build triggering chain to find the root requester
+(https://issues.jenkins-ci.org/browse/JENKINS-7740[JENKINS-7740])
+* Added an option to configure a List-ID header on emails.
+
+== 2.12 (Feb 26, 2011)
+
+* Rerelease 2.11 to properly set required Jenkins version.
+
+== 2.11 (Feb 19, 2011)
+
+*This version requires Jenkins 1.396 or newer.*
+
+* Added Charset option.
+(https://issues.jenkins-ci.org/browse/JENKINS-8011[JENKINS-8011])
+ ** Added
+"hudson.plugins.emailext.ExtendedEmailPublisher.Content-Transfer-Encoding"
+system property to specify "Content-Transfer-Encoding".
+* Added "Requester" as possible mail destination
+(https://issues.jenkins-ci.org/browse/JENKINS-7740[JENKINS-7740])
+* Need tokens to get failed tests count and total tests count, to put
+them in mail subject easy.
+(https://issues.jenkins-ci.org/browse/JENKINS-5936[JENKINS-5936])
+* Introduce $JENKINS_URL and deprecated $HUDSON_URL.
+* i18n & l10n(ja)
+
+== 2.10 (Jan 20, 2011)
+
+* Added a new content token "FILE" that includes a file from the
+workspace.
+* BUILD_LOG_REGEX Token:
+ ** Add escapeHtml - If true, escape HTML. Defaults to false.
+ ** Add matchedLineHtmlStyle - If non-null, output HTML. Matched
+lines will become
+`<b style="your-style-value">html escaped matched line</b>`.
+Defaults to null.
+* Prevent duplicate email notifications.
+(https://issues.jenkins-ci.org/browse/JENKINS-8071[JENKINS-8071])
+
+== 2.9 (Oct 14, 2010)
+
+* The _showPaths_ argument was not working for
+CHANGES_SINCE_LAST_UNSTABLE and CHANGES_SINCE_LAST_SUCCESS.
+(issue #http://issues.jenkins-ci.org/browse/JENKINS-5486[5486])
+* Add support for custom Jelly script content (JELLY_SCRIPT) (issue
+#http://issues.jenkins-ci.org/browse/JENKINS-7514[7514])
+
+== 2.8 (Sept 15, 2010)
+
+_This version requires Hudson 1.356 or newer._
+
+* Update BUILD_LOG_REGEX to properly handle http://kohsuke.org/2010/04/14/hudson-console-markups/[console
+notes].
+(issue #http://issues.jenkins-ci.org/browse/JENKINS-7402[7402])
+* Fixed password being saved in plaintext. (issue
+#http://issues.jenkins-ci.org/browse/JENKINS-5816[5816])
+* Override "Hudson URL" only when "override global settings" is
+checked. (issue
+#http://issues.jenkins-ci.org/browse/JENKINS-6193[6193])
+* Add escapeHtml parameter to BUILD_LOG content for escaping HTML.
+Defaults to false for backwards compatibility. (issue
+#http://issues.jenkins-ci.org/browse/JENKINS-7397[7397])
+
+== 2.7 (Aug 30, 2010)
+
+* New optional arg: ${BUILD_LOG_REGEX, regex, linesBefore,
+linesAfter, maxMatches, showTruncatedLines, substText} which allows
+substituting text for the matched regex. This is particularly useful
+when the text contains references to capture groups (i.e. $1, $2,
+etc.)
+
+&nbsp;
+
+* Fix invalid illegal email address exception
+(https://issues.jenkins-ci.org/browse/JENKINS-7057[JENKINS-7057]).
+
+== 2.6 (Jul 20, 2010)
+
+* Add ${BUILD_LOG_REGEX, regex, linesBefore, linesAfter, maxMatches,
+showTruncatedLines} token.
+* Add token for build cause.
+(https://issues.jenkins-ci.org/browse/JENKINS-3166[JENKINS-3166])
+* Add "changes since last unstable build" token.
+(https://issues.jenkins-ci.org/browse/JENKINS-6671[JENKINS-6671])
+* Fix issue with node properties not being available for the $ENV
+token.
+(https://issues.jenkins-ci.org/browse/JENKINS-5465[JENKINS-5465])
+* Recipient list can now use parameters.
+(https://issues.jenkins-ci.org/browse/JENKINS-6396[JENKINS-6396])
+* Improve docs regarding use of quotes for string parameters.
+(https://issues.jenkins-ci.org/browse/JENKINS-5322[JENKINS-5322])
+
+== 2.5 (Jan 20, 2010)
+
+* Fix issue with adding a pre-build trigger using $BUILD_STATUS would
+make the build appear as if it was successful or fixed when the
+build hadn't actually ran yet. (http://issues.jenkins-ci.org/browse/JENKINS-953[issue
+#953])
+* Fix NullPointerException when no root URL is configured. (http://issues.jenkins-ci.org/browse/JENKINS-1771[issue
+#1771])
+* $CHANGES_SINCE_LAST_SUCCESS was not showing unstable or aborted
+builds in the list of changes since the last successful build.
+(http://issues.jenkins-ci.org/browse/JENKINS-3519[issue #3519])
+
+== 2.4 (Jan 7, 2010)
+
+* Fix bug in 2.3 release that broke saving project config changes if
+Promoted Builds plugin is not also installed.
+(https://issues.jenkins-ci.org/browse/JENKINS-5208[JENKINS-5208])
+* Fix in overriding global email settings.
+* Fix to allow authentication without SSL.
+* Send emails as replies to previous ones for same project, as done in
+Hudson's built-in emailer.
+(https://issues.jenkins-ci.org/browse/JENKINS-3089[JENKINS-3089])
+* New "Before Build" trigger type.
+(https://issues.jenkins-ci.org/browse/JENKINS-4190[JENKINS-4190])
+
+== 2.3 (Jan 6, 2010)
+
+* Change the token handling to allow for passing of arguments, and
+allow arguments for the `BUILD_LOG`, `CHANGES`, and
+`CHANGES_SINCE_LAST_SUCCESS` tokens.
+(https://issues.jenkins-ci.org/browse/JENKINS-3085[JENKINS-3085])
+* Revamp the help. Now have help on each form element in the config.
+Rearranged help files hierarchially and deleted unused help.
+* Allow HTML content in emails. There is a global preference plus a
+per-project preference, which default to plain text.
+* When the emailer can not process an email address, it now prints to
+the builder output.
+(https://issues.jenkins-ci.org/browse/JENKINS-1529[JENKINS-1529])
+* Allow use of any environment variable.
+(https://issues.jenkins-ci.org/browse/JENKINS-3605[JENKINS-3605])
+* Add ability to re-use "global" settings (i.e. settings from the core
+Mailer configuration)
+* Add support for SVN_REVISION
+* Fix for email triggers with space in name.
+(https://issues.jenkins-ci.org/browse/JENKINS-3614[JENKINS-3614])
+* Update code for more recent Hudson.
+* Fixed help links.
+(https://issues.jenkins-ci.org/browse/JENKINS-4566[JENKINS-4566])
+* Compatibility with https://plugins.jenkins.io/promoted-builds/[Promoted Builds Plugin].
+
+== 2.2.1 (Dec 23, 2008)
