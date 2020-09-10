@@ -269,6 +269,13 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                 props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
             }
             props.put("mail.smtp.socketFactory.fallback", "false");
+
+            // RFC 2595 specifies additional checks that must be performed on the server's
+            // certificate to ensure that the server you connected to is the server you intended
+            // to connect to. This reduces the risk of "man in the middle" attacks.
+            if (props.getProperty("mail.smtp.ssl.checkserveridentity") == null) {
+                props.put("mail.smtp.ssl.checkserveridentity", "true");
+            }
         }
         if (acc.getSmtpUsername() != null) {
             props.put("mail.smtp.auth", "true");
