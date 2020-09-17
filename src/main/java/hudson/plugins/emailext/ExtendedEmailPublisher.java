@@ -585,14 +585,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             PrintStream logger = listener.getLogger();
             debug(logger, "Executing %s script", scriptName);
 
-            CompilerConfiguration cc = GroovySandbox.createSecureCompilerConfiguration();
-            cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
-            cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
-                    "jenkins",
-                    "jenkins.model",
-                    "hudson",
-                    "hudson.model"));
-
             Binding binding = new Binding();
             binding.setVariable("build", context.getBuild());
             binding.setVariable("run", context.getRun());
@@ -616,24 +608,27 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
             try {
                 ClassLoader cl = expandClasspath(context, Jenkins.get().getPluginManager().uberClassLoader);
-                GroovyShell shell = new GroovyShell(cl, binding, cc);
                 if (AbstractEvalContent.isApprovedScript(script, GroovyLanguage.get()) || !Jenkins.get().isUseSecurity()) {
+                    GroovyShell shell = new GroovyShell(cl, binding, getCompilerConfiguration(false));
                     shell.parse(script).run();
+                    cancel = (Boolean)shell.getVariable("cancel");
                 } else {
-
+                    GroovyShell shell = new GroovyShell(cl, binding, getCompilerConfiguration(true));
                     try {
-                        GroovySandbox.run(shell, script, new ProxyWhitelist(
-                                Whitelist.all(),
-                                new MimeMessageInstanceWhitelist(msg),
-                                new PropertiesInstanceWhitelist(props),
-                                new TaskListenerInstanceWhitelist(listener),
-                                new PrintStreamInstanceWhitelist(logger),
-                                new EmailExtScriptTokenMacroWhitelist()));
+                        new GroovySandbox()
+                                .withWhitelist(new ProxyWhitelist(
+                                        Whitelist.all(),
+                                        new MimeMessageInstanceWhitelist(msg),
+                                        new PropertiesInstanceWhitelist(props),
+                                        new TaskListenerInstanceWhitelist(listener),
+                                        new PrintStreamInstanceWhitelist(logger),
+                                        new EmailExtScriptTokenMacroWhitelist()))
+                                .runScript(shell, script);
+                        cancel = (Boolean)shell.getVariable("cancel");
                     } catch (RejectedAccessException x) {
                         throw ScriptApproval.get().accessRejected(x, ApprovalContext.create());
                     }
                 }
-                cancel = (Boolean)shell.getVariable("cancel");
                 debug(logger, "%s script set cancel to %b", StringUtils.capitalize(scriptName), cancel);
             } catch (SecurityException e) {
                 logger.println(StringUtils.capitalize(scriptName) + " script tried to access secured objects: " + e.getMessage());
@@ -646,6 +641,19 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             debug(logger, out.toString());
         }
         return !cancel;
+    }
+
+    private static CompilerConfiguration getCompilerConfiguration(boolean sandbox) {
+        CompilerConfiguration cc = sandbox
+                ? GroovySandbox.createSecureCompilerConfiguration()
+                : new CompilerConfiguration();
+        cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
+        cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
+                "jenkins",
+                "jenkins.model",
+                "hudson",
+                "hudson.model"));
+        return cc;
     }
 
     /**
