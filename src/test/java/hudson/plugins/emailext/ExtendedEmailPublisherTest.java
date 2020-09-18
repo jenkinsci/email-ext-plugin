@@ -87,6 +87,13 @@ public class ExtendedEmailPublisherTest {
 
     @Before
     public void before() throws Throwable {
+        ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
+        descriptor.setMailAccount(new MailAccount() {
+            {
+                setSmtpHost("smtp.notreal.com");
+            }
+        });
+
         publisher = new ExtendedEmailPublisher();
         publisher.defaultSubject = "%DEFAULT_SUBJECT";
         publisher.defaultContent = "%DEFAULT_CONTENT";
@@ -1146,7 +1153,7 @@ public class ExtendedEmailPublisherTest {
     public void testAdditionalAccounts() throws Exception {
         j.createWebClient().executeOnServer(new Callable<Object>() {
             public Void call() throws Exception {
-                ExtendedEmailPublisherDescriptor descriptor = new ExtendedEmailPublisherDescriptor();
+                ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
                 descriptor.setSmtpServer("smtp.test0.com");
                 descriptor.setSmtpPort("587");
                 descriptor.setAdvProperties("mail.smtp.ssl.trust=test0.com");

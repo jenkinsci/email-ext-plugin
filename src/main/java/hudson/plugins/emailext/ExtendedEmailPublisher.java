@@ -449,6 +449,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     boolean sendMail(ExtendedEmailPublisherContext context) {
         try {
             MimeMessage msg = createMail(context);
+            if(msg == null) {
+                context.getListener().getLogger().println("Could not create MimeMessage");
+                return false;
+            }
             debug(context.getListener().getLogger(), "Successfully created MimeMessage");
             Address[] allRecipients = msg.getAllRecipients();
             int retries = 0;
@@ -473,6 +477,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
                         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
                         Session session = descriptor.createSession(from);
+                        if(session == null) {
+                            context.getListener().getLogger().println("Could not create session");
+                            return false;
+                        }
                         // emergency reroute might have modified recipients:
                         allRecipients = msg.getAllRecipients();
                         // all email addresses are of type "rfc822", so just take first one:
@@ -718,6 +726,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         String charset = descriptor.getCharset();
 
         Session session = descriptor.createSession(from);
+        if(session == null) {
+            context.getListener().getLogger().println("Could not create session");
+            return null;
+        }
         MimeMessage msg = new MimeMessage(session);
 
         InternetAddress fromAddress = new InternetAddress(descriptor.getAdminAddress());

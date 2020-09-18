@@ -16,12 +16,18 @@ import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import javax.mail.Authenticator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -85,7 +91,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
         HtmlTextInput allowedDomains = page.getElementByName("_.allowedDomains");
         assertNotNull("Allowed Domains should be present", allowedDomains);
-        assertEquals("Allowed Domains should be blang by default",
+        assertEquals("Allowed Domains should be blank by default",
                 "", allowedDomains.getText());
 
         HtmlTextInput excludedRecipients = page.getElementByName("_.excludedCommitters");
@@ -347,6 +353,66 @@ public class ExtendedEmailPublisherDescriptorTest {
     private Permission getJenkinsManage() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         // Jenkins.MANAGE is available starting from Jenkins 2.222 (https://jenkins.io/changelog/#v2.222). See JEP-223 for more info
         return (Permission) ReflectionUtils.getPublicProperty(Jenkins.get(), "MANAGE");
+    }
+
+    @Test
+    @Issue("JENKINS-63311")
+    public void authenticatorIsCreatedWhenUsernameAndPasswordAreFilledOut() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        String from = "test@example.com";
+        MailAccount ma = new MailAccount();
+        ma.setAddress(from);
+        ma.setSmtpHost("smtp.example.com");
+        ma.setSmtpPort("25");
+        ma.setSmtpUsername("mail_user");
+        ma.setSmtpPassword("smtpPassword");
+        assertTrue(ma.isValid());
+        descriptor.setAddAccounts(Collections.singletonList(ma));
+        Function<MailAccount, Authenticator> authenticatorProvider = Mockito.mock(Function.class);
+        descriptor.setAuthenticatorProvider(authenticatorProvider);
+        descriptor.createSession(from);
+        ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
+        Mockito.verify(authenticatorProvider, Mockito.times(1)).apply(mailAccountCaptor.capture());
+        assertNotNull(mailAccountCaptor.getValue());
+    }
+
+    @Test
+    @Issue("JENKINS-63311")
+    public void authenticatorIsCreatedWhenUsernameIsFilledOutButPasswordIsNull() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        String from = "test@example.com";
+        MailAccount ma = new MailAccount();
+        ma.setAddress(from);
+        ma.setSmtpHost("smtp.example.com");
+        ma.setSmtpPort("25");
+        ma.setSmtpUsername("mail_user");
+        ma.setSmtpPassword((String) null);
+        descriptor.setAddAccounts(Collections.singletonList(ma));
+        Function<MailAccount, Authenticator> authenticatorProvider = Mockito.mock(Function.class);
+        descriptor.setAuthenticatorProvider(authenticatorProvider);
+        descriptor.createSession(from);
+        ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
+        Mockito.verify(authenticatorProvider, Mockito.times(1)).apply(mailAccountCaptor.capture());
+        assertNotNull(mailAccountCaptor.getValue());
+    }
+
+    @Test
+    @Issue("JENKINS-63311")
+    public void noAuthenticatorIsCreatedWhenUsernameIsBlank() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        String from = "test@example.com";
+        MailAccount ma = new MailAccount();
+        ma.setAddress(from);
+        ma.setSmtpHost("smtp.example.com");
+        ma.setSmtpPort("25");
+        ma.setSmtpUsername(" ");
+        ma.setSmtpPassword("smtpPassword");
+        descriptor.setAddAccounts(Collections.singletonList(ma));
+        Function<MailAccount, Authenticator> authenticatorProvider = Mockito.mock(Function.class);
+        descriptor.setAuthenticatorProvider(authenticatorProvider);
+        descriptor.createSession(from);
+        ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
+        Mockito.verify(authenticatorProvider, Mockito.never()).apply(mailAccountCaptor.capture());
     }
 
 }

@@ -52,8 +52,14 @@ public class AttachmentUtilsTest {
     public final JenkinsRule j = new JenkinsRule() {
         @Override
         public void before() throws Throwable {
-            Mailbox.clearAll();
             super.before();
+            Mailbox.clearAll();
+            ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
+            descriptor.setMailAccount(new MailAccount() {
+                {
+                    setSmtpHost("smtp.notreal.com");
+                }
+            });
         }
     };
 
