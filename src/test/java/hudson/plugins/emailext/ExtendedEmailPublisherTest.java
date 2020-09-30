@@ -36,6 +36,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.junit.*;
+import org.junit.rules.TestName;
 import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.Issue;
@@ -84,6 +85,8 @@ public class ExtendedEmailPublisherTest {
     public static JenkinsRule j = new JenkinsRule();
     private AuthorizationStrategy oldAuthorizationStrategy;
     private SecurityRealm oldSecurityRealm;
+    @Rule
+    public TestName testName = new TestName();
 
     @Before
     public void before() throws Throwable {
@@ -102,7 +105,7 @@ public class ExtendedEmailPublisherTest {
         publisher.setPresendScript("");
         publisher.setPostsendScript("");
 
-        project = j.createFreeStyleProject();
+        project = j.createFreeStyleProject(testName.getMethodName());
         project.getPublishersList().add(publisher);
 
         recProviders = Collections.emptyList();

@@ -4,7 +4,8 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.3</version>
+        <version>4.8</version>
+        <relativePath />
     </parent>
 
     <licenses>
@@ -17,7 +18,7 @@
 
     <artifactId>email-ext</artifactId>
     <packaging>hpi</packaging>
-    <version>2.77-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
     <name>Email Extension Plugin</name>
     <description>Allows to configure every aspect of email notifications: when an email is sent, who should receive it and what the email says</description>
     <url>https://github.com/jenkinsci/email-ext-plugin</url>
@@ -27,6 +28,9 @@
     </issueManagement>
 
     <properties>
+        <revision>2.77</revision>
+        <changelist>-SNAPSHOT</changelist>
+        <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
         <java.level>8</java.level>
         <jenkins.version>2.164.3</jenkins.version>
         <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
@@ -315,9 +319,10 @@
     </dependencies>
 
     <scm>
-        <connection>scm:git:https://github.com/jenkinsci/email-ext-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:jenkinsci/email-ext-plugin.git</developerConnection>
-        <tag>HEAD</tag>
+        <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
+        <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+        <url>https://github.com/${gitHubRepo}</url>
+        <tag>${scmTag}</tag>
     </scm>
 
     <repositories>

@@ -173,7 +173,7 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
      * @throws ObjectStreamException if the object cannot be restored.
      * @see <a href="http://download.oracle.com/javase/1.3/docs/guide/serialization/spec/input.doc6.html">The Java Object Serialization Specification</a>
      */
-    private Object readResolve() throws ObjectStreamException {
+    protected Object readResolve() throws ObjectStreamException {
         if (triggerScript != null && secureTriggerScript == null) {
             this.secureTriggerScript = new SecureGroovyScript(triggerScript, false, null);
             this.secureTriggerScript.configuring(ApprovalContext.create());
