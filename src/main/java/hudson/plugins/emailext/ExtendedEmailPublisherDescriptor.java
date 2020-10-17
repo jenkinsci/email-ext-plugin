@@ -15,6 +15,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.ReflectionUtils;
 import hudson.util.Secret;
+import hudson.Util;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
@@ -266,7 +267,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     @DataBoundSetter
     public void setDefaultSuffix(String defaultSuffix) {
-        this.defaultSuffix = defaultSuffix;
+        this.defaultSuffix = Util.fixEmptyAndTrim(defaultSuffix);
     }
 
     public Session createSession(String from) throws MessagingException {
@@ -436,7 +437,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @SuppressWarnings("unused")
     @DataBoundSetter
     public void setCharset(String charset) {
-        this.charset = charset;
+        this.charset = Util.fixEmptyAndTrim(charset);
     }
 
     public String getDefaultContentType() {
@@ -451,6 +452,13 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         } else {
             this.defaultContentType = contentType;
         }
+    }
+
+    public FormValidation doCheckDefaultSuffix(@QueryParameter String value) {
+        if (value.matches("@[A-Za-z0-9.\\-]+") || Util.fixEmptyAndTrim(value)==null)
+            return FormValidation.ok();
+        else
+            return FormValidation.error(Messages.Mailer_Suffix_Error());
     }
 
     public String getDefaultSubject() {
@@ -490,7 +498,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if (StringUtils.isBlank(emergencyReroute)) {
             this.emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
         } else {
-            this.emergencyReroute = emergencyReroute;
+            this.emergencyReroute = Util.fixEmptyAndTrim(emergencyReroute);
         }
     }
 
