@@ -36,6 +36,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -415,4 +416,99 @@ public class ExtendedEmailPublisherDescriptorTest {
         Mockito.verify(authenticatorProvider, Mockito.never()).apply(mailAccountCaptor.capture());
     }
 
+    @Test
+    public void testFixEmptyAndTrimNormal() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        MailAccount ma = new MailAccount();
+        ma.setAddress("example@example.com");
+        ma.setSmtpHost("smtp.example.com");
+        ma.setSmtpPort("25");
+        ma.setSmtpUsername("smtpUsername");
+
+        descriptor.setMailAccount(ma);
+        descriptor.setDefaultSuffix("@example.com");
+        descriptor.setCharset("UTF-8");
+        descriptor.setEmergencyReroute("emergency@example.com");
+        j.submit(j.createWebClient().goTo("configure").getFormByName("config"));
+
+        assertEquals("example@example.com",descriptor.getMailAccount().getAddress());
+        assertEquals("smtp.example.com",descriptor.getMailAccount().getSmtpHost());
+        assertEquals("25",descriptor.getMailAccount().getSmtpPort());
+        assertEquals("smtpUsername",descriptor.getMailAccount().getSmtpUsername());
+        assertEquals("@example.com",descriptor.getDefaultSuffix());
+        assertEquals("UTF-8",descriptor.getCharset());
+        assertEquals("emergency@example.com",descriptor.getEmergencyReroute());
+    }
+
+    @Test
+    public void testFixEmptyAndTrimExtraSpaces() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        MailAccount ma = new MailAccount();
+        ma.setAddress("       example@example.com      ");
+        ma.setSmtpHost("      smtp.example.com      ");
+        ma.setSmtpPort("      25      ");
+        ma.setSmtpUsername("      smtpUsername      ");
+
+        descriptor.setMailAccount(ma);
+        descriptor.setDefaultSuffix("      @example.com      ");
+        descriptor.setCharset("      UTF-8      ");
+        descriptor.setEmergencyReroute("      emergency@example.com      ");
+        j.submit(j.createWebClient().goTo("configure").getFormByName("config"));
+
+        assertEquals("example@example.com",descriptor.getMailAccount().getAddress());
+        assertEquals("smtp.example.com",descriptor.getMailAccount().getSmtpHost());
+        assertEquals("25",descriptor.getMailAccount().getSmtpPort());
+        assertEquals("smtpUsername",descriptor.getMailAccount().getSmtpUsername());
+        assertEquals("@example.com",descriptor.getDefaultSuffix());
+        assertEquals("UTF-8",descriptor.getCharset());
+        assertEquals("emergency@example.com",descriptor.getEmergencyReroute());
+    }
+
+    @Test
+    public void testFixEmptyAndTrimEmptyString() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        MailAccount ma = new MailAccount();
+        ma.setAddress("");
+        ma.setSmtpHost("");
+        ma.setSmtpPort("");
+        ma.setSmtpUsername("");
+
+        descriptor.setMailAccount(ma);
+        descriptor.setDefaultSuffix("");
+        descriptor.setCharset("");
+        descriptor.setEmergencyReroute("");
+        j.submit(j.createWebClient().goTo("configure").getFormByName("config"));
+
+        assertEquals("address not configured yet <nobody@nowhere>",descriptor.getMailAccount().getAddress());
+        assertNull(descriptor.getMailAccount().getSmtpHost());
+        assertEquals("25",descriptor.getMailAccount().getSmtpPort());
+        assertNull(descriptor.getMailAccount().getSmtpUsername());
+        assertNull(descriptor.getDefaultSuffix());
+        assertEquals("UTF-8",descriptor.getCharset());
+        assertEquals("",descriptor.getEmergencyReroute());
+    }
+
+    @Test
+    public void testFixEmptyAndTrimNull() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        MailAccount ma = new MailAccount();
+        ma.setAddress(null);
+        ma.setSmtpHost(null);
+        ma.setSmtpPort(null);
+        ma.setSmtpUsername(null);
+
+        descriptor.setMailAccount(ma);
+        descriptor.setDefaultSuffix(null);
+        descriptor.setCharset(null);
+        descriptor.setEmergencyReroute(null);
+        j.submit(j.createWebClient().goTo("configure").getFormByName("config"));
+
+        assertEquals("address not configured yet <nobody@nowhere>",descriptor.getMailAccount().getAddress());
+        assertNull(descriptor.getMailAccount().getSmtpHost());
+        assertEquals("25",descriptor.getMailAccount().getSmtpPort());
+        assertNull(descriptor.getMailAccount().getSmtpUsername());
+        assertNull(descriptor.getDefaultSuffix());
+        assertEquals("UTF-8",descriptor.getCharset());
+        assertEquals("",descriptor.getEmergencyReroute());
+    }
 }

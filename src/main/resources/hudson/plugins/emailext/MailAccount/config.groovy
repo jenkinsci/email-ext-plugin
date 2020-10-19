@@ -12,7 +12,7 @@ if(instance?.defaultAccount) {
     }
 }
 
-f.entry(field: "smtpHost", title: _("SMTP Server")) {
+f.entry(field: "smtpHost", title: _("SMTP server")) {
     f.textbox()
 }
 f.entry(field: "smtpPort", title: _("SMTP Port")) {
