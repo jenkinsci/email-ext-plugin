@@ -3,8 +3,6 @@ package hudson.plugins.emailext.plugins.trigger;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import org.junit.Test;
 
-import java.io.IOException;
-
 import static hudson.model.Result.FAILURE;
 import static hudson.model.Result.SUCCESS;
 
@@ -20,8 +18,7 @@ public class XNthFailureTriggerTest extends TriggerTestBase {
     }
 
     @Test
-    public void testTrigger_success()
-            throws IOException, InterruptedException {
+    public void testTrigger_success() {
         assertNotTriggered(SUCCESS);
         assertNotTriggered(SUCCESS, SUCCESS);
         assertNotTriggered(SUCCESS, SUCCESS, SUCCESS);
@@ -29,21 +26,18 @@ public class XNthFailureTriggerTest extends TriggerTestBase {
     }
 
     @Test
-    public void testTrigger_thirdFailureAfterSuccess()
-            throws IOException, InterruptedException {
+    public void testTrigger_thirdFailureAfterSuccess() {
         assertTriggered(FAILURE, SUCCESS, FAILURE, FAILURE, FAILURE);
     }
 
     @Test
-    public void testTrigger_thirdBuildFails()
-            throws IOException, InterruptedException {
+    public void testTrigger_thirdBuildFails() {
         assertTriggered(FAILURE, FAILURE, FAILURE);
         assertTriggered(SUCCESS, FAILURE, FAILURE, FAILURE);
     }
 
     @Test
-    public void testTrigger_failure()
-            throws IOException, InterruptedException {
+    public void testTrigger_failure() {
         assertNotTriggered(FAILURE);
         assertNotTriggered(FAILURE, FAILURE);
         assertNotTriggered(SUCCESS, FAILURE, FAILURE);

@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
  */
 public class ObjectInstanceWhitelistTest {
     @Test
-    public void permitsInstance() throws Exception {
+    public void permitsInstance() {
         String i = "instance";
         ObjectInstanceWhitelist<String> str = new ObjectInstanceWhitelist<String>(i) {};
         assertTrue(str.permitsInstance(i));
@@ -32,7 +32,7 @@ public class ObjectInstanceWhitelistTest {
     }
 
     @Test
-    public void isClass() throws Exception {
+    public void isClass() {
         MimeMessage message = new MimeMessage((Session) null);
         ObjectInstanceWhitelist<MimeMessage> str = new ObjectInstanceWhitelist<MimeMessage>(message) {};
         assertTrue(str.isClass(Part.class));

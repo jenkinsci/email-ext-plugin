@@ -4,8 +4,6 @@ import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import org.junit.Test;
 
-import java.io.IOException;
-
 public class SecondFailureTriggerTest extends TriggerTestBase {
 
     @Override
@@ -14,45 +12,38 @@ public class SecondFailureTriggerTest extends TriggerTestBase {
     }
 
     @Test
-    public void testTrigger_success()
-            throws IOException, InterruptedException {
+    public void testTrigger_success() {
         assertNotTriggered(Result.SUCCESS);
     }
 
     @Test
-    public void testTrigger_firstFailureAfterSuccess()
-            throws IOException, InterruptedException {
+    public void testTrigger_firstFailureAfterSuccess() {
         assertNotTriggered(Result.SUCCESS, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_secondFailureAfterSuccess()
-            throws IOException, InterruptedException {
+    public void testTrigger_secondFailureAfterSuccess() {
         assertTriggered(Result.SUCCESS, Result.FAILURE, Result.FAILURE);
         assertTriggered(Result.FAILURE, Result.FAILURE, Result.SUCCESS, Result.FAILURE, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_thirdFailureAfterSuccess()
-            throws IOException, InterruptedException {
+    public void testTrigger_thirdFailureAfterSuccess() {
         assertNotTriggered(Result.SUCCESS, Result.FAILURE, Result.FAILURE, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_firstBuildFails()
-            throws IOException, InterruptedException {
+    public void testTrigger_firstBuildFails() {
         assertNotTriggered(Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_firstTwoBuildsFail()
-            throws IOException, InterruptedException {
+    public void testTrigger_firstTwoBuildsFail() {
         assertTriggered(Result.FAILURE, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_firstThreeBuildsFail()
-            throws IOException, InterruptedException {
+    public void testTrigger_firstThreeBuildsFail() {
         assertNotTriggered(Result.FAILURE, Result.FAILURE, Result.FAILURE);
     }
 }

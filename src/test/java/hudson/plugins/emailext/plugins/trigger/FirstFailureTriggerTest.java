@@ -4,8 +4,6 @@ import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import org.junit.Test;
 
-import java.io.IOException;
-
 public class FirstFailureTriggerTest extends TriggerTestBase {
 
     @Override
@@ -14,39 +12,33 @@ public class FirstFailureTriggerTest extends TriggerTestBase {
     }
 
     @Test
-    public void testTrigger_success()
-            throws IOException, InterruptedException {
+    public void testTrigger_success() {
         assertNotTriggered(Result.SUCCESS);
     }
 
     @Test
-    public void testTrigger_multipleSuccess()
-            throws IOException, InterruptedException {
+    public void testTrigger_multipleSuccess() {
         assertNotTriggered(Result.SUCCESS, Result.SUCCESS, Result.SUCCESS);
     }
 
     @Test
-    public void testTrigger_firstFailureAfterSuccess()
-            throws IOException, InterruptedException {
+    public void testTrigger_firstFailureAfterSuccess() {
         assertTriggered(Result.SUCCESS, Result.FAILURE);
         assertTriggered(Result.FAILURE, Result.FAILURE, Result.FAILURE, Result.SUCCESS, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_secondFailureAfterSuccess()
-            throws IOException, InterruptedException {
+    public void testTrigger_secondFailureAfterSuccess() {
         assertNotTriggered(Result.SUCCESS, Result.FAILURE, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_firstBuildFails()
-            throws IOException, InterruptedException {
+    public void testTrigger_firstBuildFails() {
         assertTriggered(Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_firstTwoBuildsFail()
-            throws IOException, InterruptedException {
+    public void testTrigger_firstTwoBuildsFail() {
         assertNotTriggered(Result.FAILURE, Result.FAILURE);
     }
 }

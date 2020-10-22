@@ -1305,7 +1305,7 @@ public class ExtendedEmailPublisherTest {
     private static final class SleepOnceBuilder extends Builder {
 
         @Override
-        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException {
             if (build.number == 1) {
                 Thread.sleep(99999);
             }

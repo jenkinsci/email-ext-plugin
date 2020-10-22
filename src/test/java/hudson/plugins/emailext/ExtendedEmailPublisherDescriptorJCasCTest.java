@@ -27,7 +27,7 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
 
     @Test
     @ConfiguredWithCode("configuration-as-code.yml")
-    public void shouldValidatedJCasCConfiguration() throws Exception {
+    public void shouldValidatedJCasCConfiguration() {
         final ExtendedEmailPublisherDescriptor descriptor =
                 ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
         assertNotNull(descriptor);
@@ -82,7 +82,7 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
 
     @Test
     @ConfiguredWithCode("configuration-as-code-with-triggers.yml")
-    public void shouldBeAbleToConfigureTriggers() throws Exception {
+    public void shouldBeAbleToConfigureTriggers() {
         final ExtendedEmailPublisherDescriptor descriptor =
               ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
         assertNotNull(descriptor);

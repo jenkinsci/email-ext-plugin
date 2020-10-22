@@ -9,7 +9,6 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.junit.Rule;
 import org.junit.Test;
@@ -60,8 +59,7 @@ public class ContentBuilderTest {
     };
 
     @Test
-    public void testTransformText_shouldExpand_$PROJECT_DEFAULT_CONTENT()
-            throws IOException, InterruptedException {
+    public void testTransformText_shouldExpand_$PROJECT_DEFAULT_CONTENT() {
         assertEquals(publisher.defaultContent, ContentBuilder.transformText("$PROJECT_DEFAULT_CONTENT", publisher,
                 build, j.createLocalLauncher(), listener));
         assertEquals(publisher.defaultContent, ContentBuilder.transformText("${PROJECT_DEFAULT_CONTENT}", publisher,
@@ -69,8 +67,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testTransformText_shouldExpand_$PROJECT_DEFAULT_SUBJECT()
-            throws IOException, InterruptedException {
+    public void testTransformText_shouldExpand_$PROJECT_DEFAULT_SUBJECT() {
         assertEquals(publisher.defaultSubject, ContentBuilder.transformText("$PROJECT_DEFAULT_SUBJECT", publisher,
                 build, listener));
         assertEquals(publisher.defaultSubject, ContentBuilder.transformText("${PROJECT_DEFAULT_SUBJECT}", publisher,
@@ -78,8 +75,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testTransformText_shouldExpand_$DEFAULT_CONTENT()
-            throws IOException, InterruptedException {
+    public void testTransformText_shouldExpand_$DEFAULT_CONTENT() {
         assertEquals(publisher.getDescriptor().getDefaultBody(),
                 ContentBuilder.transformText("$DEFAULT_CONTENT", publisher,
                 build, listener));
@@ -89,8 +85,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testTransformText_shouldExpand_$DEFAULT_SUBJECT()
-            throws IOException, InterruptedException {
+    public void testTransformText_shouldExpand_$DEFAULT_SUBJECT() {
         assertEquals(publisher.getDescriptor().getDefaultSubject(),
                 ContentBuilder.transformText("$DEFAULT_SUBJECT", publisher,
                 build, listener));
@@ -100,8 +95,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testTransformText_shouldExpand_$DEFAULT_RECIPIENT_LIST()
-            throws IOException, InterruptedException {
+    public void testTransformText_shouldExpand_$DEFAULT_RECIPIENT_LIST() {
         assertEquals(publisher.getDescriptor().getDefaultRecipients(),
                 ContentBuilder.transformText("$DEFAULT_RECIPIENTS", publisher,
                 build, listener));
@@ -111,8 +105,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testTransformText_shouldExpand_$DEFAULT_PRESEND_SCRIPT()
-            throws IOException, InterruptedException {
+    public void testTransformText_shouldExpand_$DEFAULT_PRESEND_SCRIPT() {
         assertEquals(publisher.getDescriptor().getDefaultPresendScript(),
                 ContentBuilder.transformText("$DEFAULT_PRESEND_SCRIPT", publisher,
                 build, listener));
@@ -122,8 +115,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testTransformText_shouldExpand_$DEFAULT_POSTSEND_SCRIPT()
-            throws IOException, InterruptedException {
+    public void testTransformText_shouldExpand_$DEFAULT_POSTSEND_SCRIPT() {
         assertEquals(publisher.getDescriptor().getDefaultPostsendScript(),
                 ContentBuilder.transformText("$DEFAULT_POSTSEND_SCRIPT", publisher,
                 build, listener));
@@ -155,7 +147,7 @@ public class ContentBuilderTest {
     }
     
     @Test
-    public void testRuntimeMacro() throws IOException, InterruptedException {
+    public void testRuntimeMacro() {
         RuntimeContent content = new RuntimeContent("Hello, world");
         assertEquals("Hello, world", ContentBuilder.transformText("${RUNTIME}",
                 new ExtendedEmailPublisherContext(publisher, build, build.getWorkspace(), j.createLocalLauncher(), listener),
@@ -182,7 +174,7 @@ public class ContentBuilderTest {
         }
 
         @Override
-        public String evaluate(AbstractBuild<?, ?> ab, TaskListener tl, String string, Map<String, String> map, ListMultimap<String, String> lm) throws MacroEvaluationException, IOException, InterruptedException {
+        public String evaluate(AbstractBuild<?, ?> ab, TaskListener tl, String string, Map<String, String> map, ListMultimap<String, String> lm) {
             return replacement;
         }        
     }

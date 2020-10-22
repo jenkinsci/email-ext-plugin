@@ -105,7 +105,7 @@ public class AttachmentUtilsTest {
         project.getPublishersList().add(publisher);
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
                 for (int i = 0; i < 1000; i++) // Pad out the build log so the zip has something to compress
                     listener.getLogger().println("Oh Mickey, you're so fine\n" +
                             "You're so fine you blow my mind, hey Mickey,\n" +

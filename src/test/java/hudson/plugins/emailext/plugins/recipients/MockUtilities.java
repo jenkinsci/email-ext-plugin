@@ -130,7 +130,7 @@ import java.util.List;
         PowerMockito.spy(User.class);
         PowerMockito.doAnswer(new Answer<User>() {
             @Override
-            public User answer(InvocationOnMock invocation) throws Throwable {
+            public User answer(InvocationOnMock invocation) {
                 Object[] args = invocation.getArguments();
                 return getUser((String) args[0]);
             }

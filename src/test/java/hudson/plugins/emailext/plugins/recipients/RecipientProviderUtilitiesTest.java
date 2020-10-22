@@ -46,7 +46,7 @@ public class RecipientProviderUtilitiesTest {
     }
 
     @Test
-    public void getChangeSetAuthors() throws Exception {
+    public void getChangeSetAuthors() {
         Debug debug = new Debug();
         WorkflowRun run1 = mock(WorkflowRun.class);
         Set<User> authors = RecipientProviderUtilities.getChangeSetAuthors(Collections.<Run<?, ?>>singleton(run1), debug);
@@ -67,17 +67,17 @@ public class RecipientProviderUtilitiesTest {
     }
 
     @Test
-    public void getUsersTriggeringTheBuilds() throws Exception {
+    public void getUsersTriggeringTheBuilds() {
 
     }
 
     @Test
-    public void getUserTriggeringTheBuild() throws Exception {
+    public void getUserTriggeringTheBuild() {
 
     }
 
     @Test
-    public void addUsers() throws Exception {
+    public void addUsers() {
 
     }
 
