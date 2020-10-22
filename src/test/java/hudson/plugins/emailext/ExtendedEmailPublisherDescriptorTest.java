@@ -315,8 +315,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertArrayEquals(classpath, descriptor.getDefaultClasspath()
                 .stream()
                 .map(GroovyScriptPath::getPath)
-                .collect(Collectors.toList())
-                .toArray(new String[0]));
+                .toArray(String[]::new));
     }
 
     @Test
