@@ -6,7 +6,6 @@ import hudson.model.Item;
 import hudson.model.Result;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.RecipientProvider;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript;
@@ -25,9 +24,13 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.isEmptyString;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests {@link PreBuildScriptTrigger} and {@link ScriptTrigger}.
@@ -60,7 +63,7 @@ public class AbstractScriptTriggerTest {
         final String script = "out.println('Checking before trigger')\n" +
                 "return build.result.toString() == 'SUCCESS'";
         publisher.getConfiguredTriggers().add(new PreBuildScriptTrigger(
-                Collections.<RecipientProvider>emptyList(),
+                Collections.emptyList(),
                 "recipientList",
                 "replyTo",
                 "subject",
@@ -126,7 +129,7 @@ public class AbstractScriptTriggerTest {
             "  }\n" +
             "}\n";
         publisher.getConfiguredTriggers().add(new PreBuildScriptTrigger(
-                Collections.<RecipientProvider>emptyList(),
+                Collections.emptyList(),
                 "recipientList",
                 "replyTo",
                 "subject",
@@ -155,7 +158,7 @@ public class AbstractScriptTriggerTest {
 
         AbstractScriptTrigger at = (AbstractScriptTrigger) trigger;
         assertNotNull(at.getSecureTriggerScript());
-        assertThat(at.getSecureTriggerScript().getScript(), not(isEmptyString()));
+        assertThat(at.getSecureTriggerScript().getScript(), not(emptyString()));
 
         FreeStyleBuild build = j.assertBuildStatus(firstStatus, project.scheduleBuild2(0));
         j.assertLogContains(expected.getName(), build); //TODO change whenever build.getResult() ends up in a whitelist

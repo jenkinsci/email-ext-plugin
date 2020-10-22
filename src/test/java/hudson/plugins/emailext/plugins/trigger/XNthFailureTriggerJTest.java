@@ -2,7 +2,6 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.FreeStyleProject;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.plugins.RecipientProvider;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -10,7 +9,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 import java.util.Collections;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author Kanstantsin Shautsou
@@ -24,7 +23,7 @@ public class XNthFailureTriggerJTest {
         FreeStyleProject project = jRule.createFreeStyleProject();
 
         final ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        XNthFailureTrigger trigger = new XNthFailureTrigger(Collections.<RecipientProvider>emptyList(),
+        XNthFailureTrigger trigger = new XNthFailureTrigger(Collections.emptyList(),
                 "", "", "", "", "", 0, "project");
         trigger.setRequiredFailureCount(5);
 

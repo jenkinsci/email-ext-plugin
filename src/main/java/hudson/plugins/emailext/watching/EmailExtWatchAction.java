@@ -1,8 +1,11 @@
 package hudson.plugins.emailext.watching;
 
 import hudson.Extension;
-import hudson.model.*;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
 import hudson.model.Descriptor.FormException;
+import hudson.model.User;
+import hudson.model.UserPropertyDescriptor;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.tasks.Mailer;
@@ -63,7 +66,7 @@ public class EmailExtWatchAction implements Action {
 
             @Override
             public UserProperty newInstance(StaplerRequest req, JSONObject json) throws FormException {
-                List<EmailTrigger> triggers = req != null ? req.bindJSONToList(EmailTrigger.class, json) : Collections.<EmailTrigger>emptyList();
+                List<EmailTrigger> triggers = req != null ? req.bindJSONToList(EmailTrigger.class, json) : Collections.emptyList();
                 return new UserProperty(triggers);
             }
         }

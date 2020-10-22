@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 @RunWith(PowerMockRunner.class)
@@ -29,7 +29,7 @@ public class RecipientProviderTest {
     private JenkinsRule j = new JenkinsRule();
 
     @Test
-    public void allSupporting() throws Exception {
+    public void allSupporting() {
         List<RecipientProviderDescriptor> descriptors = RecipientProvider.allSupporting(WorkflowJob.class);
         assertThat(descriptors, CoreMatchers.hasItem(CoreMatchers.isA(DevelopersRecipientProvider.DescriptorImpl.class)));
         assertThat(descriptors, CoreMatchers.not(CoreMatchers.hasItem(CoreMatchers.isA(ListRecipientProvider.DescriptorImpl.class))));
@@ -40,7 +40,7 @@ public class RecipientProviderTest {
     }
 
     @Test
-    public void checkAllSupport() throws Exception {
+    public void checkAllSupport() {
         RecipientProvider.checkAllSupport(Arrays.asList(new RequesterRecipientProvider(),
                 new DevelopersRecipientProvider()), WorkflowJob.class);
         try {

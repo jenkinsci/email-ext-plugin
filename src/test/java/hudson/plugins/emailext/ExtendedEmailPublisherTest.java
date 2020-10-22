@@ -35,7 +35,11 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestName;
 import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.FailureBuilder;
@@ -48,7 +52,10 @@ import org.jvnet.hudson.test.SleepBuilder;
 import org.jvnet.mock_javamail.Mailbox;
 import org.kohsuke.stapler.Stapler;
 
-import javax.mail.*;
+import javax.mail.Address;
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -69,7 +76,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class ExtendedEmailPublisherTest {
@@ -111,7 +118,7 @@ public class ExtendedEmailPublisherTest {
         recProviders = Collections.emptyList();
         Mailbox.clearAll();
 
-        publisher.getDescriptor().setDefaultClasspath(Collections.<GroovyScriptPath>emptyList());
+        publisher.getDescriptor().setDefaultClasspath(Collections.emptyList());
         publisher.getDescriptor().setAllowedDomains(null);
         oldAuthorizationStrategy = j.jenkins.getAuthorizationStrategy();
         oldSecurityRealm = j.jenkins.getSecurityRealm();
@@ -1305,7 +1312,7 @@ public class ExtendedEmailPublisherTest {
     private static final class SleepOnceBuilder extends Builder {
 
         @Override
-        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException {
             if (build.number == 1) {
                 Thread.sleep(99999);
             }

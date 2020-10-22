@@ -4,8 +4,6 @@ import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import org.junit.Test;
 
-import java.io.IOException;
-
 /**
  *
  * @author acearl
@@ -18,38 +16,32 @@ public class BuildingTriggerTest extends TriggerTestBase {
     }
     
     @Test
-    public void testTrigger_success() 
-            throws IOException, InterruptedException {
+    public void testTrigger_success() {
         assertNotTriggered(Result.SUCCESS);
     }
     
     @Test
-    public void testTrigger_failure() 
-            throws IOException, InterruptedException {
+    public void testTrigger_failure() {
         assertNotTriggered(Result.SUCCESS);
     }
     
     @Test
-    public void testTrigger_failureUnstable() 
-            throws IOException, InterruptedException {
+    public void testTrigger_failureUnstable() {
         assertTriggered(Result.FAILURE, Result.UNSTABLE);
     }
     
     @Test
-    public void testTrigger_multipleFailure() 
-            throws IOException, InterruptedException {
+    public void testTrigger_multipleFailure() {
         assertTriggered(Result.FAILURE, Result.FAILURE, Result.FAILURE, Result.UNSTABLE);
     }
     
     @Test
-    public void testTrigger_failureSuccess() 
-            throws IOException, InterruptedException {
+    public void testTrigger_failureSuccess() {
         assertNotTriggered(Result.FAILURE, Result.SUCCESS);
     }
     
     @Test
-    public void testTrigger_failureSuccessUnstable() 
-            throws IOException, InterruptedException {
+    public void testTrigger_failureSuccessUnstable() {
         assertNotTriggered(Result.FAILURE, Result.SUCCESS, Result.UNSTABLE);
     }
 }

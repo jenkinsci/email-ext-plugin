@@ -1,7 +1,17 @@
 package hudson.plugins.emailext;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
-import com.gargoylesoftware.htmlunit.html.*;
+import com.gargoylesoftware.htmlunit.html.DomElement;
+import com.gargoylesoftware.htmlunit.html.DomNode;
+import com.gargoylesoftware.htmlunit.html.HtmlButton;
+import com.gargoylesoftware.htmlunit.html.HtmlCheckBoxInput;
+import com.gargoylesoftware.htmlunit.html.HtmlDivision;
+import com.gargoylesoftware.htmlunit.html.HtmlNumberInput;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlSelect;
+import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
+import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
+import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import hudson.Functions;
 import hudson.model.Descriptor;
 import hudson.model.User;
@@ -25,7 +35,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.mail.Authenticator;
 
@@ -184,7 +193,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         addPrecedenceBulk.setChecked(true);
         j.submit(page.getFormByName("config"));
 
-        assertEquals(true, descriptor.getPrecedenceBulk());
+        assertTrue(descriptor.getPrecedenceBulk());
     }
 
     @Test
@@ -220,16 +229,16 @@ public class ExtendedEmailPublisherDescriptorTest {
                 "Configure System [Jenkins]", page.getTitleText());
 
         List<DomElement> settings = page.getByXPath(".//div[@class='advancedLink' and span[starts-with(@id, 'yui-gen')]/span[@class='first-child']/button[./text()='Default Triggers...']]");
-        assertTrue(settings.size() == 1);
+        assertEquals(1, settings.size());
         DomNode div = settings.get(0);
         DomNode table = div.getNextSibling();
-        assertTrue(table.getLocalName().equals("table"));
+        assertEquals("table", table.getLocalName());
         DomNode tbody = table.getFirstChild();
-        assertTrue(tbody.getLocalName().equals("tbody"));
+        assertEquals("tbody", tbody.getLocalName());
         assertFalse(tbody.getChildNodes().isEmpty());
 
         List<DomNode> nodes = div.getByXPath(".//button[./text()='Default Triggers...']");
-        assertTrue(nodes.size() == 1);
+        assertEquals(1, nodes.size());
         HtmlButton defaultTriggers = (HtmlButton)nodes.get(0);
         defaultTriggers.click();
 
@@ -241,7 +250,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         };
 
         List<DomNode> failureTrigger = page.getByXPath(".//input[@json='hudson.plugins.emailext.plugins.trigger.FailureTrigger']");
-        assertTrue(failureTrigger.size() == 1);
+        assertEquals(1, failureTrigger.size());
         HtmlCheckBoxInput failureTriggerCheckBox = (HtmlCheckBoxInput)failureTrigger.get(0);
         assertTrue(failureTriggerCheckBox.isChecked());
         failureTriggerCheckBox.setChecked(false);
@@ -270,7 +279,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         HtmlTableCell settingName = (HtmlTableCell)nodes.get(0);
 
         nodes = settingName.getByXPath("../td[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath']");
-        assertTrue("Should not have any class path setup by default", nodes.size() == 0);
+        assertEquals("Should not have any class path setup by default", 0, nodes.size());
 
         nodes = settingName.getByXPath("../td[@class='setting-main']/div[@class='repeated-container' and span[starts-with(@id, 'yui-gen')]/span[@class='first-child']/button[./text()='Add']]");
         assertEquals(1, nodes.size());
@@ -280,7 +289,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         addButton.click();
 
         nodes = settingName.getByXPath("../td[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath']");
-        assertTrue(nodes.size() == 1);
+        assertEquals(1, nodes.size());
         div = (HtmlDivision) nodes.get(0);
         String divClass = div.getAttribute("class");
         assertTrue(divClass.contains("first") && divClass.contains("last") && divClass.contains("only"));
@@ -294,7 +303,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         addButton.click();
 
         nodes = settingName.getByXPath("../td[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath' and contains(@class, 'last')]");
-        assertTrue(nodes.size() == 1);
+        assertEquals(1, nodes.size());
         div = (HtmlDivision) nodes.get(0);
         divClass = div.getAttribute("class");
         assertTrue(divClass.contains("last"));
@@ -315,8 +324,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertArrayEquals(classpath, descriptor.getDefaultClasspath()
                 .stream()
                 .map(GroovyScriptPath::getPath)
-                .collect(Collectors.toList())
-                .toArray(new String[0]));
+                .toArray(String[]::new));
     }
 
     @Test
@@ -341,7 +349,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         );
         try (ACLContext c = ACL.as(User.getById(USER, true))) {
             Collection<Descriptor> descriptors = Functions.getSortedDescriptorsForGlobalConfigUnclassified();
-            assertTrue("Global configuration should not be accessible to READ users", descriptors.size() == 0);
+            assertEquals("Global configuration should not be accessible to READ users", 0, descriptors.size());
         }
         try (ACLContext c = ACL.as(User.getById(MANAGER, true))) {
             Collection<Descriptor> descriptors = Functions.getSortedDescriptorsForGlobalConfigUnclassified();
