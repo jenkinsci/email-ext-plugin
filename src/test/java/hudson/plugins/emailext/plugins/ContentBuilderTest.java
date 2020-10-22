@@ -151,7 +151,7 @@ public class ContentBuilderTest {
         RuntimeContent content = new RuntimeContent("Hello, world");
         assertEquals("Hello, world", ContentBuilder.transformText("${RUNTIME}",
                 new ExtendedEmailPublisherContext(publisher, build, build.getWorkspace(), j.createLocalLauncher(), listener),
-                Collections.singletonList((TokenMacro) content)));
+                Collections.singletonList(content)));
     }
     
     public class RuntimeContent extends TokenMacro {
