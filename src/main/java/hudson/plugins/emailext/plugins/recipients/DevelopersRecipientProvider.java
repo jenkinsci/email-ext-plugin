@@ -2,7 +2,6 @@ package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
@@ -41,7 +40,7 @@ public class DevelopersRecipientProvider extends RecipientProvider {
             }
         }
         final Debug debug = new Debug();
-        Set<User> users = RecipientProviderUtilities.getChangeSetAuthors(Collections.<Run<?, ?>>singleton(context.getRun()), debug);
+        Set<User> users = RecipientProviderUtilities.getChangeSetAuthors(Collections.singleton(context.getRun()), debug);
         RecipientProviderUtilities.addUsers(users, context, env, to, cc, bcc, debug);
     }
 

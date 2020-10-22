@@ -12,7 +12,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import org.apache.commons.io.IOUtils;
@@ -69,7 +68,7 @@ public class AttachmentUtilsTest {
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
         publisher.attachBuildLog = true;
         publisher.recipientList = "mickey@disney.com";
-        SuccessTrigger trigger = new SuccessTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
         publisher.getConfiguredTriggers().add(trigger);
         project.getPublishersList().add(publisher);
         FreeStyleBuild b = j.buildAndAssertSuccess(project);
@@ -100,7 +99,7 @@ public class AttachmentUtilsTest {
         publisher.attachBuildLog = true;
         publisher.compressBuildLog = true;
         publisher.recipientList = "mickey@disney.com";
-        SuccessTrigger trigger = new SuccessTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
         publisher.getConfiguredTriggers().add(trigger);
         project.getPublishersList().add(publisher);
         project.getBuildersList().add(new TestBuilder() {
@@ -144,7 +143,7 @@ public class AttachmentUtilsTest {
         publisher.attachmentsPattern = "*.pdf";
         publisher.recipientList = "mickey@disney.com";
 
-        SuccessTrigger trigger = new SuccessTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
 
         publisher.getConfiguredTriggers().add(trigger);
 
@@ -185,7 +184,7 @@ public class AttachmentUtilsTest {
         publisher.attachmentsPattern = "**/*.pdf";
         publisher.recipientList = "mickey@disney.com";
 
-        SuccessTrigger trigger = new SuccessTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
 
         publisher.getConfiguredTriggers().add(trigger);
 
@@ -228,7 +227,7 @@ public class AttachmentUtilsTest {
         publisher.attachmentsPattern = "**/*.html";
         publisher.recipientList = "mickey@disney.com";
 
-        SuccessTrigger trigger = new SuccessTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
 
         publisher.getConfiguredTriggers().add(trigger);
 
@@ -271,7 +270,7 @@ public class AttachmentUtilsTest {
         publisher.attachmentsPattern = "**/*.txt";
         publisher.recipientList = "mickey@disney.com";
 
-        SuccessTrigger trigger = new SuccessTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
 
         publisher.getConfiguredTriggers().add(trigger);
 

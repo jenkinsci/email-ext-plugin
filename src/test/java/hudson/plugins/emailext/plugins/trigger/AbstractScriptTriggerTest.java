@@ -6,7 +6,6 @@ import hudson.model.Item;
 import hudson.model.Result;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.RecipientProvider;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript;
@@ -64,7 +63,7 @@ public class AbstractScriptTriggerTest {
         final String script = "out.println('Checking before trigger')\n" +
                 "return build.result.toString() == 'SUCCESS'";
         publisher.getConfiguredTriggers().add(new PreBuildScriptTrigger(
-                Collections.<RecipientProvider>emptyList(),
+                Collections.emptyList(),
                 "recipientList",
                 "replyTo",
                 "subject",
@@ -130,7 +129,7 @@ public class AbstractScriptTriggerTest {
             "  }\n" +
             "}\n";
         publisher.getConfiguredTriggers().add(new PreBuildScriptTrigger(
-                Collections.<RecipientProvider>emptyList(),
+                Collections.emptyList(),
                 "recipientList",
                 "replyTo",
                 "subject",

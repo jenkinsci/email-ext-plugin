@@ -118,7 +118,7 @@ public class ExtendedEmailPublisherTest {
         recProviders = Collections.emptyList();
         Mailbox.clearAll();
 
-        publisher.getDescriptor().setDefaultClasspath(Collections.<GroovyScriptPath>emptyList());
+        publisher.getDescriptor().setDefaultClasspath(Collections.emptyList());
         publisher.getDescriptor().setAllowedDomains(null);
         oldAuthorizationStrategy = j.jenkins.getAuthorizationStrategy();
         oldSecurityRealm = j.jenkins.getSecurityRealm();

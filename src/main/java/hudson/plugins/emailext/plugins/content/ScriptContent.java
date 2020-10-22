@@ -133,7 +133,7 @@ public class ScriptContent extends AbstractEvalContent {
                 approvedScript = true;
             }
             // we add the binding to the SimpleTemplateEngine instead of the shell
-            GroovyShell shell = createEngine(descriptor, Collections.<String, Object>emptyMap(), !approvedScript);
+            GroovyShell shell = createEngine(descriptor, Collections.emptyMap(), !approvedScript);
             SimpleTemplateEngine engine = new SimpleTemplateEngine(shell);
             Template tmpl;
             synchronized (templateCache) {

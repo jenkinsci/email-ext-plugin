@@ -118,7 +118,7 @@ import java.util.List;
 
     public static void addChangeSet(final WorkflowRun build, final String... inAuthors) {
         ChangeLogSet<ChangeLogSet.Entry> changeSet = makeChangeSet(build, inAuthors);
-        PowerMockito.when(build.getChangeSets()).thenReturn(Collections.<ChangeLogSet<? extends ChangeLogSet.Entry>>singletonList(changeSet));
+        PowerMockito.when(build.getChangeSets()).thenReturn(Collections.singletonList(changeSet));
     }
 
     public static void addChangeSet(final AbstractBuild<?, ?> build, final String... inAuthors) {

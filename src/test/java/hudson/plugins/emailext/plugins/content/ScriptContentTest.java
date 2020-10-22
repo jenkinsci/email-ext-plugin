@@ -15,7 +15,6 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.MailAccount;
-import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.util.DescribableList;
@@ -310,7 +309,7 @@ public class ScriptContentTest {
         publisher.recipientList = "mickey@disney.com";
         publisher.defaultSubject = "${SCRIPT, script=\"subdir/test.groovy\"}";
         
-        SuccessTrigger trigger = new SuccessTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "", "$PROJECT_DEFAULT_SUBJECT", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "$PROJECT_DEFAULT_SUBJECT", "", "", 0, "project");
         
         publisher.getConfiguredTriggers().add(trigger);
         
