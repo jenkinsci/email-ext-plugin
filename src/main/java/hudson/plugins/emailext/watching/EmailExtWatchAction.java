@@ -1,8 +1,11 @@
 package hudson.plugins.emailext.watching;
 
 import hudson.Extension;
-import hudson.model.*;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
 import hudson.model.Descriptor.FormException;
+import hudson.model.User;
+import hudson.model.UserPropertyDescriptor;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.tasks.Mailer;
