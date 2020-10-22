@@ -25,7 +25,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.isEmptyString;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -159,7 +159,7 @@ public class AbstractScriptTriggerTest {
 
         AbstractScriptTrigger at = (AbstractScriptTrigger) trigger;
         assertNotNull(at.getSecureTriggerScript());
-        assertThat(at.getSecureTriggerScript().getScript(), not(isEmptyString()));
+        assertThat(at.getSecureTriggerScript().getScript(), not(emptyString()));
 
         FreeStyleBuild build = j.assertBuildStatus(firstStatus, project.scheduleBuild2(0));
         j.assertLogContains(expected.getName(), build); //TODO change whenever build.getResult() ends up in a whitelist
