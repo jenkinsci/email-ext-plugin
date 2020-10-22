@@ -241,7 +241,6 @@ public class ScriptContentTest {
     
     /**
      * this is for groovy template testing 
-     * @throws Exception
      */
     @Test
     public void testWithGroovyTemplate() throws Exception {
