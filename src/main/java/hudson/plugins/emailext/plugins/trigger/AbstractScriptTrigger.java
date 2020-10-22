@@ -98,8 +98,6 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
                 }
             } catch (IOException e) {
                 e.printStackTrace(listener.fatalError("Failed evaluating script trigger %s%n", e.getMessage()));
-            } finally {
-
             }
         }
         return result;
