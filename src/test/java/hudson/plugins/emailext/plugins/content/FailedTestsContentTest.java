@@ -353,7 +353,7 @@ public class FailedTestsContentTest {
         failedTestContent.showMessage = true;
         failedTestContent.showStack = true;
         failedTestContent.outputFormat = "yaml";
-        String content = failedTestContent.evaluate(build, listener, failedTestContent.MACRO_NAME);
+        String content = failedTestContent.evaluate(build, listener, FailedTestsContent.MACRO_NAME);
         assertEquals(content, "summary: \"1 tests failed.\"\n" +
                 "tests:\n" +
                 "- name: \"hudson.plugins.emailext.ExtendedEmailPublisherTest.Test\"\n" +
