@@ -1,22 +1,15 @@
 target
-.classpath
-.settings
-.project
-.idea
-.gradle
-gradlew
-gradlew.bat
-settings.gradle
-*.iml
-*.ipr
-*.iws
-work
-/email-ext.sublime-workspace
-/email-ext.sublime-project
-*.bak
-nbactions.xml
-.directory
-nb-configuration.xml
 
-/.vscode/*
-/.factorypath
+# mvn hpi:run
+work
+
+# IntelliJ IDEA project files
+*.iml
+*.iws
+*.ipr
+.idea
+
+# Eclipse project files
+.settings
+.classpath
+.project

@@ -10,10 +10,13 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-image:https://img.shields.io/jenkins/plugin/v/email-ext.svg[Jenkins Plugin,link=https://plugins.jenkins.io/email-ext]
-image:https://img.shields.io/github/release/jenkinsci/email-ext-plugin.svg?label=release[GitHub release,link=https://github.com/jenkinsci/email-ext-plugin/releases/latest]
-image:https://img.shields.io/jenkins/plugin/i/email-ext.svg?color=blue[Jenkins Plugin Installs,link=https://plugins.jenkins.io/email-ext]
-image:https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/master/badge/icon[Build Status,link=https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/master/]
+https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/master/[image:https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/master/badge/icon[Build Status]]
+https://github.com/jenkinsci/email-ext-plugin/graphs/contributors[image:https://img.shields.io/github/contributors/jenkinsci/email-ext-plugin.svg[Contributors]]
+https://plugins.jenkins.io/email-ext[image:https://img.shields.io/jenkins/plugin/v/email-ext.svg[Jenkins Plugin]]
+https://github.com/jenkinsci/email-ext-plugin/releases/latest[image:https://img.shields.io/github/release/jenkinsci/email-ext-plugin.svg?label=changelog[GitHub release]]
+https://plugins.jenkins.io/email-ext[image:https://img.shields.io/jenkins/plugin/i/email-ext.svg?color=blue[Jenkins Plugin Installs]]
+
+== Introduction
 
 This plugin allows you to configure every aspect of email notifications.
 You can customize when an email is sent, who should receive it, and what
@@ -21,10 +24,14 @@ the email says.
 
 toc::[]
 
-== Questions and bug reports
+== Issues
 
-If you need help, please post on the mailing lists https://jenkins.io/mailing-lists/, stack overflow or if you have
-found a bug log an issue at https://issues.jenkins-ci.org/ (no support tickets please).
+If you need help, please post on https://jenkins.io/mailing-lists/[the mailing
+lists] or Stack Overflow.
+
+Report issues and enhancements in the https://issues.jenkins-ci.org/[Jenkins
+issue tracker] (no support tickets please). Use the `email-ext-plugin` component
+in the `JENKINS` project.
 
 == Recipes
 
@@ -388,7 +395,9 @@ GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
 * https://plugins.jenkins.io/view-job-filters/[View Job Filters]
 * https://plugins.jenkins.io/run-condition-extras/[Run Condition Extras Plugin]
 
-== Contributing to Email-Ext plugin
+== Contributing
+
+Refer to our https://github.com/jenkinsci/.github/blob/master/CONTRIBUTING.md[contribution guidelines].
 
 Make sure you have installed http://maven.apache.org/[Maven 3] 
 and JDK 8.0 or later. Make also sure you have properly configured your

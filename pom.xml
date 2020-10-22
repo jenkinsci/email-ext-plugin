@@ -1,10 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.8</version>
+        <version>4.12</version>
         <relativePath />
     </parent>
 
@@ -21,7 +22,7 @@
     <version>${revision}${changelist}</version>
     <name>Email Extension Plugin</name>
     <description>Allows to configure every aspect of email notifications: when an email is sent, who should receive it and what the email says</description>
-    <url>https://github.com/jenkinsci/email-ext-plugin</url>
+    <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
     <issueManagement>
         <system>JIRA</system>
         <url>https://issues.jenkins-ci.org/issues/?jql=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+email-ext-plugin</url>
@@ -40,6 +41,15 @@
     </properties>
 
     <developers>
+        <developer>
+            <id>basil</id>
+            <name>Basil Crow</name>
+            <email>me@basilcrow.com</email>
+            <roles>
+                <role>maintainer</role>
+                <role>developer</role>
+            </roles>
+        </developer>
         <developer>
             <id>slide</id>
             <name>Alex Earl</name>
@@ -100,7 +110,7 @@
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-2.164.x</artifactId>
-                <version>4</version>
+                <version>10</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -319,7 +329,7 @@
     </dependencies>
 
     <scm>
-        <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
+        <connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
         <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
         <url>https://github.com/${gitHubRepo}</url>
         <tag>${scmTag}</tag>
