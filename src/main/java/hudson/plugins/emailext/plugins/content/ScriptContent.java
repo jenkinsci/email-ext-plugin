@@ -183,7 +183,7 @@ public class ScriptContent extends AbstractEvalContent {
     private String executeScript(Run<?, ?> build, FilePath workspace, TaskListener listener, InputStream scriptStream)
             throws IOException {
         String result = "";
-        Map binding = new HashMap<>();
+        Map<String, Object> binding = new HashMap<>();
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         Item parent = build.getParent();
 
