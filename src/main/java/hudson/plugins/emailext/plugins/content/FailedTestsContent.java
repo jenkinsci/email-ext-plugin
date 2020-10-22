@@ -184,7 +184,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         private String lineBreak;
 
         public SummarizedTestResult(int failCount, String lineBreak) {
-            this.tests = new ArrayList<FailedTest>();
+            this.tests = new ArrayList<>();
             this.totalFailCount = failCount;
             this.lineBreak = lineBreak;
         }
