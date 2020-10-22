@@ -318,15 +318,6 @@
             <version>${configuration-as-code.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- static analysys -->
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>3.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
     <scm>
