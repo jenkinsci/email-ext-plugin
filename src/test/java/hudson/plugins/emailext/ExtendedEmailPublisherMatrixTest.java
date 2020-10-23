@@ -48,14 +48,6 @@ public class ExtendedEmailPublisherMatrixTest {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        agents = new ArrayList<>();
-        agents.add(j.createOnlineSlave(new LabelAtom("success-agent1")));
-        agents.add(j.createOnlineSlave(new LabelAtom("success-agent2")));
-        agents.add(j.createOnlineSlave(new LabelAtom("success-agent3")));
-    }
-
-    @Before
-    public void before() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
         descriptor.setMailAccount(
                 new MailAccount() {
@@ -64,6 +56,14 @@ public class ExtendedEmailPublisherMatrixTest {
                     }
                 });
 
+        agents = new ArrayList<>();
+        agents.add(j.createOnlineSlave(new LabelAtom("success-agent1")));
+        agents.add(j.createOnlineSlave(new LabelAtom("success-agent2")));
+        agents.add(j.createOnlineSlave(new LabelAtom("success-agent3")));
+    }
+
+    @Before
+    public void before() throws Exception {
         publisher = new ExtendedEmailPublisher();
         publisher.defaultSubject = "%DEFAULT_SUBJECT";
         publisher.defaultContent = "%DEFAULT_CONTENT";
