@@ -39,6 +39,7 @@
         <argLine>-Dfile.encoding=UTF-8</argLine>
         <configuration-as-code.version>1.36</configuration-as-code.version>
         <jackson.version>2.11.3</jackson.version>
+        <enforcer.skip>true</enforcer.skip>
     </properties>
 
     <developers>
@@ -297,6 +298,12 @@
             <groupId>io.jenkins.configuration-as-code</groupId>
             <artifactId>test-harness</artifactId>
             <version>${configuration-as-code.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.oshi</groupId>
+            <artifactId>oshi-core</artifactId>
+            <version>5.2.5</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

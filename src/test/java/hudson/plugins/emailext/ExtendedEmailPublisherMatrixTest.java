@@ -16,6 +16,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import oshi.SystemInfo;
+import oshi.hardware.CentralProcessor;
+import oshi.hardware.GlobalMemory;
+import oshi.software.os.OSProcess;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,9 +33,14 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
@@ -41,9 +50,12 @@ import static org.junit.Assert.assertTrue;
 
 public class ExtendedEmailPublisherMatrixTest {
 
+    private static final Logger logger = Logger.getLogger(ExtendedEmailPublisherMatrixTest.class.getName());
+
     private ExtendedEmailPublisher publisher;
     private MatrixProject project;
     private static List<DumbSlave> agents;
+    private final SystemInfo si = new SystemInfo();
 
     @ClassRule public static JenkinsRule j = new JenkinsRule();
 
@@ -91,6 +103,7 @@ public class ExtendedEmailPublisherMatrixTest {
         publisher.getConfiguredTriggers().add( trigger );
         MatrixBuild build = project.scheduleBuild2(0).get();
         if (build.getResult().equals(Result.SUCCESS)) {
+            logMemory();
             j.assertBuildStatusSuccess(build);
         } else {
             assertThat("unexpected build status; build log was:\n------\n" + getLog(build) + "\n------\n", build.getResult(), is(Result.SUCCESS));
@@ -116,6 +129,7 @@ public class ExtendedEmailPublisherMatrixTest {
         if (build.getResult().equals(Result.SUCCESS)) {
             j.assertBuildStatusSuccess(build);
         } else {
+            logMemory();
             assertThat("unexpected build status; build log was:\n------\n" + getLog(build) + "\n------\n", build.getResult(), is(Result.SUCCESS));
         }
         assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );    
@@ -136,6 +150,7 @@ public class ExtendedEmailPublisherMatrixTest {
         if (build.getResult().equals(Result.SUCCESS)) {
             j.assertBuildStatusSuccess(build);
         } else {
+            logMemory();
             assertThat("unexpected build status; build log was:\n------\n" + getLog(build) + "\n------\n", build.getResult(), is(Result.SUCCESS));
         }
         assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );    
@@ -155,6 +170,7 @@ public class ExtendedEmailPublisherMatrixTest {
         if (build.getResult().equals(Result.SUCCESS)) {
             j.assertBuildStatusSuccess(build);
         } else {
+            logMemory();
             assertThat("unexpected build status; build log was:\n------\n" + getLog(build) + "\n------\n", build.getResult(), is(Result.SUCCESS));
         }
     
@@ -211,5 +227,53 @@ public class ExtendedEmailPublisherMatrixTest {
             result.add("");
         }
         return StringUtils.join(result, "\n");
+    }
+
+    private void logMemory() {
+        // Show debugging information about memory usage.
+        // Overall
+        logger.log(
+                Level.INFO,
+                "Uptime: {0} minutes",
+                TimeUnit.SECONDS.toMinutes(si.getOperatingSystem().getSystemUptime()));
+        // CPU
+        CentralProcessor processor = si.getHardware().getProcessor();
+        logger.log(
+                Level.INFO,
+                "Running with {0} physical CPUs and {1} logical CPUs.",
+                new Object[] {
+                        processor.getPhysicalProcessorCount(), processor.getLogicalProcessorCount()
+                });
+        logger.log(
+                Level.INFO,
+                "System load average: {0}",
+                Arrays.toString(processor.getSystemLoadAverage(3)));
+        // Memory
+        GlobalMemory memory = si.getHardware().getMemory();
+        logger.log(
+                Level.INFO,
+                "Memory: {0} MiB available / {1} MiB total",
+                new Object[] {memory.getAvailable() / 1048576L, memory.getTotal() / 1048576L});
+        // Processes
+        logger.log(Level.INFO, "Processes: {0} total", si.getOperatingSystem().getProcessCount());
+        si.getOperatingSystem().getProcesses().stream()
+                .sorted(Comparator.comparing(OSProcess::getResidentSetSize).reversed())
+                .limit(15)
+                .forEach(
+                        process -> {
+                            String name = process.getName().trim();
+                            String cmdline = process.getCommandLine().replace('\0', ' ').trim();
+                            long vsz = process.getVirtualSize();
+                            long rss = process.getResidentSetSize();
+                            if (vsz != 0 && rss != 0) {
+                                logger.log(
+                                        Level.INFO,
+                                        "Process {0} with cmdline {1}, VSZ {2} MiB, RSS {3} MiB",
+                                        new Object[] {
+                                                name, cmdline, vsz / 1048576L, rss / 1048576L
+                                        });
+                            }
+                        });
+
     }
 }
