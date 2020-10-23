@@ -1128,6 +1128,8 @@ public class ExtendedEmailPublisherTest {
         assertTrue(build1.isBuilding());
         assertFalse(build2.isBuilding());
         j.assertLogContains(Messages.ExtendedEmailPublisher__is_still_in_progress_ignoring_for_purpo(build1.getDisplayName()), build2);
+        build1.doStop();
+        j.assertBuildStatus(Result.ABORTED, build1);
     }
 
     @Test
