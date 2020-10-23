@@ -105,7 +105,9 @@ public class CssInlinerTest {
   public void testImageInliningOff() {
         String input = "<html>"
                 + "  <body>"
-                + "    <img src='https://updates.jenkins-ci.org/icons/blank.gif' />"
+                + "    <img src='"
+                + getClass().getClassLoader().getResource("blank.gif").toExternalForm()
+                + "' />"
                 + "  </body>"
                 + "</html>";
 
@@ -117,7 +119,9 @@ public class CssInlinerTest {
   public void testImageInliningOn() {
         String input = "<html>"
                 + "  <body>"
-                + "    <img src='https://updates.jenkins-ci.org/icons/blank.gif' data-inline='true' />"
+                + "    <img src='"
+                + getClass().getClassLoader().getResource("blank.gif").toExternalForm()
+                + "' data-inline='true' />"
                 + "  </body>"
                 + "</html>";
 
