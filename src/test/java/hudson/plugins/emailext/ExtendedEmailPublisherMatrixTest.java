@@ -11,8 +11,13 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import hudson.slaves.DumbSlave;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.mock_javamail.Mailbox;
 
@@ -35,41 +40,43 @@ public class ExtendedEmailPublisherMatrixTest {
 
     private ExtendedEmailPublisher publisher;
     private MatrixProject project;
-    private List<DumbSlave> agents;
- 
-    @Rule
-    public JenkinsRule j = new JenkinsRule() { 
-        @Override
-        public void before() throws Throwable {
-            super.before();
+    private static List<DumbSlave> agents;
 
-            ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
-            descriptor.setMailAccount(new MailAccount() {
-                {
-                    setSmtpHost("smtp.notreal.com");
-                }
-            });
+    @ClassRule public static JenkinsRule j = new JenkinsRule();
 
-            publisher = new ExtendedEmailPublisher();
-            publisher.defaultSubject = "%DEFAULT_SUBJECT";
-            publisher.defaultContent = "%DEFAULT_CONTENT";
-            publisher.attachBuildLog = false;
+    @Rule public TestName testName = new TestName();
 
-            project = j.jenkins.createProject(MatrixProject.class, "Foo");
-            project.getPublishersList().add( publisher );
-            agents = new ArrayList<>();
-            agents.add(createOnlineSlave(new LabelAtom("success-agent1")));
-            agents.add(createOnlineSlave(new LabelAtom("success-agent2")));
-            agents.add(createOnlineSlave(new LabelAtom("success-agent3")));
-        }
-        
-        @Override
-        public void after() throws Exception {
-            super.after();
-            agents.clear();
-            Mailbox.clearAll();
-        }
-    };
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
+        descriptor.setMailAccount(
+                new MailAccount() {
+                    {
+                        setSmtpHost("smtp.notreal.com");
+                    }
+                });
+
+        agents = new ArrayList<>();
+        agents.add(j.createOnlineSlave(new LabelAtom("success-agent1")));
+        agents.add(j.createOnlineSlave(new LabelAtom("success-agent2")));
+        agents.add(j.createOnlineSlave(new LabelAtom("success-agent3")));
+    }
+
+    @Before
+    public void before() throws Exception {
+        publisher = new ExtendedEmailPublisher();
+        publisher.defaultSubject = "%DEFAULT_SUBJECT";
+        publisher.defaultContent = "%DEFAULT_CONTENT";
+        publisher.attachBuildLog = false;
+
+        project = j.createProject(MatrixProject.class, testName.getMethodName());
+        project.getPublishersList().add(publisher);
+    }
+
+    @After
+    public void after() {
+        Mailbox.clearAll();
+    }
 
     @Test
     public void testPreBuildMatrixBuildSendParentOnly() throws Exception {
