@@ -5,6 +5,7 @@ import hudson.matrix.AxisList;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixProject;
 import hudson.matrix.MatrixRun;
+import hudson.model.Result;
 import hudson.model.labels.LabelAtom;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
@@ -15,6 +16,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -32,6 +34,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -87,7 +90,11 @@ public class ExtendedEmailPublisherMatrixTest {
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
         MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);    
+        if (build.getResult().equals(Result.SUCCESS)) {
+            j.assertBuildStatusSuccess(build);
+        } else {
+            assertThat("unexpected build status; build log was:\n------\n" + getLog(build) + "\n------\n", build.getResult(), is(Result.SUCCESS));
+        }
     
         assertThat( "Email should have been triggered, so we should see it in the logs.", build.getLog( 100 ),
                 hasItems( "Email was triggered for: " + PreBuildTrigger.TRIGGER_NAME ) );
@@ -106,7 +113,11 @@ public class ExtendedEmailPublisherMatrixTest {
        
     
         MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);        
+        if (build.getResult().equals(Result.SUCCESS)) {
+            j.assertBuildStatusSuccess(build);
+        } else {
+            assertThat("unexpected build status; build log was:\n------\n" + getLog(build) + "\n------\n", build.getResult(), is(Result.SUCCESS));
+        }
         assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );    
     }
 
@@ -122,7 +133,11 @@ public class ExtendedEmailPublisherMatrixTest {
        
     
         MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);        
+        if (build.getResult().equals(Result.SUCCESS)) {
+            j.assertBuildStatusSuccess(build);
+        } else {
+            assertThat("unexpected build status; build log was:\n------\n" + getLog(build) + "\n------\n", build.getResult(), is(Result.SUCCESS));
+        }
         assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );    
     }
     
@@ -137,7 +152,11 @@ public class ExtendedEmailPublisherMatrixTest {
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
         MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);    
+        if (build.getResult().equals(Result.SUCCESS)) {
+            j.assertBuildStatusSuccess(build);
+        } else {
+            assertThat("unexpected build status; build log was:\n------\n" + getLog(build) + "\n------\n", build.getResult(), is(Result.SUCCESS));
+        }
     
         assertThat( "Email should have been triggered, so we should see it in the logs.", build.getLog( 100 ),
                 hasItems( "Email was triggered for: " + AlwaysTrigger.TRIGGER_NAME ) );
@@ -179,5 +198,18 @@ public class ExtendedEmailPublisherMatrixTest {
         }
         list.add(new Axis("label",values));
         project.setAxes(list);
+    }
+
+    private static String getLog(MatrixBuild build) throws IOException {
+        List<String> result = new ArrayList<>();
+        result.add(build.getFullDisplayName());
+        result.addAll(build.getLog(Integer.MAX_VALUE));
+        result.add("");
+        for (MatrixRun run : build.getRuns()) {
+            result.add(run.getFullDisplayName());
+            result.addAll(run.getLog(Integer.MAX_VALUE));
+            result.add("");
+        }
+        return StringUtils.join(result, "\n");
     }
 }
