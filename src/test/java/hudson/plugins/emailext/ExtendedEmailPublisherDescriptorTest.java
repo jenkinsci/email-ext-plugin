@@ -15,10 +15,31 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import hudson.Functions;
 import hudson.model.Descriptor;
 import hudson.model.User;
+import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
+import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
+import hudson.plugins.emailext.plugins.trigger.BuildingTrigger;
+import hudson.plugins.emailext.plugins.trigger.FirstFailureTrigger;
+import hudson.plugins.emailext.plugins.trigger.FirstUnstableTrigger;
+import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
+import hudson.plugins.emailext.plugins.trigger.FixedUnhealthyTrigger;
+import hudson.plugins.emailext.plugins.trigger.ImprovementTrigger;
+import hudson.plugins.emailext.plugins.trigger.NotBuiltTrigger;
+import hudson.plugins.emailext.plugins.trigger.PreBuildScriptTrigger;
+import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
+import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
+import hudson.plugins.emailext.plugins.trigger.ScriptTrigger;
+import hudson.plugins.emailext.plugins.trigger.SecondFailureTrigger;
+import hudson.plugins.emailext.plugins.trigger.StatusChangedTrigger;
+import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
+import hudson.plugins.emailext.plugins.trigger.StillUnstableTrigger;
+import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
+import hudson.plugins.emailext.plugins.trigger.UnstableTrigger;
+import hudson.plugins.emailext.plugins.trigger.XNthFailureTrigger;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
 import hudson.security.Permission;
 import hudson.util.ReflectionUtils;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import org.junit.Assume;
 import org.junit.Rule;
@@ -26,6 +47,7 @@ import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
+import org.jvnet.hudson.test.recipes.LocalData;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -39,6 +61,7 @@ import java.util.function.Function;
 import javax.mail.Authenticator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.oneOf;
 import static org.junit.Assert.assertArrayEquals;
@@ -518,5 +541,195 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertNull(descriptor.getDefaultSuffix());
         assertEquals("UTF-8",descriptor.getCharset());
         assertEquals("",descriptor.getEmergencyReroute());
+    }
+
+    @LocalData
+    @Test
+    public void persistedConfigurationBeforeJCasC() {
+        // Local data created using Email Extension 2.71 with the following code:
+        /*
+        HtmlPage page = j.createWebClient().goTo("configure");
+        HtmlForm config = page.getFormByName("config");
+        j.submit(config);
+
+        page = j.createWebClient().goTo("configure");
+        config = page.getFormByName("config");
+        j.getButtonByCaption(config, "Advanced...").click();
+        j.getButtonByCaption(config, "Default Triggers...").click();
+        WebClientUtil.waitForJSExec(page.getWebClient());
+        HtmlCheckBoxInput useSmtpAuth = page.getElementByName("ext_mailer_use_smtp_auth");
+        useSmtpAuth.click();
+        HtmlCheckBoxInput useListId = page.getElementByName("ext_mailer_use_list_id");
+        useListId.click();
+        WebClientUtil.waitForJSExec(page.getWebClient());
+        Set<HtmlButton> buttons = new HashSet<>();
+        for (HtmlElement button : config.getElementsByTagName("button")) {
+            buttons.add((HtmlButton) button);
+        }
+        for (HtmlButton button : buttons) {
+            DomNode ancestor =
+                    button.getParentNode().getParentNode().getParentNode().getParentNode();
+            String key = ancestor.getPreviousSibling().getTextContent().trim();
+            if (key.equals("Additional accounts") || key.equals("Additional groovy classpath")) {
+                button.click();
+            }
+        }
+        WebClientUtil.waitForJSExec(page.getWebClient());
+        HtmlCheckBoxInput useSmtpAuth2 = page.getElementByName("_.auth");
+        useSmtpAuth2.click();
+        WebClientUtil.waitForJSExec(page.getWebClient());
+
+        HtmlTextInput address = page.getElementByName("_.adminAddress");
+        address.setValueAttribute("admin@example.com");
+        HtmlTextInput smtpServer = page.getElementByName("ext_mailer_smtp_server");
+        smtpServer.setValueAttribute("smtp.example.com");
+        HtmlTextInput defaultSuffix = page.getElementByName("ext_mailer_default_suffix");
+        defaultSuffix.setValueAttribute("@example.com");
+        HtmlTextInput smtpUsername = page.getElementByName("ext_mailer_smtp_username");
+        smtpUsername.setValueAttribute("admin");
+        HtmlPasswordInput smtpPassword = page.getElementByName("ext_mailer_smtp_password");
+        smtpPassword.setValueAttribute("honeycomb");
+        HtmlTextArea advProperties = page.getElementByName("ext_mailer_adv_properties");
+        advProperties.setText("mail.smtp.ssl.trust=example.com");
+        HtmlCheckBoxInput smtpUseSsl = page.getElementByName("ext_mailer_smtp_use_ssl");
+        smtpUseSsl.click();
+        HtmlTextInput smtpPort = page.getElementByName("ext_mailer_smtp_port");
+        smtpPort.setValueAttribute("2525");
+        HtmlTextInput charset = page.getElementByName("ext_mailer_charset");
+        charset.setValueAttribute("UTF-8");
+        HtmlTextInput address2 = page.getElementByName("_.address");
+        address2.setValueAttribute("admin@example2.com");
+        HtmlTextInput smtpServer2 = page.getElementByName("_.smtpHost");
+        smtpServer2.setValueAttribute("smtp.example2.com");
+        HtmlTextInput smtpPort2 = page.getElementByName("_.smtpPort");
+        smtpPort2.setValueAttribute("2626");
+        HtmlTextInput smtpUsername2 = page.getElementByName("_.smtpUsername");
+        smtpUsername2.setValueAttribute("admin2");
+        HtmlPasswordInput smtpPassword2 = page.getElementByName("_.smtpPassword");
+        smtpPassword2.setValueAttribute("honeycomb2");
+        HtmlCheckBoxInput smtpUseSsl2 = page.getElementByName("_.useSsl");
+        smtpUseSsl2.click();
+        HtmlTextArea advProperties2 = page.getElementByName("_.advProperties");
+        advProperties2.setText("mail.smtp.ssl.trust=example2.com");
+        HtmlSelect defaultContentType = page.getElementByName("ext_mailer_default_content_type");
+        defaultContentType.setSelectedAttribute("text/html", true);
+        HtmlTextInput listId = page.getElementByName("ext_mailer_list_id");
+        listId.setValueAttribute("<list.example.com>");
+        HtmlCheckBoxInput addPrecedenceBulk =
+                page.getElementByName("ext_mailer_add_precedence_bulk");
+        addPrecedenceBulk.click();
+        HtmlTextInput defaultRecipients = page.getElementByName("ext_mailer_default_recipients");
+        defaultRecipients.setValueAttribute("default@example.com");
+        HtmlTextInput defaultReplyto = page.getElementByName("ext_mailer_default_replyto");
+        defaultReplyto.setValueAttribute("noreply@example.com");
+        HtmlTextInput emergencyReroute = page.getElementByName("ext_mailer_emergency_reroute");
+        emergencyReroute.setValueAttribute("emergency@example.com");
+        HtmlTextInput allowedDomains = page.getElementByName("ext_mailer_allowed_domains");
+        allowedDomains.setValueAttribute("@example.com");
+        HtmlTextInput excludedCommitters = page.getElementByName("ext_mailer_excluded_committers");
+        excludedCommitters.setValueAttribute("excluded@example.com");
+        HtmlTextInput defaultSubject = page.getElementByName("ext_mailer_default_subject");
+        defaultSubject.setValueAttribute("$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS");
+        HtmlTextInput maxAttachmentSize = page.getElementByName("ext_mailer_max_attachment_size");
+        maxAttachmentSize.setValueAttribute("42");
+        HtmlTextArea defaultBody = page.getElementByName("ext_mailer_default_body");
+        defaultBody.setText("$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS");
+        HtmlTextArea defaultPresendScript =
+                page.getElementByName("ext_mailer_default_presend_script");
+        defaultPresendScript.setText("build.previousBuild.result.toString().equals('FAILURE')");
+        HtmlTextArea defaultPostsendScript =
+                page.getElementByName("ext_mailer_default_postsend_script");
+        defaultPostsendScript.setText("build.result.toString().equals('FAILURE')");
+        HtmlTextInput defaultClasspath = page.getElementByName("ext_mailer_default_classpath");
+        defaultClasspath.setValueAttribute("classes");
+        HtmlCheckBoxInput debugMode = page.getElementByName("ext_mailer_debug_mode");
+        debugMode.click();
+        HtmlCheckBoxInput requireAdminForTemplateTesting =
+                page.getElementByName("ext_mailer_require_admin_for_template_testing");
+        requireAdminForTemplateTesting.click();
+        HtmlCheckBoxInput watchingEnabled = page.getElementByName("ext_mailer_watching_enabled");
+        watchingEnabled.click();
+        HtmlCheckBoxInput allowUnregisteredEnabled =
+                page.getElementByName("ext_mailer_allow_unregistered_enabled");
+        allowUnregisteredEnabled.click();
+        for (HtmlInput input : config.getInputsByName("defaultTriggers")) {
+            input.click();
+        }
+
+        WebClientUtil.waitForJSExec(page.getWebClient());
+        j.submit(config);
+        */
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        assertEquals("admin@example.com", descriptor.getAdminAddress());
+        assertEquals("smtp.example.com", descriptor.getMailAccount().getSmtpHost());
+        assertEquals("@example.com", descriptor.getDefaultSuffix());
+        assertEquals("admin", descriptor.getMailAccount().getSmtpUsername());
+        assertEquals(Secret.fromString("honeycomb"), descriptor.getMailAccount().getSmtpPassword());
+        assertEquals("mail.smtp.ssl.trust=example.com", descriptor.getAdvProperties());
+        assertTrue(descriptor.getMailAccount().isUseSsl());
+        assertTrue(descriptor.getMailAccount().isDefaultAccount());
+        assertEquals("2525", descriptor.getMailAccount().getSmtpPort());
+        assertEquals("UTF-8", descriptor.getCharset());
+        assertEquals(1, descriptor.getAddAccounts().size());
+        MailAccount additionalAccount = descriptor.getAddAccounts().get(0);
+        assertEquals("admin@example2.com", additionalAccount.getAddress());
+        assertEquals("smtp.example2.com", additionalAccount.getSmtpHost());
+        assertEquals("2626", additionalAccount.getSmtpPort());
+        assertEquals("admin2", additionalAccount.getSmtpUsername());
+        assertEquals(Secret.fromString("honeycomb2"), additionalAccount.getSmtpPassword());
+        assertTrue(additionalAccount.isUseSsl());
+        assertFalse(additionalAccount.isDefaultAccount());
+        assertEquals("mail.smtp.ssl.trust=example2.com", additionalAccount.getAdvProperties());
+        assertEquals("text/html", descriptor.getDefaultContentType());
+        assertEquals("<list.example.com>", descriptor.getListId());
+        assertTrue(descriptor.getPrecedenceBulk());
+        assertEquals("default@example.com", descriptor.getDefaultRecipients());
+        assertEquals("noreply@example.com", descriptor.getDefaultReplyTo());
+        assertEquals("emergency@example.com", descriptor.getEmergencyReroute());
+        assertEquals("@example.com", descriptor.getAllowedDomains());
+        assertEquals("excluded@example.com", descriptor.getExcludedCommitters());
+        assertEquals(
+                "$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS",
+                descriptor.getDefaultSubject());
+        assertEquals(44040192, descriptor.getMaxAttachmentSize());
+        assertEquals(
+                "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS",
+                descriptor.getDefaultBody());
+        assertEquals(
+                "build.previousBuild.result.toString().equals('FAILURE')",
+                descriptor.getDefaultPresendScript());
+        assertEquals(
+                "build.result.toString().equals('FAILURE')", descriptor.getDefaultPostsendScript());
+        assertEquals(1, descriptor.getDefaultClasspath().size());
+        assertEquals("classes", descriptor.getDefaultClasspath().get(0).getPath());
+        assertTrue(descriptor.isDebugMode());
+        assertTrue(descriptor.isAdminRequiredForTemplateTesting());
+        assertTrue(descriptor.isWatchingEnabled());
+        assertTrue(descriptor.isAllowUnregisteredEnabled());
+        assertEquals(20, descriptor.getDefaultTriggerIds().size());
+        assertThat(
+                descriptor.getDefaultTriggerIds(),
+                containsInAnyOrder(
+                        AbortedTrigger.class.getName(),
+                        AlwaysTrigger.class.getName(),
+                        BuildingTrigger.class.getName(),
+                        FirstFailureTrigger.class.getName(),
+                        FirstUnstableTrigger.class.getName(),
+                        FixedTrigger.class.getName(),
+                        FixedUnhealthyTrigger.class.getName(),
+                        ImprovementTrigger.class.getName(),
+                        NotBuiltTrigger.class.getName(),
+                        PreBuildScriptTrigger.class.getName(),
+                        PreBuildTrigger.class.getName(),
+                        RegressionTrigger.class.getName(),
+                        ScriptTrigger.class.getName(),
+                        SecondFailureTrigger.class.getName(),
+                        StatusChangedTrigger.class.getName(),
+                        StillFailingTrigger.class.getName(),
+                        StillUnstableTrigger.class.getName(),
+                        SuccessTrigger.class.getName(),
+                        UnstableTrigger.class.getName(),
+                        XNthFailureTrigger.class.getName()));
     }
 }
