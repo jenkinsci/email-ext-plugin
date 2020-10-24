@@ -144,7 +144,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      */
     private String excludedCommitters = "";
 
-    private boolean overrideGlobalSettings;
+    private transient boolean overrideGlobalSettings;
 
     /**
      * If non-null, set a List-ID email header.
@@ -357,6 +357,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         this.addAccounts = addAccounts;
     }
 
+    @Deprecated
     public String getSmtpServer() {
         return mailAccount.getSmtpHost();
     }
@@ -384,6 +385,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     @SuppressWarnings("unused")
     @DataBoundSetter
+    @Deprecated
     public void setSmtpPassword(String password) {
         mailAccount.setSmtpPassword(password);
     }
@@ -391,8 +393,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     // Make API match Mailer plugin
     @SuppressWarnings("unused")
     public void setSmtpAuth(String userName, String password) {
-        setSmtpUsername(userName);
-        setSmtpPassword(password);
+        mailAccount.setSmtpUsername(userName);
+        mailAccount.setSmtpPassword(password);
     }
 
     @Deprecated
@@ -417,6 +419,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         mailAccount.setSmtpPort(nullify(port));
     }
 
+    @Deprecated
     public String getAdvProperties() {
         return mailAccount.getAdvProperties();
     }
@@ -572,6 +575,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         this.excludedCommitters = ((excluded == null) ? "" : excluded);
     }
 
+    @Deprecated
     public boolean getOverrideGlobalSettings() {
         return overrideGlobalSettings;
     }

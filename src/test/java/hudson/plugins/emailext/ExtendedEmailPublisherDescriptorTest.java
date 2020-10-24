@@ -240,7 +240,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         advProperties.setText("mail.smtp.starttls.enable=true");
         j.submit(page.getFormByName("config"));
 
-        assertEquals("mail.smtp.starttls.enable=true", descriptor.getAdvProperties());
+        assertEquals("mail.smtp.starttls.enable=true", descriptor.getMailAccount().getAdvProperties());
     }
 
     @Test
@@ -666,7 +666,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("@example.com", descriptor.getDefaultSuffix());
         assertEquals("admin", descriptor.getMailAccount().getSmtpUsername());
         assertEquals(Secret.fromString("honeycomb"), descriptor.getMailAccount().getSmtpPassword());
-        assertEquals("mail.smtp.ssl.trust=example.com", descriptor.getAdvProperties());
+        assertEquals("mail.smtp.ssl.trust=example.com", descriptor.getMailAccount().getAdvProperties());
         assertTrue(descriptor.getMailAccount().isUseSsl());
         assertTrue(descriptor.getMailAccount().isDefaultAccount());
         assertEquals("2525", descriptor.getMailAccount().getSmtpPort());
