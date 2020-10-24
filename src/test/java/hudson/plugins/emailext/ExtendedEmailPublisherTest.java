@@ -1166,9 +1166,9 @@ public class ExtendedEmailPublisherTest {
         j.createWebClient().executeOnServer(new Callable<Object>() {
             public Void call() throws Exception {
                 ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
-                descriptor.setSmtpServer("smtp.test0.com");
-                descriptor.setSmtpPort("587");
-                descriptor.setAdvProperties("mail.smtp.ssl.trust=test0.com");
+                descriptor.getMailAccount().setSmtpHost("smtp.test0.com");
+                descriptor.getMailAccount().setSmtpPort("587");
+                descriptor.getMailAccount().setAdvProperties("mail.smtp.ssl.trust=test0.com");
 
                 JSONObject form = new JSONObject();
                 form.put("project_from", "mail@test1.com");
