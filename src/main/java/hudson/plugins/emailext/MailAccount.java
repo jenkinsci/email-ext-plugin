@@ -42,7 +42,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     }
 
     public boolean isValid() {
-        return StringUtils.isNotBlank(address) && StringUtils.isNotBlank(smtpHost) && (!isAuth() || (StringUtils.isNotBlank(smtpUsername) && smtpPassword != null));
+        return (isDefaultAccount() || StringUtils.isNotBlank(address)) && StringUtils.isNotBlank(smtpHost) && (!isAuth() || (StringUtils.isNotBlank(smtpUsername) && smtpPassword != null));
     }
 
     public boolean isDefaultAccount() {
