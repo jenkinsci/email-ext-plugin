@@ -510,7 +510,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         descriptor.setEmergencyReroute("");
         j.submit(j.createWebClient().goTo("configure").getFormByName("config"));
 
-        assertEquals("address not configured yet <nobody@nowhere>",descriptor.getMailAccount().getAddress());
+        assertNull(descriptor.getMailAccount().getAddress());
         assertNull(descriptor.getMailAccount().getSmtpHost());
         assertEquals("25",descriptor.getMailAccount().getSmtpPort());
         assertNull(descriptor.getMailAccount().getSmtpUsername());
@@ -534,7 +534,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         descriptor.setEmergencyReroute(null);
         j.submit(j.createWebClient().goTo("configure").getFormByName("config"));
 
-        assertEquals("address not configured yet <nobody@nowhere>",descriptor.getMailAccount().getAddress());
+        assertNull(descriptor.getMailAccount().getAddress());
         assertNull(descriptor.getMailAccount().getSmtpHost());
         assertEquals("25",descriptor.getMailAccount().getSmtpPort());
         assertNull(descriptor.getMailAccount().getSmtpUsername());
@@ -877,8 +877,8 @@ public class ExtendedEmailPublisherDescriptorTest {
         */
         ExtendedEmailPublisherDescriptor descriptor =
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        // TODO: Fails pending the fix for JENKINS-63846
-        // assertEquals("admin@example.com", descriptor.getAdminAddress());
+        assertEquals("admin@example.com", descriptor.getAdminAddress());
+        assertNull(descriptor.getMailAccount().getAddress());
         assertEquals("smtp.example.com", descriptor.getMailAccount().getSmtpHost());
         assertEquals("@example.com", descriptor.getDefaultSuffix());
         assertEquals("admin", descriptor.getMailAccount().getSmtpUsername());

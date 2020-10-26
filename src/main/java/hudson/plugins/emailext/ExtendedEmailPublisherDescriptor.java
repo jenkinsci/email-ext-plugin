@@ -192,6 +192,22 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if(smtpAuthUsername != null) mailAccount.setSmtpUsername(smtpAuthUsername);
         if(smtpAuthPassword != null) mailAccount.setSmtpPassword(smtpAuthPassword);
         if(useSsl) mailAccount.setUseSsl(useSsl);
+
+        /*
+         * Versions 2.71 and earlier correctly left the address unset for the default account,
+         * relying solely on the system admin email address from the Jenkins Location settings for
+         * the default account and using the address specified on the account only for additional
+         * accounts. Versions 2.72 through 2.77 incorrectly set the address for the default account
+         * to the system admin email address from the Jenkins Location settings at the time the
+         * descriptor was first saved without propagating further changes from the Jenkins Location
+         * settings to the default account. To clear up this bad state, we unconditionally clear the
+         * address and rely once again solely on the system admin email address from the Jenkins
+         * Location settings for the default account.
+         */
+        if (mailAccount.getAddress() != null) {
+            mailAccount.setAddress(null);
+        }
+
         return this;
     }
 
@@ -207,7 +223,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
         if(mailAccount == null) {
             mailAccount = new MailAccount();
-            mailAccount.setAddress(getAdminAddress());
         }
 
         mailAccount.setDefaultAccount(true);
@@ -255,7 +270,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         JenkinsLocationConfiguration config = JenkinsLocationConfiguration.get();
         if(config != null) {
             if(StringUtils.isBlank(mailAccount.getAddress())) {
-                mailAccount.setAddress(config.getAdminAddress());
+                return config.getAdminAddress();
             }
         }
         return mailAccount.getAddress();
@@ -524,7 +539,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @DataBoundSetter
     public void setMailAccount(MailAccount mailAccount) {
         this.mailAccount = mailAccount;
-        this.mailAccount.setAddress(getAdminAddress());
         this.mailAccount.setDefaultAccount(true);
     }
 

@@ -32,6 +32,7 @@ import hudson.security.SecurityRealm;
 import hudson.tasks.Builder;
 import hudson.tasks.Mailer;
 import jenkins.model.Jenkins;
+import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
@@ -55,6 +56,7 @@ import org.kohsuke.stapler.Stapler;
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -876,11 +878,8 @@ public class ExtendedEmailPublisherTest {
         assertEquals(2, mailbox.size());
 
         Message msg = mailbox.get(1);
-        String[] headers = msg.getHeader("In-Reply-To");
-        assertNotNull(headers);
-        assertEquals(1, headers.length);
 
-        assertEquals("<12345@xxx.com>", headers[0]);
+        assertEquals("<12345@xxx.com>", getHeader(msg, "In-Reply-To"));
     }
 
     @Test
@@ -1306,6 +1305,40 @@ public class ExtendedEmailPublisherTest {
         assertNull(j.jenkins.getItem("should-not-exist2"));
     }
 
+    @Issue("JENKINS-63846")
+    @Test
+    public void testSystemAdminEmailChange() throws Exception {
+        SuccessTrigger successTrigger =
+                new SuccessTrigger(
+                        recProviders,
+                        "$DEFAULT_RECIPIENTS",
+                        "$DEFAULT_REPLYTO",
+                        "$DEFAULT_SUBJECT",
+                        "$DEFAULT_CONTENT",
+                        "",
+                        0,
+                        "project");
+        addEmailType(successTrigger);
+        publisher.getConfiguredTriggers().add(successTrigger);
+
+        JenkinsLocationConfiguration locationConfiguration = JenkinsLocationConfiguration.get();
+        locationConfiguration.setAdminAddress("Foo <foo@example.com>");
+        FreeStyleBuild build = j.buildAndAssertSuccess(project);
+        j.assertLogContains("Email was triggered for: Success", build);
+
+        locationConfiguration.setAdminAddress("Bar <bar@example.com>");
+        build = j.buildAndAssertSuccess(project);
+        j.assertLogContains("Email was triggered for: Success", build);
+
+        Mailbox mailbox = Mailbox.get("ashlux@gmail.com");
+        assertEquals(2, mailbox.size());
+
+        Message message = mailbox.get(0);
+        assertEquals("Foo <foo@example.com>", getHeader(message, "From"));
+        message = mailbox.get(1);
+        assertEquals("Bar <bar@example.com>", getHeader(message, "From"));
+    }
+
     /**
      * Similar to {@link SleepBuilder} but only on the first build. (Removing
      * the builder between builds is tricky since you would have to wait for the
@@ -1338,5 +1371,12 @@ public class ExtendedEmailPublisherTest {
                 setBody("Boom goes the dynamite.");
             }
         });
+    }
+
+    private static String getHeader(Message message, String headerName) throws MessagingException {
+        String[] headers = message.getHeader(headerName);
+        assertNotNull(headers);
+        assertEquals(1, headers.length);
+        return headers[0];
     }
 }
