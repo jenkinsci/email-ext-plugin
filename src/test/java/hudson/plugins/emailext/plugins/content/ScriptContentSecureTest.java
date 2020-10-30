@@ -25,6 +25,9 @@
 package hudson.plugins.emailext.plugins.content;
 
 import hudson.model.Item;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
+import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
+import hudson.plugins.emailext.MailAccount;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.junit.Before;
@@ -34,7 +37,7 @@ import org.jvnet.hudson.test.MockAuthorizationStrategy;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 /**
@@ -44,6 +47,13 @@ public class ScriptContentSecureTest extends ScriptContentTest {
 
     @Before
     public void setup() {
+        ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
+        descriptor.setMailAccount(new MailAccount() {
+            {
+                setSmtpHost("smtp.notreal.com");
+            }
+        });
+
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
 
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()

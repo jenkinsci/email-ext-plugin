@@ -8,7 +8,6 @@ import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.util.StreamTaskListener;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,8 +32,7 @@ public abstract class TriggerTestBase {
     /**
      * Asserts the the specified result history triggers the EmailTrigger.
      */
-    void assertTriggered(Result... resultHistory)
-            throws IOException, InterruptedException {
+    void assertTriggered(Result... resultHistory) {
         EmailTrigger trigger = newInstance();
         AbstractBuild<?, ?> build = mockBuild(resultHistory);
         assertTrue(trigger.trigger(build, getTaskListener()));
@@ -44,8 +42,7 @@ public abstract class TriggerTestBase {
      * Asserts the the specified result history does not trigger the
      * EmailTrigger.
      */
-    void assertNotTriggered(Result... resultHistory)
-            throws IOException, InterruptedException {
+    void assertNotTriggered(Result... resultHistory) {
         EmailTrigger trigger = newInstance();
         AbstractBuild<?, ?> build = mockBuild(resultHistory);
         assertFalse(trigger.trigger(build, getTaskListener()));

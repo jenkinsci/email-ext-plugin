@@ -54,6 +54,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -174,7 +175,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
             }
 
             if (config != null) {
-               stream = new ByteArrayInputStream(config.content.getBytes("UTF-8"));
+               stream = new ByteArrayInputStream(config.content.getBytes(StandardCharsets.UTF_8));
             }
         }
         return stream;

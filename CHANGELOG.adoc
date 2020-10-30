@@ -2,6 +2,10 @@
 = email-ext-plugin Changelog
 :toc:
 
+== 2.72 and later
+
+* Changelog moved to https://github.com/jenkinsci/email-ext-plugin/releases[GitHub Releases].
+
 == 2.71 (July 24, 2020)
 
 * Added BuilderUserRecipientProvider (thanks srasmussen)

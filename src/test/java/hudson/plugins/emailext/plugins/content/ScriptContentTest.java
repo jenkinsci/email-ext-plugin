@@ -14,7 +14,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.plugins.emailext.plugins.RecipientProvider;
+import hudson.plugins.emailext.MailAccount;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.util.DescribableList;
@@ -43,7 +43,7 @@ import java.util.Scanner;
 
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -63,6 +63,13 @@ public class ScriptContentTest {
         @Override
         public void before() throws Throwable {
             super.before();
+            ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
+            descriptor.setMailAccount(new MailAccount() {
+                {
+                    setSmtpHost("smtp.notreal.com");
+                }
+            });
+
             Mailbox.clearAll();
             
             scriptContent = new ScriptContent();
@@ -233,7 +240,6 @@ public class ScriptContentTest {
     
     /**
      * this is for groovy template testing 
-     * @throws Exception
      */
     @Test
     public void testWithGroovyTemplate() throws Exception {
@@ -303,7 +309,7 @@ public class ScriptContentTest {
         publisher.recipientList = "mickey@disney.com";
         publisher.defaultSubject = "${SCRIPT, script=\"subdir/test.groovy\"}";
         
-        SuccessTrigger trigger = new SuccessTrigger(Collections.<RecipientProvider>singletonList(new ListRecipientProvider()), "", "", "$PROJECT_DEFAULT_SUBJECT", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "$PROJECT_DEFAULT_SUBJECT", "", "", 0, "project");
         
         publisher.getConfiguredTriggers().add(trigger);
         

@@ -7,7 +7,7 @@ import hudson.model.AbstractDescribableImpl;
 import hudson.model.Job;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import jenkins.model.Jenkins;
-import org.jsoup.helper.StringUtil;
+import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.mail.internet.InternetAddress;
@@ -55,7 +55,7 @@ public abstract class RecipientProvider extends AbstractDescribableImpl<Recipien
         if (!notSupported.isEmpty()) {
             throw new IllegalArgumentException(MessageFormat.
                     format("The following recipient providers do not support {0} {1}", clazz.getName(),
-                            StringUtil.join(notSupported, ", ")));
+                            StringUtils.join(notSupported, ", ")));
         }
     }
 

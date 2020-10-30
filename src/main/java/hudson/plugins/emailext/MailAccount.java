@@ -8,8 +8,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
-
-import static hudson.Util.nullify;
+import hudson.Util;
 
 public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     private String address;
@@ -23,18 +22,18 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
 
     @Deprecated
     public MailAccount(JSONObject jo){
-        address = nullify(jo.optString("address", null));
-        smtpHost = nullify(jo.optString("smtpHost", null));
-        smtpPort = nullify(jo.optString("smtpPort", null));
+        address = Util.nullify(jo.optString("address", null));
+        smtpHost = Util.nullify(jo.optString("smtpHost", null));
+        smtpPort = Util.nullify(jo.optString("smtpPort", null));
         if(jo.optBoolean("auth", false)){
-            smtpUsername = nullify(jo.optString("smtpUsername", null));
-            String pass = nullify(jo.optString("smtpPassword", null));
+            smtpUsername = Util.nullify(jo.optString("smtpUsername", null));
+            String pass = Util.nullify(jo.optString("smtpPassword", null));
             if(pass != null) {
                 smtpPassword = Secret.fromString(pass);
             }
         }
         useSsl = jo.optBoolean("useSsl", false);
-        advProperties = nullify(jo.optString("advProperties", null));
+        advProperties = Util.nullify(jo.optString("advProperties", null));
     }
 
     @DataBoundConstructor
@@ -43,7 +42,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     }
 
     public boolean isValid() {
-        return StringUtils.isNotBlank(address) && StringUtils.isNotBlank(smtpHost) && (!isAuth() || (StringUtils.isNotBlank(smtpUsername) && smtpPassword != null));
+        return (isDefaultAccount() || StringUtils.isNotBlank(address)) && StringUtils.isNotBlank(smtpHost) && (!isAuth() || (StringUtils.isNotBlank(smtpUsername) && smtpPassword != null));
     }
 
     public boolean isDefaultAccount() {
@@ -72,7 +71,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
 
     @DataBoundSetter
     public void setAddress(String address){
-        this.address = address;
+        this.address = Util.fixEmptyAndTrim(address);
     }
 
     public String getSmtpHost(){
@@ -81,7 +80,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
 
     @DataBoundSetter
     public void setSmtpHost(String smtpHost){
-        this.smtpHost = smtpHost;
+        this.smtpHost = Util.fixEmptyAndTrim(smtpHost);
     }
 
     public String getSmtpPort(){
@@ -90,7 +89,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
 
     @DataBoundSetter
     public void setSmtpPort(String smtpPort){
-        this.smtpPort = smtpPort;
+        this.smtpPort = Util.fixEmptyAndTrim(smtpPort);
     }
 
     public String getSmtpUsername(){
@@ -99,7 +98,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
 
     @DataBoundSetter
     public void setSmtpUsername(String smtpUsername){
-        this.smtpUsername = smtpUsername;
+        this.smtpUsername = Util.fixEmptyAndTrim(smtpUsername);
     }
 
     public Secret getSmtpPassword(){

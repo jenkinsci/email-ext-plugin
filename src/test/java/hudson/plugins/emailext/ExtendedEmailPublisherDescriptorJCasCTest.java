@@ -6,10 +6,8 @@ import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
 import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
 import io.jenkins.plugins.casc.misc.ConfiguredWithCode;
 import io.jenkins.plugins.casc.misc.JenkinsConfiguredWithCodeRule;
-import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.hamcrest.core.IsIterableContaining;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -17,8 +15,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class ExtendedEmailPublisherDescriptorJCasCTest {
 
@@ -27,7 +27,7 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
 
     @Test
     @ConfiguredWithCode("configuration-as-code.yml")
-    public void shouldValidatedJCasCConfiguration() throws Exception {
+    public void shouldValidatedJCasCConfiguration() {
         final ExtendedEmailPublisherDescriptor descriptor =
                 ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
         assertNotNull(descriptor);
@@ -82,7 +82,7 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
 
     @Test
     @ConfiguredWithCode("configuration-as-code-with-triggers.yml")
-    public void shouldBeAbleToConfigureTriggers() throws Exception {
+    public void shouldBeAbleToConfigureTriggers() {
         final ExtendedEmailPublisherDescriptor descriptor =
               ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
         assertNotNull(descriptor);
