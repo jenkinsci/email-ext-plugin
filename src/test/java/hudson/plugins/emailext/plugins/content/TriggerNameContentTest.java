@@ -65,8 +65,8 @@ public class TriggerNameContentTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertThat("Email should have been triggered, so we should see it in the logs.", build.getLog(100),
                 hasItems("Email was triggered for: " + PreBuildTrigger.TRIGGER_NAME));

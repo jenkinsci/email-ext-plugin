@@ -71,7 +71,8 @@ public class AttachmentUtilsTest {
         SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
         publisher.getConfiguredTriggers().add(trigger);
         project.getPublishersList().add(publisher);
-        FreeStyleBuild b = j.buildAndAssertSuccess(project);
+        FreeStyleBuild b = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(b));
 
         Mailbox mbox = Mailbox.get("mickey@disney.com");
         assertEquals("Should have an email from success", 1, mbox.size());
@@ -113,7 +114,8 @@ public class AttachmentUtilsTest {
             }
         });
 
-        FreeStyleBuild b = j.buildAndAssertSuccess(project);
+        FreeStyleBuild b = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(b));
 
         Mailbox mbox = Mailbox.get("mickey@disney.com");
         assertEquals("Should have an email from success", 1, mbox.size());
@@ -156,8 +158,8 @@ public class AttachmentUtilsTest {
                 return true;
             }
         });
-        FreeStyleBuild b = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(b);
+        FreeStyleBuild b = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(b));
 
         Mailbox mbox = Mailbox.get("mickey@disney.com");
         assertEquals("Should have an email from success", 1, mbox.size());
@@ -198,8 +200,8 @@ public class AttachmentUtilsTest {
                 return true;
             }
         });
-        FreeStyleBuild b = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(b);
+        FreeStyleBuild b = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(b));
 
         Mailbox mbox = Mailbox.get("mickey@disney.com");
         assertEquals("Should have an email from success", 1, mbox.size());
@@ -241,8 +243,8 @@ public class AttachmentUtilsTest {
                 return true;
             }
         });
-        FreeStyleBuild b = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(b);
+        FreeStyleBuild b = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(b));
 
         Mailbox mbox = Mailbox.get("mickey@disney.com");
         assertEquals("Should have an email from success", 1, mbox.size());
@@ -284,9 +286,9 @@ public class AttachmentUtilsTest {
             }
         });
 
-        FreeStyleBuild b = project.scheduleBuild2(0).get();
+        FreeStyleBuild b = project.scheduleBuild2(0).waitForStart();
 
-        j.assertBuildStatusSuccess(b);
+        j.assertBuildStatusSuccess(j.waitForCompletion(b));
 
         Mailbox mbox = Mailbox.get("mickey@disney.com");
         assertEquals("Should have an email from success", 1, mbox.size());

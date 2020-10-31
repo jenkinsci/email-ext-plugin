@@ -92,7 +92,8 @@ public class AbstractScriptTriggerTest {
         ScriptApproval.get().approveSignature("method hudson.model.Run getResult");
 
         project = j.jenkins.getItemByFullName("iMail", FreeStyleProject.class);
-        FreeStyleBuild build = j.buildAndAssertSuccess(project);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
         j.assertLogContains("Checking before trigger", build);
 
     }
@@ -166,7 +167,8 @@ public class AbstractScriptTriggerTest {
         if (approveSignature) {
             ScriptApproval.get().preapproveAll();
 
-            build = j.buildAndAssertSuccess(project);
+            build = project.scheduleBuild2(0).waitForStart();
+            j.assertBuildStatusSuccess(j.waitForCompletion(build));
             j.assertLogContains("Checking " + name + " trigger", build);
         }
 

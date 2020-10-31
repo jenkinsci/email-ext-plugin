@@ -94,8 +94,8 @@ public class ExtendedEmailPublisherMatrixTest {
             "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
-        MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);    
+        MatrixBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));    
     
         assertThat( "Email should have been triggered, so we should see it in the logs.", build.getLog( 100 ),
                 hasItems( "Email was triggered for: " + PreBuildTrigger.TRIGGER_NAME ) );
@@ -116,8 +116,8 @@ public class ExtendedEmailPublisherMatrixTest {
         publisher.getConfiguredTriggers().add( trigger );
        
     
-        MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);        
+        MatrixBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));        
         assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );    
     }
 
@@ -135,8 +135,8 @@ public class ExtendedEmailPublisherMatrixTest {
         publisher.getConfiguredTriggers().add( trigger );
        
     
-        MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);        
+        MatrixBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));        
         assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );    
     }
     
@@ -153,8 +153,8 @@ public class ExtendedEmailPublisherMatrixTest {
             "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         addEmailType( trigger );
         publisher.getConfiguredTriggers().add( trigger );
-        MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);    
+        MatrixBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));    
     
         assertThat( "Email should have been triggered, so we should see it in the logs.", build.getLog( 100 ),
                 hasItems( "Email was triggered for: " + AlwaysTrigger.TRIGGER_NAME ) );

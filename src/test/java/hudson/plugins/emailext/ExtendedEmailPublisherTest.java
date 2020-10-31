@@ -174,8 +174,8 @@ public class ExtendedEmailPublisherTest {
     @Test
     public void testShouldNotSendEmailWhenNoTriggerEnabled()
             throws Exception {
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         List<String> log = build.getLog(100);
         assertThat("No emails should have been trigger during pre-build or post-build.", log,
@@ -190,8 +190,8 @@ public class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertThat("Email should have been triggered, so we should see it in the logs.", build.getLog(100),
                 hasItems("Email was triggered for: " + PreBuildTrigger.TRIGGER_NAME));
@@ -212,8 +212,8 @@ public class ExtendedEmailPublisherTest {
         addEmailType(successTrigger);
         publisher.getConfiguredTriggers().add(successTrigger);
 
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertThat("Email should have been triggered, so we should see it in the logs.", build.getLog(100),
                 hasItems("Email was triggered for: Success"));
@@ -230,8 +230,8 @@ public class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build));
 
         assertThat("Email should not have been triggered, so we shouldn't see it in the logs.", build.getLog(100),
                 not(hasItems("Email was triggered for: " + SuccessTrigger.TRIGGER_NAME)));
@@ -248,11 +248,11 @@ public class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build));
 
-        FreeStyleBuild build2 = project.scheduleBuild2(1).get();
-        j.assertBuildStatus(Result.FAILURE, build2);
+        FreeStyleBuild build2 = project.scheduleBuild2(1).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build2));
 
         assertThat("Email should have been triggered for build 0, so we should see it in the logs.", build.getLog(100),
                 hasItems("Email was triggered for: " + FirstFailureTrigger.TRIGGER_NAME));
@@ -272,8 +272,8 @@ public class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build));
 
         assertThat("Email should not have been triggered, so we shouldn't see it in the logs.", build.getLog(100),
                 not(hasItems("Email was triggered for: " + SuccessTrigger.TRIGGER_NAME)));
@@ -291,12 +291,12 @@ public class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        FreeStyleBuild build1 = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build1);
+        FreeStyleBuild build1 = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build1));
 
         project.getBuildersList().clear();
-        FreeStyleBuild build2 = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build2);
+        FreeStyleBuild build2 = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build2));
 
         assertThat("Email should have been triggered, so we should see it in the logs.", build2.getLog(100),
                 hasItems("Email was triggered for: " + FixedTrigger.TRIGGER_NAME));
@@ -308,14 +308,14 @@ public class ExtendedEmailPublisherTest {
             throws Exception {
         // fail
         project.getBuildersList().add(new FailureBuilder());
-        FreeStyleBuild build1 = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build1);
+        FreeStyleBuild build1 = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build1));
 
         // abort
         project.getBuildersList().clear();
         project.getBuildersList().add(new MockBuilder(Result.ABORTED));
-        FreeStyleBuild build2 = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.ABORTED, build2);
+        FreeStyleBuild build2 = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.ABORTED, j.waitForCompletion(build2));
 
         FixedTrigger trigger = new FixedTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
@@ -324,8 +324,8 @@ public class ExtendedEmailPublisherTest {
 
         // succeed
         project.getBuildersList().clear();
-        FreeStyleBuild build3 = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build3);
+        FreeStyleBuild build3 = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build3));
 
         assertThat("Email should not have been triggered, so we shouldn't see it in the logs.", build3.getLog(100),
                 not(hasItems("Email was triggered for: " + SuccessTrigger.TRIGGER_NAME)));
@@ -343,8 +343,8 @@ public class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build));
 
         assertThat("Email should not have been triggered, so we shouldn't see it in the logs.", build.getLog(100),
                 not(hasItems("Email was triggered for: " + SuccessTrigger.TRIGGER_NAME)));
@@ -362,12 +362,12 @@ public class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        FreeStyleBuild build1 = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build1);
+        FreeStyleBuild build1 = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build1));
 
         project.getBuildersList().clear();
-        FreeStyleBuild build2 = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build2);
+        FreeStyleBuild build2 = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build2));
 
         assertThat("Email should have been triggered, so we should see it in the logs.", build2.getLog(100),
                 hasItems("Email was triggered for: " + FixedUnhealthyTrigger.TRIGGER_NAME));
@@ -379,14 +379,14 @@ public class ExtendedEmailPublisherTest {
             throws Exception {
         // fail
         project.getBuildersList().add(new FailureBuilder());
-        FreeStyleBuild build1 = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build1);
+        FreeStyleBuild build1 = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build1));
 
         // abort
         project.getBuildersList().clear();
         project.getBuildersList().add(new MockBuilder(Result.ABORTED));
-        FreeStyleBuild build2 = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.ABORTED, build2);
+        FreeStyleBuild build2 = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.ABORTED, j.waitForCompletion(build2));
 
         FixedUnhealthyTrigger trigger = new FixedUnhealthyTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
@@ -395,8 +395,8 @@ public class ExtendedEmailPublisherTest {
 
         // succeed
         project.getBuildersList().clear();
-        FreeStyleBuild build3 = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build3);
+        FreeStyleBuild build3 = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build3));
 
         assertThat("Email should have been triggered, so we should see it in the logs.", build3.getLog(100),
                 hasItems("Email was triggered for: " + FixedUnhealthyTrigger.TRIGGER_NAME));
@@ -411,8 +411,8 @@ public class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertThat("Email should not have been triggered, so we should not see it in the logs.", build.getLog(100),
                 not(hasItems("Email was triggered for: " + StillFailingTrigger.TRIGGER_NAME)));
@@ -430,8 +430,8 @@ public class ExtendedEmailPublisherTest {
         publisher.getConfiguredTriggers().add(trigger);
 
         // only fail once
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build));
 
         assertThat("Email should not have been triggered, so we should not see it in the logs.", build.getLog(100),
                 not(hasItems("Email was triggered for: " + StillFailingTrigger.TRIGGER_NAME)));
@@ -449,12 +449,12 @@ public class ExtendedEmailPublisherTest {
         publisher.getConfiguredTriggers().add(trigger);
 
         // only fail once
-        FreeStyleBuild build1 = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build1);
+        FreeStyleBuild build1 = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build1));
         // then succeed
         project.getBuildersList().clear();
-        FreeStyleBuild build2 = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build2);
+        FreeStyleBuild build2 = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build2));
 
         assertThat("Email should not have been triggered, so we should not see it in the logs.", build2.getLog(100),
                 not(hasItems("Email was triggered for: " + StillFailingTrigger.TRIGGER_NAME)));
@@ -472,11 +472,11 @@ public class ExtendedEmailPublisherTest {
         publisher.getConfiguredTriggers().add(trigger);
 
         // first failure
-        FreeStyleBuild build1 = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build1);
+        FreeStyleBuild build1 = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build1));
         // second failure
-        FreeStyleBuild build2 = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build2);
+        FreeStyleBuild build2 = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build2));
 
         assertThat("Email should have been triggered, so we should see it in the logs.", build2.getLog(100),
                 hasItems("Email was triggered for: " + StillFailingTrigger.TRIGGER_NAME));
@@ -494,8 +494,8 @@ public class ExtendedEmailPublisherTest {
         addEmailType(abortedTrigger);
         publisher.getConfiguredTriggers().add(abortedTrigger);
 
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.ABORTED, build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.ABORTED, j.waitForCompletion(build));
 
         assertThat("Email should have been triggered, so we should see it in the logs.", build.getLog(100),
                 hasItems("Email was triggered for: " + AbortedTrigger.TRIGGER_NAME));
@@ -512,8 +512,8 @@ public class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build));
 
         assertThat("Email should not have been triggered, so we shouldn't see it in the logs.", build.getLog(100),
                 not(hasItems("Email was triggered for: " + AbortedTrigger.TRIGGER_NAME)));
@@ -530,8 +530,8 @@ public class ExtendedEmailPublisherTest {
         addEmailType(notbuiltTrigger);
         publisher.getConfiguredTriggers().add(notbuiltTrigger);
 
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.NOT_BUILT, build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.NOT_BUILT, j.waitForCompletion(build));
 
         assertThat("Email should have been triggered, so we should see it in the logs.", build.getLog(100),
                 hasItems("Email was triggered for: " + NotBuiltTrigger.TRIGGER_NAME));
@@ -548,8 +548,8 @@ public class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build));
 
         assertThat("Email should not have been triggered, so we shouldn't see it in the logs.", build.getLog(100),
                 not(hasItems("Email was triggered for: " + NotBuiltTrigger.TRIGGER_NAME)));
@@ -565,8 +565,8 @@ public class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build));
 
         Mailbox mailbox = Mailbox.get("ashlux@gmail.com");
         assertEquals("We should an email since the build failed.", 1, mailbox.size());
@@ -610,8 +610,8 @@ public class ExtendedEmailPublisherTest {
 
         UserIdCause cause = new UserIdCause("kutzi");
 
-        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
     }
@@ -642,8 +642,8 @@ public class ExtendedEmailPublisherTest {
 
         UserIdCause cause = new UserIdCause("kutzi");
 
-        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
         j.assertLogContains("You are here", build);
         assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
     }
@@ -677,8 +677,8 @@ public class ExtendedEmailPublisherTest {
 
         UserIdCause cause = new UserIdCause("kutzi");
 
-        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
         assertEquals(0, Mailbox.get("slide.o.mix@xxx.com").size());
@@ -706,8 +706,8 @@ public class ExtendedEmailPublisherTest {
 
         UserIdCause cause = new UserIdCause("kutzi");
 
-        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertEquals(1, Mailbox.get("kutzi@xxx.com").size());
     }
@@ -738,8 +738,8 @@ public class ExtendedEmailPublisherTest {
 
         UserIdCause cause = new UserIdCause("kutzi");
 
-        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
         assertEquals(1, Mailbox.get("slide.o.mix@xxx.com").size());
@@ -785,8 +785,8 @@ public class ExtendedEmailPublisherTest {
 
         UserIdCause cause = new UserIdCause("kutzi");
 
-        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
         assertEquals(1, Mailbox.get("slide.o.mix@xxx.com").size());
@@ -827,8 +827,8 @@ public class ExtendedEmailPublisherTest {
 
         UserIdCause cause = new UserIdCause("kutzi");
 
-        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
         assertEquals(1, Mailbox.get("slide.o.mix@xxx.com").size());
@@ -868,11 +868,11 @@ public class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatus(Result.FAILURE, build);
+        FreeStyleBuild build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build));
 
-        FreeStyleBuild build2 = project.scheduleBuild2(1).get();
-        j.assertBuildStatus(Result.FAILURE, build2);
+        FreeStyleBuild build2 = project.scheduleBuild2(1).waitForStart();
+        j.assertBuildStatus(Result.FAILURE, j.waitForCompletion(build2));
 
         Mailbox mailbox = Mailbox.get("ashlux@gmail.com");
         assertEquals(2, mailbox.size());
@@ -913,8 +913,8 @@ public class ExtendedEmailPublisherTest {
 
         UserIdCause cause = new UserIdCause("kutzi");
 
-        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertEquals(1, Mailbox.get("kutzi@xxx.com").size());
     }
@@ -938,8 +938,8 @@ public class ExtendedEmailPublisherTest {
 
         UserIdCause cause = new UserIdCause("kutzi");
 
-        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         Mailbox mailbox = Mailbox.get("kutzi@xxx.com");
         assertEquals(1, mailbox.size());
@@ -969,8 +969,8 @@ public class ExtendedEmailPublisherTest {
 
         UserIdCause cause = new UserIdCause("kutzi");
 
-        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         Mailbox mailbox = Mailbox.get("kutzi@xxx.com");
         assertEquals(1, mailbox.size());
@@ -1030,8 +1030,8 @@ public class ExtendedEmailPublisherTest {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
-        FreeStyleBuild build = prj.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = prj.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertEquals(2, Mailbox.get("mickey@disney.com").size());
     }
@@ -1051,8 +1051,8 @@ public class ExtendedEmailPublisherTest {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
-        FreeStyleBuild build = prj.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = prj.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertEquals(0, Mailbox.get("mickey@disney.com").size());
         assertThat("Publisher is disabled, should have message in build log", build.getLog(100),
@@ -1092,8 +1092,8 @@ public class ExtendedEmailPublisherTest {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
-        FreeStyleBuild build = prj.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = prj.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertEquals(1, Mailbox.get("mickey@disney.com").size());
         
@@ -1122,7 +1122,7 @@ public class ExtendedEmailPublisherTest {
         project.getBuildersList().add(new SleepOnceBuilder());
         FreeStyleBuild build1 = project.scheduleBuild2(0).waitForStart();
         assertEquals(1, build1.number);
-        FreeStyleBuild build2 = j.assertBuildStatusSuccess(project.scheduleBuild2(0).get(9999, TimeUnit.MILLISECONDS));
+        FreeStyleBuild build2 = j.assertBuildStatusSuccess(j.waitForCompletion(project.scheduleBuild2(0).waitForStart()));
         assertEquals(2, build2.number);
         assertTrue(build1.isBuilding());
         assertFalse(build2.isBuilding());
@@ -1138,8 +1138,8 @@ public class ExtendedEmailPublisherTest {
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
-        AbstractBuild<?, ?> build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);
+        AbstractBuild<?, ?> build = project.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertThat("Email should have been triggered, so we should see it in the logs.", build.getLog(100),
                 hasItems("Email was triggered for: " + AlwaysTrigger.TRIGGER_NAME));
@@ -1226,8 +1226,8 @@ public class ExtendedEmailPublisherTest {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
-        FreeStyleBuild build = prj.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = prj.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertEquals(1, Mailbox.get("user1@x1x.com").size());
         assertEquals(1, Mailbox.get("user2@x2x.com").size());
@@ -1253,8 +1253,8 @@ public class ExtendedEmailPublisherTest {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
-        FreeStyleBuild build = prj.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);
+        FreeStyleBuild build = prj.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(build));
 
         assertEquals(1, Mailbox.get("user1@x1x.com").size());
         assertEquals(1, Mailbox.get("user2@x2x.com").size());
@@ -1298,8 +1298,8 @@ public class ExtendedEmailPublisherTest {
 
         UserIdCause cause = new UserIdCause("kutzi");
 
-        FreeStyleBuild build = project.scheduleBuild2(0, cause).get();
-        j.assertBuildStatus(Result.SUCCESS, build);
+        FreeStyleBuild build = project.scheduleBuild2(0, cause).waitForStart();
+        j.assertBuildStatus(Result.SUCCESS, j.waitForCompletion(build));
         j.assertLogContains("staticMethod jenkins.model.Jenkins getInstance", build);
         assertNull(j.jenkins.getItem("should-not-exist1"));
         assertNull(j.jenkins.getItem("should-not-exist2"));

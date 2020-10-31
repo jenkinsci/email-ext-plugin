@@ -325,8 +325,8 @@ public class ScriptContentTest {
                 return p.exists();
             }
         });
-        FreeStyleBuild b = p.scheduleBuild2(0).get();     
-        j.assertBuildStatusSuccess(b);
+        FreeStyleBuild b = p.scheduleBuild2(0).waitForStart();     
+        j.assertBuildStatusSuccess(j.waitForCompletion(b));
         
         Mailbox mbox = Mailbox.get("mickey@disney.com");
         assertEquals("Should have an email from success", 1, mbox.size());

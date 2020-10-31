@@ -68,8 +68,8 @@ public class EmailExtStepTest {
     public void simpleEmail() throws Exception {
         WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");
         job.setDefinition(new CpsFlowDefinition("node { emailext(to: 'mickeymouse@disney.com', subject: 'Boo') }", true));
-        Run<?,?> run = job.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(run);
+        Run<?,?> run = job.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(run));
 
         Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
         assertEquals(1, mbox.size());
@@ -81,8 +81,8 @@ public class EmailExtStepTest {
     public void attachLog() throws Exception {
         WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");
         job.setDefinition(new CpsFlowDefinition("node { emailext(to: 'mickeymouse@disney.com', subject: 'Boo', attachLog: true) }", true));
-        Run<?,?> run = job.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(run);
+        Run<?,?> run = job.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(run));
 
         Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
         assertEquals(1, mbox.size());
@@ -107,8 +107,8 @@ public class EmailExtStepTest {
 
         WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");
         job.setDefinition(new CpsFlowDefinition("node { fileCopy('" + StringEscapeUtils.escapeJava(attachment.getAbsolutePath()) + "'); emailext (to: 'mickeymouse@disney.com', subject: 'Boo', body: 'Here is your file', attachmentsPattern: '*.pdf') }", true));
-        Run<?,?> run = job.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(run);
+        Run<?,?> run = job.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(run));
 
         Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
         assertEquals("Should have an email from success", 1, mbox.size());
@@ -133,8 +133,8 @@ public class EmailExtStepTest {
                         "  emailext(to: 'mickeymouse@disney.com', subject: 'Boo', saveOutput: true)\n" +
                         "  archiveArtifacts '*.*'\n" +
                         "}", true));
-        Run<?,?> run = job.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(run);
+        Run<?,?> run = job.scheduleBuild2(0).waitForStart();
+        j.assertBuildStatusSuccess(j.waitForCompletion(run));
 
         Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
         assertEquals(1, mbox.size());
