@@ -163,7 +163,7 @@
         <dependency>
             <groupId>org.jvnet.hudson.plugins</groupId>
             <artifactId>analysis-core</artifactId>
-            <version>1.54</version>
+            <version>1.96</version>
             <optional>true</optional>
             <exclusions>
                 <exclusion>
