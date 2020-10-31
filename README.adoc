@@ -278,7 +278,7 @@ including
 https://javadoc.jenkins-ci.org/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]
 and
 https://javadoc.jenkins-ci.org/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`].
-For example on how to do this, take a look at the existing
+For an example on how to do this, take a look at the existing
 https://github.com/jenkinsci/email-ext-plugin/blob/master/src/main/resources/hudson/plugins/emailext/templates/html.jelly[`html`]
 and
 https://github.com/jenkinsci/email-ext-plugin/blob/master/src/main/resources/hudson/plugins/emailext/templates/text.jelly[`text`]
@@ -330,7 +330,7 @@ including
 https://javadoc.jenkins-ci.org/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]
 and
 https://javadoc.jenkins-ci.org/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`].
-For example on how to do this, take a look at the existing
+For an example on how to do this, take a look at the existing
 https://github.com/jenkinsci/email-ext-plugin/blob/master/src/main/resources/hudson/plugins/emailext/templates/groovy-html.template[`html`]
 and
 https://github.com/jenkinsci/email-ext-plugin/blob/master/src/main/resources/hudson/plugins/emailext/templates/groovy-text.template[`text`]
