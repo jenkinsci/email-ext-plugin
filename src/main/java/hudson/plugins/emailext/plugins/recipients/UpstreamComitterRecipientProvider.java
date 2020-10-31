@@ -3,7 +3,6 @@ package hudson.plugins.emailext.plugins.recipients;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.Cause;
-import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
@@ -19,7 +18,9 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.mail.internet.InternetAddress;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -47,18 +48,33 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
         }
         final Debug debug = new Debug();
         debug.send("Sending email to upstream committer(s).");
-        Run<?, ?> cur;
-        Cause.UpstreamCause upc = context.getRun().getCause(Cause.UpstreamCause.class);
-        while (upc != null) {
-            Job<?, ?> p = (Job<?, ?>) Jenkins.get().getItemByFullName(upc.getUpstreamProject());
-            if(p == null) {
-                context.getListener().getLogger().print("There is a break in the project linkage, could not retrieve upstream project information");
-                break;
-            }
-            cur = p.getBuildByNumber(upc.getUpstreamBuild());
-            upc = cur.getCause(Cause.UpstreamCause.class);
-            addUpstreamCommittersTriggeringBuild(cur, to, cc, bcc, env, context, debug);
+        for (Run<?, ?> run : new HashSet<>(getUpstreamBuilds(context.getRun()))) {
+            addUpstreamCommittersTriggeringBuild(run, to, cc, bcc, env, context, debug);
         }
+    }
+
+    private static List<Run<?, ?>> getUpstreamBuilds(Run<?, ?> build) {
+        List<Run<?, ?>> upstreams = new ArrayList<>();
+        for (Cause c : build.getCauses()) {
+            if (c instanceof Cause.UpstreamCause) {
+                upstreams.addAll(upstreamCauseToRuns((Cause.UpstreamCause) c));
+            }
+        }
+        return upstreams;
+    }
+
+    private static List<Run<?, ?>> upstreamCauseToRuns(Cause.UpstreamCause cause) {
+        List<Run<?, ?>> upstreams = new ArrayList<>();
+        Run<?, ?> r = cause.getUpstreamRun();
+        if (r != null) {
+            upstreams.add(r);
+            for (Cause c : cause.getUpstreamCauses()) {
+                if (c instanceof Cause.UpstreamCause) {
+                    upstreams.addAll(upstreamCauseToRuns((Cause.UpstreamCause) c));
+                }
+            }
+        }
+        return upstreams;
     }
 
     /**
