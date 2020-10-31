@@ -7,6 +7,7 @@ import hudson.scm.EditType;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 import static org.mockito.Mockito.mock;
@@ -27,7 +28,7 @@ public class ScriptContentChangeLogSet extends ChangeLogSet<ChangeLogSet.Entry> 
     }
 
     public Iterator iterator() {
-        return Arrays.asList(new Entry() {
+        return Collections.singletonList(new Entry() {
             @Override
             public String getMsg() {
                 return "COMMIT MESSAGE";

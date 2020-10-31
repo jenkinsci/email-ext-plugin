@@ -1,5 +1,6 @@
 package hudson.plugins.emailext;
 
+import hudson.Functions;
 import hudson.matrix.Axis;
 import hudson.matrix.AxisList;
 import hudson.matrix.MatrixBuild;
@@ -11,8 +12,14 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import hudson.slaves.DumbSlave;
+import org.junit.After;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.mock_javamail.Mailbox;
 
@@ -28,51 +35,59 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class ExtendedEmailPublisherMatrixTest {
 
     private ExtendedEmailPublisher publisher;
     private MatrixProject project;
-    private List<DumbSlave> agents;
- 
-    @Rule
-    public JenkinsRule j = new JenkinsRule() { 
-        @Override
-        public void before() throws Throwable {
-            super.before();
+    private static List<DumbSlave> agents;
 
-            ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
-            descriptor.setMailAccount(new MailAccount() {
-                {
-                    setSmtpHost("smtp.notreal.com");
-                }
-            });
+    @ClassRule public static JenkinsRule j = new JenkinsRule();
 
-            publisher = new ExtendedEmailPublisher();
-            publisher.defaultSubject = "%DEFAULT_SUBJECT";
-            publisher.defaultContent = "%DEFAULT_CONTENT";
-            publisher.attachBuildLog = false;
+    @Rule public TestName testName = new TestName();
 
-            project = j.jenkins.createProject(MatrixProject.class, "Foo");
-            project.getPublishersList().add( publisher );
-            agents = new ArrayList<>();
-            agents.add(createOnlineSlave(new LabelAtom("success-agent1")));
-            agents.add(createOnlineSlave(new LabelAtom("success-agent2")));
-            agents.add(createOnlineSlave(new LabelAtom("success-agent3")));
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
+        descriptor.setMailAccount(
+                new MailAccount() {
+                    {
+                        setSmtpHost("smtp.notreal.com");
+                    }
+                });
+
+        agents = new ArrayList<>();
+        // TODO Windows ACI agents do not have enough memory to run this test.
+        if (!Functions.isWindows()) {
+            agents.add(j.createOnlineSlave(new LabelAtom("success-agent1")));
+            agents.add(j.createOnlineSlave(new LabelAtom("success-agent2")));
+            agents.add(j.createOnlineSlave(new LabelAtom("success-agent3")));
         }
-        
-        @Override
-        public void after() throws Exception {
-            super.after();
-            agents.clear();
-            Mailbox.clearAll();
-        }
-    };
+    }
+
+    @Before
+    public void before() throws Exception {
+        publisher = new ExtendedEmailPublisher();
+        publisher.defaultSubject = "%DEFAULT_SUBJECT";
+        publisher.defaultContent = "%DEFAULT_CONTENT";
+        publisher.attachBuildLog = false;
+
+        project = j.createProject(MatrixProject.class, testName.getMethodName());
+        project.getPublishersList().add(publisher);
+    }
+
+    @After
+    public void after() {
+        Mailbox.clearAll();
+    }
 
     @Test
     public void testPreBuildMatrixBuildSendParentOnly() throws Exception {
+        Assume.assumeFalse(
+                "TODO Windows ACI agents do not have enough memory to run this test",
+                Functions.isWindows());
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_PARENT);
         List<RecipientProvider> recProviders = Collections.emptyList();
         PreBuildTrigger trigger = new PreBuildTrigger(recProviders, "$DEFAULT_RECIPIENTS",
@@ -89,6 +104,9 @@ public class ExtendedEmailPublisherMatrixTest {
 
     @Test
     public void testPreBuildMatrixBuildSendAgentsOnly() throws Exception{
+        Assume.assumeFalse(
+                "TODO Windows ACI agents do not have enough memory to run this test",
+                Functions.isWindows());
         addAgentToProject(0,1,2);
         List<RecipientProvider> recProviders = Collections.emptyList();
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_CONFIGURATIONS);
@@ -105,6 +123,9 @@ public class ExtendedEmailPublisherMatrixTest {
 
     @Test
     public void testPreBuildMatrixBuildSendAgentsAndParent() throws Exception {
+        Assume.assumeFalse(
+                "TODO Windows ACI agents do not have enough memory to run this test",
+                Functions.isWindows());
         addAgentToProject(0,1);
         List<RecipientProvider> recProviders = Collections.emptyList();
         publisher.setMatrixTriggerMode(MatrixTriggerMode.BOTH);
@@ -121,6 +142,9 @@ public class ExtendedEmailPublisherMatrixTest {
     
     @Test
     public void testAttachBuildLogForAllAxes() throws Exception { 
+        Assume.assumeFalse(
+                "TODO Windows ACI agents do not have enough memory to run this test",
+                Functions.isWindows());
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_PARENT);
         publisher.attachBuildLog = true;
         addAgentToProject(0,1,2);

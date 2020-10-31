@@ -25,6 +25,7 @@ public class StaticAnalysisUtilities {
      * @return The static analysis actions for the specified build. The returned
      * list might be empty if there are no such actions.
      */
+    @Deprecated
     public List<Action> getActions(Run<?, ?> build) {
         ArrayList<Action> actions = new ArrayList<>();
         for (Action action : build.getActions(Action.class)) {

@@ -4,8 +4,6 @@ import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import org.junit.Test;
 
-import java.io.IOException;
-
 /**
  * Unit tests for the "Status changed" trigger.
  *
@@ -20,31 +18,31 @@ public class StatusChangedTriggerTest extends TriggerTestBase {
 
     // --- Transitions from <no-status> to <status> --- //
     @Test
-    public void testTrigger_Success() throws IOException, InterruptedException {
+    public void testTrigger_Success() {
         // Notification expected since this is the first build status defined
         assertTriggered(Result.SUCCESS);
     }
 
     @Test
-    public void testTrigger_Aborted() throws IOException, InterruptedException {
+    public void testTrigger_Aborted() {
         // Notification expected since this is the first build status defined
         assertTriggered(Result.ABORTED);
     }
 
     @Test
-    public void testTrigger_Failure() throws IOException, InterruptedException {
+    public void testTrigger_Failure() {
         // Notification expected since this is the first build status defined
         assertTriggered(Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_NotBuilt() throws IOException, InterruptedException {
+    public void testTrigger_NotBuilt() {
         // Notification expected since this is the first build status defined
         assertTriggered(Result.NOT_BUILT);
     }
 
     @Test
-    public void testTrigger_Unstable() throws IOException, InterruptedException {
+    public void testTrigger_Unstable() {
         // Notification expected since this is the first build status defined
         assertTriggered(Result.UNSTABLE);
     }
@@ -54,131 +52,131 @@ public class StatusChangedTriggerTest extends TriggerTestBase {
     // so we must test 5x5 = 25 transitions
     // Transitions from the "success" status
     @Test
-    public void testTrigger_SuccessSuccess() throws IOException, InterruptedException {
+    public void testTrigger_SuccessSuccess() {
         assertNotTriggered(Result.SUCCESS, Result.SUCCESS);
     }
 
     @Test
-    public void testTrigger_SuccessAborted() throws IOException, InterruptedException {
+    public void testTrigger_SuccessAborted() {
         assertTriggered(Result.SUCCESS, Result.ABORTED);
     }
 
     @Test
-    public void testTrigger_SuccessFailure() throws IOException, InterruptedException {
+    public void testTrigger_SuccessFailure() {
         assertTriggered(Result.SUCCESS, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_SuccessNotBuilt() throws IOException, InterruptedException {
+    public void testTrigger_SuccessNotBuilt() {
         assertTriggered(Result.SUCCESS, Result.NOT_BUILT);
     }
 
     @Test
-    public void testTrigger_SuccessUnstable() throws IOException, InterruptedException {
+    public void testTrigger_SuccessUnstable() {
         assertTriggered(Result.SUCCESS, Result.UNSTABLE);
     }
 
     // Transitions from the "aborted" status
     @Test
-    public void testTrigger_AbortedSuccess() throws IOException, InterruptedException {
+    public void testTrigger_AbortedSuccess() {
         assertTriggered(Result.ABORTED, Result.SUCCESS);
     }
 
     @Test
-    public void testTrigger_AbortedAborted() throws IOException, InterruptedException {
+    public void testTrigger_AbortedAborted() {
         assertNotTriggered(Result.ABORTED, Result.ABORTED);
     }
 
     @Test
-    public void testTrigger_AbortedFailure() throws IOException, InterruptedException {
+    public void testTrigger_AbortedFailure() {
         assertTriggered(Result.ABORTED, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_AbortedNotBuilt() throws IOException, InterruptedException {
+    public void testTrigger_AbortedNotBuilt() {
         assertTriggered(Result.ABORTED, Result.NOT_BUILT);
     }
 
     @Test
-    public void testTrigger_AbortedUnstable() throws IOException, InterruptedException {
+    public void testTrigger_AbortedUnstable() {
         assertTriggered(Result.ABORTED, Result.UNSTABLE);
     }
 
     // Transitions from the "failure" status
     @Test
-    public void testTrigger_FailureSuccess() throws IOException, InterruptedException {
+    public void testTrigger_FailureSuccess() {
         assertTriggered(Result.FAILURE, Result.SUCCESS);
     }
 
     @Test
-    public void testTrigger_FailureAborted() throws IOException, InterruptedException {
+    public void testTrigger_FailureAborted() {
         assertTriggered(Result.FAILURE, Result.ABORTED);
     }
 
     @Test
-    public void testTrigger_FailureFailure() throws IOException, InterruptedException {
+    public void testTrigger_FailureFailure() {
         assertNotTriggered(Result.FAILURE, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_FailureNotBuilt() throws IOException, InterruptedException {
+    public void testTrigger_FailureNotBuilt() {
         assertTriggered(Result.FAILURE, Result.NOT_BUILT);
     }
 
     @Test
-    public void testTrigger_FailureUnstable() throws IOException, InterruptedException {
+    public void testTrigger_FailureUnstable() {
         assertTriggered(Result.FAILURE, Result.UNSTABLE);
     }
 
     // Transitions from the "not_built" status
     @Test
-    public void testTrigger_NotBuiltSuccess() throws IOException, InterruptedException {
+    public void testTrigger_NotBuiltSuccess() {
         assertTriggered(Result.NOT_BUILT, Result.SUCCESS);
     }
 
     @Test
-    public void testTrigger_NotBuiltAborted() throws IOException, InterruptedException {
+    public void testTrigger_NotBuiltAborted() {
         assertTriggered(Result.NOT_BUILT, Result.ABORTED);
     }
 
     @Test
-    public void testTrigger_NotBuiltFailure() throws IOException, InterruptedException {
+    public void testTrigger_NotBuiltFailure() {
         assertTriggered(Result.NOT_BUILT, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_NotBuiltNotBuilt() throws IOException, InterruptedException {
+    public void testTrigger_NotBuiltNotBuilt() {
         assertNotTriggered(Result.NOT_BUILT, Result.NOT_BUILT);
     }
 
     @Test
-    public void testTrigger_NotBuiltUnstable() throws IOException, InterruptedException {
+    public void testTrigger_NotBuiltUnstable() {
         assertTriggered(Result.NOT_BUILT, Result.UNSTABLE);
     }
 
     // Transitions from the "unstable" status
     @Test
-    public void testTrigger_UnstableSuccess() throws IOException, InterruptedException {
+    public void testTrigger_UnstableSuccess() {
         assertTriggered(Result.UNSTABLE, Result.SUCCESS);
     }
 
     @Test
-    public void testTrigger_UnstableAborted() throws IOException, InterruptedException {
+    public void testTrigger_UnstableAborted() {
         assertTriggered(Result.UNSTABLE, Result.ABORTED);
     }
 
     @Test
-    public void testTrigger_UnstableFailure() throws IOException, InterruptedException {
+    public void testTrigger_UnstableFailure() {
         assertTriggered(Result.UNSTABLE, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_UnstableNotBuilt() throws IOException, InterruptedException {
+    public void testTrigger_UnstableNotBuilt() {
         assertTriggered(Result.UNSTABLE, Result.NOT_BUILT);
     }
 
     @Test
-    public void testTrigger_UnstableUnstable() throws IOException, InterruptedException {
+    public void testTrigger_UnstableUnstable() {
         assertNotTriggered(Result.UNSTABLE, Result.UNSTABLE);
     }
 }

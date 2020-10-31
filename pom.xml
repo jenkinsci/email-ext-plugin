@@ -1,10 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.8</version>
+        <version>4.12</version>
         <relativePath />
     </parent>
 
@@ -21,14 +22,14 @@
     <version>${revision}${changelist}</version>
     <name>Email Extension Plugin</name>
     <description>Allows to configure every aspect of email notifications: when an email is sent, who should receive it and what the email says</description>
-    <url>https://github.com/jenkinsci/email-ext-plugin</url>
+    <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
     <issueManagement>
         <system>JIRA</system>
         <url>https://issues.jenkins-ci.org/issues/?jql=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+email-ext-plugin</url>
     </issueManagement>
 
     <properties>
-        <revision>2.77</revision>
+        <revision>2.79</revision>
         <changelist>-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
         <java.level>8</java.level>
@@ -37,9 +38,19 @@
         <concurrency>1</concurrency>
         <argLine>-Dfile.encoding=UTF-8</argLine>
         <configuration-as-code.version>1.36</configuration-as-code.version>
+        <jackson.version>2.11.3</jackson.version>
     </properties>
 
     <developers>
+        <developer>
+            <id>basil</id>
+            <name>Basil Crow</name>
+            <email>me@basilcrow.com</email>
+            <roles>
+                <role>maintainer</role>
+                <role>developer</role>
+            </roles>
+        </developer>
         <developer>
             <id>slide</id>
             <name>Alex Earl</name>
@@ -100,7 +111,7 @@
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-2.164.x</artifactId>
-                <version>4</version>
+                <version>10</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -118,22 +129,22 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.11.3</version>
+            <version>1.13.1</version>
         </dependency>
         <dependency>
             <groupId>net.htmlparser.jericho</groupId>
             <artifactId>jericho-html</artifactId>
-            <version>3.3</version>
+            <version>3.4</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
-            <version>2.10.5</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.10.5</version>
+            <version>${jackson.version}</version>
         </dependency>
 
         <!-- other plugins -->
@@ -164,7 +175,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>config-file-provider</artifactId>
-            <version>2.15.6</version>
+            <version>3.6.2</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -244,13 +255,6 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
-            <version>2.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-library</artifactId>
-            <version>2.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -262,22 +266,10 @@
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.javassist</groupId>
-                    <artifactId>javassist</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito2</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.20.0-GA</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -307,19 +299,10 @@
             <version>${configuration-as-code.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- static analysys -->
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>annotations</artifactId>
-            <version>3.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
     <scm>
-        <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
+        <connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
         <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
         <url>https://github.com/${gitHubRepo}</url>
         <tag>${scmTag}</tag>

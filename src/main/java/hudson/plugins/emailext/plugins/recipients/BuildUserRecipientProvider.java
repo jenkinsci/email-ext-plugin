@@ -2,7 +2,9 @@ package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.*;
+import hudson.model.Cause;
+import hudson.model.Run;
+import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.Messages;

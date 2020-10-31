@@ -11,7 +11,7 @@ f.section(title: _("Extended E-mail Notification")) {
     f.property()
   }
 
-  f.entry(field: "defaultSuffix", help: "/descriptor/hudson.tasks.Mailer/help/defaultSuffix", title: _("Default user E-mail suffix")) {
+  f.entry(field: "defaultSuffix", help: "/descriptor/hudson.tasks.Mailer/help/defaultSuffix", title: _("Default user e-mail suffix")) {
     f.textbox()
   }
 

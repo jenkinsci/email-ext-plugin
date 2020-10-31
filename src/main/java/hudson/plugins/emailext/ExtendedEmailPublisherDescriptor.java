@@ -15,6 +15,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.ReflectionUtils;
 import hudson.util.Secret;
+import hudson.Util;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
@@ -143,7 +144,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      */
     private String excludedCommitters = "";
 
-    private boolean overrideGlobalSettings;
+    private transient boolean overrideGlobalSettings;
 
     /**
      * If non-null, set a List-ID email header.
@@ -178,7 +179,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private transient Secret smtpAuthPassword;
     private transient boolean useSsl = false;
 
-    private Function<MailAccount, Authenticator> authenticatorProvider = (acc) -> new Authenticator() {
+    private transient Function<MailAccount, Authenticator> authenticatorProvider = (acc) -> new Authenticator() {
         @Override
         protected PasswordAuthentication getPasswordAuthentication() {
             return new PasswordAuthentication(acc.getSmtpUsername(), Secret.toString(acc.getSmtpPassword()));
@@ -191,6 +192,22 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if(smtpAuthUsername != null) mailAccount.setSmtpUsername(smtpAuthUsername);
         if(smtpAuthPassword != null) mailAccount.setSmtpPassword(smtpAuthPassword);
         if(useSsl) mailAccount.setUseSsl(useSsl);
+
+        /*
+         * Versions 2.71 and earlier correctly left the address unset for the default account,
+         * relying solely on the system admin email address from the Jenkins Location settings for
+         * the default account and using the address specified on the account only for additional
+         * accounts. Versions 2.72 through 2.77 incorrectly set the address for the default account
+         * to the system admin email address from the Jenkins Location settings at the time the
+         * descriptor was first saved without propagating further changes from the Jenkins Location
+         * settings to the default account. To clear up this bad state, we unconditionally clear the
+         * address and rely once again solely on the system admin email address from the Jenkins
+         * Location settings for the default account.
+         */
+        if (mailAccount.getAddress() != null) {
+            mailAccount.setAddress(null);
+        }
+
         return this;
     }
 
@@ -206,7 +223,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
         if(mailAccount == null) {
             mailAccount = new MailAccount();
-            mailAccount.setAddress(getAdminAddress());
         }
 
         mailAccount.setDefaultAccount(true);
@@ -254,7 +270,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         JenkinsLocationConfiguration config = JenkinsLocationConfiguration.get();
         if(config != null) {
             if(StringUtils.isBlank(mailAccount.getAddress())) {
-                mailAccount.setAddress(config.getAdminAddress());
+                return config.getAdminAddress();
             }
         }
         return mailAccount.getAddress();
@@ -266,7 +282,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     @DataBoundSetter
     public void setDefaultSuffix(String defaultSuffix) {
-        this.defaultSuffix = defaultSuffix;
+        this.defaultSuffix = Util.fixEmptyAndTrim(defaultSuffix);
     }
 
     public Session createSession(String from) throws MessagingException {
@@ -356,6 +372,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         this.addAccounts = addAccounts;
     }
 
+    @Deprecated
     public String getSmtpServer() {
         return mailAccount.getSmtpHost();
     }
@@ -383,6 +400,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     @SuppressWarnings("unused")
     @DataBoundSetter
+    @Deprecated
     public void setSmtpPassword(String password) {
         mailAccount.setSmtpPassword(password);
     }
@@ -390,8 +408,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     // Make API match Mailer plugin
     @SuppressWarnings("unused")
     public void setSmtpAuth(String userName, String password) {
-        setSmtpUsername(userName);
-        setSmtpPassword(password);
+        mailAccount.setSmtpUsername(userName);
+        mailAccount.setSmtpPassword(password);
     }
 
     @Deprecated
@@ -416,6 +434,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         mailAccount.setSmtpPort(nullify(port));
     }
 
+    @Deprecated
     public String getAdvProperties() {
         return mailAccount.getAdvProperties();
     }
@@ -436,7 +455,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @SuppressWarnings("unused")
     @DataBoundSetter
     public void setCharset(String charset) {
-        this.charset = charset;
+        this.charset = Util.fixEmptyAndTrim(charset);
     }
 
     public String getDefaultContentType() {
@@ -451,6 +470,13 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         } else {
             this.defaultContentType = contentType;
         }
+    }
+
+    public FormValidation doCheckDefaultSuffix(@QueryParameter String value) {
+        if (value.matches("@[A-Za-z0-9.\\-]+") || Util.fixEmptyAndTrim(value)==null)
+            return FormValidation.ok();
+        else
+            return FormValidation.error(Messages.Mailer_Suffix_Error());
     }
 
     public String getDefaultSubject() {
@@ -490,7 +516,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if (StringUtils.isBlank(emergencyReroute)) {
             this.emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
         } else {
-            this.emergencyReroute = emergencyReroute;
+            this.emergencyReroute = Util.fixEmptyAndTrim(emergencyReroute);
         }
     }
 
@@ -513,7 +539,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @DataBoundSetter
     public void setMailAccount(MailAccount mailAccount) {
         this.mailAccount = mailAccount;
-        this.mailAccount.setAddress(getAdminAddress());
         this.mailAccount.setDefaultAccount(true);
     }
 
@@ -564,6 +589,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         this.excludedCommitters = ((excluded == null) ? "" : excluded);
     }
 
+    @Deprecated
     public boolean getOverrideGlobalSettings() {
         return overrideGlobalSettings;
     }

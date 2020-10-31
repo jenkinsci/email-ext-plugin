@@ -108,7 +108,6 @@ public class ScriptContent extends AbstractEvalContent {
      * @param build the build to act on
      * @param templateStream the template file stream
      * @return the rendered template content
-     * @throws IOException
      */
     private String renderTemplate(Run<?, ?> build, FilePath workspace, TaskListener listener, InputStream templateStream)
             throws IOException {
@@ -134,7 +133,7 @@ public class ScriptContent extends AbstractEvalContent {
                 approvedScript = true;
             }
             // we add the binding to the SimpleTemplateEngine instead of the shell
-            GroovyShell shell = createEngine(descriptor, Collections.<String, Object>emptyMap(), !approvedScript);
+            GroovyShell shell = createEngine(descriptor, Collections.emptyMap(), !approvedScript);
             SimpleTemplateEngine engine = new SimpleTemplateEngine(shell);
             Template tmpl;
             synchronized (templateCache) {
@@ -180,12 +179,11 @@ public class ScriptContent extends AbstractEvalContent {
      * @param build        the build to act on
      * @param scriptStream the script input stream
      * @return a String containing the toString of the last item in the script
-     * @throws IOException
      */
     private String executeScript(Run<?, ?> build, FilePath workspace, TaskListener listener, InputStream scriptStream)
             throws IOException {
         String result = "";
-        Map binding = new HashMap<>();
+        Map<String, Object> binding = new HashMap<>();
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         Item parent = build.getParent();
 
@@ -236,8 +234,6 @@ public class ScriptContent extends AbstractEvalContent {
      *
      * @param variables user variables to be added to the Groovy context
      * @return a GroovyShell instance
-     * @throws FileNotFoundException
-     * @throws IOException
      */
     private GroovyShell createEngine(ExtendedEmailPublisherDescriptor descriptor, Map<String, Object> variables, boolean secure)
             throws IOException {

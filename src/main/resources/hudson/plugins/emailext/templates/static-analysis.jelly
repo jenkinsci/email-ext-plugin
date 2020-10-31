@@ -414,6 +414,10 @@
               </tr>
             </j:forEach>
           </table>
+          <p>
+            Warning (see JENKINS-55744): Integration with the Static Analysis Utilities plugin has
+            been deprecated in the Email Extension plugin and will be removed in a future release.
+          </p>
         </div>
       </j:if>
 
