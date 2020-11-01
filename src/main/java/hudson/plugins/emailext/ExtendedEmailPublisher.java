@@ -523,7 +523,18 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                         context.getListener().getLogger().println(buf);
                                     }
 
-                                    debug(context.getListener().getLogger(), "SendFailedException message: " + e.getMessage());
+                                    debug(context.getListener().getLogger(), e.getClass().getSimpleName() + " message: " + e.getMessage());
+                                    Exception next = e.getNextException();
+                                    while (next != null) {
+                                        debug(
+                                                context.getListener().getLogger(),
+                                                "Next " + next.getClass().getSimpleName() + " message: " + next.getMessage());
+                                        if (next instanceof MessagingException) {
+                                            next = ((MessagingException) next).getNextException();
+                                        } else {
+                                            next = null;
+                                        }
+                                    }
                                     break;
                                 }
                             } catch (MessagingException e) {
@@ -532,7 +543,18 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                     transport.close();
                                     Thread.sleep(10000);
                                 } else {
-                                    debug(context.getListener().getLogger(), "MessagingException message: " + e.getMessage());
+                                    debug(context.getListener().getLogger(), e.getClass().getSimpleName() + " message: " + e.getMessage());
+                                    Exception next = e.getNextException();
+                                    while (next != null) {
+                                        debug(
+                                                context.getListener().getLogger(),
+                                                "Next " + next.getClass().getSimpleName() + " message: " + next.getMessage());
+                                        if (next instanceof MessagingException) {
+                                            next = ((MessagingException) next).getNextException();
+                                        } else {
+                                            next = null;
+                                        }
+                                    }
                                     break;
                                 }
                             }
