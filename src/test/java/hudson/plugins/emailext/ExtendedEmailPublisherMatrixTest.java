@@ -68,7 +68,7 @@ public class ExtendedEmailPublisherMatrixTest {
     }
 
     @Before
-    public void before() throws Exception {
+    public void setUp() throws Exception {
         publisher = new ExtendedEmailPublisher();
         publisher.defaultSubject = "%DEFAULT_SUBJECT";
         publisher.defaultContent = "%DEFAULT_CONTENT";
@@ -79,7 +79,7 @@ public class ExtendedEmailPublisherMatrixTest {
     }
 
     @After
-    public void after() {
+    public void tearDown() {
         Mailbox.clearAll();
     }
 

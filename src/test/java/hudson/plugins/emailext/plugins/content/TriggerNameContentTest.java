@@ -9,6 +9,8 @@ import hudson.plugins.emailext.MailAccount;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -29,32 +31,35 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class TriggerNameContentTest {
     private ExtendedEmailPublisher publisher;
     private FreeStyleProject project;
-    
-    @Rule
-    public JenkinsRule j = new JenkinsRule() {
-        @Override
-        public void before() throws Throwable {
-            super.before();
-            ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
-            descriptor.setMailAccount(new MailAccount() {
-                {
-                    setSmtpHost("smtp.notreal.com");
-                }
-            });
 
-            Mailbox.clearAll();
-            publisher = new ExtendedEmailPublisher();
-            publisher.defaultSubject = "%DEFAULT_SUBJECT";
-            publisher.defaultContent = "%DEFAULT_CONTENT";
-            publisher.attachmentsPattern = "";
-            publisher.recipientList = "%DEFAULT_RECIPIENTS";
-            publisher.setPresendScript("");
-            publisher.setPostsendScript("");
+    @Rule public JenkinsRule j = new JenkinsRule();
 
-            project = createFreeStyleProject();
-            project.getPublishersList().add(publisher);
-        }
-    };
+    @Before
+    public void setUp() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
+        descriptor.setMailAccount(
+                new MailAccount() {
+                    {
+                        setSmtpHost("smtp.notreal.com");
+                    }
+                });
+
+        publisher = new ExtendedEmailPublisher();
+        publisher.defaultSubject = "%DEFAULT_SUBJECT";
+        publisher.defaultContent = "%DEFAULT_CONTENT";
+        publisher.attachmentsPattern = "";
+        publisher.recipientList = "%DEFAULT_RECIPIENTS";
+        publisher.setPresendScript("");
+        publisher.setPostsendScript("");
+
+        project = j.createFreeStyleProject();
+        project.getPublishersList().add(publisher);
+    }
+
+    @After
+    public void tearDown() {
+        Mailbox.clearAll();
+    }
 
     
     @Test

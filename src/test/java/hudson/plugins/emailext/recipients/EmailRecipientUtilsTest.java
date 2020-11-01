@@ -7,6 +7,7 @@ import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.tasks.Mailer;
 import hudson.util.FormValidation;
 import org.apache.commons.collections.CollectionUtils;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -26,16 +27,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class EmailRecipientUtilsTest {
 
-    @Rule 
-    public JenkinsRule j = new JenkinsRule() {
-        @Override
-        public void before() throws Throwable {
-            emailRecipientUtils = new EmailRecipientUtils();
-            envVars = new EnvVars();
-            super.before();
-        }        
-    };
-    
+    @Rule public JenkinsRule j = new JenkinsRule();
+
+    @Before
+    public void setUp() {
+        emailRecipientUtils = new EmailRecipientUtils();
+        envVars = new EnvVars();
+    }
+
     private EmailRecipientUtils emailRecipientUtils;
     private EnvVars envVars;
 

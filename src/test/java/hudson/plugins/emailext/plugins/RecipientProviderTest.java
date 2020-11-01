@@ -8,10 +8,7 @@ import org.hamcrest.CoreMatchers;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -21,12 +18,9 @@ import static org.junit.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore({"javax.xml.*", "org.apache.xerces.*", "org.xml.sax.*"}) // workaround inspired by https://github.com/powermock/powermock/issues/864#issuecomment-410182836
 public class RecipientProviderTest {
 
-    @Rule
-    private JenkinsRule j = new JenkinsRule();
+    @Rule public JenkinsRule j = new JenkinsRule();
 
     @Test
     public void allSupporting() {
