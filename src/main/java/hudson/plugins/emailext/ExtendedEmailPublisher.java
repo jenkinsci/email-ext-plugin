@@ -508,7 +508,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                     }
                                     addresses = e.getValidUnsentAddresses();
                                     if (addresses != null && addresses.length > 0) {
-                                        buf = new StringBuilder("Error sending to the following VALID addresses:");
+                                        buf = new StringBuilder("Not sent to the following valid addresses:");
                                         for (Address a : addresses) {
                                             buf.append(' ').append(a);
                                         }
@@ -516,7 +516,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                     }
                                     addresses = e.getInvalidAddresses();
                                     if (addresses != null && addresses.length > 0) {
-                                        buf = new StringBuilder("Error sending to the following INVALID addresses:");
+                                        buf = new StringBuilder("Could not be sent to the following addresses:");
                                         for (Address a : addresses) {
                                             buf.append(' ').append(a);
                                         }
