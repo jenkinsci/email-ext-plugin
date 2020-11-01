@@ -41,7 +41,7 @@ public class AbstractScriptTriggerTest {
     public JenkinsRule j = new JenkinsRule();
 
     @Before
-    public void setup() {
+    public void setUp() {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                 // otherwise we would need to create users for each email address tested, to bypass SECURITY-372 fix:

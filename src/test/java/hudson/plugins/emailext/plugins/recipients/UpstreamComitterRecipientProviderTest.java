@@ -36,7 +36,7 @@ public class UpstreamComitterRecipientProviderTest {
     @Rule public JenkinsRule j = new JenkinsRule();
 
     @Before
-    public void before() {
+    public void setUp() {
         ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
         descriptor.setMailAccount(
                 new MailAccount() {
@@ -47,7 +47,7 @@ public class UpstreamComitterRecipientProviderTest {
     }
 
     @After
-    public void after() {
+    public void tearDown() {
         Mailbox.clearAll();
     }
 

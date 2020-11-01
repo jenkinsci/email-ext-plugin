@@ -10,6 +10,8 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -32,26 +34,23 @@ import static org.junit.Assert.assertTrue;
  */
 public class EmailExtStepTest {
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule()  {
-        @Override
-        public void before() throws Throwable {
-            super.before();
-            ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
-            descriptor.setMailAccount(new MailAccount() {
-                {
-                    setSmtpHost("smtp.notreal.com");
-                }
-            });
-            Mailbox.clearAll();
-        }
+    @Rule public JenkinsRule j = new JenkinsRule();
 
-        @Override
-        public void after() throws Exception {
-            super.after();
-            Mailbox.clearAll();
-        }
-    };
+    @Before
+    public void setUp() {
+        ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
+        descriptor.setMailAccount(
+                new MailAccount() {
+                    {
+                        setSmtpHost("smtp.notreal.com");
+                    }
+                });
+    }
+
+    @After
+    public void tearDown() {
+        Mailbox.clearAll();
+    }
 
     @Test
     public void configRoundTrip() throws Exception {
