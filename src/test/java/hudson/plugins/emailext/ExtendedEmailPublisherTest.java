@@ -62,7 +62,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -83,28 +82,26 @@ import static org.junit.Assert.assertTrue;
 
 public class ExtendedEmailPublisherTest {
 
-    @ClassRule
-    public static BuildWatcher buildWatcher = new BuildWatcher();
+    @ClassRule public static BuildWatcher buildWatcher = new BuildWatcher();
 
     private ExtendedEmailPublisher publisher;
     private FreeStyleProject project;
     private List<RecipientProvider> recProviders;
 
-    @ClassRule
-    public static JenkinsRule j = new JenkinsRule();
+    @ClassRule public static JenkinsRule j = new JenkinsRule();
     private AuthorizationStrategy oldAuthorizationStrategy;
     private SecurityRealm oldSecurityRealm;
-    @Rule
-    public TestName testName = new TestName();
+    @Rule public TestName testName = new TestName();
 
     @Before
-    public void before() throws Throwable {
+    public void setUp() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
-        descriptor.setMailAccount(new MailAccount() {
-            {
-                setSmtpHost("smtp.notreal.com");
-            }
-        });
+        descriptor.setMailAccount(
+                new MailAccount() {
+                    {
+                        setSmtpHost("smtp.notreal.com");
+                    }
+                });
 
         publisher = new ExtendedEmailPublisher();
         publisher.defaultSubject = "%DEFAULT_SUBJECT";
@@ -118,7 +115,6 @@ public class ExtendedEmailPublisherTest {
         project.getPublishersList().add(publisher);
 
         recProviders = Collections.emptyList();
-        Mailbox.clearAll();
 
         publisher.getDescriptor().setDefaultClasspath(Collections.emptyList());
         publisher.getDescriptor().setAllowedDomains(null);
@@ -127,7 +123,7 @@ public class ExtendedEmailPublisherTest {
     }
 
     @After
-    public void after() throws Exception {
+    public void tearDown() throws Exception {
         Mailbox.clearAll();
         j.jenkins.setAuthorizationStrategy(oldAuthorizationStrategy);
         j.jenkins.setSecurityRealm(oldSecurityRealm);
@@ -886,11 +882,9 @@ public class ExtendedEmailPublisherTest {
     public void testPostsendScriptModifiesToUsingGlobalExternalScript() throws Exception {
         publisher.setPostsendScript("import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n"
                 + "msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())");
-        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultClasspath");
-        f.setAccessible(true);
         List<GroovyScriptPath> classpath = new ArrayList<>();
         classpath.add(new GroovyScriptPath("src/test/postsend"));
-        f.set(publisher.getDescriptor(), classpath);
+        publisher.getDescriptor().setDefaultClasspath(classpath);
 
         verifyPostsendScriptModifiesMessageId();
     }
