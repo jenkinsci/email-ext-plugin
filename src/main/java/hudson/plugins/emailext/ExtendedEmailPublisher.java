@@ -55,6 +55,8 @@ import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.Ancestor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -70,6 +72,7 @@ import javax.mail.Multipart;
 import javax.mail.SendFailedException;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -78,6 +81,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -449,11 +453,54 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     boolean sendMail(ExtendedEmailPublisherContext context) {
         try {
-            MimeMessage msg = createMail(context);
-            if(msg == null) {
-                context.getListener().getLogger().println("Could not create MimeMessage");
+            InternetAddress fromAddress = getFromAddress();
+            MailAccount mailAccount = getMailAccount(context);
+            if (!mailAccount.isValid()) {
+                context.getListener().getLogger().println("Could not find valid mail account");
+                if (!mailAccount.isFromAddressValid()) {
+                    if (mailAccount.isDefaultAccount()) {
+                        debug(
+                                context.getListener().getLogger(),
+                                "Default account has invalid from address");
+                    } else {
+                        debug(
+                                context.getListener().getLogger(),
+                                "Additional account has invalid from address "
+                                        + mailAccount.getAddress());
+                    }
+                } else if (!mailAccount.isSmtpServerValid()) {
+                    if (mailAccount.isDefaultAccount()) {
+                        debug(
+                                context.getListener().getLogger(),
+                                "Default account has invalid SMTP server");
+                    } else {
+                        debug(
+                                context.getListener().getLogger(),
+                                "Additional account "
+                                        + mailAccount.getAddress()
+                                        + " has invalid SMTP server");
+                    }
+                } else if (!mailAccount.isSmtpAuthValid()) {
+                    if (mailAccount.isDefaultAccount()) {
+                        debug(
+                                context.getListener().getLogger(),
+                                "Default account has invalid SMTP authentication");
+                    } else {
+                        debug(
+                                context.getListener().getLogger(),
+                                "Additional account "
+                                        + mailAccount.getAddress()
+                                        + " has invalid SMTP authentication");
+                    }
+                }
                 return false;
             }
+            Session session = getDescriptor().createSession(mailAccount);
+            if (session == null) {
+                context.getListener().getLogger().println("Could not create session");
+                return false;
+            }
+            MimeMessage msg = createMail(context, fromAddress, session);
             debug(context.getListener().getLogger(), "Successfully created MimeMessage");
             Address[] allRecipients = msg.getAllRecipients();
             int retries = 0;
@@ -476,12 +523,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                         }
                         context.getListener().getLogger().println(buf);
 
-                        ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
-                        Session session = descriptor.createSession(from);
-                        if(session == null) {
-                            context.getListener().getLogger().println("Could not create session");
-                            return false;
-                        }
                         // emergency reroute might have modified recipients:
                         allRecipients = msg.getAllRecipients();
                         // all email addresses are of type "rfc822", so just take first one:
@@ -751,24 +792,90 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
 
-    private MimeMessage createMail(ExtendedEmailPublisherContext context) throws MessagingException, IOException, InterruptedException {
+    private InternetAddress getFromAddress() throws AddressException {
+        ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
+        InternetAddress fromAddress;
+        if (StringUtils.isBlank(from)) {
+            fromAddress = new InternetAddress(descriptor.getAdminAddress());
+        } else {
+            fromAddress = new InternetAddress(from);
+        }
+        return fromAddress;
+    }
+
+    @Restricted(NoExternalUse.class)
+    MailAccount getMailAccount(ExtendedEmailPublisherContext context) throws AddressException {
+        ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
+
+        if (StringUtils.isBlank(from)) {
+            debug(
+                    context.getListener().getLogger(),
+                    "Sending mail from default account using System Admin e-mail address");
+            return descriptor.getMailAccount();
+        }
+
+        InternetAddress fromAddress = new InternetAddress(from);
+        for (MailAccount addAccount : descriptor.getAddAccounts()) {
+            if (addAccount == null) {
+                continue;
+            }
+
+            if (!addAccount.isValid()) {
+                if (!addAccount.isFromAddressValid()) {
+                    debug(
+                            context.getListener().getLogger(),
+                            "Ignoring additional account "
+                                    + "with invalid from address "
+                                    + addAccount.getAddress());
+                } else if (!addAccount.isSmtpServerValid()) {
+                    debug(
+                            context.getListener().getLogger(),
+                            "Ignoring additional account "
+                                    + addAccount.getAddress()
+                                    + " with invalid SMTP server");
+                } else if (!addAccount.isSmtpAuthValid()) {
+                    debug(
+                            context.getListener().getLogger(),
+                            "Ignoring additional account "
+                                    + addAccount.getAddress()
+                                    + " with invalid SMTP authentication");
+                }
+                continue;
+            }
+
+            if (!addAccount.getAddress().equalsIgnoreCase(fromAddress.getAddress())) {
+                debug(
+                        context.getListener().getLogger(),
+                        "Ignoring valid additional account "
+                                + addAccount.getAddress()
+                                + " because it is not a match for "
+                                + from);
+                continue;
+            }
+
+            debug(
+                    context.getListener().getLogger(),
+                    "Sending mail from additional account " + addAccount.getAddress());
+            return addAccount;
+        }
+
+        debug(
+                context.getListener().getLogger(),
+                "Sending mail from default account using custom from address " + from);
+        return descriptor.getMailAccount();
+    }
+
+    private MimeMessage createMail(
+            ExtendedEmailPublisherContext context, InternetAddress fromAddress, Session session)
+            throws MessagingException, UnsupportedEncodingException, InterruptedException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
 
         String charset = descriptor.getCharset();
 
-        Session session = descriptor.createSession(from);
-        if(session == null) {
-            context.getListener().getLogger().println("Could not create session");
-            return null;
-        }
         MimeMessage msg = new MimeMessage(session);
 
-        InternetAddress fromAddress = new InternetAddress(descriptor.getAdminAddress());
         if (fromAddress.getPersonal() != null) {
             fromAddress.setPersonal(fromAddress.getPersonal(), charset);
-        }
-        if (StringUtils.isNotBlank(from)) {
-            fromAddress = new InternetAddress(from);
         }
 
         msg.setFrom(fromAddress);

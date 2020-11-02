@@ -42,7 +42,20 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     }
 
     public boolean isValid() {
-        return (isDefaultAccount() || StringUtils.isNotBlank(address)) && StringUtils.isNotBlank(smtpHost) && (!isAuth() || (StringUtils.isNotBlank(smtpUsername) && smtpPassword != null));
+        return isFromAddressValid() && isSmtpServerValid() && isSmtpAuthValid();
+    }
+
+    public boolean isFromAddressValid() {
+        return isDefaultAccount() || StringUtils.isNotBlank(address);
+    }
+
+    public boolean isSmtpServerValid() {
+        return StringUtils.isNotBlank(smtpHost);
+    }
+
+    public boolean isSmtpAuthValid() {
+        return StringUtils.isBlank(smtpUsername)
+                || (StringUtils.isNotBlank(smtpUsername) && smtpPassword != null);
     }
 
     public boolean isDefaultAccount() {
@@ -59,10 +72,6 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
         public String getDisplayName(){
             return "";
         }
-    }
-
-    public boolean isAuth(){
-        return smtpUsername != null;
     }
 
     public String getAddress(){

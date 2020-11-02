@@ -402,7 +402,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         descriptor.setAddAccounts(Collections.singletonList(ma));
         Function<MailAccount, Authenticator> authenticatorProvider = Mockito.mock(Function.class);
         descriptor.setAuthenticatorProvider(authenticatorProvider);
-        descriptor.createSession(from);
+        descriptor.createSession(ma);
         ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
         Mockito.verify(authenticatorProvider, Mockito.times(1)).apply(mailAccountCaptor.capture());
         assertNotNull(mailAccountCaptor.getValue());
@@ -422,7 +422,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         descriptor.setAddAccounts(Collections.singletonList(ma));
         Function<MailAccount, Authenticator> authenticatorProvider = Mockito.mock(Function.class);
         descriptor.setAuthenticatorProvider(authenticatorProvider);
-        descriptor.createSession(from);
+        descriptor.createSession(ma);
         ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
         Mockito.verify(authenticatorProvider, Mockito.times(1)).apply(mailAccountCaptor.capture());
         assertNotNull(mailAccountCaptor.getValue());
@@ -442,7 +442,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         descriptor.setAddAccounts(Collections.singletonList(ma));
         Function<MailAccount, Authenticator> authenticatorProvider = Mockito.mock(Function.class);
         descriptor.setAuthenticatorProvider(authenticatorProvider);
-        descriptor.createSession(from);
+        descriptor.createSession(ma);
         ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
         Mockito.verify(authenticatorProvider, Mockito.never()).apply(mailAccountCaptor.capture());
     }
