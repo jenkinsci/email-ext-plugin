@@ -1357,7 +1357,7 @@ public class ExtendedEmailPublisherTest {
         }
     }
 
-    private void addEmailType(EmailTrigger trigger) {
+    private static void addEmailType(EmailTrigger trigger) {
         trigger.setEmail(new EmailType() {
             {
                 setRecipientList("ashlux@gmail.com");
