@@ -92,6 +92,7 @@ public class ExtendedEmailPublisherTest {
     @ClassRule public static JenkinsRule j = new JenkinsRule();
     private AuthorizationStrategy oldAuthorizationStrategy;
     private SecurityRealm oldSecurityRealm;
+    private String oldAdminAddress;
     @Rule public TestName testName = new TestName();
 
     @Before
@@ -105,12 +106,15 @@ public class ExtendedEmailPublisherTest {
                 });
 
         publisher = new ExtendedEmailPublisher();
-        publisher.defaultSubject = "%DEFAULT_SUBJECT";
-        publisher.defaultContent = "%DEFAULT_CONTENT";
+        publisher.from = "";
+        publisher.contentType = "default";
+        publisher.defaultSubject = "$DEFAULT_SUBJECT";
+        publisher.defaultContent = "$DEFAULT_CONTENT";
         publisher.attachmentsPattern = "";
-        publisher.recipientList = "%DEFAULT_RECIPIENTS";
-        publisher.setPresendScript("");
-        publisher.setPostsendScript("");
+        publisher.recipientList = "$DEFAULT_RECIPIENTS";
+        publisher.setPresendScript("$DEFAULT_PRESEND_SCRIPT");
+        publisher.setPostsendScript("$DEFAULT_POSTSEND_SCRIPT");
+        publisher.replyTo = "$DEFAULT_REPLYTO";
 
         project = j.createFreeStyleProject(testName.getMethodName());
         project.getPublishersList().add(publisher);
@@ -118,9 +122,12 @@ public class ExtendedEmailPublisherTest {
         recProviders = Collections.emptyList();
 
         publisher.getDescriptor().setDefaultClasspath(Collections.emptyList());
+        publisher.getDescriptor().setDefaultSuffix(null);
+        publisher.getDescriptor().setEmergencyReroute(null);
         publisher.getDescriptor().setAllowedDomains(null);
         oldAuthorizationStrategy = j.jenkins.getAuthorizationStrategy();
         oldSecurityRealm = j.jenkins.getSecurityRealm();
+        oldAdminAddress = JenkinsLocationConfiguration.get().getAdminAddress();
     }
 
     @After
@@ -128,6 +135,7 @@ public class ExtendedEmailPublisherTest {
         Mailbox.clearAll();
         j.jenkins.setAuthorizationStrategy(oldAuthorizationStrategy);
         j.jenkins.setSecurityRealm(oldSecurityRealm);
+        JenkinsLocationConfiguration.get().setAdminAddress(oldAdminAddress);
         ScriptApproval approval = ScriptApproval.get();
         approval.clearApprovedClasspathEntries();
         approval.clearApprovedScripts();
@@ -680,8 +688,6 @@ public class ExtendedEmailPublisherTest {
         assertEquals(0, Mailbox.get("kutzi@xxx.com").size());
         assertEquals(0, Mailbox.get("slide.o.mix@xxx.com").size());
         assertEquals(1, Mailbox.get("emergency@foo.com").size());
-
-        publisher.getDescriptor().setEmergencyReroute(null);
     }
 
     @Test
@@ -1334,6 +1340,35 @@ public class ExtendedEmailPublisherTest {
         assertEquals("Foo <foo@example.com>", getHeader(message, "From"));
         message = mailbox.get(1);
         assertEquals("Bar <bar@example.com>", getHeader(message, "From"));
+    }
+
+    @Test
+    public void testProjectFrom() throws Exception {
+        SuccessTrigger successTrigger =
+                new SuccessTrigger(
+                        recProviders,
+                        "$DEFAULT_RECIPIENTS",
+                        "$DEFAULT_REPLYTO",
+                        "$DEFAULT_SUBJECT",
+                        "$DEFAULT_CONTENT",
+                        "",
+                        0,
+                        "project");
+        addEmailType(successTrigger);
+        publisher.getConfiguredTriggers().add(successTrigger);
+        publisher.from = "custom@example.com";
+
+        FreeStyleBuild build = j.buildAndAssertSuccess(project);
+        j.assertLogContains("Email was triggered for: Success", build);
+
+        Mailbox mailbox = Mailbox.get("ashlux@gmail.com");
+        assertEquals(1, mailbox.size());
+
+        Message msg = mailbox.get(0);
+        Address[] from = msg.getFrom();
+        assertEquals(1, from.length);
+
+        assertEquals("custom@example.com", from[0].toString());
     }
 
     /**
