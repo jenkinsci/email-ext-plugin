@@ -2,6 +2,7 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import hudson.Functions;
 import hudson.model.AbstractBuild;
 import hudson.model.Item;
 import hudson.model.TaskListener;
@@ -97,7 +98,7 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
                     result = (Boolean) res;
                 }
             } catch (IOException e) {
-                e.printStackTrace(listener.fatalError("Failed evaluating script trigger %s%n", e.getMessage()));
+                Functions.printStackTrace(e, listener.fatalError("Failed evaluating script trigger %s%n", e.getMessage()));
             }
         }
         return result;
