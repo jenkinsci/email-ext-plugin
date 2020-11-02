@@ -9,6 +9,7 @@ import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import hudson.EnvVars;
 import hudson.FilePath;
+import hudson.Functions;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
@@ -583,7 +584,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 return true;
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Could not send email.", e);
-            e.printStackTrace(context.getListener().error("Could not send email as a part of the post-build publishers."));
+            Functions.printStackTrace(e, context.getListener().error("Could not send email as a part of the post-build publishers."));
         }
 
         debug(context.getListener().getLogger(), "Some error occurred trying to send the email...check the Jenkins log");
@@ -664,7 +665,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 logger.println(StringUtils.capitalize(scriptName) + " script tried to access secured objects: " + e.getMessage());
                 throw e;
             } catch (Throwable t) {
-                t.printStackTrace(pw);
+                Functions.printStackTrace(t, pw);
                 logger.println(out.toString());
                 // should we cancel the sending of the email???
             }

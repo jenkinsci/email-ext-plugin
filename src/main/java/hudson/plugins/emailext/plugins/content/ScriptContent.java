@@ -7,6 +7,7 @@ import groovy.lang.Script;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
 import hudson.FilePath;
+import hudson.Functions;
 import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -167,7 +168,7 @@ public class ScriptContent extends AbstractEvalContent {
         } catch(Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
+            Functions.printStackTrace(e, pw);
             result = "Exception raised during template rendering: " + e.getMessage() + "\n\n" + sw.toString();
         }
         return result;
