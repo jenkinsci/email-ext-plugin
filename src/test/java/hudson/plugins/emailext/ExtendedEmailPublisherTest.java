@@ -11,6 +11,7 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.model.Result;
+import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
@@ -1167,7 +1168,9 @@ public class ExtendedEmailPublisherTest {
                 form.put("project_from", "mail@test1.com");
                 publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest(), form);
                 assertEquals("mail@test1.com", publisher.from);
-                Session session = descriptor.createSession(publisher.from);
+                ExtendedEmailPublisherContext context =
+                        new ExtendedEmailPublisherContext(publisher, null, null, null, TaskListener.NULL);
+                Session session = descriptor.createSession(publisher.getMailAccount(context));
                 assertEquals("smtp.test0.com", session.getProperty("mail.smtp.host"));
                 assertEquals("587", session.getProperty("mail.smtp.port"));
                 assertEquals("test0.com", session.getProperty("mail.smtp.ssl.trust"));
@@ -1188,7 +1191,7 @@ public class ExtendedEmailPublisherTest {
 
                 publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest(), form);
                 assertEquals("mail@test1.com", publisher.from);
-                session = descriptor.createSession(publisher.from);
+                session = descriptor.createSession(publisher.getMailAccount(context));
                 assertEquals("smtp.test1.com", session.getProperty("mail.smtp.host"));
                 assertEquals("25", session.getProperty("mail.smtp.port"));
                 assertEquals("test1.com", session.getProperty("mail.smtp.ssl.trust"));
@@ -1196,7 +1199,7 @@ public class ExtendedEmailPublisherTest {
                 form.put("project_from", "mail@test2.com");
                 publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest(), form);
                 assertEquals("mail@test2.com", publisher.from);
-                session = descriptor.createSession(publisher.from);
+                session = descriptor.createSession(publisher.getMailAccount(context));
                 assertEquals("smtp.test2.com", session.getProperty("mail.smtp.host"));
                 assertEquals("465", session.getProperty("mail.smtp.port"));
                 assertEquals("test2.com", session.getProperty("mail.smtp.ssl.trust"));

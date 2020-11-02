@@ -25,13 +25,14 @@ import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 
 import javax.mail.Authenticator;
-import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.internet.AddressException;
@@ -285,22 +286,9 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         this.defaultSuffix = Util.fixEmptyAndTrim(defaultSuffix);
     }
 
-    public Session createSession(String from) throws MessagingException {
+    @Restricted(NoExternalUse.class)
+    Session createSession(MailAccount acc) {
         Properties props = new Properties(System.getProperties());
-
-        MailAccount acc = mailAccount;
-        if(StringUtils.isNotBlank(from)){
-            InternetAddress fromAddress = new InternetAddress(from);
-            for(MailAccount ma : addAccounts) {
-                if(ma == null || !ma.isValid() || !ma.getAddress().equalsIgnoreCase(fromAddress.getAddress())) continue;
-                acc = ma;
-                break;
-            }
-        }
-
-        if(!acc.isValid()) {
-            return null;
-        }
 
         if (acc.getSmtpHost() != null) {
             props.put("mail.smtp.host", acc.getSmtpHost());
