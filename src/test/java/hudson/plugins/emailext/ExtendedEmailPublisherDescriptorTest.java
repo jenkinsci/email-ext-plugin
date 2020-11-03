@@ -37,11 +37,8 @@ import hudson.plugins.emailext.plugins.trigger.UnstableTrigger;
 import hudson.plugins.emailext.plugins.trigger.XNthFailureTrigger;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
-import hudson.security.Permission;
-import hudson.util.ReflectionUtils;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
-import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -51,7 +48,6 @@ import org.jvnet.hudson.test.recipes.LocalData;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -352,13 +348,6 @@ public class ExtendedEmailPublisherDescriptorTest {
 
     @Test
     public void managePermissionShouldAccess() {
-        Permission jenkinsManage;
-        try {
-            jenkinsManage = getJenkinsManage();
-        } catch (Exception e) {
-            Assume.assumeTrue("Jenkins baseline is too old for this test (requires Jenkins.MANAGE)", false);
-            return;
-        }
         final String USER = "user";
         final String MANAGER = "manager";
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
@@ -368,7 +357,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
                 // Read and Manage
                 .grant(Jenkins.READ).everywhere().to(MANAGER)
-                .grant(jenkinsManage).everywhere().to(MANAGER)
+                .grant(Jenkins.MANAGE).everywhere().to(MANAGER)
         );
         try (ACLContext c = ACL.as(User.getById(USER, true))) {
             Collection<Descriptor> descriptors = Functions.getSortedDescriptorsForGlobalConfigUnclassified();
@@ -379,12 +368,6 @@ public class ExtendedEmailPublisherDescriptorTest {
             Optional<Descriptor> found = descriptors.stream().filter(descriptor -> descriptor instanceof ExtendedEmailPublisherDescriptor).findFirst();
             assertTrue("Global configuration should be accessible to MANAGE users", found.isPresent());
         }
-    }
-
-    // TODO: remove when Jenkins core baseline is 2.222+
-    private Permission getJenkinsManage() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        // Jenkins.MANAGE is available starting from Jenkins 2.222 (https://jenkins.io/changelog/#v2.222). See JEP-223 for more info
-        return (Permission) ReflectionUtils.getPublicProperty(Jenkins.get(), "MANAGE");
     }
 
     @Test
