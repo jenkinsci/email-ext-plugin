@@ -16,7 +16,6 @@ import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -50,17 +49,6 @@ import static org.junit.Assert.assertTrue;
 public class AttachmentUtilsTest {
 
     @Rule public JenkinsRule j = new JenkinsRule();
-
-    @Before
-    public void setUp() {
-        ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
-        descriptor.setMailAccount(
-                new MailAccount() {
-                    {
-                        setSmtpHost("smtp.notreal.com");
-                    }
-                });
-    }
 
     @After
     public void tearDown() {
