@@ -50,7 +50,10 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     }
 
     public boolean isSmtpServerValid() {
-        return StringUtils.isNotBlank(smtpHost);
+        return true;
+        // Note: having no SMTP server is fine, it means localhost.
+        // More control could be implemented here when not null though,
+        // like checking the value looks like an FQDN or IP address.
     }
 
     public boolean isSmtpAuthValid() {
