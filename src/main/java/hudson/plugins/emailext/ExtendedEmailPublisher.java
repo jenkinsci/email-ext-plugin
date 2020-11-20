@@ -456,8 +456,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             InternetAddress fromAddress = getFromAddress();
             MailAccount mailAccount = getMailAccount(context);
             if (!mailAccount.isValid()) {
-                context.getListener().getLogger().println("Could not find valid mail account");
                 if (!mailAccount.isFromAddressValid()) {
+                    context.getListener()
+                            .getLogger()
+                            .println("Mail account has invalid from address");
                     if (mailAccount.isDefaultAccount()) {
                         debug(
                                 context.getListener().getLogger(),
@@ -469,6 +471,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                         + mailAccount.getAddress());
                     }
                 } else if (!mailAccount.isSmtpServerValid()) {
+                    context.getListener()
+                            .getLogger()
+                            .println("Mail account has invalid SMTP server");
                     if (mailAccount.isDefaultAccount()) {
                         debug(
                                 context.getListener().getLogger(),
@@ -481,16 +486,19 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                         + " has invalid SMTP server");
                     }
                 } else if (!mailAccount.isSmtpAuthValid()) {
+                    context.getListener()
+                            .getLogger()
+                            .println("Mail account has invalid SMTP authentication settings");
                     if (mailAccount.isDefaultAccount()) {
                         debug(
                                 context.getListener().getLogger(),
-                                "Default account has invalid SMTP authentication");
+                                "Default account has invalid SMTP authentication settings");
                     } else {
                         debug(
                                 context.getListener().getLogger(),
                                 "Additional account "
                                         + mailAccount.getAddress()
-                                        + " has invalid SMTP authentication");
+                                        + " has invalid SMTP authentication settings");
                     }
                 }
                 return false;
