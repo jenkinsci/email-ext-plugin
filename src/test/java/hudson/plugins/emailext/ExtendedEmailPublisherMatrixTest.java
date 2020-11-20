@@ -50,14 +50,6 @@ public class ExtendedEmailPublisherMatrixTest {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
-        descriptor.setMailAccount(
-                new MailAccount() {
-                    {
-                        setSmtpHost("smtp.notreal.com");
-                    }
-                });
-
         agents = new ArrayList<>();
         // TODO Windows ACI agents do not have enough memory to run this test.
         if (!Functions.isWindows()) {

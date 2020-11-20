@@ -14,7 +14,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.plugins.emailext.MailAccount;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.util.DescribableList;
@@ -63,12 +62,6 @@ public class ScriptContentTest {
         @Override
         public void before() throws Throwable {
             super.before();
-            ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
-            descriptor.setMailAccount(new MailAccount() {
-                {
-                    setSmtpHost("smtp.notreal.com");
-                }
-            });
 
             Mailbox.clearAll();
             

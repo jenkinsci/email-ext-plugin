@@ -11,13 +11,10 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Queue;
 import hudson.model.Result;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.plugins.emailext.MailAccount;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.tasks.BuildTrigger;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.FakeChangeLogSCM;
@@ -34,17 +31,6 @@ import java.util.List;
 public class UpstreamComitterRecipientProviderTest {
 
     @Rule public JenkinsRule j = new JenkinsRule();
-
-    @Before
-    public void setUp() {
-        ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
-        descriptor.setMailAccount(
-                new MailAccount() {
-                    {
-                        setSmtpHost("smtp.notreal.com");
-                    }
-                });
-    }
 
     @After
     public void tearDown() {
