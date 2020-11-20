@@ -4,8 +4,6 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
-import hudson.plugins.emailext.MailAccount;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
@@ -36,14 +34,6 @@ public class TriggerNameContentTest {
 
     @Before
     public void setUp() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
-        descriptor.setMailAccount(
-                new MailAccount() {
-                    {
-                        setSmtpHost("smtp.notreal.com");
-                    }
-                });
-
         publisher = new ExtendedEmailPublisher();
         publisher.defaultSubject = "%DEFAULT_SUBJECT";
         publisher.defaultContent = "%DEFAULT_CONTENT";

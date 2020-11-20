@@ -97,14 +97,6 @@ public class ExtendedEmailPublisherTest {
 
     @Before
     public void setUp() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
-        descriptor.setMailAccount(
-                new MailAccount() {
-                    {
-                        setSmtpHost("smtp.notreal.com");
-                    }
-                });
-
         publisher = new ExtendedEmailPublisher();
         publisher.from = "";
         publisher.contentType = "default";
