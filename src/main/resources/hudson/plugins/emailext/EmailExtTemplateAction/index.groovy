@@ -9,7 +9,7 @@ def d = namespace("jelly:define")
 import hudson.Functions
 
 def requiresAdmin = app.getDescriptor("hudson.plugins.emailext.ExtendedEmailPublisher").adminRequiredForTemplateTesting
-def hasPermission = requiresAdmin ? hudson.Functions.hasPermission(app.getDescriptor("hudson.plugins.emailext.ExtendedEmailPublisher").getJenkinsManageOrAdmin()) : hudson.Functions.hasPermission(it.project, it.project.CONFIGURE);
+def hasPermission = requiresAdmin ? hudson.Functions.hasPermission(app.MANAGE) : hudson.Functions.hasPermission(it.project, it.project.CONFIGURE);
 l.layout {
     st.include(it: my.project, page: "sidepanel")
     l.main_panel {
