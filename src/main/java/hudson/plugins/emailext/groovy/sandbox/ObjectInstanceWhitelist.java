@@ -3,7 +3,7 @@ package hudson.plugins.emailext.groovy.sandbox;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.Whitelist;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.AbstractWhitelist;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.lang.ref.WeakReference;
 
 /**

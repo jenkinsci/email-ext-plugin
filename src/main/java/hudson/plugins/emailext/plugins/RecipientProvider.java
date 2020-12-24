@@ -9,7 +9,7 @@ import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import javax.mail.internet.InternetAddress;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ public abstract class RecipientProvider extends AbstractDescribableImpl<Recipien
         return rt;
     }
 
-    public static void checkAllSupport(@Nonnull List<? extends RecipientProvider> providers, Class<? extends Job> clazz) {
+    public static void checkAllSupport(@NonNull List<? extends RecipientProvider> providers, Class<? extends Job> clazz) {
         Set<String> notSupported = new TreeSet<>();
         for (RecipientProvider provider : providers) {
             if (!provider.getDescriptor().isApplicable(clazz)) {

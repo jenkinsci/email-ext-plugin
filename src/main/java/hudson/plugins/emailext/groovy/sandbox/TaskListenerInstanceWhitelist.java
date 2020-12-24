@@ -2,8 +2,8 @@ package hudson.plugins.emailext.groovy.sandbox;
 
 import hudson.model.TaskListener;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -17,7 +17,7 @@ public class TaskListenerInstanceWhitelist extends ObjectInstanceWhitelist<TaskL
     }
 
     @Override
-    public boolean permitsMethod(@Nonnull Method method, @Nonnull Object receiver, @Nonnull Object[] args) {
+    public boolean permitsMethod(@NonNull Method method, @NonNull Object receiver, @NonNull Object[] args) {
         if (permitsInstance(receiver) && isClass(method.getDeclaringClass())) {
             String name = method.getName();
             return name.equals("getLogger")
@@ -29,12 +29,12 @@ public class TaskListenerInstanceWhitelist extends ObjectInstanceWhitelist<TaskL
     }
 
     @Override
-    public boolean permitsFieldGet(@Nonnull Field field, @Nonnull Object receiver) {
+    public boolean permitsFieldGet(@NonNull Field field, @NonNull Object receiver) {
         return false;
     }
 
     @Override
-    public boolean permitsFieldSet(@Nonnull Field field, @Nonnull Object receiver, @CheckForNull Object value) {
+    public boolean permitsFieldSet(@NonNull Field field, @NonNull Object receiver, @CheckForNull Object value) {
         return false;
     }
 }

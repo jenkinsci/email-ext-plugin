@@ -3,8 +3,8 @@ package hudson.plugins.emailext.groovy.sandbox;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.Whitelist;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.StaticWhitelist;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
 public class StaticProxyInstanceWhitelist extends ObjectInstanceWhitelist<Object> {
     private Whitelist[] proxies;
 
-    public StaticProxyInstanceWhitelist(Object instance, @Nonnull String... resources) throws IOException {
+    public StaticProxyInstanceWhitelist(Object instance, @NonNull String... resources) throws IOException {
         super(instance);
         proxies = new Whitelist[resources.length];
         for (int i = 0; i < resources.length; i++) {
@@ -25,7 +25,7 @@ public class StaticProxyInstanceWhitelist extends ObjectInstanceWhitelist<Object
     }
 
     @Override
-    public boolean permitsMethod(@Nonnull Method method, @Nonnull Object receiver, @Nonnull Object[] args) {
+    public boolean permitsMethod(@NonNull Method method, @NonNull Object receiver, @NonNull Object[] args) {
         if (permitsInstance(receiver)) {
             for (Whitelist proxy : proxies) {
                 if (proxy.permitsMethod(method, receiver, args)) {
@@ -37,7 +37,7 @@ public class StaticProxyInstanceWhitelist extends ObjectInstanceWhitelist<Object
     }
 
     @Override
-    public boolean permitsFieldGet(@Nonnull Field field, @Nonnull Object receiver) {
+    public boolean permitsFieldGet(@NonNull Field field, @NonNull Object receiver) {
         if (permitsInstance(receiver)) {
             for (Whitelist proxy : proxies) {
                 if (proxy.permitsFieldGet(field, receiver)) {
@@ -49,7 +49,7 @@ public class StaticProxyInstanceWhitelist extends ObjectInstanceWhitelist<Object
     }
 
     @Override
-    public boolean permitsFieldSet(@Nonnull Field field, @Nonnull Object receiver, @CheckForNull Object value) {
+    public boolean permitsFieldSet(@NonNull Field field, @NonNull Object receiver, @CheckForNull Object value) {
         return false;
     }
 }

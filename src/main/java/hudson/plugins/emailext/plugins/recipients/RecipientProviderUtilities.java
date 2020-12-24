@@ -39,7 +39,7 @@ import jenkins.scm.RunWithSCM;
 import org.acegisecurity.Authentication;
 import org.acegisecurity.userdetails.UsernameNotFoundException;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import javax.mail.internet.InternetAddress;
 import java.io.IOException;
 import java.lang.reflect.Field;

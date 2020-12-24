@@ -12,7 +12,7 @@ import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 public class GroovyTemplateConfig extends Config {
     @Override
@@ -50,7 +50,7 @@ public class GroovyTemplateConfig extends Config {
 
         @NonNull
         @Override
-        public Config newConfig(@Nonnull String id) {
+        public Config newConfig(@NonNull String id) {
             return new GroovyTemplateConfig(id, "Groovy Email Template", "", "");
         }
 

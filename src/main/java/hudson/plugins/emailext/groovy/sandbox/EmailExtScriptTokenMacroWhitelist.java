@@ -34,7 +34,7 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.Whitelist;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.AbstractWhitelist;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class EmailExtScriptTokenMacroWhitelist extends AbstractWhitelist {
     }
 
     @Override
-    public boolean permitsMethod(@Nonnull Method method, @Nonnull Object receiver, @Nonnull Object[] args) {
+    public boolean permitsMethod(@NonNull Method method, @NonNull Object receiver, @NonNull Object[] args) {
         //method groovy.lang.GroovyObject invokeMethod java.lang.String java.lang.Object (SimpleTemplateScript2 BUILD_ID)
         if (method.getDeclaringClass() == GroovyObject.class
                 && receiver instanceof EmailExtScript && "invokeMethod".equals(method.getName()) && args.length > 0) {
