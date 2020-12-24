@@ -1,5 +1,6 @@
 package hudson.plugins.emailext;
 
+import com.google.common.collect.ImmutableSet;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.Run;
@@ -7,20 +8,21 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.inject.Inject;
+import javax.annotation.Nonnull;
 import javax.mail.internet.InternetAddress;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class EmailExtRecipientStep extends AbstractStepImpl {
+public class EmailExtRecipientStep extends Step {
     private List<RecipientProvider> recipientProviders;
 
     @DataBoundConstructor
@@ -32,21 +34,20 @@ public class EmailExtRecipientStep extends AbstractStepImpl {
         return recipientProviders;
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public static class Executor extends AbstractSynchronousNonBlockingStepExecution<String> {
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new Executor(this, context);
+    }
+
+    public static class Executor extends SynchronousNonBlockingStepExecution<String> {
         private static final long serialVersionUID = 1L;
 
-        @Inject
-        private transient EmailExtRecipientStep step;
+        private final transient EmailExtRecipientStep step;
 
-        @StepContextParameter
-        private transient Run<?, ?> run;
-
-        @StepContextParameter
-        private transient TaskListener listener;
-
-        @StepContextParameter
-        private transient EnvVars env;
+        protected Executor(EmailExtRecipientStep step, @Nonnull StepContext context) {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected String run() throws Exception {
@@ -54,11 +55,18 @@ public class EmailExtRecipientStep extends AbstractStepImpl {
                 throw new IllegalArgumentException("You must provide at least one recipient provider");
             }
             ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-            ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, run, null, null, listener);
+            ExtendedEmailPublisherContext context =
+                    new ExtendedEmailPublisherContext(
+                            publisher,
+                            getContext().get(Run.class),
+                            null,
+                            null,
+                            getContext().get(TaskListener.class));
             Set<InternetAddress> to = new HashSet<>();
-            RecipientProvider.checkAllSupport(step.recipientProviders, run.getParent().getClass());
+            RecipientProvider.checkAllSupport(
+                    step.recipientProviders, getContext().get(Run.class).getParent().getClass());
             for (RecipientProvider provider : step.recipientProviders) {
-                provider.addRecipients(context, env, to, to, to);
+                provider.addRecipients(context, getContext().get(EnvVars.class), to, to, to);
             }
 
             StringBuilder rt = new StringBuilder();
@@ -76,9 +84,11 @@ public class EmailExtRecipientStep extends AbstractStepImpl {
     }
 
     @Extension(optional = true)
-    public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
-        public DescriptorImpl() {
-            super(Executor.class);
+    public static final class DescriptorImpl extends StepDescriptor {
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return ImmutableSet.of(Run.class, TaskListener.class, EnvVars.class);
         }
 
         @Override
