@@ -20,7 +20,7 @@ import org.jvnet.hudson.test.TestExtension;
 import org.jvnet.mock_javamail.Mailbox;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
@@ -174,7 +174,7 @@ public class EmailExtStepTest {
 
             private final transient FileCopyStep step;
 
-            protected Execution(FileCopyStep step, @Nonnull StepContext context) {
+            protected Execution(FileCopyStep step, @NonNull StepContext context) {
                 super(context);
                 this.step = step;
             }

@@ -1,6 +1,6 @@
 package hudson.plugins.emailext.groovy.sandbox;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 
@@ -14,7 +14,7 @@ public class PrintStreamInstanceWhitelist extends ObjectInstanceWhitelist<PrintS
     }
 
     @Override
-    public boolean permitsMethod(@Nonnull Method method, @Nonnull Object receiver, @Nonnull Object[] args) {
+    public boolean permitsMethod(@NonNull Method method, @NonNull Object receiver, @NonNull Object[] args) {
         if (permitsInstance(receiver) && isClass(method.getDeclaringClass())) {
             String name = method.getName();
             return name.equals("write")

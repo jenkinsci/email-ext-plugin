@@ -27,7 +27,7 @@ import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.PrintStream;
@@ -76,7 +76,7 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
     }
 
     @Override
-    public boolean configure(@Nonnull StaplerRequest req, @Nonnull JSONObject formData) {
+    public boolean configure(@NonNull StaplerRequest req, @NonNull JSONObject formData) {
         super.configure(req, formData);
         if(formData.containsKey("secureTriggerScript")) {
             this.secureTriggerScript = req.bindJSON(SecureGroovyScript.class, formData.getJSONObject("secureTriggerScript"));

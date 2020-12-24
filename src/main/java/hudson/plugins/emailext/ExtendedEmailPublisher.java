@@ -63,8 +63,8 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -1120,7 +1120,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      * in progress
      */
     public static @CheckForNull
-    Run<?, ?> getPreviousRun(@Nonnull Run<?, ?> run, TaskListener listener) {
+    Run<?, ?> getPreviousRun(@NonNull Run<?, ?> run, TaskListener listener) {
         Run<?, ?> previousRun = run.getPreviousBuild();
         if (previousRun != null && previousRun.isBuilding()) {
             listener.getLogger().println(Messages.ExtendedEmailPublisher__is_still_in_progress_ignoring_for_purpo(previousRun.getDisplayName()));

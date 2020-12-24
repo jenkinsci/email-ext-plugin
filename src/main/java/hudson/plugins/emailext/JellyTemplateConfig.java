@@ -12,7 +12,7 @@ import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.scriptsecurity.scripts.languages.JellyLanguage;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 public class JellyTemplateConfig extends Config {
     @Override
@@ -49,7 +49,7 @@ public class JellyTemplateConfig extends Config {
 
         @NonNull
         @Override
-        public Config newConfig(@Nonnull String id) {
+        public Config newConfig(@NonNull String id) {
             return new JellyTemplateConfig(id, "Jelly Email Template", "", "");
         }
 

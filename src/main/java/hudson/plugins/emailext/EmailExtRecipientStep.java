@@ -15,7 +15,7 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import javax.mail.internet.InternetAddress;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -44,7 +44,7 @@ public class EmailExtRecipientStep extends Step {
 
         private final transient EmailExtRecipientStep step;
 
-        protected Executor(EmailExtRecipientStep step, @Nonnull StepContext context) {
+        protected Executor(EmailExtRecipientStep step, @NonNull StepContext context) {
             super(context);
             this.step = step;
         }

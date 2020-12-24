@@ -25,8 +25,8 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
 import java.util.Set;
 
@@ -185,7 +185,7 @@ public class EmailExtStep extends Step {
 
         private final transient EmailExtStep step;
 
-        protected EmailExtStepExecution(EmailExtStep step, @Nonnull StepContext context) {
+        protected EmailExtStepExecution(EmailExtStep step, @NonNull StepContext context) {
             super(context);
             this.step = step;
         }

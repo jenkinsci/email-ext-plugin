@@ -21,7 +21,7 @@ import org.jenkinsci.plugins.scriptsecurity.scripts.languages.JellyLanguage;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.xml.sax.InputSource;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class JellyScriptContent extends AbstractEvalContent {
     }
 
     @Override
-    public String evaluate(@Nonnull Run<?, ?> run, FilePath workspace, @Nonnull TaskListener listener, String macroName) throws MacroEvaluationException, IOException, InterruptedException {
+    public String evaluate(@NonNull Run<?, ?> run, FilePath workspace, @NonNull TaskListener listener, String macroName) throws MacroEvaluationException, IOException, InterruptedException {
         InputStream inputStream = null;
 
         try {
@@ -64,7 +64,7 @@ public class JellyScriptContent extends AbstractEvalContent {
         return JellyTemplateConfigProvider.class;
     }
 
-    private String renderContent(@Nonnull Run<?, ?> build, InputStream inputStream, @Nonnull TaskListener listener)
+    private String renderContent(@NonNull Run<?, ?> build, InputStream inputStream, @NonNull TaskListener listener)
             throws JellyException, IOException {
         String rawScript = IOUtils.toString(inputStream);
         if (inputStream instanceof UserProvidedContentInputStream) {
@@ -93,7 +93,7 @@ public class JellyScriptContent extends AbstractEvalContent {
         return output.toString(getCharset(build));
     }
 
-    private JellyContext createContext(Object it, @Nonnull Run<?, ?> build, @Nonnull TaskListener listener) {
+    private JellyContext createContext(Object it, @NonNull Run<?, ?> build, @NonNull TaskListener listener) {
         JellyContext context = new JellyContext();
         ExtendedEmailPublisherDescriptor descriptor = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         context.setVariable("it", it);
