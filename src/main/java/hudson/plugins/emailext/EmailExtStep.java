@@ -1,8 +1,8 @@
 package hudson.plugins.emailext;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -17,21 +17,24 @@ import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by acearl on 9/14/2015.
  */
 
-public class EmailExtStep extends AbstractStepImpl {
+public class EmailExtStep extends Step {
 
     public final String subject;
 
@@ -171,18 +174,21 @@ public class EmailExtStep extends AbstractStepImpl {
         this.saveOutput = saveOutput;
     }
 
-    public static class EmailExtStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new EmailExtStepExecution(this, context);
+    }
+
+    public static class EmailExtStepExecution extends SynchronousNonBlockingStepExecution<Void> {
 
         private static final long serialVersionUID = 1L;
 
-        @Inject
-        private transient EmailExtStep step;
+        private final transient EmailExtStep step;
 
-        @StepContextParameter
-        private transient TaskListener listener;
-
-        @StepContextParameter
-        private transient Run<?,?> run;
+        protected EmailExtStepExecution(EmailExtStep step, @Nonnull StepContext context) {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected Void run() throws Exception {
@@ -194,7 +200,9 @@ public class EmailExtStep extends AbstractStepImpl {
             trigger.getEmail().getRecipientProviders().clear();
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
             if (step.recipientProviders != null) {
-                RecipientProvider.checkAllSupport(step.recipientProviders, run.getParent().getClass());
+                RecipientProvider.checkAllSupport(
+                        step.recipientProviders,
+                        getContext().get(Run.class).getParent().getClass());
                 trigger.getEmail().addRecipientProviders(step.recipientProviders);
             }
             publisher.configuredTriggers.add(trigger);
@@ -227,8 +235,13 @@ public class EmailExtStep extends AbstractStepImpl {
                 publisher.contentType = step.mimeType;
             }
 
-            final ExtendedEmailPublisherContext ctx = new ExtendedEmailPublisherContext(publisher, run,
-                    getContext().get(FilePath.class), getContext().get(Launcher.class), listener);
+            final ExtendedEmailPublisherContext ctx =
+                    new ExtendedEmailPublisherContext(
+                            publisher,
+                            getContext().get(Run.class),
+                            getContext().get(FilePath.class),
+                            getContext().get(Launcher.class),
+                            getContext().get(TaskListener.class));
             final Multimap<String, EmailTrigger> triggered = ArrayListMultimap.create();
             triggered.put(AlwaysTrigger.TRIGGER_NAME, publisher.configuredTriggers.get(0));
             ctx.setTrigger(publisher.configuredTriggers.get(0));
@@ -240,12 +253,13 @@ public class EmailExtStep extends AbstractStepImpl {
 
 
     @Extension(optional=true)
-    public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static final class DescriptorImpl extends StepDescriptor {
 
         public static final String defaultMimeType = "text/plain";
 
-        public DescriptorImpl() {
-            super(EmailExtStepExecution.class);
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return ImmutableSet.of(Run.class, TaskListener.class);
         }
 
         @Override

@@ -1,15 +1,17 @@
 package hudson.plugins.emailext;
 
+import com.google.common.collect.ImmutableSet;
 import hudson.FilePath;
 import hudson.model.Run;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepConfigTester;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -18,12 +20,14 @@ import org.jvnet.hudson.test.TestExtension;
 import org.jvnet.mock_javamail.Mailbox;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.Nonnull;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.File;
 import java.net.URL;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -130,7 +134,7 @@ public class EmailExtStepTest {
         j.assertLogContains("Archiving artifacts", run);
     }
 
-    public static class FileCopyStep extends AbstractStepImpl {
+    public static class FileCopyStep extends Step {
 
         private final String file;
 
@@ -143,11 +147,17 @@ public class EmailExtStepTest {
             return file;
         }
 
-        @TestExtension("attachment")
-        public static class DescriptorImpl extends AbstractStepDescriptorImpl {
+        @Override
+        public StepExecution start(StepContext context) throws Exception {
+            return new Execution(this, context);
+        }
 
-            public DescriptorImpl() {
-                super(Execution.class);
+        @TestExtension("attachment")
+        public static class DescriptorImpl extends StepDescriptor {
+
+            @Override
+            public Set<? extends Class<?>> getRequiredContext() {
+                return ImmutableSet.of(FilePath.class);
             }
 
             @Override public String getFunctionName() {
@@ -160,16 +170,18 @@ public class EmailExtStepTest {
 
         }
 
-        public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Boolean> {
+        public static class Execution extends SynchronousNonBlockingStepExecution<Boolean> {
 
-            @javax.inject.Inject
-            private transient FileCopyStep step;
-            @StepContextParameter
-            private transient FilePath workspace;
+            private final transient FileCopyStep step;
+
+            protected Execution(FileCopyStep step, @Nonnull StepContext context) {
+                super(context);
+                this.step = step;
+            }
 
             @Override protected Boolean run() throws Exception {
                 FilePath file = new FilePath(new File(step.file));
-                workspace.child(file.getName()).copyFrom(file);
+                getContext().get(FilePath.class).child(file.getName()).copyFrom(file);
                 return true;
             }
 
