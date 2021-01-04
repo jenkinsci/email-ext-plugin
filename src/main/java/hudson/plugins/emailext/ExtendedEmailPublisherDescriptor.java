@@ -55,7 +55,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
  * These settings are global configurations
  */
 @Extension
-@Symbol("email-ext")
+@Symbol({"email-ext", "extendedEmailPublisher"})
 public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publisher> {
 
     public static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisherDescriptor.class.getName());
