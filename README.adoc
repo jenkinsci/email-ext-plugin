@@ -207,7 +207,9 @@ For an example on how to do this, take a look at the existing https://github.com
 Using custom Jelly scripts (those not packaged with this plugin) requires the cooperation of your Jenkins administrator.
 The steps are relatively simple:
 
-. Create the Jelly script template. The name of the script should be `<name>.jelly`. It is important that the name ends in `.jelly`.
+. Create the Jelly script template. The name of the script should be `<name>.jelly`.
++
+IMPORTANT: It is important that the name ends in `.jelly`.
 . Have your Jenkins administrator place the script inside `${JENKINS_HOME}/email-templates/`.
 . Use the `$JELLY_SCRIPT` token with the `template` parameter equal to your script filename without the `.jelly` extension. For example, if the script filename is `foobar.jelly`, the email content would be `${JELLY_SCRIPT,template="foobar"}`.
 
