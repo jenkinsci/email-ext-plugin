@@ -1,5 +1,5 @@
-[[email-ext-plugin-recipes]]
-= email-ext-plugin Recipes
+[[email-extension-recipes]]
+= Email Extension Recipes
 :toc: macro
 :toc-title:
 ifdef::env-github[]
@@ -10,68 +10,61 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-This page provides examples of recipes for various things you
-can do with the Email-ext plugin for email notifications.
+This page provides examples of various things you can do with the Email Extension plugin for email notifications.
 
 toc::[]
 
 == Templates
 
-=== Additional Templates In the Source Code
+=== Additional Templates in the Source Code
 
-There are several simple examples referenced in the xref:/README.adoc[readme document],
-more examples can be found in at </src/main/resources/hudson/plugins/emailext/templates> .
+There are several simple examples referenced in the xref:/README.adoc[`README`] document; more examples can be found at https://github.com/jenkinsci/email-ext-plugin/tree/master/src/main/resources/hudson/plugins/emailext/templates[`src/main/resources/hudson/plugins/emailext/templates`].
 
 == Pre-send Scripts
 
-=== Set Message As Important
+=== Set Message as Important
 
-To do this you can set the headers in the pre-send script.
-See also
+To set a message as important, set the appropriate headers in a pre-send script:
 
-* jira discussion leading to this recipe https://issues.jenkins-ci.org/browse/JENKINS-13912?focusedCommentId=163420&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-163420,
-* Javadoc for core Jenkins classes, especially (http://javadoc.jenkins-ci.org/hudson/model/AbstractBuild.html[AbstractBuild],
- 
-
-*Pre-send Script*
-
+.Set Message as Important
 [source,groovy]
 ----
-if (build.result.toString().equals("FAILURE")) { 
-    msg.addHeader("X-Priority", "1 (Highest)"); 
-    msg.addHeader("Importance", "High"); 
+if (build.result.toString().equals("FAILURE")) {
+    msg.addHeader("X-Priority", "1 (Highest)");
+    msg.addHeader("Importance", "High");
 }
 cancel = build.result.toString().equals("ABORTED");
 ----
 
-=== Filter Recipients On Domain
+See also:
 
-The script below will filter out the recipients that DO NOT contain
-'@gooddomain.com'
+* https://issues.jenkins.io/browse/JENKINS-13912?focusedCommentId=163420&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-163420[Jira discussion leading to this recipe]
+* Javadoc for core Jenkins classes, especially https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`AbstractBuild`]
 
-*Filter Recipients on Domain*
+=== Filter Recipients on Domain
 
+To filter out the recipients that *do not* contain `@example.com`:
+
+.Filter Recipients on Domain
 [source,groovy]
 ----
 recipients = msg.getRecipients(javax.mail.Message.RecipientType.TO)
-filtered = recipients.findAll { addr -> addr.toString().endsWith('@gooddomain.com') }
+filtered = recipients.findAll { addr -> addr.toString().endsWith('@example.com') }
 msg.setRecipients(javax.mail.Message.RecipientType.TO, filtered as javax.mail.Address[])
 ----
 
-==== Filter Recipients On White List
+==== Filter Recipients on Whitelist
 
-The script below will filter out the recipients that DO NOT contain one
-of the defined white list values
+To filter out the recipients that *do not* contain one of the defined whitelist values:
 
-*Filter Recipients On White List*
-
+.Filter Recipients on Whitelist
 [source,groovy]
 ----
-emailWhiteList= ["person1", "person2", "@goodDomain1.com", "@goodDomain2.com"]
+emailWhitelist = ["person1", "person2", "@goodDomain1.com", "@goodDomain2.com"]
 
-def includedInWhiteList(addr) {
-    for (white_address in emailWhiteList) {
-        if (addr.toString().contains(white_address)) {
+def includedInWhitelist(addr) {
+    for (whiteAddress in emailWhitelist) {
+        if (addr.toString().contains(whiteAddress)) {
             return 1
             break
         }
@@ -80,7 +73,7 @@ def includedInWhiteList(addr) {
 }
 
 recipients = msg.getRecipients(javax.mail.Message.RecipientType.TO)
-filtered = recipients.findAll { addr -> includedInWhiteList(addr) > 0 }
+filtered = recipients.findAll { addr -> includedInWhitelist(addr) > 0 }
 msg.setRecipients(javax.mail.Message.RecipientType.TO, filtered as javax.mail.Address[])
 ----
 
@@ -88,29 +81,26 @@ msg.setRecipients(javax.mail.Message.RecipientType.TO, filtered as javax.mail.Ad
 
 Post-send scripts are available starting with version 2.41.
 
-=== Use rewritten Message-ID from AWS SES for In-Reply-To header
+=== Use Rewritten Message ID from Amazon SES for `In-Reply-To` Header
 
-The Amazon Simple Email Service (https://aws.amazon.com/ses/[AWS SES])
-rewrites the Message-ID header of outgoing emails. That means subsequent
-failure/success notifications will not be in the same thread, because
-they reference a non-existing message id in the In-Reply-To header.
+The Amazon Simple Email Service (https://aws.amazon.com/ses/[SES]) rewrites the message ID of outgoing emails.
+This means subsequent failure/success notifications will not be in the same thread, because they reference a nonexistent message ID in the `In-Reply-To` header.
 
-The rewritten message id is returned as last message of the SMTP
-transaction, e.g.
+The rewritten message ID is returned as last message of the SMTP transaction:
 
- 250 Ok <00000123456abcde-1234abcd-abcd-1234-1234-1234abcd1234-000000@eu-west-1.amazonses.com>
+----
+250 Ok <00000123456abcde-1234abcd-abcd-1234-1234-1234abcd1234-000000@eu-west-1.amazonses.com>
+----
 
-The following post-send script fetches the rewritten message id for
-later correct In-Reply-To headers:
+The following post-send script fetches the rewritten message ID for later use in `In-Reply-To` headers:
 
-*Use AWS SES Message-ID*
-
+.Use Amazon SES Message ID
 [source,groovy]
 ----
 import com.sun.mail.smtp.SMTPTransport;
+import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 
 String smtpHost = props.getProperty("mail.smtp.host", "");
 String awsRegex = "^email-smtp\\.([a-z0-9-]+)\\.amazonaws\\.com\$";
