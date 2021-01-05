@@ -16,17 +16,17 @@ toc::[]
 
 == Templates
 
-=== Additional Templates in the Source Code
+=== Additional templates in the source code
 
 There are several simple examples referenced in the xref:/README.adoc[`README`] document; more examples can be found at https://github.com/jenkinsci/email-ext-plugin/tree/master/src/main/resources/hudson/plugins/emailext/templates[`src/main/resources/hudson/plugins/emailext/templates`].
 
-== Pre-send Scripts
+== Pre-send scripts
 
-=== Set Message as Important
+=== Setting a message as important
 
 To set a message as important, set the appropriate headers in a pre-send script:
 
-.Set Message as Important
+.Setting a message as important
 [source,groovy]
 ----
 if (build.result.toString().equals("FAILURE")) {
@@ -41,11 +41,11 @@ See also:
 * https://issues.jenkins.io/browse/JENKINS-13912?focusedCommentId=163420&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-163420[Jira discussion leading to this recipe]
 * Javadoc for core Jenkins classes, especially https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`AbstractBuild`]
 
-=== Filter Recipients on Domain
+=== Filtering recipients on a domain
 
 To filter out the recipients that *do not* contain `@example.com`:
 
-.Filter Recipients on Domain
+.Filtering recipients on a domain
 [source,groovy]
 ----
 recipients = msg.getRecipients(javax.mail.Message.RecipientType.TO)
@@ -53,11 +53,11 @@ filtered = recipients.findAll { addr -> addr.toString().endsWith('@example.com')
 msg.setRecipients(javax.mail.Message.RecipientType.TO, filtered as javax.mail.Address[])
 ----
 
-==== Filter Recipients on Whitelist
+==== Filtering recipients on a whitelist
 
 To filter out the recipients that *do not* contain one of the defined whitelist values:
 
-.Filter Recipients on Whitelist
+.Filtering recipients on a whitelist
 [source,groovy]
 ----
 emailWhitelist = ["person1", "person2", "@goodDomain1.com", "@goodDomain2.com"]
@@ -77,11 +77,11 @@ filtered = recipients.findAll { addr -> includedInWhitelist(addr) > 0 }
 msg.setRecipients(javax.mail.Message.RecipientType.TO, filtered as javax.mail.Address[])
 ----
 
-== Post-send Scripts
+== Post-send scripts
 
 Post-send scripts are available starting with version 2.41.
 
-=== Use Rewritten Message ID from Amazon SES for `In-Reply-To` Header
+=== Using the Amazon SES message ID for the `In-Reply-To` header
 
 The Amazon Simple Email Service (https://aws.amazon.com/ses/[SES]) rewrites the message ID of outgoing emails.
 This means subsequent failure/success notifications will not be in the same thread, because they reference a nonexistent message ID in the `In-Reply-To` header.
@@ -94,7 +94,7 @@ The rewritten message ID is returned as last message of the SMTP transaction:
 
 The following post-send script fetches the rewritten message ID for later use in `In-Reply-To` headers:
 
-.Use Amazon SES Message ID
+.Using the Amazon SES message ID
 [source,groovy]
 ----
 import com.sun.mail.smtp.SMTPTransport;

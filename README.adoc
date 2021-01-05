@@ -26,11 +26,11 @@ toc::[]
 This plugin extends the https://plugins.jenkins.io/mailer/[Mailer plugin]'s functionality by giving you more control.
 It provides customization of three areas:
 
-* *Triggers* - Select the conditions that should cause an email notification to be sent.
-* *Content* - Specify the content of each triggered email's subject and body.
-* *Recipients* - Specify who should receive an email when it is triggered.
+Triggers:: Select the conditions that should cause an email notification to be sent.
+Content:: Specify the content of each triggered email's subject and body.
+Recipients:: Specify who should receive an email when it is triggered.
 
-== Questions and Issues
+== Questions and issues
 
 If you need help, please post on the https://jenkins.io/mailing-lists/[Jenkins users mailing list] or https://stackoverflow.com/questions/tagged/email-ext[Stack Overflow].
 
@@ -43,7 +43,7 @@ Use the `email-ext-plugin` component in the `JENKINS` project.
 * https://github.com/jenkinsci/.github/blob/master/CONTRIBUTING.md[Contribution guidelines]
 * xref:CHANGELOG.adoc[Changelog]
 
-== Getting Started
+== Getting started
 
 === System-wide configuration
 
@@ -63,9 +63,9 @@ In the *Post-build Actions* section, click on *Add post-build action* and then s
 
 There are three main fields that you can edit when this plugin is enabled:
 
-* *Project Recipient List* - This is a comma (or whitespace) separated list of email recipients. Allows you to specify a single recipient list for each email that is sent.
-* *Default Subject* - This allows you to configure a token (more about tokens later) that can be used to easily configure all email subjects for the project.
-* *Default Content* - Same as *Default Subject*, but for the email body instead of the subject.
+Project Recipient List:: This is a comma (or whitespace) separated list of email recipients. Allows you to specify a single recipient list for each email that is sent.
+Default Subject:: This allows you to configure a token (more about tokens later) that can be used to easily configure all email subjects for the project.
+Default Content:: Same as *Default Subject*, but for the email body instead of the subject.
 
 === Pipeline step
 
@@ -104,17 +104,17 @@ step([$class: 'Mailer',
 To see the advanced configuration for this plugin, click on the *Advanced* button.
 This section allows you to specify recipients for each type of email trigger as well as a pre-send script that can be used to modify the email prior to sending.
 
-=== Pre-send Scripts and Post-send Scripts
+=== Pre-send scripts and post-send scripts
 
 This feature allows you to write a script that can modify the https://docs.oracle.com/javaee/7/api/javax/mail/internet/MimeMessage.html[`MimeMessage`] object before or after sending the email.
 This allows adding custom headers, modifying the body, etc.
 Predefined variables include:
 
-* `msg` (https://docs.oracle.com/javaee/7/api/javax/mail/internet/MimeMessage.html[`javax.mail.internet.MimeMessage`]) - The MIME email message object, which can be modified.
-* `logger` (https://docs.oracle.com/javase/8/docs/api/java/io/PrintStream.html[`java.io.PrintStream`]) - A `PrintStream` that can be used to log messages to the build log.
-* `build` (https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]) - The build this message belongs to (only use with Freestyle projects).
-* `run` (https://javadoc.jenkins.io/hudson/model/Run.html[`hudson.model.Run`]) - The build this message belongs to (may be used with Freestyle projects or Pipeline).
-* `cancel` (boolean) - When set to true, cancels the sending of the email.
+`msg` (https://docs.oracle.com/javaee/7/api/javax/mail/internet/MimeMessage.html[`javax.mail.internet.MimeMessage`]):: The MIME email message object, which can be modified.
+`logger` (https://docs.oracle.com/javase/8/docs/api/java/io/PrintStream.html[`java.io.PrintStream`]):: A `PrintStream` that can be used to log messages to the build log.
+`build` (https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]):: The build this message belongs to (only use with Freestyle projects).
+`run` (https://javadoc.jenkins.io/hudson/model/Run.html[`hudson.model.Run`]):: The build this message belongs to (may be used with Freestyle projects or Pipeline).
+`cancel` (boolean):: When set to true, cancels the sending of the email.
 
 === Triggers
 
@@ -123,36 +123,34 @@ To add more triggers, select one from the drop-down and it will be added to the 
 Once you have added a trigger, you have several options.
 To see what conditions must be met for this plugin to send an email, click on the "?" (question mark) next to the trigger.
 
-* *Recipient List* - Add this recipient provider if you would like to have the email sent to the *Project Recipient List* configured above.
-* *Developers* - Add this recipient provider to send the email to anyone who checked in code for the last build. This plugin will generate an email address based on the committer's ID and an appended *Default user e-mail suffix* from the *Extended E-mail Notification section* of the *Configure System* page. For example, if a change was committed by someone with an ID of `first.last`, and the default user e-mail suffix is `@example.com`, then an email will be sent to `first.last@example.com`.
-* *Requestor* - Add this recipient provider to send an email to the user who initiated the build (if initiated by a user manually).
-* *Include Culprits* - If this recipient provider _and_ the *Developers* recipient provider are added, emails will include everyone who committed since the last successful build.
-* *Advanced* - Configure properties at a per-trigger level.
- ** *Recipient List* - A comma (or whitespace) separated list of email address that should receive this email if it is triggered. This list is appended to the *Project Recipient List* described above.
- ** *Subject* - Specify the subject line of the selected email.
- ** *Content* - Specify the body of the selected email.
+Recipient List:: Add this recipient provider if you would like to have the email sent to the *Project Recipient List* configured above.
+Developers:: Add this recipient provider to send the email to anyone who checked in code for the last build. This plugin will generate an email address based on the committer's ID and an appended *Default user e-mail suffix* from the *Extended E-mail Notification section* of the *Configure System* page. For example, if a change was committed by someone with an ID of `first.last`, and the default user e-mail suffix is `@example.com`, then an email will be sent to `first.last@example.com`.
+Requestor:: Add this recipient provider to send an email to the user who initiated the build (if initiated by a user manually).
+Include Culprits:: If this recipient provider _and_ the *Developers* recipient provider are added, emails will include everyone who committed since the last successful build.
+Advanced:: Configure properties at a per-trigger level:
+ Recipient List::: A comma (or whitespace) separated list of email address that should receive this email if it is triggered. This list is appended to the *Project Recipient List* described above.
+ Subject::: Specify the subject line of the selected email.
+ Content::: Specify the body of the selected email.
 
 You can also add *Script - After Build* or *Script - Before Build* triggers to a project to use Groovy scripts to define before or after the build whether or not the email will be sent.
 The script is defined in the *Groovy Script* section of the trigger.
 There are four objects added to the model for the script to use to interact with the build:
 
-* `out` (https://docs.oracle.com/javase/8/docs/api/java/io/PrintStream.html[`java.io.PrintStream`]): A `PrintStream` that can be used to log messages to the build log.
-* `build` (https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]): This is the current build, usually a subclass of `AbstractBuild`.
-* `project` (https://javadoc.jenkins.io/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`]): The project object that the current build was started from, usually a subclass of `AbstractProject`.
-* `rooturl` (https://docs.oracle.com/javase/8/docs/api/java/lang/String.html[`String`]): The Jenkins instance root URL, useful for links.
+`out` (https://docs.oracle.com/javase/8/docs/api/java/io/PrintStream.html[`java.io.PrintStream`]):: A `PrintStream` that can be used to log messages to the build log.
+`build` (https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]):: This is the current build, usually a subclass of `AbstractBuild`.
+`project` (https://javadoc.jenkins.io/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`]):: The project object that the current build was started from, usually a subclass of `AbstractProject`.
+`rooturl` (https://docs.oracle.com/javase/8/docs/api/java/lang/String.html[`String`]):: The Jenkins instance root URL, useful for links.
 
 The last line in the script should resolve to a boolean (`true` or `false`):
 
-* *Script - Before Build*:
-
+.Script - Before Build:
 [source,groovy]
 ----
 // this could be used to notify people that a new build is happening
 build.previousBuild.result.toString().equals('FAILURE')
 ----
 
-* *Script - After Build*:
-
+.Script - After Build:
 [source,groovy]
 ----
 // only send am email if the build failed and 'mickeymouse' had a commit
@@ -199,8 +197,8 @@ See the screenshots below for what these templates look like.
 You can specify which script you want by using the `template` argument.
 The usage for each type of script is as follows:
 
-* Text only Jelly script: `${JELLY_SCRIPT,template="text"}`
-* HTML Jelly script: `${JELLY_SCRIPT,template="html"}`
+Text-only Jelly script:: `${JELLY_SCRIPT,template="text"}`
+HTML Jelly script:: `${JELLY_SCRIPT,template="html"}`
 
 You can also write your own Jelly scripts.
 The Jelly scripts are particularly powerful since they provide a hook into the Jenkins API, including https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`] and https://javadoc.jenkins.io/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`].
@@ -213,10 +211,16 @@ The steps are relatively simple:
 . Have your Jenkins administrator place the script inside `${JENKINS_HOME}/email-templates/`.
 . Use the `$JELLY_SCRIPT` token with the `template` parameter equal to your script filename without the `.jelly` extension. For example, if the script filename is `foobar.jelly`, the email content would be `${JELLY_SCRIPT,template="foobar"}`.
 
-Jelly script tips:
-
-* You can get the object of other plugin actions by querying build actions like: `${it.getAction('hudson.plugins.fitnesse.FitnesseResultsAction')}`
+[TIP]
+====
+* You can get the object of other plugin actions by querying build actions, for example:
++
+[source,groovy]
+----
+${it.getAction('hudson.plugins.fitnesse.FitnesseResultsAction')}
+----
 * Then you need to know what functions are allowed by this action object and traverse through the result.
+====
 
 === Groovy script content templates
 
@@ -229,8 +233,8 @@ You can specify which script you want by using the `script` argument; you can al
 Furthermore, you can also include a script that does some initialization using the `init` argument.
 The usage for each type of script is as follows:
 
-* Text only Groovy script: `${SCRIPT, template="groovy-text.template"}`
-* HTML Groovy script: `${SCRIPT, template="groovy-html.template"}`
+Text-only Groovy script:: `${SCRIPT, template="groovy-text.template"}`
+HTML Groovy script:: `${SCRIPT, template="groovy-html.template"}`
 
 You can also write your own scripts and templates.
 The scripts are particularly powerful since they provide a hook into the Jenkins API, including https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`] and https://javadoc.jenkins.io/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`].
@@ -253,11 +257,12 @@ Refer to the following examples for doing various things with the built-in Groov
 New to version 2.15 is the ability to add attachments using https://ant.apache.org/manual/Types/fileset.html[the Ant pattern matching syntax] used in many places in Jenkins.
 You can set a maximum total attachment size in the *Extended E-mail Notification* section of the *Configure System* page; otherwise, it will be unlimited.
 
-=== Jive Formatter
+=== Jive formatter
 
 link:/docs/templates/jive-formatter.groovy[`jive-formatter.groovy`] contains methods for easy and convenient formatting of emails being sent from Jenkins to Jive.
 It should be called from the *Pre-send Script* area.
-Also, it doesn't seem like Jive supports text with multiple formats, so only call one formatting method per block of text.
+
+CAUTION: Jive does not appear to  support text with multiple formats, so only call one formatting method per block of text.
 
 Either `formatLine` or `formatText` can and should be called on every line of text that will be sent to the Jive system prior to calling formatting methods like color or size.
 Please test on your own instances of Jive and add functionality as you find it!
@@ -271,7 +276,7 @@ Class groovyClass = new GroovyClassLoader(getClass().getClassLoader()).parseClas
 GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
 ----
 
-== Related Plugins
+== Related plugins
 
 * https://plugins.jenkins.io/email-ext-recipients-column/[Email Ext Recipients Column plugin]
 * https://plugins.jenkins.io/job-direct-mail/[Job Direct Mail plugin]
