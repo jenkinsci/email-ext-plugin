@@ -142,8 +142,8 @@ headers, modifying the body, etc. Predefined variables include:
 
 * `msg` (https://docs.oracle.com/javaee/7/api/javax/mail/internet/MimeMessage.html[`javax.mail.internet.MimeMessage`]) - The MIME email message object, which can be modified.
 * `logger` (https://docs.oracle.com/javase/8/docs/api/java/io/PrintStream.html[`java.io.PrintStream`]) - A `PrintStream` that can be used to log messages to the build log.
-* `build` (https://javadoc.jenkins-ci.org/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]) - The build this message belongs to (only use with Freestyle projects).
-* `run` (https://javadoc.jenkins-ci.org/hudson/model/Run.html[`hudson.model.Run`]) - The build this message belongs to (may be used with Freestyle projects or Pipeline).
+* `build` (https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]) - The build this message belongs to (only use with Freestyle projects).
+* `run` (https://javadoc.jenkins.io/hudson/model/Run.html[`hudson.model.Run`]) - The build this message belongs to (may be used with Freestyle projects or Pipeline).
 * `cancel` (boolean) - When set to true, cancels the sending of the email.
 
 === Triggers
@@ -183,8 +183,8 @@ in the *Groovy Script* section of the trigger. There are four objects
 added to the model for the script to use to interact with the build:
 
 * `out` (https://docs.oracle.com/javase/8/docs/api/java/io/PrintStream.html[`java.io.PrintStream`]): A `PrintStream` that can be used to log messages to the build log.
-* `build` (https://javadoc.jenkins-ci.org/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]): This is the current build, usually a subclass of `AbstractBuild`.
-* `project` (https://javadoc.jenkins-ci.org/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`]): The project object that the current build was started from, usually a subclass of `AbstractProject`.
+* `build` (https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]): This is the current build, usually a subclass of `AbstractBuild`.
+* `project` (https://javadoc.jenkins.io/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`]): The project object that the current build was started from, usually a subclass of `AbstractProject`.
 * `rooturl` (https://docs.oracle.com/javase/8/docs/api/java/lang/String.html[`String`]): The Jenkins instance root URL, useful for links.
 
 The last line in the script should resolve to a boolean (`true` or
@@ -275,9 +275,9 @@ usage for each type of script is as follows:
 You can also write your own Jelly scripts. The Jelly scripts are
 particularly powerful since they provide a hook into the Jenkins API,
 including
-https://javadoc.jenkins-ci.org/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]
+https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]
 and
-https://javadoc.jenkins-ci.org/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`].
+https://javadoc.jenkins.io/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`].
 For example on how to do this, take a look at the existing
 https://github.com/jenkinsci/email-ext-plugin/blob/master/src/main/resources/hudson/plugins/emailext/templates/html.jelly[`html`]
 and
@@ -327,9 +327,9 @@ usage for each type of script is as follows:
 You can also write your own scripts and templates. The scripts are
 particularly powerful since they provide a hook into the Jenkins API,
 including
-https://javadoc.jenkins-ci.org/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]
+https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]
 and
-https://javadoc.jenkins-ci.org/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`].
+https://javadoc.jenkins.io/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`].
 For example on how to do this, take a look at the existing
 https://github.com/jenkinsci/email-ext-plugin/blob/master/src/main/resources/hudson/plugins/emailext/templates/groovy-html.template[`html`]
 and
