@@ -98,7 +98,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     }
     
     protected InputStream getFileInputStream(Run<?, ?> run, FilePath workspace, String fileName, String extension)
-            throws FileNotFoundException, IOException, InterruptedException {
+            throws IOException, InterruptedException {
         
         InputStream inputStream = null;
         if(fileName.startsWith("managed:")) {

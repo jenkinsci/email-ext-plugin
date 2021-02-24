@@ -29,6 +29,7 @@ public class TriggerNameContent extends TokenMacro {
         return name;
     }
 
+    @Override
     public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName, Map<String, String> arguments, ListMultimap<String, String> argumentMultimap) throws MacroEvaluationException, IOException, InterruptedException {
         return name;
     }

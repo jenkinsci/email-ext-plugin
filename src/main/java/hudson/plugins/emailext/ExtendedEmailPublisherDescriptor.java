@@ -178,7 +178,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private transient Secret smtpAuthPassword;
     private transient boolean useSsl = false;
 
-    private transient Function<MailAccount, Authenticator> authenticatorProvider = (acc) -> new Authenticator() {
+    private transient Function<MailAccount, Authenticator> authenticatorProvider = acc -> new Authenticator() {
         @Override
         protected PasswordAuthentication getPasswordAuthentication() {
             return new PasswordAuthentication(acc.getSmtpUsername(), Secret.toString(acc.getSmtpPassword()));

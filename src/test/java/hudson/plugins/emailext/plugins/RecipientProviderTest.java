@@ -16,7 +16,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 public class RecipientProviderTest {
 
@@ -37,14 +37,17 @@ public class RecipientProviderTest {
     public void checkAllSupport() {
         RecipientProvider.checkAllSupport(Arrays.asList(new RequesterRecipientProvider(),
                 new DevelopersRecipientProvider()), WorkflowJob.class);
-        try {
-            RecipientProvider.checkAllSupport(Arrays.asList(new RequesterRecipientProvider(),
-                    new ListRecipientProvider()), WorkflowJob.class);
-            fail("Expected to throw exception");
-        } catch (IllegalArgumentException ex) {
-            assertEquals(MessageFormat.format("The following recipient providers do not support {0} {1}",
-                    WorkflowJob.class.getName(), ListRecipientProvider.class.getName()), ex.getMessage());
-        }
+        List<? extends RecipientProvider> providers =
+                Arrays.asList(new RequesterRecipientProvider(), new ListRecipientProvider());
+        IllegalArgumentException ex =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> RecipientProvider.checkAllSupport(providers, WorkflowJob.class));
+        assertEquals(
+                MessageFormat.format(
+                        "The following recipient providers do not support {0} {1}",
+                        WorkflowJob.class.getName(), ListRecipientProvider.class.getName()),
+                ex.getMessage());
     }
 
 }

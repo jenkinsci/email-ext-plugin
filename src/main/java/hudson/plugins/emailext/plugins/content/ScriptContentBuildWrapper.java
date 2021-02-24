@@ -9,7 +9,6 @@ import hudson.tasks.test.AggregatedTestResultAction;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ScriptContentBuildWrapper {

@@ -148,7 +148,7 @@ public class EmailExtStepTest {
         }
 
         @Override
-        public StepExecution start(StepContext context) throws Exception {
+        public StepExecution start(StepContext context) {
             return new Execution(this, context);
         }
 

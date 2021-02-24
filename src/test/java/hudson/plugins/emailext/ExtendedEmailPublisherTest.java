@@ -572,7 +572,7 @@ public class ExtendedEmailPublisherTest {
                 containsString("multipart/mixed"));
 
         // TODO: add more tests for getting the multipart information.
-        if (MimeMessage.class.isInstance(msg)) {
+        if (msg instanceof MimeMessage) {
             MimeMessage mimeMsg = (MimeMessage) msg;
             assertEquals("Message content should be a MimeMultipart instance",
                     MimeMultipart.class, mimeMsg.getContent().getClass());
@@ -1066,7 +1066,7 @@ public class ExtendedEmailPublisherTest {
         final WebClient client = j.createWebClient();
         final HtmlPage page = client.goTo("job/JENKINS-15442/configure");
         final HtmlTextArea recipientList = page.getElementByName("project_recipient_list");
-        assertEquals(recipientList.getText(), "mickey@disney.com");
+        assertEquals("mickey@disney.com", recipientList.getText());
     }
     
     @Test

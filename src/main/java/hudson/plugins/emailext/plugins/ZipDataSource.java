@@ -15,9 +15,9 @@ import java.util.zip.ZipOutputStream;
 
 public class ZipDataSource implements SizedDataSource {
 
-    private final static String MIME_TYPE = "application/zip";
-    private final static String FILE_EXTENSION = ".zip";
-    private final static int BUFFER_SIZE = 1024;
+    private static final String MIME_TYPE = "application/zip";
+    private static final String FILE_EXTENSION = ".zip";
+    private static final int BUFFER_SIZE = 1024;
 
     private final String name;
     private byte[] contents;

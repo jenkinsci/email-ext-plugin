@@ -74,18 +74,14 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         AbstractTestResultAction<?> testResult = run.getAction(AbstractTestResultAction.class);
         SummarizedTestResult result = prepareSummarizedTestResult(testResult);
 
-        switch (outputFormat) {
-            case "yaml":
-                try {
-                    return result.toYamlString();
-                } catch (JsonProcessingException e) {
-                    throw new MacroEvaluationException("Unable to serialize to yaml", MACRO_NAME, e.getCause());
-                } catch (Exception e) {
-                    throw e;
-                }
-            default:
-                return result.toString();
+        if ("yaml".equals(outputFormat)) {
+            try {
+                return result.toYamlString();
+            } catch (JsonProcessingException e) {
+                throw new MacroEvaluationException("Unable to serialize to yaml", MACRO_NAME, e.getCause());
+            }
         }
+        return result.toString();
     }
 
     private boolean regressionFilter(TestResult failedTest) {
@@ -193,7 +189,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         public String toString() {
             StringBuilder builder = new StringBuilder();
             builder.append(this.summary);
-            if(tests.size() != 0) {
+            if (!tests.isEmpty()) {
                 builder.append(lineBreak);
             }
             for(FailedTest t: tests) {

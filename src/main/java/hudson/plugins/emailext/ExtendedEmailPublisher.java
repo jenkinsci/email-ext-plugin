@@ -378,8 +378,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         //Go through and remove triggers that are replaced by others
         List<String> replacedTriggers = new ArrayList<>();
 
-        for (Object tName : triggered.keySet()) {
-            String triggerName = (String) tName;
+        for (String triggerName : triggered.keySet()) {
             for (EmailTrigger trigger : triggered.get(triggerName)) {
                 replacedTriggers.addAll(trigger.getDescriptor().getTriggerReplaceList());
             }
@@ -411,8 +410,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                         //Go through and remove triggers that are replaced by others
                         replacedTriggers = new ArrayList<>();
 
-                        for (Object tName : triggered.keySet()) {
-                            String triggerName = (String) tName;
+                        for (String triggerName : triggered.keySet()) {
                             for (EmailTrigger trigger : triggered.get(triggerName)) {
                                 replacedTriggers.addAll(trigger.getDescriptor().getTriggerReplaceList());
                             }
@@ -1102,6 +1100,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return true;
     }
 
+    @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
     }

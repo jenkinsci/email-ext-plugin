@@ -28,7 +28,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 })
 @PowerMockIgnore({"javax.xml.*"}) // workaround inspired by https://github.com/powermock/powermock/issues/864#issuecomment-410182836
 public class RecipientProviderUtilitiesTest {
-    public class Debug implements RecipientProviderUtilities.IDebug {
+    public static class Debug implements RecipientProviderUtilities.IDebug {
 
         @Override
         public void send(String format, Object... args) {

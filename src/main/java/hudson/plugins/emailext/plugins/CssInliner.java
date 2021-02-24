@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  * @author <a href="https://github.com/rahulsom">Rahul Somasunderam</a>
  */
 public class CssInliner {
-    private final static Logger LOG = Logger.getLogger(CssInliner.class.getName());
+    private static final Logger LOG = Logger.getLogger(CssInliner.class.getName());
 
     public static final String CSS_STYLE = "cssstyle";
     public static final String STYLE_ATTR = "style";
@@ -64,7 +64,7 @@ public class CssInliner {
         Elements els = doc.select(STYLE_TAG);
         StringBuilder styles = new StringBuilder();
         for (Element e : els) {
-            if (e.attr("data-inline").equals("true")) {
+            if (e.attr(DATA_INLINE_ATTR).equals("true")) {
                 styles.append(e.data());
                 e.remove();
             }
@@ -157,10 +157,12 @@ public class CssInliner {
         String stylesheet = fetchStyles(doc);
 
         String trimmedStylesheet = stylesheet.replaceAll("\n", "").replaceAll("/\\*.*?\\*/", "").replaceAll(" +", " ");
-        String styleRules = trimmedStylesheet.trim(), delims = "{}";
+        String styleRules = trimmedStylesheet.trim();
+        String delims = "{}";
         StringTokenizer st = new StringTokenizer(styleRules, delims);
         while (st.countTokens() > 1) {
-            String selector = st.nextToken().trim(), properties = st.nextToken().trim();
+            String selector = st.nextToken().trim();
+            String properties = st.nextToken().trim();
             Elements selectedElements = doc.select(selector);
             for (Element selElem : selectedElements) {
                 String oldProperties = selElem.attr(CSS_STYLE);

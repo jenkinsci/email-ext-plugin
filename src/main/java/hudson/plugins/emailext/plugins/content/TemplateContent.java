@@ -13,7 +13,6 @@ import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,7 +38,6 @@ public class TemplateContent extends AbstractEvalContent {
 
     @Override
     public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) throws MacroEvaluationException, IOException, InterruptedException {
-        InputStream inputStream = null;
         String result = "";
         
         try {
@@ -50,8 +48,6 @@ public class TemplateContent extends AbstractEvalContent {
             String missingFileError = generateMissingFile("Plain Text", file);
             LOGGER.log(Level.SEVERE, missingFileError, e);
             result = missingFileError;
-        } finally {
-            IOUtils.closeQuietly(inputStream);
         }
         return result;
     }
