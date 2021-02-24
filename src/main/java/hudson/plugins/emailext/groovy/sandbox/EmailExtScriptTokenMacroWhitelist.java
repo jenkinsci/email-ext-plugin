@@ -79,7 +79,7 @@ public class EmailExtScriptTokenMacroWhitelist extends AbstractWhitelist {
                 EnvVars vars = build.getEnvironment(listener);
                 return vars.containsKey(name);
             } catch (IOException | InterruptedException e) {
-                Logger.getLogger(getClass().getName()).log(Level.WARNING, "Failed to expand environment when evaluating " + name + " on " + build.getExternalizableId(), e);
+                Logger.getLogger(getClass().getName()).log(Level.WARNING, e, () -> "Failed to expand environment when evaluating " + name + " on " + build.getExternalizableId());
             }
 
         }
