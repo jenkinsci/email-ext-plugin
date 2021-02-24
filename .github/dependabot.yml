@@ -6,7 +6,5 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    ignore:
-      - dependency-name: "org.jenkins-ci.plugins:config-file-provider"
     reviewers:
       - "basil"
