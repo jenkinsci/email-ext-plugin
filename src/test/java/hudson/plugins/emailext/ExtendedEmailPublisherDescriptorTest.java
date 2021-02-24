@@ -65,8 +65,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class ExtendedEmailPublisherDescriptorTest {
 
@@ -168,10 +168,10 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertNotNull("Allow unregistered should be present", allowUnregisteredEnabled);
         assertFalse("Allow unregistered should be unchecked by default", allowUnregisteredEnabled.isChecked());
 
-        try {
-            page.getElementByName("defaultClasspath");
-            fail("defaultClasspath section should not be present");
-        } catch (ElementNotFoundException e) {}
+        assertThrows(
+                "defaultClasspath section should not be present",
+                ElementNotFoundException.class,
+                () -> page.getElementByName("defaultClasspath"));
     }
 
     @Test

@@ -10,7 +10,7 @@ import java.util.zip.ZipInputStream;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 public class ZipDataSourceTest {
 
@@ -62,11 +62,9 @@ public class ZipDataSourceTest {
         ByteArrayInputStream in = new ByteArrayInputStream(new byte[0]);
         ZipDataSource dataSource = new ZipDataSource(name, in);
 
-        try {
-            dataSource.getOutputStream();
-        } catch (IOException e) {
-            return;
-        }
-        fail("It is not possible to get an OutputStream from the ZipDataSource, an exception should have been thrown");
+        assertThrows(
+                "It is not possible to get an OutputStream from the ZipDataSource",
+                IOException.class,
+                dataSource::getOutputStream);
     }
 }

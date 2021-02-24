@@ -35,7 +35,7 @@ import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertNull;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 
 /**
  * Runs some {@link ScriptContentTest} in a secured Jenkins.
@@ -70,14 +70,13 @@ public class ScriptContentSecureTest extends ScriptContentTest {
     @Test
     public void templateInWorkspaceUnsafe() throws Exception {
         ScriptApproval.get().clearApprovedScripts();
-        try {
-            super.templateInWorkspaceUnsafe();
-            fail("Templates in the workspace should use the Groovy sandbox");
-        } catch (AssertionError e) {
-            // Error message is a TokenMacro parse error and does not contain a script security warning, perhaps due to
-            // EmailExtScript#methodMissing? The message looks like:
-            // Error processing tokens: Error while parsing action 'Text/ZeroOrMore/FirstOf/Token/DelimitedToken/DelimitedToken_Action3' at input position (line 1, pos 39)
-        }
+        assertThrows(
+                "Templates in the workspace should use the Groovy sandbox",
+                AssertionError.class,
+                super::templateInWorkspaceUnsafe);
+        // Error message is a TokenMacro parse error and does not contain a script security warning,
+        // perhaps due to EmailExtScript#methodMissing? The message looks like:
+        // Error processing tokens: Error while parsing action 'Text/ZeroOrMore/FirstOf/Token/DelimitedToken/DelimitedToken_Action3' at input position (line 1, pos 39)
         assertNull(j.jenkins.getItem("should-not-exist"));
     }
 
@@ -85,12 +84,13 @@ public class ScriptContentSecureTest extends ScriptContentTest {
     @Test
     public void templateInWorkspaceWithConstructor() throws Exception {
         ScriptApproval.get().clearApprovedScripts();
-        try {
-            super.templateInWorkspace("/testConstructor.groovy");
-            fail("Templates in the workspace should use the Groovy sandbox");
-        } catch (AssertionError e) {
-            assertThat(e.getMessage(), containsString("staticMethod jenkins.model.Jenkins getInstance"));
-        }
+        AssertionError e =
+                assertThrows(
+                        "Templates in the workspace should use the Groovy sandbox",
+                        AssertionError.class,
+                        () -> super.templateInWorkspace("/testConstructor.groovy"));
+        assertThat(
+                e.getMessage(), containsString("staticMethod jenkins.model.Jenkins getInstance"));
         assertNull(j.jenkins.getItem("should-not-exist"));
     }
 
