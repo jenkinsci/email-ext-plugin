@@ -193,7 +193,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         public String toString() {
             StringBuilder builder = new StringBuilder();
             builder.append(this.summary);
-            if(tests.size() != 0) {
+            if (!tests.isEmpty()) {
                 builder.append(lineBreak);
             }
             for(FailedTest t: tests) {
