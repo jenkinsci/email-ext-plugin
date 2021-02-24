@@ -64,7 +64,7 @@ public class CssInliner {
         Elements els = doc.select(STYLE_TAG);
         StringBuilder styles = new StringBuilder();
         for (Element e : els) {
-            if (e.attr("data-inline").equals("true")) {
+            if (e.attr(DATA_INLINE_ATTR).equals("true")) {
                 styles.append(e.data());
                 e.remove();
             }
