@@ -6,7 +6,6 @@ import hudson.model.Run;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction;
-import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 
 import java.util.ArrayList;
@@ -33,35 +32,6 @@ public class ScriptContentBuildWrapper {
             }
         }
         return null;
-    }
-
-    /**
-     * Returns all build actions that derive from
-     * <code>AbstractResultAction</code>. Every action represents a single
-     * analysis result.
-     * 
-     * @return The static analysis actions for the current build. The returned
-     *         list might be empty if there are no such actions.
-     */
-    @Whitelisted
-    public List<Action> getStaticAnalysisActions() {
-        if (isPluginInstalled("analysis-core")) {
-            return new StaticAnalysisUtilities().getActions(build);
-        } else {
-            return Collections.emptyList();
-        }
-    }
-
-    /**
-     * Returns whether the specified plug-in is installed.
-     *
-     * @param shortName
-     *            the plug-in to check
-     * @return <code>true</code> if the specified plug-in is installed,
-     *         <code>false</code> if not.
-     */
-    public static boolean isPluginInstalled(final String shortName) {
-        return Jenkins.get().getPlugin(shortName) != null;
     }
 
     @Whitelisted

@@ -371,56 +371,6 @@
         </div>
       </j:if>
 
-      <!-- Static Analysis -->
-      <j:set var="actions" value="${it.staticAnalysisActions}" />
-      <j:if test="${!actions.isEmpty()}">
-        <div class="content">
-          <h1>Static Analysis Results</h1>
-          <table>
-            <tr>
-              <th></th>
-              <th>Name</th>
-              <th>Result</th>
-              <th>Total</th>
-              <th>High</th>
-              <th>Normal</th>
-              <th>Low</th>
-            </tr>
-            <j:forEach var="action" items="${actions}">
-              <tr>
-                <td>
-                  <img src="${rooturl}${action.smallImageName}" />
-                </td>
-                <td>
-                  <a href="${rooturl}${build.url}/${action.urlName}">${action.displayName}</a> 
-                </td>
-                <td class="center">
-                  <j:choose>
-                    <j:when test="${action.result.pluginResult=='SUCCESS'}">
-                      <img src="${rooturl}static/e59dfe28/images/16x16/blue.gif" />
-                    </j:when>
-                    <j:when test="${action.result.pluginResult=='FAILURE'}">
-                      <img src="${rooturl}static/e59dfe28/images/16x16/red.gif" />
-                    </j:when>
-                    <j:otherwise>
-                      <img src="${rooturl}static/e59dfe28/images/16x16/yellow.gif" />
-                    </j:otherwise>
-                  </j:choose>
-                </td>
-                <td class="center">${action.result.numberOfAnnotations} </td>
-                <td class="center">${action.result.getNumberOfAnnotations('HIGH')} </td>
-                <td class="center">${action.result.getNumberOfAnnotations('NORMAL')} </td>
-                <td class="center">${action.result.getNumberOfAnnotations('LOW')} </td>
-              </tr>
-            </j:forEach>
-          </table>
-          <p>
-            Warning (see JENKINS-55744): Integration with the Static Analysis Utilities plugin has
-            been deprecated in the Email Extension plugin and will be removed in a future release.
-          </p>
-        </div>
-      </j:if>
-
       <div class="content">
         <!-- CONSOLE OUTPUT -->
         <a href="${rooturl}${build.url}/console">
