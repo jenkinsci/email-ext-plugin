@@ -154,7 +154,7 @@ public class ContentBuilderTest {
                 Collections.singletonList(content)));
     }
     
-    public class RuntimeContent extends TokenMacro {
+    public static class RuntimeContent extends TokenMacro {
         
         public static final String MACRO_NAME = "RUNTIME";
         private final String replacement;
