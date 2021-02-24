@@ -572,7 +572,7 @@ public class ExtendedEmailPublisherTest {
                 containsString("multipart/mixed"));
 
         // TODO: add more tests for getting the multipart information.
-        if (MimeMessage.class.isInstance(msg)) {
+        if (msg instanceof MimeMessage) {
             MimeMessage mimeMsg = (MimeMessage) msg;
             assertEquals("Message content should be a MimeMultipart instance",
                     MimeMultipart.class, mimeMsg.getContent().getClass());
