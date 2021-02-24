@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  * @author <a href="https://github.com/rahulsom">Rahul Somasunderam</a>
  */
 public class CssInliner {
-    private final static Logger LOG = Logger.getLogger(CssInliner.class.getName());
+    private static final Logger LOG = Logger.getLogger(CssInliner.class.getName());
 
     public static final String CSS_STYLE = "cssstyle";
     public static final String STYLE_ATTR = "style";

@@ -14,7 +14,7 @@ import static org.junit.Assert.fail;
 
 public class ZipDataSourceTest {
 
-    private final static int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 1024;
 
     @Test
     public void testGetName() throws IOException {
