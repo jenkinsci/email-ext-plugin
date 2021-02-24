@@ -12,8 +12,6 @@ import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
-
 public class GroovyTemplateConfig extends Config {
     @Override
     public ConfigProvider getDescriptor() {
