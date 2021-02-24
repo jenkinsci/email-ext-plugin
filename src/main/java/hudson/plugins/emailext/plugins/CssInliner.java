@@ -157,10 +157,12 @@ public class CssInliner {
         String stylesheet = fetchStyles(doc);
 
         String trimmedStylesheet = stylesheet.replaceAll("\n", "").replaceAll("/\\*.*?\\*/", "").replaceAll(" +", " ");
-        String styleRules = trimmedStylesheet.trim(), delims = "{}";
+        String styleRules = trimmedStylesheet.trim();
+        String delims = "{}";
         StringTokenizer st = new StringTokenizer(styleRules, delims);
         while (st.countTokens() > 1) {
-            String selector = st.nextToken().trim(), properties = st.nextToken().trim();
+            String selector = st.nextToken().trim();
+            String properties = st.nextToken().trim();
             Elements selectedElements = doc.select(selector);
             for (Element selElem : selectedElements) {
                 String oldProperties = selElem.attr(CSS_STYLE);
