@@ -55,6 +55,7 @@ public class EmailExtWatchAction implements Action {
                 super(UserProperty.class);
             }
 
+            @Override
             public String getDisplayName() {
                 return "Extended Email Job Watching";
             }
