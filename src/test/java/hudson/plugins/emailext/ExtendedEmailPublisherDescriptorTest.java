@@ -372,7 +372,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
     @Test
     @Issue("JENKINS-63311")
-    public void authenticatorIsCreatedWhenUsernameAndPasswordAreFilledOut() throws Exception {
+    public void authenticatorIsCreatedWhenUsernameAndPasswordAreFilledOut() {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         String from = "test@example.com";
         MailAccount ma = new MailAccount();
@@ -393,7 +393,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
     @Test
     @Issue("JENKINS-63311")
-    public void authenticatorIsCreatedWhenUsernameIsFilledOutButPasswordIsNull() throws Exception {
+    public void authenticatorIsCreatedWhenUsernameIsFilledOutButPasswordIsNull() {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         String from = "test@example.com";
         MailAccount ma = new MailAccount();
@@ -413,7 +413,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
     @Test
     @Issue("JENKINS-63311")
-    public void noAuthenticatorIsCreatedWhenUsernameIsBlank() throws Exception {
+    public void noAuthenticatorIsCreatedWhenUsernameIsBlank() {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         String from = "test@example.com";
         MailAccount ma = new MailAccount();
@@ -719,7 +719,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     @Issue("JENKINS-63846")
     @LocalData
     @Test
-    public void persistedConfigurationBeforeDefaultAddress() throws Exception {
+    public void persistedConfigurationBeforeDefaultAddress() {
         // Local data created using Email Extension 2.72 with the following code:
         /*
         HtmlPage page = j.createWebClient().goTo("configure");
