@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.activation.MimetypesFileTypeMap;
+import javax.activation.FileTypeMap;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
@@ -70,7 +70,7 @@ public class AttachmentUtils implements Serializable {
         }
 
         public String getContentType() {
-            return MimetypesFileTypeMap.getDefaultFileTypeMap()
+            return FileTypeMap.getDefaultFileTypeMap()
                     .getContentType(file.getName());
         }
 
