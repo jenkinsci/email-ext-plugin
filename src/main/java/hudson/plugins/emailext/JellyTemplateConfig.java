@@ -53,6 +53,7 @@ public class JellyTemplateConfig extends Config {
             return new JellyTemplateConfig(id, "Jelly Email Template", "", "");
         }
 
+        @Deprecated
         @Override
         protected String getXmlFileName() {
             return "email-ext-jelly-config-files.xml";

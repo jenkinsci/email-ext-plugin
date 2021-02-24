@@ -54,6 +54,7 @@ public class GroovyTemplateConfig extends Config {
             return new GroovyTemplateConfig(id, "Groovy Email Template", "", "");
         }
 
+        @Deprecated
         @Override
         protected String getXmlFileName() {
             return "email-ext-groovy-config-files.xml";

@@ -6,6 +6,7 @@ package hudson.plugins.emailext;
  * @author jjamison
  *
  */
+@Deprecated
 public class Util {
 
     // Prevent instantiation.
