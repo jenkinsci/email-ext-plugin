@@ -37,7 +37,7 @@ import hudson.tasks.MailSender;
 import jenkins.model.Jenkins;
 import jenkins.scm.RunWithSCM;
 import org.acegisecurity.Authentication;
-import org.acegisecurity.userdetails.UsernameNotFoundException;
+import org.acegisecurity.AuthenticationException;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import javax.mail.internet.InternetAddress;
@@ -177,7 +177,7 @@ public final class RecipientProviderUtilities {
                                     continue;
                                 }
                             }
-                        } catch (UsernameNotFoundException x) {
+                        } catch (AuthenticationException x) {
                             
                             if (SEND_TO_UNKNOWN_USERS || ExtendedEmailPublisher.descriptor().isAllowUnregisteredEnabled() ) {
                                 listener.getLogger().printf("Warning: %s is not a recognized user, but sending mail anyway%n", userAddress);
