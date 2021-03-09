@@ -50,26 +50,7 @@
                 <role>maintainer</role>
                 <role>developer</role>
             </roles>
-        </developer>
-        <developer>
-            <id>slide</id>
-            <name>Alex Earl</name>
-            <email>slide.o.mix@gmail.com</email>
-            <roles>
-                <role>maintainer</role>
-                <role>developer</role>
-            </roles>
-        </developer>
-        <developer>
-            <id>davidvanlaatum</id>
-            <name>David van Laatum</name>
-            <timezone>9.5</timezone>
-            <email>david@vanlaatum.id.au</email>
-            <roles>
-                <role>developer</role>
-                <role>maintainer</role>
-            </roles>
-        </developer>
+        </developer>        
     </developers>
 
     <contributors>
@@ -100,6 +81,21 @@
             <!--<id>ssogabe</id>-->
             <name>Seiji Sogabe</name>
             <email>s.sogabe@gmail.com</email>
+            <roles>
+                <role>Past Maintainer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>Alex Earl</name>
+            <email>slide.o.mix@gmail.com</email>
+            <roles>
+                <role>Past Maintainer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>David van Laatum</name>
+            <timezone>9.5</timezone>
+            <email>david@vanlaatum.id.au</email>
             <roles>
                 <role>Past Maintainer</role>
             </roles>
