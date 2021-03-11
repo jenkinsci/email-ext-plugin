@@ -177,6 +177,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private transient String smtpAuthUsername;
     private transient Secret smtpAuthPassword;
     private transient boolean useSsl = false;
+    private transient boolean useTls = false;
 
     private transient Function<MailAccount, Authenticator> authenticatorProvider = acc -> new Authenticator() {
         @Override
@@ -191,6 +192,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if(smtpAuthUsername != null) mailAccount.setSmtpUsername(smtpAuthUsername);
         if(smtpAuthPassword != null) mailAccount.setSmtpPassword(smtpAuthPassword);
         if(useSsl) mailAccount.setUseSsl(useSsl);
+        if(useTls) mailAccount.setUseTls(useTls);
 
         /*
          * Versions 2.71 and earlier correctly left the address unset for the default account,
@@ -286,13 +288,16 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     @Restricted(NoExternalUse.class)
     Session createSession(MailAccount acc) {
+        final String SMTP_PORT_PROPERTY = "mail.smtp.port";
+        final String SMTP_SOCKETFACTORY_PORT_PROPERTY = "mail.smtp.socketFactory.port";
+
         Properties props = new Properties(System.getProperties());
 
         if (acc.getSmtpHost() != null) {
             props.put("mail.smtp.host", acc.getSmtpHost());
         }
         if (acc.getSmtpPort() != null) {
-            props.put("mail.smtp.port", acc.getSmtpPort());
+            props.put(SMTP_PORT_PROPERTY, acc.getSmtpPort());
         }
         if (acc.isUseSsl()) {
             /* This allows the user to override settings by setting system properties but
@@ -301,10 +306,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
              * and thats done in mail sender, and it would be a bit of a hack to get it all to
              * coordinate, and we can make it work through setting mail.smtp properties.
              */
-            if (props.getProperty("mail.smtp.socketFactory.port") == null) {
+            if (props.getProperty(SMTP_SOCKETFACTORY_PORT_PROPERTY) == null) {
                 String port = acc.getSmtpPort() == null ? "465" : mailAccount.getSmtpPort();
-                props.put("mail.smtp.port", port);
-                props.put("mail.smtp.socketFactory.port", port);
+                props.put(SMTP_PORT_PROPERTY, port);
+                props.put(SMTP_SOCKETFACTORY_PORT_PROPERTY, port);
             }
             if (props.getProperty("mail.smtp.socketFactory.class") == null) {
                 props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
@@ -317,6 +322,22 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             if (props.getProperty("mail.smtp.ssl.checkserveridentity") == null) {
                 props.put("mail.smtp.ssl.checkserveridentity", "true");
             }
+        }
+        if (acc.isUseTls()) {
+            /* This allows the user to override settings by setting system properties and
+             * also allows us to use the default STARTTLS port, 587, if no port is already set.
+             * Only the properties included below are required to use STARTTLS and they are
+             * not expected to be enabled simultaneously with SSL (it will actually throw a
+             * "javax.net.ssl.SSLException: Unrecognized SSL message, plaintext connection?"
+             * if SMTP server expects only TLS).
+             */
+            if (props.getProperty(SMTP_SOCKETFACTORY_PORT_PROPERTY) == null) {
+                String port = smtpPort==null?"587":smtpPort;
+                props.put(SMTP_PORT_PROPERTY, port);
+                props.put(SMTP_SOCKETFACTORY_PORT_PROPERTY, port);
+            }
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.starttls.required", "true");
         }
         if (!StringUtils.isBlank(acc.getSmtpUsername())) {
             props.put("mail.smtp.auth", "true");
@@ -407,6 +428,17 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @Deprecated
     public void setUseSsl(boolean useSsl) {
         mailAccount.setUseSsl(useSsl);
+    }
+
+    @Deprecated
+    public boolean getUseTls() {
+        return mailAccount.isUseTls();
+    }
+
+    @SuppressWarnings("unused")
+    @Deprecated
+    public void setUseTls(boolean useTls) {
+        mailAccount.setUseTls(useTls);
     }
 
     @Deprecated

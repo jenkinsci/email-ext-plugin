@@ -43,6 +43,7 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
         assertEquals("smtp-username", account.getSmtpUsername());
         assertEquals("smtp-password", account.getSmtpPassword().getPlainText());
         assertTrue(account.isUseSsl());
+        assertTrue(account.isUseTls());
         assertEquals("avd-properties", account.getAdvProperties());
 
         assertEquals("UTF-8", descriptor.getCharset());
@@ -60,6 +61,7 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
         assertEquals("smtp-password-xyz", account.getSmtpPassword().getPlainText());
         assertEquals("adv-properties-xyz", account.getAdvProperties());
         assertTrue(account.isUseSsl());
+        assertTrue(account.isUseTls());
 
         assertEquals("first-account@domain.extension", descriptor.getDefaultRecipients());
         assertEquals("@domain.extension", descriptor.getAllowedDomains());

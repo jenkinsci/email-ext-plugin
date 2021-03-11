@@ -8,6 +8,7 @@
     <smtpUsername>admin</smtpUsername>
     <smtpPassword>honeycomb</smtpPassword>
     <useSsl>true</useSsl>
+    <useTls>true</useTls>
     <advProperties>mail.smtp.ssl.trust=example.com</advProperties>
     <defaultAccount>true</defaultAccount>
   </mailAccount>
@@ -19,6 +20,7 @@
       <smtpUsername>admin2</smtpUsername>
       <smtpPassword>honeycomb2</smtpPassword>
       <useSsl>true</useSsl>
+      <useTls>true</useTls>
       <advProperties>mail.smtp.ssl.trust=example2.com</advProperties>
       <defaultAccount>false</defaultAccount>
     </hudson.plugins.emailext.MailAccount>

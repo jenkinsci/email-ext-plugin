@@ -17,6 +17,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     private String smtpUsername;
     private Secret smtpPassword;
     private boolean useSsl;
+    private boolean useTls;
     private String advProperties;
     private boolean defaultAccount;
 
@@ -33,6 +34,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
             }
         }
         useSsl = jo.optBoolean("useSsl", false);
+        useTls = jo.optBoolean("useTls", false);
         advProperties = Util.nullify(jo.optString("advProperties", null));
     }
 
@@ -133,6 +135,15 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     @DataBoundSetter
     public void setUseSsl(boolean useSsl){
         this.useSsl = useSsl;
+    }
+
+    public boolean isUseTls(){
+        return useTls;
+    }
+
+    @DataBoundSetter
+    public void setUseTls(boolean useTls){
+        this.useTls = useTls;
     }
 
     public String getAdvProperties(){
