@@ -177,7 +177,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private transient String smtpAuthUsername;
     private transient Secret smtpAuthPassword;
     private transient boolean useSsl = false;
-    private transient boolean useTls = false;
 
     private transient Function<MailAccount, Authenticator> authenticatorProvider = acc -> new Authenticator() {
         @Override
@@ -192,7 +191,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if(smtpAuthUsername != null) mailAccount.setSmtpUsername(smtpAuthUsername);
         if(smtpAuthPassword != null) mailAccount.setSmtpPassword(smtpAuthPassword);
         if(useSsl) mailAccount.setUseSsl(useSsl);
-        if(useTls) mailAccount.setUseTls(useTls);
 
         /*
          * Versions 2.71 and earlier correctly left the address unset for the default account,
