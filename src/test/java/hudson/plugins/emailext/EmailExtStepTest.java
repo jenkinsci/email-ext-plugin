@@ -1,6 +1,5 @@
 package hudson.plugins.emailext;
 
-import com.google.common.collect.ImmutableSet;
 import hudson.FilePath;
 import hudson.model.Run;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -27,6 +26,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.File;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -157,7 +157,7 @@ public class EmailExtStepTest {
 
             @Override
             public Set<? extends Class<?>> getRequiredContext() {
-                return ImmutableSet.of(FilePath.class);
+                return Collections.singleton(FilePath.class);
             }
 
             @Override public String getFunctionName() {

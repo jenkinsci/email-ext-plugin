@@ -1,6 +1,5 @@
 package hudson.plugins.emailext;
 
-import com.google.common.collect.ImmutableSet;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.Run;
@@ -17,6 +16,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import javax.mail.internet.InternetAddress;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -88,7 +88,9 @@ public class EmailExtRecipientStep extends Step {
 
         @Override
         public Set<? extends Class<?>> getRequiredContext() {
-            return ImmutableSet.of(Run.class, TaskListener.class, EnvVars.class);
+            Set<Class<?>> context = new HashSet<>();
+            Collections.addAll(context, Run.class, TaskListener.class, EnvVars.class);
+            return Collections.unmodifiableSet(context);
         }
 
         @Override
