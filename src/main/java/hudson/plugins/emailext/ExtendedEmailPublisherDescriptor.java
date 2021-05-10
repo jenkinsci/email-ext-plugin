@@ -431,17 +431,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     @Deprecated
-    public boolean getUseTls() {
-        return mailAccount.isUseTls();
-    }
-
-    @SuppressWarnings("unused")
-    @Deprecated
-    public void setUseTls(boolean useTls) {
-        mailAccount.setUseTls(useTls);
-    }
-
-    @Deprecated
     public String getSmtpPort() {
         return mailAccount.getSmtpPort();
     }
