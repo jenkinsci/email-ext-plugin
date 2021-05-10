@@ -1,7 +1,6 @@
 package hudson.plugins.emailext;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import hudson.Extension;
 import hudson.FilePath;
@@ -27,6 +26,8 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -259,7 +260,9 @@ public class EmailExtStep extends Step {
 
         @Override
         public Set<? extends Class<?>> getRequiredContext() {
-            return ImmutableSet.of(Run.class, TaskListener.class);
+            Set<Class<?>> context = new HashSet<>();
+            Collections.addAll(context, Run.class, TaskListener.class);
+            return Collections.unmodifiableSet(context);
         }
 
         @Override
