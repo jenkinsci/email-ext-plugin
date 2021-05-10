@@ -8,6 +8,7 @@ unclassified:
         smtpUsername: "smtp-username"
         smtpPassword: "smtp-password"
         useSsl: true
+        useTls: true
         advProperties: "avd-properties"
     charset: "UTF-8"
     defaultContentType: "text/html"
@@ -22,6 +23,7 @@ unclassified:
       smtpPassword: "smtp-password-xyz"
       advProperties: "adv-properties-xyz"
       useSsl: true
+      useTls: true
     defaultRecipients: "first-account@domain.extension"
     allowedDomains: "@domain.extension"
     excludedCommitters: "not-this-committer"

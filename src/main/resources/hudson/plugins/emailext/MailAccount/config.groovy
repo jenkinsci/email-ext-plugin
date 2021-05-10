@@ -29,6 +29,9 @@ f.advanced {
     f.entry(field: "useSsl", title: _("Use SSL")) {
         f.checkbox()
     }
+    f.entry(field: "useTls", title: _("Use TLS")) {
+        f.checkbox()
+    }
     f.entry(field: "advProperties", title: _("Advanced Email Properties")) {
         f.textarea()
     }
