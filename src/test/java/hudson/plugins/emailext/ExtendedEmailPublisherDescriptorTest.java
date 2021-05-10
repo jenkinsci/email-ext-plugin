@@ -576,8 +576,6 @@ public class ExtendedEmailPublisherDescriptorTest {
         advProperties.setText("mail.smtp.ssl.trust=example.com");
         HtmlCheckBoxInput smtpUseSsl = page.getElementByName("ext_mailer_smtp_use_ssl");
         smtpUseSsl.click();
-        HtmlCheckBoxInput smtpUseTls = page.getElementByName("ext_mailer_smtp_use_tls");
-        smtpUseTls.click();
         HtmlTextInput smtpPort = page.getElementByName("ext_mailer_smtp_port");
         smtpPort.setValueAttribute("2525");
         HtmlTextInput charset = page.getElementByName("ext_mailer_charset");
@@ -594,8 +592,6 @@ public class ExtendedEmailPublisherDescriptorTest {
         smtpPassword2.setValueAttribute("honeycomb2");
         HtmlCheckBoxInput smtpUseSsl2 = page.getElementByName("_.useSsl");
         smtpUseSsl2.click();
-        HtmlCheckBoxInput smtpUseTls2 = page.getElementByName("_.useTls");
-        smtpUseTls2.click();
         HtmlTextArea advProperties2 = page.getElementByName("_.advProperties");
         advProperties2.setText("mail.smtp.ssl.trust=example2.com");
         HtmlSelect defaultContentType = page.getElementByName("ext_mailer_default_content_type");
@@ -655,7 +651,6 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals(Secret.fromString("honeycomb"), descriptor.getMailAccount().getSmtpPassword());
         assertEquals("mail.smtp.ssl.trust=example.com", descriptor.getMailAccount().getAdvProperties());
         assertTrue(descriptor.getMailAccount().isUseSsl());
-        assertTrue(descriptor.getMailAccount().isUseTls());
         assertTrue(descriptor.getMailAccount().isDefaultAccount());
         assertEquals("2525", descriptor.getMailAccount().getSmtpPort());
         assertEquals("UTF-8", descriptor.getCharset());
@@ -667,7 +662,6 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("admin2", additionalAccount.getSmtpUsername());
         assertEquals(Secret.fromString("honeycomb2"), additionalAccount.getSmtpPassword());
         assertTrue(additionalAccount.isUseSsl());
-        assertTrue(additionalAccount.isUseTls());
         assertFalse(additionalAccount.isDefaultAccount());
         assertEquals("mail.smtp.ssl.trust=example2.com", additionalAccount.getAdvProperties());
         assertEquals("text/html", descriptor.getDefaultContentType());
@@ -797,9 +791,6 @@ public class ExtendedEmailPublisherDescriptorTest {
         List<DomElement> smtpUseSsls = page.getElementsByName("_.useSsl");
         HtmlCheckBoxInput smtpUseSsl = (HtmlCheckBoxInput) smtpUseSsls.get(0);
         smtpUseSsl.click();
-        List<DomElement> smtpUseTlss = page.getElementsByName("_.useTls");
-        HtmlCheckBoxInput smtpUseTls = (HtmlCheckBoxInput) smtpUseTlss.get(0);
-        smtpUseTls.click();
         List<DomElement> advPropertiesElements = page.getElementsByName("_.advProperties");
         HtmlTextArea advProperties = (HtmlTextArea) advPropertiesElements.get(0);
         advProperties.setText("mail.smtp.ssl.trust=example.com");
@@ -820,8 +811,6 @@ public class ExtendedEmailPublisherDescriptorTest {
         smtpPassword2.setValueAttribute("honeycomb2");
         HtmlCheckBoxInput smtpUseSsl2 = (HtmlCheckBoxInput) smtpUseSsls.get(1);
         smtpUseSsl2.click();
-        HtmlCheckBoxInput smtpUseTls2 = (HtmlCheckBoxInput) smtpUseTlss.get(1);
-        smtpUseTls2.click();
         HtmlTextArea advProperties2 = (HtmlTextArea) advPropertiesElements.get(1);
         advProperties2.setText("mail.smtp.ssl.trust=example2.com");
         HtmlSelect defaultContentType = page.getElementByName("_.defaultContentType");
@@ -879,7 +868,6 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals(Secret.fromString("honeycomb"), descriptor.getMailAccount().getSmtpPassword());
         assertEquals("mail.smtp.ssl.trust=example.com", descriptor.getMailAccount().getAdvProperties());
         assertTrue(descriptor.getMailAccount().isUseSsl());
-        assertTrue(descriptor.getMailAccount().isUseTls());
         assertTrue(descriptor.getMailAccount().isDefaultAccount());
         assertEquals("2525", descriptor.getMailAccount().getSmtpPort());
         assertEquals("UTF-8", descriptor.getCharset());
@@ -891,7 +879,6 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("admin2", additionalAccount.getSmtpUsername());
         assertEquals(Secret.fromString("honeycomb2"), additionalAccount.getSmtpPassword());
         assertTrue(additionalAccount.isUseSsl());
-        assertTrue(additionalAccount.isUseTls());
         assertFalse(additionalAccount.isDefaultAccount());
         assertEquals("mail.smtp.ssl.trust=example2.com", additionalAccount.getAdvProperties());
         assertEquals("text/html", descriptor.getDefaultContentType());
