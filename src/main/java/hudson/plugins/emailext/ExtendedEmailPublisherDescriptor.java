@@ -330,7 +330,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
              * if SMTP server expects only TLS).
              */
             if (props.getProperty(SMTP_SOCKETFACTORY_PORT_PROPERTY) == null) {
-                String port = smtpPort==null?"587":smtpPort;
+                String port = acc.getSmtpPort() == null ? "587" : mailAccount.getSmtpPort();
                 props.put(SMTP_PORT_PROPERTY, port);
                 props.put(SMTP_SOCKETFACTORY_PORT_PROPERTY, port);
             }
