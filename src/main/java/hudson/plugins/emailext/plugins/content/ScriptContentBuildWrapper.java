@@ -42,10 +42,9 @@ public class ScriptContentBuildWrapper {
     public List<TestResult> getJUnitTestResult() {
         List<TestResult> result = new ArrayList<>();
         List<AggregatedTestResultAction> actions = build.getActions(AggregatedTestResultAction.class);
-        for (Action action : actions) {
+        for (AggregatedTestResultAction action : actions) {
             /* Maven Project */
-            List<AggregatedTestResultAction.ChildReport> reportList =
-                    ((AggregatedTestResultAction) action).getChildReports();
+            List<AggregatedTestResultAction.ChildReport> reportList = action.getChildReports();
             for (AggregatedTestResultAction.ChildReport report : reportList) {
                 if (report.result instanceof hudson.tasks.junit.TestResult) {
                     result.add((TestResult) report.result);
