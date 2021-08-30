@@ -36,7 +36,6 @@ import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringReader;
