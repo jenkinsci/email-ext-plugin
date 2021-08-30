@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins.trigger;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
@@ -40,7 +41,8 @@ public class ScriptTrigger extends AbstractScriptTrigger {
         public DescriptorImpl() {
             addDefaultRecipientProvider(new ListRecipientProvider());
         }
-        
+
+        @NonNull
         @Override
         public String getDisplayName() {
             return TRIGGER_NAME;

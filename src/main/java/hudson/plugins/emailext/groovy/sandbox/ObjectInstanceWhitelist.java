@@ -23,7 +23,7 @@ public abstract class ObjectInstanceWhitelist<T> extends AbstractWhitelist {
     protected boolean isClass(Class<?> declaringClass) {
         T t = instance.get();
         if (t != null) {
-            Class c = t.getClass();
+            Class<?> c = t.getClass();
             while (c != null && c != Object.class) {
                 if (declaringClass == c) {
                     return true;
@@ -38,8 +38,8 @@ public abstract class ObjectInstanceWhitelist<T> extends AbstractWhitelist {
         return false;
     }
 
-    private boolean isInterface(Class<?> declaringClass, Class[] interfaces) {
-        for (Class interf : interfaces) {
+    private boolean isInterface(Class<?> declaringClass, Class<?>[] interfaces) {
+        for (Class<?> interf : interfaces) {
             if (declaringClass == interf) {
                 return true;
             }

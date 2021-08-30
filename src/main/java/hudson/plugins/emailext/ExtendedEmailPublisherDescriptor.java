@@ -36,7 +36,6 @@ import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringReader;
@@ -260,6 +259,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
     }
 
+    @NonNull
     @Override
     public String getDisplayName() {
         return Messages.ExtendedEmailPublisherDescriptor_DisplayName();
@@ -720,7 +720,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     public List<String> getDefaultTriggerIds() {
         if (defaultTriggerIds.isEmpty()) {
             if (!defaultTriggers.isEmpty()) {
-                defaultTriggerIds.clear();
                 for (EmailTriggerDescriptor t : this.defaultTriggers) {
                     // we have to do the below because a bunch of stuff is not serialized for the Descriptor
                     EmailTriggerDescriptor d = Jenkins.get().getDescriptorByType(t.getClass());
@@ -772,8 +771,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return "/plugin/email-ext/help/main.html";
     }
 
-    public FormValidation doAddressCheck(@QueryParameter final String value)
-            throws IOException, ServletException {
+    public FormValidation doAddressCheck(@QueryParameter final String value) {
         try {
             new InternetAddress(value);
             return FormValidation.ok();
@@ -782,13 +780,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
     }
 
-    public FormValidation doRecipientListRecipientsCheck(@QueryParameter final String value)
-            throws IOException, ServletException {
+    public FormValidation doRecipientListRecipientsCheck(@QueryParameter final String value) {
         return new EmailRecipientUtils().validateFormRecipientList(value);
     }
 
-    public FormValidation doMaxAttachmentSizeCheck(@QueryParameter final String value)
-            throws IOException, ServletException {
+    public FormValidation doMaxAttachmentSizeCheck(@QueryParameter final String value) {
         try {
             String testValue = value.trim();
             // we support an empty value (which means default)

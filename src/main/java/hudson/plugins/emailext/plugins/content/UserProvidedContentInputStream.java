@@ -23,6 +23,8 @@
  */
 package hudson.plugins.emailext.plugins.content;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -38,12 +40,12 @@ public class UserProvidedContentInputStream extends InputStream {
     }
 
     @Override
-    public int read(byte[] b) throws IOException {
+    public int read(@NonNull byte[] b) throws IOException {
         return delegate.read(b);
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(@NonNull byte[] b, int off, int len) throws IOException {
         return delegate.read(b, off, len);
     }
 

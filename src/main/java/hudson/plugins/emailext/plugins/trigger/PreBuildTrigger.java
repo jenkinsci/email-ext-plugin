@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins.trigger;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
@@ -41,7 +42,8 @@ public class PreBuildTrigger extends EmailTrigger {
         public DescriptorImpl() {
             addDefaultRecipientProvider(new ListRecipientProvider());
         }
-        
+
+        @NonNull
         @Override
         public String getDisplayName() {
             return TRIGGER_NAME;

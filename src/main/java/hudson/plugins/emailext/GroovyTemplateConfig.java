@@ -41,6 +41,7 @@ public class GroovyTemplateConfig extends Config {
             return ContentType.DefinedType.GROOVY;
         }
 
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.GroovyTemplateConfigProvider_DisplayName();

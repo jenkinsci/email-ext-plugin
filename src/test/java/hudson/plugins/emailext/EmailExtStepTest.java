@@ -164,7 +164,9 @@ public class EmailExtStepTest {
                 return "fileCopy";
             }
 
-            @Override public String getDisplayName() {
+            @NonNull
+            @Override
+            public String getDisplayName() {
                 return "Copy a file into the workspace";
             }
 

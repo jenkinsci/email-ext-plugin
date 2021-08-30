@@ -1,9 +1,9 @@
 package hudson.plugins.emailext.watching;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
-import hudson.model.Descriptor.FormException;
 import hudson.model.User;
 import hudson.model.UserPropertyDescriptor;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
@@ -55,6 +55,7 @@ public class EmailExtWatchAction implements Action {
                 super(UserProperty.class);
             }
 
+            @NonNull
             @Override
             public String getDisplayName() {
                 return "Extended Email Job Watching";
@@ -65,6 +66,7 @@ public class EmailExtWatchAction implements Action {
                 return new UserProperty(null);
             }
 
+            @NonNull
             @Override
             public UserProperty newInstance(StaplerRequest req, JSONObject json) throws FormException {
                 List<EmailTrigger> triggers = req != null ? req.bindJSONToList(EmailTrigger.class, json) : Collections.emptyList();
@@ -75,7 +77,7 @@ public class EmailExtWatchAction implements Action {
     
     private AbstractProject<?,?> project;
     
-    public EmailExtWatchAction(AbstractProject project) {
+    public EmailExtWatchAction(AbstractProject<?, ?> project) {
         this.project = project;
     }
 
@@ -144,7 +146,7 @@ public class EmailExtWatchAction implements Action {
         return p;
     }
     
-    public void doStopWatching(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException, FormException {
+    public void doStopWatching(StaplerRequest req, StaplerResponse rsp) throws IOException {
         User user = User.current();
         if(user != null) {
             stopWatching();
@@ -159,7 +161,7 @@ public class EmailExtWatchAction implements Action {
     }
     
     @RequirePOST
-    public void doConfigSubmit(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException, FormException {
+    public void doConfigSubmit(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
         User user = User.current();
         if(user != null) {
             Object json = req.getSubmittedForm().get("triggers");

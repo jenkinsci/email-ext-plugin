@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins.trigger;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Run;
@@ -59,7 +60,8 @@ public class ImprovementTrigger extends EmailTrigger {
             addDefaultRecipientProvider(new DevelopersRecipientProvider());
             addDefaultRecipientProvider(new ListRecipientProvider());
         }
-        
+
+        @NonNull
         @Override
         public String getDisplayName() {
             return TRIGGER_NAME;

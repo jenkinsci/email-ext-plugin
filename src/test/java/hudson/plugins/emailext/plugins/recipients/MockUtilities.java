@@ -32,11 +32,9 @@ import hudson.tasks.Mailer;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AbstractTestResultAction;
-import org.apache.commons.collections.Transformer;
 import org.apache.commons.collections.iterators.TransformIterator;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 
@@ -76,37 +74,31 @@ import java.util.List;
         }
 
         public Iterator iterator() {
-            return new TransformIterator(Arrays.asList(authors).iterator(), new Transformer() {
+            return new TransformIterator(Arrays.asList(authors).iterator(), inAuthor -> new Entry() {
                 @Override
-                public Object transform(final Object inAuthor) {
-                    return new ChangeLogSet.Entry() {
-                        @Override
-                        public String getMsg() {
-                            return "COMMIT MESSAGE";
-                        }
-
-                        @Override
-                        public User getAuthor() {
-                            return getUser((String) inAuthor);
-                        }
-
-                        @Override
-                        public Collection<String> getAffectedPaths() {
-                            return Collections.emptySet();
-                        }
-
-                        @Override
-                        public String getMsgAnnotated() {
-                            return getMsg();
-                        }
-
-                        @Override
-                        public Collection<? extends ChangeLogSet.AffectedFile> getAffectedFiles() {
-                            return Collections.emptySet();
-                        }
-                    };
+                public String getMsg() {
+                    return "COMMIT MESSAGE";
                 }
 
+                @Override
+                public User getAuthor() {
+                    return getUser((String) inAuthor);
+                }
+
+                @Override
+                public Collection<String> getAffectedPaths() {
+                    return Collections.emptySet();
+                }
+
+                @Override
+                public String getMsgAnnotated() {
+                    return getMsg();
+                }
+
+                @Override
+                public Collection<? extends AffectedFile> getAffectedFiles() {
+                    return Collections.emptySet();
+                }
             });
         }
 
@@ -128,12 +120,9 @@ import java.util.List;
 
     public static void addRequestor(final AbstractBuild<?, ?> build, final String requestor) throws Exception {
         PowerMockito.spy(User.class);
-        PowerMockito.doAnswer(new Answer<User>() {
-            @Override
-            public User answer(InvocationOnMock invocation) {
-                Object[] args = invocation.getArguments();
-                return getUser((String) args[0]);
-            }
+        PowerMockito.doAnswer((Answer<User>) invocation -> {
+            Object[] args = invocation.getArguments();
+            return getUser((String) args[0]);
         }).when(User.class, "get", Mockito.anyString(), Mockito.anyBoolean(), Mockito.any());
         final Cause.UserIdCause cause = PowerMockito.mock(Cause.UserIdCause.class);
         PowerMockito.when(cause.getUserId()).thenReturn(requestor);

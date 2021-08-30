@@ -29,7 +29,7 @@ public abstract class RecipientProvider extends AbstractDescribableImpl<Recipien
         return Jenkins.get().getDescriptorList(RecipientProvider.class);
     }
 
-    public static List<RecipientProviderDescriptor> allSupporting(Class<? extends Job> clazz) {
+    public static List<RecipientProviderDescriptor> allSupporting(Class<? extends Job<?, ?>> clazz) {
         List<RecipientProviderDescriptor> rt = new ArrayList<>();
         for (RecipientProviderDescriptor recipientProviderDescriptor : all()) {
             try {

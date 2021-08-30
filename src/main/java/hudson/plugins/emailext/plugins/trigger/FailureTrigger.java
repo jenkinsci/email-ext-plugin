@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins.trigger;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
@@ -51,7 +52,8 @@ public class FailureTrigger extends EmailTrigger {
         public DescriptorImpl() {
             addDefaultRecipientProvider(new DevelopersRecipientProvider());
         }
-        
+
+        @NonNull
         @Override
         public String getDisplayName() {
             return TRIGGER_NAME;

@@ -1,5 +1,6 @@
 package hudson.plugins.emailext;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
@@ -73,6 +74,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
 
     @Extension
     public static class MailAccountDescriptor extends Descriptor<MailAccount>{
+        @NonNull
         @Override
         public String getDisplayName(){
             return "";

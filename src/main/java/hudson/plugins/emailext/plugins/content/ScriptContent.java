@@ -43,7 +43,6 @@ import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -91,7 +90,7 @@ public class ScriptContent extends AbstractEvalContent {
             LOGGER.log(Level.SEVERE, missingScriptError);
             result = missingScriptError;
         } catch (GroovyRuntimeException e) {
-            result = "Error in script or template: " + e.toString();
+            result = "Error in script or template: " + e;
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
@@ -110,8 +109,7 @@ public class ScriptContent extends AbstractEvalContent {
      * @param templateStream the template file stream
      * @return the rendered template content
      */
-    private String renderTemplate(Run<?, ?> build, FilePath workspace, TaskListener listener, InputStream templateStream)
-            throws IOException {
+    private String renderTemplate(Run<?, ?> build, FilePath workspace, TaskListener listener, InputStream templateStream) {
         
         String result;
         
@@ -152,11 +150,8 @@ public class ScriptContent extends AbstractEvalContent {
             } else {
                 //unapproved script, so run in sandbox
                 StaticProxyInstanceWhitelist whitelist = new StaticProxyInstanceWhitelist(build, "templates-instances.whitelist");
-                result = GroovySandbox.runInSandbox(new Callable<String>() {
-                    @Override
-                    public String call() throws Exception {
-                        return tmplR.make(binding).toString(); //TODO there is a PrintWriter instance created in make and bound to out
-                    }
+                result = GroovySandbox.runInSandbox(() -> {
+                    return tmplR.make(binding).toString(); //TODO there is a PrintWriter instance created in make and bound to out
                 }, new ProxyWhitelist(
                         Whitelist.all(),
                         new TaskListenerInstanceWhitelist(listener),
@@ -169,7 +164,7 @@ public class ScriptContent extends AbstractEvalContent {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             Functions.printStackTrace(e, pw);
-            result = "Exception raised during template rendering: " + e.getMessage() + "\n\n" + sw.toString();
+            result = "Exception raised during template rendering: " + e.getMessage() + "\n\n" + sw;
         }
         return result;
     }
@@ -236,8 +231,7 @@ public class ScriptContent extends AbstractEvalContent {
      * @param variables user variables to be added to the Groovy context
      * @return a GroovyShell instance
      */
-    private GroovyShell createEngine(ExtendedEmailPublisherDescriptor descriptor, Map<String, Object> variables, boolean secure)
-            throws IOException {
+    private GroovyShell createEngine(ExtendedEmailPublisherDescriptor descriptor, Map<String, Object> variables, boolean secure) {
 
         ClassLoader cl;
         CompilerConfiguration cc;

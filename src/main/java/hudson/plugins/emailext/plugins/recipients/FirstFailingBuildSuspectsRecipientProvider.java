@@ -23,6 +23,7 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.Result;
@@ -106,6 +107,7 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
     @Symbol("brokenBuildSuspects")
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
 
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.FirstFailingBuildSuspectsRecipientProvider_DisplayName();

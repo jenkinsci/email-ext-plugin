@@ -87,7 +87,7 @@ public class ScriptContentTest {
             f.set( publisher.getDescriptor(), "ashlux@gmail.com" );
 
             build =  mock(AbstractBuild.class);
-            AbstractProject project = mock(AbstractProject.class);
+            AbstractProject<?, ?> project = mock(AbstractProject.class);
             DescribableList publishers = mock(DescribableList.class);
             when(publishers.get(ExtendedEmailPublisher.class)).thenReturn(publisher);
             when(project.getPublishersList()).thenReturn(publishers);

@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins.recipients;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.Cause;
@@ -117,6 +118,7 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
     @Symbol("upstreamDevelopers")
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
 
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.UpstreamComitterRecipientProvider_DisplayName();

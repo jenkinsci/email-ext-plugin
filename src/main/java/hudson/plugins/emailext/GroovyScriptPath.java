@@ -1,5 +1,6 @@
 package hudson.plugins.emailext;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
@@ -49,6 +50,7 @@ public class GroovyScriptPath extends AbstractDescribableImpl<GroovyScriptPath> 
     
     @Extension
     public static class GroovyScriptPathDescriptor extends Descriptor<GroovyScriptPath> {
+        @NonNull
         @Override
         public String getDisplayName() {
             return "";
