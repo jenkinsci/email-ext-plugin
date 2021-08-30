@@ -772,8 +772,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return "/plugin/email-ext/help/main.html";
     }
 
-    public FormValidation doAddressCheck(@QueryParameter final String value)
-            throws IOException, ServletException {
+    public FormValidation doAddressCheck(@QueryParameter final String value) {
         try {
             new InternetAddress(value);
             return FormValidation.ok();
@@ -782,13 +781,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
     }
 
-    public FormValidation doRecipientListRecipientsCheck(@QueryParameter final String value)
-            throws IOException, ServletException {
+    public FormValidation doRecipientListRecipientsCheck(@QueryParameter final String value) {
         return new EmailRecipientUtils().validateFormRecipientList(value);
     }
 
-    public FormValidation doMaxAttachmentSizeCheck(@QueryParameter final String value)
-            throws IOException, ServletException {
+    public FormValidation doMaxAttachmentSizeCheck(@QueryParameter final String value) {
         try {
             String testValue = value.trim();
             // we support an empty value (which means default)

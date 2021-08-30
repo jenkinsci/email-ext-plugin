@@ -144,7 +144,7 @@ public class EmailExtWatchAction implements Action {
         return p;
     }
     
-    public void doStopWatching(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException, FormException {
+    public void doStopWatching(StaplerRequest req, StaplerResponse rsp) throws IOException {
         User user = User.current();
         if(user != null) {
             stopWatching();
@@ -159,7 +159,7 @@ public class EmailExtWatchAction implements Action {
     }
     
     @RequirePOST
-    public void doConfigSubmit(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException, FormException {
+    public void doConfigSubmit(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
         User user = User.current();
         if(user != null) {
             Object json = req.getSubmittedForm().get("triggers");

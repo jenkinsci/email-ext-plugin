@@ -110,8 +110,7 @@ public class ScriptContent extends AbstractEvalContent {
      * @param templateStream the template file stream
      * @return the rendered template content
      */
-    private String renderTemplate(Run<?, ?> build, FilePath workspace, TaskListener listener, InputStream templateStream)
-            throws IOException {
+    private String renderTemplate(Run<?, ?> build, FilePath workspace, TaskListener listener, InputStream templateStream) {
         
         String result;
         
@@ -154,7 +153,7 @@ public class ScriptContent extends AbstractEvalContent {
                 StaticProxyInstanceWhitelist whitelist = new StaticProxyInstanceWhitelist(build, "templates-instances.whitelist");
                 result = GroovySandbox.runInSandbox(new Callable<String>() {
                     @Override
-                    public String call() throws Exception {
+                    public String call() {
                         return tmplR.make(binding).toString(); //TODO there is a PrintWriter instance created in make and bound to out
                     }
                 }, new ProxyWhitelist(
@@ -236,8 +235,7 @@ public class ScriptContent extends AbstractEvalContent {
      * @param variables user variables to be added to the Groovy context
      * @return a GroovyShell instance
      */
-    private GroovyShell createEngine(ExtendedEmailPublisherDescriptor descriptor, Map<String, Object> variables, boolean secure)
-            throws IOException {
+    private GroovyShell createEngine(ExtendedEmailPublisherDescriptor descriptor, Map<String, Object> variables, boolean secure) {
 
         ClassLoader cl;
         CompilerConfiguration cc;

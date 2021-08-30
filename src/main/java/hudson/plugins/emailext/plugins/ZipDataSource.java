@@ -48,7 +48,7 @@ public class ZipDataSource implements SizedDataSource {
         return MIME_TYPE;
     }
 
-    public InputStream getInputStream() throws IOException {
+    public InputStream getInputStream() {
         return new ByteArrayInputStream(contents);
     }
 

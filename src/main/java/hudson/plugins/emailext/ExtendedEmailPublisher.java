@@ -347,7 +347,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         debug(listener.getLogger(), "Checking for post-build");
         if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
             debug(listener.getLogger(), "Performing post-build step");
@@ -873,7 +873,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     private MimeMessage createMail(
             ExtendedEmailPublisherContext context, InternetAddress fromAddress, Session session)
-            throws MessagingException, UnsupportedEncodingException, InterruptedException {
+            throws MessagingException, UnsupportedEncodingException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
 
         String charset = descriptor.getCharset();
@@ -1142,7 +1142,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             Launcher launcher, BuildListener buildlistener) {
         return new MatrixAggregator(matrixbuild, launcher, buildlistener) {
             @Override
-            public boolean endBuild() throws InterruptedException, IOException {
+            public boolean endBuild() {
                 LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
 
                 // Will be run by parent so we check if needed to be executed by parent
@@ -1153,7 +1153,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
 
             @Override
-            public boolean startBuild() throws InterruptedException, IOException {
+            public boolean startBuild() {
                 LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
                 // Will be run by parent so we check if needed to be executed by parent
                 if (getMatrixTriggerMode().forParent) {

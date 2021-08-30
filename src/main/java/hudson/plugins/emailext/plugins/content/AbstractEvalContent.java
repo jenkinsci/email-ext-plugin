@@ -161,7 +161,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         return parent.act(new IsChildFileCallable(potentialChild));
     }
 
-    private InputStream getManagedFile(Run<?, ?> run, String fileName) throws UnsupportedEncodingException {
+    private InputStream getManagedFile(Run<?, ?> run, String fileName) {
         InputStream stream = null;
         Plugin plugin = Jenkins.get().getPlugin("config-file-provider");
         if (plugin != null) {
@@ -196,7 +196,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
             //checking doesn't check if we are system or not since it assumed being called from doCheckField
             return ACL.impersonate(Jenkins.ANONYMOUS, new NotReallyRoleSensitiveCallable<Boolean, Exception>() {
                 @Override
-                public Boolean call() throws Exception {
+                public Boolean call() {
                     return approval.checking(script, language).kind == FormValidation.Kind.OK;
                 }
             });
@@ -214,7 +214,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         }
 
         @Override
-        public Boolean invoke(File parent, VirtualChannel channel) throws IOException, InterruptedException {
+        public Boolean invoke(File parent, VirtualChannel channel) {
             if (potentialChild.isRemote()) {
                 //Not on the same machine so can't be a child of the local file
                 return false;
