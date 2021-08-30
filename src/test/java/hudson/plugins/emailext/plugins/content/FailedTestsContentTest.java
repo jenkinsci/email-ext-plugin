@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 public class FailedTestsContentTest {
     private FailedTestsContent failedTestContent;
 
-    private AbstractBuild build;
+    private AbstractBuild<?, ?> build;
 
     private TaskListener listener;
 
@@ -66,7 +66,7 @@ public class FailedTestsContentTest {
     @Test
     public void testGetContent_whenAllTestsPassedShouldGiveMeaningfulMessage()
             throws Exception {
-        AbstractTestResultAction testResults = mock(AbstractTestResultAction.class);
+        AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
         when(testResults.getFailCount()).thenReturn(0);
 
         when(build.getAction(AbstractTestResultAction.class)).thenReturn(testResults);

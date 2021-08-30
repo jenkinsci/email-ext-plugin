@@ -30,7 +30,7 @@ public abstract class EmailExtScript extends Script {
                 for(Map.Entry<String, Object> entry : argMap.entrySet()) {
                     String value = entry.getValue().toString();
                     if(entry.getValue() instanceof List) {
-                        List valueList = (List)entry.getValue();
+                        List<?> valueList = (List<?>)entry.getValue();
                         for(Object v : valueList) {
                             multiMap.put(entry.getKey(), v.toString());
                         }

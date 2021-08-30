@@ -49,7 +49,7 @@ public class ExtendedEmailPublisherContext {
     @Deprecated
     public AbstractBuild<?, ?> getBuild() {
         if(run instanceof AbstractBuild) {
-            return (AbstractBuild)run;
+            return (AbstractBuild<?, ?>)run;
         }
         return null;
     }

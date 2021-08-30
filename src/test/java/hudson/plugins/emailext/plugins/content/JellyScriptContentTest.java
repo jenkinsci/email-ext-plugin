@@ -52,7 +52,7 @@ public class JellyScriptContentTest {
             f.set(publisher.getDescriptor(), "http://localhost/");
             
             build = mock(AbstractBuild.class);
-            AbstractProject project = mock(AbstractProject.class);
+            AbstractProject<?, ?> project = mock(AbstractProject.class);
             DescribableList publishers = mock(DescribableList.class);
             when(publishers.get(ExtendedEmailPublisher.class)).thenReturn(publisher);
             when(project.getPublishersList()).thenReturn(publishers);

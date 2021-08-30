@@ -99,7 +99,7 @@ public class ScriptContentBuildWrapperTest
 
     private ChildReport mockChildReport()
     {
-        final AbstractTestResultAction testResultAction1 = mock( AbstractTestResultAction.class );
+        final AbstractTestResultAction<?> testResultAction1 = mock( AbstractTestResultAction.class );
         when( testResultAction1.getResult() ).thenReturn( new TestResult() );
         return new ChildReport( mockBuild, testResultAction1 );
     }

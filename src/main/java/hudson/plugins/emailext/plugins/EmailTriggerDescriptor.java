@@ -43,8 +43,8 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
     protected EmailTrigger _createDefault() {
         EmailTrigger trigger;
         try {
-            Constructor ctor = clazz.getConstructor(List.class, String.class, String.class, String.class, String.class, String.class, int.class, String.class);
-            trigger = (EmailTrigger)ctor.newInstance(defaultRecipientProviders, "", "$PROJECT_DEFAULT_REPLYTO", "$PROJECT_DEFAULT_SUBJECT", "$PROJECT_DEFAULT_CONTENT", "", 0, "project");
+            Constructor<? extends EmailTrigger> ctor = clazz.getConstructor(List.class, String.class, String.class, String.class, String.class, String.class, int.class, String.class);
+            trigger = ctor.newInstance(defaultRecipientProviders, "", "$PROJECT_DEFAULT_REPLYTO", "$PROJECT_DEFAULT_SUBJECT", "$PROJECT_DEFAULT_CONTENT", "", 0, "project");
         } catch(Exception e) {
                 trigger = null;
         }

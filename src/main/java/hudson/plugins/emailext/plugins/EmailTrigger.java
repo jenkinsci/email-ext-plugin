@@ -152,7 +152,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
      * @return The number of test failures for the Run
      */
     protected int getNumFailures(Run<?, ?> build) {
-        AbstractTestResultAction<? extends AbstractTestResultAction> a = build.getAction(AbstractTestResultAction.class);
+        AbstractTestResultAction<? extends AbstractTestResultAction<?>> a = build.getAction(AbstractTestResultAction.class);
         if (a instanceof AggregatedTestResultAction) {
             int result = 0;
             AggregatedTestResultAction action = (AggregatedTestResultAction) a;
