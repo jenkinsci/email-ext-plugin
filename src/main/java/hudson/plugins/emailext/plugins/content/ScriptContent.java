@@ -151,11 +151,8 @@ public class ScriptContent extends AbstractEvalContent {
             } else {
                 //unapproved script, so run in sandbox
                 StaticProxyInstanceWhitelist whitelist = new StaticProxyInstanceWhitelist(build, "templates-instances.whitelist");
-                result = GroovySandbox.runInSandbox(new Callable<String>() {
-                    @Override
-                    public String call() {
-                        return tmplR.make(binding).toString(); //TODO there is a PrintWriter instance created in make and bound to out
-                    }
+                result = GroovySandbox.runInSandbox(() -> {
+                    return tmplR.make(binding).toString(); //TODO there is a PrintWriter instance created in make and bound to out
                 }, new ProxyWhitelist(
                         Whitelist.all(),
                         new TaskListenerInstanceWhitelist(listener),
