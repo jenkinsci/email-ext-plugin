@@ -91,7 +91,7 @@ public class ScriptContent extends AbstractEvalContent {
             LOGGER.log(Level.SEVERE, missingScriptError);
             result = missingScriptError;
         } catch (GroovyRuntimeException e) {
-            result = "Error in script or template: " + e.toString();
+            result = "Error in script or template: " + e;
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
@@ -169,7 +169,7 @@ public class ScriptContent extends AbstractEvalContent {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             Functions.printStackTrace(e, pw);
-            result = "Exception raised during template rendering: " + e.getMessage() + "\n\n" + sw.toString();
+            result = "Exception raised during template rendering: " + e.getMessage() + "\n\n" + sw;
         }
         return result;
     }

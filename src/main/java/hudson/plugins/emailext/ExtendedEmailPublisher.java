@@ -713,7 +713,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 throw e;
             } catch (Throwable t) {
                 Functions.printStackTrace(t, pw);
-                logger.println(out.toString());
+                logger.println(out);
                 // should we cancel the sending of the email???
             }
             debug(logger, out.toString());

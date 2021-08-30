@@ -229,7 +229,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             if (failedTest.stackTrace != null || failedTest.errorMessage != null) {
                 local.append(lineBreak);
             }
-            buffer.append(local.toString());
+            buffer.append(local);
         }
 
     }
