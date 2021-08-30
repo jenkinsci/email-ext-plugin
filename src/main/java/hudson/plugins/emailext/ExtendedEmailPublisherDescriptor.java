@@ -720,7 +720,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     public List<String> getDefaultTriggerIds() {
         if (defaultTriggerIds.isEmpty()) {
             if (!defaultTriggers.isEmpty()) {
-                defaultTriggerIds.clear();
                 for (EmailTriggerDescriptor t : this.defaultTriggers) {
                     // we have to do the below because a bunch of stuff is not serialized for the Descriptor
                     EmailTriggerDescriptor d = Jenkins.get().getDescriptorByType(t.getClass());
