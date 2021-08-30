@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins.trigger;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
@@ -36,6 +37,7 @@ public class XNthFailureTrigger extends NthFailureTrigger {
     @Extension
     public static final class DescriptorImpl extends NthFailureTrigger.DescriptorImpl {
 
+        @NonNull
         @Override
         public String getDisplayName() {
             return TRIGGER_NAME;

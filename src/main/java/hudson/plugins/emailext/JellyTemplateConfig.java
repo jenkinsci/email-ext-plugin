@@ -40,6 +40,7 @@ public class JellyTemplateConfig extends Config {
             return ContentType.DefinedType.XML;
         }
 
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.JellyTemplateConfigProvider_DisplayName();

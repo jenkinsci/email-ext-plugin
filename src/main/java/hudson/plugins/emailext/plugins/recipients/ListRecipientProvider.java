@@ -6,6 +6,7 @@
 
 package hudson.plugins.emailext.plugins.recipients;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.Job;
@@ -51,6 +52,7 @@ public class ListRecipientProvider extends RecipientProvider {
     @Symbol("recipients")
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
 
+        @NonNull
         @Override
         public String getDisplayName() {
             return Messages.ListRecipientProvider_DisplayName();

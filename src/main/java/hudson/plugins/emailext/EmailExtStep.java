@@ -270,6 +270,7 @@ public class EmailExtStep extends Step {
             return "emailext";
         }
 
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Extended Email";

@@ -98,6 +98,7 @@ public class EmailExtRecipientStep extends Step {
             return "emailextrecipients";
         }
 
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Extended Email Recipients";

@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.watching;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.Job;
@@ -21,6 +22,7 @@ public class EmailExtWatchJobProperty extends JobProperty<Job<?, ?>> {
 
     final List<String> watchers = new ArrayList<>();
 
+    @NonNull
     @Override
     public Collection<Action> getJobActions(Job<?, ?> job) {
         return Collections.emptyList();
@@ -80,6 +82,7 @@ public class EmailExtWatchJobProperty extends JobProperty<Job<?, ?>> {
             return null;
         }
 
+        @NonNull
         @Override
         public String getDisplayName() {
             return "";

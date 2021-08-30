@@ -259,6 +259,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
     }
 
+    @NonNull
     @Override
     public String getDisplayName() {
         return Messages.ExtendedEmailPublisherDescriptor_DisplayName();

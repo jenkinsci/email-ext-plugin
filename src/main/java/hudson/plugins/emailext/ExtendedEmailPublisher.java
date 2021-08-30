@@ -327,6 +327,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.matrixTriggerMode = matrixTriggerMode;
     }
 
+    @NonNull
     @Override
     public Collection<? extends Action> getProjectActions(AbstractProject<?, ?> project) {
         return Collections.singletonList(new EmailExtWatchAction(project));

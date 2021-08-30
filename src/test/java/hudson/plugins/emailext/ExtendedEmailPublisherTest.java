@@ -2,6 +2,7 @@
 
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -1375,6 +1376,7 @@ public class ExtendedEmailPublisherTest {
 
         public static final class DescriptorImpl extends Descriptor<Builder> {
 
+            @NonNull
             @Override
             public String getDisplayName() {
                 return "Sleep once";

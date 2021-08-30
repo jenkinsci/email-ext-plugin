@@ -1,9 +1,9 @@
 package hudson.plugins.emailext.watching;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
-import hudson.model.Descriptor.FormException;
 import hudson.model.User;
 import hudson.model.UserPropertyDescriptor;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
@@ -55,6 +55,7 @@ public class EmailExtWatchAction implements Action {
                 super(UserProperty.class);
             }
 
+            @NonNull
             @Override
             public String getDisplayName() {
                 return "Extended Email Job Watching";
@@ -65,6 +66,7 @@ public class EmailExtWatchAction implements Action {
                 return new UserProperty(null);
             }
 
+            @NonNull
             @Override
             public UserProperty newInstance(StaplerRequest req, JSONObject json) throws FormException {
                 List<EmailTrigger> triggers = req != null ? req.bindJSONToList(EmailTrigger.class, json) : Collections.emptyList();
