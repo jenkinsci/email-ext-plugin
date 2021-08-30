@@ -121,7 +121,7 @@ public class AttachmentUtilsTest {
 
         BodyPart attach = part.getBodyPart(1);
         assertThat(attach.getSize(), allOf(greaterThan(0),
-                lessThanOrEqualTo((new Long(b.getLogFile().length()).intValue()))));
+                lessThanOrEqualTo((Long.valueOf(b.getLogFile().length()).intValue()))));
         assertEquals("build.zip", attach.getFileName());
         assertThat(IOUtils.toString(attach.getInputStream()), containsString("build.log")); // zips have plain text filename in them
     }
