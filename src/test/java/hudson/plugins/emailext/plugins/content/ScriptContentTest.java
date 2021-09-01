@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Scanner;
@@ -267,7 +268,7 @@ public class ScriptContentTest {
 
     @Test public void templateOnDisk() throws Exception {
         scriptContent.template = "testing1.template";
-        FileUtils.write(new File(ScriptContent.scriptsFolder(), "testing1.template"), "2+2=${2+2}");
+        FileUtils.write(new File(ScriptContent.scriptsFolder(), "testing1.template"), "2+2=${2+2}", StandardCharsets.UTF_8);
         assertEquals("2+2=4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
@@ -275,10 +276,10 @@ public class ScriptContentTest {
         }
         long end = System.currentTimeMillis();
         System.out.printf("average time %.2fmsec%n", (end - start) / 1000.0);
-        FileUtils.write(new File(ScriptContent.scriptsFolder(), "testing1.template"), "2 + 2 = ${2+2}");
+        FileUtils.write(new File(ScriptContent.scriptsFolder(), "testing1.template"), "2 + 2 = ${2+2}", StandardCharsets.UTF_8);
         assertEquals("2 + 2 = 4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
         scriptContent.template = "testing2.template";
-        FileUtils.write(new File(ScriptContent.scriptsFolder(), "testing2.template"), "2 + 2 is ${2+2}");
+        FileUtils.write(new File(ScriptContent.scriptsFolder(), "testing2.template"), "2 + 2 is ${2+2}", StandardCharsets.UTF_8);
         assertEquals("2 + 2 is 4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
         scriptContent.template = "testing1.template";
         assertEquals("2 + 2 = 4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));

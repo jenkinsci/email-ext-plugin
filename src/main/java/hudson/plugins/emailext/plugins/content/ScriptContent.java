@@ -40,6 +40,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -123,7 +124,7 @@ public class ScriptContent extends AbstractEvalContent {
         binding.put("workspace", workspace);
 
         try {
-            String text = IOUtils.toString(templateStream);
+            String text = IOUtils.toString(templateStream, StandardCharsets.UTF_8);
             boolean approvedScript = false;
             if (templateStream instanceof UserProvidedContentInputStream && !AbstractEvalContent.isApprovedScript(text, GroovyLanguage.get())) {
                 approvedScript = false;
