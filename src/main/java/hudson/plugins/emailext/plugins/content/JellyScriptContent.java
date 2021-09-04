@@ -27,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 
 @EmailToken
 public class JellyScriptContent extends AbstractEvalContent {
@@ -66,7 +67,7 @@ public class JellyScriptContent extends AbstractEvalContent {
 
     private String renderContent(@NonNull Run<?, ?> build, InputStream inputStream, @NonNull TaskListener listener)
             throws JellyException, IOException {
-        String rawScript = IOUtils.toString(inputStream);
+        String rawScript = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
         if (inputStream instanceof UserProvidedContentInputStream) {
             Item parent = build.getParent();
             ScriptApproval.get().configuring(rawScript, JellyLanguage.get(), ApprovalContext.create().withItem(parent));

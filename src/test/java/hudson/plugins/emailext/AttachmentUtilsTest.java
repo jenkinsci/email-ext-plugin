@@ -31,6 +31,7 @@ import javax.mail.internet.MimeUtility;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import static org.hamcrest.Matchers.allOf;
@@ -79,7 +80,7 @@ public class AttachmentUtilsTest {
 
         BodyPart attach = part.getBodyPart(1);
         assertThat(attach.getSize(), greaterThan(0));
-        assertThat(IOUtils.toString(attach.getInputStream()), containsString("mickey@disney.com"));
+        assertThat(IOUtils.toString(attach.getInputStream(), StandardCharsets.UTF_8), containsString("mickey@disney.com"));
         assertEquals("build.log", attach.getFileName());
     }
 
@@ -123,7 +124,7 @@ public class AttachmentUtilsTest {
         assertThat(attach.getSize(), allOf(greaterThan(0),
                 lessThanOrEqualTo((Long.valueOf(b.getLogFile().length()).intValue()))));
         assertEquals("build.zip", attach.getFileName());
-        assertThat(IOUtils.toString(attach.getInputStream()), containsString("build.log")); // zips have plain text filename in them
+        assertThat(IOUtils.toString(attach.getInputStream(), StandardCharsets.UTF_8), containsString("build.log")); // zips have plain text filename in them
     }
 
     @Test

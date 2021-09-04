@@ -16,6 +16,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,7 @@ public class ContentBuilderTest {
         public void before() throws Throwable {
             super.before();
 
-            listener = new StreamBuildListener(System.out);
+            listener = new StreamBuildListener(System.out, StandardCharsets.UTF_8);
 
             publisher = new ExtendedEmailPublisher();
             publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";

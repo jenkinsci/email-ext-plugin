@@ -394,7 +394,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
         if (jprop != null) {
             for (String u : jprop.getWatchers()) {
-                User user = User.get(u);
+                User user = User.getById(u, false);
                 if (user != null) {
                     EmailExtWatchAction.UserProperty prop = user.getProperty(EmailExtWatchAction.UserProperty.class);
                     if (prop != null) {

@@ -13,6 +13,7 @@ import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,7 +43,7 @@ public class TemplateContent extends AbstractEvalContent {
         
         try {
             if (!StringUtils.isEmpty(file)) {
-                result = IOUtils.toString(getFileInputStream(run, workspace, file, ".txt"));
+                result = IOUtils.toString(getFileInputStream(run, workspace, file, ".txt"), StandardCharsets.UTF_8);
             }
         } catch (FileNotFoundException e) {
             String missingFileError = generateMissingFile("Plain Text", file);
