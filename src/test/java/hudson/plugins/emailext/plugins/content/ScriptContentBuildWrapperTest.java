@@ -2,7 +2,6 @@ package hudson.plugins.emailext.plugins.content;
 
 import hudson.Functions;
 import hudson.model.AbstractBuild;
-import hudson.model.Action;
 import hudson.tasks.junit.TestResult;
 import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AbstractTestResultAction;
@@ -10,10 +9,6 @@ import hudson.tasks.test.AggregatedTestResultAction;
 import hudson.tasks.test.AggregatedTestResultAction.ChildReport;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -26,9 +21,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith( PowerMockRunner.class )
-@PrepareForTest( value = { AggregatedTestResultAction.class, AggregatedTestResultAction.ChildReport.class } )
-@PowerMockIgnore({"javax.xml.*"}) // workaround inspired by https://github.com/powermock/powermock/issues/864#issuecomment-410182836
 public class ScriptContentBuildWrapperTest
 {
     private ScriptContentBuildWrapper buildWrapper;
@@ -58,18 +50,6 @@ public class ScriptContentBuildWrapperTest
         when( mockBuild.getActions() ).thenReturn(new LinkedList<>() );
 
         assertNull( buildWrapper.getAction( "class.not.found" ) );
-    }
-
-    @Test
-    public void testGetAction_returnActionWhenFoundByName()
-    {
-        final Action expectedAction = mock( Action.class );
-        when( mockBuild.getActions() ).thenReturn( new LinkedList<Action>()
-            {{
-                add( expectedAction );
-            }} );
-
-        assertSame( expectedAction, buildWrapper.getAction( expectedAction.getClass().getName() ) );
     }
 
     @Test

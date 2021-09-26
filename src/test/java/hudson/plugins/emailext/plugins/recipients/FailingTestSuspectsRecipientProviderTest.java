@@ -23,7 +23,6 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
-import hudson.PluginManager;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
@@ -31,51 +30,40 @@ import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.tasks.Mailer;
 import jenkins.model.Jenkins;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({
-    ExtendedEmailPublisherDescriptor.class,
-    FreeStyleBuild.class,
-    Jenkins.class,
-    Mailer.class,
-    Mailer.DescriptorImpl.class,
-    User.class,
-    FreeStyleProject.class,
-    PluginManager.class
-})
-@PowerMockIgnore({"javax.xml.*"}) // workaround inspired by https://github.com/powermock/powermock/issues/864#issuecomment-410182836
 public class FailingTestSuspectsRecipientProviderTest {
+
+    private MockedStatic<Jenkins> mockedJenkins;
+    private MockedStatic<Mailer> mockedMailer;
 
     @Before
     public void before() throws Exception {
-        final Jenkins jenkins = PowerMockito.mock(Jenkins.class);
-        PowerMockito.when(jenkins.isUseSecurity()).thenReturn(false);
-        final ExtendedEmailPublisherDescriptor extendedEmailPublisherDescriptor = PowerMockito.mock(ExtendedEmailPublisherDescriptor.class);
+        final Jenkins jenkins = Mockito.mock(Jenkins.class);
+        Mockito.when(jenkins.isUseSecurity()).thenReturn(false);
+        final ExtendedEmailPublisherDescriptor extendedEmailPublisherDescriptor = Mockito.mock(ExtendedEmailPublisherDescriptor.class);
         extendedEmailPublisherDescriptor.setDebugMode(true);
-        PowerMockito.when(extendedEmailPublisherDescriptor.getExcludedCommitters()).thenReturn("");
+        Mockito.when(extendedEmailPublisherDescriptor.getExcludedCommitters()).thenReturn("");
 
-        PowerMockito.when(jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class)).thenReturn(extendedEmailPublisherDescriptor);
+        Mockito.when(jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class)).thenReturn(extendedEmailPublisherDescriptor);
 
-        final PluginManager pluginManager = PowerMockito.mock(PluginManager.class);
-        Whitebox.setInternalState(pluginManager, "uberClassLoader", this.getClass().getClassLoader());
+        mockedJenkins = Mockito.mockStatic(Jenkins.class);
+        mockedJenkins.when(Jenkins::get).thenReturn(jenkins);
 
-        PowerMockito.when(jenkins.getPluginManager()).thenReturn(pluginManager);
+        final Mailer.DescriptorImpl descriptor = Mockito.mock(Mailer.DescriptorImpl.class);
+        Mockito.when(descriptor.getDefaultSuffix()).thenReturn("DOMAIN");
+        mockedMailer = Mockito.mockStatic(Mailer.class);
+        mockedMailer.when(Mailer::descriptor).thenReturn(descriptor);
+    }
 
-        PowerMockito.mockStatic(Jenkins.class);
-        PowerMockito.doReturn(jenkins).when(Jenkins.class, "get");
-
-        final Mailer.DescriptorImpl descriptor = PowerMockito.mock(Mailer.DescriptorImpl.class);
-        PowerMockito.when(descriptor.getDefaultSuffix()).thenReturn("DOMAIN");
-        PowerMockito.mockStatic(Mailer.class);
-        PowerMockito.doReturn(descriptor).when(Mailer.class, "descriptor");
+    @After
+    public void after() {
+        mockedMailer.close();
+        mockedJenkins.close();
     }
 
     @Test
@@ -86,71 +74,73 @@ public class FailingTestSuspectsRecipientProviderTest {
          * No committers.
          * Tests {a,b} fail.
          */
-        final FreeStyleProject p = PowerMockito.mock(FreeStyleProject.class);
-        final FreeStyleBuild build1 = PowerMockito.spy(new FreeStyleBuild(p));
-        PowerMockito.doReturn(Result.UNSTABLE).when(build1).getResult();
-        PowerMockito.doReturn(null).when(build1).getPreviousCompletedBuild();
-        MockUtilities.addRequestor(build1, "A");
-        MockUtilities.addTestResultAction(build1, build1, build1);
-        TestUtilities.checkRecipients(build1, new FailingTestSuspectsRecipientProvider(), "A");
+        try (MockedStatic<User> mockedUser = Mockito.mockStatic(User.class)) {
+            final FreeStyleProject p = Mockito.mock(FreeStyleProject.class);
+            final FreeStyleBuild build1 = Mockito.spy(new FreeStyleBuild(p));
+            Mockito.doReturn(Result.UNSTABLE).when(build1).getResult();
+            Mockito.doReturn(null).when(build1).getPreviousCompletedBuild();
+            MockUtilities.addRequestor(mockedUser, build1, "A");
+            MockUtilities.addTestResultAction(build1, build1, build1);
+            TestUtilities.checkRecipients(build1, new FailingTestSuspectsRecipientProvider(), "A");
 
-        /*
-         * Requestor: (none)
-         * Committers {U,V}.
-         * Tests {a,b,c} fail.
-         */
-        final FreeStyleBuild build2 = PowerMockito.spy(new FreeStyleBuild(p));
-        PowerMockito.doReturn(Result.UNSTABLE).when(build2).getResult();
-        PowerMockito.doReturn(build1).when(build2).getPreviousCompletedBuild();
-        MockUtilities.addChangeSet(build2, "U", "V");
-        MockUtilities.addTestResultAction(build2, build1, build1, build2);
-        TestUtilities.checkRecipients(build2, new FailingTestSuspectsRecipientProvider(), "A", "U", "V");
+            /*
+             * Requestor: (none)
+             * Committers {U,V}.
+             * Tests {a,b,c} fail.
+             */
+            final FreeStyleBuild build2 = Mockito.spy(new FreeStyleBuild(p));
+            Mockito.doReturn(Result.UNSTABLE).when(build2).getResult();
+            Mockito.doReturn(build1).when(build2).getPreviousCompletedBuild();
+            MockUtilities.addChangeSet(build2, "U", "V");
+            MockUtilities.addTestResultAction(build2, build1, build1, build2);
+            TestUtilities.checkRecipients(build2, new FailingTestSuspectsRecipientProvider(), "A", "U", "V");
 
-        /*
-         * Requestor: (none)
-         * Committers {X,V}.
-         * Tests {c,d} fail.
-         */
-        final FreeStyleBuild build3 = PowerMockito.spy(new FreeStyleBuild(p));
-        PowerMockito.doReturn(Result.UNSTABLE).when(build3).getResult();
-        PowerMockito.doReturn(build2).when(build3).getPreviousCompletedBuild();
-        MockUtilities.addChangeSet(build3, "X", "V");
-        MockUtilities.addTestResultAction(build3, build2, build3);
-        TestUtilities.checkRecipients(build3, new FailingTestSuspectsRecipientProvider(), "U", "V", "X");
+            /*
+             * Requestor: (none)
+             * Committers {X,V}.
+             * Tests {c,d} fail.
+             */
+            final FreeStyleBuild build3 = Mockito.spy(new FreeStyleBuild(p));
+            Mockito.doReturn(Result.UNSTABLE).when(build3).getResult();
+            Mockito.doReturn(build2).when(build3).getPreviousCompletedBuild();
+            MockUtilities.addChangeSet(build3, "X", "V");
+            MockUtilities.addTestResultAction(build3, build2, build3);
+            TestUtilities.checkRecipients(build3, new FailingTestSuspectsRecipientProvider(), "U", "V", "X");
 
-        /*
-         * Requestor: (none)
-         * Committers {K}
-         * No tests were performed. The build failed.
-         */
-        final FreeStyleBuild build4 = PowerMockito.spy(new FreeStyleBuild(p));
-        PowerMockito.doReturn(Result.FAILURE).when(build4).getResult();
-        PowerMockito.doReturn(build3).when(build4).getPreviousCompletedBuild();
-        MockUtilities.addChangeSet(build4, "K");
-        TestUtilities.checkRecipients(build4, new FailingTestSuspectsRecipientProvider());
+            /*
+             * Requestor: (none)
+             * Committers {K}
+             * No tests were performed. The build failed.
+             */
+            final FreeStyleBuild build4 = Mockito.spy(new FreeStyleBuild(p));
+            Mockito.doReturn(Result.FAILURE).when(build4).getResult();
+            Mockito.doReturn(build3).when(build4).getPreviousCompletedBuild();
+            MockUtilities.addChangeSet(build4, "K");
+            TestUtilities.checkRecipients(build4, new FailingTestSuspectsRecipientProvider());
 
-        /*
-         * Requestor: (none)
-         * Committers {X,U,V}.
-         * No tests were performed. The build failed.
-         */
-        final FreeStyleBuild build5 = PowerMockito.spy(new FreeStyleBuild(p));
-        PowerMockito.doReturn(Result.FAILURE).when(build5).getResult();
-        PowerMockito.doReturn(build4).when(build5).getPreviousCompletedBuild();
-        MockUtilities.addChangeSet(build5, "U", "W");
-        TestUtilities.checkRecipients(build5, new FailingTestSuspectsRecipientProvider());
+            /*
+             * Requestor: (none)
+             * Committers {X,U,V}.
+             * No tests were performed. The build failed.
+             */
+            final FreeStyleBuild build5 = Mockito.spy(new FreeStyleBuild(p));
+            Mockito.doReturn(Result.FAILURE).when(build5).getResult();
+            Mockito.doReturn(build4).when(build5).getPreviousCompletedBuild();
+            MockUtilities.addChangeSet(build5, "U", "W");
+            TestUtilities.checkRecipients(build5, new FailingTestSuspectsRecipientProvider());
 
-        /*
-         * Requestor: A
-         * Committers {W}.
-         * Tests {a,e (new test)} fail.
-         */
-        final FreeStyleBuild build6 = PowerMockito.spy(new FreeStyleBuild(p));
-        PowerMockito.doReturn(Result.UNSTABLE).when(build6).getResult();
-        PowerMockito.doReturn(build5).when(build6).getPreviousCompletedBuild();
-        MockUtilities.addRequestor(build6, "A");
-        MockUtilities.addChangeSet(build6, "W");
-        MockUtilities.addTestResultAction(build6, build6, build6);
-        TestUtilities.checkRecipients(build6, new FailingTestSuspectsRecipientProvider(), "A", "K", "U", "W");
+            /*
+             * Requestor: A
+             * Committers {W}.
+             * Tests {a,e (new test)} fail.
+             */
+            final FreeStyleBuild build6 = Mockito.spy(new FreeStyleBuild(p));
+            Mockito.doReturn(Result.UNSTABLE).when(build6).getResult();
+            Mockito.doReturn(build5).when(build6).getPreviousCompletedBuild();
+            MockUtilities.addRequestor(mockedUser, build6, "A");
+            MockUtilities.addChangeSet(build6, "W");
+            MockUtilities.addTestResultAction(build6, build6, build6);
+            TestUtilities.checkRecipients(build6, new FailingTestSuspectsRecipientProvider(), "A", "K", "U", "W");
+        }
     }
 }

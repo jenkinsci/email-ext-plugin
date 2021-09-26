@@ -8,16 +8,11 @@ import hudson.util.StreamTaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
-import static java.util.Collections.singletonList;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -25,11 +20,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-
-@SuppressWarnings({"unchecked"})
-@RunWith(PowerMockRunner.class)
-@PrepareForTest( { TestResult.class })
-@PowerMockIgnore({"javax.xml.*"}) // workaround inspired by https://github.com/powermock/powermock/issues/864#issuecomment-410182836
 public class FailedTestsContentTest {
     private FailedTestsContent failedTestContent;
 
@@ -257,7 +247,7 @@ public class FailedTestsContentTest {
         when(result.getErrorDetails()).thenReturn("expected:<ABORTED> but was:<COMPLETED> ");
         when(result.getErrorStackTrace()).thenReturn("at org.nexusformat.NexusFile.<clinit>(NexusFile.java:99)");
 
-        Mockito.<List<? extends TestResult>>when(testResults.getFailedTests()).thenReturn(singletonList(result));
+        Mockito.<List<? extends TestResult>>when(testResults.getFailedTests()).thenReturn(Collections.singletonList(result));
         when(build.getAction(AbstractTestResultAction.class)).thenReturn(testResults);
 
         failedTestContent.showMessage = true;
@@ -347,7 +337,7 @@ public class FailedTestsContentTest {
         when(result.getErrorDetails()).thenReturn("expected:<ABORTED> but was:<COMPLETED> ");
         when(result.getErrorStackTrace()).thenReturn(testStackTrace);
 
-        Mockito.<List<? extends TestResult>>when(testResults.getFailedTests()).thenReturn(singletonList(result));
+        Mockito.<List<? extends TestResult>>when(testResults.getFailedTests()).thenReturn(Collections.singletonList(result));
         when(build.getAction(AbstractTestResultAction.class)).thenReturn(testResults);
 
         failedTestContent.showMessage = true;

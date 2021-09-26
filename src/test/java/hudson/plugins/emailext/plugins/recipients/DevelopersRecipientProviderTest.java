@@ -9,59 +9,55 @@ import hudson.tasks.Mailer;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({
-        ExtendedEmailPublisherDescriptor.class,
-        FreeStyleBuild.class,
-        Jenkins.class,
-        Mailer.class,
-        Mailer.DescriptorImpl.class,
-        User.class,
-        WorkflowRun.class,
-        WorkflowJob.class,
-        FreeStyleProject.class
-})
-@PowerMockIgnore({"javax.xml.*"}) // workaround inspired by https://github.com/powermock/powermock/issues/864#issuecomment-410182836
 public class DevelopersRecipientProviderTest {
+
+    private MockedStatic<Jenkins> mockedJenkins;
+    private MockedStatic<Mailer> mockedMailer;
 
     @Before
     public void before() throws Exception {
-        final Jenkins jenkins = PowerMockito.mock(Jenkins.class);
-        PowerMockito.when(jenkins.isUseSecurity()).thenReturn(false);
-        final ExtendedEmailPublisherDescriptor extendedEmailPublisherDescriptor = PowerMockito.mock(ExtendedEmailPublisherDescriptor.class);
+        final Jenkins jenkins = Mockito.mock(Jenkins.class);
+        Mockito.when(jenkins.isUseSecurity()).thenReturn(false);
+        final ExtendedEmailPublisherDescriptor extendedEmailPublisherDescriptor = Mockito.mock(ExtendedEmailPublisherDescriptor.class);
         extendedEmailPublisherDescriptor.setDebugMode(true);
-        PowerMockito.when(extendedEmailPublisherDescriptor.getExcludedCommitters()).thenReturn("");
+        Mockito.when(extendedEmailPublisherDescriptor.getExcludedCommitters()).thenReturn("");
 
-        PowerMockito.when(jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class)).thenReturn(extendedEmailPublisherDescriptor);
-        PowerMockito.mockStatic(Jenkins.class);
-        PowerMockito.doReturn(jenkins).when(Jenkins.class, "get");
+        Mockito.when(jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class)).thenReturn(extendedEmailPublisherDescriptor);
+        mockedJenkins = Mockito.mockStatic(Jenkins.class);
+        mockedJenkins.when(Jenkins::get).thenReturn(jenkins);
 
-        final Mailer.DescriptorImpl descriptor = PowerMockito.mock(Mailer.DescriptorImpl.class);
-        PowerMockito.when(descriptor.getDefaultSuffix()).thenReturn("DOMAIN");
-        PowerMockito.mockStatic(Mailer.class);
-        PowerMockito.doReturn(descriptor).when(Mailer.class, "descriptor");
+        final Mailer.DescriptorImpl descriptor = Mockito.mock(Mailer.DescriptorImpl.class);
+        Mockito.when(descriptor.getDefaultSuffix()).thenReturn("DOMAIN");
+        mockedMailer = Mockito.mockStatic(Mailer.class);
+        mockedMailer.when(Mailer::descriptor).thenReturn(descriptor);
+    }
+
+    @After
+    public void after() {
+        mockedMailer.close();
+        mockedJenkins.close();
     }
 
     @Test
     public void testAddRecipients() throws Exception {
-        final FreeStyleProject p = PowerMockito.mock(FreeStyleProject.class);
-        final FreeStyleBuild build1 = PowerMockito.spy(new FreeStyleBuild(p));
-        PowerMockito.doReturn(Result.UNSTABLE).when(build1).getResult();
-        MockUtilities.addRequestor(build1, "A");
-        MockUtilities.addChangeSet(build1, "X", "V");
-        TestUtilities.checkRecipients(build1, new DevelopersRecipientProvider(), "X", "V");
+        try (MockedStatic<User> mockedUser = Mockito.mockStatic(User.class)) {
+            final FreeStyleProject p = Mockito.mock(FreeStyleProject.class);
+            final FreeStyleBuild build1 = Mockito.spy(new FreeStyleBuild(p));
+            Mockito.doReturn(Result.UNSTABLE).when(build1).getResult();
+            MockUtilities.addRequestor(mockedUser, build1, "A");
+            MockUtilities.addChangeSet(build1, "X", "V");
+            TestUtilities.checkRecipients(build1, new DevelopersRecipientProvider(), "X", "V");
+        }
 
-        final WorkflowJob j = PowerMockito.mock(WorkflowJob.class);
-        final WorkflowRun build2 = PowerMockito.spy(new WorkflowRun(j));
-        PowerMockito.doReturn(Result.UNSTABLE).when(build2).getResult();
+        final WorkflowJob j = Mockito.mock(WorkflowJob.class);
+        final WorkflowRun build2 = Mockito.spy(new WorkflowRun(j));
+        Mockito.doReturn(Result.UNSTABLE).when(build2).getResult();
         MockUtilities.addChangeSet(build2, "X", "V");
         TestUtilities.checkRecipients(build2, new DevelopersRecipientProvider(), "X", "V");
     }
