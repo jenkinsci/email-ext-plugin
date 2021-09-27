@@ -13,17 +13,16 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.scm.ChangeLogSet;
 import java.io.PrintStream;
-import jenkins.model.Jenkins;
-import jenkins.scm.RunWithSCM;
-import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.DataBoundConstructor;
-
-import javax.mail.internet.InternetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.mail.internet.InternetAddress;
+import jenkins.model.Jenkins;
+import jenkins.scm.RunWithSCM;
+import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * Sends emails to committers of upstream builds which triggered this build.

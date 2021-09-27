@@ -24,17 +24,13 @@
 
 package hudson.plugins.emailext.groovy.sandbox;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import groovy.lang.GroovyObject;
 import hudson.EnvVars;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.content.EmailExtScript;
-import org.jenkinsci.plugins.scriptsecurity.sandbox.Whitelist;
-import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.AbstractWhitelist;
-import org.jenkinsci.plugins.tokenmacro.TokenMacro;
-
-import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -42,6 +38,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.Whitelist;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.AbstractWhitelist;
+import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
 /**
  * {@link Whitelist} for the {@link org.jenkinsci.plugins.tokenmacro.TokenMacro} expansion in {@link hudson.plugins.emailext.plugins.content.EmailExtScript}.

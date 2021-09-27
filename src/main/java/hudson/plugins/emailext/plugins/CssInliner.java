@@ -1,5 +1,11 @@
 package hudson.plugins.emailext.plugins;
 
+import java.net.URL;
+import java.net.URLConnection;
+import java.text.MessageFormat;
+import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.htmlparser.jericho.Source;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -9,13 +15,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Entities;
 import org.jsoup.select.Elements;
-
-import java.net.URL;
-import java.net.URLConnection;
-import java.text.MessageFormat;
-import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>

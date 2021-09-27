@@ -1,9 +1,8 @@
 package hudson.plugins.emailext;
 
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
-
 import javax.mail.internet.InternetAddress;
+import jenkins.model.Jenkins;
 
 class RecipientListStringAnalyser {
 

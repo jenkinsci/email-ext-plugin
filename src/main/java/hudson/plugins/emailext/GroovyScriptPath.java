@@ -4,11 +4,10 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
-import org.kohsuke.stapler.DataBoundConstructor;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * Model a classpath entry for Groovy pre script execution.

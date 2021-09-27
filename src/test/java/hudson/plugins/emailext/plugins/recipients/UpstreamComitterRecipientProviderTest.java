@@ -13,7 +13,9 @@ import hudson.model.Result;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.tasks.BuildTrigger;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,10 +25,6 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.SequenceLock;
 import org.jvnet.hudson.test.TestBuilder;
 import org.jvnet.mock_javamail.Mailbox;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class UpstreamComitterRecipientProviderTest {
 

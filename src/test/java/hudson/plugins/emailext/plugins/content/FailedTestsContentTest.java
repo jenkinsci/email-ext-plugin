@@ -1,24 +1,23 @@
 package hudson.plugins.emailext.plugins.content;
 
-import hudson.model.AbstractBuild;
-import hudson.model.TaskListener;
-import hudson.tasks.test.AbstractTestResultAction;
-import hudson.tasks.test.TestResult;
-import hudson.util.StreamTaskListener;
-import org.apache.commons.lang.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import hudson.model.AbstractBuild;
+import hudson.model.TaskListener;
+import hudson.tasks.test.AbstractTestResultAction;
+import hudson.tasks.test.TestResult;
+import hudson.util.StreamTaskListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.apache.commons.lang.StringUtils;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 public class FailedTestsContentTest {
     private FailedTestsContent failedTestContent;

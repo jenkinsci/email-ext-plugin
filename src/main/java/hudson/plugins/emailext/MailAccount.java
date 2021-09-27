@@ -2,6 +2,7 @@ package hudson.plugins.emailext;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import hudson.Util;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.util.Secret;
@@ -9,7 +10,6 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
-import hudson.Util;
 
 public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     private String address;

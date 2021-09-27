@@ -1,5 +1,10 @@
 package hudson.plugins.emailext.plugins.content;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.TaskListener;
@@ -7,18 +12,11 @@ import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.util.DescribableList;
 import hudson.util.StreamTaskListener;
+import java.lang.reflect.Field;
+import java.util.GregorianCalendar;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.mockito.Mockito;
-
-import java.lang.reflect.Field;
-import java.util.GregorianCalendar;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class JellyScriptContentTest {
 
@@ -124,6 +122,6 @@ public class JellyScriptContentTest {
 
     private void mockChangeSet(final AbstractBuild build) {
         ScriptContentChangeLogSet changeLog = new ScriptContentChangeLogSet(build);
-        Mockito.when(build.getChangeSet()).thenReturn(changeLog);
+        when(build.getChangeSet()).thenReturn(changeLog);
     }
 }

@@ -1,9 +1,8 @@
 package hudson.plugins.emailext.groovy.sandbox;
 
-import hudson.model.TaskListener;
-
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.model.TaskListener;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 

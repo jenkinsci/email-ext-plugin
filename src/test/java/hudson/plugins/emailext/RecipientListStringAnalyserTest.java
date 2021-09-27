@@ -1,10 +1,9 @@
 package hudson.plugins.emailext;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import javax.mail.internet.InternetAddress;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 public class RecipientListStringAnalyserTest {
 

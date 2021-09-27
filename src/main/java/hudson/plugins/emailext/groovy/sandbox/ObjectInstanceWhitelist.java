@@ -1,10 +1,9 @@
 package hudson.plugins.emailext.groovy.sandbox;
 
-import org.jenkinsci.plugins.scriptsecurity.sandbox.Whitelist;
-import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.AbstractWhitelist;
-
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.lang.ref.WeakReference;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.Whitelist;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.AbstractWhitelist;
 
 /**
  * A {@link Whitelist} that permits methods on specific object instances.

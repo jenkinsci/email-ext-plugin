@@ -24,7 +24,6 @@
 package hudson.plugins.emailext.plugins.content;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-
 import java.io.IOException;
 import java.io.InputStream;
 

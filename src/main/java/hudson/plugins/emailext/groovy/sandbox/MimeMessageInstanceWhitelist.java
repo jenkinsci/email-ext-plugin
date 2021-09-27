@@ -1,8 +1,8 @@
 package hudson.plugins.emailext.groovy.sandbox;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-import javax.mail.internet.MimeMessage;
 import java.lang.reflect.Method;
+import javax.mail.internet.MimeMessage;
 
 /**
  * {@link org.jenkinsci.plugins.scriptsecurity.sandbox.Whitelist} of explicit {@link MimeMessage} instances.

@@ -1,29 +1,28 @@
 package hudson.plugins.emailext.recipients;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+
 import hudson.EnvVars;
 import hudson.model.User;
 import hudson.plugins.emailext.EmailRecipientUtils;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.tasks.Mailer;
 import hudson.util.FormValidation;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class EmailRecipientUtilsTest {
 

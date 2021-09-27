@@ -13,16 +13,13 @@ import hudson.model.TaskListener;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
-import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
-import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
-
+import org.apache.commons.lang.StringEscapeUtils;
+import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 /**
  * An EmailContent for failing tests. Only shows tests that have failed.
@@ -135,8 +132,8 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     }
 
     private int addTest(SummarizedTestResult result, int printSize, TestResult failedTest) {
-        String stackTrace = showStack ? (escapeHtml ? escapeHtml(failedTest.getErrorStackTrace()) : failedTest.getErrorStackTrace()) : null;
-        String errorDetails = showMessage ? (escapeHtml ? escapeHtml(failedTest.getErrorDetails()) : failedTest.getErrorDetails()) : null;
+        String stackTrace = showStack ? (escapeHtml ? StringEscapeUtils.escapeHtml(failedTest.getErrorStackTrace()) : failedTest.getErrorStackTrace()) : null;
+        String errorDetails = showMessage ? (escapeHtml ? StringEscapeUtils.escapeHtml(failedTest.getErrorDetails()) : failedTest.getErrorDetails()) : null;
         String name = String.format("%s.%s", (failedTest instanceof CaseResult) ? ((CaseResult) failedTest).getClassName() : failedTest.getFullName(),
                 failedTest.getDisplayName());
         FailedTest t = new FailedTest(name, failedTest.isPassed(), errorDetails, stackTrace);
