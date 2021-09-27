@@ -34,9 +34,9 @@ import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AbstractTestResultAction;
 import org.apache.commons.collections.iterators.TransformIterator;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,9 +52,9 @@ import java.util.List;
     }
 
     public static User getUser(final String author) {
-        final User user = PowerMockito.mock(User.class);
+        final User user = Mockito.mock(User.class);
         final Mailer.UserProperty mailProperty = new Mailer.UserProperty(author + AT_DOMAIN);
-        PowerMockito.when(user.getProperty(Mailer.UserProperty.class)).thenReturn(mailProperty);
+        Mockito.when(user.getProperty(Mailer.UserProperty.class)).thenReturn(mailProperty);
         return user;
     }
 
@@ -110,36 +110,35 @@ import java.util.List;
 
     public static void addChangeSet(final WorkflowRun build, final String... inAuthors) {
         ChangeLogSet<ChangeLogSet.Entry> changeSet = makeChangeSet(build, inAuthors);
-        PowerMockito.when(build.getChangeSets()).thenReturn(Collections.singletonList(changeSet));
+        Mockito.when(build.getChangeSets()).thenReturn(Collections.singletonList(changeSet));
     }
 
     public static void addChangeSet(final AbstractBuild<?, ?> build, final String... inAuthors) {
         ChangeLogSet<ChangeLogSet.Entry> changeSet = makeChangeSet(build, inAuthors);
-        PowerMockito.doReturn(changeSet).when(build).getChangeSet();
+        Mockito.doReturn(changeSet).when(build).getChangeSet();
     }
 
-    public static void addRequestor(final AbstractBuild<?, ?> build, final String requestor) throws Exception {
-        PowerMockito.spy(User.class);
-        PowerMockito.doAnswer((Answer<User>) invocation -> {
+    public static void addRequestor(final MockedStatic<User> mockedUser, final AbstractBuild<?, ?> build, final String requestor) throws Exception {
+        mockedUser.when(() -> User.get(Mockito.anyString(), Mockito.anyBoolean(), Mockito.any())).then((Answer<User>) invocation -> {
             Object[] args = invocation.getArguments();
             return getUser((String) args[0]);
-        }).when(User.class, "get", Mockito.anyString(), Mockito.anyBoolean(), Mockito.any());
-        final Cause.UserIdCause cause = PowerMockito.mock(Cause.UserIdCause.class);
-        PowerMockito.when(cause.getUserId()).thenReturn(requestor);
-        PowerMockito.doReturn(cause).when(build).getCause(Cause.UserIdCause.class);
+        });
+        final Cause.UserIdCause cause = Mockito.mock(Cause.UserIdCause.class);
+        Mockito.when(cause.getUserId()).thenReturn(requestor);
+        Mockito.doReturn(cause).when(build).getCause(Cause.UserIdCause.class);
     }
 
     public static void addTestResultAction(final AbstractBuild<?, ?> build, final AbstractBuild<?, ?>... failedSinces) {
         final List<CaseResult> failedTests = new LinkedList<>();
         for (final AbstractBuild failedSince : failedSinces) {
-            final CaseResult caseResult = PowerMockito.mock(CaseResult.class);
-            PowerMockito.when(caseResult.getFailedSinceRun()).thenReturn(failedSince);
+            final CaseResult caseResult = Mockito.mock(CaseResult.class);
+            Mockito.when(caseResult.getFailedSinceRun()).thenReturn(failedSince);
             failedTests.add(caseResult);
         }
-        final TestResultAction testResultAction = PowerMockito.mock(TestResultAction.class);
-        PowerMockito.when(testResultAction.getFailedTests()).thenReturn(failedTests);
-        PowerMockito.when(testResultAction.getFailCount()).thenReturn(failedTests.size());
-        PowerMockito.doReturn(testResultAction).when(build).getAction(AbstractTestResultAction.class);
+        final TestResultAction testResultAction = Mockito.mock(TestResultAction.class);
+        Mockito.when(testResultAction.getFailedTests()).thenReturn(failedTests);
+        Mockito.when(testResultAction.getFailCount()).thenReturn(failedTests.size());
+        Mockito.doReturn(testResultAction).when(build).getAction(AbstractTestResultAction.class);
     }
 
 }
