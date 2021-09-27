@@ -92,7 +92,13 @@ public class ScriptContent extends AbstractEvalContent {
         } catch (GroovyRuntimeException e) {
             result = "Error in script or template: " + e;
         } finally {
-            IOUtils.closeQuietly(inputStream);
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                // ignore
+            }
         }
         return result;
     }
