@@ -117,7 +117,7 @@ import org.mockito.stubbing.Answer;
         Mockito.doReturn(changeSet).when(build).getChangeSet();
     }
 
-    public static void addRequestor(final MockedStatic<User> mockedUser, final AbstractBuild<?, ?> build, final String requestor) throws Exception {
+    public static void addRequestor(final MockedStatic<User> mockedUser, final AbstractBuild<?, ?> build, final String requestor) {
         mockedUser.when(() -> User.get(Mockito.anyString(), Mockito.anyBoolean(), Mockito.any())).then((Answer<User>) invocation -> {
             Object[] args = invocation.getArguments();
             return getUser((String) args[0]);

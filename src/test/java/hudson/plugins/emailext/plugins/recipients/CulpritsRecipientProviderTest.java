@@ -18,7 +18,7 @@ public class CulpritsRecipientProviderTest {
     private MockedStatic<Mailer> mockedMailer;
 
     @Before
-    public void before() throws Exception {
+    public void before() {
         final Jenkins jenkins = Mockito.mock(Jenkins.class);
         Mockito.when(jenkins.isUseSecurity()).thenReturn(false);
         final ExtendedEmailPublisherDescriptor extendedEmailPublisherDescriptor = Mockito.mock(ExtendedEmailPublisherDescriptor.class);
