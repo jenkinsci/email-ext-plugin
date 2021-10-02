@@ -14,12 +14,11 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import java.io.PrintStream;
 import java.util.Collections;
+import java.util.Set;
+import javax.mail.internet.InternetAddress;
 import jenkins.model.Jenkins;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import javax.mail.internet.InternetAddress;
-import java.util.Set;
 
 /**
  * Created by acearl on 12/25/13.

@@ -32,18 +32,17 @@ import hudson.tasks.Mailer;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.junit.TestResultAction;
 import hudson.tasks.test.AbstractTestResultAction;
-import org.apache.commons.collections.iterators.TransformIterator;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.collections.iterators.TransformIterator;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 
 /* package private */ final class MockUtilities {
     private static final String AT_DOMAIN = "@DOMAIN";
@@ -118,7 +117,7 @@ import java.util.List;
         Mockito.doReturn(changeSet).when(build).getChangeSet();
     }
 
-    public static void addRequestor(final MockedStatic<User> mockedUser, final AbstractBuild<?, ?> build, final String requestor) throws Exception {
+    public static void addRequestor(final MockedStatic<User> mockedUser, final AbstractBuild<?, ?> build, final String requestor) {
         mockedUser.when(() -> User.get(Mockito.anyString(), Mockito.anyBoolean(), Mockito.any())).then((Answer<User>) invocation -> {
             Object[] args = invocation.getArguments();
             return getUser((String) args[0]);

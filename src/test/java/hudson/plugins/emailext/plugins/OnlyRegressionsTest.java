@@ -1,5 +1,8 @@
 package hudson.plugins.emailext.plugins;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -9,16 +12,12 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.content.FailedTestsContent;
 import hudson.tasks.junit.JUnitResultArchiver;
 import hudson.util.StreamTaskListener;
+import java.io.IOException;
+import java.net.URL;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
-
-import java.io.IOException;
-import java.net.URL;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class OnlyRegressionsTest {
 

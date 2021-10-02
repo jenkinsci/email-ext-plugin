@@ -23,6 +23,9 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import hudson.EnvVars;
 import hudson.Launcher;
 import hudson.model.Run;
@@ -30,15 +33,11 @@ import hudson.model.StreamBuildListener;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.util.StreamTaskListener;
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 
 /* package private */ final class TestUtilities {
     private static final String AT_DOMAIN = "@DOMAIN";

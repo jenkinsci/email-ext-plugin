@@ -14,10 +14,8 @@ import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.tasks.junit.CaseResult;
 import hudson.tasks.test.AbstractTestResultAction;
-import org.kohsuke.stapler.DataBoundConstructor;
-
 import java.util.List;
-
+import org.kohsuke.stapler.DataBoundConstructor;
 
 public class RegressionTrigger extends EmailTrigger {
     

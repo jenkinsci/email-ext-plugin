@@ -1,5 +1,9 @@
 package hudson.plugins.emailext.plugins.content;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.tasks.test.AbstractTestResultAction;
@@ -7,10 +11,6 @@ import hudson.util.StreamTaskListener;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Test class for TestCountsContentTest.

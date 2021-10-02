@@ -24,7 +24,6 @@
 package hudson.plugins.emailext;
 
 import hudson.Plugin;
-
 import java.util.Arrays;
 
 /**

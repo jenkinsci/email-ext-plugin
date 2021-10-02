@@ -24,6 +24,11 @@
 
 package hudson.plugins.emailext.plugins.content;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+
 import hudson.model.Item;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
@@ -31,11 +36,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertNull;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertThrows;
 
 /**
  * Runs some {@link ScriptContentTest} in a secured Jenkins.

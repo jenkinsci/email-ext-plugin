@@ -1,5 +1,14 @@
 package hudson.plugins.emailext.plugins.content;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import com.cloudbees.hudson.plugins.folder.Folder;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Functions;
@@ -18,19 +27,6 @@ import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.util.DescribableList;
 import hudson.util.StreamTaskListener;
-import jenkins.model.JenkinsLocationConfiguration;
-import org.apache.commons.io.FileUtils;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.TestBuilder;
-import org.jvnet.hudson.test.recipes.LocalData;
-import org.jvnet.mock_javamail.Mailbox;
-import org.mockito.Mockito;
-
-import com.cloudbees.hudson.plugins.folder.Folder;
-
-import javax.mail.Message;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,14 +36,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Scanner;
-
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import javax.mail.Message;
+import jenkins.model.JenkinsLocationConfiguration;
+import org.apache.commons.io.FileUtils;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.recipes.LocalData;
+import org.jvnet.mock_javamail.Mailbox;
 
 public class ScriptContentTest {
     private ScriptContent scriptContent;
@@ -331,7 +328,7 @@ public class ScriptContentTest {
 
     private void mockChangeSet(final AbstractBuild build) {
         ScriptContentChangeLogSet changeLog = new ScriptContentChangeLogSet(build);
-        Mockito.when(build.getChangeSet()).thenReturn(changeLog);
-        Mockito.when(build.getChangeSets()).thenReturn(Collections.singletonList(changeLog));
+        when(build.getChangeSet()).thenReturn(changeLog);
+        when(build.getChangeSets()).thenReturn(Collections.singletonList(changeLog));
     }
 }

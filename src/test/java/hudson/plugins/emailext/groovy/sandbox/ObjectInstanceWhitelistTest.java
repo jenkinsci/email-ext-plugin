@@ -1,15 +1,13 @@
 package hudson.plugins.emailext.groovy.sandbox;
 
-import org.junit.Test;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Method;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
-
-import java.lang.reflect.Method;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 /**
  * Tests {@link ObjectInstanceWhitelist}

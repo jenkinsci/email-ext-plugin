@@ -1,21 +1,20 @@
 package hudson.plugins.emailext.plugins.recipients;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.Mailer;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.collection.IsCollectionWithSize;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.collection.IsCollectionWithSize;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.junit.Test;
 
 public class RecipientProviderUtilitiesTest {
     public static class Debug implements RecipientProviderUtilities.IDebug {

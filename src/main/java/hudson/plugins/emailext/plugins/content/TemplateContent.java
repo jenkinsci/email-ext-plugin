@@ -5,17 +5,16 @@ import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.EmailToken;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.lib.configprovider.ConfigProvider;
-import org.jenkinsci.plugins.configfiles.custom.CustomConfig.CustomConfigProvider;
-import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.lib.configprovider.ConfigProvider;
+import org.jenkinsci.plugins.configfiles.custom.CustomConfig.CustomConfigProvider;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 @EmailToken
 public class TemplateContent extends AbstractEvalContent {

@@ -36,14 +36,13 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.tasks.test.AbstractTestResultAction;
 import hudson.tasks.test.TestResult;
-import jenkins.model.Jenkins;
-import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.DataBoundConstructor;
-
-import javax.mail.internet.InternetAddress;
 import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Set;
+import javax.mail.internet.InternetAddress;
+import jenkins.model.Jenkins;
+import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * A recipient provider that assigns ownership of a failing test to the set of developers (including any initiator)

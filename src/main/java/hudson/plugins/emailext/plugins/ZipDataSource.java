@@ -1,7 +1,6 @@
 package hudson.plugins.emailext.plugins;
 
 import hudson.plugins.emailext.SizedDataSource;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;

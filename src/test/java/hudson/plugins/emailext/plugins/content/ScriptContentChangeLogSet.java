@@ -1,17 +1,16 @@
 package hudson.plugins.emailext.plugins.content;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import hudson.model.AbstractBuild;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.EditType;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Created by acearl on 12/3/2014.

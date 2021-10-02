@@ -1,9 +1,9 @@
 package hudson.plugins.emailext.plugins;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for CssInliner

@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins.content;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.model.Item;
 import hudson.model.Run;
@@ -7,6 +8,12 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.JellyTemplateConfig.JellyTemplateConfigProvider;
 import hudson.plugins.emailext.plugins.EmailToken;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.jelly.JellyContext;
@@ -20,14 +27,6 @@ import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.scriptsecurity.scripts.languages.JellyLanguage;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.xml.sax.InputSource;
-
-import edu.umd.cs.findbugs.annotations.NonNull;
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 
 @EmailToken
 public class JellyScriptContent extends AbstractEvalContent {
@@ -56,7 +55,13 @@ public class JellyScriptContent extends AbstractEvalContent {
         } catch (FileNotFoundException e) {
             return generateMissingFile("Jelly", template);
         } finally {
-            IOUtils.closeQuietly(inputStream);
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                // ignore
+            }
         }
     }
 

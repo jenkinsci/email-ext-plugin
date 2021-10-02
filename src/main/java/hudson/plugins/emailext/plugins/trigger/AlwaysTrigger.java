@@ -9,9 +9,8 @@ import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
-import org.kohsuke.stapler.DataBoundConstructor;
-
 import java.util.List;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  *

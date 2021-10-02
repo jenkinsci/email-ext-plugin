@@ -1,10 +1,8 @@
 package hudson.plugins.emailext.plugins.trigger;
 
+import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import org.junit.Test;
-
-import static hudson.model.Result.FAILURE;
-import static hudson.model.Result.SUCCESS;
 
 /**
  * @author Kanstantsin Shautsou
@@ -19,28 +17,28 @@ public class XNthFailureTriggerTest extends TriggerTestBase {
 
     @Test
     public void testTrigger_success() {
-        assertNotTriggered(SUCCESS);
-        assertNotTriggered(SUCCESS, SUCCESS);
-        assertNotTriggered(SUCCESS, SUCCESS, SUCCESS);
-        assertNotTriggered(SUCCESS, SUCCESS, SUCCESS, SUCCESS);
+        assertNotTriggered(Result.SUCCESS);
+        assertNotTriggered(Result.SUCCESS, Result.SUCCESS);
+        assertNotTriggered(Result.SUCCESS, Result.SUCCESS, Result.SUCCESS);
+        assertNotTriggered(Result.SUCCESS, Result.SUCCESS, Result.SUCCESS, Result.SUCCESS);
     }
 
     @Test
     public void testTrigger_thirdFailureAfterSuccess() {
-        assertTriggered(FAILURE, SUCCESS, FAILURE, FAILURE, FAILURE);
+        assertTriggered(Result.FAILURE, Result.SUCCESS, Result.FAILURE, Result.FAILURE, Result.FAILURE);
     }
 
     @Test
     public void testTrigger_thirdBuildFails() {
-        assertTriggered(FAILURE, FAILURE, FAILURE);
-        assertTriggered(SUCCESS, FAILURE, FAILURE, FAILURE);
+        assertTriggered(Result.FAILURE, Result.FAILURE, Result.FAILURE);
+        assertTriggered(Result.SUCCESS, Result.FAILURE, Result.FAILURE, Result.FAILURE);
     }
 
     @Test
     public void testTrigger_failure() {
-        assertNotTriggered(FAILURE);
-        assertNotTriggered(FAILURE, FAILURE);
-        assertNotTriggered(SUCCESS, FAILURE, FAILURE);
-        assertNotTriggered(SUCCESS, FAILURE, FAILURE, SUCCESS);
+        assertNotTriggered(Result.FAILURE);
+        assertNotTriggered(Result.FAILURE, Result.FAILURE);
+        assertNotTriggered(Result.SUCCESS, Result.FAILURE, Result.FAILURE);
+        assertNotTriggered(Result.SUCCESS, Result.FAILURE, Result.FAILURE, Result.SUCCESS);
     }
 }

@@ -6,12 +6,6 @@ import hudson.model.User;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.tasks.Mailer;
 import hudson.util.FormValidation;
-import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -19,6 +13,11 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
 
 public class EmailRecipientUtils {
 

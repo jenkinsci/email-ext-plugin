@@ -23,6 +23,7 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.EnvVars;
 import hudson.model.Cause;
 import hudson.model.Item;
@@ -34,13 +35,6 @@ import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.MailSender;
-import jenkins.model.Jenkins;
-import jenkins.scm.RunWithSCM;
-import org.acegisecurity.Authentication;
-import org.acegisecurity.AuthenticationException;
-
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-import javax.mail.internet.InternetAddress;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -49,6 +43,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import javax.mail.internet.InternetAddress;
+import jenkins.model.Jenkins;
+import jenkins.scm.RunWithSCM;
+import org.acegisecurity.Authentication;
+import org.acegisecurity.AuthenticationException;
 
 public final class RecipientProviderUtilities {
     private static final Logger LOGGER = Logger.getLogger(RecipientProviderUtilities.class.getName());
