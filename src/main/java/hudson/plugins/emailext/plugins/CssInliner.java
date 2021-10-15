@@ -3,11 +3,11 @@ package hudson.plugins.emailext.plugins;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.MessageFormat;
+import java.util.Base64;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.htmlparser.jericho.Source;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.jsoup.Jsoup;
@@ -117,7 +117,7 @@ public class CssInliner {
 
                     urlConnection.getContent();
                     byte[] srcContent = IOUtils.toByteArray(url.openStream());
-                    String base64 = new Base64().encodeToString(srcContent);
+                    String base64 = Base64.getEncoder().encodeToString(srcContent);
 
                     img.attr(IMG_SRC_ATTR, MessageFormat.format("data:{0};base64,{1}", contentType, base64));
                 } catch (Exception e) {
