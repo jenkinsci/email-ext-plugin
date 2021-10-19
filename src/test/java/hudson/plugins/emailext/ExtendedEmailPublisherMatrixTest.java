@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import hudson.Functions;
 import hudson.matrix.Axis;
 import hudson.matrix.AxisList;
 import hudson.matrix.MatrixBuild;
@@ -27,7 +26,6 @@ import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.junit.After;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -50,12 +48,9 @@ public class ExtendedEmailPublisherMatrixTest {
     @BeforeClass
     public static void beforeClass() throws Exception {
         agents = new ArrayList<>();
-        // TODO Windows ACI agents do not have enough memory to run this test.
-        if (!Functions.isWindows()) {
-            agents.add(j.createOnlineSlave(new LabelAtom("success-agent1")));
-            agents.add(j.createOnlineSlave(new LabelAtom("success-agent2")));
-            agents.add(j.createOnlineSlave(new LabelAtom("success-agent3")));
-        }
+        agents.add(j.createOnlineSlave(new LabelAtom("success-agent1")));
+        agents.add(j.createOnlineSlave(new LabelAtom("success-agent2")));
+        agents.add(j.createOnlineSlave(new LabelAtom("success-agent3")));
     }
 
     @Before
@@ -76,9 +71,6 @@ public class ExtendedEmailPublisherMatrixTest {
 
     @Test
     public void testPreBuildMatrixBuildSendParentOnly() throws Exception {
-        Assume.assumeFalse(
-                "TODO Windows ACI agents do not have enough memory to run this test",
-                Functions.isWindows());
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_PARENT);
         List<RecipientProvider> recProviders = Collections.emptyList();
         PreBuildTrigger trigger = new PreBuildTrigger(recProviders, "$DEFAULT_RECIPIENTS",
@@ -95,9 +87,6 @@ public class ExtendedEmailPublisherMatrixTest {
 
     @Test
     public void testPreBuildMatrixBuildSendAgentsOnly() throws Exception{
-        Assume.assumeFalse(
-                "TODO Windows ACI agents do not have enough memory to run this test",
-                Functions.isWindows());
         addAgentToProject(0,1,2);
         List<RecipientProvider> recProviders = Collections.emptyList();
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_CONFIGURATIONS);
@@ -114,9 +103,6 @@ public class ExtendedEmailPublisherMatrixTest {
 
     @Test
     public void testPreBuildMatrixBuildSendAgentsAndParent() throws Exception {
-        Assume.assumeFalse(
-                "TODO Windows ACI agents do not have enough memory to run this test",
-                Functions.isWindows());
         addAgentToProject(0,1);
         List<RecipientProvider> recProviders = Collections.emptyList();
         publisher.setMatrixTriggerMode(MatrixTriggerMode.BOTH);
@@ -133,9 +119,6 @@ public class ExtendedEmailPublisherMatrixTest {
     
     @Test
     public void testAttachBuildLogForAllAxes() throws Exception { 
-        Assume.assumeFalse(
-                "TODO Windows ACI agents do not have enough memory to run this test",
-                Functions.isWindows());
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_PARENT);
         publisher.attachBuildLog = true;
         addAgentToProject(0,1,2);
