@@ -800,13 +800,17 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     private InternetAddress getFromAddress() throws AddressException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
-        InternetAddress fromAddress;
-        if (StringUtils.isBlank(from)) {
-            fromAddress = new InternetAddress(descriptor.getAdminAddress());
-        } else {
-            fromAddress = new InternetAddress(from);
+        final String defaultSuffix = descriptor.getDefaultSuffix();
+        String actualFrom = from;
+
+        if (StringUtils.isBlank(actualFrom)) {
+            actualFrom = descriptor.getAdminAddress();
         }
-        return fromAddress;
+
+        if(!actualFrom.contains("@") && defaultSuffix != null && defaultSuffix.contains("@")) {
+            actualFrom += defaultSuffix;
+        }
+        return new InternetAddress(actualFrom);
     }
 
     @Restricted(NoExternalUse.class)
