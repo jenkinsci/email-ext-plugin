@@ -12,6 +12,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.Domain;
+import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.DomNode;
@@ -24,8 +29,12 @@ import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
 import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+import hudson.FilePath;
 import hudson.Functions;
+import hudson.Launcher;
 import hudson.model.Descriptor;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
@@ -54,6 +63,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import javax.mail.Authenticator;
 import jenkins.model.Jenkins;
@@ -64,6 +74,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.recipes.LocalData;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 public class ExtendedEmailPublisherDescriptorTest {
@@ -369,73 +380,45 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
-    @Issue("JENKINS-63311")
-    public void authenticatorIsCreatedWhenUsernameAndPasswordAreFilledOut() {
+    public void noAuthenticatorIsCreatedWhenCredentialsIsBlank() {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        String from = "test@example.com";
-        MailAccount ma = new MailAccount();
-        ma.setAddress(from);
-        ma.setSmtpHost("smtp.example.com");
-        ma.setSmtpPort("25");
-        ma.setSmtpUsername("mail_user");
-        ma.setSmtpPassword("smtpPassword");
-        assertTrue(ma.isValid());
-        descriptor.setAddAccounts(Collections.singletonList(ma));
-        Function<MailAccount, Authenticator> authenticatorProvider = Mockito.mock(Function.class);
-        descriptor.setAuthenticatorProvider(authenticatorProvider);
-        descriptor.createSession(ma);
-        ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
-        Mockito.verify(authenticatorProvider, Mockito.times(1)).apply(mailAccountCaptor.capture());
-        assertNotNull(mailAccountCaptor.getValue());
-    }
 
-    @Test
-    @Issue("JENKINS-63311")
-    public void authenticatorIsCreatedWhenUsernameIsFilledOutButPasswordIsNull() {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         String from = "test@example.com";
         MailAccount ma = new MailAccount();
         ma.setAddress(from);
         ma.setSmtpHost("smtp.example.com");
         ma.setSmtpPort("25");
-        ma.setSmtpUsername("mail_user");
-        ma.setSmtpPassword((String) null);
-        descriptor.setAddAccounts(Collections.singletonList(ma));
-        Function<MailAccount, Authenticator> authenticatorProvider = Mockito.mock(Function.class);
-        descriptor.setAuthenticatorProvider(authenticatorProvider);
-        descriptor.createSession(ma);
-        ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
-        Mockito.verify(authenticatorProvider, Mockito.times(1)).apply(mailAccountCaptor.capture());
-        assertNotNull(mailAccountCaptor.getValue());
-    }
+        ma.setCredentialsId(null);
 
-    @Test
-    @Issue("JENKINS-63311")
-    public void noAuthenticatorIsCreatedWhenUsernameIsBlank() {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        String from = "test@example.com";
-        MailAccount ma = new MailAccount();
-        ma.setAddress(from);
-        ma.setSmtpHost("smtp.example.com");
-        ma.setSmtpPort("25");
-        ma.setSmtpUsername(" ");
-        ma.setSmtpPassword("smtpPassword");
+        ExtendedEmailPublisher publisher = Mockito.mock(ExtendedEmailPublisher.class);
+        Run<?,?> run = Mockito.mock(Run.class);
+        FilePath workspace = Mockito.mock(FilePath.class);
+        Launcher launcher = Mockito.mock(Launcher.class);
+        TaskListener listener = Mockito.mock(TaskListener.class);
+
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, run, workspace, launcher, listener);
+
         descriptor.setAddAccounts(Collections.singletonList(ma));
-        Function<MailAccount, Authenticator> authenticatorProvider = Mockito.mock(Function.class);
+        BiFunction<MailAccount, Run<?,?>, Authenticator> authenticatorProvider = Mockito.mock(BiFunction.class);
         descriptor.setAuthenticatorProvider(authenticatorProvider);
-        descriptor.createSession(ma);
+        descriptor.createSession(ma, context);
         ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
-        Mockito.verify(authenticatorProvider, Mockito.never()).apply(mailAccountCaptor.capture());
+        ArgumentCaptor<Run<?,?>> runCaptor = ArgumentCaptor.forClass(Run.class);
+        Mockito.verify(authenticatorProvider, Mockito.never()).apply(mailAccountCaptor.capture(), runCaptor.capture());
     }
 
     @Test
     public void testFixEmptyAndTrimNormal() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        // add a credential to the GLOBAL scope
+        UsernamePasswordCredentials c = new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL, "email-ext", "Username/password for SMTP", "smtpUsername", "password");
+        CredentialsProvider.lookupStores(j.jenkins).iterator().next().addCredentials(Domain.global(), c);
+
         MailAccount ma = new MailAccount();
         ma.setAddress("example@example.com");
         ma.setSmtpHost("smtp.example.com");
         ma.setSmtpPort("25");
-        ma.setSmtpUsername("smtpUsername");
+        ma.setCredentialsId("email-ext");
 
         descriptor.setMailAccount(ma);
         descriptor.setDefaultSuffix("@example.com");
@@ -446,7 +429,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("example@example.com",descriptor.getMailAccount().getAddress());
         assertEquals("smtp.example.com",descriptor.getMailAccount().getSmtpHost());
         assertEquals("25",descriptor.getMailAccount().getSmtpPort());
-        assertEquals("smtpUsername",descriptor.getMailAccount().getSmtpUsername());
+        assertEquals("email-ext",descriptor.getMailAccount().getCredentialsId());
         assertEquals("@example.com",descriptor.getDefaultSuffix());
         assertEquals("UTF-8",descriptor.getCharset());
         assertEquals("emergency@example.com",descriptor.getEmergencyReroute());
@@ -455,11 +438,15 @@ public class ExtendedEmailPublisherDescriptorTest {
     @Test
     public void testFixEmptyAndTrimExtraSpaces() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        // add a credential to the GLOBAL scope
+        UsernamePasswordCredentials c = new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL, "email-ext", "Username/password for SMTP", "smtpUsername", "password");
+        CredentialsProvider.lookupStores(j.jenkins).iterator().next().addCredentials(Domain.global(), c);
+
         MailAccount ma = new MailAccount();
         ma.setAddress("       example@example.com      ");
         ma.setSmtpHost("      smtp.example.com      ");
         ma.setSmtpPort("      25      ");
-        ma.setSmtpUsername("      smtpUsername      ");
+        ma.setCredentialsId("     email-ext     ");
 
         descriptor.setMailAccount(ma);
         descriptor.setDefaultSuffix("      @example.com      ");
@@ -470,7 +457,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("example@example.com",descriptor.getMailAccount().getAddress());
         assertEquals("smtp.example.com",descriptor.getMailAccount().getSmtpHost());
         assertEquals("25",descriptor.getMailAccount().getSmtpPort());
-        assertEquals("smtpUsername",descriptor.getMailAccount().getSmtpUsername());
+        assertEquals("email-ext",descriptor.getMailAccount().getCredentialsId());
         assertEquals("@example.com",descriptor.getDefaultSuffix());
         assertEquals("UTF-8",descriptor.getCharset());
         assertEquals("emergency@example.com",descriptor.getEmergencyReroute());
@@ -483,7 +470,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         ma.setAddress("");
         ma.setSmtpHost("");
         ma.setSmtpPort("");
-        ma.setSmtpUsername("");
+        ma.setCredentialsId("");
 
         descriptor.setMailAccount(ma);
         descriptor.setDefaultSuffix("");
@@ -494,7 +481,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertNull(descriptor.getMailAccount().getAddress());
         assertNull(descriptor.getMailAccount().getSmtpHost());
         assertEquals("25",descriptor.getMailAccount().getSmtpPort());
-        assertNull(descriptor.getMailAccount().getSmtpUsername());
+        assertNull(descriptor.getMailAccount().getCredentialsId());
         assertNull(descriptor.getDefaultSuffix());
         assertEquals("UTF-8",descriptor.getCharset());
         assertEquals("",descriptor.getEmergencyReroute());
@@ -507,7 +494,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         ma.setAddress(null);
         ma.setSmtpHost(null);
         ma.setSmtpPort(null);
-        ma.setSmtpUsername(null);
+        ma.setCredentialsId(null);
 
         descriptor.setMailAccount(ma);
         descriptor.setDefaultSuffix(null);
@@ -518,7 +505,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertNull(descriptor.getMailAccount().getAddress());
         assertNull(descriptor.getMailAccount().getSmtpHost());
         assertEquals("25",descriptor.getMailAccount().getSmtpPort());
-        assertNull(descriptor.getMailAccount().getSmtpUsername());
+        assertNull(descriptor.getMailAccount().getCredentialsId());
         assertNull(descriptor.getDefaultSuffix());
         assertEquals("UTF-8",descriptor.getCharset());
         assertEquals("",descriptor.getEmergencyReroute());
@@ -645,8 +632,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("admin@example.com", descriptor.getAdminAddress());
         assertEquals("smtp.example.com", descriptor.getMailAccount().getSmtpHost());
         assertEquals("@example.com", descriptor.getDefaultSuffix());
-        assertEquals("admin", descriptor.getMailAccount().getSmtpUsername());
-        assertEquals(Secret.fromString("honeycomb"), descriptor.getMailAccount().getSmtpPassword());
+        assertEquals("email-ext-credentials-honeycomb", descriptor.getMailAccount().getCredentialsId());
         assertEquals("mail.smtp.ssl.trust=example.com", descriptor.getMailAccount().getAdvProperties());
         assertTrue(descriptor.getMailAccount().isUseSsl());
         assertTrue(descriptor.getMailAccount().isDefaultAccount());
@@ -657,8 +643,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("admin@example2.com", additionalAccount.getAddress());
         assertEquals("smtp.example2.com", additionalAccount.getSmtpHost());
         assertEquals("2626", additionalAccount.getSmtpPort());
-        assertEquals("admin2", additionalAccount.getSmtpUsername());
-        assertEquals(Secret.fromString("honeycomb2"), additionalAccount.getSmtpPassword());
+        assertEquals("email-ext-credentials-honeycomb2", additionalAccount.getCredentialsId());
         assertTrue(additionalAccount.isUseSsl());
         assertFalse(additionalAccount.isDefaultAccount());
         assertEquals("mail.smtp.ssl.trust=example2.com", additionalAccount.getAdvProperties());
@@ -862,8 +847,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertNull(descriptor.getMailAccount().getAddress());
         assertEquals("smtp.example.com", descriptor.getMailAccount().getSmtpHost());
         assertEquals("@example.com", descriptor.getDefaultSuffix());
-        assertEquals("admin", descriptor.getMailAccount().getSmtpUsername());
-        assertEquals(Secret.fromString("honeycomb"), descriptor.getMailAccount().getSmtpPassword());
+        assertEquals("email-ext-credentials-honeycomb", descriptor.getMailAccount().getCredentialsId());
         assertEquals("mail.smtp.ssl.trust=example.com", descriptor.getMailAccount().getAdvProperties());
         assertTrue(descriptor.getMailAccount().isUseSsl());
         assertTrue(descriptor.getMailAccount().isDefaultAccount());
@@ -874,8 +858,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("admin@example2.com", additionalAccount.getAddress());
         assertEquals("smtp.example2.com", additionalAccount.getSmtpHost());
         assertEquals("2626", additionalAccount.getSmtpPort());
-        assertEquals("admin2", additionalAccount.getSmtpUsername());
-        assertEquals(Secret.fromString("honeycomb2"), additionalAccount.getSmtpPassword());
+        assertEquals("email-ext-credentials-honeycomb2", additionalAccount.getCredentialsId());
         assertTrue(additionalAccount.isUseSsl());
         assertFalse(additionalAccount.isDefaultAccount());
         assertEquals("mail.smtp.ssl.trust=example2.com", additionalAccount.getAdvProperties());

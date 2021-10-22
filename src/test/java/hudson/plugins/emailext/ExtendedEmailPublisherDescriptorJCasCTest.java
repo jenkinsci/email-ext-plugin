@@ -3,8 +3,12 @@ package hudson.plugins.emailext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.cloudbees.plugins.credentials.Credentials;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import hudson.ExtensionList;
 import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
 import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
@@ -39,8 +43,7 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
         assertEquals("foo.bar", account.getAddress());
         assertEquals("smtp-host", account.getSmtpHost());
         assertEquals("1234", account.getSmtpPort());
-        assertEquals("smtp-username", account.getSmtpUsername());
-        assertEquals("smtp-password", account.getSmtpPassword().getPlainText());
+        assertEquals("credentials-id", account.getCredentialsId());
         assertTrue(account.isUseSsl());
         assertTrue(account.isUseTls());
         assertEquals("avd-properties", account.getAdvProperties());
@@ -56,8 +59,7 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
         assertTrue(account.isDefaultAccount());
         assertEquals("smtp-host-xyz", account.getSmtpHost());
         assertEquals("9876", account.getSmtpPort());
-        assertEquals("smtp-username-xyz", account.getSmtpUsername());
-        assertEquals("smtp-password-xyz", account.getSmtpPassword().getPlainText());
+        assertEquals("smtp-credentials-xyz", account.getCredentialsId());
         assertEquals("adv-properties-xyz", account.getAdvProperties());
         assertTrue(account.isUseSsl());
         assertTrue(account.isUseTls());
@@ -98,5 +100,71 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
               descriptor.getDefaultTriggerIds(),
               Matchers.contains(expectedTriggers.stream().map(Matchers::equalTo).collect(Collectors.toList()))
         );
+    }
+
+    @Test
+    @ConfiguredWithCode("configuration-as-code-upgrade.yml")
+    public void shouldValidatedJCasCConfigurationWithUpgrade() {
+        final ExtendedEmailPublisherDescriptor descriptor =
+                ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
+        assertNotNull(descriptor);
+
+        assertEquals("@domain.extension", descriptor.getDefaultSuffix());
+
+        assertEquals(1, descriptor.getAddAccounts().size());
+        MailAccount account = descriptor.getAddAccounts().get(0);
+        assertFalse(account.isDefaultAccount());
+        assertEquals("foo.bar", account.getAddress());
+        assertEquals("smtp-host", account.getSmtpHost());
+        assertEquals("1234", account.getSmtpPort());
+        assertNotNull(account.getCredentialsId());
+        assertNull(account.getSmtpUsername());
+        assertNull(account.getSmtpPassword());
+        assertTrue(account.isUseSsl());
+        assertTrue(account.isUseTls());
+        assertEquals("avd-properties", account.getAdvProperties());
+
+        assertEquals("UTF-8", descriptor.getCharset());
+        assertEquals("text/html", descriptor.getDefaultContentType());
+        assertEquals("DEFAULT EMAIL SUBJECT", descriptor.getDefaultSubject());
+        assertEquals("DEFAULT BODY", descriptor.getDefaultBody());
+        assertEquals("emergency-reroute", descriptor.getEmergencyReroute());
+        assertEquals(42, descriptor.getMaxAttachmentSizeMb());
+
+        account = descriptor.getMailAccount();
+        assertTrue(account.isDefaultAccount());
+        assertEquals("smtp-host-xyz", account.getSmtpHost());
+        assertEquals("9876", account.getSmtpPort());
+        assertNotNull(account.getCredentialsId());
+        assertNull(account.getSmtpUsername());
+        assertNull(account.getSmtpPassword());
+        assertEquals("adv-properties-xyz", account.getAdvProperties());
+        assertTrue(account.isUseSsl());
+        assertTrue(account.isUseTls());
+
+        // check that credentials were created for the two accounts
+        List<Credentials> creds = CredentialsProvider.lookupCredentials(com.cloudbees.plugins.credentials.Credentials.class);
+        assertEquals(2, creds.size());
+        for (Credentials c : creds) {
+            assertEquals(c.getClass(), StandardUsernamePasswordCredentials.class);
+        }
+
+        assertEquals("first-account@domain.extension", descriptor.getDefaultRecipients());
+        assertEquals("@domain.extension", descriptor.getAllowedDomains());
+        assertEquals("not-this-committer", descriptor.getExcludedCommitters());
+        assertEquals("list-id", descriptor.getListId());
+        assertTrue(descriptor.getPrecedenceBulk());
+        assertEquals("no-reply@domain.extension", descriptor.getDefaultReplyTo());
+        assertTrue(descriptor.isAdminRequiredForTemplateTesting());
+        assertTrue(descriptor.isWatchingEnabled());
+        assertTrue(descriptor.isAllowUnregisteredEnabled());
+        assertEquals("default-presend-script", descriptor.getDefaultPresendScript());
+        assertEquals("defaultpostsend-script", descriptor.getDefaultPostsendScript());
+
+        assertEquals(0, descriptor.getDefaultClasspath().size());
+        assertEquals(1, descriptor.getDefaultTriggerIds().size());
+        assertEquals("hudson.plugins.emailext.plugins.trigger.FailureTrigger", descriptor.getDefaultTriggerIds().get(0));
+
+        assertTrue(descriptor.isDebugMode());
     }
 }

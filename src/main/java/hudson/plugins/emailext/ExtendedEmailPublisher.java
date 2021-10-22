@@ -483,25 +483,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                         + mailAccount.getAddress()
                                         + " has invalid SMTP server");
                     }
-                } else if (!mailAccount.isSmtpAuthValid()) {
-                    context.getListener()
-                            .getLogger()
-                            .println("Mail account has invalid SMTP authentication settings");
-                    if (mailAccount.isDefaultAccount()) {
-                        debug(
-                                context.getListener().getLogger(),
-                                "Default account has invalid SMTP authentication settings");
-                    } else {
-                        debug(
-                                context.getListener().getLogger(),
-                                "Additional account "
-                                        + mailAccount.getAddress()
-                                        + " has invalid SMTP authentication settings");
-                    }
                 }
                 return false;
             }
-            Session session = getDescriptor().createSession(mailAccount);
+            Session session = getDescriptor().createSession(mailAccount, context);
             if (session == null) {
                 context.getListener().getLogger().println("Could not create session");
                 return false;
@@ -839,12 +824,6 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                             "Ignoring additional account "
                                     + addAccount.getAddress()
                                     + " with invalid SMTP server");
-                } else if (!addAccount.isSmtpAuthValid()) {
-                    debug(
-                            context.getListener().getLogger(),
-                            "Ignoring additional account "
-                                    + addAccount.getAddress()
-                                    + " with invalid SMTP authentication");
                 }
                 continue;
             }

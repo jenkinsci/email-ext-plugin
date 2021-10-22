@@ -20,12 +20,10 @@ f.entry(field: "smtpPort", title: _("SMTP Port")) {
 }
 
 f.advanced {
-    f.entry(field: "smtpUsername", title: _("SMTP Username")) {
-        f.textbox()
+    f.entry(field: "credentialsId", title: _("Credentials")) {
+        c.select()
     }
-    f.entry(field: "smtpPassword", title: _("SMTP Password")) {
-        f.password()
-    }
+
     f.entry(field: "useSsl", title: _("Use SSL")) {
         f.checkbox()
     }

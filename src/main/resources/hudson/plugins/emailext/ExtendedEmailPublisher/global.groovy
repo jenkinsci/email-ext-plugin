@@ -26,7 +26,7 @@ f.section(title: _("Extended E-mail Notification")) {
           f.repeatableDeleteButton()
         }
       }
-      }
+    }
   }
 
   f.entry(field: "defaultContentType", help: "/plugin/email-ext/help/globalConfig/contentType.html", title: _("Default Content Type")) {

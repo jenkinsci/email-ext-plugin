@@ -1,5 +1,10 @@
 package hudson.plugins.emailext;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardCredentials;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.Util;
@@ -7,8 +12,11 @@ import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
+import hudson.model.Run;
+import hudson.model.queue.Tasks;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
+import hudson.security.ACL;
 import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
@@ -23,6 +31,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -173,10 +182,19 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private transient Secret smtpAuthPassword;
     private transient boolean useSsl = false;
 
-    private transient Function<MailAccount, Authenticator> authenticatorProvider = acc -> new Authenticator() {
+    private transient BiFunction<MailAccount, Run<?,?>, Authenticator> authenticatorProvider = (acc, run) -> new Authenticator() {
         @Override
         protected PasswordAuthentication getPasswordAuthentication() {
-            return new PasswordAuthentication(acc.getSmtpUsername(), Secret.toString(acc.getSmtpPassword()));
+            StandardUsernamePasswordCredentials c = CredentialsProvider.findCredentialById(acc.getCredentialsId(),
+                            StandardUsernamePasswordCredentials.class,
+                            run,
+                            (DomainRequirement) null);
+
+            if(c == null) {
+                return null;
+            }
+
+            return new PasswordAuthentication(c.getUsername(), Secret.toString(c.getPassword()));
         }
     };
 
@@ -281,7 +299,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     @Restricted(NoExternalUse.class)
-    Session createSession(MailAccount acc) {
+    Session createSession(MailAccount acc, ExtendedEmailPublisherContext context) {
         final String SMTP_PORT_PROPERTY = "mail.smtp.port";
         final String SMTP_SOCKETFACTORY_PORT_PROPERTY = "mail.smtp.socketFactory.port";
 
@@ -333,7 +351,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             props.put("mail.smtp.starttls.enable", "true");
             props.put("mail.smtp.starttls.required", "true");
         }
-        if (!StringUtils.isBlank(acc.getSmtpUsername())) {
+        if (!StringUtils.isBlank(acc.getCredentialsId())) {
             props.put("mail.smtp.auth", "true");
         }
 
@@ -350,14 +368,14 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             LOGGER.log(Level.WARNING, "Parameters parse fail.", e);
         }
 
-        return Session.getInstance(props, getAuthenticator(acc));
+        return Session.getInstance(props, getAuthenticator(acc, context));
     }
 
-    private Authenticator getAuthenticator(final MailAccount acc) {
-        if (acc == null || StringUtils.isBlank(acc.getSmtpUsername())) {
+    private Authenticator getAuthenticator(final MailAccount acc, final ExtendedEmailPublisherContext context) {
+        if (acc == null || StringUtils.isBlank(acc.getCredentialsId())) {
             return null;
         }
-        return authenticatorProvider.apply(acc);
+        return authenticatorProvider.apply(acc, context.getRun());
     }
 
     public String getHudsonUrl() {
@@ -819,11 +837,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return Jenkins.MANAGE;
     }
 
-    Function<MailAccount, Authenticator> getAuthenticatorProvider() {
+    BiFunction<MailAccount, Run<?, ?>, Authenticator> getAuthenticatorProvider() {
         return authenticatorProvider;
     }
 
-    void setAuthenticatorProvider(Function<MailAccount, Authenticator> authenticatorProvider) {
+    void setAuthenticatorProvider(BiFunction<MailAccount, Run<?,?>, Authenticator> authenticatorProvider) {
         this.authenticatorProvider = authenticatorProvider;
     }
 }
