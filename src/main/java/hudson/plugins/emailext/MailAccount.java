@@ -29,6 +29,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.util.Collections;
 import java.util.List;
 
 public class MailAccount extends AbstractDescribableImpl<MailAccount>{
@@ -125,7 +126,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
                             item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
                             item,
                             StandardUsernamePasswordCredentials.class,
-                            null,
+                            Collections.emptyList(),
                             CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class))
                     .includeCurrentValue(credentialsId);
         }
