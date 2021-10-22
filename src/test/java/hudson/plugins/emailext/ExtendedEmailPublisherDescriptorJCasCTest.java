@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import hudson.ExtensionList;
 import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
 import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
@@ -146,7 +146,7 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
         List<Credentials> creds = CredentialsProvider.lookupCredentials(com.cloudbees.plugins.credentials.Credentials.class);
         assertEquals(2, creds.size());
         for (Credentials c : creds) {
-            assertEquals(c.getClass(), StandardUsernamePasswordCredentials.class);
+            assertEquals(UsernamePasswordCredentialsImpl.class, c.getClass());
         }
 
         assertEquals("first-account@domain.extension", descriptor.getDefaultRecipients());
