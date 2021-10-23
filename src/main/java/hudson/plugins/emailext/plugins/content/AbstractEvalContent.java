@@ -23,7 +23,6 @@
  */
 package hudson.plugins.emailext.plugins.content;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.Plugin;
 import hudson.model.AbstractBuild;
@@ -32,6 +31,7 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.remoting.VirtualChannel;
 import hudson.security.ACL;
+import hudson.security.ACLContext;
 import hudson.util.FormValidation;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -187,17 +187,14 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         return ExtendedEmailPublisher.descriptor().getCharset();
     }
 
-    @Restricted(NoExternalUse.class) @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "The callable is not going to be serialized")
+    @Restricted(NoExternalUse.class)
     public static boolean isApprovedScript(final String script, final Language language) {
         final ScriptApproval approval = ScriptApproval.get();
         try {
             //checking doesn't check if we are system or not since it assumed being called from doCheckField
-            return ACL.impersonate(Jenkins.ANONYMOUS, new NotReallyRoleSensitiveCallable<Boolean, Exception>() {
-                @Override
-                public Boolean call() {
-                    return approval.checking(script, language).kind == FormValidation.Kind.OK;
-                }
-            });
+            try (ACLContext context = ACL.as2(Jenkins.ANONYMOUS2)) {
+                return approval.checking(script, language).kind == FormValidation.Kind.OK;
+            }
         } catch (Exception e) {
             Logger.getLogger(AbstractEvalContent.class.getName()).log(Level.WARNING, "Could not determine approval state of script.", e);
             return false;
