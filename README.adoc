@@ -126,28 +126,27 @@ To see what conditions must be met for this plugin to send an email, click on th
 
 The following triggers are available as part of the Extended Email Publisher plugin, other plugins can provide triggers as well through the extension point defined in the Extended Email Publisher:
 
-* *Aborted* -  An email will be sent if the build status is "Aborted". A build is aborted via the UI or API, but normally requires
-some sort of user intervention to occur. An aborted build is stopped during its execution.
-* *Always* - Always triggers an email after the build, regardless of the status of the build.
-* *Before Build* -  An email will be sent when the build begins, but after SCM polling has completed.
-* *Failure -> Unstable (Test Failures)* - An email will be sent any time the build goes from failing (compilation or build step failures), to unstable (unit test failures). This basically means that all the builds steps were successful, but there are still tests failing.
-* *Failure - Any* - An email will be sent any time the build fails.  If the "Failure - Still" trigger is configured, and the previous build status was "Failure", then the "Failure - Still" trigger will send an email instead.
-* *Failure - 1st* - An email will be sent when the build status changes from "Success" to "Failure".
-* *Failure - 2nd* - An email will be sent when the build fails twice in a row after a successful build.
-* *Failure - Still* - An email will be sent if the build status is "Failure" for two or more builds in a row.
-* *Failure - X* - An email will be sent when the build fails X times in a row after a successful build
-* *Fixed* - An email will be sent when the build status changes from "Failure" or "Unstable" to "Success".
-* *Not Built* - An email will be sent if the build status is "Not Built". This status code is used in a multi-stage build (like maven2) where a problem in earlier stage prevented later stages from building.
-* *Script - After Build* - Allows the user to define a script that is executed to determine if an email should be sent *AFTER* the build occurs. The last line of the script should resolve to true to send an email, or false to not send an email. See <<script_trigger_options>> below for parameters available to the script.
-* *Script - Before Build* - Allows the user to define a script that is executed to determine if an email should be sent *BEFORE* the build occurs. The last line of the script should resolve to true to send an email, or false to not send an email. See <<script_trigger_options>> below for parameters available to the script.
-* *Status Changed* - An email will be sent if the build status changes.
-* *Success* -  An email will be sent if the build status is "Successful". If the "Fixed" trigger is configured, and the previous build status was "Failure" or "Unstable", then the "Fixed" trigger will send an email instead.
-* *Test Improvement* - An email will be sent any time there is an improvement. A build is considered to have improved whenever it has fewer test failures than the previous build. If the current failure count went to 0 (no more test failures) this trigger will NOT send an email.
-* *Test Regression* - An email will be sent any time there is a regression. A build is considered to regress whenever it has more failures than the previous build, or if there are new tests that failed.
-* *Unstable (Test Failures)* -  An email will be sent any time the build is unstable. A build is unstable if there are test failures, but all the build steps completed successfully. If the "Unstable - Still" trigger is configured, and the previous build status was "Unstable", then the "Unstable - Still" trigger will send an email instead.
-* *Unstable (Test Failures) - 1st* - An email will be sent when the build status changes from anything to "Unstable".
-* *Unstable (Test Failures) - Still* - An email will be sent if the build status is "Unstable" for two or more builds in a row. A build is unstable if there are test failures, but all the build steps completed successfully.
-* *Unstable (Test Failures)/Failure -> Success* - An email will be sent when the build status changes from "Failure" or "Unstable" to "Success". Intermediate "Aborted" builds are ignored.
+Aborted:: An email will be sent if the build status is "Aborted". A build is aborted via the UI or API, but normally requires some sort of user intervention to occur. An aborted build is stopped during its execution.
+Always:: Always triggers an email after the build, regardless of the status of the build.
+Before Build:: An email will be sent when the build begins, but after SCM polling has completed.
+Failure -> Unstable (Test Failures):: An email will be sent any time the build goes from failing (compilation or build step failures), to unstable (unit test failures). This basically means that all the builds steps were successful, but there are still tests failing.
+Failure - Any:: An email will be sent any time the build fails.  If the "Failure - Still" trigger is configured, and the previous build status was "Failure", then the "Failure - Still" trigger will send an email instead.
+Failure - 1st:: An email will be sent when the build status changes from "Success" to "Failure".
+Failure - 2nd:: An email will be sent when the build fails twice in a row after a successful build.
+Failure - Still:: An email will be sent if the build status is "Failure" for two or more builds in a row.
+Failure - X:: An email will be sent when the build fails X times in a row after a successful build
+Fixed:: An email will be sent when the build status changes from "Failure" or "Unstable" to "Success".
+Not Built:: An email will be sent if the build status is "Not Built". This status code is used in a multi-stage build (like maven2) where a problem in earlier stage prevented later stages from building.
+Script - After Build:: Allows the user to define a script that is executed to determine if an email should be sent *AFTER* the build occurs. The last line of the script should resolve to true to send an email, or false to not send an email. See <<script_trigger_options>> below for parameters available to the script.
+Script - Before Build:: Allows the user to define a script that is executed to determine if an email should be sent *BEFORE* the build occurs. The last line of the script should resolve to true to send an email, or false to not send an email. See <<script_trigger_options>> below for parameters available to the script.
+Status Changed:: An email will be sent if the build status changes.
+Success::  An email will be sent if the build status is "Successful". If the "Fixed" trigger is configured, and the previous build status was "Failure" or "Unstable", then the "Fixed" trigger will send an email instead.
+Test Improvement:: An email will be sent any time there is an improvement. A build is considered to have improved whenever it has fewer test failures than the previous build. If the current failure count went to 0 (no more test failures) this trigger will NOT send an email.
+Test Regression:: An email will be sent any time there is a regression. A build is considered to regress whenever it has more failures than the previous build, or if there are new tests that failed.
+Unstable (Test Failures)::  An email will be sent any time the build is unstable. A build is unstable if there are test failures, but all the build steps completed successfully. If the "Unstable - Still" trigger is configured, and the previous build status was "Unstable", then the "Unstable - Still" trigger will send an email instead.
+Unstable (Test Failures) - 1st:: An email will be sent when the build status changes from anything to "Unstable".
+Unstable (Test Failures) - Still:: An email will be sent if the build status is "Unstable" for two or more builds in a row. A build is unstable if there are test failures, but all the build steps completed successfully.
+Unstable (Test Failures)/Failure -> Success:: An email will be sent when the build status changes from "Failure" or "Unstable" to "Success". Intermediate "Aborted" builds are ignored.
 
 ==== Common Trigger Options
 
