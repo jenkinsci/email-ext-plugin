@@ -46,8 +46,8 @@ import java.util.logging.Logger;
 import javax.mail.internet.InternetAddress;
 import jenkins.model.Jenkins;
 import jenkins.scm.RunWithSCM;
-import org.acegisecurity.Authentication;
-import org.acegisecurity.AuthenticationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 
 public final class RecipientProviderUtilities {
     private static final Logger LOGGER = Logger.getLogger(RecipientProviderUtilities.class.getName());
@@ -167,8 +167,8 @@ public final class RecipientProviderUtilities {
                 if (userAddress != null) {
                     if (Jenkins.get().isUseSecurity()) {
                         try {
-                            Authentication auth = user.impersonate();
-                            if (run != null && !run.getACL().hasPermission(auth, Item.READ)) {
+                            Authentication auth = user.impersonate2();
+                            if (run != null && !run.getACL().hasPermission2(auth, Item.READ)) {
                                 if (SEND_TO_USERS_WITHOUT_READ) {
                                     listener.getLogger().printf("Warning: user %s has no permission to view %s, but sending mail anyway%n", userAddress, run.getFullDisplayName());
                                 } else {
