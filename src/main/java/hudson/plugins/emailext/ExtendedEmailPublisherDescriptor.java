@@ -1,8 +1,6 @@
 package hudson.plugins.emailext;
 
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -13,10 +11,8 @@ import hudson.init.Initializer;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
-import hudson.model.queue.Tasks;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
-import hudson.security.ACL;
 import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;

@@ -2,12 +2,11 @@
 <hudson.plugins.emailext.ExtendedEmailPublisherDescriptor>
   <defaultSuffix>@example.com</defaultSuffix>
   <mailAccount>
-    <address>address not configured yet &lt;nobody@nowhere&gt;</address>
     <smtpHost>smtp.example.com</smtpHost>
     <smtpPort>2525</smtpPort>
-    <smtpUsername>admin</smtpUsername>
-    <smtpPassword>honeycomb</smtpPassword>
+    <credentialsId>email-ext-admin</credentialsId>
     <useSsl>true</useSsl>
+    <useTls>false</useTls>
     <advProperties>mail.smtp.ssl.trust=example.com</advProperties>
     <defaultAccount>true</defaultAccount>
   </mailAccount>
@@ -16,9 +15,9 @@
       <address>admin@example2.com</address>
       <smtpHost>smtp.example2.com</smtpHost>
       <smtpPort>2626</smtpPort>
-      <smtpUsername>admin2</smtpUsername>
-      <smtpPassword>honeycomb2</smtpPassword>
+      <credentialsId>email-ext-admin2</credentialsId>
       <useSsl>true</useSsl>
+      <useTls>false</useTls>
       <advProperties>mail.smtp.ssl.trust=example2.com</advProperties>
       <defaultAccount>false</defaultAccount>
     </hudson.plugins.emailext.MailAccount>
@@ -62,7 +61,6 @@
   <defaultReplyTo>noreply@example.com</defaultReplyTo>
   <allowedDomains>@example.com</allowedDomains>
   <excludedCommitters>excluded@example.com</excludedCommitters>
-  <overrideGlobalSettings>false</overrideGlobalSettings>
   <listId>&lt;list.example.com&gt;</listId>
   <precedenceBulk>true</precedenceBulk>
   <debugMode>true</debugMode>
