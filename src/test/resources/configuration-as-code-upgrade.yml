@@ -5,7 +5,8 @@ unclassified:
       - address: "foo.bar"
         smtpHost: "smtp-host"
         smtpPort: "1234"
-        credentialsId: "credentials-id"
+        smtpUsername: "smtp-username"
+        smtpPassword: "smtp-password"
         useSsl: true
         useTls: true
         advProperties: "avd-properties"
@@ -18,7 +19,8 @@ unclassified:
     mailAccount:
       smtpHost: "smtp-host-xyz"
       smtpPort: "9876"
-      credentialsId: "smtp-credentials-xyz"
+      smtpUsername: "smtp-username-xyz"
+      smtpPassword: "smtp-password-xyz"
       advProperties: "adv-properties-xyz"
       useSsl: true
       useTls: true
