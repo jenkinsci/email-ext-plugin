@@ -300,7 +300,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("Should be at the Configure System page",
                 "Configure System [Jenkins]", page.getTitleText());
 
-        List<DomElement> nodes = page.getByXPath(".//div[contains(@class, 'setting-name') and ./text()='Additional groovy classpath']");
+        List<DomElement> nodes = page.getByXPath(".//div[contains(@class, 'setting-name') and ./text()='Additional groovy classpath'] | .//div[contains(@class, 'jenkins-form-label') and ./text()='Additional groovy classpath']");
         assertEquals(1, nodes.size());
         HtmlDivision settingName = (HtmlDivision) nodes.get(0);
 

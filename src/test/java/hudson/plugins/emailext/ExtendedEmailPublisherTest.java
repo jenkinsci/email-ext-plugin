@@ -1358,6 +1358,38 @@ public class ExtendedEmailPublisherTest {
         assertEquals("custom@example.com", from[0].toString());
     }
 
+    @Test
+    @Issue("JENKINS-63523")
+    public void testProjectFromWithDefaultSuffix() throws Exception {
+        publisher.getDescriptor().setDefaultSuffix("@example.com");
+
+        SuccessTrigger successTrigger =
+                new SuccessTrigger(
+                        recProviders,
+                        "$DEFAULT_RECIPIENTS",
+                        "$DEFAULT_REPLYTO",
+                        "$DEFAULT_SUBJECT",
+                        "$DEFAULT_CONTENT",
+                        "",
+                        0,
+                        "project");
+        addEmailType(successTrigger);
+        publisher.getConfiguredTriggers().add(successTrigger);
+        publisher.from = "custom";
+
+        FreeStyleBuild build = j.buildAndAssertSuccess(project);
+        j.assertLogContains("Email was triggered for: Success", build);
+
+        Mailbox mailbox = Mailbox.get("ashlux@gmail.com");
+        assertEquals(1, mailbox.size());
+
+        Message msg = mailbox.get(0);
+        Address[] from = msg.getFrom();
+        assertEquals(1, from.length);
+
+        assertEquals("custom@example.com", from[0].toString());
+    }
+
     /**
      * Similar to {@link SleepBuilder} but only on the first build. (Removing
      * the builder between builds is tricky since you would have to wait for the
