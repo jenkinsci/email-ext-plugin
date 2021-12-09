@@ -28,7 +28,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlDivision;
 import com.gargoylesoftware.htmlunit.html.HtmlNumberInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSelect;
-import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
 import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import hudson.FilePath;
@@ -65,7 +64,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import javax.mail.Authenticator;
 import jenkins.model.Jenkins;
 import org.apache.xpath.Arg;
@@ -261,10 +259,10 @@ public class ExtendedEmailPublisherDescriptorTest {
         List<DomElement> settings = page.getByXPath(".//div[@class='advancedLink' and span[starts-with(@id, 'yui-gen')]/span[@class='first-child']/button[./text()='Default Triggers...']]");
         assertEquals(1, settings.size());
         DomNode div = settings.get(0);
-        DomNode table = div.getNextSibling();
-        assertEquals("table", table.getLocalName());
-        DomNode tbody = table.getFirstChild();
-        assertEquals("tbody", tbody.getLocalName());
+        DomNode advancedBody = div.getNextSibling();
+        assertEquals("div", advancedBody.getLocalName());
+        DomNode tbody = advancedBody.getFirstChild();
+        assertEquals("div", tbody.getLocalName());
         assertFalse(tbody.getChildNodes().isEmpty());
 
         List<DomNode> nodes = div.getByXPath(".//button[./text()='Default Triggers...']");
@@ -304,21 +302,21 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("Should be at the Configure System page",
                 "Configure System [Jenkins]", page.getTitleText());
 
-        List<DomElement> nodes = page.getByXPath(".//td[@class='setting-name' and ./text()='Additional groovy classpath']");
+        List<DomElement> nodes = page.getByXPath(".//div[contains(@class, 'setting-name') and ./text()='Additional groovy classpath'] | .//div[contains(@class, 'jenkins-form-label') and ./text()='Additional groovy classpath']");
         assertEquals(1, nodes.size());
-        HtmlTableCell settingName = (HtmlTableCell)nodes.get(0);
+        HtmlDivision settingName = (HtmlDivision) nodes.get(0);
 
-        nodes = settingName.getByXPath("../td[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath']");
+        nodes = settingName.getByXPath("../div[contains(@class, 'setting-name')]/div[@class='repeated-container']/div[@name='defaultClasspath']");
         assertEquals("Should not have any class path setup by default", 0, nodes.size());
 
-        nodes = settingName.getByXPath("../td[@class='setting-main']/div[@class='repeated-container' and span[starts-with(@id, 'yui-gen')]/span[@class='first-child']/button[./text()='Add']]");
+        nodes = settingName.getByXPath("../div[@class='setting-main']/div[@class='repeated-container' and span[starts-with(@id, 'yui-gen')]/span[@class='first-child']/button[./text()='Add']]");
         assertEquals(1, nodes.size());
         HtmlDivision div = (HtmlDivision)nodes.get(0);
         nodes = div.getByXPath(".//button[./text()='Add']");
         HtmlButton addButton = (HtmlButton)nodes.get(0);
         addButton.click();
 
-        nodes = settingName.getByXPath("../td[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath']");
+        nodes = settingName.getByXPath("../div[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath']");
         assertEquals(1, nodes.size());
         div = (HtmlDivision) nodes.get(0);
         String divClass = div.getAttribute("class");
@@ -332,7 +330,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
         addButton.click();
 
-        nodes = settingName.getByXPath("../td[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath' and contains(@class, 'last')]");
+        nodes = settingName.getByXPath("../div[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath' and contains(@class, 'last')]");
         assertEquals(1, nodes.size());
         div = (HtmlDivision) nodes.get(0);
         divClass = div.getAttribute("class");

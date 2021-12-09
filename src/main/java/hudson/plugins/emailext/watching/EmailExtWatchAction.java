@@ -67,7 +67,7 @@ public class EmailExtWatchAction implements Action {
 
             @NonNull
             @Override
-            public UserProperty newInstance(StaplerRequest req, JSONObject json) throws FormException {
+            public UserProperty newInstance(StaplerRequest req, @NonNull JSONObject json) throws FormException {
                 List<EmailTrigger> triggers = req != null ? req.bindJSONToList(EmailTrigger.class, json) : Collections.emptyList();
                 return new UserProperty(triggers);
             }
