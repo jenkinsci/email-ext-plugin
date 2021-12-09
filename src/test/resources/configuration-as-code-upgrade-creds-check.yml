@@ -1,0 +1,17 @@
+unclassified:
+  email-ext:
+    defaultSuffix: "@cool.com"
+    charset: "UTF-8"
+    defaultContentType: "text/html"
+    defaultSubject: "DEFAULT EMAIL SUBJECT"
+    defaultBody: "DEFAULT BODY"
+    maxAttachmentSizeMb: 42
+    mailAccount:
+      smtpHost: "smtp.gmail.com"
+      smtpPort: "465"
+      smtpUsername: "smtp-username-xyz"
+      smtpPassword: "smtp-password-xyz"
+      useSsl: true
+    defaultRecipients: "first-account@domain.extension"
+    allowedDomains: "@cool.com"
+    debugMode: true

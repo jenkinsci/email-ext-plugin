@@ -282,7 +282,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
             // create new credentials with the principal and secret and use it.
             final StandardUsernamePasswordCredentials newCredentials =
                     new UsernamePasswordCredentialsImpl(
-                            CredentialsScope.SYSTEM,
+                            CredentialsScope.GLOBAL,
                             null,
                             "Migrated from email-ext username/password",
                             smtpUsername,

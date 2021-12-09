@@ -10,23 +10,37 @@ import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import hudson.ExtensionList;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
 import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
+import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
 import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
 import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
 import io.jenkins.plugins.casc.misc.ConfiguredWithCode;
 import io.jenkins.plugins.casc.misc.JenkinsConfiguredWithCodeRule;
+
+import java.io.FileOutputStream;
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.apache.commons.io.IOUtils;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
+import org.mockito.Mockito;
+
+import javax.mail.Authenticator;
+import javax.mail.PasswordAuthentication;
 
 public class ExtendedEmailPublisherDescriptorJCasCTest {
 
-    @Rule
-    public JenkinsConfiguredWithCodeRule r = new JenkinsConfiguredWithCodeRule();
+    @Rule public JenkinsConfiguredWithCodeRule r = new JenkinsConfiguredWithCodeRule();
+    @Rule public TestName testName = new TestName();
 
     @Test
     @ConfiguredWithCode("configuration-as-code.yml")
@@ -166,5 +180,21 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
         assertEquals("hudson.plugins.emailext.plugins.trigger.FailureTrigger", descriptor.getDefaultTriggerIds().get(0));
 
         assertTrue(descriptor.isDebugMode());
+    }
+
+    @Test
+    @ConfiguredWithCode("configuration-as-code-upgrade-creds-check.yml")
+    public void shouldUseCorrectCredentialsAfterUpgrade() throws Exception {
+        final ExtendedEmailPublisherDescriptor descriptor =
+                ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
+
+        FreeStyleBuild build = Mockito.mock(FreeStyleBuild.class);
+
+        Authenticator authenticator = descriptor.getAuthenticatorProvider().apply(descriptor.getMailAccount(), build);
+        Method method = authenticator.getClass().getDeclaredMethod("getPasswordAuthentication");
+        PasswordAuthentication passwordAuthentication = (PasswordAuthentication)method.invoke(authenticator);
+        assertNotNull(passwordAuthentication);
+        assertEquals("smtp-username-xyz", passwordAuthentication.getUserName());
+        assertEquals("smtp-password-xyz", passwordAuthentication.getPassword());
     }
 }
