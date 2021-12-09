@@ -3,6 +3,7 @@ package hudson.plugins.emailext;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import com.cloudbees.plugins.credentials.domains.HostnamePortRequirement;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.Util;
@@ -181,10 +182,16 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private transient BiFunction<MailAccount, Run<?,?>, Authenticator> authenticatorProvider = (acc, run) -> new Authenticator() {
         @Override
         protected PasswordAuthentication getPasswordAuthentication() {
+            DomainRequirement domainRequirement = null;
+            if(StringUtils.isNotBlank(acc.getSmtpHost()) && StringUtils.isNotBlank(acc.getSmtpPort())) {
+                domainRequirement = new HostnamePortRequirement(acc.getSmtpHost(), Integer.parseInt(acc.getSmtpPort()));
+            }
+
             StandardUsernamePasswordCredentials c = CredentialsProvider.findCredentialById(acc.getCredentialsId(),
                             StandardUsernamePasswordCredentials.class,
                             run,
-                            (DomainRequirement) null);
+                            domainRequirement
+                            );
 
             if(c == null) {
                 return null;

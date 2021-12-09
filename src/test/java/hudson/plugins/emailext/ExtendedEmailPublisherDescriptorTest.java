@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
@@ -58,7 +59,6 @@ import hudson.plugins.emailext.plugins.trigger.UnstableTrigger;
 import hudson.plugins.emailext.plugins.trigger.XNthFailureTrigger;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
-import hudson.util.Secret;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -66,12 +66,14 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import javax.mail.Authenticator;
 import jenkins.model.Jenkins;
+import org.apache.xpath.Arg;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.recipes.LocalData;
+import org.kohsuke.args4j.Argument;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -403,6 +405,35 @@ public class ExtendedEmailPublisherDescriptorTest {
         ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
         ArgumentCaptor<Run<?,?>> runCaptor = ArgumentCaptor.forClass(Run.class);
         Mockito.verify(authenticatorProvider, Mockito.never()).apply(mailAccountCaptor.capture(), runCaptor.capture());
+    }
+
+    @Test
+    public void authenticatorIsCreatedWhenCredentialsIdProvided() throws Exception {
+        UsernamePasswordCredentials c = new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL, "email-ext-admin", "Username/password for SMTP", "admin", "honeycomb");
+        CredentialsProvider.lookupStores(j.jenkins).iterator().next().addCredentials(Domain.global(), c);
+        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        String from = "test@example.com";
+        MailAccount ma = new MailAccount();
+        ma.setAddress(from);
+        ma.setSmtpHost("smtp.example.com");
+        ma.setSmtpPort("25");
+        ma.setCredentialsId("email-ext-admin");
+
+        ExtendedEmailPublisher publisher = Mockito.mock(ExtendedEmailPublisher.class);
+        Run<?,?> run = Mockito.mock(Run.class);
+        FilePath workspace = Mockito.mock(FilePath.class);
+        Launcher launcher = Mockito.mock(Launcher.class);
+        TaskListener listener = Mockito.mock(TaskListener.class);
+
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, run, workspace, launcher, listener);
+
+        BiFunction<MailAccount, Run<?,?>, Authenticator> authenticatorProvider = Mockito.mock(BiFunction.class);
+        descriptor.setAuthenticatorProvider(authenticatorProvider);
+        descriptor.createSession(ma, context);
+        ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
+        ArgumentCaptor<Run<?,?>> runCaptor = ArgumentCaptor.forClass(Run.class);
+        Mockito.verify(authenticatorProvider, Mockito.atLeast(1)).apply(mailAccountCaptor.capture(), runCaptor.capture());
     }
 
     @Test
