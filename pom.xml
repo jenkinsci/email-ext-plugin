@@ -117,12 +117,6 @@
     <dependencies>
         <!-- libraries -->
         <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>1.4.7</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>1.14.3</version>
@@ -223,11 +217,22 @@
             <artifactId>cloudbees-folder</artifactId>
             <scope>test</scope>
         </dependency>
+        <!--
+            This must come before javax-mail-api in the class path in order to avoid eclipse-ee4j/mail#350.
+        -->
         <dependency>
             <groupId>org.jvnet.mock-javamail</groupId>
             <artifactId>mock-javamail</artifactId>
-            <version>1.9</version>
+            <version>1.12</version>
             <scope>test</scope>
+        </dependency>
+        <!--
+            This must come after mock-javamail in the class path in order to avoid eclipse-ee4j/mail#350.
+        -->
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>javax-mail-api</artifactId>
+            <version>1.6.2-2</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
