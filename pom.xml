@@ -232,7 +232,7 @@
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>javax-mail-api</artifactId>
-            <version>1.6.2-2</version>
+            <version>1.6.2-5</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
