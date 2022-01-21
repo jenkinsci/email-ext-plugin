@@ -33,7 +33,7 @@
         <changelist>-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
         <java.level>8</java.level>
-        <jenkins.version>2.277.1</jenkins.version>
+        <jenkins.version>2.331</jenkins.version>
         <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
         <concurrency>1</concurrency>
         <argLine>-Dfile.encoding=UTF-8</argLine>
@@ -106,8 +106,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.277.x</artifactId>
-                <version>984.vb5eaac999a7e</version>
+                <artifactId>bom-weekly</artifactId>
+                <version>1117.v62a_f6a_01de98</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
