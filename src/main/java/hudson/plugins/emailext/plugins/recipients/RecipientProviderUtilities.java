@@ -43,7 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.mail.internet.InternetAddress;
+import jakarta.mail.internet.InternetAddress;
 import jenkins.model.Jenkins;
 import jenkins.scm.RunWithSCM;
 import org.springframework.security.core.Authentication;

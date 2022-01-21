@@ -10,8 +10,8 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 //TODO should probably be moved into default lists in script-security
 @Restricted(NoExternalUse.class)
 @Extension
-public class StaticJavaxMailWhitelist extends ProxyWhitelist {
-    public StaticJavaxMailWhitelist() throws IOException {
-        super(StaticWhitelist.from(StaticJavaxMailWhitelist.class.getResource("javax.mail.whitelist")));
+public class StaticJakartaMailWhitelist extends ProxyWhitelist {
+    public StaticJakartaMailWhitelist() throws IOException {
+        super(StaticWhitelist.from(StaticJakartaMailWhitelist.class.getResource("jakarta.mail.whitelist")));
     }
 }

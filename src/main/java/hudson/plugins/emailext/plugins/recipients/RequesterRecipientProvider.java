@@ -15,7 +15,7 @@ import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import java.io.PrintStream;
 import java.util.Collections;
 import java.util.Set;
-import javax.mail.internet.InternetAddress;
+import jakarta.mail.internet.InternetAddress;
 import jenkins.model.Jenkins;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;

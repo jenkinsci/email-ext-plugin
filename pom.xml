@@ -143,6 +143,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>mailer</artifactId>
+            <version>410.va_7940d9ded39</version> <!-- TODO https://github.com/jenkinsci/mailer-plugin/pull/144 -->
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -218,12 +219,12 @@
             <scope>test</scope>
         </dependency>
         <!--
-            This must come before javax-mail-api in the class path in order to avoid eclipse-ee4j/mail#350.
+            This must come before jakarta-mail-api in the class path in order to avoid eclipse-ee4j/mail#350.
         -->
         <dependency>
             <groupId>org.jvnet.mock-javamail</groupId>
             <artifactId>mock-javamail</artifactId>
-            <version>1.12</version>
+            <version>2.0</version>
             <scope>test</scope>
         </dependency>
         <!--
@@ -231,8 +232,8 @@
         -->
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
-            <artifactId>javax-mail-api</artifactId>
-            <version>1.6.2-5</version>
+            <artifactId>jakarta-mail-api</artifactId>
+            <version>2.0.0-5</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

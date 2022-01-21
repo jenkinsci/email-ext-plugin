@@ -48,9 +48,9 @@ To filter out the recipients that *do not* contain `@example.com`:
 .Filtering recipients on a domain
 [source,groovy]
 ----
-recipients = msg.getRecipients(javax.mail.Message.RecipientType.TO)
+recipients = msg.getRecipients(jakarta.mail.Message.RecipientType.TO)
 filtered = recipients.findAll { addr -> addr.toString().endsWith('@example.com') }
-msg.setRecipients(javax.mail.Message.RecipientType.TO, filtered as javax.mail.Address[])
+msg.setRecipients(jakarta.mail.Message.RecipientType.TO, filtered as jakarta.mail.Address[])
 ----
 
 ==== Filtering recipients on a whitelist
@@ -72,9 +72,9 @@ def includedInWhitelist(addr) {
     return 0
 }
 
-recipients = msg.getRecipients(javax.mail.Message.RecipientType.TO)
+recipients = msg.getRecipients(jakarta.mail.Message.RecipientType.TO)
 filtered = recipients.findAll { addr -> includedInWhitelist(addr) > 0 }
-msg.setRecipients(javax.mail.Message.RecipientType.TO, filtered as javax.mail.Address[])
+msg.setRecipients(jakarta.mail.Message.RecipientType.TO, filtered as jakarta.mail.Address[])
 ----
 
 == Post-send scripts

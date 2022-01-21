@@ -36,8 +36,8 @@ import hudson.util.StreamTaskListener;
 import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
 
 /* package private */ final class TestUtilities {
     private static final String AT_DOMAIN = "@DOMAIN";

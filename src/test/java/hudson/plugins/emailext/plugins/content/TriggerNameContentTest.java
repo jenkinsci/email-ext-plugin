@@ -13,7 +13,7 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import java.util.Collections;
 import java.util.List;
-import javax.mail.Message;
+import jakarta.mail.Message;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

@@ -1,0 +1,3 @@
+staticField jakarta.mail.Message$RecipientType BCC
+staticField jakarta.mail.Message$RecipientType CC
+staticField jakarta.mail.Message$RecipientType TO
