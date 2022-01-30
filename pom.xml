@@ -39,6 +39,8 @@
         <argLine>-Dfile.encoding=UTF-8</argLine>
         <!-- To be removed once Jenkins.MANAGE gets out of beta -->
         <useBeta>true</useBeta>
+        <!-- To be removed once this is available through the plugin parent POM -->
+        <jenkins-test-harness.version>1698.vc58b_4e102e41</jenkins-test-harness.version>
     </properties>
 
     <developers>
