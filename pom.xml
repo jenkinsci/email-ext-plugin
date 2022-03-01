@@ -33,14 +33,12 @@
         <changelist>-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
         <java.level>8</java.level>
-        <jenkins.version>2.277.1</jenkins.version>
+        <jenkins.version>2.303.3</jenkins.version>
         <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
         <concurrency>1</concurrency>
         <argLine>-Dfile.encoding=UTF-8</argLine>
         <!-- To be removed once Jenkins.MANAGE gets out of beta -->
         <useBeta>true</useBeta>
-        <!-- To be removed once this is available through the plugin parent POM -->
-        <jenkins-test-harness.version>1698.vc58b_4e102e41</jenkins-test-harness.version>
     </properties>
 
     <developers>
@@ -108,8 +106,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.277.x</artifactId>
-                <version>984.vb5eaac999a7e</version>
+                <artifactId>bom-2.303.x</artifactId>
+                <version>1155.v77b_fd92a_26fc</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
