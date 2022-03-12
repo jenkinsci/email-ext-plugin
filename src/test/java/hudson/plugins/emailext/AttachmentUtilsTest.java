@@ -9,11 +9,13 @@ package hudson.plugins.emailext;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeThat;
 
 import hudson.FilePath;
 import hudson.Launcher;
@@ -26,6 +28,7 @@ import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import javax.mail.BodyPart;
@@ -257,6 +260,7 @@ public class AttachmentUtilsTest {
     @Test
     @Issue("JENKINS-33574")
     public void testNonEnglishCharacter() throws Exception {
+        assumeThat(Charset.defaultCharset(), equalTo(StandardCharsets.UTF_8));
         FreeStyleProject project = j.createFreeStyleProject("foo");
 
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
