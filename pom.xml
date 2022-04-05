@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.39</version>
+        <version>4.40</version>
         <relativePath />
     </parent>
 
@@ -32,7 +32,6 @@
         <revision>2.88</revision>
         <changelist>-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
-        <java.level>8</java.level>
         <jenkins.version>2.303.3</jenkins.version>
         <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
         <concurrency>1</concurrency>
