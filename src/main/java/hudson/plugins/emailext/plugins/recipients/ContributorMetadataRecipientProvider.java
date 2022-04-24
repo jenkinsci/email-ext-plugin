@@ -47,25 +47,59 @@ public class ContributorMetadataRecipientProvider extends RecipientProvider {
 
         final Debug debug = new Debug();
 
-        ContributorMetadataAction contributor = context.getRun().getAction(ContributorMetadataAction.class);
-        if(contributor != null) {
-            User user = User.getById(contributor.getContributor(), false);
-            if(user == null) {
-                // just add the email address if set
-                if(!StringUtils.isBlank(contributor.getContributorEmail())) {
-                    try {
-                        to.add(new InternetAddress(contributor.getContributorEmail()));
-                    } catch(AddressException e) {
-                        context.getListener().error(Messages.ErrorAddingContributorAddress(e.getMessage()));
-                        debug.send(Messages.ErrorAddingContributorAddress(e.toString()));
-                    }
-                }
-            } else {
+        ContributorMetadataAction action = context.getRun().getAction(ContributorMetadataAction.class);
+        if(action != null) {
+            User user = findUser(debug, action.getContributor(), action.getContributorEmail());
+            if(user != null) {
                 RecipientProviderUtilities.addUsers(Collections.singleton(user), context, env, to, cc, bcc, debug);
             }
         } else {
-            context.getListener().getLogger().print(Messages.NoContributorInformationAvailable());
+            debug.send("No ContributorMetadataAction is available");
+            context.getListener().getLogger().print(Messages.ContributorMetadataRecipientProvider_NoContributorInformationAvailable());
         }    
+    }
+
+    public User findUser(RecipientProviderUtilities.IDebug debug, String author, String authorEmail) {
+        // first we look for a user based on the user id (author), then if
+        // that fails, we look for one based on the email.
+        User user = null;
+        if(!StringUtils.isBlank(author)) {
+            debug.send("Trying username to get user account from Jenkins");
+            user = User.get(author, false, Collections.emptyMap());
+        }
+
+        if(user == null) {
+            if(!StringUtils.isBlank(authorEmail)) {
+                debug.send("Trying email address to get user account from Jenkins");
+                user = User.get(authorEmail, false, Collections.emptyMap());
+                if (user == null) {
+                    debug.send("Looking through all users for a matching email address");
+                    for (User existingUser : User.getAll()) {
+                        if (authorEmail.equalsIgnoreCase(getMail(existingUser))) {
+                            user = existingUser;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if(user == null) {
+            debug.send("Could not find user with information provided");
+        }
+
+        return user;
+    }
+
+    private String getMail(User user) {
+        hudson.tasks.Mailer.UserProperty property = user.getProperty(hudson.tasks.Mailer.UserProperty.class);
+        if (property == null) {
+            return null;
+        }
+        if (!property.hasExplicitlyConfiguredAddress()) {
+            return null;
+        }
+        return property.getExplicitlyConfiguredAddress();
     }
 
     @Extension
@@ -78,5 +112,4 @@ public class ContributorMetadataRecipientProvider extends RecipientProvider {
             return Messages.ContributorMetadataRecipientProvider_DisplayName();
         }
     }
-    
 }

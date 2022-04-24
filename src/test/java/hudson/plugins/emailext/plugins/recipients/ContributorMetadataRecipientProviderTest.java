@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.model.Result;
+import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.tasks.Mailer;
 import jenkins.model.Jenkins;
@@ -10,48 +11,43 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.mock_javamail.Mailbox;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import java.util.Collections;
+
 public class ContributorMetadataRecipientProviderTest {
 
-    private MockedStatic<Jenkins> mockedJenkins;
-    private MockedStatic<Mailer> mockedMailer;
-
-    @Before
-    public void before() {
-        final Jenkins jenkins = Mockito.mock(Jenkins.class);
-        Mockito.when(jenkins.isUseSecurity()).thenReturn(false);
-        final ExtendedEmailPublisherDescriptor extendedEmailPublisherDescriptor = Mockito.mock(ExtendedEmailPublisherDescriptor.class);
-        extendedEmailPublisherDescriptor.setDebugMode(true);
-        Mockito.when(extendedEmailPublisherDescriptor.getExcludedCommitters()).thenReturn("");
-
-        Mockito.when(jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class)).thenReturn(extendedEmailPublisherDescriptor);
-        mockedJenkins = Mockito.mockStatic(Jenkins.class);
-        mockedJenkins.when(Jenkins::get).thenReturn(jenkins);
-
-        final Mailer.DescriptorImpl descriptor = Mockito.mock(Mailer.DescriptorImpl.class);
-        Mockito.when(descriptor.getDefaultSuffix()).thenReturn("DOMAIN");
-        mockedMailer = Mockito.mockStatic(Mailer.class);
-        mockedMailer.when(Mailer::descriptor).thenReturn(descriptor);
-    }
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
 
     @After
-    public void after() {
-        mockedMailer.close();
-        mockedJenkins.close();
+    public void tearDown() {
+        Mailbox.clearAll();
     }
 
     @Test
     public void testAddRecipients() throws Exception {
-        final WorkflowJob j = Mockito.mock(WorkflowJob.class);
-        final WorkflowRun build = Mockito.spy(new WorkflowRun(j));
-        Mockito.when(build.getResult()).thenReturn(Result.UNSTABLE);
-        final ContributorMetadataAction action = Mockito.mock(ContributorMetadataAction.class);
-        Mockito.when(action.getContributorEmail()).thenReturn("mickey@disney.com");
-        Mockito.when(build.getAction(ContributorMetadataAction.class)).thenReturn(action);
+        User user = User.get("someone", true, Collections.emptyMap());
+        user.addProperty(new Mailer.UserProperty("someone@DOMAIN"));
 
-        TestUtilities.checkRecipients(build, new ContributorMetadataRecipientProvider(), "mickey@disney.com");
-    }    
+        WorkflowJob job = j.createProject(WorkflowJob.class, "test");
+        WorkflowRun run = job.scheduleBuild2(0).get();
+        run.addAction(new ContributorMetadataAction("someone", "Some One", "someone@DOMAIN" ));
+
+        TestUtilities.checkRecipients(run, new ContributorMetadataRecipientProvider(), "someone");
+    }
+
+    @Test
+    public void testAddRecipients_NotUser() throws Exception {
+        WorkflowJob job = j.createProject(WorkflowJob.class, "test");
+        WorkflowRun run = job.scheduleBuild2(0).get();
+        run.addAction(new ContributorMetadataAction("someoneelse", "Some One Else", "someoneelse@DOMAIN" ));
+
+        TestUtilities.checkRecipients(run, new ContributorMetadataRecipientProvider());
+    }
 }
