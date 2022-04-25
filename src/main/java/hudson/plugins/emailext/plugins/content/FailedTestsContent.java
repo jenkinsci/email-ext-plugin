@@ -45,9 +45,6 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     public int maxLength = Integer.MAX_VALUE;
 
     @Parameter
-    public boolean escapeHtml = false;
-
-    @Parameter
     public String outputFormat = "";
 
     @Parameter
@@ -166,6 +163,11 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         public String toString() {
             return String.format("Name:%s, Status:%s, Error message: %s, Stack trace:%s", this.name, this.status, this.errorMessage, this.stackTrace);
         }
+    }
+
+    @Override
+    public boolean handlesHtmlEscapeInternally() {
+        return true;
     }
 
     private static class SummarizedTestResult {
