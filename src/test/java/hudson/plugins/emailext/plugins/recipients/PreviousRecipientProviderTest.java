@@ -72,72 +72,59 @@ public class PreviousRecipientProviderTest {
     public void testAddRecipients() throws Exception {
 
         /*
-         * Requestor: A No committers. Failed.
+         * No previous build means no previous recipients.
          */
         try (MockedStatic<User> mockedUser = Mockito.mockStatic(User.class)) {
             final FreeStyleProject p = Mockito.mock(FreeStyleProject.class);
             final FreeStyleBuild build1 = Mockito.spy(new FreeStyleBuild(p));
-            Mockito.doReturn(Result.FAILURE).when(build1).getResult();
+            Mockito.doReturn(Result.SUCCESS).when(build1).getResult();
             Mockito.doReturn(null).when(build1).getPreviousCompletedBuild();
             MockUtilities.addRequestor(mockedUser, build1, "A");
-            TestUtilities.checkRecipients(build1, new PreviousRecipientProvider(), "A");
+            TestUtilities.checkRecipients(build1, new PreviousRecipientProvider());
 
             /*
-             * Requestor: A No committers. Unstable.
+             * Previous build has requestor A and no committer.
              */
             final FreeStyleBuild build2 = Mockito.spy(new FreeStyleBuild(p));
-            Mockito.doReturn(Result.UNSTABLE).when(build2).getResult();
+            Mockito.doReturn(Result.SUCCESS).when(build2).getResult();
             Mockito.doReturn(build1).when(build2).getPreviousCompletedBuild();
-            MockUtilities.addRequestor(mockedUser, build2, "A");
+            MockUtilities.addRequestor(mockedUser, build2, "B");
             TestUtilities.checkRecipients(build2, new PreviousRecipientProvider(), "A");
 
             /*
-             * Requestor: A Committers {X,V}. Failed.
+             * Previous build has requestor B no committer.
              */
             final FreeStyleBuild build3 = Mockito.spy(new FreeStyleBuild(p));
-            Mockito.doReturn(Result.FAILURE).when(build3).getResult();
+            Mockito.doReturn(Result.SUCCESS).when(build3).getResult();
             Mockito.doReturn(build2).when(build3).getPreviousCompletedBuild();
-            MockUtilities.addRequestor(mockedUser, build3, "A");
-            MockUtilities.addChangeSet(build3, "X", "V");
-            TestUtilities.checkRecipients(build3, new PreviousRecipientProvider(), "X", "V");
+            MockUtilities.addRequestor(mockedUser, build3, "C");
+            MockUtilities.addChangeSet(build3, "D");
+            TestUtilities.checkRecipients(build3, new PreviousRecipientProvider(), "B");
 
             /*
-             * Requestor: B Committers {X}. Aborted.
+             * Previous build has requestor C and committer D.
              */
             final FreeStyleBuild build4 = Mockito.spy(new FreeStyleBuild(p));
-            Mockito.doReturn(Result.ABORTED).when(build4).getResult();
+            Mockito.doReturn(Result.SUCCESS).when(build4).getResult();
             Mockito.doReturn(build3).when(build4).getPreviousCompletedBuild();
-            MockUtilities.addRequestor(mockedUser, build4, "B");
-            MockUtilities.addChangeSet(build4, "X");
-            TestUtilities.checkRecipients(build4, new PreviousRecipientProvider(), "X", "V");
+            TestUtilities.checkRecipients(build4, new PreviousRecipientProvider(), "C", "D");
 
             /*
-             * Requestor: B Committers {U,V}. Failed.
+             * Previous build has no requestor or committer, the one before has requestor C and committer D.
              */
             final FreeStyleBuild build5 = Mockito.spy(new FreeStyleBuild(p));
-            Mockito.doReturn(Result.FAILURE).when(build5).getResult();
+            Mockito.doReturn(Result.SUCCESS).when(build5).getResult();
             Mockito.doReturn(build4).when(build5).getPreviousCompletedBuild();
-            MockUtilities.addRequestor(mockedUser, build5, "B");
-            MockUtilities.addChangeSet(build5, "U", "V");
-            TestUtilities.checkRecipients(build5, new PreviousRecipientProvider(), "X", "V", "U");
+            MockUtilities.addRequestor(mockedUser, build5, "E");
+            TestUtilities.checkRecipients(build5, new PreviousRecipientProvider(), "C", "D");
 
             /*
-             * Requestor: A Committers {W}. Success.
+             * Previous build has no requestor and committer E.
              */
             final FreeStyleBuild build6 = Mockito.spy(new FreeStyleBuild(p));
-            Mockito.doReturn(Result.UNSTABLE).when(build6).getResult();
+            Mockito.doReturn(Result.SUCCESS).when(build6).getResult();
             Mockito.doReturn(build5).when(build6).getPreviousCompletedBuild();
-            MockUtilities.addRequestor(mockedUser, build6, "A");
-            MockUtilities.addChangeSet(build6, "W");
-            TestUtilities.checkRecipients(build6, new PreviousRecipientProvider(), "X", "V", "W", "U");
-
-            /*
-             * Requestor: none Committers none. Success.
-             */
-            final FreeStyleBuild build7 = Mockito.spy(new FreeStyleBuild(p));
-            Mockito.doReturn(Result.UNSTABLE).when(build6).getResult();
-            Mockito.doReturn(build6).when(build7).getPreviousCompletedBuild();
-            TestUtilities.checkRecipients(build6, new PreviousRecipientProvider(), "X", "V", "W", "U");
+            TestUtilities.checkRecipients(build6, new PreviousRecipientProvider(), "E");
         }
     }
 }

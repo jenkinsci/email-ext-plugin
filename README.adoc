@@ -156,7 +156,7 @@ Recipient List:: Add this recipient provider if you would like to have the email
 Developers:: Add this recipient provider to send the email to anyone who checked in code for the last build. This plugin will generate an email address based on the committer's ID and an appended *Default user e-mail suffix* from the *Extended E-mail Notification section* of the *Configure System* page. For example, if a change was committed by someone with an ID of `first.last`, and the default user e-mail suffix is `@example.com`, then an email will be sent to `first.last@example.com`.
 Requestor:: Add this recipient provider to send an email to the user who initiated the build (if initiated by a user manually).
 Include Culprits:: If this recipient provider _and_ the *Developers* recipient provider are added, emails will include everyone who committed since the last successful build.
-Previous:: Add this recipient provider to send an email to the the culprits / requestor or developers of the previous build(s).
+Previous:: Add this recipient provider to send an email to the the culprits, requestor and developers of the previous build(s).
 Advanced:: Configure properties at a per-trigger level:
  Recipient List::: A comma (or whitespace) separated list of email address that should receive this email if it is triggered. This list is appended to the *Project Recipient List* described above.
  Subject::: Specify the subject line of the selected email.

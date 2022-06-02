@@ -57,16 +57,14 @@ public class PreviousRecipientProvider extends RecipientProvider {
         }
 
         final Debug debug = new Debug();
-        Run<?, ?> run = context.getRun();
+
         Set<User> users = new HashSet<>();
-
-        if (run instanceof RunWithSCM) {
-            users.addAll(((RunWithSCM<?, ?>) run).getCulprits());
-        }
-
-        Run<?, ?> build = run;
+        Run<?, ?> build = context.getRun().getPreviousCompletedBuild();
 
         while (users.isEmpty() && build != null) {
+            if (build instanceof RunWithSCM) {
+                users.addAll(((RunWithSCM<?, ?>) build).getCulprits());
+            }
             users.addAll(RecipientProviderUtilities.getChangeSetAuthors(Collections.singleton(build), debug));
             users.addAll(RecipientProviderUtilities.getUsersTriggeringTheBuilds(Collections.singleton(build), debug));
             build = build.getPreviousCompletedBuild();
