@@ -32,7 +32,7 @@
         <revision>2.90</revision>
         <changelist>-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
-        <jenkins.version>2.303.3</jenkins.version>
+        <jenkins.version>2.346.1</jenkins.version>
         <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
         <concurrency>1</concurrency>
         <!-- To be removed once Jenkins.MANAGE gets out of beta -->
@@ -104,7 +104,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.303.x</artifactId>
+                <artifactId>bom-2.346.x</artifactId>
                 <version>1478.v81d3dc4f9a_43</version>
                 <scope>import</scope>
                 <type>pom</type>
