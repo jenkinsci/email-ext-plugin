@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.33</version>
+        <version>4.43.1</version>
         <relativePath />
     </parent>
 
@@ -29,14 +29,12 @@
     </issueManagement>
 
     <properties>
-        <revision>2.88</revision>
+        <revision>2.90</revision>
         <changelist>-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
-        <java.level>8</java.level>
-        <jenkins.version>2.331</jenkins.version>
+        <jenkins.version>2.332.1</jenkins.version>
         <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
         <concurrency>1</concurrency>
-        <argLine>-Dfile.encoding=UTF-8</argLine>
         <!-- To be removed once Jenkins.MANAGE gets out of beta -->
         <useBeta>true</useBeta>
     </properties>
@@ -106,8 +104,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-weekly</artifactId>
-                <version>1117.v62a_f6a_01de98</version>
+                <artifactId>bom-2.332.x</artifactId>
+                <version>1478.v81d3dc4f9a_43</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -119,7 +117,7 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.14.3</version>
+            <version>1.15.2</version>
         </dependency>
         <dependency>
             <groupId>net.htmlparser.jericho</groupId>
@@ -147,7 +145,6 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>config-file-provider</artifactId>
-            <version>3.8.1</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -161,6 +158,10 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>scm-api</artifactId>
         </dependency>
 
         <!-- workflow stuff -->
@@ -188,11 +189,6 @@
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-support</artifactId>
             <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>scm-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency> <!-- StepConfigTester -->
@@ -232,7 +228,6 @@
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>javax-mail-api</artifactId>
-            <version>1.6.2-5</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -272,7 +267,7 @@
     </dependencies>
 
     <scm>
-        <connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
+        <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
         <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
         <url>https://github.com/${gitHubRepo}</url>
         <tag>${scmTag}</tag>
