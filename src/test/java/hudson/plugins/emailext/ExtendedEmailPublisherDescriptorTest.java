@@ -64,7 +64,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import javax.mail.Authenticator;
+import jakarta.mail.Authenticator;
 import jenkins.model.Jenkins;
 import org.apache.xpath.Arg;
 import org.junit.Rule;

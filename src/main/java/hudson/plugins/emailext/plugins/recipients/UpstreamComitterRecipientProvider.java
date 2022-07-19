@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.mail.internet.InternetAddress;
+import jakarta.mail.internet.InternetAddress;
 import jenkins.model.Jenkins;
 import jenkins.scm.RunWithSCM;
 import org.jenkinsci.Symbol;

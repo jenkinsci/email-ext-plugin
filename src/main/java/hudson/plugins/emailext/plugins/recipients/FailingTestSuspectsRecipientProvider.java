@@ -39,7 +39,7 @@ import hudson.tasks.test.TestResult;
 import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Set;
-import javax.mail.internet.InternetAddress;
+import jakarta.mail.internet.InternetAddress;
 import jenkins.model.Jenkins;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;

@@ -34,8 +34,8 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.mockito.Mockito;
 
-import javax.mail.Authenticator;
-import javax.mail.PasswordAuthentication;
+import jakarta.mail.Authenticator;
+import jakarta.mail.PasswordAuthentication;
 
 public class ExtendedEmailPublisherDescriptorJCasCTest {
 

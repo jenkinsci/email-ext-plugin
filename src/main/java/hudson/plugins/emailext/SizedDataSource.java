@@ -1,6 +1,6 @@
 package hudson.plugins.emailext;
 
-import javax.activation.DataSource;
+import jakarta.activation.DataSource;
 
 public interface SizedDataSource extends DataSource {
     long getSize();

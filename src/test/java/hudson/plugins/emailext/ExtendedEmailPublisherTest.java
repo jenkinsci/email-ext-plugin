@@ -50,14 +50,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.mail.Address;
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import jakarta.mail.Address;
+import jakarta.mail.BodyPart;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Session;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
@@ -655,7 +655,7 @@ public class ExtendedEmailPublisherTest {
     @Issue("JENKINS-22777")
     public void testEmergencyRerouteOverridesPresendScript() throws Exception {
         publisher.getDescriptor().setEmergencyReroute("emergency@foo.com");
-        publisher.setPresendScript("import javax.mail.Message.RecipientType\n"
+        publisher.setPresendScript("import jakarta.mail.Message.RecipientType\n"
                 + "msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')");
         SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
@@ -714,7 +714,7 @@ public class ExtendedEmailPublisherTest {
 
     @Test
     public void testPresendScriptModifiesTo() throws Exception {
-        publisher.setPresendScript("import javax.mail.Message.RecipientType\n"
+        publisher.setPresendScript("import jakarta.mail.Message.RecipientType\n"
                 + "msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')");
         SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
                 "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
@@ -759,7 +759,7 @@ public class ExtendedEmailPublisherTest {
     }
 
     private void verifyPresendScriptModifiesToUsingProjectExternalScript() throws Exception {
-        publisher.setPresendScript("import javax.mail.Message.RecipientType\n"
+        publisher.setPresendScript("import jakarta.mail.Message.RecipientType\n"
                 + "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n"
                 + "msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())");
         SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
@@ -801,7 +801,7 @@ public class ExtendedEmailPublisherTest {
     }
 
     private void verifyPresendScriptModifiesToUsingGlobalExternalScript() throws Exception {
-        publisher.setPresendScript("import javax.mail.Message.RecipientType\n"
+        publisher.setPresendScript("import jakarta.mail.Message.RecipientType\n"
                 + "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n"
                 + "msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())");
         SuccessTrigger successTrigger = new SuccessTrigger(recProviders, "$DEFAULT_RECIPIENTS",
