@@ -29,7 +29,7 @@
     </issueManagement>
 
     <properties>
-        <revision>2.90</revision>
+        <revision>2.89.1</revision>
         <changelist>-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
         <jenkins.version>2.303.3</jenkins.version>
