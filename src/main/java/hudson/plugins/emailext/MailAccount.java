@@ -44,6 +44,8 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     private String advProperties;
     private boolean defaultAccount;
 
+    private boolean useOAuth2;
+
     @Deprecated
     public MailAccount(JSONObject jo){
         address = Util.nullify(jo.optString("address", null));
@@ -239,6 +241,15 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     @DataBoundSetter
     public void setUseTls(boolean useTls){
         this.useTls = useTls;
+    }
+
+    public boolean isUseOAuth2() {
+        return useOAuth2;
+    }
+
+    @DataBoundSetter
+    public void setUseOAuth2(boolean useOAuth2) {
+        this.useOAuth2 = useOAuth2;
     }
 
     public String getAdvProperties(){
