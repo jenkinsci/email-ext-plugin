@@ -358,6 +358,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             props.put("mail.smtp.auth", "true");
         }
 
+        if(acc.isUseOAuth2()) {
+            props.put("mail.smtp.auth.mechanisms", "XOAUTH2");
+        }
+
         // avoid hang by setting some timeout.
         props.put("mail.smtp.timeout", "60000");
         props.put("mail.smtp.connectiontimeout", "60000");
