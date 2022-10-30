@@ -66,7 +66,6 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import jakarta.mail.Authenticator;
 import jenkins.model.Jenkins;
-import org.apache.xpath.Arg;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
