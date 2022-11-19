@@ -32,7 +32,7 @@
         <revision>2.93</revision>
         <changelist>-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
-        <jenkins.version>2.332.1</jenkins.version>
+        <jenkins.version>2.332.4</jenkins.version>
         <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
         <concurrency>1</concurrency>
         <!-- To be removed once Jenkins.MANAGE gets out of beta -->
