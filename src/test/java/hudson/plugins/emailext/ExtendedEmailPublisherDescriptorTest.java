@@ -255,16 +255,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("Should be at the Configure System page",
                 "Configure System [Jenkins]", page.getTitleText());
 
-        List<DomElement> settings = page.getByXPath(".//div[@class='advancedLink' and span[starts-with(@id, 'yui-gen')]/span[@class='first-child']/button[./text()='Default Triggers...']]");
-        assertEquals(1, settings.size());
-        DomNode div = settings.get(0);
-        DomNode advancedBody = div.getNextSibling();
-        assertEquals("div", advancedBody.getLocalName());
-        DomNode tbody = advancedBody.getFirstChild();
-        assertEquals("div", tbody.getLocalName());
-        assertFalse(tbody.getChildNodes().isEmpty());
-
-        List<DomNode> nodes = div.getByXPath(".//button[./text()='Default Triggers...']");
+        List<DomNode> nodes = page.getByXPath(".//button[contains(text(),'Default Triggers')]");
         assertEquals(1, nodes.size());
         HtmlButton defaultTriggers = (HtmlButton)nodes.get(0);
         defaultTriggers.click();
