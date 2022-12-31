@@ -6,16 +6,6 @@
 
 package hudson.plugins.emailext.plugins.recipients;
 
-import java.io.PrintStream;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import jakarta.mail.internet.InternetAddress;
-
-import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.DataBoundConstructor;
-
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -26,8 +16,15 @@ import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.Messages;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
+import jakarta.mail.internet.InternetAddress;
+import java.io.PrintStream;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import jenkins.model.Jenkins;
 import jenkins.scm.RunWithSCM;
+import org.jenkinsci.Symbol;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * A recipient provider that finds the first culprits / requestor or developers of the previous build(s).
