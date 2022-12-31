@@ -1,22 +1,16 @@
 package hudson.plugins.emailext.plugins.recipients;
 
-import hudson.model.Result;
 import hudson.model.User;
-import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.tasks.Mailer;
-import jenkins.model.Jenkins;
 import jenkins.scm.api.metadata.ContributorMetadataAction;
 
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.mock_javamail.Mailbox;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 import java.util.Collections;
 

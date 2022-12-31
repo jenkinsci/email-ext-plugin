@@ -16,7 +16,7 @@ public class ObjectInstanceWhitelistTest {
     @Test
     public void permitsInstance() {
         String i = "instance";
-        ObjectInstanceWhitelist<String> str = new ObjectInstanceWhitelist<String>(i) {};
+        ObjectInstanceWhitelist<String> str = new ObjectInstanceWhitelist<>(i) {};
         assertTrue(str.permitsInstance(i));
     }
 
@@ -33,7 +33,7 @@ public class ObjectInstanceWhitelistTest {
     @Test
     public void isClass() {
         MimeMessage message = new MimeMessage((Session) null);
-        ObjectInstanceWhitelist<MimeMessage> str = new ObjectInstanceWhitelist<MimeMessage>(message) {};
+        ObjectInstanceWhitelist<MimeMessage> str = new ObjectInstanceWhitelist<>(message) {};
         assertTrue(str.isClass(Part.class));
     }
 

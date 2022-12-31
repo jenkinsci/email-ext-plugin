@@ -58,13 +58,13 @@ public class ScriptContentBuildWrapperTest
         final ChildReport childReport1 = mockChildReport();
         final ChildReport childReport2 = mockChildReport();
         when( surefireAggregatedReport.getChildReports() ).thenReturn(
-            new LinkedList<AggregatedTestResultAction.ChildReport>()
+            new LinkedList<>()
             {{
                     add( childReport1 );
                     add( childReport2 );
                 }} );
 
-        when( mockBuild.getActions(AggregatedTestResultAction.class) ).thenReturn( new LinkedList<AggregatedTestResultAction>()
+        when( mockBuild.getActions(AggregatedTestResultAction.class) ).thenReturn( new LinkedList<>()
         {{
                 add( surefireAggregatedReport );
             }} );

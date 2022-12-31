@@ -4,7 +4,6 @@ import java.io.PrintStream;
 import java.util.Collections;
 import java.util.Set;
 
-import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 
 import org.apache.commons.lang3.StringUtils;
