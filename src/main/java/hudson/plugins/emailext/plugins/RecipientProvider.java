@@ -7,6 +7,7 @@ import hudson.ExtensionPoint;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Job;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
+import jakarta.mail.internet.InternetAddress;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jakarta.mail.internet.InternetAddress;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 

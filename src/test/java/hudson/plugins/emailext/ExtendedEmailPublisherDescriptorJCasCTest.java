@@ -16,21 +16,18 @@ import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
 import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
 import io.jenkins.plugins.casc.misc.ConfiguredWithCode;
 import io.jenkins.plugins.casc.misc.JenkinsConfiguredWithCodeRule;
-
+import jakarta.mail.Authenticator;
+import jakarta.mail.PasswordAuthentication;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.mockito.Mockito;
-
-import jakarta.mail.Authenticator;
-import jakarta.mail.PasswordAuthentication;
 
 public class ExtendedEmailPublisherDescriptorJCasCTest {
 

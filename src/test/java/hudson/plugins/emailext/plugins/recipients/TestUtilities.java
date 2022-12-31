@@ -33,11 +33,11 @@ import hudson.model.StreamBuildListener;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.util.StreamTaskListener;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
 import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
-import jakarta.mail.internet.AddressException;
-import jakarta.mail.internet.InternetAddress;
 
 /* package private */ final class TestUtilities {
     private static final String AT_DOMAIN = "@DOMAIN";

@@ -8,13 +8,12 @@ import static org.junit.Assert.assertTrue;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import hudson.util.Secret;
+import java.util.List;
 import net.sf.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.WithoutJenkins;
-
-import java.util.List;
 
 public class MailAccountTest {
     @Rule

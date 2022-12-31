@@ -2,8 +2,8 @@ package hudson.plugins.emailext.plugins.recipients;
 
 import hudson.model.User;
 import hudson.tasks.Mailer;
+import java.util.Collections;
 import jenkins.scm.api.metadata.ContributorMetadataAction;
-
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.After;
@@ -11,8 +11,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.mock_javamail.Mailbox;
-
-import java.util.Collections;
 
 public class ContributorMetadataRecipientProviderTest {
 
