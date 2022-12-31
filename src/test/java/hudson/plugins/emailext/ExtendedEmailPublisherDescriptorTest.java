@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
-import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
@@ -72,7 +71,6 @@ import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.recipes.LocalData;
-import org.kohsuke.args4j.Argument;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -947,7 +945,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
     @Test
     @LocalData
-    public void persistedConfigurationWithCredentialId() throws Exception {
+    public void persistedConfigurationWithCredentialId() {
         // Local data created using Email Extension 2.72 with the following code:
         /*
         // add two credentials to the GLOBAL scope
