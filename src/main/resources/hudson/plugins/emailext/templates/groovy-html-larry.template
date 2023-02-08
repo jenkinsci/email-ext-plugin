@@ -46,7 +46,7 @@ img.cartoon {width: 36px; display:inline}
 						<td>${project.name}</td>
 					</tr>
 					<tr>
-						<th>Build ${build.displayName}:</th>
+						<th>Build ${hudson.Util.xmlEscape(build.displayName)}:</th>
 						<td><a
 							href="${rooturl}${build.url}">${rooturl}${build.url}</a></td>
 					</tr>
