@@ -6,6 +6,7 @@ import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
+import groovy.text.TemplateEngine;
 import hudson.FilePath;
 import hudson.Functions;
 import hudson.model.Item;
@@ -133,20 +134,26 @@ public class ScriptContent extends AbstractEvalContent {
             boolean approvedScript = false;
             if (templateStream instanceof UserProvidedContentInputStream && !AbstractEvalContent.isApprovedScript(text, GroovyLanguage.get())) {
                 approvedScript = false;
-                ScriptApproval.get().configuring(text, GroovyLanguage.get(), ApprovalContext.create().withItem(build.getParent()));
+                ScriptApproval.get().configuring(text, GroovyLanguage.get(), ApprovalContext.create().withItem(build.getParent()), false);
             } else {
                 approvedScript = true;
             }
             // we add the binding to the SimpleTemplateEngine instead of the shell
             GroovyShell shell = createEngine(descriptor, Collections.emptyMap(), !approvedScript);
-            SimpleTemplateEngine engine = new SimpleTemplateEngine(shell);
+            TemplateEngine engine;
+            if (!approvedScript) {
+                engine = new hudson.plugins.emailext.groovy.sandbox.SimpleTemplateEngine(shell, true);
+            } else {
+                engine = new SimpleTemplateEngine(shell);
+            }
             Template tmpl;
             synchronized (templateCache) {
-                Reference<Template> templateR = templateCache.get(text);
+                final String key = text + ":" + approvedScript;
+                Reference<Template> templateR = templateCache.get(key);
                 tmpl = templateR == null ? null : templateR.get();
                 if (tmpl == null) {
                     tmpl = engine.createTemplate(text);
-                    templateCache.put(text, new SoftReference<>(tmpl));
+                    templateCache.put(key, new SoftReference<>(tmpl));
                 }
             }
             final Template tmplR = tmpl;
@@ -259,7 +266,6 @@ public class ScriptContent extends AbstractEvalContent {
         for (Map.Entry<String, Object> e : variables.entrySet()) {
             binding.setVariable(e.getKey(), e.getValue());
         }
-
         return new GroovyShell(cl, binding, cc);
     }
 
