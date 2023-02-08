@@ -23,6 +23,7 @@
  */
 package hudson.plugins.emailext.plugins.content;
 
+import hudson.ExtensionList;
 import hudson.FilePath;
 import hudson.Plugin;
 import hudson.model.AbstractBuild;
@@ -32,6 +33,7 @@ import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.remoting.VirtualChannel;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
+import hudson.security.Permission;
 import hudson.util.FormValidation;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -49,6 +51,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.lib.configprovider.model.Config;
 import org.jenkinsci.plugins.configfiles.ConfigFiles;
+import org.jenkinsci.plugins.configfiles.GlobalConfigFiles;
 import org.jenkinsci.plugins.scriptsecurity.scripts.Language;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
@@ -159,7 +162,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     }
 
     private InputStream getManagedFile(Run<?, ?> run, String fileName) {
-        InputStream stream = null;
+        InputStream stream;
         Plugin plugin = Jenkins.get().getPlugin("config-file-provider");
         if (plugin != null) {
             Config config = null;
@@ -173,9 +176,16 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
 
             if (config != null) {
                stream = new ByteArrayInputStream(config.content.getBytes(StandardCharsets.UTF_8));
+                if (ExtensionList.lookupSingleton(GlobalConfigFiles.class).getById(config.id) == config) {
+                    // the config is in the Global configuration not a folder - so it is approved by virtue of only being modified by an admin
+                    return stream;
+                } else {
+                    // the script may have been written by anyone so it needs to be sandboxed
+                    return new UserProvidedContentInputStream(stream);
+                }
             }
         }
-        return stream;
+        return null;
     }
     
     protected String generateMissingFile(String type, String fileName) {
@@ -189,15 +199,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     @Restricted(NoExternalUse.class)
     public static boolean isApprovedScript(final String script, final Language language) {
         final ScriptApproval approval = ScriptApproval.get();
-        try {
-            //checking doesn't check if we are system or not since it assumed being called from doCheckField
-            try (ACLContext context = ACL.as2(Jenkins.ANONYMOUS2)) {
-                return approval.checking(script, language).kind == FormValidation.Kind.OK;
-            }
-        } catch (Exception e) {
-            Logger.getLogger(AbstractEvalContent.class.getName()).log(Level.WARNING, "Could not determine approval state of script.", e);
-            return false;
-        }
+        return approval.isScriptApproved(script, language);
     }
 
     private static class IsChildFileCallable extends MasterToSlaveFileCallable<Boolean> {
