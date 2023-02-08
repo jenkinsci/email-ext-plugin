@@ -18,7 +18,7 @@ l.layout {
                 var templateFile = document.getElementById('template_file_name').value;
                 var buildId = document.getElementById('template_build').value;
                 templateTester.renderTemplate(templateFile,buildId, function(t) {
-                    document.getElementById('rendered_template').innerHTML = t.responseObject()[0];
+                    document.getElementById('rendered_template').src = "data:text/html;charset=utf-8," + escape(t.responseObject()[0]);
                     var consoleOutput = t.responseObject()[1];
                     if(consoleOutput.length == 0) {
                         document.getElementById('output').style.display = 'none';                        
@@ -49,7 +49,7 @@ l.layout {
                     }
                 }
             }
-            div(id: "rendered_template")
+            iframe(id:"rendered_template", width:"80%", height:"500px", frameBorder:"0", sandbox:"")
             div(id: "output", style: "display:none;") {
                 hr()
                 h3(_("Template Console Output"))
