@@ -78,7 +78,7 @@
     </tr>
     <tr>
       <td>Cause:</td>
-      <td><% build.causes.each() { cause -> %> ${cause.shortDescription} <%  } %></td>
+      <td><% build.causes.each() { cause -> %> ${hudson.Util.xmlEscape(cause.shortDescription)} <%  } %></td>
     </tr>
   </table>
   <br/>
@@ -208,7 +208,7 @@
       junitResult -> junitResult.getChildren().each {
         packageResult -> %>
     <tr>
-      <td>${packageResult.getName()}</td>
+      <td>${hudson.Util.xmlEscape(packageResult.getName())}</td>
       <td>${packageResult.getFailCount()}</td>
       <td>${packageResult.getPassCount()}</td>
       <td>${packageResult.getSkipCount()}</td>
@@ -218,7 +218,7 @@
         test -> %>
             <tr>
               <td class="test test-fixed" colspan="5">
-                ${test.getFullName()} ${test.getStatus()}
+                ${hudson.Util.xmlEscape(test.getFullName())} ${test.getStatus()}
               </td>
             </tr>
         <% } %>
@@ -226,7 +226,7 @@
           failed_test -> %>
     <tr>
       <td class="test test-failed" colspan="5">
-        ${failed_test.getFullName()} (Age: ${failed_test.getAge()})
+        ${hudson.Util.xmlEscape(failed_test.getFullName())} (Age: ${failed_test.getAge()})
       </td>
     </tr>
         <% }
