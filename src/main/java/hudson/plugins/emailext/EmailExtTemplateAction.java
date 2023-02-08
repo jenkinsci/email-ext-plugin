@@ -134,7 +134,7 @@ public class EmailExtTemplateAction implements Action {
                 scriptContent.template = templateFile;                
                 result[0] = scriptContent.evaluate(build, listener, "SCRIPT");                
             }
-            result[1] = stream.toString(ExtendedEmailPublisher.descriptor().getCharset());
+            result[1] = hudson.Util.xmlEscape(stream.toString(ExtendedEmailPublisher.descriptor().getCharset()));
         } catch (Exception ex) {
             result[0] = renderError(ex);
         }         
