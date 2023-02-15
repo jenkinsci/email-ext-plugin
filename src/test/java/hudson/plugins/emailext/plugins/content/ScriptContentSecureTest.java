@@ -24,18 +24,37 @@
 
 package hudson.plugins.emailext.plugins.content;
 
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 
+import com.cloudbees.hudson.plugins.folder.Folder;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
 import hudson.model.Item;
+import hudson.plugins.emailext.ExtendedEmailPublisher;
+import hudson.plugins.emailext.GroovyTemplateConfig;
+import hudson.util.LogTaskListener;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.configfiles.folder.FolderConfigFileAction;
+import org.jenkinsci.plugins.configfiles.folder.FolderConfigFileProperty;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.junit.Before;
 import org.junit.Test;
+import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
+import org.jvnet.hudson.test.MockFolder;
+
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Runs some {@link ScriptContentTest} in a secured Jenkins.
@@ -97,5 +116,55 @@ public class ScriptContentSecureTest extends ScriptContentTest {
     @Test
     public void testGroovyTemplateWithContentToken() throws Exception {
         super.testGroovyTemplateWithContentToken();
+    }
+
+    @Test @Issue("SECURITY-2939")
+    public void managedBadTemplateInFolder() throws Exception {
+        final Folder folder = j.createProject(Folder.class, "sub");
+
+        final FreeStyleProject project = folder.createProject(FreeStyleProject.class, "Free");
+        project.getBuildersList().add(new CaptureEnvironmentBuilder());
+        project.getPublishersList().add(new ExtendedEmailPublisher());
+        final FreeStyleBuild build = j.buildAndAssertSuccess(project);
+        FolderConfigFileAction folderConfigFileAction = folder.getAction(FolderConfigFileAction.class);
+        folderConfigFileAction.getGroupedConfigs(); //Should create the config store accessed below
+        final FolderConfigFileProperty folderConfigFileProperty = folder.getProperties().get(FolderConfigFileProperty.class);
+        folderConfigFileProperty.getConfigs().add(
+                new GroovyTemplateConfig(
+                "long-long-id", "test.groovy", "Bad groovy template script",
+                        "<%\n" +
+                                "  // Whatever Groovy code you want\n" +
+                                "  Jenkins.get().setSystemMessage(\"You got hax0red\");\n" +
+                                "  // You can easily exfiltrate data using out.print or throwing an exception with the data in the message\n" +
+                                "  out.println(Jenkins.get().getSystemMessage());\n" +
+                                "%>")
+        );
+        ScriptContent scriptContent = new ScriptContent();
+        scriptContent.template = "managed:test.groovy";
+        final LogTaskListener listener = new LogTaskListener(Logger.getLogger(getClass().getName()), Level.INFO);
+        String result = scriptContent.evaluate(build, listener, "SCRIPT");
+        assertThat(result, not(containsString("You got hax0red")));
+        assertNotEquals("You got hax0red", Jenkins.get().getSystemMessage());
+        assertThat(result, containsString("Scripts not permitted to use"));
+
+        final ScriptApproval scriptApproval = ScriptApproval.get();
+        assertThat(scriptApproval.getPendingScripts(), hasSize(1));
+        scriptApproval.preapproveAll();
+
+        scriptContent = new ScriptContent();
+        scriptContent.template = "managed:test.groovy";
+        result = scriptContent.evaluate(build, listener, "SCRIPT");
+        assertThat(result, containsString("You got hax0red"));
+        assertEquals("You got hax0red", Jenkins.get().getSystemMessage());
+        Jenkins.get().setSystemMessage("");
+
+        scriptApproval.clearApprovedScripts();
+
+        scriptContent = new ScriptContent();
+        scriptContent.template = "managed:test.groovy";
+        result = scriptContent.evaluate(build, listener, "SCRIPT");
+        assertThat(result, not(containsString("You got hax0red")));
+        assertNotEquals("You got hax0red", Jenkins.get().getSystemMessage());
+        assertThat(result, containsString("Scripts not permitted to use"));
     }
 }
