@@ -221,6 +221,18 @@
             <artifactId>mock-javamail</artifactId>
             <version>2.0</version>
             <scope>test</scope>
+            <exclusions>
+                <!-- Provided by jakarta-activation-api plugin -->
+                <exclusion>
+                    <groupId>com.sun.activation</groupId>
+                    <artifactId>jakarta.activation</artifactId>
+                </exclusion>
+                <!-- Provided by jakarta-mail-api plugin -->
+                <exclusion>
+                    <groupId>com.sun.mail</groupId>
+                    <artifactId>jakarta.mail</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--
             This must come after mock-javamail in the class path in order to avoid eclipse-ee4j/mail#350.
