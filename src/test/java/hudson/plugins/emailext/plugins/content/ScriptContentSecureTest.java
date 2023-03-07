@@ -27,7 +27,6 @@ package hudson.plugins.emailext.plugins.content;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -41,6 +40,8 @@ import hudson.model.Item;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.GroovyTemplateConfig;
 import hudson.util.LogTaskListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.configfiles.folder.FolderConfigFileAction;
 import org.jenkinsci.plugins.configfiles.folder.FolderConfigFileProperty;
@@ -50,11 +51,6 @@ import org.junit.Test;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
-import org.jvnet.hudson.test.MockFolder;
-
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Runs some {@link ScriptContentTest} in a secured Jenkins.
