@@ -58,6 +58,7 @@ import hudson.plugins.emailext.plugins.trigger.UnstableTrigger;
 import hudson.plugins.emailext.plugins.trigger.XNthFailureTrigger;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
+import hudson.util.VersionNumber;
 import jakarta.mail.Authenticator;
 import java.util.Collection;
 import java.util.Collections;
@@ -79,12 +80,21 @@ public class ExtendedEmailPublisherDescriptorTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
+    private void assertTitlePage(HtmlPage page) {
+        VersionNumber jenkinsVersion = j.jenkins.getVersion();
+        VersionNumber newManageJenkinsVersion = new VersionNumber("2.395");
+        String expectedTitle = "System [Jenkins]";
+        if (jenkinsVersion.isOlderThan(newManageJenkinsVersion)) {
+            expectedTitle = "Configure System [Jenkins]";
+        }
+        assertEquals("Should be at the Configure System page", expectedTitle, page.getTitleText());
+    }
+
     @Test
     public void testGlobalConfigDefaultState() throws Exception {
         HtmlPage page = j.createWebClient().goTo("configure");
 
-        assertEquals("Should be at the Configure System page",
-                "Configure System [Jenkins]", page.getTitleText());
+        assertTitlePage(page);
 
         HtmlTextInput smtpHost = page.getElementByName("_.smtpHost");
         assertNotNull("SMTP Server should be present", smtpHost);
@@ -250,8 +260,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
 
-        assertEquals("Should be at the Configure System page",
-                "Configure System [Jenkins]", page.getTitleText());
+        assertTitlePage(page);
 
         List<DomNode> nodes = page.getByXPath(".//button[contains(text(),'Default Triggers')]");
         assertEquals(1, nodes.size());
@@ -287,8 +296,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
 
-        assertEquals("Should be at the Configure System page",
-                "Configure System [Jenkins]", page.getTitleText());
+        assertTitlePage(page);
 
         List<DomElement> nodes = page.getByXPath(".//div[contains(@class, 'setting-name') and ./text()='Additional groovy classpath'] | .//div[contains(@class, 'jenkins-form-label') and ./text()='Additional groovy classpath']");
         assertEquals(1, nodes.size());
