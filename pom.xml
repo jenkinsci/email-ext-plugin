@@ -33,6 +33,9 @@
         <changelist>-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
         <jenkins.version>2.361.4</jenkins.version>
+        <spotbugs.effort>Max</spotbugs.effort>
+        <spotbugs.failOnError>true</spotbugs.failOnError>
+        <spotbugs.threshold>Low</spotbugs.threshold>
         <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
         <concurrency>1</concurrency>
         <!-- To be removed once Jenkins.MANAGE gets out of beta -->
