@@ -20,89 +20,82 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ScriptContentBuildWrapperTest
-{
+public class ScriptContentBuildWrapperTest {
     private ScriptContentBuildWrapper buildWrapper;
 
     private AbstractBuild<?, ?> mockBuild;
 
     @Before
-    public void setup()
-    {
-        mockBuild = mock( AbstractBuild.class );
+    public void setup() {
+        mockBuild = mock(AbstractBuild.class);
 
-        buildWrapper = new ScriptContentBuildWrapper( mockBuild );
+        buildWrapper = new ScriptContentBuildWrapper(mockBuild);
     }
 
     @Test
-    public void testGetTimestampString()
-    {
+    public void testGetTimestampString() {
         final Calendar calendar = Calendar.getInstance();
-        when( mockBuild.getTimestamp() ).thenReturn( calendar );
+        when(mockBuild.getTimestamp()).thenReturn(calendar);
 
-        assertEquals( Functions.rfc822Date( calendar ), buildWrapper.getTimestampString() );
+        assertEquals(Functions.rfc822Date(calendar), buildWrapper.getTimestampString());
     }
 
     @Test
-    public void testGetAction_whenActionNotFoundThenReturnNull()
-    {
-        when( mockBuild.getActions() ).thenReturn(new LinkedList<>() );
+    public void testGetAction_whenActionNotFoundThenReturnNull() {
+        when(mockBuild.getActions()).thenReturn(new LinkedList<>());
 
-        assertNull( buildWrapper.getAction( "class.not.found" ) );
+        assertNull(buildWrapper.getAction("class.not.found"));
     }
 
     @Test
-    public void testGetJUnitTestResult_whenMavenProjectUseMavenPluginsSurefireAggregatedReport()
-    {
-        final AggregatedTestResultAction surefireAggregatedReport = mock( AggregatedTestResultAction.class );
+    public void testGetJUnitTestResult_whenMavenProjectUseMavenPluginsSurefireAggregatedReport() {
+        final AggregatedTestResultAction surefireAggregatedReport = mock(AggregatedTestResultAction.class);
         final ChildReport childReport1 = mockChildReport();
         final ChildReport childReport2 = mockChildReport();
-        when( surefireAggregatedReport.getChildReports() ).thenReturn(
-            new LinkedList<>()
-            {{
-                    add( childReport1 );
-                    add( childReport2 );
-                }} );
+        when(surefireAggregatedReport.getChildReports()).thenReturn(new LinkedList<>() {
+            {
+                add(childReport1);
+                add(childReport2);
+            }
+        });
 
-        when( mockBuild.getActions(AggregatedTestResultAction.class) ).thenReturn( new LinkedList<>()
-        {{
-                add( surefireAggregatedReport );
-            }} );
+        when(mockBuild.getActions(AggregatedTestResultAction.class)).thenReturn(new LinkedList<>() {
+            {
+                add(surefireAggregatedReport);
+            }
+        });
 
         final List<TestResult> testResults = buildWrapper.getJUnitTestResult();
 
-        assertEquals( 2, testResults.size() );
-        assertSame( childReport1.result, testResults.get( 0 ) );
-        assertSame( childReport2.result, testResults.get( 1 ) );
+        assertEquals(2, testResults.size());
+        assertSame(childReport1.result, testResults.get(0));
+        assertSame(childReport2.result, testResults.get(1));
     }
 
-    private ChildReport mockChildReport()
-    {
-        final AbstractTestResultAction<?> testResultAction1 = mock( AbstractTestResultAction.class );
-        when( testResultAction1.getResult() ).thenReturn( new TestResult() );
-        return new ChildReport( mockBuild, testResultAction1 );
+    private ChildReport mockChildReport() {
+        final AbstractTestResultAction<?> testResultAction1 = mock(AbstractTestResultAction.class);
+        when(testResultAction1.getResult()).thenReturn(new TestResult());
+        return new ChildReport(mockBuild, testResultAction1);
     }
 
     @Test
-    public void testGetJUnitTestResult_listShouldBeEmptyWhenNoTestsFound()
-    {
+    public void testGetJUnitTestResult_listShouldBeEmptyWhenNoTestsFound() {
         final List<TestResult> testResults = buildWrapper.getJUnitTestResult();
 
-        assertTrue( testResults.isEmpty() );
+        assertTrue(testResults.isEmpty());
     }
 
     @Test
-    public void testGetJUnitTestResult_whenFreestyleProjectShouldGetTest()
-    {
+    public void testGetJUnitTestResult_whenFreestyleProjectShouldGetTest() {
         final TestResult testResult = new TestResult();
-        final TestResultAction testResultAction = mock( TestResultAction.class );
+        final TestResultAction testResultAction = mock(TestResultAction.class);
 
-        when( testResultAction.getResult() ).thenReturn( testResult );
-        when( mockBuild.getAction( TestResultAction.class ) ).thenReturn( testResultAction );
+        when(testResultAction.getResult()).thenReturn(testResult);
+        when(mockBuild.getAction(TestResultAction.class)).thenReturn(testResultAction);
 
         final List<TestResult> testResults = buildWrapper.getJUnitTestResult();
 
-        assertEquals( 1, testResults.size() );
-        assertSame( testResult, testResults.get( 0 ) );
+        assertEquals(1, testResults.size());
+        assertSame(testResult, testResults.get(0));
     }
 }

@@ -62,26 +62,34 @@ public class ScriptContentSecureTest extends ScriptContentTest {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
 
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
-                                                   .grant(Jenkins.ADMINISTER).everywhere().to("bob")
-                                                   .grant(Jenkins.READ, Item.READ, Item.EXTENDED_READ).everywhere().to("alice"));
+                .grant(Jenkins.ADMINISTER)
+                .everywhere()
+                .to("bob")
+                .grant(Jenkins.READ, Item.READ, Item.EXTENDED_READ)
+                .everywhere()
+                .to("alice"));
     }
 
+    @Override
     @Test
     public void testShouldFindScriptOnClassPath() throws Exception {
         super.testShouldFindScriptOnClassPath();
     }
 
+    @Override
     @Test
     public void testShouldFindTemplateOnClassPath() throws Exception {
         super.testShouldFindTemplateOnClassPath();
     }
 
+    @Override
     @Test
     public void templateInWorkspace() throws Exception {
         ScriptApproval.get().clearApprovedScripts();
         super.templateInWorkspace();
     }
 
+    @Override
     @Test
     public void templateInWorkspaceUnsafe() throws Exception {
         ScriptApproval.get().clearApprovedScripts();
@@ -91,7 +99,8 @@ public class ScriptContentSecureTest extends ScriptContentTest {
                 super::templateInWorkspaceUnsafe);
         // Error message is a TokenMacro parse error and does not contain a script security warning,
         // perhaps due to EmailExtScript#methodMissing? The message looks like:
-        // Error processing tokens: Error while parsing action 'Text/ZeroOrMore/FirstOf/Token/DelimitedToken/DelimitedToken_Action3' at input position (line 1, pos 39)
+        // Error processing tokens: Error while parsing action
+        // 'Text/ZeroOrMore/FirstOf/Token/DelimitedToken/DelimitedToken_Action3' at input position (line 1, pos 39)
         assertNull(j.jenkins.getItem("should-not-exist"));
     }
 
@@ -99,22 +108,22 @@ public class ScriptContentSecureTest extends ScriptContentTest {
     @Test
     public void templateInWorkspaceWithConstructor() throws Exception {
         ScriptApproval.get().clearApprovedScripts();
-        AssertionError e =
-                assertThrows(
-                        "Templates in the workspace should use the Groovy sandbox",
-                        AssertionError.class,
-                        () -> super.templateInWorkspace("/testConstructor.groovy"));
-        assertThat(
-                e.getMessage(), containsString("staticMethod jenkins.model.Jenkins getInstance"));
+        AssertionError e = assertThrows(
+                "Templates in the workspace should use the Groovy sandbox",
+                AssertionError.class,
+                () -> super.templateInWorkspace("/testConstructor.groovy"));
+        assertThat(e.getMessage(), containsString("staticMethod jenkins.model.Jenkins getInstance"));
         assertNull(j.jenkins.getItem("should-not-exist"));
     }
 
+    @Override
     @Test
     public void testGroovyTemplateWithContentToken() throws Exception {
         super.testGroovyTemplateWithContentToken();
     }
 
-    @Test @Issue("SECURITY-2939")
+    @Test
+    @Issue("SECURITY-2939")
     public void managedBadTemplateInFolder() throws Exception {
         final Folder folder = j.createProject(Folder.class, "sub");
 
@@ -123,21 +132,24 @@ public class ScriptContentSecureTest extends ScriptContentTest {
         project.getPublishersList().add(new ExtendedEmailPublisher());
         final FreeStyleBuild build = j.buildAndAssertSuccess(project);
         FolderConfigFileAction folderConfigFileAction = folder.getAction(FolderConfigFileAction.class);
-        folderConfigFileAction.getGroupedConfigs(); //Should create the config store accessed below
-        final FolderConfigFileProperty folderConfigFileProperty = folder.getProperties().get(FolderConfigFileProperty.class);
-        folderConfigFileProperty.getConfigs().add(
-                new GroovyTemplateConfig(
-                "long-long-id", "test.groovy", "Bad groovy template script",
-                        "<%\n" +
-                                "  // Whatever Groovy code you want\n" +
-                                "  Jenkins.get().setSystemMessage(\"You got hax0red\");\n" +
-                                "  // You can easily exfiltrate data using out.print or throwing an exception with the data in the message\n" +
-                                "  out.println(Jenkins.get().getSystemMessage());\n" +
-                                "%>")
-        );
+        folderConfigFileAction.getGroupedConfigs(); // Should create the config store accessed below
+        final FolderConfigFileProperty folderConfigFileProperty =
+                folder.getProperties().get(FolderConfigFileProperty.class);
+        folderConfigFileProperty
+                .getConfigs()
+                .add(new GroovyTemplateConfig(
+                        "long-long-id",
+                        "test.groovy",
+                        "Bad groovy template script",
+                        "<%\n" + "  // Whatever Groovy code you want\n"
+                                + "  Jenkins.get().setSystemMessage(\"You got hax0red\");\n"
+                                + "  // You can easily exfiltrate data using out.print or throwing an exception with the data in the message\n"
+                                + "  out.println(Jenkins.get().getSystemMessage());\n"
+                                + "%>"));
         ScriptContent scriptContent = new ScriptContent();
         scriptContent.template = "managed:test.groovy";
-        final LogTaskListener listener = new LogTaskListener(Logger.getLogger(getClass().getName()), Level.INFO);
+        final LogTaskListener listener =
+                new LogTaskListener(Logger.getLogger(getClass().getName()), Level.INFO);
         String result = scriptContent.evaluate(build, listener, "SCRIPT");
         assertThat(result, not(containsString("You got hax0red")));
         assertNotEquals("You got hax0red", Jenkins.get().getSystemMessage());

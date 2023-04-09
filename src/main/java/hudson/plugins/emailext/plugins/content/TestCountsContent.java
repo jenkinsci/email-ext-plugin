@@ -23,12 +23,12 @@ public class TestCountsContent extends DataBoundTokenMacro {
 
     @Parameter
     public String var = VAR_DEFAULT_VALUE;
-    
+
     @Override
     public boolean acceptsMacroName(String macroName) {
         return macroName.equals(MACRO_NAME);
     }
-   
+
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
@@ -45,7 +45,7 @@ public class TestCountsContent extends DataBoundTokenMacro {
         }
 
         var = var.toLowerCase();
-        
+
         switch (var) {
             case "total":
                 return String.valueOf(action.getTotalCount());

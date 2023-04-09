@@ -65,7 +65,11 @@ public class JellyScriptContent extends AbstractEvalContent {
         String rawScript = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
         if (inputStream instanceof UserProvidedContentInputStream) {
             Item parent = build.getParent();
-            ScriptApproval.get().configuring(rawScript, JellyLanguage.get(), ApprovalContext.create().withItem(parent));
+            ScriptApproval.get()
+                    .configuring(
+                            rawScript,
+                            JellyLanguage.get(),
+                            ApprovalContext.create().withItem(parent));
             ScriptApproval.get().using(rawScript, JellyLanguage.get());
         }
 
@@ -78,8 +82,7 @@ public class JellyScriptContent extends AbstractEvalContent {
         return null;
     }
 
-    private String convert(Run<?, ?> build, JellyContext context, Script script)
-            throws JellyTagException, IOException {
+    private String convert(Run<?, ?> build, JellyContext context, Script script) throws JellyTagException, IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream(16 * 1024);
         XMLOutput xmlOutput = XMLOutput.createXMLOutput(output);
         script.run(context, xmlOutput);
@@ -91,7 +94,8 @@ public class JellyScriptContent extends AbstractEvalContent {
 
     private JellyContext createContext(Object it, @NonNull Run<?, ?> build, @NonNull TaskListener listener) {
         JellyContext context = new JellyContext();
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         context.setVariable("it", it);
         context.setVariable("build", build);
         context.setVariable("project", build.getParent());

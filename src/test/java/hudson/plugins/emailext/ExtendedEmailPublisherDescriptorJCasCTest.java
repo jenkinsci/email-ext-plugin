@@ -31,8 +31,11 @@ import org.mockito.Mockito;
 
 public class ExtendedEmailPublisherDescriptorJCasCTest {
 
-    @Rule public JenkinsConfiguredWithCodeRule r = new JenkinsConfiguredWithCodeRule();
-    @Rule public TestName testName = new TestName();
+    @Rule
+    public JenkinsConfiguredWithCodeRule r = new JenkinsConfiguredWithCodeRule();
+
+    @Rule
+    public TestName testName = new TestName();
 
     @Test
     @ConfiguredWithCode("configuration-as-code.yml")
@@ -84,7 +87,9 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
 
         assertEquals(0, descriptor.getDefaultClasspath().size());
         assertEquals(1, descriptor.getDefaultTriggerIds().size());
-        assertEquals("hudson.plugins.emailext.plugins.trigger.FailureTrigger", descriptor.getDefaultTriggerIds().get(0));
+        assertEquals(
+                "hudson.plugins.emailext.plugins.trigger.FailureTrigger",
+                descriptor.getDefaultTriggerIds().get(0));
 
         assertTrue(descriptor.isDebugMode());
     }
@@ -93,19 +98,16 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
     @ConfiguredWithCode("configuration-as-code-with-triggers.yml")
     public void shouldBeAbleToConfigureTriggers() {
         final ExtendedEmailPublisherDescriptor descriptor =
-              ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
+                ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
         assertNotNull(descriptor);
 
         final List<String> expectedTriggers = Arrays.asList(
-              RegressionTrigger.class.getName(),
-              AbortedTrigger.class.getName(),
-              FixedTrigger.class.getName()
-        );
+                RegressionTrigger.class.getName(), AbortedTrigger.class.getName(), FixedTrigger.class.getName());
 
         MatcherAssert.assertThat(
-              descriptor.getDefaultTriggerIds(),
-              Matchers.contains(expectedTriggers.stream().map(Matchers::equalTo).collect(Collectors.toList()))
-        );
+                descriptor.getDefaultTriggerIds(),
+                Matchers.contains(
+                        expectedTriggers.stream().map(Matchers::equalTo).collect(Collectors.toList())));
     }
 
     @Test
@@ -149,7 +151,8 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
         assertTrue(account.isUseTls());
 
         // check that credentials were created for the two accounts
-        List<Credentials> creds = CredentialsProvider.lookupCredentials(com.cloudbees.plugins.credentials.Credentials.class);
+        List<Credentials> creds =
+                CredentialsProvider.lookupCredentials(com.cloudbees.plugins.credentials.Credentials.class);
         assertEquals(2, creds.size());
         for (Credentials c : creds) {
             assertEquals(UsernamePasswordCredentialsImpl.class, c.getClass());
@@ -169,7 +172,9 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
 
         assertEquals(0, descriptor.getDefaultClasspath().size());
         assertEquals(1, descriptor.getDefaultTriggerIds().size());
-        assertEquals("hudson.plugins.emailext.plugins.trigger.FailureTrigger", descriptor.getDefaultTriggerIds().get(0));
+        assertEquals(
+                "hudson.plugins.emailext.plugins.trigger.FailureTrigger",
+                descriptor.getDefaultTriggerIds().get(0));
 
         assertTrue(descriptor.isDebugMode());
     }
@@ -184,7 +189,7 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
 
         Authenticator authenticator = descriptor.getAuthenticatorProvider().apply(descriptor.getMailAccount(), build);
         Method method = authenticator.getClass().getDeclaredMethod("getPasswordAuthentication");
-        PasswordAuthentication passwordAuthentication = (PasswordAuthentication)method.invoke(authenticator);
+        PasswordAuthentication passwordAuthentication = (PasswordAuthentication) method.invoke(authenticator);
         assertNotNull(passwordAuthentication);
         assertEquals("smtp-username-xyz", passwordAuthentication.getUserName());
         assertEquals("smtp-password-xyz", passwordAuthentication.getPassword());

@@ -142,14 +142,14 @@ public class EmailType {
         if (recipientProviders == null) {
             recipientProviders = new ArrayList<>();
         }
-        if(providers != null) {
+        if (providers != null) {
             recipientProviders.addAll(providers);
         }
     }
 
     @Whitelisted
     public void setRecipientList(String recipientList) {
-        this.recipientList = hudson.Util.fixEmptyAndTrim ( recipientList );
+        this.recipientList = hudson.Util.fixEmptyAndTrim(recipientList);
     }
 
     @Whitelisted
@@ -159,7 +159,7 @@ public class EmailType {
 
     @Whitelisted
     public void setReplyTo(String replyTo) {
-        this.replyTo = hudson.Util.fixEmptyAndTrim ( replyTo );
+        this.replyTo = hudson.Util.fixEmptyAndTrim(replyTo);
     }
 
     @Whitelisted
@@ -210,8 +210,8 @@ public class EmailType {
             // get rid of PROJECT_DEFAULT_RECIPIENTS stuff
             this.recipientList = this.recipientList.replaceAll("\\$\\{?PROJECT_DEFAULT_RECIPIENTS\\}?", "");
         }
-        
-        if(recipientProviders == null) {
+
+        if (recipientProviders == null) {
             recipientProviders = new ArrayList<>();
         }
 
@@ -234,118 +234,118 @@ public class EmailType {
 
         return this;
     }
-    
+
     @Deprecated
     public boolean getSendToCulprits() {
-        for(RecipientProvider p : recipientProviders) {
-            if(p instanceof CulpritsRecipientProvider) {
+        for (RecipientProvider p : recipientProviders) {
+            if (p instanceof CulpritsRecipientProvider) {
                 return true;
             }
         }
         return false;
     }
-    
+
     @Deprecated
     public void setSendToCulprits(boolean sendToCulprits) {
-        if(sendToCulprits && !getSendToCulprits()) {
+        if (sendToCulprits && !getSendToCulprits()) {
             // need to add
             recipientProviders.add(new CulpritsRecipientProvider());
-        } else if(!sendToCulprits && getSendToCulprits()) {
+        } else if (!sendToCulprits && getSendToCulprits()) {
             int index;
-            for(index = 0; index < recipientProviders.size(); index++) {
-                if(recipientProviders.get(index) instanceof CulpritsRecipientProvider) {
+            for (index = 0; index < recipientProviders.size(); index++) {
+                if (recipientProviders.get(index) instanceof CulpritsRecipientProvider) {
                     break;
                 }
             }
-            
-            if(index >=0 && index < recipientProviders.size()) {
+
+            if (index >= 0 && index < recipientProviders.size()) {
                 recipientProviders.remove(index);
             }
         }
     }
-    
+
     @Deprecated
     public boolean getSendToDevelopers() {
-        for(RecipientProvider p : recipientProviders) {
-            if(p instanceof DevelopersRecipientProvider) {
+        for (RecipientProvider p : recipientProviders) {
+            if (p instanceof DevelopersRecipientProvider) {
                 return true;
             }
         }
         return false;
     }
-    
+
     @Deprecated
     public void setSendToDevelopers(boolean sendToDevelopers) {
-        if(sendToDevelopers && !getSendToDevelopers()) {
+        if (sendToDevelopers && !getSendToDevelopers()) {
             // need to add
             recipientProviders.add(new DevelopersRecipientProvider());
-        } else if(!sendToDevelopers && getSendToDevelopers()) {
+        } else if (!sendToDevelopers && getSendToDevelopers()) {
             int index;
-            for(index = 0; index < recipientProviders.size(); index++) {
-                if(recipientProviders.get(index) instanceof DevelopersRecipientProvider) {
+            for (index = 0; index < recipientProviders.size(); index++) {
+                if (recipientProviders.get(index) instanceof DevelopersRecipientProvider) {
                     break;
                 }
             }
-            
-            if(index >= 0 && index < recipientProviders.size()) {
+
+            if (index >= 0 && index < recipientProviders.size()) {
                 recipientProviders.remove(index);
             }
         }
     }
-    
+
     @Deprecated
     public boolean getSendToRequester() {
-        for(RecipientProvider p : recipientProviders) {
-            if(p instanceof RequesterRecipientProvider) {
+        for (RecipientProvider p : recipientProviders) {
+            if (p instanceof RequesterRecipientProvider) {
                 return true;
             }
         }
         return false;
     }
-    
+
     @Deprecated
     public void setSendToRequester(boolean sendToRequester) {
-        if(sendToRequester && !getSendToRequester()) {
+        if (sendToRequester && !getSendToRequester()) {
             // need to add
             recipientProviders.add(new RequesterRecipientProvider());
-        } else if(!sendToRequester && getSendToRequester()) {
+        } else if (!sendToRequester && getSendToRequester()) {
             int index;
-            for(index = 0; index < recipientProviders.size(); index++) {
-                if(recipientProviders.get(index) instanceof RequesterRecipientProvider) {
+            for (index = 0; index < recipientProviders.size(); index++) {
+                if (recipientProviders.get(index) instanceof RequesterRecipientProvider) {
                     break;
                 }
             }
-            
-            if(index >= 0 && index < recipientProviders.size()) {
+
+            if (index >= 0 && index < recipientProviders.size()) {
                 recipientProviders.remove(index);
             }
         }
     }
-    
+
     @Deprecated
     public boolean getSendToRecipientList() {
-        for(RecipientProvider p : recipientProviders) {
-            if(p instanceof ListRecipientProvider) {
+        for (RecipientProvider p : recipientProviders) {
+            if (p instanceof ListRecipientProvider) {
                 return true;
             }
         }
         return false;
     }
-    
+
     @Deprecated
     public void setSendToRecipientList(boolean sendToRecipientList) {
-        if(sendToRecipientList && !getSendToRecipientList()) {
+        if (sendToRecipientList && !getSendToRecipientList()) {
             // need to add
             recipientProviders.add(new RequesterRecipientProvider());
-        } else if(!sendToRecipientList && getSendToRecipientList()) {
+        } else if (!sendToRecipientList && getSendToRecipientList()) {
             int index;
-            for(index = 0; index < recipientProviders.size(); index++) {
-                if(recipientProviders.get(index) instanceof ListRecipientProvider) {
+            for (index = 0; index < recipientProviders.size(); index++) {
+                if (recipientProviders.get(index) instanceof ListRecipientProvider) {
                     break;
                 }
             }
-            
-            if(index >= 0 && index < recipientProviders.size()) {
+
+            if (index >= 0 && index < recipientProviders.size()) {
                 recipientProviders.remove(index);
             }
         }

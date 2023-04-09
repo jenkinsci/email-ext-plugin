@@ -20,9 +20,7 @@ public class RecipientProviderUtilitiesTest {
     public static class Debug implements RecipientProviderUtilities.IDebug {
 
         @Override
-        public void send(String format, Object... args) {
-
-        }
+        public void send(String format, Object... args) {}
     }
 
     public static Set<String> usersToEMails(Set<User> users) {
@@ -51,22 +49,17 @@ public class RecipientProviderUtilitiesTest {
         MockUtilities.addChangeSet(run2, "C");
 
         authors = RecipientProviderUtilities.getChangeSetAuthors(Arrays.asList(run1, run2), debug);
-        assertThat(usersToEMails(authors), CoreMatchers.equalTo(new HashSet<>(Arrays.asList("A@DOMAIN", "B@DOMAIN", "C@DOMAIN"))));
+        assertThat(
+                usersToEMails(authors),
+                CoreMatchers.equalTo(new HashSet<>(Arrays.asList("A@DOMAIN", "B@DOMAIN", "C@DOMAIN"))));
     }
 
     @Test
-    public void getUsersTriggeringTheBuilds() {
-
-    }
+    public void getUsersTriggeringTheBuilds() {}
 
     @Test
-    public void getUserTriggeringTheBuild() {
-
-    }
+    public void getUserTriggeringTheBuild() {}
 
     @Test
-    public void addUsers() {
-
-    }
-
+    public void addUsers() {}
 }

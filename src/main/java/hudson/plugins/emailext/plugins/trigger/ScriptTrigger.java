@@ -15,18 +15,78 @@ public class ScriptTrigger extends AbstractScriptTrigger {
     public static final String TRIGGER_NAME = "Script - After Build";
 
     @DataBoundConstructor
-    public ScriptTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, SecureGroovyScript secureTriggerScript) {
-        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, secureTriggerScript);
+    public ScriptTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType,
+            SecureGroovyScript secureTriggerScript) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType,
+                secureTriggerScript);
     }
-    
+
     @Deprecated
-    public ScriptTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
-        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, triggerScript);
+    public ScriptTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType,
+            String triggerScript) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType,
+                triggerScript);
     }
-    
+
     @Deprecated
-    public ScriptTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
-        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, triggerScript);
+    public ScriptTrigger(
+            boolean sendToList,
+            boolean sendToDevs,
+            boolean sendToRequester,
+            boolean sendToCulprits,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType,
+            String triggerScript) {
+        super(
+                sendToList,
+                sendToDevs,
+                sendToRequester,
+                sendToCulprits,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType,
+                triggerScript);
     }
 
     @Override
@@ -46,15 +106,24 @@ public class ScriptTrigger extends AbstractScriptTrigger {
         public String getDisplayName() {
             return TRIGGER_NAME;
         }
-        
+
         @Override
         public boolean isWatchable() {
             return false;
         }
-        
+
         @Override
         public EmailTrigger createDefault() {
-            return new ScriptTrigger(defaultRecipientProviders, "", "$PROJECT_DEFAULT_REPLYTO", "$PROJECT_DEFAULT_SUBJECT", "$PROJECT_DEFAULT_CONTENT", "", 0, "project", new SecureGroovyScript("", false, null));
+            return new ScriptTrigger(
+                    defaultRecipientProviders,
+                    "",
+                    "$PROJECT_DEFAULT_REPLYTO",
+                    "$PROJECT_DEFAULT_SUBJECT",
+                    "$PROJECT_DEFAULT_CONTENT",
+                    "",
+                    0,
+                    "project",
+                    new SecureGroovyScript("", false, null));
         }
-    }    
+    }
 }

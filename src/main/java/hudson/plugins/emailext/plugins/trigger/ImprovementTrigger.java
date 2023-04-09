@@ -18,27 +18,69 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class ImprovementTrigger extends EmailTrigger {
 
     public static final String TRIGGER_NAME = "Test Improvement";
-    
+
     @DataBoundConstructor
-    public ImprovementTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public ImprovementTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
-    
+
     @Deprecated
-    public ImprovementTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public ImprovementTrigger(
+            boolean sendToList,
+            boolean sendToDevs,
+            boolean sendToRequester,
+            boolean sendToCulprits,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                sendToList,
+                sendToDevs,
+                sendToRequester,
+                sendToCulprits,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
 
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
-        Run<?,?> previousRun = ExtendedEmailPublisher.getPreviousRun(build, listener);
+        Run<?, ?> previousRun = ExtendedEmailPublisher.getPreviousRun(build, listener);
 
-        if (previousRun == null)
+        if (previousRun == null) {
             return false;
-        if (build.getAction(AbstractTestResultAction.class) == null) return false;
-        if (previousRun.getAction(AbstractTestResultAction.class) == null)
+        }
+        if (build.getAction(AbstractTestResultAction.class) == null) {
             return false;
-        
+        }
+        if (previousRun.getAction(AbstractTestResultAction.class) == null) {
+            return false;
+        }
+
         int numCurrFailures = getNumFailures(build);
 
         // The first part of the condition avoids accidental triggering for
@@ -51,11 +93,11 @@ public class ImprovementTrigger extends EmailTrigger {
 
     @Extension
     public static final class DescriptorImpl extends EmailTriggerDescriptor {
-        
+
         public DescriptorImpl() {
             addTriggerNameToReplace(UnstableTrigger.TRIGGER_NAME);
             addTriggerNameToReplace(StillUnstableTrigger.TRIGGER_NAME);
-            
+
             addDefaultRecipientProvider(new DevelopersRecipientProvider());
             addDefaultRecipientProvider(new ListRecipientProvider());
         }
@@ -65,10 +107,10 @@ public class ImprovementTrigger extends EmailTrigger {
         public String getDisplayName() {
             return TRIGGER_NAME;
         }
-        
+
         @Override
         public EmailTrigger createDefault() {
             return _createDefault();
         }
-    }    
+    }
 }

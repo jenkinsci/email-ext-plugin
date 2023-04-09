@@ -22,41 +22,41 @@ public abstract class EmailExtScript extends Script {
     public EmailExtScript() {}
 
     private void populateArgs(Object args, Map<String, String> map, ListMultimap<String, String> multiMap) {
-        if(args instanceof Object[]) {
-            Object[] argArray = (Object[])args;
-            if(argArray.length > 0) {
-                Map<String, Object> argMap = (Map<String, Object>)argArray[0];
-                for(Map.Entry<String, Object> entry : argMap.entrySet()) {
+        if (args instanceof Object[]) {
+            Object[] argArray = (Object[]) args;
+            if (argArray.length > 0) {
+                Map<String, Object> argMap = (Map<String, Object>) argArray[0];
+                for (Map.Entry<String, Object> entry : argMap.entrySet()) {
                     String value = entry.getValue().toString();
-                    if(entry.getValue() instanceof List) {
-                        List<?> valueList = (List<?>)entry.getValue();
-                        for(Object v : valueList) {
+                    if (entry.getValue() instanceof List) {
+                        List<?> valueList = (List<?>) entry.getValue();
+                        for (Object v : valueList) {
                             multiMap.put(entry.getKey(), v.toString());
                         }
                         value = valueList.get(valueList.size() - 1).toString();
                     } else {
                         multiMap.put(entry.getKey(), value);
-                    }                                               
+                    }
                     map.put(entry.getKey(), value);
-                }                    
-            }                
+                }
+            }
         }
     }
 
     public Object methodMissing(String name, Object args)
             throws MacroEvaluationException, IOException, InterruptedException {
-    
+
         TokenMacro macro = null;
-        for(TokenMacro m : TokenMacro.all()) {
-            if(m.acceptsMacroName(name)) {
+        for (TokenMacro m : TokenMacro.all()) {
+            if (m.acceptsMacroName(name)) {
                 macro = m;
                 break;
             }
         }
 
-		if (macro == null) {
-            for(TokenMacro m : ContentBuilder.getPrivateMacros()) {
-                if(m.acceptsMacroName(name)) {
+        if (macro == null) {
+            for (TokenMacro m : ContentBuilder.getPrivateMacros()) {
+                if (m.acceptsMacroName(name)) {
                     macro = m;
                     break;
                 }
@@ -69,19 +69,19 @@ public abstract class EmailExtScript extends Script {
             populateArgs(args, argsMap, argsMultimap);
 
             // Get the build, workspace and listener from the binding.
-            Run<?, ?> build = (Run<?, ?>)this.getBinding().getVariable("build");
-            FilePath workspace = (FilePath)this.getBinding().getVariable("workspace");
-            TaskListener listener = (TaskListener)this.getBinding().getVariable("listener");
+            Run<?, ?> build = (Run<?, ?>) this.getBinding().getVariable("build");
+            FilePath workspace = (FilePath) this.getBinding().getVariable("workspace");
+            TaskListener listener = (TaskListener) this.getBinding().getVariable("listener");
 
             return macro.evaluate(build, workspace, listener, name, argsMap, argsMultimap);
         } else {
             // try environment variables
 
             // Get the build and listener from the binding.
-            Run<?,?> build = (Run<?,?>)this.getBinding().getVariable("build");
-            TaskListener listener = (TaskListener)this.getBinding().getVariable("listener");
+            Run<?, ?> build = (Run<?, ?>) this.getBinding().getVariable("build");
+            TaskListener listener = (TaskListener) this.getBinding().getVariable("listener");
             EnvVars vars = build.getEnvironment(listener);
-            if(vars.containsKey(name)) {
+            if (vars.containsKey(name)) {
                 return vars.get(name, "");
             }
         }

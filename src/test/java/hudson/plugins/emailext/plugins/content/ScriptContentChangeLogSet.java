@@ -26,53 +26,59 @@ public class ScriptContentChangeLogSet extends ChangeLogSet<ChangeLogSet.Entry> 
         return false;
     }
 
+    @Override
     public Iterator iterator() {
         return Collections.singletonList(new Entry() {
-            @Override
-            public String getMsg() {
-                return "COMMIT MESSAGE";
-            }
+                    @Override
+                    public String getMsg() {
+                        return "COMMIT MESSAGE";
+                    }
 
-            @Override
-            public User getAuthor() {
-                User user = mock(User.class);
-                when(user.getDisplayName()).thenReturn("Kohsuke Kawaguchi");
-                when(user.getFullName()).thenReturn("Kohsuke Kawaguchi");
-                return user;
-            }
+                    @Override
+                    public User getAuthor() {
+                        User user = mock(User.class);
+                        when(user.getDisplayName()).thenReturn("Kohsuke Kawaguchi");
+                        when(user.getFullName()).thenReturn("Kohsuke Kawaguchi");
+                        return user;
+                    }
 
-            @Override
-            public Collection<String> getAffectedPaths() {
-                return Arrays.asList("path1", "path2");
-            }
+                    @Override
+                    public Collection<String> getAffectedPaths() {
+                        return Arrays.asList("path1", "path2");
+                    }
 
-            @Override
-            public String getMsgAnnotated() {
-                return getMsg();
-            }
+                    @Override
+                    public String getMsgAnnotated() {
+                        return getMsg();
+                    }
 
-            @Override
-            public Collection<? extends AffectedFile> getAffectedFiles() {
-                return Arrays.asList(
-                        new AffectedFile() {
-                            public String getPath() {
-                                return "path1";
-                            }
+                    @Override
+                    public Collection<? extends AffectedFile> getAffectedFiles() {
+                        return Arrays.asList(
+                                new AffectedFile() {
+                                    @Override
+                                    public String getPath() {
+                                        return "path1";
+                                    }
 
-                            public EditType getEditType() {
-                                return EditType.EDIT;
-                            }
-                        },
-                        new AffectedFile() {
-                            public String getPath() {
-                                return "path2";
-                            }
+                                    @Override
+                                    public EditType getEditType() {
+                                        return EditType.EDIT;
+                                    }
+                                },
+                                new AffectedFile() {
+                                    @Override
+                                    public String getPath() {
+                                        return "path2";
+                                    }
 
-                            public EditType getEditType() {
-                                return EditType.ADD;
-                            }
-                        });
-            }
-        }).iterator();
+                                    @Override
+                                    public EditType getEditType() {
+                                        return EditType.ADD;
+                                    }
+                                });
+                    }
+                })
+                .iterator();
     }
 }

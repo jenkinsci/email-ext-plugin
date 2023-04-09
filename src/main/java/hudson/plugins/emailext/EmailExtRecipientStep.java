@@ -54,16 +54,16 @@ public class EmailExtRecipientStep extends Step {
                 throw new IllegalArgumentException("You must provide at least one recipient provider");
             }
             ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-            ExtendedEmailPublisherContext context =
-                    new ExtendedEmailPublisherContext(
-                            publisher,
-                            getContext().get(Run.class),
-                            null,
-                            null,
-                            getContext().get(TaskListener.class));
+            ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(
+                    publisher,
+                    getContext().get(Run.class),
+                    null,
+                    null,
+                    getContext().get(TaskListener.class));
             Set<InternetAddress> to = new HashSet<>();
             RecipientProvider.checkAllSupport(
-                    step.recipientProviders, getContext().get(Run.class).getParent().getClass());
+                    step.recipientProviders,
+                    getContext().get(Run.class).getParent().getClass());
             for (RecipientProvider provider : step.recipientProviders) {
                 provider.addRecipients(context, getContext().get(EnvVars.class), to, to, to);
             }

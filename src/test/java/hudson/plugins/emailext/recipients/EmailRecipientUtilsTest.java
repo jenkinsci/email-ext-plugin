@@ -26,7 +26,8 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 public class EmailRecipientUtilsTest {
 
-    @Rule public JenkinsRule j = new JenkinsRule();
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
 
     @Before
     public void setUp() {
@@ -40,13 +41,17 @@ public class EmailRecipientUtilsTest {
     @Test
     @Issue("JENKINS-32889")
     public void testDelimiters() throws Exception {
-        String[] testStrings = { "mickey@disney.com;donald@disney.com;goofy@disney.com;pluto@disney.com",
-                "mickey@disney.com donald@disney.com goofy@disney.com pluto@disney.com",
-                "mickey@disney.com,donald@disney.com,goofy@disney.com,pluto@disney.com" };
-        for(String testString : testStrings) {
-            Set<InternetAddress> addresses = EmailRecipientUtils.convertRecipientString(testString, envVars, EmailRecipientUtils.TO);
+        String[] testStrings = {
+            "mickey@disney.com;donald@disney.com;goofy@disney.com;pluto@disney.com",
+            "mickey@disney.com donald@disney.com goofy@disney.com pluto@disney.com",
+            "mickey@disney.com,donald@disney.com,goofy@disney.com,pluto@disney.com"
+        };
+        for (String testString : testStrings) {
+            Set<InternetAddress> addresses =
+                    EmailRecipientUtils.convertRecipientString(testString, envVars, EmailRecipientUtils.TO);
 
-            assertEquals(setOf("mickey@disney.com", "donald@disney.com", "goofy@disney.com", "pluto@disney.com"), addresses);
+            assertEquals(
+                    setOf("mickey@disney.com", "donald@disney.com", "goofy@disney.com", "pluto@disney.com"), addresses);
         }
     }
 
@@ -105,8 +110,8 @@ public class EmailRecipientUtilsTest {
     @Test
     public void testConvertRecipientList_emailAddressesShouldBeUnique()
             throws AddressException, UnsupportedEncodingException {
-        Set<InternetAddress> internetAddresses =
-                EmailRecipientUtils.convertRecipientString("ashlux@gmail.com, mickeymouse@disney.com, ashlux@gmail.com", envVars);
+        Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString(
+                "ashlux@gmail.com, mickeymouse@disney.com, ashlux@gmail.com", envVars);
 
         assertEquals(setOf("ashlux@gmail.com", "mickeymouse@disney.com"), internetAddresses);
     }
@@ -131,15 +136,13 @@ public class EmailRecipientUtilsTest {
 
     @Test
     public void testValidateFormRecipientList_validationShouldFailWithBadEmailAddress() {
-        FormValidation formValidation =
-                emailRecipientUtils.validateFormRecipientList("@@@");
+        FormValidation formValidation = emailRecipientUtils.validateFormRecipientList("@@@");
 
         assertEquals(FormValidation.Kind.ERROR, formValidation.kind);
     }
 
     @Test
-    public void testConvertRecipientList_defaultSuffix()
-            throws AddressException, UnsupportedEncodingException {
+    public void testConvertRecipientList_defaultSuffix() throws AddressException, UnsupportedEncodingException {
         ExtendedEmailPublisher.descriptor().setDefaultSuffix("@gmail.com");
         Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("ashlux", envVars);
 
@@ -147,8 +150,7 @@ public class EmailRecipientUtilsTest {
     }
 
     @Test
-    public void testConvertRecipientList_userName()
-            throws AddressException, IOException {
+    public void testConvertRecipientList_userName() throws AddressException, IOException {
         ExtendedEmailPublisher.descriptor().setDefaultSuffix("@gmail.com");
         User u = User.getById("advantiss", true);
         u.setFullName("Peter Samoshkin");
@@ -161,8 +163,7 @@ public class EmailRecipientUtilsTest {
     }
 
     @Test
-    public void testCC()
-            throws Exception {
+    public void testCC() throws Exception {
         envVars.put("EMAIL_LIST", "ashlux@gmail.com, cc:slide.o.mix@gmail.com, another@gmail.com");
 
         Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars);
@@ -175,8 +176,7 @@ public class EmailRecipientUtilsTest {
     }
 
     @Test
-    public void testBCC()
-            throws Exception {
+    public void testBCC() throws Exception {
         envVars.put("EMAIL_LIST", "ashlux@gmail.com, bcc:slide.o.mix@gmail.com, another@gmail.com");
 
         Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars);
@@ -189,9 +189,9 @@ public class EmailRecipientUtilsTest {
     }
 
     @Test
-    public void testBCCandCC()
-            throws Exception {
-        envVars.put("EMAIL_LIST", "ashlux@gmail.com, bcc:slide.o.mix@gmail.com, another@gmail.com, cc:example@gmail.com");
+    public void testBCCandCC() throws Exception {
+        envVars.put(
+                "EMAIL_LIST", "ashlux@gmail.com, bcc:slide.o.mix@gmail.com, another@gmail.com, cc:example@gmail.com");
 
         Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars);
 
@@ -207,26 +207,27 @@ public class EmailRecipientUtilsTest {
     }
 
     @Test
-    public void testSameRecipientInTOandCCandBCC_ShouldNotBeFilteredFromTOandCC()
-            throws Exception {
+    public void testSameRecipientInTOandCCandBCC_ShouldNotBeFilteredFromTOandCC() throws Exception {
         String recipientListString = "user@gmail.com, bcc:user@gmail.com, cc:user@gmail.com";
 
-        Set<InternetAddress> toInternetAddresses = EmailRecipientUtils.convertRecipientString(recipientListString, envVars);
+        Set<InternetAddress> toInternetAddresses =
+                EmailRecipientUtils.convertRecipientString(recipientListString, envVars);
 
         assertEquals(setOf("user@gmail.com"), toInternetAddresses);
 
-        Set<InternetAddress> ccInternetAddresses = EmailRecipientUtils.convertRecipientString(recipientListString, envVars, EmailRecipientUtils.CC);
+        Set<InternetAddress> ccInternetAddresses =
+                EmailRecipientUtils.convertRecipientString(recipientListString, envVars, EmailRecipientUtils.CC);
 
         assertEquals(setOf("user@gmail.com"), ccInternetAddresses);
 
-        Set<InternetAddress> bccInternetAddresses = EmailRecipientUtils.convertRecipientString(recipientListString, envVars, EmailRecipientUtils.BCC);
+        Set<InternetAddress> bccInternetAddresses =
+                EmailRecipientUtils.convertRecipientString(recipientListString, envVars, EmailRecipientUtils.BCC);
 
         assertEquals(setOf("user@gmail.com"), bccInternetAddresses);
     }
 
     @Test
-    public void testUTF8()
-            throws Exception {
+    public void testUTF8() throws Exception {
         envVars.put("EMAIL_LIST", "ashlux@gmail.com, cc:slide.o.mix@gmail.com, 愛嬋 <another@gmail.com>");
 
         Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars);
@@ -250,12 +251,11 @@ public class EmailRecipientUtilsTest {
 
     // Test helper:
 
-    private Set<InternetAddress> setOf(String ... emailAddresses) throws AddressException {
+    private Set<InternetAddress> setOf(String... emailAddresses) throws AddressException {
         final Set<InternetAddress> addresses = new LinkedHashSet<>();
         for (String emailAddress : emailAddresses) {
             addresses.add(new InternetAddress(emailAddress));
         }
         return addresses;
     }
-
 }

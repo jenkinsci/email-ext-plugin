@@ -17,10 +17,24 @@ public class XNthFailureTrigger extends NthFailureTrigger {
     private int requiredFailureCount = 3;
 
     @DataBoundConstructor
-    public XNthFailureTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo,
-                              String subject, String body, String attachmentsPattern, int attachBuildLog,
-                              String contentType) {
-        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public XNthFailureTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
 
     @Override

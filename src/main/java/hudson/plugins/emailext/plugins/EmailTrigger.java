@@ -29,21 +29,32 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     private EmailType email;
 
     @Deprecated
-    protected EmailTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequestor, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+    protected EmailTrigger(
+            boolean sendToList,
+            boolean sendToDevs,
+            boolean sendToRequestor,
+            boolean sendToCulprits,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
         List<RecipientProvider> providers = new ArrayList<>();
-        if(sendToList) {
+        if (sendToList) {
             providers.add(new ListRecipientProvider());
         }
 
-        if(sendToDevs) {
+        if (sendToDevs) {
             providers.add(new DevelopersRecipientProvider());
         }
 
-        if(sendToRequestor) {
+        if (sendToRequestor) {
             providers.add(new RequesterRecipientProvider());
         }
 
-        if(sendToCulprits) {
+        if (sendToCulprits) {
             providers.add(new CulpritsRecipientProvider());
         }
 
@@ -59,8 +70,15 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         email.setContentType(contentType);
     }
 
-    protected EmailTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo,
-                           String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
+    protected EmailTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
         email = new EmailType();
         email.addRecipientProviders(recipientProviders);
         email.setRecipientList(recipientList);
@@ -73,9 +91,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         email.setContentType(contentType);
     }
 
-    protected EmailTrigger(JSONObject formData) {
-
-    }
+    protected EmailTrigger(JSONObject formData) {}
 
     public static DescriptorExtensionList<EmailTrigger, EmailTriggerDescriptor> all() {
         return Jenkins.get().getDescriptorList(EmailTrigger.class);
@@ -83,8 +99,8 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
 
     public static List<EmailTriggerDescriptor> allWatchable() {
         List<EmailTriggerDescriptor> list = new ArrayList<>();
-        for(EmailTriggerDescriptor d : all()) {
-            if(d.isWatchable()) {
+        for (EmailTriggerDescriptor d : all()) {
+            if (d.isWatchable()) {
                 list.add(d);
             }
         }
@@ -123,20 +139,21 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         this.email = email;
     }
 
+    @Override
     public EmailTriggerDescriptor getDescriptor() {
         return (EmailTriggerDescriptor) Jenkins.get().getDescriptor(getClass());
     }
-    
+
     public boolean configure(StaplerRequest req, JSONObject formData) {
         setEmail(createMailType(req, formData));
         return true;
     }
-    
+
     @Deprecated
     protected EmailType createMailType(JSONObject formData) {
         return createMailType(Stapler.getCurrentRequest(), formData);
     }
-    
+
     protected EmailType createMailType(StaplerRequest req, JSONObject formData) {
         return req.bindJSON(EmailType.class, formData);
     }
@@ -151,7 +168,8 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
      * @return The number of test failures for the Run
      */
     protected int getNumFailures(Run<?, ?> build) {
-        AbstractTestResultAction<? extends AbstractTestResultAction<?>> a = build.getAction(AbstractTestResultAction.class);
+        AbstractTestResultAction<? extends AbstractTestResultAction<?>> a =
+                build.getAction(AbstractTestResultAction.class);
         if (a instanceof AggregatedTestResultAction) {
             int result = 0;
             AggregatedTestResultAction action = (AggregatedTestResultAction) a;

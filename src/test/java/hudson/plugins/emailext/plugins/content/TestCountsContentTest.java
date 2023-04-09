@@ -31,8 +31,7 @@ public class TestCountsContentTest {
     }
 
     @After
-    public void tearDown() {
-    }
+    public void tearDown() {}
 
     @Test
     @SuppressWarnings("unchecked")
@@ -56,7 +55,8 @@ public class TestCountsContentTest {
     public void testGetContent() throws Exception {
         AbstractTestResultAction<?> results = mock(AbstractTestResultAction.class);
         when(results.getTotalCount()).thenReturn(5);
-        when(results.getTotalCount() - results.getFailCount() - results.getSkipCount()).thenReturn(2);
+        when(results.getTotalCount() - results.getFailCount() - results.getSkipCount())
+                .thenReturn(2);
         when(results.getFailCount()).thenReturn(2);
         when(results.getSkipCount()).thenReturn(1);
         when(build.getAction(AbstractTestResultAction.class)).thenReturn(results);

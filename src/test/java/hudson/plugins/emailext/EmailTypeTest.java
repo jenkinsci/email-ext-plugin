@@ -20,7 +20,7 @@ import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
 public class EmailTypeTest {
-    
+
     @Rule
     public final JenkinsRule j = new JenkinsRule();
 
@@ -34,18 +34,18 @@ public class EmailTypeTest {
     @Test
     public void testHasDeveloperRecipients() {
         EmailType t = new EmailType();
-        
+
         t.addRecipientProvider(new DevelopersRecipientProvider());
-        
+
         assertTrue(t.getHasRecipients());
     }
 
     @Test
     public void testHasRecipientList() {
         EmailType t = new EmailType();
-        
+
         t.addRecipientProvider(new ListRecipientProvider());
-        
+
         assertTrue(t.getHasRecipients());
     }
 
@@ -73,43 +73,47 @@ public class EmailTypeTest {
 
         assertFalse(t.getCompressBuildLog());
     }
-    
+
     @Test
     public void testUpgradeToRecipientProvider() throws IOException {
         URL url = this.getClass().getResource("/recipient-provider-upgrade.xml");
-        File jobConfig = new File(url.getFile());    
+        File jobConfig = new File(url.getFile());
 
-        final ExtendedEmailPublisherDescriptor desc = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        final ExtendedEmailPublisherDescriptor desc =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         FreeStyleProject prj = j.createFreeStyleProject();
-        prj.updateByXml((Source)new StreamSource(new FileReader(jobConfig)));
-        
-        ExtendedEmailPublisher pub = (ExtendedEmailPublisher)prj.getPublisher(desc);
-        
+        prj.updateByXml((Source) new StreamSource(new FileReader(jobConfig)));
+
+        ExtendedEmailPublisher pub = (ExtendedEmailPublisher) prj.getPublisher(desc);
+
         // make sure the publisher got picked up
         assertNotNull(pub);
-        
+
         // make sure the trigger was marshalled
         assertFalse(pub.configuredTriggers.isEmpty());
-        
+
         // should have developers, requestor and culprits
-        assertEquals(3, pub.configuredTriggers.get(0).getEmail().getRecipientProviders().size());
+        assertEquals(
+                3,
+                pub.configuredTriggers.get(0).getEmail().getRecipientProviders().size());
     }
 
     @Test
     @Issue("JENKINS-24506")
     public void testUpgradeTriggerWithNoRecipients() throws IOException {
         URL url = this.getClass().getResource("/recipient-provider-upgrade2.xml");
-        File jobConfig = new File(url.getFile());    
+        File jobConfig = new File(url.getFile());
 
-        final ExtendedEmailPublisherDescriptor desc = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        final ExtendedEmailPublisherDescriptor desc =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         FreeStyleProject prj = j.createFreeStyleProject();
-        prj.updateByXml((Source)new StreamSource(new FileReader(jobConfig)));
-        
-        ExtendedEmailPublisher pub = (ExtendedEmailPublisher)prj.getPublisher(desc);
-        
+        prj.updateByXml((Source) new StreamSource(new FileReader(jobConfig)));
+
+        ExtendedEmailPublisher pub = (ExtendedEmailPublisher) prj.getPublisher(desc);
+
         // make sure the publisher got picked up
         assertNotNull(pub);
-        
+
         assertNotNull(pub.getConfiguredTriggers().get(0).getEmail().getRecipientProviders());
     }
 }

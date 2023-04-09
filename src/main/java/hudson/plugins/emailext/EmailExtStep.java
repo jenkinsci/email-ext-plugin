@@ -33,7 +33,6 @@ import org.kohsuke.stapler.DataBoundSetter;
 /**
  * Created by acearl on 9/14/2015.
  */
-
 public class EmailExtStep extends Step {
 
     public final String subject;
@@ -48,7 +47,7 @@ public class EmailExtStep extends Step {
 
     @CheckForNull
     private String replyTo;
-    
+
     @CheckForNull
     private String from;
 
@@ -101,7 +100,7 @@ public class EmailExtStep extends Step {
     public void setFrom(@CheckForNull String from) {
         this.from = Util.fixNull(from);
     }
-    
+
     public @CheckForNull String getReplyTo() {
         return replyTo == null ? "" : replyTo;
     }
@@ -195,7 +194,8 @@ public class EmailExtStep extends Step {
             ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
             publisher.configuredTriggers.clear();
 
-            AlwaysTrigger.DescriptorImpl descriptor = Jenkins.get().getDescriptorByType(AlwaysTrigger.DescriptorImpl.class);
+            AlwaysTrigger.DescriptorImpl descriptor =
+                    Jenkins.get().getDescriptorByType(AlwaysTrigger.DescriptorImpl.class);
             EmailTrigger trigger = descriptor.createDefault();
             trigger.getEmail().getRecipientProviders().clear();
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
@@ -222,11 +222,11 @@ public class EmailExtStep extends Step {
             if (StringUtils.isNotBlank(step.replyTo)) {
                 publisher.replyTo = step.replyTo;
             }
-            
+
             if (StringUtils.isNotBlank(step.from)) {
                 publisher.from = step.from;
             }
-            
+
             if (StringUtils.isNotBlank(step.attachmentsPattern)) {
                 publisher.attachmentsPattern = step.attachmentsPattern;
             }
@@ -235,13 +235,12 @@ public class EmailExtStep extends Step {
                 publisher.contentType = step.mimeType;
             }
 
-            final ExtendedEmailPublisherContext ctx =
-                    new ExtendedEmailPublisherContext(
-                            publisher,
-                            getContext().get(Run.class),
-                            getContext().get(FilePath.class),
-                            getContext().get(Launcher.class),
-                            getContext().get(TaskListener.class));
+            final ExtendedEmailPublisherContext ctx = new ExtendedEmailPublisherContext(
+                    publisher,
+                    getContext().get(Run.class),
+                    getContext().get(FilePath.class),
+                    getContext().get(Launcher.class),
+                    getContext().get(TaskListener.class));
             final Multimap<String, EmailTrigger> triggered = ArrayListMultimap.create();
             triggered.put(AlwaysTrigger.TRIGGER_NAME, publisher.configuredTriggers.get(0));
             ctx.setTrigger(publisher.configuredTriggers.get(0));
@@ -251,8 +250,7 @@ public class EmailExtStep extends Step {
         }
     }
 
-
-    @Extension(optional=true)
+    @Extension(optional = true)
     public static final class DescriptorImpl extends StepDescriptor {
 
         public static final String defaultMimeType = "text/plain";

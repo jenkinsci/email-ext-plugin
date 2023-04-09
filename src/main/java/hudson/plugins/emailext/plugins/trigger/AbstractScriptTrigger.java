@@ -39,8 +39,25 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
 
     protected SecureGroovyScript secureTriggerScript;
 
-    public AbstractScriptTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, SecureGroovyScript secureTriggerScript) {
-        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public AbstractScriptTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType,
+            SecureGroovyScript secureTriggerScript) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
         this.secureTriggerScript = secureTriggerScript;
         StaplerRequest request = Stapler.getCurrentRequest();
         ApprovalContext context = ApprovalContext.create().withCurrentUser();
@@ -51,13 +68,54 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
     }
 
     @Deprecated
-    public AbstractScriptTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
-        this(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType, new SecureGroovyScript(triggerScript, false, null));
+    public AbstractScriptTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType,
+            String triggerScript) {
+        this(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType,
+                new SecureGroovyScript(triggerScript, false, null));
     }
-    
+
     @Deprecated
-    public AbstractScriptTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType, String triggerScript) {
-        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public AbstractScriptTrigger(
+            boolean sendToList,
+            boolean sendToDevs,
+            boolean sendToRequester,
+            boolean sendToCulprits,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType,
+            String triggerScript) {
+        super(
+                sendToList,
+                sendToDevs,
+                sendToRequester,
+                sendToCulprits,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
         this.triggerScript = triggerScript;
     }
 
@@ -77,9 +135,11 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
     @Override
     public boolean configure(@NonNull StaplerRequest req, @NonNull JSONObject formData) {
         super.configure(req, formData);
-        if(formData.containsKey("secureTriggerScript")) {
-            this.secureTriggerScript = req.bindJSON(SecureGroovyScript.class, formData.getJSONObject("secureTriggerScript"));
-            this.secureTriggerScript.configuring(ApprovalContext.create().withCurrentUser().withItem(req.findAncestorObject(Item.class)));
+        if (formData.containsKey("secureTriggerScript")) {
+            this.secureTriggerScript =
+                    req.bindJSON(SecureGroovyScript.class, formData.getJSONObject("secureTriggerScript"));
+            this.secureTriggerScript.configuring(
+                    ApprovalContext.create().withCurrentUser().withItem(req.findAncestorObject(Item.class)));
         }
         return true;
     }
@@ -97,12 +157,13 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
                     result = (Boolean) res;
                 }
             } catch (IOException e) {
-                Functions.printStackTrace(e, listener.fatalError("Failed evaluating script trigger %s%n", e.getMessage()));
+                Functions.printStackTrace(
+                        e, listener.fatalError("Failed evaluating script trigger %s%n", e.getMessage()));
             }
         }
         return result;
     }
-    
+
     private Object evaluate(AbstractBuild<?, ?> build, TaskListener listener) throws IOException {
         ClassLoader loader = Jenkins.get().getPluginManager().uberClassLoader;
         JenkinsLocationConfiguration configuration = JenkinsLocationConfiguration.get();
@@ -123,16 +184,13 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
         try {
             loader = GroovySandbox.createSecureClassLoader(loader);
             CompilerConfiguration cc;
-            if(secureTriggerScript.isSandbox()) {
+            if (secureTriggerScript.isSandbox()) {
                 cc = GroovySandbox.createSecureCompilerConfiguration();
             } else {
                 cc = new CompilerConfiguration();
             }
-            cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
-                    "jenkins",
-                    "jenkins.model",
-                    "hudson",
-                    "hudson.model"));
+            cc.addCompilationCustomizers(
+                    new ImportCustomizer().addStarImports("jenkins", "jenkins.model", "hudson", "hudson.model"));
 
             Binding binding = new Binding();
             binding.setVariable("build", build);
@@ -145,14 +203,16 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
 
             if (secureTriggerScript.isSandbox()) {
                 try {
-                    return GroovySandbox.run(shell, secureTriggerScript.getScript(), new ProxyWhitelist(
-                            Whitelist.all(),
-                            new PrintStreamInstanceWhitelist(logger)));
+                    return GroovySandbox.run(
+                            shell,
+                            secureTriggerScript.getScript(),
+                            new ProxyWhitelist(Whitelist.all(), new PrintStreamInstanceWhitelist(logger)));
                 } catch (RejectedAccessException x) {
                     throw ScriptApproval.get().accessRejected(x, ApprovalContext.create());
                 }
             } else {
-                return shell.evaluate(ScriptApproval.get().using(secureTriggerScript.getScript(), GroovyLanguage.get()));
+                return shell.evaluate(
+                        ScriptApproval.get().using(secureTriggerScript.getScript(), GroovyLanguage.get()));
             }
         } finally {
             if (urlcl != null) {

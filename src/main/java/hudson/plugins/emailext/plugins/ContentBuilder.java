@@ -26,7 +26,7 @@ import org.jenkinsci.plugins.tokenmacro.TokenMacro;
  *
  */
 public final class ContentBuilder {
-    
+
     @CopyOnWrite
     private static volatile List<TokenMacro> privateMacros;
 
@@ -41,42 +41,52 @@ public final class ContentBuilder {
     private static final String PROJECT_DEFAULT_REPLYTO = "\\$PROJECT_DEFAULT_REPLYTO|\\$\\{PROJECT_DEFAULT_REPLYTO\\}";
 
     private ContentBuilder() {
-    	throw new InstantiationError( "Must not instantiate this class" );
+        throw new InstantiationError("Must not instantiate this class");
     }
 
     private static String noNull(String string) {
         return string == null ? "" : string;
     }
-    
-    public static String transformText(String origText, ExtendedEmailPublisherContext context, List<TokenMacro> additionalMacros) {
-        if(StringUtils.isBlank(origText)) return "";
-        
+
+    public static String transformText(
+            String origText, ExtendedEmailPublisherContext context, List<TokenMacro> additionalMacros) {
+        if (StringUtils.isBlank(origText)) {
+            return "";
+        }
+
         String defaultContent = Matcher.quoteReplacement(noNull(context.getPublisher().defaultContent));
         String defaultSubject = Matcher.quoteReplacement(noNull(context.getPublisher().defaultSubject));
         String defaultReplyTo = Matcher.quoteReplacement(noNull(context.getPublisher().replyTo));
-        String defaultBody = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultBody()));
-        String defaultExtSubject = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultSubject()));
-        String defaultRecipients = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultRecipients()));
-        String defaultExtReplyTo = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultReplyTo()));
-        String defaultPresendScript = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultPresendScript()));
-        String defaultPostsendScript = Matcher.quoteReplacement(noNull(context.getPublisher().getDescriptor().getDefaultPostsendScript()));
-        String newText = origText.replaceAll(
-                PROJECT_DEFAULT_BODY, defaultContent).replaceAll(
-                PROJECT_DEFAULT_SUBJECT, defaultSubject).replaceAll(
-                PROJECT_DEFAULT_REPLYTO, defaultReplyTo).replaceAll(
-                DEFAULT_BODY, defaultBody).replaceAll(
-                DEFAULT_SUBJECT, defaultExtSubject).replaceAll(
-                DEFAULT_RECIPIENTS, defaultRecipients).replaceAll(
-                DEFAULT_REPLYTO, defaultExtReplyTo).replaceAll(
-                DEFAULT_PRESEND_SCRIPT, defaultPresendScript).replaceAll(
-                DEFAULT_POSTSEND_SCRIPT, defaultPostsendScript);
-        
+        String defaultBody = Matcher.quoteReplacement(
+                noNull(context.getPublisher().getDescriptor().getDefaultBody()));
+        String defaultExtSubject = Matcher.quoteReplacement(
+                noNull(context.getPublisher().getDescriptor().getDefaultSubject()));
+        String defaultRecipients = Matcher.quoteReplacement(
+                noNull(context.getPublisher().getDescriptor().getDefaultRecipients()));
+        String defaultExtReplyTo = Matcher.quoteReplacement(
+                noNull(context.getPublisher().getDescriptor().getDefaultReplyTo()));
+        String defaultPresendScript = Matcher.quoteReplacement(
+                noNull(context.getPublisher().getDescriptor().getDefaultPresendScript()));
+        String defaultPostsendScript = Matcher.quoteReplacement(
+                noNull(context.getPublisher().getDescriptor().getDefaultPostsendScript()));
+        String newText = origText.replaceAll(PROJECT_DEFAULT_BODY, defaultContent)
+                .replaceAll(PROJECT_DEFAULT_SUBJECT, defaultSubject)
+                .replaceAll(PROJECT_DEFAULT_REPLYTO, defaultReplyTo)
+                .replaceAll(DEFAULT_BODY, defaultBody)
+                .replaceAll(DEFAULT_SUBJECT, defaultExtSubject)
+                .replaceAll(DEFAULT_RECIPIENTS, defaultRecipients)
+                .replaceAll(DEFAULT_REPLYTO, defaultExtReplyTo)
+                .replaceAll(DEFAULT_PRESEND_SCRIPT, defaultPresendScript)
+                .replaceAll(DEFAULT_POSTSEND_SCRIPT, defaultPostsendScript);
+
         try {
             List<TokenMacro> macros = new ArrayList<>(getPrivateMacros());
-            if(additionalMacros != null)
+            if (additionalMacros != null) {
                 macros.addAll(additionalMacros);
-            if(context.getRun() != null) {
-                newText = TokenMacro.expandAll(context.getRun(), context.getWorkspace(), context.getListener(), newText, false, macros);
+            }
+            if (context.getRun() != null) {
+                newText = TokenMacro.expandAll(
+                        context.getRun(), context.getWorkspace(), context.getListener(), newText, false, macros);
             } else {
                 context.getListener().getLogger().println("Job type does not allow token replacement.");
             }
@@ -89,19 +99,26 @@ public final class ContentBuilder {
     }
 
     @Deprecated
-    public static String transformText(String origText, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, BuildListener listener) {
+    public static String transformText(
+            String origText, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, BuildListener listener) {
         return transformText(origText, publisher, build, null, listener);
     }
-    
-    public static String transformText(String origText, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+
+    public static String transformText(
+            String origText,
+            ExtendedEmailPublisher publisher,
+            AbstractBuild<?, ?> build,
+            Launcher launcher,
+            BuildListener listener) {
         ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, null, listener);
         return transformText(origText, context, null);
     }
-    
+
     public static synchronized List<TokenMacro> getPrivateMacros() {
-        if(privateMacros != null)
+        if (privateMacros != null) {
             return privateMacros;
-        
+        }
+
         privateMacros = new ArrayList<>();
         ClassLoader cl = Jenkins.get().pluginManager.uberClassLoader;
         for (final IndexItem<EmailToken, TokenMacro> item : Index.load(EmailToken.class, TokenMacro.class, cl)) {

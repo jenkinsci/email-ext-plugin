@@ -31,7 +31,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
-public class MailAccount extends AbstractDescribableImpl<MailAccount>{
+public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     private String address;
     private String smtpHost;
     private String smtpPort = "25";
@@ -46,11 +46,11 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     private boolean useOAuth2;
 
     @Deprecated
-    public MailAccount(JSONObject jo){
+    public MailAccount(JSONObject jo) {
         address = Util.nullify(jo.optString("address", null));
         smtpHost = Util.nullify(jo.optString("smtpHost", null));
         smtpPort = Util.nullify(jo.optString("smtpPort", null));
-        if(jo.optBoolean("auth", false)){
+        if (jo.optBoolean("auth", false)) {
             credentialsId = Util.nullify(jo.optString("credentialsId", null));
         }
         useSsl = jo.optBoolean("useSsl", false);
@@ -59,9 +59,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     }
 
     @DataBoundConstructor
-    public MailAccount() {
-
-    }
+    public MailAccount() {}
 
     public boolean isValid() {
         return isFromAddressValid() && isSmtpServerValid();
@@ -93,22 +91,21 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
         this.defaultAccount = defaultAccount;
     }
 
+    @Override
     public MailAccountDescriptor getDescriptor() {
         return (MailAccountDescriptor) Jenkins.get().getDescriptor(getClass());
     }
 
     @Extension
-    public static class MailAccountDescriptor extends Descriptor<MailAccount>{
+    public static class MailAccountDescriptor extends Descriptor<MailAccount> {
         @NonNull
         @Override
-        public String getDisplayName(){
+        public String getDisplayName() {
             return "";
         }
 
         @SuppressWarnings("unused") // Used by stapler
-        public ListBoxModel doFillCredentialsIdItems(
-                @AncestorInPath Item item,
-                @QueryParameter String credentialsId) {
+        public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
 
             final StandardListBoxModel result = new StandardListBoxModel();
             if (item == null) {
@@ -116,13 +113,11 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
                     return result.includeCurrentValue(credentialsId);
                 }
             } else {
-                if (!item.hasPermission(Item.EXTENDED_READ)
-                        && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
                     return result.includeCurrentValue(credentialsId);
                 }
             }
-            return result
-                    .includeEmptyValue()
+            return result.includeEmptyValue()
                     .includeMatchingAs(
                             item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
                             item,
@@ -132,16 +127,13 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
                     .includeCurrentValue(credentialsId);
         }
 
-        public FormValidation doCheckCredentialsId(
-                @AncestorInPath Item item,
-                @QueryParameter String value) {
+        public FormValidation doCheckCredentialsId(@AncestorInPath Item item, @QueryParameter String value) {
             if (item == null) {
                 if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                     return FormValidation.ok();
                 }
             } else {
-                if (!item.hasPermission(Item.EXTENDED_READ)
-                        && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
                     return FormValidation.ok();
                 }
             }
@@ -150,56 +142,57 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
             }
 
             if (CredentialsProvider.listCredentials(
-                    StandardUsernamePasswordCredentials.class,
-                    item,
-                    item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task)item) : ACL.SYSTEM,
-                    null,
-                    CredentialsMatchers.withId(value)).isEmpty()) {
+                            StandardUsernamePasswordCredentials.class,
+                            item,
+                            item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
+                            null,
+                            CredentialsMatchers.withId(value))
+                    .isEmpty()) {
                 return FormValidation.error("Cannot find currently selected credentials");
             }
             return FormValidation.ok();
         }
     }
 
-    public String getAddress(){
+    public String getAddress() {
         return address;
     }
 
     @DataBoundSetter
-    public void setAddress(String address){
+    public void setAddress(String address) {
         this.address = Util.fixEmptyAndTrim(address);
     }
 
-    public String getSmtpHost(){
+    public String getSmtpHost() {
         return smtpHost;
     }
 
     @DataBoundSetter
-    public void setSmtpHost(String smtpHost){
+    public void setSmtpHost(String smtpHost) {
         this.smtpHost = Util.fixEmptyAndTrim(smtpHost);
     }
 
-    public String getSmtpPort(){
+    public String getSmtpPort() {
         return smtpPort;
     }
 
     @DataBoundSetter
-    public void setSmtpPort(String smtpPort){
+    public void setSmtpPort(String smtpPort) {
         this.smtpPort = Util.fixEmptyAndTrim(smtpPort);
     }
 
     @Deprecated
-    public String getSmtpUsername(){
+    public String getSmtpUsername() {
         return smtpUsername;
     }
 
     @DataBoundSetter
-    public void setSmtpUsername(String smtpUsername){
+    public void setSmtpUsername(String smtpUsername) {
         this.smtpUsername = Util.fixEmptyAndTrim(smtpUsername);
     }
 
     @Deprecated
-    public Secret getSmtpPassword(){
+    public Secret getSmtpPassword() {
         return smtpPassword;
     }
 
@@ -213,7 +206,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
     }
 
     public String getCredentialsId() {
-        if(StringUtils.isBlank(credentialsId) && StringUtils.isNotBlank(smtpUsername) && smtpPassword != null) {
+        if (StringUtils.isBlank(credentialsId) && StringUtils.isNotBlank(smtpUsername) && smtpPassword != null) {
             migrateCredentials();
         }
         return credentialsId;
@@ -224,21 +217,21 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
         this.credentialsId = Util.fixEmptyAndTrim(credentialsId);
     }
 
-    public boolean isUseSsl(){
+    public boolean isUseSsl() {
         return useSsl;
     }
 
     @DataBoundSetter
-    public void setUseSsl(boolean useSsl){
+    public void setUseSsl(boolean useSsl) {
         this.useSsl = useSsl;
     }
 
-    public boolean isUseTls(){
+    public boolean isUseTls() {
         return useTls;
     }
 
     @DataBoundSetter
-    public void setUseTls(boolean useTls){
+    public void setUseTls(boolean useTls) {
         this.useTls = useTls;
     }
 
@@ -251,17 +244,17 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
         this.useOAuth2 = useOAuth2;
     }
 
-    public String getAdvProperties(){
+    public String getAdvProperties() {
         return advProperties;
     }
 
     @DataBoundSetter
-    public void setAdvProperties(String advProperties){
+    public void setAdvProperties(String advProperties) {
         this.advProperties = advProperties;
     }
 
     private Object readResolve() {
-        if(StringUtils.isBlank(credentialsId) && StringUtils.isNotBlank(smtpUsername) && smtpPassword != null) {
+        if (StringUtils.isBlank(credentialsId) && StringUtils.isNotBlank(smtpUsername) && smtpPassword != null) {
             migrateCredentials();
         }
         return this;
@@ -269,17 +262,13 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
 
     private void migrateCredentials() {
         DomainRequirement domainRequirement = null;
-        if(StringUtils.isNotBlank(smtpHost) && StringUtils.isNotBlank(smtpPort)) {
+        if (StringUtils.isNotBlank(smtpHost) && StringUtils.isNotBlank(smtpPort)) {
             domainRequirement = new HostnamePortRequirement(smtpHost, Integer.parseInt(smtpPort));
         }
-        final List<StandardUsernamePasswordCredentials> credentials =
-                CredentialsMatchers.filter(
-                        CredentialsProvider.lookupCredentials(
-                                StandardUsernamePasswordCredentials.class,
-                                Jenkins.get(),
-                                ACL.SYSTEM,
-                                domainRequirement),
-                        CredentialsMatchers.withUsername(smtpUsername));
+        final List<StandardUsernamePasswordCredentials> credentials = CredentialsMatchers.filter(
+                CredentialsProvider.lookupCredentials(
+                        StandardUsernamePasswordCredentials.class, Jenkins.get(), ACL.SYSTEM, domainRequirement),
+                CredentialsMatchers.withUsername(smtpUsername));
         for (final StandardUsernamePasswordCredentials cred : credentials) {
             if (StringUtils.equals(smtpPassword.getPlainText(), Secret.toString(cred.getPassword()))) {
                 // If some credentials have the same username/password, use those.
@@ -290,13 +279,12 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount>{
         if (StringUtils.isBlank(credentialsId)) {
             // If we couldn't find any existing credentials,
             // create new credentials with the principal and secret and use it.
-            final StandardUsernamePasswordCredentials newCredentials =
-                    new UsernamePasswordCredentialsImpl(
-                            CredentialsScope.GLOBAL,
-                            null,
-                            "Migrated from email-ext username/password",
-                            smtpUsername,
-                            smtpPassword.getPlainText());
+            final StandardUsernamePasswordCredentials newCredentials = new UsernamePasswordCredentialsImpl(
+                    CredentialsScope.GLOBAL,
+                    null,
+                    "Migrated from email-ext username/password",
+                    smtpUsername,
+                    smtpPassword.getPlainText());
             SystemCredentialsProvider.getInstance().getCredentials().add(newCredentials);
             credentialsId = newCredentials.getId();
         }

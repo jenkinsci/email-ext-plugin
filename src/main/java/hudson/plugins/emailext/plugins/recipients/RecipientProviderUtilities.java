@@ -52,8 +52,7 @@ import org.springframework.security.core.AuthenticationException;
 public final class RecipientProviderUtilities {
     private static final Logger LOGGER = Logger.getLogger(RecipientProviderUtilities.class.getName());
 
-    private RecipientProviderUtilities() {
-    }
+    private RecipientProviderUtilities() {}
 
     public interface IDebug {
         void send(final String format, final Object... args);
@@ -142,23 +141,44 @@ public final class RecipientProviderUtilities {
     }
 
     @Deprecated
-    public static void addUsers(final Set<User> users, final TaskListener listener, final EnvVars env,
-        final Set<InternetAddress> to, final Set<InternetAddress> cc, final Set<InternetAddress> bcc, final IDebug debug) {
+    public static void addUsers(
+            final Set<User> users,
+            final TaskListener listener,
+            final EnvVars env,
+            final Set<InternetAddress> to,
+            final Set<InternetAddress> cc,
+            final Set<InternetAddress> bcc,
+            final IDebug debug) {
         addUsers(users, listener, null, env, to, cc, bcc, debug);
     }
 
-    public static void addUsers(final Set<User> users, final ExtendedEmailPublisherContext context, final EnvVars env,
-        final Set<InternetAddress> to, final Set<InternetAddress> cc, final Set<InternetAddress> bcc, final IDebug debug) {
+    public static void addUsers(
+            final Set<User> users,
+            final ExtendedEmailPublisherContext context,
+            final EnvVars env,
+            final Set<InternetAddress> to,
+            final Set<InternetAddress> cc,
+            final Set<InternetAddress> bcc,
+            final IDebug debug) {
         addUsers(users, context.getListener(), context.getRun(), env, to, cc, bcc, debug);
     }
 
     /** If set, send to known users who lack {@link Item#READ} access to the job. */
-    static /* not final */ boolean SEND_TO_USERS_WITHOUT_READ = Boolean.getBoolean(MailSender.class.getName() + ".SEND_TO_USERS_WITHOUT_READ");
+    static /* not final */ boolean SEND_TO_USERS_WITHOUT_READ =
+            Boolean.getBoolean(MailSender.class.getName() + ".SEND_TO_USERS_WITHOUT_READ");
     /** If set, send to unknown users. */
-    static /* not final */ boolean SEND_TO_UNKNOWN_USERS = Boolean.getBoolean(MailSender.class.getName() + ".SEND_TO_UNKNOWN_USERS");
+    static /* not final */ boolean SEND_TO_UNKNOWN_USERS =
+            Boolean.getBoolean(MailSender.class.getName() + ".SEND_TO_UNKNOWN_USERS");
 
-    private static void addUsers(final Set<User> users, final TaskListener listener, @CheckForNull Run<?,?> run, final EnvVars env,
-        final Set<InternetAddress> to, final Set<InternetAddress> cc, final Set<InternetAddress> bcc, final IDebug debug) {
+    private static void addUsers(
+            final Set<User> users,
+            final TaskListener listener,
+            @CheckForNull Run<?, ?> run,
+            final EnvVars env,
+            final Set<InternetAddress> to,
+            final Set<InternetAddress> cc,
+            final Set<InternetAddress> bcc,
+            final IDebug debug) {
         for (final User user : users) {
             if (EmailRecipientUtils.isExcludedRecipient(user, listener)) {
                 debug.send("User %s is an excluded recipient.", user.getFullName());
@@ -170,25 +190,39 @@ public final class RecipientProviderUtilities {
                             Authentication auth = user.impersonate2();
                             if (run != null && !run.getACL().hasPermission2(auth, Item.READ)) {
                                 if (SEND_TO_USERS_WITHOUT_READ) {
-                                    listener.getLogger().printf("Warning: user %s has no permission to view %s, but sending mail anyway%n", userAddress, run.getFullDisplayName());
+                                    listener.getLogger()
+                                            .printf(
+                                                    "Warning: user %s has no permission to view %s, but sending mail anyway%n",
+                                                    userAddress, run.getFullDisplayName());
                                 } else {
-                                    listener.getLogger().printf("Not sending mail to user %s with no permission to view %s", userAddress, run.getFullDisplayName());
+                                    listener.getLogger()
+                                            .printf(
+                                                    "Not sending mail to user %s with no permission to view %s",
+                                                    userAddress, run.getFullDisplayName());
                                     continue;
                                 }
                             }
                         } catch (AuthenticationException x) {
-                            
-                            if (SEND_TO_UNKNOWN_USERS || ExtendedEmailPublisher.descriptor().isAllowUnregisteredEnabled() ) {
-                                listener.getLogger().printf("Warning: %s is not a recognized user, but sending mail anyway%n", userAddress);
+
+                            if (SEND_TO_UNKNOWN_USERS
+                                    || ExtendedEmailPublisher.descriptor().isAllowUnregisteredEnabled()) {
+                                listener.getLogger()
+                                        .printf(
+                                                "Warning: %s is not a recognized user, but sending mail anyway%n",
+                                                userAddress);
                             } else {
-                                listener.getLogger().printf("Not sending mail to unregistered user %s because your SCM"
-                                        + " claimed this was associated with a user ID ‘", userAddress);
+                                listener.getLogger()
+                                        .printf(
+                                                "Not sending mail to unregistered user %s because your SCM"
+                                                        + " claimed this was associated with a user ID ‘",
+                                                userAddress);
                                 try {
                                     listener.hyperlink('/' + user.getUrl(), user.getDisplayName());
                                 } catch (IOException ignored) {
                                 }
-                                listener.getLogger().printf("' which your security realm does not recognize; you may need" +
-                                        " changes in your SCM plugin%n");
+                                listener.getLogger()
+                                        .printf("' which your security realm does not recognize; you may need"
+                                                + " changes in your SCM plugin%n");
                                 continue;
                             }
                         }
@@ -196,9 +230,11 @@ public final class RecipientProviderUtilities {
                     debug.send("Adding %s with address %s", user.getFullName(), userAddress);
                     EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, userAddress, env, listener);
                 } else {
-                    listener.getLogger().println("Failed to send e-mail to "
-                        + user.getFullName()
-                        + " because no e-mail address is known, and no default e-mail domain is configured");
+                    listener.getLogger()
+                            .println(
+                                    "Failed to send e-mail to "
+                                            + user.getFullName()
+                                            + " because no e-mail address is known, and no default e-mail domain is configured");
                 }
             }
         }

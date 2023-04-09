@@ -22,20 +22,23 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class ContributorMetadataRecipientProvider extends RecipientProvider {
 
     @DataBoundConstructor
-    public ContributorMetadataRecipientProvider() {
-
-    }
+    public ContributorMetadataRecipientProvider() {}
 
     @Override
-    public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to,
-            Set<InternetAddress> cc, Set<InternetAddress> bcc) {
+    public void addRecipients(
+            ExtendedEmailPublisherContext context,
+            EnvVars env,
+            Set<InternetAddress> to,
+            Set<InternetAddress> cc,
+            Set<InternetAddress> bcc) {
 
         final class Debug implements RecipientProviderUtilities.IDebug {
-            private final ExtendedEmailPublisherDescriptor descriptor
-                    = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+            private final ExtendedEmailPublisherDescriptor descriptor =
+                    Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 
+            @Override
             public void send(final String format, final Object... args) {
                 descriptor.debug(logger, format, args);
             }
@@ -44,28 +47,30 @@ public class ContributorMetadataRecipientProvider extends RecipientProvider {
         final Debug debug = new Debug();
 
         ContributorMetadataAction action = context.getRun().getAction(ContributorMetadataAction.class);
-        if(action != null) {
+        if (action != null) {
             User user = findUser(debug, action.getContributor(), action.getContributorEmail());
-            if(user != null) {
+            if (user != null) {
                 RecipientProviderUtilities.addUsers(Collections.singleton(user), context, env, to, cc, bcc, debug);
             }
         } else {
             debug.send("No ContributorMetadataAction is available");
-            context.getListener().getLogger().print(Messages.ContributorMetadataRecipientProvider_NoContributorInformationAvailable());
-        }    
+            context.getListener()
+                    .getLogger()
+                    .print(Messages.ContributorMetadataRecipientProvider_NoContributorInformationAvailable());
+        }
     }
 
     public User findUser(RecipientProviderUtilities.IDebug debug, String author, String authorEmail) {
         // first we look for a user based on the user id (author), then if
         // that fails, we look for one based on the email.
         User user = null;
-        if(!StringUtils.isBlank(author)) {
+        if (!StringUtils.isBlank(author)) {
             debug.send("Trying username to get user account from Jenkins");
             user = User.get(author, false, Collections.emptyMap());
         }
 
-        if(user == null) {
-            if(!StringUtils.isBlank(authorEmail)) {
+        if (user == null) {
+            if (!StringUtils.isBlank(authorEmail)) {
                 debug.send("Trying email address to get user account from Jenkins");
                 user = User.get(authorEmail, false, Collections.emptyMap());
                 if (user == null) {
@@ -80,7 +85,7 @@ public class ContributorMetadataRecipientProvider extends RecipientProvider {
             }
         }
 
-        if(user == null) {
+        if (user == null) {
             debug.send("Could not find user with information provided");
         }
 

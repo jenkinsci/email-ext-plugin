@@ -50,19 +50,23 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvider {
 
     @DataBoundConstructor
-    public FirstFailingBuildSuspectsRecipientProvider() {
-    }
+    public FirstFailingBuildSuspectsRecipientProvider() {}
 
     @Override
-    public void addRecipients(final ExtendedEmailPublisherContext context, final EnvVars env,
-        final Set<InternetAddress> to, final Set<InternetAddress> cc, final Set<InternetAddress> bcc) {
+    public void addRecipients(
+            final ExtendedEmailPublisherContext context,
+            final EnvVars env,
+            final Set<InternetAddress> to,
+            final Set<InternetAddress> cc,
+            final Set<InternetAddress> bcc) {
 
         final class Debug implements RecipientProviderUtilities.IDebug {
-            private final ExtendedEmailPublisherDescriptor descriptor
-                = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+            private final ExtendedEmailPublisherDescriptor descriptor =
+                    Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 
+            @Override
             public void send(final String format, final Object... args) {
                 descriptor.debug(logger, format, args);
             }
@@ -85,7 +89,7 @@ public class FirstFailingBuildSuspectsRecipientProvider extends RecipientProvide
                 Run<?, ?> candidate = currentRun;
                 while (candidate != null) {
                     final Result candidateResult = candidate.getResult();
-                    if ( candidateResult == null || !candidateResult.isWorseOrEqualTo(Result.FAILURE) ) {
+                    if (candidateResult == null || !candidateResult.isWorseOrEqualTo(Result.FAILURE)) {
                         break;
                     }
                     firstFailedBuild = candidate;

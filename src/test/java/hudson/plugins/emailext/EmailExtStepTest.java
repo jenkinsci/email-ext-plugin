@@ -36,7 +36,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
  */
 public class EmailExtStepTest {
 
-    @Rule public JenkinsRule j = new JenkinsRule();
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
 
     @After
     public void tearDown() {
@@ -57,8 +58,9 @@ public class EmailExtStepTest {
     @Test
     public void simpleEmail() throws Exception {
         WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");
-        job.setDefinition(new CpsFlowDefinition("node { emailext(to: 'mickeymouse@disney.com', subject: 'Boo') }", true));
-        Run<?,?> run = job.scheduleBuild2(0).get();
+        job.setDefinition(
+                new CpsFlowDefinition("node { emailext(to: 'mickeymouse@disney.com', subject: 'Boo') }", true));
+        Run<?, ?> run = job.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(run);
 
         Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
@@ -70,8 +72,9 @@ public class EmailExtStepTest {
     @Test
     public void attachLog() throws Exception {
         WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");
-        job.setDefinition(new CpsFlowDefinition("node { emailext(to: 'mickeymouse@disney.com', subject: 'Boo', attachLog: true) }", true));
-        Run<?,?> run = job.scheduleBuild2(0).get();
+        job.setDefinition(new CpsFlowDefinition(
+                "node { emailext(to: 'mickeymouse@disney.com', subject: 'Boo', attachLog: true) }", true));
+        Run<?, ?> run = job.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(run);
 
         Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
@@ -87,7 +90,9 @@ public class EmailExtStepTest {
         assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
 
         BodyPart attach = part.getBodyPart(1);
-        assertTrue("There should be a log named \"build.log\" attached", "build.log".equalsIgnoreCase(attach.getFileName()));
+        assertTrue(
+                "There should be a log named \"build.log\" attached",
+                "build.log".equalsIgnoreCase(attach.getFileName()));
     }
 
     @Test
@@ -96,8 +101,11 @@ public class EmailExtStepTest {
         final File attachment = new File(url.getFile());
 
         WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");
-        job.setDefinition(new CpsFlowDefinition("node { fileCopy('" + StringEscapeUtils.escapeJava(attachment.getAbsolutePath()) + "'); emailext (to: 'mickeymouse@disney.com', subject: 'Boo', body: 'Here is your file', attachmentsPattern: '*.pdf') }", true));
-        Run<?,?> run = job.scheduleBuild2(0).get();
+        job.setDefinition(new CpsFlowDefinition(
+                "node { fileCopy('" + StringEscapeUtils.escapeJava(attachment.getAbsolutePath())
+                        + "'); emailext (to: 'mickeymouse@disney.com', subject: 'Boo', body: 'Here is your file', attachmentsPattern: '*.pdf') }",
+                true));
+        Run<?, ?> run = job.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(run);
 
         Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
@@ -107,23 +115,24 @@ public class EmailExtStepTest {
         assertTrue("Message should be multipart", msg instanceof MimeMessage);
         assertTrue("Content should be a MimeMultipart", msg.getContent() instanceof MimeMultipart);
 
-        MimeMultipart part = (MimeMultipart)msg.getContent();
+        MimeMultipart part = (MimeMultipart) msg.getContent();
 
         assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
 
         BodyPart attach = part.getBodyPart(1);
-        assertTrue("There should be a PDF named \"test.pdf\" attached", "test.pdf".equalsIgnoreCase(attach.getFileName()));
+        assertTrue(
+                "There should be a PDF named \"test.pdf\" attached", "test.pdf".equalsIgnoreCase(attach.getFileName()));
     }
 
     @Test
     public void saveOutput() throws Exception {
         WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");
         job.setDefinition(new CpsFlowDefinition(
-                "node {\n" +
-                        "  emailext(to: 'mickeymouse@disney.com', subject: 'Boo', saveOutput: true)\n" +
-                        "  archiveArtifacts '*.*'\n" +
-                        "}", true));
-        Run<?,?> run = job.scheduleBuild2(0).get();
+                "node {\n" + "  emailext(to: 'mickeymouse@disney.com', subject: 'Boo', saveOutput: true)\n"
+                        + "  archiveArtifacts '*.*'\n"
+                        + "}",
+                true));
+        Run<?, ?> run = job.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(run);
 
         Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
@@ -159,7 +168,8 @@ public class EmailExtStepTest {
                 return Collections.singleton(FilePath.class);
             }
 
-            @Override public String getFunctionName() {
+            @Override
+            public String getFunctionName() {
                 return "fileCopy";
             }
 
@@ -168,7 +178,6 @@ public class EmailExtStepTest {
             public String getDisplayName() {
                 return "Copy a file into the workspace";
             }
-
         }
 
         public static class Execution extends SynchronousNonBlockingStepExecution<Boolean> {
@@ -180,7 +189,8 @@ public class EmailExtStepTest {
                 this.step = step;
             }
 
-            @Override protected Boolean run() throws Exception {
+            @Override
+            protected Boolean run() throws Exception {
                 FilePath file = new FilePath(new File(step.file));
                 getContext().get(FilePath.class).child(file.getName()).copyFrom(file);
                 return true;
@@ -188,6 +198,5 @@ public class EmailExtStepTest {
 
             private static final long serialVersionUID = 1L;
         }
-
     }
 }

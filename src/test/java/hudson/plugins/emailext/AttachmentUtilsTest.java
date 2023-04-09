@@ -51,7 +51,8 @@ import org.jvnet.mock_javamail.Mailbox;
  */
 public class AttachmentUtilsTest {
 
-    @Rule public JenkinsRule j = new JenkinsRule();
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
 
     @After
     public void tearDown() {
@@ -64,7 +65,8 @@ public class AttachmentUtilsTest {
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
         publisher.attachBuildLog = true;
         publisher.recipientList = "mickey@disney.com";
-        SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(
+                Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
         publisher.getConfiguredTriggers().add(trigger);
         project.getPublishersList().add(publisher);
         FreeStyleBuild b = j.buildAndAssertSuccess(project);
@@ -82,29 +84,35 @@ public class AttachmentUtilsTest {
 
         BodyPart attach = part.getBodyPart(1);
         assertThat(attach.getSize(), greaterThan(0));
-        assertThat(IOUtils.toString(attach.getInputStream(), StandardCharsets.UTF_8), containsString("mickey@disney.com"));
+        assertThat(
+                IOUtils.toString(attach.getInputStream(), StandardCharsets.UTF_8), containsString("mickey@disney.com"));
         assertEquals("build.log", attach.getFileName());
     }
 
     @Test
     public void testBuildLogZipAttachment() throws Exception {
         // check the size limit applies to the compressed size
-        j.getInstance().getDescriptorByType(ExtendedEmailPublisherDescriptor.class).setMaxAttachmentSize(80000);
+        j.getInstance()
+                .getDescriptorByType(ExtendedEmailPublisherDescriptor.class)
+                .setMaxAttachmentSize(80000);
         FreeStyleProject project = j.createFreeStyleProject("foo");
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
         publisher.attachBuildLog = true;
         publisher.compressBuildLog = true;
         publisher.recipientList = "mickey@disney.com";
-        SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(
+                Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
         publisher.getConfiguredTriggers().add(trigger);
         project.getPublishersList().add(publisher);
         project.getBuildersList().add(new TestBuilder() {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
-                for (int i = 0; i < 1000; i++) // Pad out the build log so the zip has something to compress
-                    listener.getLogger().println("Oh Mickey, you're so fine\n" +
-                            "You're so fine you blow my mind, hey Mickey,\n" +
-                            "Hey Mickey\n");
+                // Pad out the build log so the zip has something to compress
+                for (int i = 0; i < 1000; i++) {
+                    listener.getLogger()
+                            .println("Oh Mickey, you're so fine\n" + "You're so fine you blow my mind, hey Mickey,\n"
+                                    + "Hey Mickey\n");
+                }
                 return true;
             }
         });
@@ -123,10 +131,15 @@ public class AttachmentUtilsTest {
         assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
 
         BodyPart attach = part.getBodyPart(1);
-        assertThat(attach.getSize(), allOf(greaterThan(0),
-                lessThanOrEqualTo((Long.valueOf(b.getLogFile().length()).intValue()))));
+        assertThat(
+                attach.getSize(),
+                allOf(
+                        greaterThan(0),
+                        lessThanOrEqualTo(Long.valueOf(b.getLogFile().length()).intValue())));
         assertEquals("build.zip", attach.getFileName());
-        assertThat(IOUtils.toString(attach.getInputStream(), StandardCharsets.UTF_8), containsString("build.log")); // zips have plain text filename in them
+        assertThat(
+                IOUtils.toString(attach.getInputStream(), StandardCharsets.UTF_8),
+                containsString("build.log")); // zips have plain text filename in them
     }
 
     @Test
@@ -139,7 +152,8 @@ public class AttachmentUtilsTest {
         publisher.attachmentsPattern = "*.pdf";
         publisher.recipientList = "mickey@disney.com";
 
-        SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(
+                Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
 
         publisher.getConfiguredTriggers().add(trigger);
 
@@ -147,7 +161,8 @@ public class AttachmentUtilsTest {
 
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 build.getWorkspace().child("test.pdf").copyFrom(new FilePath(attachment));
                 return true;
             }
@@ -162,12 +177,13 @@ public class AttachmentUtilsTest {
         assertTrue("Message should be multipart", msg instanceof MimeMessage);
         assertTrue("Content should be a MimeMultipart", msg.getContent() instanceof MimeMultipart);
 
-        MimeMultipart part = (MimeMultipart)msg.getContent();
+        MimeMultipart part = (MimeMultipart) msg.getContent();
 
         assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
 
         BodyPart attach = part.getBodyPart(1);
-        assertTrue("There should be a PDF named \"test.pdf\" attached", "test.pdf".equalsIgnoreCase(attach.getFileName()));
+        assertTrue(
+                "There should be a PDF named \"test.pdf\" attached", "test.pdf".equalsIgnoreCase(attach.getFileName()));
     }
 
     @Test
@@ -180,7 +196,8 @@ public class AttachmentUtilsTest {
         publisher.attachmentsPattern = "**/*.pdf";
         publisher.recipientList = "mickey@disney.com";
 
-        SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(
+                Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
 
         publisher.getConfiguredTriggers().add(trigger);
 
@@ -188,7 +205,8 @@ public class AttachmentUtilsTest {
 
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 build.getWorkspace().child("testreport").mkdirs();
                 build.getWorkspace().child("testreport").child("test.pdf").copyFrom(new FilePath(attachment));
                 return true;
@@ -204,12 +222,13 @@ public class AttachmentUtilsTest {
         assertTrue("Message should be multipart", msg instanceof MimeMessage);
         assertTrue("Content should be a MimeMultipart", msg.getContent() instanceof MimeMultipart);
 
-        MimeMultipart part = (MimeMultipart)msg.getContent();
+        MimeMultipart part = (MimeMultipart) msg.getContent();
 
         assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
 
         BodyPart attach = part.getBodyPart(1);
-        assertTrue("There should be a PDF named \"test.pdf\" attached", "test.pdf".equalsIgnoreCase(attach.getFileName()));
+        assertTrue(
+                "There should be a PDF named \"test.pdf\" attached", "test.pdf".equalsIgnoreCase(attach.getFileName()));
     }
 
     @Test
@@ -223,7 +242,8 @@ public class AttachmentUtilsTest {
         publisher.attachmentsPattern = "**/*.html";
         publisher.recipientList = "mickey@disney.com";
 
-        SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(
+                Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
 
         publisher.getConfiguredTriggers().add(trigger);
 
@@ -231,7 +251,8 @@ public class AttachmentUtilsTest {
 
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
                 build.getWorkspace().child("testreport").mkdirs();
                 build.getWorkspace().child("testreport").child("test.html").copyFrom(new FilePath(attachment));
                 return true;
@@ -247,12 +268,14 @@ public class AttachmentUtilsTest {
         assertTrue("Message should be multipart", msg instanceof MimeMessage);
         assertTrue("Content should be a MimeMultipart", msg.getContent() instanceof MimeMultipart);
 
-        MimeMultipart part = (MimeMultipart)msg.getContent();
+        MimeMultipart part = (MimeMultipart) msg.getContent();
 
         assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
 
         BodyPart attach = part.getBodyPart(1);
-        assertTrue("There should be a HTML file named \"test.html\" attached", "test.html".equalsIgnoreCase(attach.getFileName()));
+        assertTrue(
+                "There should be a HTML file named \"test.html\" attached",
+                "test.html".equalsIgnoreCase(attach.getFileName()));
 
         assertTrue("The file should have the \"text/html\" mimetype", attach.isMimeType("text/html"));
     }
@@ -267,7 +290,8 @@ public class AttachmentUtilsTest {
         publisher.attachmentsPattern = "**/*.txt";
         publisher.recipientList = "mickey@disney.com";
 
-        SuccessTrigger trigger = new SuccessTrigger(Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+        SuccessTrigger trigger = new SuccessTrigger(
+                Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
 
         publisher.getConfiguredTriggers().add(trigger);
 
@@ -275,8 +299,9 @@ public class AttachmentUtilsTest {
 
         project.getBuildersList().add(new TestBuilder() {
             @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-                build.getWorkspace().child("已使用红包.txt").write("test.property=success","UTF-8");
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                build.getWorkspace().child("已使用红包.txt").write("test.property=success", "UTF-8");
                 return build.getWorkspace().child("已使用红包.txt").exists();
             }
         });
@@ -292,14 +317,16 @@ public class AttachmentUtilsTest {
         assertTrue("Message should be multipart", msg instanceof MimeMessage);
         assertTrue("Content should be a MimeMultipart", msg.getContent() instanceof MimeMultipart);
 
-        MimeMultipart part = (MimeMultipart)msg.getContent();
+        MimeMultipart part = (MimeMultipart) msg.getContent();
 
         assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
 
         BodyPart attach = part.getBodyPart(1);
         String attachment_filename = MimeUtility.decodeText(attach.getFileName());
-        assertTrue(String.format("There should be a txt file named \"已使用红包.txt\" attached but found %s", attachment_filename),
-                   "已使用红包.txt".equalsIgnoreCase(attachment_filename));
+        assertTrue(
+                String.format(
+                        "There should be a txt file named \"已使用红包.txt\" attached but found %s", attachment_filename),
+                "已使用红包.txt".equalsIgnoreCase(attachment_filename));
 
         assertTrue("The file should have the \"text/plain\" mimetype", attach.isMimeType("text/plain"));
     }

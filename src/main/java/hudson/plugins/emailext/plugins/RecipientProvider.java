@@ -23,7 +23,7 @@ import org.apache.commons.lang.StringUtils;
  */
 public abstract class RecipientProvider extends AbstractDescribableImpl<RecipientProvider> implements ExtensionPoint {
     private static final Logger LOG = Logger.getLogger(RecipientProvider.class.getName());
-    
+
     public static DescriptorExtensionList<RecipientProvider, RecipientProviderDescriptor> all() {
         return Jenkins.get().getDescriptorList(RecipientProvider.class);
     }
@@ -36,14 +36,19 @@ public abstract class RecipientProvider extends AbstractDescribableImpl<Recipien
                     rt.add(recipientProviderDescriptor);
                 }
             } catch (Exception ex) {
-                LOG.log(Level.WARNING, MessageFormat.format("Exception checking if {0} supports {1}, skipping",
-                        recipientProviderDescriptor.getDisplayName(), clazz.getName()), ex);
+                LOG.log(
+                        Level.WARNING,
+                        MessageFormat.format(
+                                "Exception checking if {0} supports {1}, skipping",
+                                recipientProviderDescriptor.getDisplayName(), clazz.getName()),
+                        ex);
             }
         }
         return rt;
     }
 
-    public static void checkAllSupport(@NonNull List<? extends RecipientProvider> providers, Class<? extends Job> clazz) {
+    public static void checkAllSupport(
+            @NonNull List<? extends RecipientProvider> providers, Class<? extends Job> clazz) {
         Set<String> notSupported = new TreeSet<>();
         for (RecipientProvider provider : providers) {
             if (!provider.getDescriptor().isApplicable(clazz)) {
@@ -52,9 +57,9 @@ public abstract class RecipientProvider extends AbstractDescribableImpl<Recipien
         }
 
         if (!notSupported.isEmpty()) {
-            throw new IllegalArgumentException(MessageFormat.
-                    format("The following recipient providers do not support {0} {1}", clazz.getName(),
-                            StringUtils.join(notSupported, ", ")));
+            throw new IllegalArgumentException(MessageFormat.format(
+                    "The following recipient providers do not support {0} {1}",
+                    clazz.getName(), StringUtils.join(notSupported, ", ")));
         }
     }
 
@@ -63,5 +68,10 @@ public abstract class RecipientProvider extends AbstractDescribableImpl<Recipien
         return (RecipientProviderDescriptor) super.getDescriptor();
     }
 
-    public abstract void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc);
+    public abstract void addRecipients(
+            ExtendedEmailPublisherContext context,
+            EnvVars env,
+            Set<InternetAddress> to,
+            Set<InternetAddress> cc,
+            Set<InternetAddress> bcc);
 }

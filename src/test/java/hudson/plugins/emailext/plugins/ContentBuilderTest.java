@@ -29,6 +29,7 @@ public class ContentBuilderTest {
     private ExtendedEmailPublisher publisher;
     private BuildListener listener;
     private AbstractBuild<?, ?> build;
+
     @Rule
     public JenkinsRule j = new JenkinsRule() {
         @Override
@@ -60,72 +61,79 @@ public class ContentBuilderTest {
 
     @Test
     public void testTransformText_shouldExpand_$PROJECT_DEFAULT_CONTENT() {
-        assertEquals(publisher.defaultContent, ContentBuilder.transformText("$PROJECT_DEFAULT_CONTENT", publisher,
-                build, j.createLocalLauncher(), listener));
-        assertEquals(publisher.defaultContent, ContentBuilder.transformText("${PROJECT_DEFAULT_CONTENT}", publisher,
-                build, j.createLocalLauncher(), listener));
+        assertEquals(
+                publisher.defaultContent,
+                ContentBuilder.transformText(
+                        "$PROJECT_DEFAULT_CONTENT", publisher, build, j.createLocalLauncher(), listener));
+        assertEquals(
+                publisher.defaultContent,
+                ContentBuilder.transformText(
+                        "${PROJECT_DEFAULT_CONTENT}", publisher, build, j.createLocalLauncher(), listener));
     }
 
     @Test
     public void testTransformText_shouldExpand_$PROJECT_DEFAULT_SUBJECT() {
-        assertEquals(publisher.defaultSubject, ContentBuilder.transformText("$PROJECT_DEFAULT_SUBJECT", publisher,
-                build, listener));
-        assertEquals(publisher.defaultSubject, ContentBuilder.transformText("${PROJECT_DEFAULT_SUBJECT}", publisher,
-                build, listener));
+        assertEquals(
+                publisher.defaultSubject,
+                ContentBuilder.transformText("$PROJECT_DEFAULT_SUBJECT", publisher, build, listener));
+        assertEquals(
+                publisher.defaultSubject,
+                ContentBuilder.transformText("${PROJECT_DEFAULT_SUBJECT}", publisher, build, listener));
     }
 
     @Test
     public void testTransformText_shouldExpand_$DEFAULT_CONTENT() {
-        assertEquals(publisher.getDescriptor().getDefaultBody(),
-                ContentBuilder.transformText("$DEFAULT_CONTENT", publisher,
-                build, listener));
-        assertEquals(publisher.getDescriptor().getDefaultBody(),
-                ContentBuilder.transformText("${DEFAULT_CONTENT}", publisher,
-                build, listener));
+        assertEquals(
+                publisher.getDescriptor().getDefaultBody(),
+                ContentBuilder.transformText("$DEFAULT_CONTENT", publisher, build, listener));
+        assertEquals(
+                publisher.getDescriptor().getDefaultBody(),
+                ContentBuilder.transformText("${DEFAULT_CONTENT}", publisher, build, listener));
     }
 
     @Test
     public void testTransformText_shouldExpand_$DEFAULT_SUBJECT() {
-        assertEquals(publisher.getDescriptor().getDefaultSubject(),
-                ContentBuilder.transformText("$DEFAULT_SUBJECT", publisher,
-                build, listener));
-        assertEquals(publisher.getDescriptor().getDefaultSubject(),
-                ContentBuilder.transformText("${DEFAULT_SUBJECT}", publisher,
-                build, listener));
+        assertEquals(
+                publisher.getDescriptor().getDefaultSubject(),
+                ContentBuilder.transformText("$DEFAULT_SUBJECT", publisher, build, listener));
+        assertEquals(
+                publisher.getDescriptor().getDefaultSubject(),
+                ContentBuilder.transformText("${DEFAULT_SUBJECT}", publisher, build, listener));
     }
 
     @Test
     public void testTransformText_shouldExpand_$DEFAULT_RECIPIENT_LIST() {
-        assertEquals(publisher.getDescriptor().getDefaultRecipients(),
-                ContentBuilder.transformText("$DEFAULT_RECIPIENTS", publisher,
-                build, listener));
-        assertEquals(publisher.getDescriptor().getDefaultRecipients(),
-                ContentBuilder.transformText("${DEFAULT_RECIPIENTS}", publisher,
-                build, listener));
+        assertEquals(
+                publisher.getDescriptor().getDefaultRecipients(),
+                ContentBuilder.transformText("$DEFAULT_RECIPIENTS", publisher, build, listener));
+        assertEquals(
+                publisher.getDescriptor().getDefaultRecipients(),
+                ContentBuilder.transformText("${DEFAULT_RECIPIENTS}", publisher, build, listener));
     }
 
     @Test
     public void testTransformText_shouldExpand_$DEFAULT_PRESEND_SCRIPT() {
-        assertEquals(publisher.getDescriptor().getDefaultPresendScript(),
-                ContentBuilder.transformText("$DEFAULT_PRESEND_SCRIPT", publisher,
-                build, listener));
-        assertEquals(publisher.getDescriptor().getDefaultPresendScript(),
-                ContentBuilder.transformText("${DEFAULT_PRESEND_SCRIPT}", publisher,
-                build, listener));
+        assertEquals(
+                publisher.getDescriptor().getDefaultPresendScript(),
+                ContentBuilder.transformText("$DEFAULT_PRESEND_SCRIPT", publisher, build, listener));
+        assertEquals(
+                publisher.getDescriptor().getDefaultPresendScript(),
+                ContentBuilder.transformText("${DEFAULT_PRESEND_SCRIPT}", publisher, build, listener));
     }
 
     @Test
     public void testTransformText_shouldExpand_$DEFAULT_POSTSEND_SCRIPT() {
-        assertEquals(publisher.getDescriptor().getDefaultPostsendScript(),
-                ContentBuilder.transformText("$DEFAULT_POSTSEND_SCRIPT", publisher,
-                build, listener));
-        assertEquals(publisher.getDescriptor().getDefaultPostsendScript(),
-                ContentBuilder.transformText("${DEFAULT_POSTSEND_SCRIPT}", publisher,
-                build, listener));
+        assertEquals(
+                publisher.getDescriptor().getDefaultPostsendScript(),
+                ContentBuilder.transformText("$DEFAULT_POSTSEND_SCRIPT", publisher, build, listener));
+        assertEquals(
+                publisher.getDescriptor().getDefaultPostsendScript(),
+                ContentBuilder.transformText("${DEFAULT_POSTSEND_SCRIPT}", publisher, build, listener));
     }
 
     @Test
-    public void testTransformText_noNPEWithNullDefaultSubjectBody() throws NoSuchFieldException, IllegalAccessException {
+    public void testTransformText_noNPEWithNullDefaultSubjectBody()
+            throws NoSuchFieldException, IllegalAccessException {
         Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultBody");
         f.setAccessible(true);
         f.set(publisher.getDescriptor(), null);
@@ -145,20 +153,24 @@ public class ContentBuilderTest {
 
         assertEquals("\\BAR", ContentBuilder.transformText("\\${ENV, var=\"FOO\"}", publisher, build, listener));
     }
-    
+
     @Test
     public void testRuntimeMacro() {
         RuntimeContent content = new RuntimeContent("Hello, world");
-        assertEquals("Hello, world", ContentBuilder.transformText("${RUNTIME}",
-                new ExtendedEmailPublisherContext(publisher, build, build.getWorkspace(), j.createLocalLauncher(), listener),
-                Collections.singletonList(content)));
+        assertEquals(
+                "Hello, world",
+                ContentBuilder.transformText(
+                        "${RUNTIME}",
+                        new ExtendedEmailPublisherContext(
+                                publisher, build, build.getWorkspace(), j.createLocalLauncher(), listener),
+                        Collections.singletonList(content)));
     }
-    
+
     public static class RuntimeContent extends TokenMacro {
-        
+
         public static final String MACRO_NAME = "RUNTIME";
         private final String replacement;
-        
+
         public RuntimeContent(String replacement) {
             this.replacement = replacement;
         }
@@ -174,8 +186,13 @@ public class ContentBuilderTest {
         }
 
         @Override
-        public String evaluate(AbstractBuild<?, ?> ab, TaskListener tl, String string, Map<String, String> map, ListMultimap<String, String> lm) {
+        public String evaluate(
+                AbstractBuild<?, ?> ab,
+                TaskListener tl,
+                String string,
+                Map<String, String> map,
+                ListMultimap<String, String> lm) {
             return replacement;
-        }        
+        }
     }
 }

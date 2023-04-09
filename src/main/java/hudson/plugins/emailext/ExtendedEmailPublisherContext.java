@@ -23,22 +23,28 @@ public class ExtendedEmailPublisherContext {
     private Multimap<String, EmailTrigger> triggered;
 
     @Deprecated
-    public ExtendedEmailPublisherContext(ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+    public ExtendedEmailPublisherContext(
+            ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         this(publisher, build, build.getWorkspace(), launcher, listener);
     }
 
-    public ExtendedEmailPublisherContext(ExtendedEmailPublisher publisher, Run<?,?> run, FilePath workspace, Launcher launcher, TaskListener listener) {
+    public ExtendedEmailPublisherContext(
+            ExtendedEmailPublisher publisher,
+            Run<?, ?> run,
+            FilePath workspace,
+            Launcher launcher,
+            TaskListener listener) {
         this.publisher = publisher;
         this.run = run;
         this.workspace = workspace;
         this.launcher = launcher;
         this.listener = listener;
     }
-    
+
     public ExtendedEmailPublisher getPublisher() {
         return publisher;
     }
-    
+
     protected void setPublisher(ExtendedEmailPublisher publisher) {
         this.publisher = publisher;
     }
@@ -48,13 +54,13 @@ public class ExtendedEmailPublisherContext {
      */
     @Deprecated
     public AbstractBuild<?, ?> getBuild() {
-        if(run instanceof AbstractBuild) {
-            return (AbstractBuild<?, ?>)run;
+        if (run instanceof AbstractBuild) {
+            return (AbstractBuild<?, ?>) run;
         }
         return null;
     }
 
-    public Run<?,?> getRun() {
+    public Run<?, ?> getRun() {
         return run;
     }
 
@@ -64,16 +70,16 @@ public class ExtendedEmailPublisherContext {
 
     public EmailTrigger getTrigger() {
         return trigger;
-    }    
-    
+    }
+
     protected void setTrigger(EmailTrigger trigger) {
         this.trigger = trigger;
     }
-    
+
     protected void setLauncher(Launcher launcher) {
         this.launcher = launcher;
     }
-    
+
     public Launcher getLauncher() {
         return launcher;
     }
@@ -85,11 +91,11 @@ public class ExtendedEmailPublisherContext {
     protected void setListener(TaskListener listener) {
         this.listener = listener;
     }
-    
+
     public Multimap<String, EmailTrigger> getTriggered() {
         return triggered;
     }
-    
+
     protected void setTriggered(Multimap<String, EmailTrigger> triggered) {
         this.triggered = triggered;
     }

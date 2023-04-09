@@ -8,8 +8,7 @@ import hudson.model.Job;
  */
 public abstract class RecipientProviderDescriptor extends Descriptor<RecipientProvider> {
 
-    protected RecipientProviderDescriptor() {
-    }
+    protected RecipientProviderDescriptor() {}
 
     public boolean isApplicable(Class<? extends Job> jobType) {
         return true;

@@ -20,13 +20,51 @@ public class FixedUnhealthyTrigger extends EmailTrigger {
     public static final String TRIGGER_NAME = "Unstable (Test Failures)/Failure -> Success";
 
     @DataBoundConstructor
-    public FixedUnhealthyTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public FixedUnhealthyTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
-    
+
     @Deprecated
-    public FixedUnhealthyTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public FixedUnhealthyTrigger(
+            boolean sendToList,
+            boolean sendToDevs,
+            boolean sendToRequester,
+            boolean sendToCulprits,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                sendToList,
+                sendToDevs,
+                sendToRequester,
+                sendToCulprits,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
 
     @Override
@@ -36,7 +74,8 @@ public class FixedUnhealthyTrigger extends EmailTrigger {
 
         if (buildResult == Result.SUCCESS) {
             Run<?, ?> prevBuild = getPreviousRun(build, listener);
-            if (prevBuild != null && (prevBuild.getResult() == Result.UNSTABLE || prevBuild.getResult() == Result.FAILURE)) {
+            if (prevBuild != null
+                    && (prevBuild.getResult() == Result.UNSTABLE || prevBuild.getResult() == Result.FAILURE)) {
                 return true;
             }
         }
@@ -64,7 +103,7 @@ public class FixedUnhealthyTrigger extends EmailTrigger {
 
         public DescriptorImpl() {
             addTriggerNameToReplace(SuccessTrigger.TRIGGER_NAME);
-            
+
             addDefaultRecipientProvider(new DevelopersRecipientProvider());
             addDefaultRecipientProvider(new ListRecipientProvider());
         }
@@ -74,7 +113,7 @@ public class FixedUnhealthyTrigger extends EmailTrigger {
         public String getDisplayName() {
             return TRIGGER_NAME;
         }
-        
+
         @Override
         public EmailTrigger createDefault() {
             return _createDefault();

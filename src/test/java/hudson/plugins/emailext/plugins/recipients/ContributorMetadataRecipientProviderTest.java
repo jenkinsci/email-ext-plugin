@@ -29,7 +29,7 @@ public class ContributorMetadataRecipientProviderTest {
 
         WorkflowJob job = j.createProject(WorkflowJob.class, "test");
         WorkflowRun run = job.scheduleBuild2(0).get();
-        run.addAction(new ContributorMetadataAction("someone", "Some One", "someone@DOMAIN" ));
+        run.addAction(new ContributorMetadataAction("someone", "Some One", "someone@DOMAIN"));
 
         TestUtilities.checkRecipients(run, new ContributorMetadataRecipientProvider(), "someone");
     }
@@ -38,7 +38,7 @@ public class ContributorMetadataRecipientProviderTest {
     public void testAddRecipients_NotUser() throws Exception {
         WorkflowJob job = j.createProject(WorkflowJob.class, "test");
         WorkflowRun run = job.scheduleBuild2(0).get();
-        run.addAction(new ContributorMetadataAction("someoneelse", "Some One Else", "someoneelse@DOMAIN" ));
+        run.addAction(new ContributorMetadataAction("someoneelse", "Some One Else", "someoneelse@DOMAIN"));
 
         TestUtilities.checkRecipients(run, new ContributorMetadataRecipientProvider());
     }

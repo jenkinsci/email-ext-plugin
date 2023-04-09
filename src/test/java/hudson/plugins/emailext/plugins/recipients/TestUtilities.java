@@ -42,14 +42,17 @@ import java.util.Set;
 /* package private */ final class TestUtilities {
     private static final String AT_DOMAIN = "@DOMAIN";
 
-    private TestUtilities() {
-    }
+    private TestUtilities() {}
 
     public static void checkRecipients(
-            final Run<?, ?> build,
-            final RecipientProvider provider,
-            final String... inAuthors) throws AddressException {
-        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(null, build, null, new Launcher.LocalLauncher(StreamTaskListener.fromStdout()), new StreamBuildListener(System.out, Charset.defaultCharset()));
+            final Run<?, ?> build, final RecipientProvider provider, final String... inAuthors)
+            throws AddressException {
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(
+                null,
+                build,
+                null,
+                new Launcher.LocalLauncher(StreamTaskListener.fromStdout()),
+                new StreamBuildListener(System.out, Charset.defaultCharset()));
         EnvVars envVars = new EnvVars();
         Set<InternetAddress> to = new HashSet<>();
         Set<InternetAddress> cc = new HashSet<>();

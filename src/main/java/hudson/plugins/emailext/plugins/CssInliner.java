@@ -95,7 +95,10 @@ public class CssInliner {
         applyStyles(doc);
         inlineImages(doc);
 
-        doc.outputSettings(doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml).prettyPrint(false).escapeMode(Entities.EscapeMode.extended));
+        doc.outputSettings(doc.outputSettings()
+                .syntax(Document.OutputSettings.Syntax.xml)
+                .prettyPrint(false)
+                .escapeMode(Entities.EscapeMode.extended));
         return StringEscapeUtils.unescapeHtml(doc.outerHtml());
     }
 
@@ -155,7 +158,8 @@ public class CssInliner {
     private void extractStyles(Document doc) {
         String stylesheet = fetchStyles(doc);
 
-        String trimmedStylesheet = stylesheet.replaceAll("\n", "").replaceAll("/\\*.*?\\*/", "").replaceAll(" +", " ");
+        String trimmedStylesheet =
+                stylesheet.replaceAll("\n", "").replaceAll("/\\*.*?\\*/", "").replaceAll(" +", " ");
         String styleRules = trimmedStylesheet.trim();
         String delims = "{}";
         StringTokenizer st = new StringTokenizer(styleRules, delims);
@@ -165,9 +169,9 @@ public class CssInliner {
             Elements selectedElements = doc.select(selector);
             for (Element selElem : selectedElements) {
                 String oldProperties = selElem.attr(CSS_STYLE);
-                selElem.attr(CSS_STYLE,
-                        oldProperties.length() > 0 ? concatenateProperties(
-                                        oldProperties, properties) : properties);
+                selElem.attr(
+                        CSS_STYLE,
+                        oldProperties.length() > 0 ? concatenateProperties(oldProperties, properties) : properties);
             }
         }
     }

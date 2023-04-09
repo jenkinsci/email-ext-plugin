@@ -54,25 +54,28 @@ public class AttachmentUtils implements Serializable {
             this.file = file;
         }
 
+        @Override
         public InputStream getInputStream() throws IOException {
             InputStream stream = null;
             try {
                 stream = file.read();
-            } catch(InterruptedException e) {
+            } catch (InterruptedException e) {
                 stream = null;
             }
             return stream;
         }
 
+        @Override
         public OutputStream getOutputStream() throws IOException {
             throw new IOException("Unsupported");
         }
 
+        @Override
         public String getContentType() {
-            return FileTypeMap.getDefaultFileTypeMap()
-                    .getContentType(file.getName());
+            return FileTypeMap.getDefaultFileTypeMap().getContentType(file.getName());
         }
 
+        @Override
         public String getName() {
             return file.getName();
         }
@@ -81,35 +84,39 @@ public class AttachmentUtils implements Serializable {
     private static class LogFileDataSource implements SizedDataSource {
 
         private static final String DATA_SOURCE_NAME = "build.log";
-        
-        private final Run<?,?> run;
+
+        private final Run<?, ?> run;
 
         public LogFileDataSource(Run<?, ?> run) {
             this.run = run;
         }
-        
+
+        @Override
         public InputStream getInputStream() throws IOException {
             InputStream res;
             long logFileLength = run.getLogText().length();
             long pos = 0;
             ByteArrayOutputStream bao = new ByteArrayOutputStream();
-            
-            while(pos < logFileLength) {
+
+            while (pos < logFileLength) {
                 pos = run.getLogText().writeLogTo(pos, bao);
-            }            
-            
+            }
+
             res = new ByteArrayInputStream(bao.toByteArray());
             return res;
         }
-        
+
+        @Override
         public OutputStream getOutputStream() throws IOException {
             throw new IOException("Unsupported");
         }
-        
+
+        @Override
         public String getContentType() {
             return "text/plain";
         }
-        
+
+        @Override
         public String getName() {
             return DATA_SOURCE_NAME;
         }
@@ -135,11 +142,12 @@ public class AttachmentUtils implements Serializable {
                 FilePath[] files = ws.list(ContentBuilder.transformText(attachmentsPattern, context, null));
 
                 for (FilePath file : files) {
-                    if (maxAttachmentSize > 0
-                            && totalAttachmentSize + file.length() >= maxAttachmentSize) {
-                        context.getListener().getLogger().println("Skipping `" + file.getName()
-                                + "' (" + file.length()
-                                + " bytes) - too large for maximum attachments size");
+                    if (maxAttachmentSize > 0 && totalAttachmentSize + file.length() >= maxAttachmentSize) {
+                        context.getListener()
+                                .getLogger()
+                                .println("Skipping `" + file.getName()
+                                        + "' (" + file.length()
+                                        + " bytes) - too large for maximum attachments size");
                         continue;
                     }
 
@@ -153,30 +161,38 @@ public class AttachmentUtils implements Serializable {
                         attachments.add(attachmentPart);
                         totalAttachmentSize += file.length();
                     } catch (MessagingException e) {
-                        context.getListener().getLogger().println("Error adding `"
-                                + file.getName() + "' as attachment - "
-                                + e.getMessage());
+                        context.getListener()
+                                .getLogger()
+                                .println("Error adding `" + file.getName() + "' as attachment - " + e.getMessage());
                     }
                 }
             }
         }
         return attachments;
     }
-    
+
     @Deprecated
-    public void attach(Multipart multipart, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, BuildListener listener) {
-        final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, null, listener);
+    public void attach(
+            Multipart multipart, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, BuildListener listener) {
+        final ExtendedEmailPublisherContext context =
+                new ExtendedEmailPublisherContext(publisher, build, null, listener);
         attach(multipart, context);
     }
 
-    public void attach(Multipart multipart, ExtendedEmailPublisher publisher, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
-        final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, launcher, listener);
+    public void attach(
+            Multipart multipart,
+            ExtendedEmailPublisher publisher,
+            AbstractBuild<?, ?> build,
+            Launcher launcher,
+            BuildListener listener) {
+        final ExtendedEmailPublisherContext context =
+                new ExtendedEmailPublisherContext(publisher, build, launcher, listener);
         attach(multipart, context);
     }
-    
+
     public void attach(Multipart multipart, ExtendedEmailPublisherContext context) {
         try {
-            
+
             List<MimeBodyPart> attachments = getAttachments(context);
             if (attachments != null) {
                 for (MimeBodyPart attachment : attachments) {
@@ -189,10 +205,11 @@ public class AttachmentUtils implements Serializable {
             context.getListener().error("Error attaching items to message: " + e.getMessage());
         } catch (InterruptedException e) {
             context.getListener().error("Interrupted in processing attachments: " + e.getMessage());
-        }    
+        }
     }
-    
-    private static void attachSingleLog(ExtendedEmailPublisherContext context, Run<?,?> run, Multipart multipart, boolean compress) {
+
+    private static void attachSingleLog(
+            ExtendedEmailPublisherContext context, Run<?, ?> run, Multipart multipart, boolean compress) {
         try {
             long maxAttachmentSize = context.getPublisher().getDescriptor().getMaxAttachmentSize();
 
@@ -208,26 +225,30 @@ public class AttachmentUtils implements Serializable {
             }
 
             if (maxAttachmentSize > 0 && fileSource.getSize() >= maxAttachmentSize) {
-                context.getListener().getLogger().println("Skipping build log attachment - "
-                        + " too large for maximum attachments size");
+                context.getListener()
+                        .getLogger()
+                        .println("Skipping build log attachment - " + " too large for maximum attachments size");
                 return;
             }
 
-            if(run instanceof MatrixRun)
-                attachment.setFileName("build" + "-" + ((MatrixRun)run).getParent().getCombination().toString('-', '-') +  "." + (compress ? "zip" : "log"));
-            else
+            if (run instanceof MatrixRun) {
+                attachment.setFileName("build" + "-"
+                        + ((MatrixRun) run).getParent().getCombination().toString('-', '-') + "."
+                        + (compress ? "zip" : "log"));
+            } else {
                 attachment.setFileName("build." + (compress ? "zip" : "log"));
+            }
             attachment.setDataHandler(new DataHandler(fileSource));
             multipart.addBodyPart(attachment);
         } catch (MessagingException | IOException e) {
             context.getListener().error("Error attaching build log to message: " + e.getMessage());
         }
     }
-    
+
     public static void attachBuildLog(ExtendedEmailPublisherContext context, Multipart multipart, boolean compress) {
         if (context.getRun() instanceof MatrixBuild) {
-            MatrixBuild build = (MatrixBuild)context.getRun();
-            for(MatrixRun run : build.getExactRuns()) {
+            MatrixBuild build = (MatrixBuild) context.getRun();
+            for (MatrixRun run : build.getExactRuns()) {
                 attachSingleLog(context, run, multipart, compress);
             }
         } else {
@@ -236,13 +257,26 @@ public class AttachmentUtils implements Serializable {
     }
 
     @Deprecated
-    public static void attachBuildLog(ExtendedEmailPublisher publisher, Multipart multipart, AbstractBuild<?, ?> build, BuildListener listener, boolean compress) {
-        final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, null, listener);
+    public static void attachBuildLog(
+            ExtendedEmailPublisher publisher,
+            Multipart multipart,
+            AbstractBuild<?, ?> build,
+            BuildListener listener,
+            boolean compress) {
+        final ExtendedEmailPublisherContext context =
+                new ExtendedEmailPublisherContext(publisher, build, null, listener);
         attachBuildLog(context, multipart, compress);
     }
-    
-    public static void attachBuildLog(ExtendedEmailPublisher publisher, Multipart multipart, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, boolean compress) {
-        final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, build, launcher, listener);
+
+    public static void attachBuildLog(
+            ExtendedEmailPublisher publisher,
+            Multipart multipart,
+            AbstractBuild<?, ?> build,
+            Launcher launcher,
+            BuildListener listener,
+            boolean compress) {
+        final ExtendedEmailPublisherContext context =
+                new ExtendedEmailPublisherContext(publisher, build, launcher, listener);
         attachBuildLog(context, multipart, compress);
     }
 }

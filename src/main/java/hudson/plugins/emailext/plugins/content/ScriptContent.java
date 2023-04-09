@@ -51,28 +51,29 @@ import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 public class ScriptContent extends AbstractEvalContent {
 
     private static final Logger LOGGER = Logger.getLogger(ScriptContent.class.getName());
-    
+
     @Parameter
     public String script = "";
-    
+
     private static final String DEFAULT_TEMPLATE_NAME = "groovy-html.template";
-    
+
     @Parameter
     public String template = DEFAULT_TEMPLATE_NAME;
-    
+
     public static final String MACRO_NAME = "SCRIPT";
-    
-    private static final Map<String,Reference<Template>> templateCache = new HashMap<>();
-    
+
+    private static final Map<String, Reference<Template>> templateCache = new HashMap<>();
+
     public ScriptContent() {
         super(MACRO_NAME);
     }
 
     @Override
-    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) throws MacroEvaluationException, IOException, InterruptedException {
+    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
         InputStream inputStream = null;
         String result = "";
-        
+
         try {
             if (!StringUtils.isEmpty(script)) {
                 inputStream = getFileInputStream(run, workspace, script, ".groovy");
@@ -105,10 +106,10 @@ public class ScriptContent extends AbstractEvalContent {
     }
 
     @Override
-    protected Class<? extends ConfigProvider> getProviderClass () {
+    protected Class<? extends ConfigProvider> getProviderClass() {
         return GroovyTemplateConfigProvider.class;
     }
-    
+
     /**
      * Renders the template using a SimpleTemplateEngine
      *
@@ -116,12 +117,14 @@ public class ScriptContent extends AbstractEvalContent {
      * @param templateStream the template file stream
      * @return the rendered template content
      */
-    private String renderTemplate(Run<?, ?> build, FilePath workspace, TaskListener listener, InputStream templateStream) {
-        
+    private String renderTemplate(
+            Run<?, ?> build, FilePath workspace, TaskListener listener, InputStream templateStream) {
+
         String result;
-        
+
         final Map<String, Object> binding = new HashMap<>();
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         binding.put("build", build);
         binding.put("listener", listener);
         binding.put("it", new ScriptContentBuildWrapper(build));
@@ -132,9 +135,15 @@ public class ScriptContent extends AbstractEvalContent {
         try {
             String text = IOUtils.toString(templateStream, StandardCharsets.UTF_8);
             boolean approvedScript = false;
-            if (templateStream instanceof UserProvidedContentInputStream && !AbstractEvalContent.isApprovedScript(text, GroovyLanguage.get())) {
+            if (templateStream instanceof UserProvidedContentInputStream
+                    && !AbstractEvalContent.isApprovedScript(text, GroovyLanguage.get())) {
                 approvedScript = false;
-                ScriptApproval.get().configuring(text, GroovyLanguage.get(), ApprovalContext.create().withItem(build.getParent()), false);
+                ScriptApproval.get()
+                        .configuring(
+                                text,
+                                GroovyLanguage.get(),
+                                ApprovalContext.create().withItem(build.getParent()),
+                                false);
             } else {
                 approvedScript = true;
             }
@@ -158,22 +167,24 @@ public class ScriptContent extends AbstractEvalContent {
             }
             final Template tmplR = tmpl;
             if (approvedScript) {
-                //The script has been approved by an admin, so run it as is
+                // The script has been approved by an admin, so run it as is
                 result = tmplR.make(binding).toString();
             } else {
-                //unapproved script, so run in sandbox
-                StaticProxyInstanceWhitelist whitelist = new StaticProxyInstanceWhitelist(build, "templates-instances.whitelist");
-                result = GroovySandbox.runInSandbox(() -> {
-                    return tmplR.make(binding).toString(); //TODO there is a PrintWriter instance created in make and bound to out
-                }, new ProxyWhitelist(
-                        Whitelist.all(),
-                        new TaskListenerInstanceWhitelist(listener),
-                        new PrintStreamInstanceWhitelist(listener.getLogger()),
-                        new EmailExtScriptTokenMacroWhitelist(),
-                        whitelist));
+                // unapproved script, so run in sandbox
+                StaticProxyInstanceWhitelist whitelist =
+                        new StaticProxyInstanceWhitelist(build, "templates-instances.whitelist");
+                result = GroovySandbox.runInSandbox(
+                        // TODO there is a PrintWriter instance created in make and bound to out
+                        () -> tmplR.make(binding).toString(),
+                        new ProxyWhitelist(
+                                Whitelist.all(),
+                                new TaskListenerInstanceWhitelist(listener),
+                                new PrintStreamInstanceWhitelist(listener.getLogger()),
+                                new EmailExtScriptTokenMacroWhitelist(),
+                                whitelist));
             }
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             Functions.printStackTrace(e, pw);
@@ -193,7 +204,8 @@ public class ScriptContent extends AbstractEvalContent {
             throws IOException {
         String result = "";
         Map<String, Object> binding = new HashMap<>();
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         Item parent = build.getParent();
 
         binding.put("build", build);
@@ -207,18 +219,24 @@ public class ScriptContent extends AbstractEvalContent {
         String scriptContent = IOUtils.toString(scriptStream, descriptor.getCharset());
 
         if (scriptStream instanceof UserProvidedContentInputStream) {
-            ScriptApproval.get().configuring(scriptContent, GroovyLanguage.get(), ApprovalContext.create().withItem(parent));
+            ScriptApproval.get()
+                    .configuring(
+                            scriptContent,
+                            GroovyLanguage.get(),
+                            ApprovalContext.create().withItem(parent));
         }
 
-        if (scriptStream instanceof UserProvidedContentInputStream && !AbstractEvalContent.isApprovedScript(scriptContent, GroovyLanguage.get())) {
-            //Unapproved script, run it in the sandbox
+        if (scriptStream instanceof UserProvidedContentInputStream
+                && !AbstractEvalContent.isApprovedScript(scriptContent, GroovyLanguage.get())) {
+            // Unapproved script, run it in the sandbox
             GroovyShell shell = createEngine(descriptor, binding, true);
-            Object res = GroovySandbox.run(shell, scriptContent, new ProxyWhitelist(
-                    Whitelist.all(),
-                    new PrintStreamInstanceWhitelist(logger),
-                    new EmailExtScriptTokenMacroWhitelist()
-
-            ));
+            Object res = GroovySandbox.run(
+                    shell,
+                    scriptContent,
+                    new ProxyWhitelist(
+                            Whitelist.all(),
+                            new PrintStreamInstanceWhitelist(logger),
+                            new EmailExtScriptTokenMacroWhitelist()));
             if (res != null) {
                 result = res.toString();
             }
@@ -226,7 +244,7 @@ public class ScriptContent extends AbstractEvalContent {
             if (scriptStream instanceof UserProvidedContentInputStream) {
                 ScriptApproval.get().using(scriptContent, GroovyLanguage.get());
             }
-            //Pre approved script, so run as is
+            // Pre approved script, so run as is
             GroovyShell shell = createEngine(descriptor, binding, false);
             Script script = shell.parse(scriptContent);
             Object res = script.run();
@@ -244,7 +262,8 @@ public class ScriptContent extends AbstractEvalContent {
      * @param variables user variables to be added to the Groovy context
      * @return a GroovyShell instance
      */
-    private GroovyShell createEngine(ExtendedEmailPublisherDescriptor descriptor, Map<String, Object> variables, boolean secure) {
+    private GroovyShell createEngine(
+            ExtendedEmailPublisherDescriptor descriptor, Map<String, Object> variables, boolean secure) {
 
         ClassLoader cl;
         CompilerConfiguration cc;
@@ -255,12 +274,9 @@ public class ScriptContent extends AbstractEvalContent {
             cl = Jenkins.get().getPluginManager().uberClassLoader;
             cc = new CompilerConfiguration();
         }
-        cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName()); 
-        cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(
-                "jenkins",
-                "jenkins.model",
-                "hudson",
-                "hudson.model"));
+        cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
+        cc.addCompilationCustomizers(
+                new ImportCustomizer().addStarImports("jenkins", "jenkins.model", "hudson", "hudson.model"));
 
         Binding binding = new Binding();
         for (Map.Entry<String, Object> e : variables.entrySet()) {

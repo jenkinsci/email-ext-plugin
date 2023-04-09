@@ -29,7 +29,8 @@ public class TriggerNameContentTest {
     private ExtendedEmailPublisher publisher;
     private FreeStyleProject project;
 
-    @Rule public JenkinsRule j = new JenkinsRule();
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
 
     @Before
     public void setUp() throws Exception {
@@ -50,25 +51,33 @@ public class TriggerNameContentTest {
         Mailbox.clearAll();
     }
 
-    
     @Test
     public void testTriggerName() throws Exception {
         List<RecipientProvider> recProviders = Collections.emptyList();
-        PreBuildTrigger trigger = new PreBuildTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
+        PreBuildTrigger trigger = new PreBuildTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
         FreeStyleBuild build = project.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(build);
 
-        assertThat("Email should have been triggered, so we should see it in the logs.", build.getLog(100),
+        assertThat(
+                "Email should have been triggered, so we should see it in the logs.",
+                build.getLog(100),
                 hasItems("Email was triggered for: " + PreBuildTrigger.TRIGGER_NAME));
         assertEquals(1, Mailbox.get("mickey@disney.com").size());
         Message message = Mailbox.get("mickey@disney.com").get(0);
         assertEquals(PreBuildTrigger.TRIGGER_NAME, message.getSubject());
     }
-    
+
     private void addEmailType(EmailTrigger trigger) {
         trigger.setEmail(new EmailType() {
             {

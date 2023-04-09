@@ -21,15 +21,17 @@ public class GroovyTemplateConfig extends Config {
     @DataBoundConstructor
     public GroovyTemplateConfig(String id, String name, String comment, String content) {
         super(id, name, comment, content);
-        ScriptApproval.get().configuring(content, GroovyLanguage.get(), ApprovalContext.create().withCurrentUser());
+        ScriptApproval.get()
+                .configuring(
+                        content, GroovyLanguage.get(), ApprovalContext.create().withCurrentUser());
     }
 
     public Object readResolve() {
         ScriptApproval.get().configuring(content, GroovyLanguage.get(), ApprovalContext.create());
         return this;
     }
-    
-    @Extension(optional=true)
+
+    @Extension(optional = true)
     public static final class GroovyTemplateConfigProvider extends AbstractConfigProviderImpl {
 
         public GroovyTemplateConfigProvider() {

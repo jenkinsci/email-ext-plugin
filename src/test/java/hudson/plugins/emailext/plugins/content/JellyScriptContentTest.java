@@ -48,7 +48,7 @@ public class JellyScriptContentTest {
             f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("hudsonUrl");
             f.setAccessible(true);
             f.set(publisher.getDescriptor(), "http://localhost/");
-            
+
             build = mock(AbstractBuild.class);
             AbstractProject<?, ?> project = mock(AbstractProject.class);
             DescribableList publishers = mock(DescribableList.class);
@@ -57,22 +57,20 @@ public class JellyScriptContentTest {
             when(build.getProject()).thenReturn(project);
         }
     };
-    
+
     private JellyScriptContent content;
     private ExtendedEmailPublisher publisher;
     private TaskListener listener;
     private AbstractBuild build;
 
     @Test
-    public void testShouldFindTemplateOnClassPath()
-            throws Exception {
+    public void testShouldFindTemplateOnClassPath() throws Exception {
         content.template = "empty-template-on-classpath";
         assertEquals("HELLO WORLD!", content.evaluate(build, listener, JellyScriptContent.MACRO_NAME));
     }
 
     @Test
-    public void testWhenTemplateNotFoundThrowFileNotFoundException()
-            throws Exception {
+    public void testWhenTemplateNotFoundThrowFileNotFoundException() throws Exception {
         content.template = "template-does-not-exist";
         String output = content.evaluate(build, listener, JellyScriptContent.MACRO_NAME);
 
@@ -92,8 +90,7 @@ public class JellyScriptContentTest {
 
         String output = content.evaluate(build, listener, JellyScriptContent.MACRO_NAME);
 
-        assertTrue(output.contains(
-                "CHANGE SET\n"
+        assertTrue(output.contains("CHANGE SET\n"
                 + "Revision  by Kohsuke Kawaguchi: (COMMIT MESSAGE)\n"
                 + "  change: edit path1\n"
                 + "  change: add path2\n"));

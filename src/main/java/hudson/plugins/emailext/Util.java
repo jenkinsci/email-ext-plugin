@@ -10,8 +10,7 @@ package hudson.plugins.emailext;
 public class Util {
 
     // Prevent instantiation.
-    private Util() {
-    }
+    private Util() {}
 
     /**
      * Replaces all the printf-style escape sequences in a string

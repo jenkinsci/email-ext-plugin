@@ -44,8 +44,12 @@ public class AbstractScriptTriggerTest {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                 // otherwise we would need to create users for each email address tested, to bypass SECURITY-372 fix:
-                .grant(Jenkins.READ, Item.READ, Item.DISCOVER, Item.CONFIGURE).everywhere().toAuthenticated()
-                .grant(Jenkins.ADMINISTER).everywhere().to("bob"));
+                .grant(Jenkins.READ, Item.READ, Item.DISCOVER, Item.CONFIGURE)
+                .everywhere()
+                .toAuthenticated()
+                .grant(Jenkins.ADMINISTER)
+                .everywhere()
+                .to("bob"));
     }
 
     @Test
@@ -59,18 +63,20 @@ public class AbstractScriptTriggerTest {
         publisher.setPresendScript("");
         publisher.setPostsendScript("");
 
-        final String script = "out.println('Checking before trigger')\n" +
-                "return build.result.toString() == 'SUCCESS'";
-        publisher.getConfiguredTriggers().add(new PreBuildScriptTrigger(
-                Collections.emptyList(),
-                "recipientList",
-                "replyTo",
-                "subject",
-                "body",
-                "attachmentsPattern",
-                0,
-                "text/plain",
-                new SecureGroovyScript(script, true, null)));
+        final String script =
+                "out.println('Checking before trigger')\n" + "return build.result.toString() == 'SUCCESS'";
+        publisher
+                .getConfiguredTriggers()
+                .add(new PreBuildScriptTrigger(
+                        Collections.emptyList(),
+                        "recipientList",
+                        "replyTo",
+                        "subject",
+                        "body",
+                        "attachmentsPattern",
+                        0,
+                        "text/plain",
+                        new SecureGroovyScript(script, true, null)));
 
         FreeStyleProject project = j.createFreeStyleProject("iMail");
         project.getPublishersList().add(publisher);
@@ -78,7 +84,8 @@ public class AbstractScriptTriggerTest {
         JenkinsRule.WebClient client = j.createWebClient().login("alice");
         j.submit(client.getPage(project, "configure").getFormByName("config"));
 
-        PreBuildScriptTrigger trigger = checkTrigger(PreBuildScriptTrigger.class, "iMail", Result.FAILURE, RejectedAccessException.class, false);
+        PreBuildScriptTrigger trigger = checkTrigger(
+                PreBuildScriptTrigger.class, "iMail", Result.FAILURE, RejectedAccessException.class, false);
 
         assertEquals("recipientList", trigger.getEmail().getRecipientList());
         assertEquals("replyTo", trigger.getEmail().getReplyTo());
@@ -93,7 +100,6 @@ public class AbstractScriptTriggerTest {
         project = j.jenkins.getItemByFullName("iMail", FreeStyleProject.class);
         FreeStyleBuild build = j.buildAndAssertSuccess(project);
         j.assertLogContains("Checking before trigger", build);
-
     }
 
     @Test
@@ -101,7 +107,6 @@ public class AbstractScriptTriggerTest {
     @Issue("SECURITY-257")
     public void beforeBuildTriggerMigration() throws Exception {
         checkTrigger(PreBuildScriptTrigger.class, "Before", Result.FAILURE, UnapprovedUsageException.class, true);
-
     }
 
     @Test
@@ -121,22 +126,23 @@ public class AbstractScriptTriggerTest {
         publisher.recipientList = "%DEFAULT_RECIPIENTS";
         publisher.setPresendScript("");
         publisher.setPostsendScript("");
-        String script = "class DoNotRunConstructor {\n" +
-            "  static void main(String[] args) {}\n" +
-            "  DoNotRunConstructor() {\n" +
-            "    assert jenkins.model.Jenkins.instance.createProject(hudson.model.FreeStyleProject, 'should-not-exist')\n" +
-            "  }\n" +
-            "}\n";
-        publisher.getConfiguredTriggers().add(new PreBuildScriptTrigger(
-                Collections.emptyList(),
-                "recipientList",
-                "replyTo",
-                "subject",
-                "body",
-                "attachmentsPattern",
-                0,
-                "text/plain",
-                new SecureGroovyScript(script, true, null)));
+        String script = "class DoNotRunConstructor {\n" + "  static void main(String[] args) {}\n"
+                + "  DoNotRunConstructor() {\n"
+                + "    assert jenkins.model.Jenkins.instance.createProject(hudson.model.FreeStyleProject, 'should-not-exist')\n"
+                + "  }\n"
+                + "}\n";
+        publisher
+                .getConfiguredTriggers()
+                .add(new PreBuildScriptTrigger(
+                        Collections.emptyList(),
+                        "recipientList",
+                        "replyTo",
+                        "subject",
+                        "body",
+                        "attachmentsPattern",
+                        0,
+                        "text/plain",
+                        new SecureGroovyScript(script, true, null)));
 
         FreeStyleProject p = j.createFreeStyleProject("p1");
         p.getPublishersList().add(publisher);
@@ -145,7 +151,13 @@ public class AbstractScriptTriggerTest {
         assertNull(j.jenkins.getItem("should-not-exist"));
     }
 
-    private <T> T checkTrigger(Class<T> clazz, String name, Result firstStatus, Class<? extends Exception> expected, boolean approveSignature) throws Exception {
+    private <T> T checkTrigger(
+            Class<T> clazz,
+            String name,
+            Result firstStatus,
+            Class<? extends Exception> expected,
+            boolean approveSignature)
+            throws Exception {
         FreeStyleProject project = j.jenkins.getItemByFullName(name, FreeStyleProject.class);
         assertNotNull(project);
         ExtendedEmailPublisher publisher = project.getPublishersList().get(ExtendedEmailPublisher.class);
@@ -160,7 +172,7 @@ public class AbstractScriptTriggerTest {
         assertThat(at.getSecureTriggerScript().getScript(), not(emptyString()));
 
         FreeStyleBuild build = j.assertBuildStatus(firstStatus, project.scheduleBuild2(0));
-        j.assertLogContains(expected.getName(), build); //TODO change whenever build.getResult() ends up in a whitelist
+        j.assertLogContains(expected.getName(), build); // TODO change whenever build.getResult() ends up in a whitelist
 
         if (approveSignature) {
             ScriptApproval.get().preapproveAll();
@@ -171,5 +183,4 @@ public class AbstractScriptTriggerTest {
 
         return clazz.cast(at);
     }
-
 }
