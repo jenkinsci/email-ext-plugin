@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import net.java.sezpoz.Indexable;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
-@Indexable(type=TokenMacro.class)
+@Indexable(type = TokenMacro.class)
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE})
 @Documented

@@ -58,10 +58,10 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
  * @author acearl
  */
 public abstract class AbstractEvalContent extends DataBoundTokenMacro {
-    
+
     protected static final String EMAIL_TEMPLATES_DIRECTORY = "email-templates";
     protected final String macroName;
-    
+
     public AbstractEvalContent(String macroName) {
         this.macroName = macroName;
     }
@@ -73,73 +73,76 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     }
 
     @Override
-    public abstract String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) throws MacroEvaluationException, IOException, InterruptedException;
+    public abstract String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException;
 
     @Override
     public boolean acceptsMacroName(String macroName) {
         return macroName.equals(this.macroName);
     }
-    
+
     public static File scriptsFolder() {
         return new File(Jenkins.get().getRootDir(), EMAIL_TEMPLATES_DIRECTORY);
     }
 
     protected abstract Class<? extends ConfigProvider> getProviderClass();
-    
+
     @Override
     public boolean hasNestedContent() {
         return false;
     }
-    
+
     protected InputStream getFileInputStream(Run<?, ?> run, FilePath workspace, String fileName, String extension)
             throws IOException, InterruptedException {
-        
+
         InputStream inputStream = null;
-        if(fileName.startsWith("managed:")) {
+        if (fileName.startsWith("managed:")) {
             String managedFileName = fileName.substring(8);
             try {
                 inputStream = getManagedFile(run, managedFileName);
-            } catch(NoClassDefFoundError e) {
+            } catch (NoClassDefFoundError e) {
                 inputStream = null;
             }
-            
-            if(inputStream == null) {
+
+            if (inputStream == null) {
                 throw new FileNotFoundException(String.format("Managed file '%s' not found", managedFileName));
             }
             return inputStream;
         }
-        
+
         String fileExt = FilenameUtils.getExtension(fileName);
-        
+
         // add default extension if needed
         if ("".equals(fileExt)) {
             fileName += extension;
-        }    
-        
+        }
+
         // next we look in the workspace, this means the filename is relative to the root of the workspace
-        if(workspace != null) {
+        if (workspace != null) {
             FilePath file = workspace.child(fileName);
-            if(file.exists() && isChildOf(file, workspace)) { //Guard against .. escapes
+            if (file.exists() && isChildOf(file, workspace)) { // Guard against .. escapes
                 inputStream = new UserProvidedContentInputStream(file.read());
             }
         }
 
-        if(inputStream == null) {        
-            inputStream = getClass().getClassLoader().getResourceAsStream(
-                    "hudson/plugins/emailext/templates/" + fileName);
+        if (inputStream == null) {
+            inputStream =
+                    getClass().getClassLoader().getResourceAsStream("hudson/plugins/emailext/templates/" + fileName);
 
             if (inputStream == null) {
                 File templateFile = new File(scriptsFolder(), fileName);
 
                 // the file may have an extension, but not the correct one
-                if(!templateFile.exists()) {
+                if (!templateFile.exists()) {
                     fileName += extension;
                     templateFile = new File(scriptsFolder(), fileName);
                 }
 
                 if (!templateFile.exists() || !isChildOf(new FilePath(templateFile), new FilePath(scriptsFolder()))) {
-                    //guard against .. escapes
-                    throw new FileNotFoundException(fileName); //Say whatever the user provided so we don't leak any information about the filesystem, but generateMissingFile should cover us.
+                    // guard against .. escapes
+                    throw new FileNotFoundException(
+                            fileName); // Say whatever the user provided so we don't leak any information about the
+                    // filesystem, but generateMissingFile should cover us.
                 } else {
                     inputStream = new FileInputStream(templateFile);
                 }
@@ -150,8 +153,9 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     }
 
     @Restricted(NoExternalUse.class)
-    public static boolean isChildOf(final FilePath potentialChild, final FilePath parent) throws IOException, InterruptedException {
-        //TODO JENKINS-26838 use API when available in core
+    public static boolean isChildOf(final FilePath potentialChild, final FilePath parent)
+            throws IOException, InterruptedException {
+        // TODO JENKINS-26838 use API when available in core
         return parent.act(new IsChildFileCallable(potentialChild));
     }
 
@@ -160,7 +164,8 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         Plugin plugin = Jenkins.get().getPlugin("config-file-provider");
         if (plugin != null) {
             Config config = null;
-            List<Config> configs = ConfigFiles.getConfigsInContext(run.getParent().getParent(), getProviderClass());
+            List<Config> configs =
+                    ConfigFiles.getConfigsInContext(run.getParent().getParent(), getProviderClass());
             for (Config c : configs) {
                 if (c.name.equalsIgnoreCase(fileName)) {
                     config = c;
@@ -169,9 +174,10 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
             }
 
             if (config != null) {
-               stream = new ByteArrayInputStream(config.content.getBytes(StandardCharsets.UTF_8));
+                stream = new ByteArrayInputStream(config.content.getBytes(StandardCharsets.UTF_8));
                 if (ExtensionList.lookupSingleton(GlobalConfigFiles.class).getById(config.id) == config) {
-                    // the config is in the Global configuration not a folder - so it is approved by virtue of only being modified by an admin
+                    // the config is in the Global configuration not a folder - so it is approved by virtue of only
+                    // being modified by an admin
                     return stream;
                 } else {
                     // the script may have been written by anyone so it needs to be sandboxed
@@ -181,11 +187,11 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         }
         return null;
     }
-    
+
     protected String generateMissingFile(String type, String fileName) {
         return type + " file [" + fileName + "] was not found in $JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ".";
     }
-    
+
     protected String getCharset(Run<?, ?> build) {
         return ExtendedEmailPublisher.descriptor().getCharset();
     }
@@ -206,12 +212,12 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         @Override
         public Boolean invoke(File parent, VirtualChannel channel) {
             if (potentialChild.isRemote()) {
-                //Not on the same machine so can't be a child of the local file
+                // Not on the same machine so can't be a child of the local file
                 return false;
             }
             FilePath test = potentialChild.getParent();
             FilePath target = new FilePath(parent);
-            while(test != null && !target.equals(test)) {
+            while (test != null && !target.equals(test)) {
                 test = test.getParent();
             }
             return target.equals(test);

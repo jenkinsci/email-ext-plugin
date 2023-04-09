@@ -60,8 +60,8 @@ public class EmailExtWatchJobProperty extends JobProperty<Job<?, ?>> {
     }
 
     public boolean isWatching(User user) {
-        for(String u : watchers) {
-            if(u.compareTo(user.getId()) == 0) {
+        for (String u : watchers) {
+            if (u.compareTo(user.getId()) == 0) {
                 return true;
             }
         }
@@ -76,8 +76,7 @@ public class EmailExtWatchJobProperty extends JobProperty<Job<?, ?>> {
         }
 
         @Override
-        public JobProperty<?> newInstance(StaplerRequest req,
-                                          JSONObject formData) throws FormException {
+        public JobProperty<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             return null;
         }
 

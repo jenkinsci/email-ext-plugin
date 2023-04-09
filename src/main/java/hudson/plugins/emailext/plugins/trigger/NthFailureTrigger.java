@@ -23,18 +23,74 @@ public abstract class NthFailureTrigger extends EmailTrigger {
 
     /** @deprecated override getRequiredFailureCount instead of passing in failureCount */
     @Deprecated
-    public NthFailureTrigger(int failureCount, List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public NthFailureTrigger(
+            int failureCount,
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
         this.failureCount = failureCount;
     }
 
-    public NthFailureTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public NthFailureTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
-    
+
     @Deprecated
-    public NthFailureTrigger(int failureCount, boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public NthFailureTrigger(
+            int failureCount,
+            boolean sendToList,
+            boolean sendToDevs,
+            boolean sendToRequester,
+            boolean sendToCulprits,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                sendToList,
+                sendToDevs,
+                sendToRequester,
+                sendToCulprits,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
         this.failureCount = failureCount;
     }
 
@@ -45,7 +101,7 @@ public abstract class NthFailureTrigger extends EmailTrigger {
 
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
-        Run<?,?> run = build;
+        Run<?, ?> run = build;
         int count = getRequiredFailureCount();
         // Work back through the failed builds.
         for (int i = 0; i < count; i++) {
@@ -70,7 +126,7 @@ public abstract class NthFailureTrigger extends EmailTrigger {
         public DescriptorImpl() {
             addTriggerNameToReplace(FailureTrigger.TRIGGER_NAME);
             addTriggerNameToReplace(StillFailingTrigger.TRIGGER_NAME);
-            
+
             addDefaultRecipientProvider(new DevelopersRecipientProvider());
             addDefaultRecipientProvider(new ListRecipientProvider());
         }

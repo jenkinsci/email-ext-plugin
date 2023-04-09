@@ -31,29 +31,32 @@ import org.kohsuke.stapler.DataBoundConstructor;
  *
  * @author acearl
  */
-
 public class CulpritsRecipientProvider extends RecipientProvider {
 
     @DataBoundConstructor
-    public CulpritsRecipientProvider() {
-
-    }
+    public CulpritsRecipientProvider() {}
 
     @Override
-    public void addRecipients(final ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
+    public void addRecipients(
+            final ExtendedEmailPublisherContext context,
+            EnvVars env,
+            Set<InternetAddress> to,
+            Set<InternetAddress> cc,
+            Set<InternetAddress> bcc) {
         final class Debug implements RecipientProviderUtilities.IDebug {
-            private final ExtendedEmailPublisherDescriptor descriptor
-                    = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+            private final ExtendedEmailPublisherDescriptor descriptor =
+                    Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 
+            @Override
             public void send(final String format, final Object... args) {
                 descriptor.debug(logger, format, args);
             }
         }
 
         final Debug debug = new Debug();
-        Run<?,?> run = context.getRun();
+        Run<?, ?> run = context.getRun();
 
         if (run instanceof RunWithSCM) {
             Set<User> culprits = ((RunWithSCM<?, ?>) run).getCulprits();

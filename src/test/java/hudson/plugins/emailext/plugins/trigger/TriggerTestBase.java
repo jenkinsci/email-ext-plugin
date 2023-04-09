@@ -19,11 +19,11 @@ import java.util.List;
  * Base class for testing
  */
 public abstract class TriggerTestBase {
-    
+
     protected List<RecipientProvider> recProviders = Collections.emptyList();
 
     abstract EmailTrigger newInstance();
-    
+
     TaskListener getTaskListener() {
         return StreamTaskListener.fromStdout();
     }

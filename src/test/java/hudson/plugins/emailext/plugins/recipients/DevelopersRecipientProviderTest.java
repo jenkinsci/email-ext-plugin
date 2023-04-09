@@ -24,11 +24,13 @@ public class DevelopersRecipientProviderTest {
     public void before() {
         final Jenkins jenkins = Mockito.mock(Jenkins.class);
         Mockito.when(jenkins.isUseSecurity()).thenReturn(false);
-        final ExtendedEmailPublisherDescriptor extendedEmailPublisherDescriptor = Mockito.mock(ExtendedEmailPublisherDescriptor.class);
+        final ExtendedEmailPublisherDescriptor extendedEmailPublisherDescriptor =
+                Mockito.mock(ExtendedEmailPublisherDescriptor.class);
         extendedEmailPublisherDescriptor.setDebugMode(true);
         Mockito.when(extendedEmailPublisherDescriptor.getExcludedCommitters()).thenReturn("");
 
-        Mockito.when(jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class)).thenReturn(extendedEmailPublisherDescriptor);
+        Mockito.when(jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class))
+                .thenReturn(extendedEmailPublisherDescriptor);
         mockedJenkins = Mockito.mockStatic(Jenkins.class);
         mockedJenkins.when(Jenkins::get).thenReturn(jenkins);
 

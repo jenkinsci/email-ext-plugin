@@ -12,13 +12,52 @@ public class FirstFailureTrigger extends NthFailureTrigger {
     public static final String TRIGGER_NAME = "Failure - 1st";
 
     @DataBoundConstructor
-    public FirstFailureTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public FirstFailureTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
-    
+
     @Deprecated
-    public FirstFailureTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(1, sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public FirstFailureTrigger(
+            boolean sendToList,
+            boolean sendToDevs,
+            boolean sendToRequester,
+            boolean sendToCulprits,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                1,
+                sendToList,
+                sendToDevs,
+                sendToRequester,
+                sendToCulprits,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
 
     @Override
@@ -34,7 +73,8 @@ public class FirstFailureTrigger extends NthFailureTrigger {
         public String getDisplayName() {
             return TRIGGER_NAME;
         }
-        
+
+        @Override
         public EmailTrigger createDefault() {
             return _createDefault();
         }

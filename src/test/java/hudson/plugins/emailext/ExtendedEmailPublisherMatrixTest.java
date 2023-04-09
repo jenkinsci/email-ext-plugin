@@ -41,9 +41,11 @@ public class ExtendedEmailPublisherMatrixTest {
     private MatrixProject project;
     private static List<DumbSlave> agents;
 
-    @ClassRule public static JenkinsRule j = new JenkinsRule();
+    @ClassRule
+    public static JenkinsRule j = new JenkinsRule();
 
-    @Rule public TestName testName = new TestName();
+    @Rule
+    public TestName testName = new TestName();
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -73,102 +75,135 @@ public class ExtendedEmailPublisherMatrixTest {
     public void testPreBuildMatrixBuildSendParentOnly() throws Exception {
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_PARENT);
         List<RecipientProvider> recProviders = Collections.emptyList();
-        PreBuildTrigger trigger = new PreBuildTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
-        addEmailType( trigger );
-        publisher.getConfiguredTriggers().add( trigger );
+        PreBuildTrigger trigger = new PreBuildTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
+        addEmailType(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
         MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);    
-    
-        assertThat( "Email should have been triggered, so we should see it in the logs.", build.getLog( 100 ),
-                hasItems( "Email was triggered for: " + PreBuildTrigger.TRIGGER_NAME ) );
-        assertEquals( 1, Mailbox.get( "solganik@gmail.com" ).size() );
+        j.assertBuildStatusSuccess(build);
+
+        assertThat(
+                "Email should have been triggered, so we should see it in the logs.",
+                build.getLog(100),
+                hasItems("Email was triggered for: " + PreBuildTrigger.TRIGGER_NAME));
+        assertEquals(1, Mailbox.get("solganik@gmail.com").size());
     }
 
     @Test
-    public void testPreBuildMatrixBuildSendAgentsOnly() throws Exception{
-        addAgentToProject(0,1,2);
+    public void testPreBuildMatrixBuildSendAgentsOnly() throws Exception {
+        addAgentToProject(0, 1, 2);
         List<RecipientProvider> recProviders = Collections.emptyList();
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_CONFIGURATIONS);
-        PreBuildTrigger trigger = new PreBuildTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
-        addEmailType( trigger );
-        publisher.getConfiguredTriggers().add( trigger );
-       
-    
+        PreBuildTrigger trigger = new PreBuildTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
+        addEmailType(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
+
         MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);        
-        assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );    
+        j.assertBuildStatusSuccess(build);
+        assertEquals(3, Mailbox.get("solganik@gmail.com").size());
     }
 
     @Test
     public void testPreBuildMatrixBuildSendAgentsAndParent() throws Exception {
-        addAgentToProject(0,1);
+        addAgentToProject(0, 1);
         List<RecipientProvider> recProviders = Collections.emptyList();
         publisher.setMatrixTriggerMode(MatrixTriggerMode.BOTH);
-        PreBuildTrigger trigger = new PreBuildTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
-        addEmailType( trigger );
-        publisher.getConfiguredTriggers().add( trigger );
-       
-    
+        PreBuildTrigger trigger = new PreBuildTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
+        addEmailType(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
+
         MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);        
-        assertEquals( 3, Mailbox.get( "solganik@gmail.com" ).size() );    
+        j.assertBuildStatusSuccess(build);
+        assertEquals(3, Mailbox.get("solganik@gmail.com").size());
     }
-    
+
     @Test
-    public void testAttachBuildLogForAllAxes() throws Exception { 
+    public void testAttachBuildLogForAllAxes() throws Exception {
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_PARENT);
         publisher.attachBuildLog = true;
-        addAgentToProject(0,1,2);
+        addAgentToProject(0, 1, 2);
         List<RecipientProvider> recProviders = Collections.emptyList();
-        AlwaysTrigger trigger = new AlwaysTrigger(recProviders, "$DEFAULT_RECIPIENTS",
-            "$DEFAULT_REPLYTO", "$DEFAULT_SUBJECT", "$DEFAULT_CONTENT", "", 0, "project");
-        addEmailType( trigger );
-        publisher.getConfiguredTriggers().add( trigger );
+        AlwaysTrigger trigger = new AlwaysTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
+        addEmailType(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
         MatrixBuild build = project.scheduleBuild2(0).get();
-        j.assertBuildStatusSuccess(build);    
-    
-        assertThat( "Email should have been triggered, so we should see it in the logs.", build.getLog( 100 ),
-                hasItems( "Email was triggered for: " + AlwaysTrigger.TRIGGER_NAME ) );
-        
-        assertEquals( 1, Mailbox.get( "solganik@gmail.com" ).size() );
-        
+        j.assertBuildStatusSuccess(build);
+
+        assertThat(
+                "Email should have been triggered, so we should see it in the logs.",
+                build.getLog(100),
+                hasItems("Email was triggered for: " + AlwaysTrigger.TRIGGER_NAME));
+
+        assertEquals(1, Mailbox.get("solganik@gmail.com").size());
+
         Message msg = Mailbox.get("solganik@gmail.com").get(0);
-        
+
         assertTrue("Message should be multipart", msg instanceof MimeMessage);
         assertTrue("Content should be a MimeMultipart", msg.getContent() instanceof MimeMultipart);
-        
-        MimeMultipart part = (MimeMultipart)msg.getContent();
-        
+
+        MimeMultipart part = (MimeMultipart) msg.getContent();
+
         assertEquals("Should have four body items (message + attachment)", 4, part.getCount());
-        
+
         int i = 1;
-        for(MatrixRun r : build.getExactRuns()) {
-            String fileName = "build" + "-" + r.getParent().getCombination().toString('-', '-') +  ".log";
+        for (MatrixRun r : build.getExactRuns()) {
+            String fileName = "build" + "-" + r.getParent().getCombination().toString('-', '-') + ".log";
             BodyPart attach = part.getBodyPart(i);
-            assertTrue("There should be a log named \"" + fileName + "\" attached", fileName.equalsIgnoreCase(attach.getFileName()));        
+            assertTrue(
+                    "There should be a log named \"" + fileName + "\" attached",
+                    fileName.equalsIgnoreCase(attach.getFileName()));
             i++;
         }
     }
 
-    private void addEmailType( EmailTrigger trigger ) {
-        trigger.setEmail( new EmailType()
-        {{
-            setRecipientList( "solganik@gmail.com" );
-            setSubject( "Yet another Hudson email" );
-            setBody( "Boom goes the dynamite." );
-        }} );
+    private void addEmailType(EmailTrigger trigger) {
+        trigger.setEmail(new EmailType() {
+            {
+                setRecipientList("solganik@gmail.com");
+                setSubject("Yet another Hudson email");
+                setBody("Boom goes the dynamite.");
+            }
+        });
     }
 
-    private void addAgentToProject(int ... agentInxes) throws IOException {
+    private void addAgentToProject(int... agentInxes) throws IOException {
         AxisList list = new AxisList();
         List<String> values = new LinkedList<>();
         for (int agentInx : agentInxes) {
             values.add(agents.get(agentInx).getLabelString());
         }
-        list.add(new Axis("label",values));
+        list.add(new Axis("label", values));
         project.setAxes(list);
     }
 }

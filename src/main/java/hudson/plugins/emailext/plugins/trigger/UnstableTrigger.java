@@ -15,15 +15,53 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class UnstableTrigger extends EmailTrigger {
 
     public static final String TRIGGER_NAME = "Unstable (Test Failures)";
-    
+
     @DataBoundConstructor
-    public UnstableTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public UnstableTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
-    
+
     @Deprecated
-    public UnstableTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public UnstableTrigger(
+            boolean sendToList,
+            boolean sendToDevs,
+            boolean sendToRequester,
+            boolean sendToCulprits,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                sendToList,
+                sendToDevs,
+                sendToRequester,
+                sendToCulprits,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
 
     @Override
@@ -43,10 +81,10 @@ public class UnstableTrigger extends EmailTrigger {
         public String getDisplayName() {
             return TRIGGER_NAME;
         }
-        
+
         @Override
         public EmailTrigger createDefault() {
             return _createDefault();
         }
-    }    
+    }
 }

@@ -17,15 +17,53 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class StillFailingTrigger extends EmailTrigger {
 
     public static final String TRIGGER_NAME = "Failure - Still";
-    
+
     @DataBoundConstructor
-    public StillFailingTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public StillFailingTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
-    
+
     @Deprecated
-    public StillFailingTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public StillFailingTrigger(
+            boolean sendToList,
+            boolean sendToDevs,
+            boolean sendToRequester,
+            boolean sendToCulprits,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                sendToList,
+                sendToDevs,
+                sendToRequester,
+                sendToCulprits,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
 
     @Override
@@ -47,7 +85,7 @@ public class StillFailingTrigger extends EmailTrigger {
 
         public DescriptorImpl() {
             addTriggerNameToReplace(FailureTrigger.TRIGGER_NAME);
-            
+
             addDefaultRecipientProvider(new DevelopersRecipientProvider());
         }
 
@@ -56,10 +94,10 @@ public class StillFailingTrigger extends EmailTrigger {
         public String getDisplayName() {
             return TRIGGER_NAME;
         }
-        
+
         @Override
         public EmailTrigger createDefault() {
             return _createDefault();
         }
-    }    
+    }
 }

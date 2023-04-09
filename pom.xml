@@ -1,302 +1,280 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>plugin</artifactId>
-        <version>4.59</version>
-        <relativePath />
-    </parent>
+  <parent>
+    <groupId>org.jenkins-ci.plugins</groupId>
+    <artifactId>plugin</artifactId>
+    <version>4.59</version>
+    <relativePath />
+  </parent>
 
-    <licenses>
-        <license>
-            <name>The MIT License (MIT)</name>
-            <url>https://opensource.org/licenses/MIT</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
+  <artifactId>email-ext</artifactId>
+  <version>${revision}${changelist}</version>
+  <packaging>hpi</packaging>
+  <name>Email Extension Plugin</name>
+  <description>Allows to configure every aspect of email notifications: when an email is sent, who should receive it and what the email says</description>
+  <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
 
-    <artifactId>email-ext</artifactId>
-    <packaging>hpi</packaging>
-    <version>${revision}${changelist}</version>
-    <name>Email Extension Plugin</name>
-    <description>Allows to configure every aspect of email notifications: when an email is sent, who should receive it and what the email says</description>
-    <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-    <issueManagement>
-        <system>JIRA</system>
-        <url>https://issues.jenkins-ci.org/issues/?jql=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+email-ext-plugin</url>
-    </issueManagement>
+  <licenses>
+    <license>
+      <name>The MIT License (MIT)</name>
+      <url>https://opensource.org/licenses/MIT</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
 
-    <properties>
-        <revision>2.96</revision>
-        <changelist>-SNAPSHOT</changelist>
-        <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
-        <jenkins.version>2.361.4</jenkins.version>
-        <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
-        <concurrency>1</concurrency>
-        <!-- To be removed once Jenkins.MANAGE gets out of beta -->
-        <useBeta>true</useBeta>
-    </properties>
+  <developers>
+    <developer>
+      <id>basil</id>
+      <name>Basil Crow</name>
+      <email>me@basilcrow.com</email>
+      <roles>
+        <role>maintainer</role>
+        <role>developer</role>
+      </roles>
+    </developer>
+  </developers>
 
-    <developers>
-        <developer>
-            <id>basil</id>
-            <name>Basil Crow</name>
-            <email>me@basilcrow.com</email>
-            <roles>
-                <role>maintainer</role>
-                <role>developer</role>
-            </roles>
-        </developer>        
-    </developers>
+  <contributors>
+    <contributor>
+      <!--<id>ashlux</id>-->
+      <name>Ash Lux</name>
+      <email>ashlux@gmail.com</email>
+      <roles>
+        <role>Past Maintainer</role>
+      </roles>
+    </contributor>
+    <contributor>
+      <!--<id>kdsweeney</id>-->
+      <name>Kyle Sweeney</name>
+      <roles>
+        <role>Past Maintainer</role>
+      </roles>
+    </contributor>
+    <contributor>
+      <!--<id>krwalker</id>-->
+      <name>K. R. Walker</name>
+      <email>krwalker@stellarscience.com</email>
+      <roles>
+        <role>Past Maintainer</role>
+      </roles>
+    </contributor>
+    <contributor>
+      <!--<id>ssogabe</id>-->
+      <name>Seiji Sogabe</name>
+      <email>s.sogabe@gmail.com</email>
+      <roles>
+        <role>Past Maintainer</role>
+      </roles>
+    </contributor>
+    <contributor>
+      <name>Alex Earl</name>
+      <email>slide.o.mix@gmail.com</email>
+      <roles>
+        <role>Past Maintainer</role>
+      </roles>
+    </contributor>
+    <contributor>
+      <name>David van Laatum</name>
+      <email>david@vanlaatum.id.au</email>
+      <roles>
+        <role>Past Maintainer</role>
+      </roles>
+      <timezone>9.5</timezone>
+    </contributor>
+  </contributors>
 
-    <contributors>
-        <contributor>
-            <!--<id>ashlux</id>-->
-            <name>Ash Lux</name>
-            <email>ashlux@gmail.com</email>
-            <roles>
-                <role>Past Maintainer</role>
-            </roles>
-        </contributor>
-        <contributor>
-            <!--<id>kdsweeney</id>-->
-            <name>Kyle Sweeney</name>
-            <roles>
-                <role>Past Maintainer</role>
-            </roles>
-        </contributor>
-        <contributor>
-            <!--<id>krwalker</id>-->
-            <name>K. R. Walker</name>
-            <email>krwalker@stellarscience.com</email>
-            <roles>
-                <role>Past Maintainer</role>
-            </roles>
-        </contributor>
-        <contributor>
-            <!--<id>ssogabe</id>-->
-            <name>Seiji Sogabe</name>
-            <email>s.sogabe@gmail.com</email>
-            <roles>
-                <role>Past Maintainer</role>
-            </roles>
-        </contributor>
-        <contributor>
-            <name>Alex Earl</name>
-            <email>slide.o.mix@gmail.com</email>
-            <roles>
-                <role>Past Maintainer</role>
-            </roles>
-        </contributor>
-        <contributor>
-            <name>David van Laatum</name>
-            <timezone>9.5</timezone>
-            <email>david@vanlaatum.id.au</email>
-            <roles>
-                <role>Past Maintainer</role>
-            </roles>
-        </contributor>
-    </contributors>
+  <scm>
+    <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
+    <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+    <tag>${scmTag}</tag>
+    <url>https://github.com/${gitHubRepo}</url>
+  </scm>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.361.x</artifactId>
-                <version>1981.v17df70e84a_a_1</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+  <issueManagement>
+    <system>JIRA</system>
+    <url>https://issues.jenkins-ci.org/issues/?jql=project+%3D+JENKINS+AND+status+in+%28Open%2C+%22In+Progress%22%2C+Reopened%29+AND+component+%3D+email-ext-plugin</url>
+  </issueManagement>
 
+  <properties>
+    <revision>2.96</revision>
+    <changelist>-SNAPSHOT</changelist>
+    <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
+    <jenkins.version>2.361.4</jenkins.version>
+    <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
+    <concurrency>1</concurrency>
+    <!-- To be removed once Jenkins.MANAGE gets out of beta -->
+    <useBeta>true</useBeta>
+  </properties>
+
+  <dependencyManagement>
     <dependencies>
-        <!-- libraries -->
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>1.15.4</version>
-        </dependency>
-        <dependency>
-            <groupId>net.htmlparser.jericho</groupId>
-            <artifactId>jericho-html</artifactId>
-            <version>3.4</version>
-        </dependency>
-
-        <!-- other plugins -->
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>jackson2-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>matrix-project</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>mailer</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>config-file-provider</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>token-macro</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>structs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>credentials</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>scm-api</artifactId>
-        </dependency>
-
-        <!-- workflow stuff -->
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-step-api</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-job</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-support</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-support</artifactId>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency> <!-- StepConfigTester -->
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-step-api</artifactId>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-cps</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>script-security</artifactId>
-        </dependency>
-
-        <!-- testing -->
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>cloudbees-folder</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <!--
-            This must come before jakarta-mail-api in the class path in order to avoid eclipse-ee4j/mail#350.
-        -->
-        <dependency>
-            <groupId>org.jvnet.mock-javamail</groupId>
-            <artifactId>mock-javamail</artifactId>
-            <version>2.0</version>
-            <scope>test</scope>
-            <exclusions>
-                <!-- Provided by jakarta-activation-api plugin -->
-                <exclusion>
-                    <groupId>com.sun.activation</groupId>
-                    <artifactId>jakarta.activation</artifactId>
-                </exclusion>
-                <!-- Provided by jakarta-mail-api plugin -->
-                <exclusion>
-                    <groupId>com.sun.mail</groupId>
-                    <artifactId>jakarta.mail</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--
-            This must come after mock-javamail in the class path in order to avoid eclipse-ee4j/mail#350.
-        -->
-        <dependency>
-            <groupId>io.jenkins.plugins</groupId>
-            <artifactId>jakarta-mail-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-durable-task-step</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-basic-steps</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jenkins</groupId>
-            <artifactId>configuration-as-code</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jenkins.configuration-as-code</groupId>
-            <artifactId>test-harness</artifactId>
-            <scope>test</scope>
-        </dependency>
+      <dependency>
+        <groupId>io.jenkins.tools.bom</groupId>
+        <artifactId>bom-2.361.x</artifactId>
+        <version>1981.v17df70e84a_a_1</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
+  </dependencyManagement>
 
-    <scm>
-        <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
-        <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
-        <url>https://github.com/${gitHubRepo}</url>
-        <tag>${scmTag}</tag>
-    </scm>
+  <dependencies>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>jakarta-mail-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.htmlparser.jericho</groupId>
+      <artifactId>jericho-html</artifactId>
+      <version>3.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>config-file-provider</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>credentials</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>jackson2-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>mailer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>matrix-project</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>scm-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>script-security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>structs</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>token-macro</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-job</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-step-api</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>1.15.4</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins</groupId>
+      <artifactId>configuration-as-code</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.configuration-as-code</groupId>
+      <artifactId>test-harness</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>cloudbees-folder</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-basic-steps</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-cps</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-durable-task-step</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- StepConfigTester -->
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-step-api</artifactId>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-support</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+      <artifactId>workflow-support</artifactId>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jvnet.mock-javamail</groupId>
+      <artifactId>mock-javamail</artifactId>
+      <version>2.0</version>
+      <scope>test</scope>
+      <exclusions>
+        <!-- Provided by jakarta-activation-api plugin -->
+        <exclusion>
+          <groupId>com.sun.activation</groupId>
+          <artifactId>jakarta.activation</artifactId>
+        </exclusion>
+        <!-- Provided by jakarta-mail-api plugin -->
+        <exclusion>
+          <groupId>com.sun.mail</groupId>
+          <artifactId>jakarta.mail</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
-    <repositories>
-        <repository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/public/</url>
-        </repository>
-    </repositories>
+  <repositories>
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </repository>
+  </repositories>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/public/</url>
-        </pluginRepository>
-    </pluginRepositories>
-
+  <pluginRepositories>
+    <pluginRepository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
 </project>

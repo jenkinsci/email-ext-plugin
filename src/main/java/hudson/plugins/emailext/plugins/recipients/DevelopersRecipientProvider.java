@@ -23,24 +23,29 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class DevelopersRecipientProvider extends RecipientProvider {
 
     @DataBoundConstructor
-    public DevelopersRecipientProvider() {
-
-    }
+    public DevelopersRecipientProvider() {}
 
     @Override
-    public void addRecipients(final ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
+    public void addRecipients(
+            final ExtendedEmailPublisherContext context,
+            EnvVars env,
+            Set<InternetAddress> to,
+            Set<InternetAddress> cc,
+            Set<InternetAddress> bcc) {
         final class Debug implements RecipientProviderUtilities.IDebug {
-            private final ExtendedEmailPublisherDescriptor descriptor
-                    = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+            private final ExtendedEmailPublisherDescriptor descriptor =
+                    Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 
+            @Override
             public void send(final String format, final Object... args) {
                 descriptor.debug(logger, format, args);
             }
         }
         final Debug debug = new Debug();
-        Set<User> users = RecipientProviderUtilities.getChangeSetAuthors(Collections.singleton(context.getRun()), debug);
+        Set<User> users =
+                RecipientProviderUtilities.getChangeSetAuthors(Collections.singleton(context.getRun()), debug);
         RecipientProviderUtilities.addUsers(users, context, env, to, cc, bcc, debug);
     }
 

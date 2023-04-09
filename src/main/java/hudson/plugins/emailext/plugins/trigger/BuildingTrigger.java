@@ -18,15 +18,53 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class BuildingTrigger extends EmailTrigger {
 
     public static final String TRIGGER_NAME = "Failure -> Unstable (Test Failures)";
-    
+
     @DataBoundConstructor
-    public BuildingTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public BuildingTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
-    
+
     @Deprecated
-    public BuildingTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public BuildingTrigger(
+            boolean sendToList,
+            boolean sendToDevs,
+            boolean sendToRequester,
+            boolean sendToCulprits,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                sendToList,
+                sendToDevs,
+                sendToRequester,
+                sendToCulprits,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
 
     @Override
@@ -56,11 +94,11 @@ public class BuildingTrigger extends EmailTrigger {
         @Override
         public String getDisplayName() {
             return TRIGGER_NAME;
-        }        
-        
+        }
+
         @Override
         public EmailTrigger createDefault() {
             return _createDefault();
         }
-    }   
+    }
 }

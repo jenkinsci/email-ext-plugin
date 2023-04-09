@@ -19,13 +19,51 @@ public class StatusChangedTrigger extends EmailTrigger {
     public static final String TRIGGER_NAME = "Status Changed";
 
     @DataBoundConstructor
-    public StatusChangedTrigger(List<RecipientProvider> recipientProviders, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(recipientProviders, recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public StatusChangedTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
-    
+
     @Deprecated
-    public StatusChangedTrigger(boolean sendToList, boolean sendToDevs, boolean sendToRequester, boolean sendToCulprits, String recipientList, String replyTo, String subject, String body, String attachmentsPattern, int attachBuildLog, String contentType) {
-        super(sendToList, sendToDevs, sendToRequester, sendToCulprits,recipientList, replyTo, subject, body, attachmentsPattern, attachBuildLog, contentType);
+    public StatusChangedTrigger(
+            boolean sendToList,
+            boolean sendToDevs,
+            boolean sendToRequester,
+            boolean sendToCulprits,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        super(
+                sendToList,
+                sendToDevs,
+                sendToRequester,
+                sendToCulprits,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLog,
+                contentType);
     }
 
     @Override
@@ -48,7 +86,7 @@ public class StatusChangedTrigger extends EmailTrigger {
 
     @Extension
     public static final class DescriptorImpl extends EmailTriggerDescriptor {
-        
+
         public DescriptorImpl() {
             addDefaultRecipientProvider(new DevelopersRecipientProvider());
         }
@@ -58,7 +96,7 @@ public class StatusChangedTrigger extends EmailTrigger {
         public String getDisplayName() {
             return TRIGGER_NAME;
         }
-        
+
         @Override
         public EmailTrigger createDefault() {
             return _createDefault();

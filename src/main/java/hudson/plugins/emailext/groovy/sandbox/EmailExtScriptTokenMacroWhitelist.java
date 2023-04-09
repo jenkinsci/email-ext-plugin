@@ -60,10 +60,13 @@ public class EmailExtScriptTokenMacroWhitelist extends AbstractWhitelist {
 
     @Override
     public boolean permitsMethod(@NonNull Method method, @NonNull Object receiver, @NonNull Object[] args) {
-        //method groovy.lang.GroovyObject invokeMethod java.lang.String java.lang.Object (SimpleTemplateScript2 BUILD_ID)
+        // method groovy.lang.GroovyObject invokeMethod java.lang.String java.lang.Object (SimpleTemplateScript2
+        // BUILD_ID)
         if (method.getDeclaringClass() == GroovyObject.class
-                && receiver instanceof EmailExtScript && "invokeMethod".equals(method.getName()) && args.length > 0) {
-            EmailExtScript script = (EmailExtScript)receiver;
+                && receiver instanceof EmailExtScript
+                && "invokeMethod".equals(method.getName())
+                && args.length > 0) {
+            EmailExtScript script = (EmailExtScript) receiver;
             String name = String.valueOf(args[0]);
 
             for (TokenMacro m : macros) {
@@ -71,16 +74,20 @@ public class EmailExtScriptTokenMacroWhitelist extends AbstractWhitelist {
                     return true;
                 }
             }
-            //Else check environment
-            Run<?,?> build = (Run<?,?>)script.getBinding().getVariable("build");
-            TaskListener listener = (TaskListener)script.getBinding().getVariable("listener");
+            // Else check environment
+            Run<?, ?> build = (Run<?, ?>) script.getBinding().getVariable("build");
+            TaskListener listener = (TaskListener) script.getBinding().getVariable("listener");
             try {
                 EnvVars vars = build.getEnvironment(listener);
                 return vars.containsKey(name);
             } catch (IOException | InterruptedException e) {
-                Logger.getLogger(getClass().getName()).log(Level.WARNING, e, () -> "Failed to expand environment when evaluating " + name + " on " + build.getExternalizableId());
+                Logger.getLogger(getClass().getName())
+                        .log(
+                                Level.WARNING,
+                                e,
+                                () -> "Failed to expand environment when evaluating " + name + " on "
+                                        + build.getExternalizableId());
             }
-
         }
         return false;
     }

@@ -43,18 +43,22 @@ public class ZipDataSource implements SizedDataSource {
         contents = baos.toByteArray();
     }
 
+    @Override
     public String getContentType() {
         return MIME_TYPE;
     }
 
+    @Override
     public InputStream getInputStream() {
         return new ByteArrayInputStream(contents);
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public OutputStream getOutputStream() throws IOException {
         throw new ZipException("This zip file " + name + " is not modifiable");
     }

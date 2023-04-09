@@ -28,22 +28,24 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * A recipient provider that finds the first culprits / requestor or developers of the previous build(s).
- * 
+ *
  * @author strangelookingnerd
  */
 public class PreviousRecipientProvider extends RecipientProvider {
 
     @DataBoundConstructor
-    public PreviousRecipientProvider() {
-
-    }
+    public PreviousRecipientProvider() {}
 
     @Override
-    public void addRecipients(final ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to,
-            Set<InternetAddress> cc, Set<InternetAddress> bcc) {
+    public void addRecipients(
+            final ExtendedEmailPublisherContext context,
+            EnvVars env,
+            Set<InternetAddress> to,
+            Set<InternetAddress> cc,
+            Set<InternetAddress> bcc) {
         final class Debug implements RecipientProviderUtilities.IDebug {
-            private final ExtendedEmailPublisherDescriptor descriptor = Jenkins.get()
-                    .getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+            private final ExtendedEmailPublisherDescriptor descriptor =
+                    Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 

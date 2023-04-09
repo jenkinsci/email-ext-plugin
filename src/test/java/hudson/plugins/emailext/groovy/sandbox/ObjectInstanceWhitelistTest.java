@@ -36,5 +36,4 @@ public class ObjectInstanceWhitelistTest {
         ObjectInstanceWhitelist<MimeMessage> str = new ObjectInstanceWhitelist<>(message) {};
         assertTrue(str.isClass(Part.class));
     }
-
 }

@@ -109,8 +109,12 @@ public class SimpleTemplateEngine extends TemplateEngine {
      * Default: 1MB
      */
     // public for testing
-    @SuppressFBWarnings(value = "MS_SHOULD_BE_FINAL", justification = "non final to make it editable from the script console (convenient to temporarily change the value without restarting)")
-    public static int MAX_EXPANDED_SIZE_BYTES = SystemProperties.getInteger(SimpleTemplateEngine.class.getName() + ".MAX_EXPANDED_SIZE_BYTES", 1024 * 1024);
+    @SuppressFBWarnings(
+            value = "MS_SHOULD_BE_FINAL",
+            justification =
+                    "non final to make it editable from the script console (convenient to temporarily change the value without restarting)")
+    public static int MAX_EXPANDED_SIZE_BYTES =
+            SystemProperties.getInteger(SimpleTemplateEngine.class.getName() + ".MAX_EXPANDED_SIZE_BYTES", 1024 * 1024);
 
     private static AtomicInteger counter = new AtomicInteger(1);
 
@@ -122,13 +126,14 @@ public class SimpleTemplateEngine extends TemplateEngine {
         this.sandbox = sandbox;
     }
 
+    @Override
     public Template createTemplate(Reader reader) throws CompilationFailedException, IOException {
-        return createTemplate(reader,"SimpleTemplateScript" + counter.getAndIncrement() + ".groovy");
+        return createTemplate(reader, "SimpleTemplateScript" + counter.getAndIncrement() + ".groovy");
     }
 
     public Template createTemplate(Reader reader, String fileName) throws CompilationFailedException, IOException {
         SimpleTemplate template = new SimpleTemplate(sandbox);
-        template.script = parseScript(reader,fileName);
+        template.script = parseScript(reader, fileName);
         return template;
     }
 
@@ -142,7 +147,10 @@ public class SimpleTemplateEngine extends TemplateEngine {
         try (GroovySandbox.Scope scope = new GroovySandbox().enter()) {
             return groovyShell.parse(script, fileName);
         } catch (Exception e) {
-            throw new GroovyRuntimeException("Failed to parse template script (your template may contain an error or be trying to use expressions not currently supported): " + e, e);
+            throw new GroovyRuntimeException(
+                    "Failed to parse template script (your template may contain an error or be trying to use expressions not currently supported): "
+                            + e,
+                    e);
         }
     }
 
@@ -156,10 +164,12 @@ public class SimpleTemplateEngine extends TemplateEngine {
 
         protected Script script;
 
+        @Override
         public Writable make() {
             return make(null);
         }
 
+        @Override
         public Writable make(final Map map) {
             return new Writable() {
                 /**
@@ -167,16 +177,19 @@ public class SimpleTemplateEngine extends TemplateEngine {
                  *
                  * @see groovy.lang.Writable#writeTo(java.io.Writer)
                  */
-                @Override public Writer writeTo(Writer writer) throws IOException {
+                @Override
+                public Writer writeTo(Writer writer) throws IOException {
                     Binding binding;
-                    if (map == null)
+                    if (map == null) {
                         binding = new Binding();
-                    else
+                    } else {
                         binding = new Binding(map);
+                    }
                     PrintWriter pw = new PrintWriter(writer);
                     try {
                         if (sandbox) {
-                            // Cannot use normal GroovySandbox.runScript here because template preparation was separated.
+                            // Cannot use normal GroovySandbox.runScript here because template preparation was
+                            // separated.
                             try (GroovySandbox.Scope scope = new GroovySandbox().enter()) {
                                 final Script scriptObject = InvokerHelper.createScript(script.getClass(), binding);
                                 scriptObject.setProperty("out", pw);
@@ -188,7 +201,9 @@ public class SimpleTemplateEngine extends TemplateEngine {
                             scriptObject.run();
                         }
                     } catch (MissingPropertyException x) {
-                        throw (IOException) new IOException("did you forget to escape \\$" + x.getProperty() + " for non-Groovy variables?").initCause(x);
+                        throw (IOException) new IOException(
+                                        "did you forget to escape \\$" + x.getProperty() + " for non-Groovy variables?")
+                                .initCause(x);
                     }
                     pw.flush();
                     return writer;
@@ -199,6 +214,7 @@ public class SimpleTemplateEngine extends TemplateEngine {
                  *
                  * @see java.lang.Object#toString()
                  */
+                @Override
                 public String toString() {
                     StringWriter sw = new StringWriter();
                     try {
@@ -286,7 +302,7 @@ public class SimpleTemplateEngine extends TemplateEngine {
 
     private void startScript(StringWriter sw) {
         sw.write("/* Generated by SimpleTemplateEngine */\n");
-        sw.write(printMethod()+"\"\"\"");
+        sw.write(printMethod() + "\"\"\"");
     }
 
     private void endScript(StringWriter sw) {
@@ -355,9 +371,9 @@ public class SimpleTemplateEngine extends TemplateEngine {
              */
             // if (c != '\n' && c != '\r') {
             sw.write(c);
-            //}
+            // }
         }
-        sw.write(";\n"+printMethod()+"\"\"\"");
+        sw.write(";\n" + printMethod() + "\"\"\"");
     }
 
     protected String printMethod() {

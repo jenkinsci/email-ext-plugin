@@ -81,7 +81,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     public JenkinsRule j = new JenkinsRule();
 
     private void assertTitlePage(HtmlPage page) {
-        VersionNumber jenkinsVersion = j.jenkins.getVersion();
+        VersionNumber jenkinsVersion = Jenkins.getVersion();
         VersionNumber newManageJenkinsVersion = new VersionNumber("2.395");
         String expectedTitle = "System [Jenkins]";
         if (jenkinsVersion.isOlderThan(newManageJenkinsVersion)) {
@@ -111,52 +111,53 @@ public class ExtendedEmailPublisherDescriptorTest {
         // default content type select control
         HtmlSelect contentType = page.getElementByName("_.defaultContentType");
         assertNotNull("Content type selection should be present", contentType);
-        assertEquals("Plain text should be selected by default",
-                "text/plain", contentType.getSelectedOptions().get(0).getValueAttribute());
+        assertEquals(
+                "Plain text should be selected by default",
+                "text/plain",
+                contentType.getSelectedOptions().get(0).getValueAttribute());
 
         HtmlCheckBoxInput precedenceBulk = page.getElementByName("_.precedenceBulk");
         assertNotNull("Precedence Bulk should be present", precedenceBulk);
-        assertFalse("Add precedence bulk should not be checked by default",
-                precedenceBulk.isChecked());
+        assertFalse("Add precedence bulk should not be checked by default", precedenceBulk.isChecked());
 
         HtmlTextInput defaultRecipients = page.getElementByName("_.defaultRecipients");
         assertNotNull("Default Recipients should be present", defaultRecipients);
-        assertEquals("Default recipients should be blank by default",
-                "", defaultRecipients.getText());
+        assertEquals("Default recipients should be blank by default", "", defaultRecipients.getText());
 
         HtmlTextInput defaultReplyTo = page.getElementByName("_.defaultReplyTo");
         assertNotNull("Default Reply-to should be present", defaultReplyTo);
-        assertEquals("Default Reply-To should be blank by default",
-                "", defaultReplyTo.getText());
+        assertEquals("Default Reply-To should be blank by default", "", defaultReplyTo.getText());
 
         HtmlTextInput emergencyReroute = page.getElementByName("_.emergencyReroute");
         assertNotNull("Emergency Reroute should be present", emergencyReroute);
-        assertEquals("Emergency Reroute should be blank by default",
-                "", emergencyReroute.getText());
+        assertEquals("Emergency Reroute should be blank by default", "", emergencyReroute.getText());
 
         HtmlTextInput allowedDomains = page.getElementByName("_.allowedDomains");
         assertNotNull("Allowed Domains should be present", allowedDomains);
-        assertEquals("Allowed Domains should be blank by default",
-                "", allowedDomains.getText());
+        assertEquals("Allowed Domains should be blank by default", "", allowedDomains.getText());
 
         HtmlTextInput excludedRecipients = page.getElementByName("_.excludedCommitters");
         assertNotNull("Excluded Recipients should be present", excludedRecipients);
-        assertEquals("Excluded Recipients should be blank by default",
-                "", excludedRecipients.getText());
+        assertEquals("Excluded Recipients should be blank by default", "", excludedRecipients.getText());
 
         HtmlTextInput defaultSubject = page.getElementByName("_.defaultSubject");
         assertNotNull("Default Subject should be present", defaultSubject);
-        assertEquals("Default Subject should be set",
+        assertEquals(
+                "Default Subject should be set",
                 "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!",
                 defaultSubject.getText());
 
         HtmlNumberInput maxAttachmentSize = page.getElementByName("_.maxAttachmentSizeMb");
         assertNotNull("Max attachment size should be present", maxAttachmentSize);
-        assertThat("Max attachment size should be blank or -1 by default", maxAttachmentSize.getText(), is(oneOf("", "-1")));
+        assertThat(
+                "Max attachment size should be blank or -1 by default",
+                maxAttachmentSize.getText(),
+                is(oneOf("", "-1")));
 
         HtmlTextArea defaultContent = page.getElementByName("_.defaultBody");
         assertNotNull("Default content should be present", defaultContent);
-        assertEquals("Default content should be set by default",
+        assertEquals(
+                "Default content should be set by default",
                 "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:\n\nCheck console output at $BUILD_URL to view the results.",
                 defaultContent.getText());
 
@@ -174,7 +175,9 @@ public class ExtendedEmailPublisherDescriptorTest {
 
         HtmlCheckBoxInput adminRequiredForTemplateTesting = page.getElementByName("_.adminRequiredForTemplateTesting");
         assertNotNull("Admin required for template testing should be present", adminRequiredForTemplateTesting);
-        assertFalse("Admin required for template testing should be unchecked by default", adminRequiredForTemplateTesting.isChecked());
+        assertFalse(
+                "Admin required for template testing should be unchecked by default",
+                adminRequiredForTemplateTesting.isChecked());
 
         HtmlCheckBoxInput watchingEnabled = page.getElementByName("_.watchingEnabled");
         assertNotNull("Watching enable should be present", watchingEnabled);
@@ -193,7 +196,8 @@ public class ExtendedEmailPublisherDescriptorTest {
     @Test
     @Issue("JENKINS-20030")
     public void testGlobalConfigSimpleRoundTrip() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
         HtmlTextInput defaultRecipients = page.getElementByName("_.defaultRecipients");
         defaultRecipients.setValueAttribute("mickey@disney.com");
@@ -205,7 +209,8 @@ public class ExtendedEmailPublisherDescriptorTest {
     @Test
     @Issue("JENKINS-63367")
     public void testSmtpPortRetainsSetValue() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         JenkinsRule.WebClient client = j.createWebClient();
         HtmlPage page = client.goTo("configure");
         HtmlNumberInput smtpPort = page.getElementByName("_.smtpPort");
@@ -222,7 +227,8 @@ public class ExtendedEmailPublisherDescriptorTest {
     @Test
     @Issue("JENKINS-20133")
     public void testPrecedenceBulkSettingRoundTrip() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
         HtmlCheckBoxInput addPrecedenceBulk = page.getElementByName("_.precedenceBulk");
         addPrecedenceBulk.setChecked(true);
@@ -234,7 +240,8 @@ public class ExtendedEmailPublisherDescriptorTest {
     @Test
     @Issue("JENKINS-20133")
     public void testListIDRoundTrip() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
         HtmlTextInput listId = page.getElementByName("_.listId");
         listId.setValueAttribute("hammer");
@@ -246,44 +253,49 @@ public class ExtendedEmailPublisherDescriptorTest {
 
     @Test
     public void testAdvancedProperties() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
         HtmlTextArea advProperties = page.getElementByName("_.advProperties");
         advProperties.setText("mail.smtp.starttls.enable=true");
         j.submit(page.getFormByName("config"));
 
-        assertEquals("mail.smtp.starttls.enable=true", descriptor.getMailAccount().getAdvProperties());
+        assertEquals(
+                "mail.smtp.starttls.enable=true", descriptor.getMailAccount().getAdvProperties());
     }
 
     @Test
     public void defaultTriggers() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
 
         assertTitlePage(page);
 
         List<DomNode> nodes = page.getByXPath(".//button[contains(text(),'Default Triggers')]");
         assertEquals(1, nodes.size());
-        HtmlButton defaultTriggers = (HtmlButton)nodes.get(0);
+        HtmlButton defaultTriggers = (HtmlButton) nodes.get(0);
         defaultTriggers.click();
 
         String[] selectedTriggers = {
-                "hudson.plugins.emailext.plugins.trigger.AbortedTrigger",
-                "hudson.plugins.emailext.plugins.trigger.PreBuildTrigger",
-                "hudson.plugins.emailext.plugins.trigger.FixedTrigger",
-                "hudson.plugins.emailext.plugins.trigger.RegressionTrigger",
+            "hudson.plugins.emailext.plugins.trigger.AbortedTrigger",
+            "hudson.plugins.emailext.plugins.trigger.PreBuildTrigger",
+            "hudson.plugins.emailext.plugins.trigger.FixedTrigger",
+            "hudson.plugins.emailext.plugins.trigger.RegressionTrigger",
         };
 
-        List<DomNode> failureTrigger = page.getByXPath(".//input[@json='hudson.plugins.emailext.plugins.trigger.FailureTrigger']");
+        List<DomNode> failureTrigger =
+                page.getByXPath(".//input[@json='hudson.plugins.emailext.plugins.trigger.FailureTrigger']");
         assertEquals(1, failureTrigger.size());
-        HtmlCheckBoxInput failureTriggerCheckBox = (HtmlCheckBoxInput)failureTrigger.get(0);
+        HtmlCheckBoxInput failureTriggerCheckBox = (HtmlCheckBoxInput) failureTrigger.get(0);
         assertTrue(failureTriggerCheckBox.isChecked());
         failureTriggerCheckBox.setChecked(false);
 
-        for(String selectedTrigger : selectedTriggers) {
-            List<DomNode> triggerItems = page.getByXPath(".//input[@name='_.defaultTriggerIds' and @json='"+selectedTrigger+"']");
+        for (String selectedTrigger : selectedTriggers) {
+            List<DomNode> triggerItems =
+                    page.getByXPath(".//input[@name='_.defaultTriggerIds' and @json='" + selectedTrigger + "']");
             assertEquals(1, triggerItems.size());
-            HtmlCheckBoxInput checkBox = (HtmlCheckBoxInput)triggerItems.get(0);
+            HtmlCheckBoxInput checkBox = (HtmlCheckBoxInput) triggerItems.get(0);
             checkBox.setChecked(true);
         }
 
@@ -293,26 +305,31 @@ public class ExtendedEmailPublisherDescriptorTest {
 
     @Test
     public void groovyClassPath() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
 
         assertTitlePage(page);
 
-        List<DomElement> nodes = page.getByXPath(".//div[contains(@class, 'setting-name') and ./text()='Additional groovy classpath'] | .//div[contains(@class, 'jenkins-form-label') and ./text()='Additional groovy classpath']");
+        List<DomElement> nodes = page.getByXPath(
+                ".//div[contains(@class, 'setting-name') and ./text()='Additional groovy classpath'] | .//div[contains(@class, 'jenkins-form-label') and ./text()='Additional groovy classpath']");
         assertEquals(1, nodes.size());
         HtmlDivision settingName = (HtmlDivision) nodes.get(0);
 
-        nodes = settingName.getByXPath("../div[contains(@class, 'setting-name')]/div[@class='repeated-container']/div[@name='defaultClasspath']");
+        nodes = settingName.getByXPath(
+                "../div[contains(@class, 'setting-name')]/div[@class='repeated-container']/div[@name='defaultClasspath']");
         assertEquals("Should not have any class path setup by default", 0, nodes.size());
 
-        nodes = settingName.getByXPath("../div[@class='setting-main']/div[@class='repeated-container' and span[starts-with(@id, 'yui-gen')]/span[@class='first-child']/button[./text()='Add']]");
+        nodes = settingName.getByXPath(
+                "../div[@class='setting-main']/div[@class='repeated-container' and span[starts-with(@id, 'yui-gen')]/span[@class='first-child']/button[./text()='Add']]");
         assertEquals(1, nodes.size());
-        HtmlDivision div = (HtmlDivision)nodes.get(0);
+        HtmlDivision div = (HtmlDivision) nodes.get(0);
         nodes = div.getByXPath(".//button[./text()='Add']");
-        HtmlButton addButton = (HtmlButton)nodes.get(0);
+        HtmlButton addButton = (HtmlButton) nodes.get(0);
         addButton.click();
 
-        nodes = settingName.getByXPath("../div[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath']");
+        nodes = settingName.getByXPath(
+                "../div[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath']");
         assertEquals(1, nodes.size());
         div = (HtmlDivision) nodes.get(0);
         String divClass = div.getAttribute("class");
@@ -321,12 +338,13 @@ public class ExtendedEmailPublisherDescriptorTest {
         nodes = div.getByXPath(".//input[@name='_.path' and @type='text']");
         assertEquals(1, nodes.size());
 
-        HtmlTextInput path = (HtmlTextInput)nodes.get(0);
+        HtmlTextInput path = (HtmlTextInput) nodes.get(0);
         path.setText("/path/to/classes");
 
         addButton.click();
 
-        nodes = settingName.getByXPath("../div[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath' and contains(@class, 'last')]");
+        nodes = settingName.getByXPath(
+                "../div[@class='setting-main']/div[@class='repeated-container']/div[@name='defaultClasspath' and contains(@class, 'last')]");
         assertEquals(1, nodes.size());
         div = (HtmlDivision) nodes.get(0);
         divClass = div.getAttribute("class");
@@ -335,20 +353,20 @@ public class ExtendedEmailPublisherDescriptorTest {
 
         nodes = div.getByXPath(".//input[@name='_.path' and @type='text']");
         assertEquals(1, nodes.size());
-        path = (HtmlTextInput)nodes.get(0);
+        path = (HtmlTextInput) nodes.get(0);
         path.setText("/other/path/to/classes");
 
         j.submit(page.getFormByName("config"));
 
         String[] classpath = {
-                "/path/to/classes",
-                "/other/path/to/classes",
+            "/path/to/classes", "/other/path/to/classes",
         };
 
-        assertArrayEquals(classpath, descriptor.getDefaultClasspath()
-                .stream()
-                .map(GroovyScriptPath::getPath)
-                .toArray(String[]::new));
+        assertArrayEquals(
+                classpath,
+                descriptor.getDefaultClasspath().stream()
+                        .map(GroovyScriptPath::getPath)
+                        .toArray(String[]::new));
     }
 
     @Test
@@ -358,26 +376,34 @@ public class ExtendedEmailPublisherDescriptorTest {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                 // Read access
-                .grant(Jenkins.READ).everywhere().to(USER)
+                .grant(Jenkins.READ)
+                .everywhere()
+                .to(USER)
 
                 // Read and Manage
-                .grant(Jenkins.READ).everywhere().to(MANAGER)
-                .grant(Jenkins.MANAGE).everywhere().to(MANAGER)
-        );
+                .grant(Jenkins.READ)
+                .everywhere()
+                .to(MANAGER)
+                .grant(Jenkins.MANAGE)
+                .everywhere()
+                .to(MANAGER));
         try (ACLContext c = ACL.as(User.getById(USER, true))) {
             Collection<Descriptor> descriptors = Functions.getSortedDescriptorsForGlobalConfigUnclassified();
             assertEquals("Global configuration should not be accessible to READ users", 0, descriptors.size());
         }
         try (ACLContext c = ACL.as(User.getById(MANAGER, true))) {
             Collection<Descriptor> descriptors = Functions.getSortedDescriptorsForGlobalConfigUnclassified();
-            Optional<Descriptor> found = descriptors.stream().filter(descriptor -> descriptor instanceof ExtendedEmailPublisherDescriptor).findFirst();
+            Optional<Descriptor> found = descriptors.stream()
+                    .filter(descriptor -> descriptor instanceof ExtendedEmailPublisherDescriptor)
+                    .findFirst();
             assertTrue("Global configuration should be accessible to MANAGE users", found.isPresent());
         }
     }
 
     @Test
     public void noAuthenticatorIsCreatedWhenCredentialsIsBlank() {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
         String from = "test@example.com";
         MailAccount ma = new MailAccount();
@@ -387,27 +413,30 @@ public class ExtendedEmailPublisherDescriptorTest {
         ma.setCredentialsId(null);
 
         ExtendedEmailPublisher publisher = Mockito.mock(ExtendedEmailPublisher.class);
-        Run<?,?> run = Mockito.mock(Run.class);
+        Run<?, ?> run = Mockito.mock(Run.class);
         FilePath workspace = Mockito.mock(FilePath.class);
         Launcher launcher = Mockito.mock(Launcher.class);
         TaskListener listener = Mockito.mock(TaskListener.class);
 
-        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, run, workspace, launcher, listener);
+        ExtendedEmailPublisherContext context =
+                new ExtendedEmailPublisherContext(publisher, run, workspace, launcher, listener);
 
         descriptor.setAddAccounts(Collections.singletonList(ma));
-        BiFunction<MailAccount, Run<?,?>, Authenticator> authenticatorProvider = Mockito.mock(BiFunction.class);
+        BiFunction<MailAccount, Run<?, ?>, Authenticator> authenticatorProvider = Mockito.mock(BiFunction.class);
         descriptor.setAuthenticatorProvider(authenticatorProvider);
         descriptor.createSession(ma, context);
         ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
-        ArgumentCaptor<Run<?,?>> runCaptor = ArgumentCaptor.forClass(Run.class);
+        ArgumentCaptor<Run<?, ?>> runCaptor = ArgumentCaptor.forClass(Run.class);
         Mockito.verify(authenticatorProvider, Mockito.never()).apply(mailAccountCaptor.capture(), runCaptor.capture());
     }
 
     @Test
     public void authenticatorIsCreatedWhenCredentialsIdProvided() throws Exception {
-        UsernamePasswordCredentials c = new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL, "email-ext-admin", "Username/password for SMTP", "admin", "honeycomb");
+        UsernamePasswordCredentials c = new UsernamePasswordCredentialsImpl(
+                CredentialsScope.GLOBAL, "email-ext-admin", "Username/password for SMTP", "admin", "honeycomb");
         CredentialsProvider.lookupStores(j.jenkins).iterator().next().addCredentials(Domain.global(), c);
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
         String from = "test@example.com";
         MailAccount ma = new MailAccount();
@@ -417,26 +446,30 @@ public class ExtendedEmailPublisherDescriptorTest {
         ma.setCredentialsId("email-ext-admin");
 
         ExtendedEmailPublisher publisher = Mockito.mock(ExtendedEmailPublisher.class);
-        Run<?,?> run = Mockito.mock(Run.class);
+        Run<?, ?> run = Mockito.mock(Run.class);
         FilePath workspace = Mockito.mock(FilePath.class);
         Launcher launcher = Mockito.mock(Launcher.class);
         TaskListener listener = Mockito.mock(TaskListener.class);
 
-        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, run, workspace, launcher, listener);
+        ExtendedEmailPublisherContext context =
+                new ExtendedEmailPublisherContext(publisher, run, workspace, launcher, listener);
 
-        BiFunction<MailAccount, Run<?,?>, Authenticator> authenticatorProvider = Mockito.mock(BiFunction.class);
+        BiFunction<MailAccount, Run<?, ?>, Authenticator> authenticatorProvider = Mockito.mock(BiFunction.class);
         descriptor.setAuthenticatorProvider(authenticatorProvider);
         descriptor.createSession(ma, context);
         ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
-        ArgumentCaptor<Run<?,?>> runCaptor = ArgumentCaptor.forClass(Run.class);
-        Mockito.verify(authenticatorProvider, Mockito.atLeast(1)).apply(mailAccountCaptor.capture(), runCaptor.capture());
+        ArgumentCaptor<Run<?, ?>> runCaptor = ArgumentCaptor.forClass(Run.class);
+        Mockito.verify(authenticatorProvider, Mockito.atLeast(1))
+                .apply(mailAccountCaptor.capture(), runCaptor.capture());
     }
 
     @Test
     public void testFixEmptyAndTrimNormal() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         // add a credential to the GLOBAL scope
-        UsernamePasswordCredentials c = new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL, "email-ext", "Username/password for SMTP", "smtpUsername", "password");
+        UsernamePasswordCredentials c = new UsernamePasswordCredentialsImpl(
+                CredentialsScope.GLOBAL, "email-ext", "Username/password for SMTP", "smtpUsername", "password");
         CredentialsProvider.lookupStores(j.jenkins).iterator().next().addCredentials(Domain.global(), c);
 
         MailAccount ma = new MailAccount();
@@ -451,20 +484,22 @@ public class ExtendedEmailPublisherDescriptorTest {
         descriptor.setEmergencyReroute("emergency@example.com");
         j.submit(j.createWebClient().goTo("configure").getFormByName("config"));
 
-        assertEquals("example@example.com",descriptor.getMailAccount().getAddress());
-        assertEquals("smtp.example.com",descriptor.getMailAccount().getSmtpHost());
-        assertEquals("25",descriptor.getMailAccount().getSmtpPort());
-        assertEquals("email-ext",descriptor.getMailAccount().getCredentialsId());
-        assertEquals("@example.com",descriptor.getDefaultSuffix());
-        assertEquals("UTF-8",descriptor.getCharset());
-        assertEquals("emergency@example.com",descriptor.getEmergencyReroute());
+        assertEquals("example@example.com", descriptor.getMailAccount().getAddress());
+        assertEquals("smtp.example.com", descriptor.getMailAccount().getSmtpHost());
+        assertEquals("25", descriptor.getMailAccount().getSmtpPort());
+        assertEquals("email-ext", descriptor.getMailAccount().getCredentialsId());
+        assertEquals("@example.com", descriptor.getDefaultSuffix());
+        assertEquals("UTF-8", descriptor.getCharset());
+        assertEquals("emergency@example.com", descriptor.getEmergencyReroute());
     }
 
     @Test
     public void testFixEmptyAndTrimExtraSpaces() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         // add a credential to the GLOBAL scope
-        UsernamePasswordCredentials c = new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL, "email-ext", "Username/password for SMTP", "smtpUsername", "password");
+        UsernamePasswordCredentials c = new UsernamePasswordCredentialsImpl(
+                CredentialsScope.GLOBAL, "email-ext", "Username/password for SMTP", "smtpUsername", "password");
         CredentialsProvider.lookupStores(j.jenkins).iterator().next().addCredentials(Domain.global(), c);
 
         MailAccount ma = new MailAccount();
@@ -479,18 +514,19 @@ public class ExtendedEmailPublisherDescriptorTest {
         descriptor.setEmergencyReroute("      emergency@example.com      ");
         j.submit(j.createWebClient().goTo("configure").getFormByName("config"));
 
-        assertEquals("example@example.com",descriptor.getMailAccount().getAddress());
-        assertEquals("smtp.example.com",descriptor.getMailAccount().getSmtpHost());
-        assertEquals("25",descriptor.getMailAccount().getSmtpPort());
-        assertEquals("email-ext",descriptor.getMailAccount().getCredentialsId());
-        assertEquals("@example.com",descriptor.getDefaultSuffix());
-        assertEquals("UTF-8",descriptor.getCharset());
-        assertEquals("emergency@example.com",descriptor.getEmergencyReroute());
+        assertEquals("example@example.com", descriptor.getMailAccount().getAddress());
+        assertEquals("smtp.example.com", descriptor.getMailAccount().getSmtpHost());
+        assertEquals("25", descriptor.getMailAccount().getSmtpPort());
+        assertEquals("email-ext", descriptor.getMailAccount().getCredentialsId());
+        assertEquals("@example.com", descriptor.getDefaultSuffix());
+        assertEquals("UTF-8", descriptor.getCharset());
+        assertEquals("emergency@example.com", descriptor.getEmergencyReroute());
     }
 
     @Test
     public void testFixEmptyAndTrimEmptyString() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         MailAccount ma = new MailAccount();
         ma.setAddress("");
         ma.setSmtpHost("");
@@ -505,16 +541,17 @@ public class ExtendedEmailPublisherDescriptorTest {
 
         assertNull(descriptor.getMailAccount().getAddress());
         assertNull(descriptor.getMailAccount().getSmtpHost());
-        assertEquals("25",descriptor.getMailAccount().getSmtpPort());
+        assertEquals("25", descriptor.getMailAccount().getSmtpPort());
         assertNull(descriptor.getMailAccount().getCredentialsId());
         assertNull(descriptor.getDefaultSuffix());
-        assertEquals("UTF-8",descriptor.getCharset());
-        assertEquals("",descriptor.getEmergencyReroute());
+        assertEquals("UTF-8", descriptor.getCharset());
+        assertEquals("", descriptor.getEmergencyReroute());
     }
 
     @Test
     public void testFixEmptyAndTrimNull() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         MailAccount ma = new MailAccount();
         ma.setAddress(null);
         ma.setSmtpHost(null);
@@ -529,11 +566,11 @@ public class ExtendedEmailPublisherDescriptorTest {
 
         assertNull(descriptor.getMailAccount().getAddress());
         assertNull(descriptor.getMailAccount().getSmtpHost());
-        assertEquals("25",descriptor.getMailAccount().getSmtpPort());
+        assertEquals("25", descriptor.getMailAccount().getSmtpPort());
         assertNull(descriptor.getMailAccount().getCredentialsId());
         assertNull(descriptor.getDefaultSuffix());
-        assertEquals("UTF-8",descriptor.getCharset());
-        assertEquals("",descriptor.getEmergencyReroute());
+        assertEquals("UTF-8", descriptor.getCharset());
+        assertEquals("", descriptor.getEmergencyReroute());
     }
 
     @LocalData
@@ -664,7 +701,8 @@ public class ExtendedEmailPublisherDescriptorTest {
             assertEquals(UsernamePasswordCredentialsImpl.class, c.getClass());
             assertEquals("Migrated from email-ext username/password", c.getDescription());
         }
-        assertEquals("mail.smtp.ssl.trust=example.com", descriptor.getMailAccount().getAdvProperties());
+        assertEquals(
+                "mail.smtp.ssl.trust=example.com", descriptor.getMailAccount().getAdvProperties());
         assertTrue(descriptor.getMailAccount().isUseSsl());
         assertTrue(descriptor.getMailAccount().isDefaultAccount());
         assertEquals("2525", descriptor.getMailAccount().getSmtpPort());
@@ -686,18 +724,11 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("emergency@example.com", descriptor.getEmergencyReroute());
         assertEquals("@example.com", descriptor.getAllowedDomains());
         assertEquals("excluded@example.com", descriptor.getExcludedCommitters());
-        assertEquals(
-                "$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS",
-                descriptor.getDefaultSubject());
+        assertEquals("$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS", descriptor.getDefaultSubject());
         assertEquals(44040192, descriptor.getMaxAttachmentSize());
-        assertEquals(
-                "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS",
-                descriptor.getDefaultBody());
-        assertEquals(
-                "build.previousBuild.result.toString().equals('FAILURE')",
-                descriptor.getDefaultPresendScript());
-        assertEquals(
-                "build.result.toString().equals('FAILURE')", descriptor.getDefaultPostsendScript());
+        assertEquals("$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS", descriptor.getDefaultBody());
+        assertEquals("build.previousBuild.result.toString().equals('FAILURE')", descriptor.getDefaultPresendScript());
+        assertEquals("build.result.toString().equals('FAILURE')", descriptor.getDefaultPostsendScript());
         assertEquals(1, descriptor.getDefaultClasspath().size());
         assertEquals("classes", descriptor.getDefaultClasspath().get(0).getPath());
         assertTrue(descriptor.isDebugMode());
@@ -885,7 +916,8 @@ public class ExtendedEmailPublisherDescriptorTest {
             assertEquals(UsernamePasswordCredentialsImpl.class, c.getClass());
             assertEquals("Migrated from email-ext username/password", c.getDescription());
         }
-        assertEquals("mail.smtp.ssl.trust=example.com", descriptor.getMailAccount().getAdvProperties());
+        assertEquals(
+                "mail.smtp.ssl.trust=example.com", descriptor.getMailAccount().getAdvProperties());
         assertTrue(descriptor.getMailAccount().isUseSsl());
         assertTrue(descriptor.getMailAccount().isDefaultAccount());
         assertEquals("2525", descriptor.getMailAccount().getSmtpPort());
@@ -907,18 +939,11 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("emergency@example.com", descriptor.getEmergencyReroute());
         assertEquals("@example.com", descriptor.getAllowedDomains());
         assertEquals("excluded@example.com", descriptor.getExcludedCommitters());
-        assertEquals(
-                "$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS",
-                descriptor.getDefaultSubject());
+        assertEquals("$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS", descriptor.getDefaultSubject());
         assertEquals(44040192, descriptor.getMaxAttachmentSize());
-        assertEquals(
-                "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS",
-                descriptor.getDefaultBody());
-        assertEquals(
-                "build.previousBuild.result.toString().equals('FAILURE')",
-                descriptor.getDefaultPresendScript());
-        assertEquals(
-                "build.result.toString().equals('FAILURE')", descriptor.getDefaultPostsendScript());
+        assertEquals("$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS", descriptor.getDefaultBody());
+        assertEquals("build.previousBuild.result.toString().equals('FAILURE')", descriptor.getDefaultPresendScript());
+        assertEquals("build.result.toString().equals('FAILURE')", descriptor.getDefaultPostsendScript());
         assertEquals(1, descriptor.getDefaultClasspath().size());
         assertEquals("classes", descriptor.getDefaultClasspath().get(0).getPath());
         assertTrue(descriptor.isDebugMode());
@@ -1105,7 +1130,8 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("smtp.example.com", descriptor.getMailAccount().getSmtpHost());
         assertEquals("@example.com", descriptor.getDefaultSuffix());
         assertEquals("email-ext-admin", descriptor.getMailAccount().getCredentialsId());
-        assertEquals("mail.smtp.ssl.trust=example.com", descriptor.getMailAccount().getAdvProperties());
+        assertEquals(
+                "mail.smtp.ssl.trust=example.com", descriptor.getMailAccount().getAdvProperties());
         assertTrue(descriptor.getMailAccount().isUseSsl());
         assertTrue(descriptor.getMailAccount().isDefaultAccount());
         assertEquals("2525", descriptor.getMailAccount().getSmtpPort());
@@ -1127,18 +1153,11 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals("emergency@example.com", descriptor.getEmergencyReroute());
         assertEquals("@example.com", descriptor.getAllowedDomains());
         assertEquals("excluded@example.com", descriptor.getExcludedCommitters());
-        assertEquals(
-                "$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS",
-                descriptor.getDefaultSubject());
+        assertEquals("$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS", descriptor.getDefaultSubject());
         assertEquals(44040192, descriptor.getMaxAttachmentSize());
-        assertEquals(
-                "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS",
-                descriptor.getDefaultBody());
-        assertEquals(
-                "build.previousBuild.result.toString().equals('FAILURE')",
-                descriptor.getDefaultPresendScript());
-        assertEquals(
-                "build.result.toString().equals('FAILURE')", descriptor.getDefaultPostsendScript());
+        assertEquals("$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS", descriptor.getDefaultBody());
+        assertEquals("build.previousBuild.result.toString().equals('FAILURE')", descriptor.getDefaultPresendScript());
+        assertEquals("build.result.toString().equals('FAILURE')", descriptor.getDefaultPostsendScript());
         assertEquals(1, descriptor.getDefaultClasspath().size());
         assertEquals("classes", descriptor.getDefaultClasspath().get(0).getPath());
         assertTrue(descriptor.isDebugMode());

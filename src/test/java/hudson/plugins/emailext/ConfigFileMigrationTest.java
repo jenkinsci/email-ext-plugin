@@ -22,15 +22,20 @@ public class ConfigFileMigrationTest {
             // as all the config files have been moved to global config,
             // all providers must not hold any files any more
             AbstractConfigProviderImpl acp = (AbstractConfigProviderImpl) cp;
-            Assert.assertTrue("configs for " + acp.getProviderId() + " should be empty", acp.getConfigs().isEmpty());
+            Assert.assertTrue(
+                    "configs for " + acp.getProviderId() + " should be empty",
+                    acp.getConfigs().isEmpty());
         }
 
-        Assert.assertEquals(1, getProvider(JellyTemplateConfig.JellyTemplateConfigProvider.class).getAllConfigs().size());
+        Assert.assertEquals(
+                1,
+                getProvider(JellyTemplateConfig.JellyTemplateConfigProvider.class)
+                        .getAllConfigs()
+                        .size());
         Assert.assertEquals(1, GlobalConfigFiles.get().getConfigs().size());
     }
 
     private <T> T getProvider(Class<T> providerClass) {
         return j.getInstance().getExtensionList(providerClass).get(providerClass);
     }
-
 }

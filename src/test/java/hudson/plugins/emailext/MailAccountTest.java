@@ -19,14 +19,16 @@ public class MailAccountTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
-    @Test @WithoutJenkins
+    @Test
+    @WithoutJenkins
     public void testIsValidEmptyConfig() {
         JSONObject obj = new JSONObject();
         MailAccount account = new MailAccount(obj);
         assertFalse(account.isValid());
     }
 
-    @Test @WithoutJenkins
+    @Test
+    @WithoutJenkins
     public void testIsValidMissingAddress() {
         JSONObject obj = new JSONObject();
         obj.put("smtpHost", "mail.bar.com");
@@ -35,7 +37,8 @@ public class MailAccountTest {
         assertFalse(account.isValid());
     }
 
-    @Test @WithoutJenkins
+    @Test
+    @WithoutJenkins
     public void testIsValidNonAuthConfig() {
         JSONObject obj = new JSONObject();
         obj.put("address", "foo@bar.com");
@@ -66,7 +69,8 @@ public class MailAccountTest {
 
         assertNotNull(account.getCredentialsId());
 
-        List<StandardUsernamePasswordCredentials> creds = CredentialsProvider.lookupCredentials(StandardUsernamePasswordCredentials.class);
+        List<StandardUsernamePasswordCredentials> creds =
+                CredentialsProvider.lookupCredentials(StandardUsernamePasswordCredentials.class);
         assertEquals(1, creds.size());
         StandardUsernamePasswordCredentials c = creds.get(0);
         assertEquals("foo", c.getUsername());

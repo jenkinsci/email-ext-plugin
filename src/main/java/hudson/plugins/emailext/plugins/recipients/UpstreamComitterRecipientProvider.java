@@ -30,18 +30,22 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class UpstreamComitterRecipientProvider extends RecipientProvider {
 
     @DataBoundConstructor
-    public UpstreamComitterRecipientProvider() {
-
-    }
+    public UpstreamComitterRecipientProvider() {}
 
     @Override
-    public void addRecipients(final ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
+    public void addRecipients(
+            final ExtendedEmailPublisherContext context,
+            EnvVars env,
+            Set<InternetAddress> to,
+            Set<InternetAddress> cc,
+            Set<InternetAddress> bcc) {
         final class Debug implements RecipientProviderUtilities.IDebug {
-            private final ExtendedEmailPublisherDescriptor descriptor
-                    = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+            private final ExtendedEmailPublisherDescriptor descriptor =
+                    Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 
+            @Override
             public void send(final String format, final Object... args) {
                 descriptor.debug(logger, format, args);
             }
@@ -86,8 +90,17 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
      * @param bcc the bcc recipient list
      * @param env the build environment
      */
-    private void addUpstreamCommittersTriggeringBuild(Run<?, ?> run, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, final ExtendedEmailPublisherContext context, RecipientProviderUtilities.IDebug debug) {
-        debug.send("Adding upstream committer from job %s with build number %s", run.getParent().getDisplayName(), run.getNumber());
+    private void addUpstreamCommittersTriggeringBuild(
+            Run<?, ?> run,
+            Set<InternetAddress> to,
+            Set<InternetAddress> cc,
+            Set<InternetAddress> bcc,
+            EnvVars env,
+            final ExtendedEmailPublisherContext context,
+            RecipientProviderUtilities.IDebug debug) {
+        debug.send(
+                "Adding upstream committer from job %s with build number %s",
+                run.getParent().getDisplayName(), run.getNumber());
 
         if (run instanceof RunWithSCM) {
             List<ChangeLogSet<? extends ChangeLogSet.Entry>> changeSets = ((RunWithSCM<?, ?>) run).getChangeSets();
@@ -108,7 +121,14 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
      * @param bcc The list of bcc addresses to add to
      * @param env The build environment
      */
-    private void addUserFromChangeSet(ChangeLogSet.Entry change, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, final ExtendedEmailPublisherContext context, RecipientProviderUtilities.IDebug debug) {
+    private void addUserFromChangeSet(
+            ChangeLogSet.Entry change,
+            Set<InternetAddress> to,
+            Set<InternetAddress> cc,
+            Set<InternetAddress> bcc,
+            EnvVars env,
+            final ExtendedEmailPublisherContext context,
+            RecipientProviderUtilities.IDebug debug) {
         User user = change.getAuthor();
         RecipientProviderUtilities.addUsers(Collections.singleton(user), context, env, to, cc, bcc, debug);
     }

@@ -32,16 +32,26 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class ListRecipientProvider extends RecipientProvider {
 
     @DataBoundConstructor
-    public ListRecipientProvider() {
-
-    }
+    public ListRecipientProvider() {}
 
     @Override
-    public void addRecipients(ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
+    public void addRecipients(
+            ExtendedEmailPublisherContext context,
+            EnvVars env,
+            Set<InternetAddress> to,
+            Set<InternetAddress> cc,
+            Set<InternetAddress> bcc) {
         try {
-            ExtendedEmailPublisherDescriptor descriptor = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+            ExtendedEmailPublisherDescriptor descriptor =
+                    Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
             descriptor.debug(context.getListener().getLogger(), "Adding recipients from project recipient list");
-            EmailRecipientUtils.addAddressesFromRecipientList(to, cc, bcc, EmailRecipientUtils.getRecipientList(context, context.getPublisher().recipientList), env, context.getListener());
+            EmailRecipientUtils.addAddressesFromRecipientList(
+                    to,
+                    cc,
+                    bcc,
+                    EmailRecipientUtils.getRecipientList(context, context.getPublisher().recipientList),
+                    env,
+                    context.getListener());
         } catch (MessagingException ex) {
             Logger.getLogger(ListRecipientProvider.class.getName()).log(Level.SEVERE, null, ex);
         }

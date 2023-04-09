@@ -17,18 +17,21 @@ public class JellyTemplateConfig extends Config {
     public ConfigProvider getDescriptor() {
         return Jenkins.get().getDescriptorByType(JellyTemplateConfigProvider.class);
     }
+
     @DataBoundConstructor
     public JellyTemplateConfig(String id, String name, String comment, String content) {
         super(id, name, comment, content);
-        ScriptApproval.get().configuring(content, JellyLanguage.get(), ApprovalContext.create().withCurrentUser());
+        ScriptApproval.get()
+                .configuring(
+                        content, JellyLanguage.get(), ApprovalContext.create().withCurrentUser());
     }
 
     public Object readResolve() {
         ScriptApproval.get().configuring(content, JellyLanguage.get(), ApprovalContext.create());
         return this;
     }
-    
-    @Extension(optional=true)
+
+    @Extension(optional = true)
     public static final class JellyTemplateConfigProvider extends AbstractConfigProviderImpl {
 
         public JellyTemplateConfigProvider() {

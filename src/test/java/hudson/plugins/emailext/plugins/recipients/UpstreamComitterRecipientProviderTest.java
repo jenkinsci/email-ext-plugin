@@ -28,7 +28,8 @@ import org.jvnet.mock_javamail.Mailbox;
 
 public class UpstreamComitterRecipientProviderTest {
 
-    @Rule public JenkinsRule j = new JenkinsRule();
+    @Rule
+    public JenkinsRule j = new JenkinsRule();
 
     @After
     public void tearDown() {
@@ -53,33 +54,20 @@ public class UpstreamComitterRecipientProviderTest {
         FreeStyleProject ds = j.createFreeStyleProject("ds");
         ds.setQuietPeriod(0);
         SequenceLock seq = new SequenceLock();
-        ds.getBuildersList()
-                .add(
-                        new TestBuilder() {
-                            @Override
-                            public boolean perform(
-                                    AbstractBuild<?, ?> build,
-                                    Launcher launcher,
-                                    BuildListener listener)
-                                    throws InterruptedException {
-                                if (build.number == 1) {
-                                    seq.phase(0);
-                                    seq.phase(2);
-                                }
-                                return true;
-                            }
-                        });
+        ds.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException {
+                if (build.number == 1) {
+                    seq.phase(0);
+                    seq.phase(2);
+                }
+                return true;
+            }
+        });
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        SuccessTrigger successTrigger =
-                new SuccessTrigger(
-                        Collections.singletonList(new UpstreamComitterRecipientProvider()),
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        0,
-                        "project");
+        SuccessTrigger successTrigger = new SuccessTrigger(
+                Collections.singletonList(new UpstreamComitterRecipientProvider()), "", "", "", "", "", 0, "project");
         publisher.getConfiguredTriggers().add(successTrigger);
         ds.getPublishersList().add(publisher);
         j.jenkins.rebuildDependencyGraph();

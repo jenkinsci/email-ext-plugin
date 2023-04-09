@@ -51,19 +51,23 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
 
     @DataBoundConstructor
-    public FailingTestSuspectsRecipientProvider() {
-    }
+    public FailingTestSuspectsRecipientProvider() {}
 
     @Override
-    public void addRecipients(final ExtendedEmailPublisherContext context, final EnvVars env,
-        final Set<InternetAddress> to, final Set<InternetAddress> cc, final Set<InternetAddress> bcc) {
+    public void addRecipients(
+            final ExtendedEmailPublisherContext context,
+            final EnvVars env,
+            final Set<InternetAddress> to,
+            final Set<InternetAddress> cc,
+            final Set<InternetAddress> bcc) {
 
         final class Debug implements RecipientProviderUtilities.IDebug {
-            private final ExtendedEmailPublisherDescriptor descriptor
-                = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+            private final ExtendedEmailPublisherDescriptor descriptor =
+                    Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 
+            @Override
             public void send(final String format, final Object... args) {
                 descriptor.debug(logger, format, args);
             }
@@ -92,7 +96,8 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
                             debug.send("  runWhereTestStartedFailing: %d", runWhereTestStartedFailing.getNumber());
                             buildsWhereATestStartedFailing.add(runWhereTestStartedFailing);
                         } else {
-                            context.getListener().error("getFailedSinceRun returned null for %s", caseResult.getFullDisplayName());
+                            context.getListener()
+                                    .error("getFailedSinceRun returned null for %s", caseResult.getFullDisplayName());
                         }
                     }
                     // For each build where a test started failing, walk backward looking for build results worse than
@@ -121,7 +126,8 @@ public class FailingTestSuspectsRecipientProvider extends RecipientProvider {
                                     debug.send("      previousResult was better than FAILURE; stopping search");
                                     break;
                                 } else {
-                                    debug.send("      previousResult was not better than FAILURE; adding to buildsWithSuspects; continuing search");
+                                    debug.send(
+                                            "      previousResult was not better than FAILURE; adding to buildsWithSuspects; continuing search");
                                     buildsWithSuspects.add(previousBuildToCheck);
                                     previousBuildToCheck = previousBuildToCheck.getPreviousCompletedBuild();
                                     if (previousBuildToCheck != null) {

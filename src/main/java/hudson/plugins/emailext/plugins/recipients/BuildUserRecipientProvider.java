@@ -22,22 +22,26 @@ import org.kohsuke.stapler.DataBoundConstructor;
 /**
  * Created by skroell on 03/03/2020.
  */
-
 public class BuildUserRecipientProvider extends RecipientProvider {
 
     @DataBoundConstructor
-    public BuildUserRecipientProvider() {
-
-    }
+    public BuildUserRecipientProvider() {}
 
     @Override
-    public void addRecipients(final ExtendedEmailPublisherContext context, EnvVars env, Set<InternetAddress> to, Set<InternetAddress> cc, Set<InternetAddress> bcc) {
-        
+    public void addRecipients(
+            final ExtendedEmailPublisherContext context,
+            EnvVars env,
+            Set<InternetAddress> to,
+            Set<InternetAddress> cc,
+            Set<InternetAddress> bcc) {
+
         final class Debug implements RecipientProviderUtilities.IDebug {
-            private final ExtendedEmailPublisherDescriptor descriptor = Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+            private final ExtendedEmailPublisherDescriptor descriptor =
+                    Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
             private final PrintStream logger = context.getListener().getLogger();
 
+            @Override
             public void send(final String format, final Object... args) {
                 descriptor.debug(logger, format, args);
             }
@@ -50,14 +54,20 @@ public class BuildUserRecipientProvider extends RecipientProvider {
         // user triggering ex. a rebuild and not the original upstream user.
         Run<?, ?> cur = context.getRun();
         Cause.UserIdCause upc = cur.getCause(hudson.model.Cause.UserIdCause.class);
-        if(upc == null){
+        if (upc == null) {
             context.getListener().getLogger().print("The build was not caused by a user!");
         }
         addUserTriggeringTheBuild(cur, to, cc, bcc, env, context, debug);
     }
 
-    private static void addUserTriggeringTheBuild(Run<?, ?> run, Set<InternetAddress> to,
-        Set<InternetAddress> cc, Set<InternetAddress> bcc, EnvVars env, final ExtendedEmailPublisherContext context, RecipientProviderUtilities.IDebug debug) {
+    private static void addUserTriggeringTheBuild(
+            Run<?, ?> run,
+            Set<InternetAddress> to,
+            Set<InternetAddress> cc,
+            Set<InternetAddress> bcc,
+            EnvVars env,
+            final ExtendedEmailPublisherContext context,
+            RecipientProviderUtilities.IDebug debug) {
 
         final User user = RecipientProviderUtilities.getUserTriggeringTheBuild(run);
         if (user != null) {

@@ -57,14 +57,15 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         return macroName.equals(MACRO_NAME);
     }
 
-
     @Override
-    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName) throws MacroEvaluationException{
+    public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
+            throws MacroEvaluationException {
         return evaluate(build, build.getWorkspace(), listener, macroName);
     }
 
     @Override
-    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) throws MacroEvaluationException {
+    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName)
+            throws MacroEvaluationException {
         AbstractTestResultAction<?> testResult = run.getAction(AbstractTestResultAction.class);
         SummarizedTestResult result = prepareSummarizedTestResult(testResult);
 
@@ -83,23 +84,23 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     }
 
     private void setMaxLength() {
-        if(maxLength < Integer.MAX_VALUE) {
+        if (maxLength < Integer.MAX_VALUE) {
             maxLength *= 1024;
         }
     }
 
     private int getTestAge(TestResult result) {
-        if(result.isPassed())
+        if (result.isPassed()) {
             return 0;
-        else if (result.getRun() != null) {
-            return result.getRun().getNumber()-result.getFailedSince()+1;
+        } else if (result.getRun() != null) {
+            return result.getRun().getNumber() - result.getFailedSince() + 1;
         } else {
             return 0;
         }
     }
 
     private SummarizedTestResult prepareSummarizedTestResult(AbstractTestResultAction<?> testResult) {
-        if(null == testResult) {
+        if (null == testResult) {
             SummarizedTestResult result = new SummarizedTestResult(0, getLineBreak());
             result.summary = "No tests ran.";
             return result;
@@ -108,30 +109,39 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         List<? extends TestResult> failedAndFilteredTests = filterTests(testResult.getFailedTests(), testNamePattern);
         failCount = testNamePattern.length() == 0 ? failCount : failedAndFilteredTests.size();
         SummarizedTestResult result = new SummarizedTestResult(failCount, getLineBreak());
-        if(failCount == 0) {
+        if (failCount == 0) {
             result.summary = "All tests passed";
-        }
-        else {
+        } else {
             result.summary = String.format("%d tests failed.", failCount);
             setMaxLength();
-            if(maxTests > 0) {
+            if (maxTests > 0) {
                 int printSize = 0;
                 for (TestResult failedTest : failedAndFilteredTests) {
                     if (regressionFilter(failedTest)) {
                         printSize = addTest(result, printSize, failedTest);
                     }
                 }
-                result.otherFailedTests = (failCount > result.tests.size());
-                result.truncatedOutput = (printSize > maxLength);
+                result.otherFailedTests = failCount > result.tests.size();
+                result.truncatedOutput = printSize > maxLength;
             }
         }
         return result;
     }
 
     private int addTest(SummarizedTestResult result, int printSize, TestResult failedTest) {
-        String stackTrace = showStack ? (escapeHtml ? StringEscapeUtils.escapeHtml(failedTest.getErrorStackTrace()) : failedTest.getErrorStackTrace()) : null;
-        String errorDetails = showMessage ? (escapeHtml ? StringEscapeUtils.escapeHtml(failedTest.getErrorDetails()) : failedTest.getErrorDetails()) : null;
-        String name = String.format("%s.%s", (failedTest instanceof CaseResult) ? ((CaseResult) failedTest).getClassName() : failedTest.getFullName(),
+        String stackTrace = showStack
+                ? (escapeHtml
+                        ? StringEscapeUtils.escapeHtml(failedTest.getErrorStackTrace())
+                        : failedTest.getErrorStackTrace())
+                : null;
+        String errorDetails = showMessage
+                ? (escapeHtml
+                        ? StringEscapeUtils.escapeHtml(failedTest.getErrorDetails())
+                        : failedTest.getErrorDetails())
+                : null;
+        String name = String.format(
+                "%s.%s",
+                failedTest instanceof CaseResult ? ((CaseResult) failedTest).getClassName() : failedTest.getFullName(),
                 failedTest.getDisplayName());
         FailedTest t = new FailedTest(name, failedTest.isPassed(), errorDetails, stackTrace);
         String testYaml = t.toString();
@@ -152,7 +162,8 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         String status;
         String errorMessage;
         String stackTrace;
-        public FailedTest(String name, boolean status, String errorMessage, String stackTrace){
+
+        public FailedTest(String name, boolean status, String errorMessage, String stackTrace) {
             this.errorMessage = errorMessage;
             this.name = name;
             this.stackTrace = stackTrace;
@@ -161,7 +172,9 @@ public class FailedTestsContent extends DataBoundTokenMacro {
 
         @Override
         public String toString() {
-            return String.format("Name:%s, Status:%s, Error message: %s, Stack trace:%s", this.name, this.status, this.errorMessage, this.stackTrace);
+            return String.format(
+                    "Name:%s, Status:%s, Error message: %s, Stack trace:%s",
+                    this.name, this.status, this.errorMessage, this.stackTrace);
         }
     }
 
@@ -191,11 +204,13 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             if (!tests.isEmpty()) {
                 builder.append(lineBreak);
             }
-            for(FailedTest t: tests) {
+            for (FailedTest t : tests) {
                 outputTest(builder, lineBreak, t);
             }
             if (otherFailedTests) {
-                builder.append("... and ").append(totalFailCount - tests.size()).append(" other failed tests.")
+                builder.append("... and ")
+                        .append(totalFailCount - tests.size())
+                        .append(" other failed tests.")
                         .append(lineBreak);
             }
             if (this.truncatedOutput) {
@@ -206,7 +221,8 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         }
 
         public String toYamlString() throws JsonProcessingException {
-            ObjectMapper om = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+            ObjectMapper om = new ObjectMapper(new YAMLFactory()
+                    .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
                     .configure(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE, true));
             return om.writeValueAsString(this);
         }
@@ -218,11 +234,19 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             local.append(failedTest.name).append(lineBreak);
 
             if (failedTest.errorMessage != null) {
-                local.append(lineBreak).append("Error Message:").append(lineBreak).append(failedTest.errorMessage).append(lineBreak);
+                local.append(lineBreak)
+                        .append("Error Message:")
+                        .append(lineBreak)
+                        .append(failedTest.errorMessage)
+                        .append(lineBreak);
             }
 
             if (failedTest.stackTrace != null) {
-                local.append(lineBreak).append("Stack Trace:").append(lineBreak).append(failedTest.stackTrace).append(lineBreak);
+                local.append(lineBreak)
+                        .append("Stack Trace:")
+                        .append(lineBreak)
+                        .append(failedTest.stackTrace)
+                        .append(lineBreak);
             }
 
             if (failedTest.stackTrace != null || failedTest.errorMessage != null) {
@@ -230,13 +254,14 @@ public class FailedTestsContent extends DataBoundTokenMacro {
             }
             buffer.append(local);
         }
-
     }
 
     private List<? extends TestResult> filterTests(List<? extends TestResult> failedTests, String regexPattern) {
-        if(regexPattern.length() != 0) {
+        if (regexPattern.length() != 0) {
             Pattern pattern = Pattern.compile(regexPattern);
-            failedTests = failedTests.stream().filter(t -> pattern.matcher(t.getFullName()).matches()).collect(Collectors.toList());
+            failedTests = failedTests.stream()
+                    .filter(t -> pattern.matcher(t.getFullName()).matches())
+                    .collect(Collectors.toList());
         }
         return failedTests;
     }

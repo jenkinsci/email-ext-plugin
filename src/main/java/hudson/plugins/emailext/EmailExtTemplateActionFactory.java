@@ -24,17 +24,17 @@ public class EmailExtTemplateActionFactory extends TransientProjectActionFactory
     public Collection<? extends Action> createFor(AbstractProject target) {
         boolean hasEmailExt = false;
         if (target.getPublishersList() != null) {
-            for(Object p : target.getPublishersList()) {
-                if(p instanceof ExtendedEmailPublisher) {
+            for (Object p : target.getPublishersList()) {
+                if (p instanceof ExtendedEmailPublisher) {
                     hasEmailExt = true;
                     break;
                 }
             }
-        }        
-        
-        if(hasEmailExt) {
+        }
+
+        if (hasEmailExt) {
             return Collections.singletonList(new EmailExtTemplateAction(target));
         }
         return Collections.emptyList();
-    }        
+    }
 }

@@ -20,16 +20,16 @@ import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 public class TemplateContent extends AbstractEvalContent {
 
     private static final Logger LOGGER = Logger.getLogger(TemplateContent.class.getName());
-    
-    @Parameter(required=true)
+
+    @Parameter(required = true)
     public String file = "";
-    
+
     public static final String MACRO_NAME = "TEMPLATE";
-    
+
     public TemplateContent() {
         super(MACRO_NAME);
     }
-    
+
     @Override
     public String evaluate(AbstractBuild<?, ?> build, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
@@ -37,9 +37,10 @@ public class TemplateContent extends AbstractEvalContent {
     }
 
     @Override
-    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName) throws MacroEvaluationException, IOException, InterruptedException {
+    public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName)
+            throws MacroEvaluationException, IOException, InterruptedException {
         String result = "";
-        
+
         try {
             if (!StringUtils.isEmpty(file)) {
                 result = IOUtils.toString(getFileInputStream(run, workspace, file, ".txt"), StandardCharsets.UTF_8);
@@ -52,10 +53,11 @@ public class TemplateContent extends AbstractEvalContent {
         return result;
     }
 
+    @Override
     protected Class<? extends ConfigProvider> getProviderClass() {
         return CustomConfigProvider.class;
     }
-    
+
     @Override
     public boolean hasNestedContent() {
         return true;

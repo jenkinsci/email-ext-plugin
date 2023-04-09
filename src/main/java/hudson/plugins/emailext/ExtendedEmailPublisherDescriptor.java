@@ -178,34 +178,43 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private transient Secret smtpAuthPassword;
     private transient boolean useSsl = false;
 
-    private transient BiFunction<MailAccount, Run<?,?>, Authenticator> authenticatorProvider = (acc, run) -> new Authenticator() {
-        @Override
-        protected PasswordAuthentication getPasswordAuthentication() {
-            DomainRequirement domainRequirement = null;
-            if(StringUtils.isNotBlank(acc.getSmtpHost()) && StringUtils.isNotBlank(acc.getSmtpPort())) {
-                domainRequirement = new HostnamePortRequirement(acc.getSmtpHost(), Integer.parseInt(acc.getSmtpPort()));
-            }
+    private transient BiFunction<MailAccount, Run<?, ?>, Authenticator> authenticatorProvider =
+            (acc, run) -> new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    DomainRequirement domainRequirement = null;
+                    if (StringUtils.isNotBlank(acc.getSmtpHost()) && StringUtils.isNotBlank(acc.getSmtpPort())) {
+                        domainRequirement =
+                                new HostnamePortRequirement(acc.getSmtpHost(), Integer.parseInt(acc.getSmtpPort()));
+                    }
 
-            StandardUsernamePasswordCredentials c = CredentialsProvider.findCredentialById(acc.getCredentialsId(),
-                            StandardUsernamePasswordCredentials.class,
-                            run,
-                            domainRequirement
-                            );
+                    StandardUsernamePasswordCredentials c = CredentialsProvider.findCredentialById(
+                            acc.getCredentialsId(), StandardUsernamePasswordCredentials.class, run, domainRequirement);
 
-            if(c == null) {
-                return null;
-            }
+                    if (c == null) {
+                        return null;
+                    }
 
-            return new PasswordAuthentication(c.getUsername(), Secret.toString(c.getPassword()));
+                    return new PasswordAuthentication(c.getUsername(), Secret.toString(c.getPassword()));
+                }
+            };
+
+    private Object readResolve() {
+        if (smtpHost != null) {
+            mailAccount.setSmtpHost(smtpHost);
         }
-    };
-
-    private Object readResolve(){
-        if(smtpHost != null) mailAccount.setSmtpHost(smtpHost);
-        if(smtpPort != null) mailAccount.setSmtpPort(smtpPort);
-        if(smtpAuthUsername != null) mailAccount.setSmtpUsername(smtpAuthUsername);
-        if(smtpAuthPassword != null) mailAccount.setSmtpPassword(smtpAuthPassword);
-        if(useSsl) mailAccount.setUseSsl(useSsl);
+        if (smtpPort != null) {
+            mailAccount.setSmtpPort(smtpPort);
+        }
+        if (smtpAuthUsername != null) {
+            mailAccount.setSmtpUsername(smtpAuthUsername);
+        }
+        if (smtpAuthPassword != null) {
+            mailAccount.setSmtpPassword(smtpAuthPassword);
+        }
+        if (useSsl) {
+            mailAccount.setUseSsl(useSsl);
+        }
 
         /*
          * Versions 2.71 and earlier correctly left the address unset for the default account,
@@ -235,7 +244,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
         }
 
-        if(mailAccount == null) {
+        if (mailAccount == null) {
             mailAccount = new MailAccount();
         }
 
@@ -246,14 +255,14 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     public static void autoConfigure() {
         ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
 
-        if (Jenkins.get().isUseSecurity()
-                && (!StringUtils.isBlank(descriptor.getDefaultPostsendScript())) || !StringUtils.isBlank(descriptor.getDefaultPresendScript())) {
+        if (Jenkins.get().isUseSecurity() && !StringUtils.isBlank(descriptor.getDefaultPostsendScript())
+                || !StringUtils.isBlank(descriptor.getDefaultPresendScript())) {
             descriptor.setDefaultPostsendScript(descriptor.getDefaultPostsendScript());
             descriptor.setDefaultPresendScript(descriptor.getDefaultPresendScript());
             try {
                 descriptor.setDefaultClasspath(descriptor.getDefaultClasspath());
             } catch (FormException e) {
-                //Some of the old configured classpaths probably used some environment variable, let's clean those out
+                // Some of the old configured classpaths probably used some environment variable, let's clean those out
                 List<GroovyScriptPath> newList = new ArrayList<>();
                 for (GroovyScriptPath path : descriptor.getDefaultClasspath()) {
                     URL u = path.asURL();
@@ -262,7 +271,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                             new ClasspathEntry(u.toString());
                             newList.add(path);
                         } catch (MalformedURLException mfue) {
-                            LOGGER.log(Level.WARNING, "The default classpath contained a malformed url, will be ignored.", mfue);
+                            LOGGER.log(
+                                    Level.WARNING,
+                                    "The default classpath contained a malformed url, will be ignored.",
+                                    mfue);
                         }
                     }
                 }
@@ -283,8 +295,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     public String getAdminAddress() {
         JenkinsLocationConfiguration config = JenkinsLocationConfiguration.get();
-        if(config != null) {
-            if(StringUtils.isBlank(mailAccount.getAddress())) {
+        if (config != null) {
+            if (StringUtils.isBlank(mailAccount.getAddress())) {
                 return config.getAdminAddress();
             }
         }
@@ -357,7 +369,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             props.put("mail.smtp.auth", "true");
         }
 
-        if(acc.isUseOAuth2()) {
+        if (acc.isUseOAuth2()) {
             props.put("mail.smtp.auth.mechanisms", "XOAUTH2");
         }
 
@@ -498,10 +510,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public FormValidation doCheckDefaultSuffix(@QueryParameter String value) {
-        if (value.matches("@[A-Za-z0-9.\\-]+") || Util.fixEmptyAndTrim(value)==null)
+        if (value.matches("@[A-Za-z0-9.\\-]+") || Util.fixEmptyAndTrim(value) == null) {
             return FormValidation.ok();
-        else
+        } else {
             return FormValidation.error(Messages.Mailer_Suffix_Error());
+        }
     }
 
     public String getDefaultSubject() {
@@ -568,7 +581,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public long getMaxAttachmentSizeMb() {
-        if(maxAttachmentSize < 0) {
+        if (maxAttachmentSize < 0) {
             return -1;
         }
         return maxAttachmentSize / (1024 * 1024);
@@ -577,7 +590,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @SuppressWarnings("unused")
     @DataBoundSetter
     public void setMaxAttachmentSizeMb(long mb) {
-        if(mb < 0) {
+        if (mb < 0) {
             setMaxAttachmentSize(mb);
         } else {
             setMaxAttachmentSize(mb * (1024 * 1024));
@@ -591,7 +604,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @SuppressWarnings("unused")
     @DataBoundSetter
     public void setDefaultRecipients(String recipients) {
-        this.recipientList = ((recipients == null) ? "" : recipients);
+        this.recipientList = recipients == null ? "" : recipients;
     }
 
     public String getAllowedDomains() {
@@ -601,7 +614,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @SuppressWarnings("unused")
     @DataBoundSetter
     public void setAllowedDomains(String allowed) {
-        this.allowedDomains = ((allowed == null) ? "" : allowed);
+        this.allowedDomains = allowed == null ? "" : allowed;
     }
 
     public String getExcludedCommitters() {
@@ -611,7 +624,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @SuppressWarnings("unused")
     @DataBoundSetter
     public void setExcludedCommitters(String excluded) {
-        this.excludedCommitters = ((excluded == null) ? "" : excluded);
+        this.excludedCommitters = excluded == null ? "" : excluded;
     }
 
     @Deprecated
@@ -646,7 +659,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @SuppressWarnings("unused")
     @DataBoundSetter
     public void setDefaultReplyTo(String to) {
-        this.defaultReplyTo = ((to == null) ? "" : to);
+        this.defaultReplyTo = to == null ? "" : to;
     }
 
     public boolean isSecurityEnabled() {
@@ -696,9 +709,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @DataBoundSetter
     public void setDefaultPresendScript(String script) {
         script = StringUtils.trim(script);
-        this.defaultPresendScript = ScriptApproval.get().configuring(((script == null) ? "" : script),
-                GroovyLanguage.get(),
-                ApprovalContext.create().withCurrentUser());
+        this.defaultPresendScript = ScriptApproval.get()
+                .configuring(
+                        script == null ? "" : script,
+                        GroovyLanguage.get(),
+                        ApprovalContext.create().withCurrentUser());
     }
 
     public String getDefaultPostsendScript() {
@@ -709,9 +724,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @DataBoundSetter
     public void setDefaultPostsendScript(String script) {
         script = StringUtils.trim(script);
-        this.defaultPostsendScript = ScriptApproval.get().configuring(((script == null) ? "" : script),
-                GroovyLanguage.get(),
-                ApprovalContext.create().withCurrentUser());
+        this.defaultPostsendScript = ScriptApproval.get()
+                .configuring(
+                        script == null ? "" : script,
+                        GroovyLanguage.get(),
+                        ApprovalContext.create().withCurrentUser());
     }
 
     public List<GroovyScriptPath> getDefaultClasspath() {
@@ -748,7 +765,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                     }
                 }
             } else {
-                FailureTrigger.DescriptorImpl f = Jenkins.get().getDescriptorByType(FailureTrigger.DescriptorImpl.class);
+                FailureTrigger.DescriptorImpl f =
+                        Jenkins.get().getDescriptorByType(FailureTrigger.DescriptorImpl.class);
                 if (f != null) {
                     defaultTriggerIds.add(f.getId());
                 }
@@ -772,8 +790,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     @Override
-    public boolean configure(StaplerRequest req, JSONObject formData)
-            throws FormException {
+    public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
         req.bindJSON(this, formData);
         save();
         return super.configure(req, formData);
@@ -847,7 +864,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return authenticatorProvider;
     }
 
-    void setAuthenticatorProvider(BiFunction<MailAccount, Run<?,?>, Authenticator> authenticatorProvider) {
+    void setAuthenticatorProvider(BiFunction<MailAccount, Run<?, ?>, Authenticator> authenticatorProvider) {
         this.authenticatorProvider = authenticatorProvider;
     }
 }

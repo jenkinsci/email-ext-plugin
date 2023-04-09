@@ -23,8 +23,8 @@ class RecipientListStringAnalyser {
         this(null, null, recipientsListString);
     }
 
-    private RecipientListStringAnalyser(TaskListener listener, ExtendedEmailPublisherDescriptor descriptor,
-                                        String recipientsListString) {
+    private RecipientListStringAnalyser(
+            TaskListener listener, ExtendedEmailPublisherDescriptor descriptor, String recipientsListString) {
         this.listener = listener;
         this.descriptor = descriptor;
         this.recipients = recipientsListString;
@@ -33,8 +33,8 @@ class RecipientListStringAnalyser {
     }
 
     static RecipientListStringAnalyser newInstance(TaskListener listener, String recipientsListString) {
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.get().getDescriptorByType(
-                ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         return new RecipientListStringAnalyser(listener, descriptor, recipientsListString);
     }
 
@@ -52,8 +52,11 @@ class RecipientListStringAnalyser {
             debug("\tfirstFoundIdx-substring: %s", recipients.substring(firstFoundIdx));
             type = getType(firstFoundIdx);
             debug("\t=> found type: %d", type);
-            idx = firstFoundIdx + lengthOfTypePrefix(type) + address.toString().length()
-                    + adaptLengthForOptionalPersonal(address) + 1;
+            idx = firstFoundIdx
+                    + lengthOfTypePrefix(type)
+                    + address.toString().length()
+                    + adaptLengthForOptionalPersonal(address)
+                    + 1;
         } else {
             debug("\t=> type not found");
         }
@@ -79,7 +82,7 @@ class RecipientListStringAnalyser {
 
     private int findFirst(int firstIdx, String search) {
         int foundIdx = recipients.indexOf(search, idx);
-        return (foundIdx == -1) ? firstIdx : Math.min(firstIdx, foundIdx);
+        return foundIdx == -1 ? firstIdx : Math.min(firstIdx, foundIdx);
     }
 
     private int getType(int firstFoundIdx) {
@@ -116,7 +119,9 @@ class RecipientListStringAnalyser {
     }
 
     private int adaptLengthForOptionalPersonal(InternetAddress address) {
-        return address.getPersonal() != null ? -4 : 0; // This may not be precise! Quotes around personal name + '<' and '>' around email address...
+        return address.getPersonal() != null
+                ? -4
+                : 0; // This may not be precise! Quotes around personal name + '<' and '>' around email address...
     }
 
     private void debug(final String format, final Object... args) {
@@ -124,5 +129,4 @@ class RecipientListStringAnalyser {
             descriptor.debug(listener.getLogger(), format, args);
         }
     }
-
 }
