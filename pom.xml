@@ -106,6 +106,7 @@
     <concurrency>1</concurrency>
     <!-- To be removed once Jenkins.MANAGE gets out of beta -->
     <useBeta>true</useBeta>
+    <spotless.check.skip>false</spotless.check.skip>
   </properties>
 
   <dependencyManagement>
