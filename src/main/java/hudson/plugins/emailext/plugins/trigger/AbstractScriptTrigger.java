@@ -103,6 +103,7 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
         return result;
     }
     
+    @SuppressWarnings("lgtm[jenkins/unsafe-classes]")
     private Object evaluate(AbstractBuild<?, ?> build, TaskListener listener) throws IOException {
         ClassLoader loader = Jenkins.get().getPluginManager().uberClassLoader;
         JenkinsLocationConfiguration configuration = JenkinsLocationConfiguration.get();

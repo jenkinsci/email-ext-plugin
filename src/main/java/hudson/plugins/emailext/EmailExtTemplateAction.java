@@ -6,6 +6,7 @@ import hudson.Plugin;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.model.Item;
 import hudson.plugins.emailext.plugins.content.AbstractEvalContent;
 import hudson.plugins.emailext.plugins.content.JellyScriptContent;
 import hudson.plugins.emailext.plugins.content.ScriptContent;
@@ -56,10 +57,20 @@ public class EmailExtTemplateAction implements Action {
                 + "</span>";
     }
     
+    @SuppressWarnings("lgtm[jenkins/csrf]")
     public FormValidation doTemplateFileCheck(@QueryParameter final String value) {
+        // See src/main/resources/hudson/plugins/emailext/EmailExtTemplateAction/{index,action}.groovy
+        if (Jenkins.get()
+                .getDescriptorByType(ExtendedEmailPublisherDescriptor.class)
+                .isAdminRequiredForTemplateTesting()) {
+            Jenkins.get().checkPermission(Jenkins.MANAGE);
+        } else {
+            project.checkPermission(Item.CONFIGURE);
+        }
+
         if(!StringUtils.isEmpty(value)) {
             if(value.startsWith("managed:")) {
-                return checkForManagedFile(value);
+                return checkForManagedFile(StringUtils.removeStart(value, "managed:"));
             } else {
                 // first check in the default resources area...
                 InputStream inputStream = Thread.currentThread().getContextClassLoader()

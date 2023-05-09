@@ -639,6 +639,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         executeScript(postsendScript, "post-send", context, msg, session, transport);
     }
 
+    @SuppressWarnings("lgtm[jenkins/unsafe-classes]")
     private boolean executeScript(String rawScript, String scriptName, ExtendedEmailPublisherContext context,
             MimeMessage msg, Session session, Transport transport) {
         boolean cancel = false;
