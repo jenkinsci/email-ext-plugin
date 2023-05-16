@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>email-ext</artifactId>
-  <version>2.97</version>
+  <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
   <name>Email Extension Plugin</name>
   <description>Allows to configure every aspect of email notifications: when an email is sent, who should receive it and what the email says</description>
@@ -88,7 +88,7 @@
   <scm>
     <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
     <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
-    <tag>email-ext-2.97</tag>
+    <tag>${scmTag}</tag>
     <url>https://github.com/${gitHubRepo}</url>
   </scm>
 
@@ -98,7 +98,7 @@
   </issueManagement>
 
   <properties>
-    <revision>2.97</revision>
+    <revision>2.98</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
     <jenkins.version>2.361.4</jenkins.version>
