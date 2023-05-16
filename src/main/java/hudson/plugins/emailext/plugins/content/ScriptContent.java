@@ -117,6 +117,7 @@ public class ScriptContent extends AbstractEvalContent {
      * @param templateStream the template file stream
      * @return the rendered template content
      */
+    @SuppressWarnings("lgtm[jenkins/unsafe-classes]")
     private String renderTemplate(
             Run<?, ?> build, FilePath workspace, TaskListener listener, InputStream templateStream) {
 
@@ -200,6 +201,7 @@ public class ScriptContent extends AbstractEvalContent {
      * @param scriptStream the script input stream
      * @return a String containing the toString of the last item in the script
      */
+    @SuppressWarnings("lgtm[jenkins/unsafe-classes]")
     private String executeScript(Run<?, ?> build, FilePath workspace, TaskListener listener, InputStream scriptStream)
             throws IOException {
         String result = "";
@@ -262,6 +264,7 @@ public class ScriptContent extends AbstractEvalContent {
      * @param variables user variables to be added to the Groovy context
      * @return a GroovyShell instance
      */
+    @SuppressWarnings("lgtm[jenkins/unsafe-classes]")
     private GroovyShell createEngine(
             ExtendedEmailPublisherDescriptor descriptor, Map<String, Object> variables, boolean secure) {
 

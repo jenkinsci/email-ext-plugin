@@ -4,9 +4,11 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.model.Item;
 import hudson.model.User;
 import hudson.model.UserPropertyDescriptor;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
+import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
@@ -15,11 +17,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.servlet.ServletException;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.interceptor.RequirePOST;
+import org.kohsuke.stapler.verb.POST;
 
 /**
  *
@@ -149,9 +153,16 @@ public class EmailExtWatchAction implements Action {
         return p;
     }
 
+    @POST
     public void doStopWatching(StaplerRequest req, StaplerResponse rsp) throws IOException {
+        // See src/main/resources/hudson/plugins/emailext/watching/EmailExtWatchAction/{index,jobMain}.groovy
         User user = User.current();
-        if (user != null) {
+        if (user != null
+                && Jenkins.get()
+                        .getDescriptorByType(ExtendedEmailPublisherDescriptor.class)
+                        .isWatchingEnabled()) {
+            project.checkPermission(Item.READ);
+
             stopWatching();
             for (hudson.model.UserProperty property : user.getAllProperties()) {
                 if (property instanceof EmailExtWatchAction.UserProperty) {
@@ -165,8 +176,14 @@ public class EmailExtWatchAction implements Action {
 
     @RequirePOST
     public void doConfigSubmit(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+        // See src/main/resources/hudson/plugins/emailext/watching/EmailExtWatchAction/{index,jobMain}.groovy
         User user = User.current();
-        if (user != null) {
+        if (user != null
+                && Jenkins.get()
+                        .getDescriptorByType(ExtendedEmailPublisherDescriptor.class)
+                        .isWatchingEnabled()) {
+            project.checkPermission(Item.READ);
+
             Object json = req.getSubmittedForm().get("triggers");
             List<EmailTrigger> triggers = req.bindJSONToList(EmailTrigger.class, json);
 

@@ -121,6 +121,7 @@ public class SimpleTemplateEngine extends TemplateEngine {
     protected final GroovyShell groovyShell;
     private final boolean sandbox;
 
+    @SuppressWarnings("lgtm[jenkins/unsafe-classes]")
     public SimpleTemplateEngine(GroovyShell groovyShell, boolean sandbox) {
         this.groovyShell = groovyShell;
         this.sandbox = sandbox;
@@ -137,6 +138,7 @@ public class SimpleTemplateEngine extends TemplateEngine {
         return template;
     }
 
+    @SuppressWarnings("lgtm[jenkins/unsafe-classes]")
     protected Script parseScript(Reader reader, String fileName) throws CompilationFailedException, IOException {
         String script = parse(reader);
         if (LOGGER.isLoggable(Level.FINE)) {

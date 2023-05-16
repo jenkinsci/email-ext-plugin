@@ -104,7 +104,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             return "";
         }
 
-        @SuppressWarnings("unused") // Used by stapler
+        @SuppressWarnings({"lgtm[jenkins/csrf]", "unused"}) // Used by stapler
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
 
             final StandardListBoxModel result = new StandardListBoxModel();
@@ -127,6 +127,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                     .includeCurrentValue(credentialsId);
         }
 
+        @SuppressWarnings("lgtm[jenkins/csrf]")
         public FormValidation doCheckCredentialsId(@AncestorInPath Item item, @QueryParameter String value) {
             if (item == null) {
                 if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {

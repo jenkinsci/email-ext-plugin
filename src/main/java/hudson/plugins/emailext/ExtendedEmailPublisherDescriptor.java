@@ -509,6 +509,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
     }
 
+    @SuppressWarnings({"lgtm[jenkins/csrf]", "lgtm[jenkins/no-permission-check]"})
     public FormValidation doCheckDefaultSuffix(@QueryParameter String value) {
         if (value.matches("@[A-Za-z0-9.\\-]+") || Util.fixEmptyAndTrim(value) == null) {
             return FormValidation.ok();
@@ -781,7 +782,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         defaultTriggerIds = triggerIds;
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"lgtm[jenkins/csrf]", "lgtm[jenkins/no-permission-check]", "unused"})
     public ListBoxModel doFillDefaultContentTypeItems() {
         ListBoxModel items = new ListBoxModel();
         items.add(Messages.contentType_plainText(), "text/plain");
@@ -808,6 +809,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return "/plugin/email-ext/help/main.html";
     }
 
+    @SuppressWarnings({"lgtm[jenkins/csrf]", "lgtm[jenkins/no-permission-check]"})
     public FormValidation doAddressCheck(@QueryParameter final String value) {
         try {
             new InternetAddress(value);
@@ -817,10 +819,12 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
     }
 
+    @SuppressWarnings({"lgtm[jenkins/csrf]", "lgtm[jenkins/no-permission-check]"})
     public FormValidation doRecipientListRecipientsCheck(@QueryParameter final String value) {
         return new EmailRecipientUtils().validateFormRecipientList(value);
     }
 
+    @SuppressWarnings({"lgtm[jenkins/csrf]", "lgtm[jenkins/no-permission-check]"})
     public FormValidation doMaxAttachmentSizeCheck(@QueryParameter final String value) {
         try {
             String testValue = value.trim();
