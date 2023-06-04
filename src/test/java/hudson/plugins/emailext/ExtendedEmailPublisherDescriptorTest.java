@@ -18,17 +18,6 @@ import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.Domain;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
-import com.gargoylesoftware.htmlunit.ElementNotFoundException;
-import com.gargoylesoftware.htmlunit.html.DomElement;
-import com.gargoylesoftware.htmlunit.html.DomNode;
-import com.gargoylesoftware.htmlunit.html.HtmlButton;
-import com.gargoylesoftware.htmlunit.html.HtmlCheckBoxInput;
-import com.gargoylesoftware.htmlunit.html.HtmlDivision;
-import com.gargoylesoftware.htmlunit.html.HtmlNumberInput;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlSelect;
-import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
-import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import hudson.FilePath;
 import hudson.Functions;
 import hudson.Launcher;
@@ -66,6 +55,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import jenkins.model.Jenkins;
+import org.htmlunit.ElementNotFoundException;
+import org.htmlunit.html.DomElement;
+import org.htmlunit.html.DomNode;
+import org.htmlunit.html.HtmlButton;
+import org.htmlunit.html.HtmlCheckBoxInput;
+import org.htmlunit.html.HtmlDivision;
+import org.htmlunit.html.HtmlNumberInput;
+import org.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlSelect;
+import org.htmlunit.html.HtmlTextArea;
+import org.htmlunit.html.HtmlTextInput;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -114,7 +114,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals(
                 "Plain text should be selected by default",
                 "text/plain",
-                contentType.getSelectedOptions().get(0).getValueAttribute());
+                contentType.getSelectedOptions().get(0).getValue());
 
         HtmlCheckBoxInput precedenceBulk = page.getElementByName("_.precedenceBulk");
         assertNotNull("Precedence Bulk should be present", precedenceBulk);
@@ -200,7 +200,7 @@ public class ExtendedEmailPublisherDescriptorTest {
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
         HtmlTextInput defaultRecipients = page.getElementByName("_.defaultRecipients");
-        defaultRecipients.setValueAttribute("mickey@disney.com");
+        defaultRecipients.setValue("mickey@disney.com");
         j.submit(page.getFormByName("config"));
 
         assertEquals("mickey@disney.com", descriptor.getDefaultRecipients());
@@ -214,14 +214,14 @@ public class ExtendedEmailPublisherDescriptorTest {
         JenkinsRule.WebClient client = j.createWebClient();
         HtmlPage page = client.goTo("configure");
         HtmlNumberInput smtpPort = page.getElementByName("_.smtpPort");
-        smtpPort.setValueAttribute("587");
+        smtpPort.setValue("587");
         j.submit(page.getFormByName("config"));
 
         assertEquals("587", descriptor.getMailAccount().getSmtpPort());
 
         page = client.goTo("configure");
         smtpPort = page.getElementByName("_.smtpPort");
-        assertEquals("587", smtpPort.getValueAttribute());
+        assertEquals("587", smtpPort.getValue());
     }
 
     @Test
@@ -244,7 +244,7 @@ public class ExtendedEmailPublisherDescriptorTest {
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
         HtmlTextInput listId = page.getElementByName("_.listId");
-        listId.setValueAttribute("hammer");
+        listId.setValue("hammer");
 
         j.submit(page.getFormByName("config"));
 
@@ -610,33 +610,33 @@ public class ExtendedEmailPublisherDescriptorTest {
         WebClientUtil.waitForJSExec(page.getWebClient());
 
         HtmlTextInput address = page.getElementByName("_.adminAddress");
-        address.setValueAttribute("admin@example.com");
+        address.setValue("admin@example.com");
         HtmlTextInput smtpServer = page.getElementByName("ext_mailer_smtp_server");
-        smtpServer.setValueAttribute("smtp.example.com");
+        smtpServer.setValue("smtp.example.com");
         HtmlTextInput defaultSuffix = page.getElementByName("ext_mailer_default_suffix");
-        defaultSuffix.setValueAttribute("@example.com");
+        defaultSuffix.setValue("@example.com");
         HtmlTextInput smtpUsername = page.getElementByName("ext_mailer_smtp_username");
-        smtpUsername.setValueAttribute("admin");
+        smtpUsername.setValue("admin");
         HtmlPasswordInput smtpPassword = page.getElementByName("ext_mailer_smtp_password");
-        smtpPassword.setValueAttribute("honeycomb");
+        smtpPassword.setValue("honeycomb");
         HtmlTextArea advProperties = page.getElementByName("ext_mailer_adv_properties");
         advProperties.setText("mail.smtp.ssl.trust=example.com");
         HtmlCheckBoxInput smtpUseSsl = page.getElementByName("ext_mailer_smtp_use_ssl");
         smtpUseSsl.click();
         HtmlTextInput smtpPort = page.getElementByName("ext_mailer_smtp_port");
-        smtpPort.setValueAttribute("2525");
+        smtpPort.setValue("2525");
         HtmlTextInput charset = page.getElementByName("ext_mailer_charset");
-        charset.setValueAttribute("UTF-8");
+        charset.setValue("UTF-8");
         HtmlTextInput address2 = page.getElementByName("_.address");
-        address2.setValueAttribute("admin@example2.com");
+        address2.setValue("admin@example2.com");
         HtmlTextInput smtpServer2 = page.getElementByName("_.smtpHost");
-        smtpServer2.setValueAttribute("smtp.example2.com");
+        smtpServer2.setValue("smtp.example2.com");
         HtmlTextInput smtpPort2 = page.getElementByName("_.smtpPort");
-        smtpPort2.setValueAttribute("2626");
+        smtpPort2.setValue("2626");
         HtmlTextInput smtpUsername2 = page.getElementByName("_.smtpUsername");
-        smtpUsername2.setValueAttribute("admin2");
+        smtpUsername2.setValue("admin2");
         HtmlPasswordInput smtpPassword2 = page.getElementByName("_.smtpPassword");
-        smtpPassword2.setValueAttribute("honeycomb2");
+        smtpPassword2.setValue("honeycomb2");
         HtmlCheckBoxInput smtpUseSsl2 = page.getElementByName("_.useSsl");
         smtpUseSsl2.click();
         HtmlTextArea advProperties2 = page.getElementByName("_.advProperties");
@@ -644,24 +644,24 @@ public class ExtendedEmailPublisherDescriptorTest {
         HtmlSelect defaultContentType = page.getElementByName("ext_mailer_default_content_type");
         defaultContentType.setSelectedAttribute("text/html", true);
         HtmlTextInput listId = page.getElementByName("ext_mailer_list_id");
-        listId.setValueAttribute("<list.example.com>");
+        listId.setValue("<list.example.com>");
         HtmlCheckBoxInput addPrecedenceBulk =
                 page.getElementByName("ext_mailer_add_precedence_bulk");
         addPrecedenceBulk.click();
         HtmlTextInput defaultRecipients = page.getElementByName("ext_mailer_default_recipients");
-        defaultRecipients.setValueAttribute("default@example.com");
+        defaultRecipients.setValue("default@example.com");
         HtmlTextInput defaultReplyto = page.getElementByName("ext_mailer_default_replyto");
-        defaultReplyto.setValueAttribute("noreply@example.com");
+        defaultReplyto.setValue("noreply@example.com");
         HtmlTextInput emergencyReroute = page.getElementByName("ext_mailer_emergency_reroute");
-        emergencyReroute.setValueAttribute("emergency@example.com");
+        emergencyReroute.setValue("emergency@example.com");
         HtmlTextInput allowedDomains = page.getElementByName("ext_mailer_allowed_domains");
-        allowedDomains.setValueAttribute("@example.com");
+        allowedDomains.setValue("@example.com");
         HtmlTextInput excludedCommitters = page.getElementByName("ext_mailer_excluded_committers");
-        excludedCommitters.setValueAttribute("excluded@example.com");
+        excludedCommitters.setValue("excluded@example.com");
         HtmlTextInput defaultSubject = page.getElementByName("ext_mailer_default_subject");
-        defaultSubject.setValueAttribute("$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS");
+        defaultSubject.setValue("$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS");
         HtmlTextInput maxAttachmentSize = page.getElementByName("ext_mailer_max_attachment_size");
-        maxAttachmentSize.setValueAttribute("42");
+        maxAttachmentSize.setValue("42");
         HtmlTextArea defaultBody = page.getElementByName("ext_mailer_default_body");
         defaultBody.setText("$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS");
         HtmlTextArea defaultPresendScript =
@@ -671,7 +671,7 @@ public class ExtendedEmailPublisherDescriptorTest {
                 page.getElementByName("ext_mailer_default_postsend_script");
         defaultPostsendScript.setText("build.result.toString().equals('FAILURE')");
         HtmlTextInput defaultClasspath = page.getElementByName("ext_mailer_default_classpath");
-        defaultClasspath.setValueAttribute("classes");
+        defaultClasspath.setValue("classes");
         HtmlCheckBoxInput debugMode = page.getElementByName("ext_mailer_debug_mode");
         debugMode.click();
         HtmlCheckBoxInput requireAdminForTemplateTesting =
@@ -820,19 +820,19 @@ public class ExtendedEmailPublisherDescriptorTest {
         WebClientUtil.waitForJSExec(page.getWebClient());
 
         HtmlTextInput address = page.getElementByName("_.adminAddress");
-        address.setValueAttribute("admin@example.com");
+        address.setValue("admin@example.com");
         List<DomElement> smtpServers = page.getElementsByName("_.smtpHost");
         HtmlTextInput smtpServer = (HtmlTextInput) smtpServers.get(0);
-        smtpServer.setValueAttribute("smtp.example.com");
+        smtpServer.setValue("smtp.example.com");
         List<DomElement> smtpPorts = page.getElementsByName("_.smtpPort");
         HtmlNumberInput smtpPort = (HtmlNumberInput) smtpPorts.get(0);
-        smtpPort.setValueAttribute("2525");
+        smtpPort.setValue("2525");
         List<DomElement> smtpUsernames = page.getElementsByName("_.smtpUsername");
         HtmlTextInput smtpUsername = (HtmlTextInput) smtpUsernames.get(0);
-        smtpUsername.setValueAttribute("admin");
+        smtpUsername.setValue("admin");
         List<DomElement> smtpPasswords = page.getElementsByName("_.smtpPassword");
         HtmlTextInput smtpPassword = (HtmlTextInput) smtpPasswords.get(0);
-        smtpPassword.setValueAttribute("honeycomb");
+        smtpPassword.setValue("honeycomb");
         List<DomElement> smtpUseSsls = page.getElementsByName("_.useSsl");
         HtmlCheckBoxInput smtpUseSsl = (HtmlCheckBoxInput) smtpUseSsls.get(0);
         smtpUseSsl.click();
@@ -840,20 +840,20 @@ public class ExtendedEmailPublisherDescriptorTest {
         HtmlTextArea advProperties = (HtmlTextArea) advPropertiesElements.get(0);
         advProperties.setText("mail.smtp.ssl.trust=example.com");
         HtmlTextInput defaultSuffix = page.getElementByName("_.defaultSuffix");
-        defaultSuffix.setValueAttribute("@example.com");
+        defaultSuffix.setValue("@example.com");
         HtmlTextInput charset = page.getElementByName("_.charset");
-        charset.setValueAttribute("UTF-8");
+        charset.setValue("UTF-8");
         List<DomElement> addresses = page.getElementsByName("_.address");
         HtmlTextInput address2 = (HtmlTextInput) addresses.get(1);
-        address2.setValueAttribute("admin@example2.com");
+        address2.setValue("admin@example2.com");
         HtmlTextInput smtpServer2 = (HtmlTextInput) smtpServers.get(1);
-        smtpServer2.setValueAttribute("smtp.example2.com");
+        smtpServer2.setValue("smtp.example2.com");
         HtmlNumberInput smtpPort2 = (HtmlNumberInput) smtpPorts.get(1);
-        smtpPort2.setValueAttribute("2626");
+        smtpPort2.setValue("2626");
         HtmlTextInput smtpUsername2 = (HtmlTextInput) smtpUsernames.get(1);
-        smtpUsername2.setValueAttribute("admin2");
+        smtpUsername2.setValue("admin2");
         HtmlTextInput smtpPassword2 = (HtmlTextInput) smtpPasswords.get(1);
-        smtpPassword2.setValueAttribute("honeycomb2");
+        smtpPassword2.setValue("honeycomb2");
         HtmlCheckBoxInput smtpUseSsl2 = (HtmlCheckBoxInput) smtpUseSsls.get(1);
         smtpUseSsl2.click();
         HtmlTextArea advProperties2 = (HtmlTextArea) advPropertiesElements.get(1);
@@ -861,23 +861,23 @@ public class ExtendedEmailPublisherDescriptorTest {
         HtmlSelect defaultContentType = page.getElementByName("_.defaultContentType");
         defaultContentType.setSelectedAttribute("text/html", true);
         HtmlTextInput listId = page.getElementByName("_.listId");
-        listId.setValueAttribute("<list.example.com>");
+        listId.setValue("<list.example.com>");
         HtmlCheckBoxInput addPrecedenceBulk = page.getElementByName("_.precedenceBulk");
         addPrecedenceBulk.click();
         HtmlTextInput defaultRecipients = page.getElementByName("_.defaultRecipients");
-        defaultRecipients.setValueAttribute("default@example.com");
+        defaultRecipients.setValue("default@example.com");
         HtmlTextInput defaultReplyto = page.getElementByName("_.defaultReplyTo");
-        defaultReplyto.setValueAttribute("noreply@example.com");
+        defaultReplyto.setValue("noreply@example.com");
         HtmlTextInput emergencyReroute = page.getElementByName("_.emergencyReroute");
-        emergencyReroute.setValueAttribute("emergency@example.com");
+        emergencyReroute.setValue("emergency@example.com");
         HtmlTextInput allowedDomains = page.getElementByName("_.allowedDomains");
-        allowedDomains.setValueAttribute("@example.com");
+        allowedDomains.setValue("@example.com");
         HtmlTextInput excludedCommitters = page.getElementByName("_.excludedCommitters");
-        excludedCommitters.setValueAttribute("excluded@example.com");
+        excludedCommitters.setValue("excluded@example.com");
         HtmlTextInput defaultSubject = page.getElementByName("_.defaultSubject");
-        defaultSubject.setValueAttribute("$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS");
+        defaultSubject.setValue("$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS");
         HtmlNumberInput maxAttachmentSize = page.getElementByName("_.maxAttachmentSizeMb");
-        maxAttachmentSize.setValueAttribute("42");
+        maxAttachmentSize.setValue("42");
         HtmlTextArea defaultBody = page.getElementByName("_.defaultBody");
         defaultBody.setText("$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS");
         HtmlTextArea defaultPresendScript = page.getElementByName("_.defaultPresendScript");
@@ -885,7 +885,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         HtmlTextArea defaultPostsendScript = page.getElementByName("_.defaultPostsendScript");
         defaultPostsendScript.setText("build.result.toString().equals('FAILURE')");
         HtmlTextInput defaultClasspath = page.getElementByName("_.path");
-        defaultClasspath.setValueAttribute("classes");
+        defaultClasspath.setValue("classes");
         HtmlCheckBoxInput debugMode = page.getElementByName("_.debugMode");
         debugMode.click();
         HtmlCheckBoxInput requireAdminForTemplateTesting =
@@ -1043,13 +1043,13 @@ public class ExtendedEmailPublisherDescriptorTest {
         WebClientUtil.waitForJSExec(page.getWebClient());
 
         HtmlTextInput address = page.getElementByName("_.adminAddress");
-        address.setValueAttribute("admin@example.com");
+        address.setValue("admin@example.com");
         List<DomElement> smtpServers = page.getElementsByName("_.smtpHost");
         HtmlTextInput smtpServer = (HtmlTextInput) smtpServers.get(0);
-        smtpServer.setValueAttribute("smtp.example.com");
+        smtpServer.setValue("smtp.example.com");
         List<DomElement> smtpPorts = page.getElementsByName("_.smtpPort");
         HtmlNumberInput smtpPort = (HtmlNumberInput) smtpPorts.get(0);
-        smtpPort.setValueAttribute("2525");
+        smtpPort.setValue("2525");
         List<DomElement> credentialsIds = page.getElementsByName("_.credentialsId");
         HtmlSelect credentialsId = (HtmlSelect)credentialsIds.get(0);
         List<HtmlOption> options = credentialsId.getOptions();
@@ -1061,16 +1061,16 @@ public class ExtendedEmailPublisherDescriptorTest {
         HtmlTextArea advProperties = (HtmlTextArea) advPropertiesElements.get(0);
         advProperties.setText("mail.smtp.ssl.trust=example.com");
         HtmlTextInput defaultSuffix = page.getElementByName("_.defaultSuffix");
-        defaultSuffix.setValueAttribute("@example.com");
+        defaultSuffix.setValue("@example.com");
         HtmlTextInput charset = page.getElementByName("_.charset");
-        charset.setValueAttribute("UTF-8");
+        charset.setValue("UTF-8");
         List<DomElement> addresses = page.getElementsByName("_.address");
         HtmlTextInput address2 = (HtmlTextInput) addresses.get(1);
-        address2.setValueAttribute("admin@example2.com");
+        address2.setValue("admin@example2.com");
         HtmlTextInput smtpServer2 = (HtmlTextInput) smtpServers.get(1);
-        smtpServer2.setValueAttribute("smtp.example2.com");
+        smtpServer2.setValue("smtp.example2.com");
         HtmlNumberInput smtpPort2 = (HtmlNumberInput) smtpPorts.get(1);
-        smtpPort2.setValueAttribute("2626");
+        smtpPort2.setValue("2626");
         HtmlSelect credentialId2 = (HtmlSelect)credentialsIds.get(1);
         credentialId2.setSelectedIndex(2);
         HtmlCheckBoxInput smtpUseSsl2 = (HtmlCheckBoxInput) smtpUseSsls.get(1);
@@ -1080,23 +1080,23 @@ public class ExtendedEmailPublisherDescriptorTest {
         HtmlSelect defaultContentType = page.getElementByName("_.defaultContentType");
         defaultContentType.setSelectedAttribute("text/html", true);
         HtmlTextInput listId = page.getElementByName("_.listId");
-        listId.setValueAttribute("<list.example.com>");
+        listId.setValue("<list.example.com>");
         HtmlCheckBoxInput addPrecedenceBulk = page.getElementByName("_.precedenceBulk");
         addPrecedenceBulk.click();
         HtmlTextInput defaultRecipients = page.getElementByName("_.defaultRecipients");
-        defaultRecipients.setValueAttribute("default@example.com");
+        defaultRecipients.setValue("default@example.com");
         HtmlTextInput defaultReplyto = page.getElementByName("_.defaultReplyTo");
-        defaultReplyto.setValueAttribute("noreply@example.com");
+        defaultReplyto.setValue("noreply@example.com");
         HtmlTextInput emergencyReroute = page.getElementByName("_.emergencyReroute");
-        emergencyReroute.setValueAttribute("emergency@example.com");
+        emergencyReroute.setValue("emergency@example.com");
         HtmlTextInput allowedDomains = page.getElementByName("_.allowedDomains");
-        allowedDomains.setValueAttribute("@example.com");
+        allowedDomains.setValue("@example.com");
         HtmlTextInput excludedCommitters = page.getElementByName("_.excludedCommitters");
-        excludedCommitters.setValueAttribute("excluded@example.com");
+        excludedCommitters.setValue("excluded@example.com");
         HtmlTextInput defaultSubject = page.getElementByName("_.defaultSubject");
-        defaultSubject.setValueAttribute("$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS");
+        defaultSubject.setValue("$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS");
         HtmlNumberInput maxAttachmentSize = page.getElementByName("_.maxAttachmentSizeMb");
-        maxAttachmentSize.setValueAttribute("42");
+        maxAttachmentSize.setValue("42");
         HtmlTextArea defaultBody = page.getElementByName("_.defaultBody");
         defaultBody.setText("$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS");
         HtmlTextArea defaultPresendScript = page.getElementByName("_.defaultPresendScript");
@@ -1104,7 +1104,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         HtmlTextArea defaultPostsendScript = page.getElementByName("_.defaultPostsendScript");
         defaultPostsendScript.setText("build.result.toString().equals('FAILURE')");
         HtmlTextInput defaultClasspath = page.getElementByName("_.path");
-        defaultClasspath.setValueAttribute("classes");
+        defaultClasspath.setValue("classes");
         HtmlCheckBoxInput debugMode = page.getElementByName("_.debugMode");
         debugMode.click();
         HtmlCheckBoxInput requireAdminForTemplateTesting =
