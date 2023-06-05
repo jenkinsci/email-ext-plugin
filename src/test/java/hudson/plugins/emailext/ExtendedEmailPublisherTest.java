@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
@@ -1699,6 +1700,90 @@ public class ExtendedEmailPublisherTest {
         assertEquals(1, from.length);
 
         assertEquals("custom@example.com", from[0].toString());
+    }
+
+    @Test
+    public void testLowerThanLimit() throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("test");
+        prj.getPublishersList().add(publisher);
+
+        publisher.recipientList = "mickey@disney.com";
+        for(int i = 0; i < 90; i++) {
+            publisher.configuredTriggers.add(new SuccessTrigger(
+                    recProviders,
+                    "$DEFAULT_RECIPIENTS",
+                    "$DEFAULT_REPLYTO",
+                    "$DEFAULT_SUBJECT",
+                    "$DEFAULT_CONTENT",
+                    "",
+                    0,
+                    "project"));
+        }
+
+        for (EmailTrigger trigger : publisher.configuredTriggers) {
+            trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
+        }
+
+        FreeStyleBuild build = prj.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(90, Mailbox.get("mickey@disney.com").size());
+    }
+
+    @Test
+    public void testEqualsLimit() throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("test2");
+        prj.getPublishersList().add(publisher);
+
+        publisher.recipientList = "mickey@disney.com";
+        for(int i = 0; i < EmailThrottler.THROTTLING_LIMIT; i++) {
+            publisher.configuredTriggers.add(new SuccessTrigger(
+                    recProviders,
+                    "$DEFAULT_RECIPIENTS",
+                    "$DEFAULT_REPLYTO",
+                    "$DEFAULT_SUBJECT",
+                    "$DEFAULT_CONTENT",
+                    "",
+                    0,
+                    "project"));
+        }
+
+        for (EmailTrigger trigger : publisher.configuredTriggers) {
+            trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
+        }
+
+        FreeStyleBuild build = prj.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(EmailThrottler.THROTTLING_LIMIT, Mailbox.get("mickey@disney.com").size());
+    }
+
+    @Test
+    public void testOverLimit() throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("test3");
+        prj.getPublishersList().add(publisher);
+
+        publisher.recipientList = "mickey@disney.com";
+        for(int i = 0; i < 120; i++) {
+            publisher.configuredTriggers.add(new SuccessTrigger(
+                    recProviders,
+                    "$DEFAULT_RECIPIENTS",
+                    "$DEFAULT_REPLYTO",
+                    "$DEFAULT_SUBJECT",
+                    "$DEFAULT_CONTENT",
+                    "",
+                    0,
+                    "project"));
+        }
+
+        for (EmailTrigger trigger : publisher.configuredTriggers) {
+            trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
+        }
+
+        FreeStyleBuild build = prj.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(EmailThrottler.THROTTLING_LIMIT, Mailbox.get("mickey@disney.com").size());
     }
 
     /**
