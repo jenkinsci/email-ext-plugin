@@ -114,7 +114,7 @@ public class ExtendedEmailPublisherDescriptorTest {
         assertEquals(
                 "Plain text should be selected by default",
                 "text/plain",
-                contentType.getSelectedOptions().get(0).getValue());
+                contentType.getSelectedOptions().get(0).getValueAttribute());
 
         HtmlCheckBoxInput precedenceBulk = page.getElementByName("_.precedenceBulk");
         assertNotNull("Precedence Bulk should be present", precedenceBulk);
