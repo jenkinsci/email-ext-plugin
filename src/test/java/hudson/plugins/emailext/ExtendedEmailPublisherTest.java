@@ -16,6 +16,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Launcher;
+import hudson.matrix.MatrixBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Cause.UserIdCause;
@@ -1696,6 +1697,98 @@ public class ExtendedEmailPublisherTest {
         assertEquals(1, from.length);
 
         assertEquals("custom@example.com", from[0].toString());
+    }
+
+    @Test
+    public void testLowerThanLimit() throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("testLowerThanLimit");
+        prj.getPublishersList().add(publisher);
+
+        publisher.recipientList = "mickey@disney.com";
+        for(int i = 0; i < 90; i++) {
+            publisher.configuredTriggers.add(new SuccessTrigger(
+                    recProviders,
+                    "$DEFAULT_RECIPIENTS",
+                    "$DEFAULT_REPLYTO",
+                    "$DEFAULT_SUBJECT",
+                    "$DEFAULT_CONTENT",
+                    "",
+                    0,
+                    "project"));
+        }
+
+        for (EmailTrigger trigger : publisher.configuredTriggers) {
+            trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
+        }
+
+        FreeStyleBuild build = prj.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(90, Mailbox.get("mickey@disney.com").size());
+    }
+
+    @Test
+    public void testEqualsLimit() throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("testEqualsLimit");
+        prj.getPublishersList().add(publisher);
+
+        publisher.recipientList = "mickey@disney.com";
+        for(int i = 0; i < 100; i++) {
+            publisher.configuredTriggers.add(new SuccessTrigger(
+                    recProviders,
+                    "$DEFAULT_RECIPIENTS",
+                    "$DEFAULT_REPLYTO",
+                    "$DEFAULT_SUBJECT",
+                    "$DEFAULT_CONTENT",
+                    "",
+                    0,
+                    "project"));
+        }
+
+        for (EmailTrigger trigger : publisher.configuredTriggers) {
+            trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
+        }
+
+        FreeStyleBuild build = prj.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(100, Mailbox.get("mickey@disney.com").size());
+        assertThat(
+                "We should see limit alert in logs.",
+                build.getLog(100),
+                hasItems("Could not send email. Throttling limit exceeded."));
+    }
+
+    @Test
+    public void testOverLimit() throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("testOverLimit");
+        prj.getPublishersList().add(publisher);
+
+        publisher.recipientList = "mickey@disney.com";
+        for(int i = 0; i < 120; i++) {
+            publisher.configuredTriggers.add(new SuccessTrigger(
+                    recProviders,
+                    "$DEFAULT_RECIPIENTS",
+                    "$DEFAULT_REPLYTO",
+                    "$DEFAULT_SUBJECT",
+                    "$DEFAULT_CONTENT",
+                    "",
+                    0,
+                    "project"));
+        }
+
+        for (EmailTrigger trigger : publisher.configuredTriggers) {
+            trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
+        }
+
+        FreeStyleBuild build = prj.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(120, Mailbox.get("mickey@disney.com").size());
+        assertThat(
+                "We should see limit alert in logs.",
+                build.getLog(100),
+                hasItems("Could not send email. Throttling limit exceeded."));
     }
 
     /**
