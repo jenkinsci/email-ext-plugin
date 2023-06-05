@@ -16,7 +16,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTextArea;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Launcher;
-import hudson.matrix.MatrixBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Cause.UserIdCause;
@@ -31,7 +30,17 @@ import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
-import hudson.plugins.emailext.plugins.trigger.*;
+import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
+import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
+import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
+import hudson.plugins.emailext.plugins.trigger.FirstFailureTrigger;
+import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
+import hudson.plugins.emailext.plugins.trigger.FixedUnhealthyTrigger;
+import hudson.plugins.emailext.plugins.trigger.NotBuiltTrigger;
+import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
+import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
+import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
+import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.security.AuthorizationStrategy;
 import hudson.security.SecurityRealm;
 import hudson.tasks.Builder;
@@ -49,7 +58,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
 
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
@@ -1719,14 +1727,14 @@ public class ExtendedEmailPublisherTest {
 
         assertEquals(90, Mailbox.get("mickey@disney.com").size());
     }
-//
+
     @Test
     public void testEqualsLimit() throws Exception {
         FreeStyleProject prj = j.createFreeStyleProject("test2");
         prj.getPublishersList().add(publisher);
 
         publisher.recipientList = "mickey@disney.com";
-        for(int i = 0; i < 100; i++) {
+        for(int i = 0; i < EmailThrottler.THROTTLING_LIMIT; i++) {
             publisher.configuredTriggers.add(new SuccessTrigger(
                     recProviders,
                     "$DEFAULT_RECIPIENTS",
@@ -1745,9 +1753,9 @@ public class ExtendedEmailPublisherTest {
         FreeStyleBuild build = prj.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(build);
 
-        assertEquals(100, Mailbox.get("mickey@disney.com").size());
+        assertEquals(EmailThrottler.THROTTLING_LIMIT, Mailbox.get("mickey@disney.com").size());
     }
-//
+
     @Test
     public void testOverLimit() throws Exception {
         FreeStyleProject prj = j.createFreeStyleProject("test3");
@@ -1773,10 +1781,8 @@ public class ExtendedEmailPublisherTest {
         FreeStyleBuild build = prj.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(build);
 
-        assertEquals(100, Mailbox.get("mickey@disney.com").size());
+        assertEquals(EmailThrottler.THROTTLING_LIMIT, Mailbox.get("mickey@disney.com").size());
     }
-
-
 
     /**
      * Similar to {@link SleepBuilder} but only on the first build. (Removing
