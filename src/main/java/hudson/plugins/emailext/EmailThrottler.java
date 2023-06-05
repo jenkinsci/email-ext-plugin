@@ -4,7 +4,7 @@ public class EmailThrottler {
     private static EmailThrottler instance;
     private int emailCount;
     private long lastResetTime;
-    private static final int THROTTLING_LIMIT = 100; // Set your limit
+    public static final int THROTTLING_LIMIT = 100; // Set your limit
     private static final long THROTTLING_PERIOD = 60 * 60 * 1000; // Set your period (in milliseconds)
 
     public EmailThrottler() {
@@ -31,7 +31,7 @@ public class EmailThrottler {
         emailCount++;
     }
 
-    private synchronized void resetEmailCount() {
+    public synchronized void resetEmailCount() {
         emailCount = 0;
         lastResetTime = System.currentTimeMillis();
     }

@@ -32,6 +32,7 @@ import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
+import hudson.plugins.emailext.plugins.trigger.BuildingTrigger;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.FirstFailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
@@ -39,6 +40,7 @@ import hudson.plugins.emailext.plugins.trigger.FixedUnhealthyTrigger;
 import hudson.plugins.emailext.plugins.trigger.NotBuiltTrigger;
 import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
+import hudson.plugins.emailext.plugins.trigger.SecondFailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.security.AuthorizationStrategy;
@@ -135,6 +137,7 @@ public class ExtendedEmailPublisherTest {
         ScriptApproval approval = ScriptApproval.get();
         approval.clearApprovedClasspathEntries();
         approval.clearApprovedScripts();
+        EmailThrottler.getInstance().resetEmailCount();
     }
 
     private void setUpSecurity() {
@@ -1739,5 +1742,209 @@ public class ExtendedEmailPublisherTest {
         assertNotNull(headers);
         assertEquals(1, headers.length);
         return headers[0];
+    }
+
+    @Test
+    public void testAbortedTriggerShouldNotBypassThrottling() throws Exception {
+        for (int i = 1; i <= EmailThrottler.THROTTLING_LIMIT; i++) {
+            EmailThrottler.getInstance().incrementEmailCount();
+        }
+        assertTrue(EmailThrottler.getInstance().isThrottlingLimitExceeded());
+
+        project.getBuildersList().add(new MockBuilder(Result.ABORTED));
+        BuildingTrigger trigger = new BuildingTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
+        addEmailType(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
+
+        FreeStyleBuild build = project.scheduleBuild2(0).get();
+        j.assertBuildStatus(Result.ABORTED, build);
+
+        assertThat(
+                "Email should not have been triggered, so we should not see it in the logs.",
+                build.getLog(100),
+                not(hasItems("Email was triggered for: " + AbortedTrigger.TRIGGER_NAME)));
+        assertEquals(0, Mailbox.get("ashlux@gmail.com").size());
+    }
+
+    @Test
+    public void testNotBuiltTriggerShouldBypassThrottling() throws Exception {
+        for (int i = 1; i <= EmailThrottler.THROTTLING_LIMIT; i++) {
+            EmailThrottler.getInstance().incrementEmailCount();
+        }
+        assertTrue(EmailThrottler.getInstance().isThrottlingLimitExceeded());
+
+        project.getBuildersList().add(new MockBuilder(Result.NOT_BUILT));
+        NotBuiltTrigger trigger = new NotBuiltTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
+        addEmailType(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
+
+        FreeStyleBuild build = project.scheduleBuild2(0).get();
+        j.assertBuildStatus(Result.NOT_BUILT, build);
+
+        assertThat(
+                "Email should have been triggered, so we should see it in the logs.",
+                build.getLog(100),
+                hasItems("Email was triggered for: " + NotBuiltTrigger.TRIGGER_NAME));
+        assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
+    }
+
+    @Test
+    public void testFirstFailureTriggerShouldBypassThrottling() throws Exception {
+        for (int i = 1; i <= EmailThrottler.THROTTLING_LIMIT; i++) {
+            EmailThrottler.getInstance().incrementEmailCount();
+        }
+        assertTrue(EmailThrottler.getInstance().isThrottlingLimitExceeded());
+
+        project.getBuildersList().add(new FailureBuilder());
+        FirstFailureTrigger trigger = new FirstFailureTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
+        addEmailType(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
+
+        FreeStyleBuild build = project.scheduleBuild2(0).get();
+        j.assertBuildStatus(Result.FAILURE, build);
+
+        FreeStyleBuild build2 = project.scheduleBuild2(1).get();
+        j.assertBuildStatus(Result.FAILURE, build2);
+
+        assertThat(
+                "Email should have been triggered for build 0, so we should see it in the logs.",
+                build.getLog(100),
+                hasItems("Email was triggered for: " + FirstFailureTrigger.TRIGGER_NAME));
+
+        assertThat(
+                "Email should NOT have been triggered for build 1, so we shouldn't see it in the logs.",
+                build2.getLog(100),
+                not(hasItems("Email was triggered for: " + FailureTrigger.TRIGGER_NAME)));
+        assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
+    }
+
+    @Test
+    public void testSecondFailureTriggerShouldBypassThrottling() throws Exception {
+        for (int i = 1; i <= EmailThrottler.THROTTLING_LIMIT; i++) {
+            EmailThrottler.getInstance().incrementEmailCount();
+        }
+        assertTrue(EmailThrottler.getInstance().isThrottlingLimitExceeded());
+
+        project.getBuildersList().add(new FailureBuilder());
+        SecondFailureTrigger trigger = new SecondFailureTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
+        addEmailType(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
+
+        FreeStyleBuild build = project.scheduleBuild2(0).get();
+        j.assertBuildStatus(Result.FAILURE, build);
+
+        FreeStyleBuild build2 = project.scheduleBuild2(1).get();
+        j.assertBuildStatus(Result.FAILURE, build2);
+
+        assertThat(
+                "Email should NOT have been triggered for build 0, so we shouldn't see it in the logs.",
+                build.getLog(100),
+                not(hasItems("Email was triggered for: " + SecondFailureTrigger.TRIGGER_NAME)));
+
+        assertThat(
+                "Email should have been triggered for build 1, so we should see it in the logs.",
+                build2.getLog(100),
+                hasItems("Email was triggered for: " + SecondFailureTrigger.TRIGGER_NAME));
+        assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
+    }
+
+
+    @Test
+    public void testRegressionTriggerShouldBypassThrottling() throws Exception {
+        for (int i = 1; i <= EmailThrottler.THROTTLING_LIMIT; i++) {
+            EmailThrottler.getInstance().incrementEmailCount();
+        }
+        assertTrue(EmailThrottler.getInstance().isThrottlingLimitExceeded());
+
+        project.getBuildersList().add(new FailureBuilder());
+        RegressionTrigger trigger = new RegressionTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
+        addEmailType(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
+
+        FreeStyleBuild build = project.scheduleBuild2(0).get();
+        j.assertBuildStatus(Result.FAILURE, build);
+
+        assertThat(
+                "Email should have been triggered, so we should see it in the logs.",
+                build.getLog(100),
+                hasItems("Email was triggered for: " + RegressionTrigger.TRIGGER_NAME));
+        assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
+    }
+
+    @Test
+    public void testStillFailingTriggerShouldBypassThrottling() throws Exception {
+        for (int i = 1; i <= EmailThrottler.THROTTLING_LIMIT; i++) {
+            EmailThrottler.getInstance().incrementEmailCount();
+        }
+        assertTrue(EmailThrottler.getInstance().isThrottlingLimitExceeded());
+
+        project.getBuildersList().add(new FailureBuilder());
+        StillFailingTrigger trigger = new StillFailingTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
+        addEmailType(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
+
+        // first failure
+        FreeStyleBuild build1 = project.scheduleBuild2(0).get();
+        j.assertBuildStatus(Result.FAILURE, build1);
+        // second failure
+        FreeStyleBuild build2 = project.scheduleBuild2(0).get();
+        j.assertBuildStatus(Result.FAILURE, build2);
+
+        assertThat(
+                "Email should have been triggered, so we should see it in the logs.",
+                build2.getLog(100),
+                hasItems("Email was triggered for: " + StillFailingTrigger.TRIGGER_NAME));
+        assertEquals(
+                "We should only have one email since the first failure doesn't count as 'still failing'.",
+                1,
+                Mailbox.get("ashlux@gmail.com").size());
     }
 }
