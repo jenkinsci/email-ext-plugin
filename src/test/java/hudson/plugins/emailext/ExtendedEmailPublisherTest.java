@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
@@ -1708,7 +1707,7 @@ public class ExtendedEmailPublisherTest {
         prj.getPublishersList().add(publisher);
 
         publisher.recipientList = "mickey@disney.com";
-        for(int i = 0; i < 90; i++) {
+        for (int i = 0; i < 90; i++) {
             publisher.configuredTriggers.add(new SuccessTrigger(
                     recProviders,
                     "$DEFAULT_RECIPIENTS",
@@ -1736,7 +1735,7 @@ public class ExtendedEmailPublisherTest {
         prj.getPublishersList().add(publisher);
 
         publisher.recipientList = "mickey@disney.com";
-        for(int i = 0; i < EmailThrottler.THROTTLING_LIMIT; i++) {
+        for (int i = 0; i < EmailThrottler.THROTTLING_LIMIT; i++) {
             publisher.configuredTriggers.add(new SuccessTrigger(
                     recProviders,
                     "$DEFAULT_RECIPIENTS",
@@ -1755,7 +1754,9 @@ public class ExtendedEmailPublisherTest {
         FreeStyleBuild build = prj.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(build);
 
-        assertEquals(EmailThrottler.THROTTLING_LIMIT, Mailbox.get("mickey@disney.com").size());
+        assertEquals(
+                EmailThrottler.THROTTLING_LIMIT,
+                Mailbox.get("mickey@disney.com").size());
     }
 
     @Test
@@ -1764,7 +1765,7 @@ public class ExtendedEmailPublisherTest {
         prj.getPublishersList().add(publisher);
 
         publisher.recipientList = "mickey@disney.com";
-        for(int i = 0; i < 120; i++) {
+        for (int i = 0; i < 120; i++) {
             publisher.configuredTriggers.add(new SuccessTrigger(
                     recProviders,
                     "$DEFAULT_RECIPIENTS",
@@ -1783,7 +1784,9 @@ public class ExtendedEmailPublisherTest {
         FreeStyleBuild build = prj.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(build);
 
-        assertEquals(EmailThrottler.THROTTLING_LIMIT, Mailbox.get("mickey@disney.com").size());
+        assertEquals(
+                EmailThrottler.THROTTLING_LIMIT,
+                Mailbox.get("mickey@disney.com").size());
     }
 
     /**
@@ -1964,7 +1967,6 @@ public class ExtendedEmailPublisherTest {
                 hasItems("Email was triggered for: " + SecondFailureTrigger.TRIGGER_NAME));
         assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
     }
-
 
     @Test
     public void testRegressionTriggerShouldBypassThrottling() throws Exception {
