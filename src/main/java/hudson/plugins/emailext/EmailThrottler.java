@@ -5,11 +5,11 @@ public class EmailThrottler {
     private static EmailThrottler instance;
     private int emailCount;
     private long lastResetTime;
-    private static final long THROTTLING_PERIOD = 60 * 60 * 1000; // Set your period (in milliseconds)
+    private static final long THROTTLING_PERIOD = 60 * 60 * 1000 * 1000000L; // Set your period (in nanoseconds)
 
     public EmailThrottler() {
         this.emailCount = 0;
-        this.lastResetTime = System.currentTimeMillis();
+        this.lastResetTime = System.nanoTime();
     }
 
     public static synchronized EmailThrottler getInstance() {
@@ -20,7 +20,7 @@ public class EmailThrottler {
     }
 
     public synchronized boolean isThrottlingLimitExceeded() {
-        long currentTime = System.currentTimeMillis();
+        long currentTime = System.nanoTime();
         if (currentTime - lastResetTime > THROTTLING_PERIOD) {
             resetEmailCount();
         }
@@ -33,6 +33,6 @@ public class EmailThrottler {
 
     public synchronized void resetEmailCount() {
         emailCount = 0;
-        lastResetTime = System.currentTimeMillis();
+        lastResetTime = System.nanoTime();
     }
 }
