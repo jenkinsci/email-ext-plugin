@@ -30,7 +30,19 @@ import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
-import hudson.plugins.emailext.plugins.trigger.*;
+import hudson.plugins.emailext.plugins.trigger.AbortedTrigger;
+import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
+import hudson.plugins.emailext.plugins.trigger.BuildingTrigger;
+import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
+import hudson.plugins.emailext.plugins.trigger.FirstFailureTrigger;
+import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
+import hudson.plugins.emailext.plugins.trigger.FixedUnhealthyTrigger;
+import hudson.plugins.emailext.plugins.trigger.NotBuiltTrigger;
+import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
+import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
+import hudson.plugins.emailext.plugins.trigger.SecondFailureTrigger;
+import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
+import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.security.AuthorizationStrategy;
 import hudson.security.SecurityRealm;
 import hudson.tasks.Builder;
@@ -1734,7 +1746,7 @@ public class ExtendedEmailPublisherTest {
 
     @Test
     public void testAbortedTriggerShouldNotBypassThrottling() throws Exception {
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= EmailThrottler.THROTTLING_LIMIT; i++) {
             EmailThrottler.getInstance().incrementEmailCount();
         }
         assertTrue(EmailThrottler.getInstance().isThrottlingLimitExceeded());
@@ -1764,7 +1776,7 @@ public class ExtendedEmailPublisherTest {
 
     @Test
     public void testNotBuiltTriggerShouldBypassThrottling() throws Exception {
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= EmailThrottler.THROTTLING_LIMIT; i++) {
             EmailThrottler.getInstance().incrementEmailCount();
         }
         assertTrue(EmailThrottler.getInstance().isThrottlingLimitExceeded());
@@ -1794,7 +1806,7 @@ public class ExtendedEmailPublisherTest {
 
     @Test
     public void testFirstFailureTriggerShouldBypassThrottling() throws Exception {
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= EmailThrottler.THROTTLING_LIMIT; i++) {
             EmailThrottler.getInstance().incrementEmailCount();
         }
         assertTrue(EmailThrottler.getInstance().isThrottlingLimitExceeded());
@@ -1832,7 +1844,7 @@ public class ExtendedEmailPublisherTest {
 
     @Test
     public void testSecondFailureTriggerShouldBypassThrottling() throws Exception {
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= EmailThrottler.THROTTLING_LIMIT; i++) {
             EmailThrottler.getInstance().incrementEmailCount();
         }
         assertTrue(EmailThrottler.getInstance().isThrottlingLimitExceeded());
@@ -1871,7 +1883,7 @@ public class ExtendedEmailPublisherTest {
 
     @Test
     public void testRegressionTriggerShouldBypassThrottling() throws Exception {
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= EmailThrottler.THROTTLING_LIMIT; i++) {
             EmailThrottler.getInstance().incrementEmailCount();
         }
         assertTrue(EmailThrottler.getInstance().isThrottlingLimitExceeded());
@@ -1901,7 +1913,7 @@ public class ExtendedEmailPublisherTest {
 
     @Test
     public void testStillFailingTriggerShouldBypassThrottling() throws Exception {
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= EmailThrottler.THROTTLING_LIMIT; i++) {
             EmailThrottler.getInstance().incrementEmailCount();
         }
         assertTrue(EmailThrottler.getInstance().isThrottlingLimitExceeded());
