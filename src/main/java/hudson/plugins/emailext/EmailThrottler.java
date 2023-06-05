@@ -1,11 +1,10 @@
 package hudson.plugins.emailext;
 
 public class EmailThrottler {
-
-    public static final int THROTTLING_LIMIT = 100; // Set your limit
     private static EmailThrottler instance;
     private int emailCount;
     private long lastResetTime;
+    public static final int THROTTLING_LIMIT = 100; // Set your limit
     private static final long THROTTLING_PERIOD = 60 * 60 * 1000; // Set your period (in milliseconds)
 
     public EmailThrottler() {

@@ -187,7 +187,7 @@ public class ExtendedEmailPublisherTest {
         FreeStyleBuild build = project.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(build);
 
-        List<String> log = build.getLog(EmailThrottler.THROTTLING_LIMIT);
+        List<String> log = build.getLog(100);
         assertThat(
                 "No emails should have been trigger during pre-build or post-build.",
                 log,
@@ -213,7 +213,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should have been triggered, so we should see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 hasItems("Email was triggered for: " + PreBuildTrigger.TRIGGER_NAME));
         assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -243,7 +243,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should have been triggered, so we should see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 hasItems("Email was triggered for: Success"));
         assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -269,7 +269,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should not have been triggered, so we shouldn't see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 not(hasItems("Email was triggered for: " + SuccessTrigger.TRIGGER_NAME)));
         assertEquals(0, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -298,12 +298,12 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should have been triggered for build 0, so we should see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 hasItems("Email was triggered for: " + FirstFailureTrigger.TRIGGER_NAME));
 
         assertThat(
                 "Email should NOT have been triggered for build 1, so we shouldn't see it in the logs.",
-                build2.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build2.getLog(100),
                 not(hasItems("Email was triggered for: " + FailureTrigger.TRIGGER_NAME)));
         assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -329,7 +329,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should not have been triggered, so we shouldn't see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 not(hasItems("Email was triggered for: " + SuccessTrigger.TRIGGER_NAME)));
         assertEquals(
                 "No email should have been sent out since the build failed only once.",
@@ -362,7 +362,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should have been triggered, so we should see it in the logs.",
-                build2.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build2.getLog(100),
                 hasItems("Email was triggered for: " + FixedTrigger.TRIGGER_NAME));
         assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -399,7 +399,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should not have been triggered, so we shouldn't see it in the logs.",
-                build3.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build3.getLog(100),
                 not(hasItems("Email was triggered for: " + SuccessTrigger.TRIGGER_NAME)));
         assertEquals(
                 "No email should have been sent out since the prior build was aborted.",
@@ -428,7 +428,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should not have been triggered, so we shouldn't see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 not(hasItems("Email was triggered for: " + SuccessTrigger.TRIGGER_NAME)));
         assertEquals(
                 "No email should have been sent out since the build failed only once.",
@@ -461,7 +461,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should have been triggered, so we should see it in the logs.",
-                build2.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build2.getLog(100),
                 hasItems("Email was triggered for: " + FixedUnhealthyTrigger.TRIGGER_NAME));
         assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -498,7 +498,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should have been triggered, so we should see it in the logs.",
-                build3.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build3.getLog(100),
                 hasItems("Email was triggered for: " + FixedUnhealthyTrigger.TRIGGER_NAME));
         assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -522,7 +522,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should not have been triggered, so we should not see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 not(hasItems("Email was triggered for: " + StillFailingTrigger.TRIGGER_NAME)));
         assertEquals(0, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -549,7 +549,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should not have been triggered, so we should not see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 not(hasItems("Email was triggered for: " + StillFailingTrigger.TRIGGER_NAME)));
         assertEquals(0, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -580,7 +580,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should not have been triggered, so we should not see it in the logs.",
-                build2.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build2.getLog(100),
                 not(hasItems("Email was triggered for: " + StillFailingTrigger.TRIGGER_NAME)));
         assertEquals(0, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -610,7 +610,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should have been triggered, so we should see it in the logs.",
-                build2.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build2.getLog(100),
                 hasItems("Email was triggered for: " + StillFailingTrigger.TRIGGER_NAME));
         assertEquals(
                 "We should only have one email since the first failure doesn't count as 'still failing'.",
@@ -639,7 +639,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should have been triggered, so we should see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 hasItems("Email was triggered for: " + AbortedTrigger.TRIGGER_NAME));
         assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -665,7 +665,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should not have been triggered, so we shouldn't see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 not(hasItems("Email was triggered for: " + AbortedTrigger.TRIGGER_NAME)));
         assertEquals(0, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -691,7 +691,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should have been triggered, so we should see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 hasItems("Email was triggered for: " + NotBuiltTrigger.TRIGGER_NAME));
         assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -717,7 +717,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should not have been triggered, so we shouldn't see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 not(hasItems("Email was triggered for: " + NotBuiltTrigger.TRIGGER_NAME)));
         assertEquals(0, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -1317,7 +1317,7 @@ public class ExtendedEmailPublisherTest {
         assertEquals(0, Mailbox.get("mickey@disney.com").size());
         assertThat(
                 "Publisher is disabled, should have message in build log",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 hasItem("Extended Email Publisher is currently disabled in project settings"));
     }
 
@@ -1424,7 +1424,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should have been triggered, so we should see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 hasItems("Email was triggered for: " + AlwaysTrigger.TRIGGER_NAME));
 
         Mailbox mbox = Mailbox.get("ashlux@gmail.com");
@@ -1854,7 +1854,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should not have been triggered, so we should not see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 not(hasItems("Email was triggered for: " + AbortedTrigger.TRIGGER_NAME)));
         assertEquals(0, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -1884,7 +1884,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should have been triggered, so we should see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 hasItems("Email was triggered for: " + NotBuiltTrigger.TRIGGER_NAME));
         assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -1917,12 +1917,12 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should have been triggered for build 0, so we should see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 hasItems("Email was triggered for: " + FirstFailureTrigger.TRIGGER_NAME));
 
         assertThat(
                 "Email should NOT have been triggered for build 1, so we shouldn't see it in the logs.",
-                build2.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build2.getLog(100),
                 not(hasItems("Email was triggered for: " + FailureTrigger.TRIGGER_NAME)));
         assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -1955,12 +1955,12 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should NOT have been triggered for build 0, so we shouldn't see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 not(hasItems("Email was triggered for: " + SecondFailureTrigger.TRIGGER_NAME)));
 
         assertThat(
                 "Email should have been triggered for build 1, so we should see it in the logs.",
-                build2.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build2.getLog(100),
                 hasItems("Email was triggered for: " + SecondFailureTrigger.TRIGGER_NAME));
         assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -1991,7 +1991,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should have been triggered, so we should see it in the logs.",
-                build.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build.getLog(100),
                 hasItems("Email was triggered for: " + RegressionTrigger.TRIGGER_NAME));
         assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
     }
@@ -2025,7 +2025,7 @@ public class ExtendedEmailPublisherTest {
 
         assertThat(
                 "Email should have been triggered, so we should see it in the logs.",
-                build2.getLog(EmailThrottler.THROTTLING_LIMIT),
+                build2.getLog(100),
                 hasItems("Email was triggered for: " + StillFailingTrigger.TRIGGER_NAME));
         assertEquals(
                 "We should only have one email since the first failure doesn't count as 'still failing'.",
