@@ -522,6 +522,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
             MimeMessage msg = createMail(context, fromAddress, session);
             debug(context.getListener().getLogger(), "Successfully created MimeMessage");
+            if (EmailThrottler.getInstance().isThrottlingLimitExceeded()) {
+                return false;
+            }
+
             Address[] allRecipients = msg.getAllRecipients();
             int retries = 0;
             if (executePresendScript(context, msg)) {
@@ -552,6 +556,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                         try {
                             transport.connect();
                             transport.sendMessage(msg, allRecipients);
+                            EmailThrottler.getInstance().incrementEmailCount();
                             break;
                         } catch (SendFailedException e) {
                             if (e.getNextException() != null
