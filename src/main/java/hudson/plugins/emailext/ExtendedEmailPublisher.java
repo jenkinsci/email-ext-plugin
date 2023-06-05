@@ -522,7 +522,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
             MimeMessage msg = createMail(context, fromAddress, session);
             debug(context.getListener().getLogger(), "Successfully created MimeMessage");
-            if (EmailThrottler.getInstance().isThrottlingLimitExceeded()) {
+            if (EmailThrottler.getInstance().isThrottlingLimitExceeded() && !context.getTrigger().shouldBypassThrottling()) {
                 context.getListener().getLogger().println("Could not send email. Throttling limit exceeded.");
                 return false;
             }

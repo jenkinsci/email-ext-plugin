@@ -78,6 +78,11 @@ public class FirstUnstableTrigger extends EmailTrigger {
                 : build.getResult() == Result.UNSTABLE;
     }
 
+    @Override
+    public boolean shouldBypassThrottling() {
+        return true;
+    }
+
     @Extension
     public static final class DescriptorImpl extends EmailTriggerDescriptor {
 

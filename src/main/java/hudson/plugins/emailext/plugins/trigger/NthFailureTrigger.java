@@ -121,6 +121,11 @@ public abstract class NthFailureTrigger extends EmailTrigger {
         return run == null || run.getResult() == Result.SUCCESS || run.getResult() == Result.UNSTABLE;
     }
 
+    @Override
+    public boolean shouldBypassThrottling() {
+        return true;
+    }
+
     public abstract static class DescriptorImpl extends EmailTriggerDescriptor {
 
         public DescriptorImpl() {
