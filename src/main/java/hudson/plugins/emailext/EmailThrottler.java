@@ -31,7 +31,7 @@ public class EmailThrottler {
         emailCount++;
     }
 
-    private synchronized void resetEmailCount() {
+    public synchronized void resetEmailCount() {
         emailCount = 0;
         lastResetTime = System.currentTimeMillis();
     }
