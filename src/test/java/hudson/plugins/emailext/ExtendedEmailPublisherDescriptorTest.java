@@ -320,12 +320,21 @@ public class ExtendedEmailPublisherDescriptorTest {
                 "../div[contains(@class, 'setting-name')]/div[@class='repeated-container']/div[@name='defaultClasspath']");
         assertEquals("Should not have any class path setup by default", 0, nodes.size());
 
-        nodes = settingName.getByXPath(
-                "../div[@class='setting-main']/div[@class='repeated-container' and span[starts-with(@id, 'yui-gen')]/span[@class='first-child']/button[./text()='Add']]");
-        assertEquals(1, nodes.size());
-        HtmlDivision div = (HtmlDivision) nodes.get(0);
-        nodes = div.getByXPath(".//button[./text()='Add']");
-        HtmlButton addButton = (HtmlButton) nodes.get(0);
+        HtmlDivision div;
+        HtmlButton addButton;
+        if (Jenkins.getVersion().isOlderThan(new VersionNumber("2.409"))) {
+            nodes = settingName.getByXPath(
+                    "../div[@class='setting-main']/div[@class='repeated-container' and span[starts-with(@id, 'yui-gen')]/span[@class='first-child']/button[./text()='Add']]");
+            assertEquals(1, nodes.size());
+            div = (HtmlDivision) nodes.get(0);
+            nodes = div.getByXPath(".//button[./text()='Add']");
+            addButton = (HtmlButton) nodes.get(0);
+        } else {
+            nodes = settingName.getByXPath(
+                    "../div[@class='setting-main']/div[@class='repeated-container']/button[./text()='Add']");
+            assertEquals(1, nodes.size());
+            addButton = (HtmlButton) nodes.get(0);
+        }
         addButton.click();
 
         nodes = settingName.getByXPath(
