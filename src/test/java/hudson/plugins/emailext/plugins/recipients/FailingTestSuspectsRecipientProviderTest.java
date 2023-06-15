@@ -29,6 +29,7 @@ import hudson.model.Result;
 import hudson.model.User;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.tasks.Mailer;
+import hudson.tasks.test.AbstractTestResultAction;
 import jenkins.model.Jenkins;
 import org.junit.After;
 import org.junit.Before;
@@ -118,6 +119,7 @@ public class FailingTestSuspectsRecipientProviderTest {
             Mockito.doReturn(Result.FAILURE).when(build4).getResult();
             Mockito.doReturn(build3).when(build4).getPreviousCompletedBuild();
             MockUtilities.addChangeSet(build4, "K");
+            Mockito.doReturn(null).when(build4).getAction(AbstractTestResultAction.class);
             TestUtilities.checkRecipients(build4, new FailingTestSuspectsRecipientProvider());
 
             /*
@@ -129,6 +131,7 @@ public class FailingTestSuspectsRecipientProviderTest {
             Mockito.doReturn(Result.FAILURE).when(build5).getResult();
             Mockito.doReturn(build4).when(build5).getPreviousCompletedBuild();
             MockUtilities.addChangeSet(build5, "U", "W");
+            Mockito.doReturn(null).when(build5).getAction(AbstractTestResultAction.class);
             TestUtilities.checkRecipients(build5, new FailingTestSuspectsRecipientProvider());
 
             /*
