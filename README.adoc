@@ -172,7 +172,7 @@ There are four objects added to the model for the script to use to interact with
 `build` (https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`]):: This is the current build, usually a subclass of `AbstractBuild`.
 `project` (https://javadoc.jenkins.io/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`]):: The project object that the current build was started from, usually a subclass of `AbstractProject`.
 `rooturl` (https://docs.oracle.com/javase/8/docs/api/java/lang/String.html[`String`]):: The Jenkins instance root URL, useful for links.
-
+example
 The last line in the script should resolve to a boolean (`true` or `false`):
 
 .Script - Before Build:
