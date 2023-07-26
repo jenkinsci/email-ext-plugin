@@ -192,13 +192,15 @@ public final class RecipientProviderUtilities {
                                 if (SEND_TO_USERS_WITHOUT_READ) {
                                     listener.getLogger()
                                             .printf(
-                                                    "Warning: user %s has no permission to view %s, but sending mail anyway%n",
-                                                    userAddress, run.getFullDisplayName());
+                                                    "Warning: user (id: %s, email: %s) has no permission to view %s, " +
+                                                        "but sending mail anyway%n",
+                                                    user.getId(), userAddress, run.getFullDisplayName());
                                 } else {
                                     listener.getLogger()
                                             .printf(
-                                                    "Not sending mail to user %s with no permission to view %s",
-                                                    userAddress, run.getFullDisplayName());
+                                                    "Not sending mail to user (id: %s, email: %s) with no permission " +
+                                                        "to view %s",
+                                                    user.getId(), userAddress, run.getFullDisplayName());
                                     continue;
                                 }
                             }
@@ -208,14 +210,14 @@ public final class RecipientProviderUtilities {
                                     || ExtendedEmailPublisher.descriptor().isAllowUnregisteredEnabled()) {
                                 listener.getLogger()
                                         .printf(
-                                                "Warning: %s is not a recognized user, but sending mail anyway%n",
-                                                userAddress);
+                                                "Warning: user (id: %s, email: %s) is not a recognized user, but sending mail anyway%n",
+                                                user.getId(), userAddress);
                             } else {
                                 listener.getLogger()
                                         .printf(
-                                                "Not sending mail to unregistered user %s because your SCM"
-                                                        + " claimed this was associated with a user ID ‘",
-                                                userAddress);
+                                                "Not sending mail to unregistered user (id: %s, email: %s) because " +
+                                                    "your SCM claimed this was associated with a user ID ‘",
+                                                user.getId(), userAddress);
                                 try {
                                     listener.hyperlink('/' + user.getUrl(), user.getDisplayName());
                                 } catch (IOException ignored) {
