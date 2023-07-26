@@ -192,14 +192,14 @@ public final class RecipientProviderUtilities {
                                 if (SEND_TO_USERS_WITHOUT_READ) {
                                     listener.getLogger()
                                             .printf(
-                                                    "Warning: user (id: %s, email: %s) has no permission to view %s, " +
-                                                        "but sending mail anyway%n",
+                                                    "Warning: user (id: %s, email: %s) has no permission to view %s, "
+                                                            + "but sending mail anyway%n",
                                                     user.getId(), userAddress, run.getFullDisplayName());
                                 } else {
                                     listener.getLogger()
                                             .printf(
-                                                    "Not sending mail to user (id: %s, email: %s) with no permission " +
-                                                        "to view %s",
+                                                    "Not sending mail to user (id: %s, email: %s) with no permission "
+                                                            + "to view %s",
                                                     user.getId(), userAddress, run.getFullDisplayName());
                                     continue;
                                 }
@@ -215,8 +215,8 @@ public final class RecipientProviderUtilities {
                             } else {
                                 listener.getLogger()
                                         .printf(
-                                                "Not sending mail to unregistered user (id: %s, email: %s) because " +
-                                                    "your SCM claimed this was associated with a user ID ‘",
+                                                "Not sending mail to unregistered user (id: %s, email: %s) because "
+                                                        + "your SCM claimed this was associated with a user ID ‘",
                                                 user.getId(), userAddress);
                                 try {
                                     listener.hyperlink('/' + user.getUrl(), user.getDisplayName());
