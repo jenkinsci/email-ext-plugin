@@ -216,7 +216,7 @@ public final class RecipientProviderUtilities {
                                 listener.getLogger()
                                         .printf(
                                                 "Not sending mail to unregistered user (id: %s, email: %s) because "
-                                                        + "your SCM claimed this was associated with a user ID ‘",
+                                                        + "your SCM claimed this was associated with a user ID '",
                                                 user.getId(), userAddress);
                                 try {
                                     listener.hyperlink('/' + user.getUrl(), user.getDisplayName());
