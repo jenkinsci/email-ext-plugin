@@ -99,6 +99,28 @@ step([$class: 'Mailer',
   recipients: emailextrecipients([culprits(), requestor()])])
 ----
 
+=== Allow administrators to disable modification of the 'from' email field
+
+If you would like to disable the ability to use `from:` with the `emailext` Pipeline step, as well as disable `Project From` for freestyle jobs, start your controller with the system property: `-Dhudson.plugins.emailext.disable-job-from=true`.
+When this system property is enabled, emails will always use the `from` address defined at `Manage Jenkins` -> `System` -> `System Admin e-mail address`.
+If a Pipeline uses `from:` when this property is true, the value from the `from:` field will be ignored (email will still be sent), and the following message will be emitted in the controller logs::
+
+----
+INFO    h.plugins.emailext.EmailExtStep#setFrom: Pipeline step used 'from', from value was ignored because it is disabled via system property hudson.plugins.emailext.disable-job-from
+----
+
+If a freestyle job is configured with the `Project From` field, when saving the job configuration that field is ignored, and the following message will be emitted in the controller logs:
+
+----
+INFO    h.p.e.ExtendedEmailPublisher#<init>: Freestyle job was configured with `Project From`, from value was ignored because it is disabled via system property hudson.plugins.emailext.disable-job-from
+----
+
+If a freestyle job was already configured and using the `Project From` field, then subsequently this system property is enabled, the 'from' will be ignored (but the job will not be reconfigured), and a message will be emitted in the controller logs:
+
+----
+INFO    h.p.e.ExtendedEmailPublisher#getFromAddress: Pre-existing freestyle job had configuration with `Project From`, from value was ignored because it is disabled via system property hudson.plugins.emailext.disable-job-from
+----
+
 == Usage
 
 To see the advanced configuration for this plugin, click on the *Advanced* button.

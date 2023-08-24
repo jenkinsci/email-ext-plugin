@@ -105,6 +105,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     private static final String CONTENT_TRANSFER_ENCODING =
             System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
+    protected static final String DISABLE_FROM_PROPERTY =
+            ExtendedEmailPublisher.class.getPackage().getName() + ".disable-job-from";
+    protected static final boolean DISABLE_FROM =
+            System.getProperty(DISABLE_FROM_PROPERTY, "false").equals("true");
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
@@ -256,7 +260,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.attachBuildLog = project_attach_buildlog > 0;
         this.compressBuildLog = project_attach_buildlog > 1;
         this.replyTo = project_replyto;
-        this.from = project_from;
+        if (DISABLE_FROM) {
+            LOGGER.log(
+                    Level.INFO,
+                    "Freestyle job was configured with `Project From`, from value was ignored because it is disabled via system property "
+                            + DISABLE_FROM_PROPERTY);
+            this.from = "";
+        } else {
+            this.from = project_from;
+        }
         this.saveOutput = project_save_output;
         this.configuredTriggers = project_triggers;
         this.matrixTriggerMode = matrixTriggerMode;
@@ -842,6 +854,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         String actualFrom = from;
 
         if (StringUtils.isBlank(actualFrom)) {
+            actualFrom = descriptor.getAdminAddress();
+        } else if (DISABLE_FROM) {
+            LOGGER.log(
+                    Level.INFO,
+                    "Pre-existing freestyle job had configuration with `Project From`, from value was ignored because it is disabled via system property "
+                            + DISABLE_FROM_PROPERTY);
             actualFrom = descriptor.getAdminAddress();
         }
 

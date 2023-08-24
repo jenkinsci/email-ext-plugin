@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -34,6 +36,7 @@ import org.kohsuke.stapler.DataBoundSetter;
  * Created by acearl on 9/14/2015.
  */
 public class EmailExtStep extends Step {
+    private static final Logger LOGGER = Logger.getLogger(EmailExtStep.class.getName());
 
     public final String subject;
 
@@ -98,7 +101,15 @@ public class EmailExtStep extends Step {
 
     @DataBoundSetter
     public void setFrom(@CheckForNull String from) {
-        this.from = Util.fixNull(from);
+        if (ExtendedEmailPublisher.DISABLE_FROM) {
+            LOGGER.log(
+                    Level.INFO,
+                    "Pipeline step used 'from', from value was ignored because it is disabled via system property "
+                            + ExtendedEmailPublisher.DISABLE_FROM_PROPERTY);
+            this.from = "";
+        } else {
+            this.from = Util.fixNull(from);
+        }
     }
 
     public @CheckForNull String getReplyTo() {
