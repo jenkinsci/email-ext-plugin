@@ -13,9 +13,10 @@ def configured = instance != null
 f.entry(title: _("Disable Extended Email Publisher"), help: "/plugin/email-ext/help/projectConfig/disable.html", description: _("Allows the user to disable the publisher, while maintaining the settings")) {
     f.checkbox(name: "project_disabled", checked: instance?.disabled)
 }
-
-f.entry(title: _("Project From")) {
-  f.textbox(name: "project_from", value: configured ? instance.from : "")
+if (hudson.plugins.emailext.ExtendedEmailPublisher.getEnableFrom() ) {
+  f.entry(title: _("Project From")) {
+    f.textbox(name: "project_from", value: configured ? instance.from : "")
+  }
 }
 f.entry(title: _("Project Recipient List"), help: "/plugin/email-ext/help/projectConfig/globalRecipientList.html", description: _("Comma-separated list of email address that should receive notifications for this project.")) {
   f.textarea(name: "project_recipient_list", value: configured ? instance.recipientList : "\$DEFAULT_RECIPIENTS", checkUrl: "'${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck?value='+encodeURIComponent(this.value)")

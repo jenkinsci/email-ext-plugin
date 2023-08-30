@@ -310,6 +310,18 @@ Class groovyClass = new GroovyClassLoader(getClass().getClassLoader()).parseClas
 GroovyObject jiveFormatter = (GroovyObject) groovyClass.newInstance();
 ----
 
+=== JENKINS-71925: Deprecation of jobs modifying the 'from' email field
+
+In plugin version `2.100` and older, users could configure jobs on a controller to modify the 'from' attribute at a job level (using Pipeline `from:` , or freestyle `Project From`).
+
+Some companies have internal policies which do not allow this, and it can be unexpected when an email 'from' can be controlled by any user who has the `Job/Configure` permission or the ability to commit to a repo which contains a Jenkinsfile.
+
+The 'from' field of emails now always uses the `from` address defined at `Manage Jenkins` -> `System` -> `System Admin e-mail address`, and is not configurable at a job-level.
+
+Users that would like to go back to the previous behaviour can add the system property as a startup argument: `-Dhudson.plugins.emailext.enable-job-from=true`.
+
+A message is emitted to the controller logs when the 'from'/'project from' field is used by a job, at a `WARNING` level if the 'from' address was ignored, and 'INFO' level if the system property is set (to remind about the deprecation).
+
 == Related plugins
 
 * https://plugins.jenkins.io/email-ext-recipients-column/[Email Ext Recipients Column plugin]

@@ -105,6 +105,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     private static final String CONTENT_TRANSFER_ENCODING =
             System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
+    protected static final String ENABLE_FROM_PROPERTY =
+            ExtendedEmailPublisher.class.getPackage().getName() + ".enable-job-from";
+    protected static final boolean ENABLE_FROM =
+            System.getProperty(ENABLE_FROM_PROPERTY, "false").equals("true");
+
+    public static boolean getEnableFrom() {
+        return ENABLE_FROM;
+    }
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
@@ -256,7 +264,22 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.attachBuildLog = project_attach_buildlog > 0;
         this.compressBuildLog = project_attach_buildlog > 1;
         this.replyTo = project_replyto;
-        this.from = project_from;
+        if (project_from != null && !project_from.equals("")) {
+            if (ENABLE_FROM) {
+                LOGGER.log(
+                        Level.INFO,
+                        "JENKINS-71925: Freestyle job was configured with `Project From` which is deprecated");
+                this.from = project_from;
+            } else {
+                LOGGER.log(
+                        Level.WARNING,
+                        "JENKINS-71925: Freestyle job was configured with `Project From` which is deprecated, from value was ignored because it is disabled by default. Enable by setting system property '"
+                                + ENABLE_FROM_PROPERTY + "' to true");
+                this.from = "";
+            }
+        } else {
+            this.from = "";
+        }
         this.saveOutput = project_save_output;
         this.configuredTriggers = project_triggers;
         this.matrixTriggerMode = matrixTriggerMode;
@@ -842,6 +865,14 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         String actualFrom = from;
 
         if (StringUtils.isBlank(actualFrom)) {
+            actualFrom = descriptor.getAdminAddress();
+        } else if (ENABLE_FROM) {
+            LOGGER.log(Level.INFO, "JENKINS-71925: Job has `Project From` configured, which is deprecated");
+        } else {
+            LOGGER.log(
+                    Level.WARNING,
+                    "JENKINS-71925: Job has `Project From` configured, from value was ignored because it is disabled by default. Enable by setting system property '"
+                            + ENABLE_FROM_PROPERTY + "' to true");
             actualFrom = descriptor.getAdminAddress();
         }
 

@@ -22,7 +22,6 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.model.Result;
-import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
@@ -47,7 +46,6 @@ import jakarta.mail.Address;
 import jakarta.mail.BodyPart;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
-import jakarta.mail.Session;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
@@ -1218,7 +1216,7 @@ public class ExtendedEmailPublisherTest {
         Address[] replyTo = msg.getReplyTo();
         assertEquals(1, replyTo.length);
 
-        assertEquals("address not configured yet <nobody@nowhere>", replyTo[0].toString());
+        assertEquals(JenkinsLocationConfiguration.get().getAdminAddress(), replyTo[0].toString());
     }
 
     @Test
@@ -1442,58 +1440,6 @@ public class ExtendedEmailPublisherTest {
     }
 
     @Test
-    public void testAdditionalAccounts() throws Exception {
-        j.createWebClient().executeOnServer(() -> {
-            ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
-            descriptor.getMailAccount().setSmtpHost("smtp.test0.com");
-            descriptor.getMailAccount().setSmtpPort("587");
-            descriptor.getMailAccount().setAdvProperties("mail.smtp.ssl.trust=test0.com");
-
-            JSONObject form = new JSONObject();
-            form.put("project_from", "mail@test1.com");
-            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest(), form);
-            assertEquals("mail@test1.com", publisher.from);
-            ExtendedEmailPublisherContext context =
-                    new ExtendedEmailPublisherContext(publisher, null, null, null, TaskListener.NULL);
-            Session session = descriptor.createSession(publisher.getMailAccount(context), context);
-            assertEquals("smtp.test0.com", session.getProperty("mail.smtp.host"));
-            assertEquals("587", session.getProperty("mail.smtp.port"));
-            assertEquals("test0.com", session.getProperty("mail.smtp.ssl.trust"));
-
-            List<MailAccount> addaccs = new ArrayList<>();
-            JSONObject dform = new JSONObject();
-            dform.put("address", "mail@test1.com");
-            dform.put("smtpHost", "smtp.test1.com");
-            dform.put("smtpPort", "25");
-            dform.put("advProperties", "mail.smtp.ssl.trust=test1.com");
-            addaccs.add(new MailAccount(dform));
-            dform.put("address", "mail@test2.com");
-            dform.put("smtpHost", "smtp.test2.com");
-            dform.put("smtpPort", "465");
-            dform.put("advProperties", "mail.smtp.ssl.trust=test2.com");
-            addaccs.add(new MailAccount(dform));
-            descriptor.setAddAccounts(addaccs);
-
-            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest(), form);
-            assertEquals("mail@test1.com", publisher.from);
-            session = descriptor.createSession(publisher.getMailAccount(context), context);
-            assertEquals("smtp.test1.com", session.getProperty("mail.smtp.host"));
-            assertEquals("25", session.getProperty("mail.smtp.port"));
-            assertEquals("test1.com", session.getProperty("mail.smtp.ssl.trust"));
-
-            form.put("project_from", "mail@test2.com");
-            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest(), form);
-            assertEquals("mail@test2.com", publisher.from);
-            session = descriptor.createSession(publisher.getMailAccount(context), context);
-            assertEquals("smtp.test2.com", session.getProperty("mail.smtp.host"));
-            assertEquals("465", session.getProperty("mail.smtp.port"));
-            assertEquals("test2.com", session.getProperty("mail.smtp.ssl.trust"));
-
-            return null;
-        });
-    }
-
-    @Test
     public void testAllowedDomains1() throws Exception {
         FreeStyleProject prj = j.createFreeStyleProject();
         prj.getPublishersList().add(publisher);
@@ -1664,7 +1610,8 @@ public class ExtendedEmailPublisherTest {
         Address[] from = msg.getFrom();
         assertEquals(1, from.length);
 
-        assertEquals("custom@example.com", from[0].toString());
+        // JENKINS-71925 from email should be ignored
+        assertEquals(JenkinsLocationConfiguration.get().getAdminAddress(), from[0].toString());
     }
 
     @Test
@@ -1694,8 +1641,8 @@ public class ExtendedEmailPublisherTest {
         Message msg = mailbox.get(0);
         Address[] from = msg.getFrom();
         assertEquals(1, from.length);
-
-        assertEquals("custom@example.com", from[0].toString());
+        // JENKINS-71925 from email should be ignored
+        assertEquals(JenkinsLocationConfiguration.get().getAdminAddress(), from[0].toString());
     }
 
     /**
