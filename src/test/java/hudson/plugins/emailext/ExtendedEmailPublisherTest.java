@@ -1641,6 +1641,7 @@ public class ExtendedEmailPublisherTest {
         Message msg = mailbox.get(0);
         Address[] from = msg.getFrom();
         assertEquals(1, from.length);
+
         // JENKINS-71925 from email should be ignored
         assertEquals(JenkinsLocationConfiguration.get().getAdminAddress(), from[0].toString());
     }
