@@ -106,8 +106,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     private static final String CONTENT_TRANSFER_ENCODING =
             System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
 
-    private static final String ENABLE_FROM_PROPERTY =
-            ExtendedEmailPublisher.class.getPackage().getName() + ".enable-job-from";
+    private static final String ENABLE_FROM_PROPERTY = ExtendedEmailPublisher.class.getName() + ".enableFrom";
 
     @SuppressFBWarnings(value = "MS_SHOULD_BE_FINAL", justification = "for script console")
     public static boolean ENABLE_FROM = Boolean.getBoolean(ENABLE_FROM_PROPERTY);
