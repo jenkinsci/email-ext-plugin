@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.Set;
 import jenkins.model.Jenkins;
 import jenkins.scm.api.metadata.ContributorMetadataAction;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
