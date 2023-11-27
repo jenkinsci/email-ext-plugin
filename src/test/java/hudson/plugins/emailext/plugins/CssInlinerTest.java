@@ -102,7 +102,7 @@ public class CssInlinerTest {
         String output = process(input);
         assertEquals(
                 "<html>"
-                        + "<head><style> span {font-family: Verdana;} </style></head>"
+                        + "<head><style><![CDATA[ span {font-family: Verdana;} ]]></style></head>"
                         + "<body><span style=\"font-size: 10px; color: red;\">Red text</span></body></html>",
                 output);
     }
