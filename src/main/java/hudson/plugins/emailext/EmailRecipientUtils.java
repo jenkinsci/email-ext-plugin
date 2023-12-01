@@ -26,7 +26,7 @@ public class EmailRecipientUtils {
     public static final int TO = 0;
     public static final int CC = 1;
     public static final int BCC = 2;
-    
+
     private static final String EMAIL_LIST_SPLIT_BY = "[ ;,]";
 
     public static Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars)
@@ -140,19 +140,15 @@ public class EmailRecipientUtils {
     private static String fixupDelimiters(String input) {
         String[] splitEmailList = input.split(EMAIL_LIST_SPLIT_BY);
         StringBuilder inputBuilder = new StringBuilder();
-        for(String s : splitEmailList)
-        {
-            if(!s.isEmpty())
-            {
+        for (String s : splitEmailList) {
+            if (!s.isEmpty()) {
                 inputBuilder.append(s);
-                if(!s.contains("@")) {
+                if (!s.contains("@")) {
                     inputBuilder.append(" ");
-                }
-                else {
+                } else {
                     inputBuilder.append(",");
                 }
             }
-
         }
         return inputBuilder.toString();
     }
