@@ -26,6 +26,8 @@ public class EmailRecipientUtils {
     public static final int TO = 0;
     public static final int CC = 1;
     public static final int BCC = 2;
+    
+    private static final String EMAIL_LIST_SPLIT_BY = "[ ;,]";
 
     public static Set<InternetAddress> convertRecipientString(String recipientList, EnvVars envVars)
             throws AddressException, UnsupportedEncodingException {
@@ -136,14 +138,23 @@ public class EmailRecipientUtils {
     }
 
     private static String fixupDelimiters(String input) {
-        input = input.trim();
-        input = input.replaceAll("\\s+", " ");
-        if (input.contains(" ") && !input.contains(",")) {
-            input = input.replace(" ", ",");
-        }
+        String[] splitEmailList = input.split(EMAIL_LIST_SPLIT_BY);
+        StringBuilder inputBuilder = new StringBuilder();
+        for(String s : splitEmailList)
+        {
+            if(!s.isEmpty())
+            {
+                inputBuilder.append(s);
+                if(!s.contains("@")) {
+                    inputBuilder.append(" ");
+                }
+                else {
+                    inputBuilder.append(",");
+                }
+            }
 
-        input = input.replace(';', ',');
-        return input;
+        }
+        return inputBuilder.toString();
     }
 
     public static boolean isAllowedDomain(String userName, TaskListener listener) {
