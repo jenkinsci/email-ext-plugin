@@ -84,4 +84,15 @@ By packages
   </j:if>
 </j:if>
 
+<!-- WARNINGS-NG REPORT -->
+<j:set var="aggregationAction" value="${it.getAction('io.jenkins.plugins.analysis.core.model.AggregationAction')}" />
+    <j:if test="${aggregationAction!=null}">
+        <j:whitespace>${aggregationAction.getDisplayName().toUpperCase()}&#10;</j:whitespace>
+        <j:forEach var="tool" items="${aggregationAction.getTools()}">
+            <j:whitespace>Tool: ${tool.getName()}&#10;</j:whitespace>
+            <j:whitespace>Report: ${tool.getLatestUrl()}&#10;</j:whitespace>
+            <j:whitespace>Low: ${tool.getLowSize()}, Normal: ${tool.getNormalSize()}, High: ${tool.getHighSize()}, Error: ${tool.getErrorSize()}&#10;</j:whitespace>
+            <j:whitespace>&#10;</j:whitespace>
+         </j:forEach>
+    </j:if>
 </j:jelly>
