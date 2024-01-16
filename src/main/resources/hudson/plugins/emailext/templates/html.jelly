@@ -237,6 +237,31 @@ TD.console { font-family:Courier New; }
 <BR/>
 </j:if>
 
+<!-- WARNINGS-NG REPORT -->
+
+<j:set var="aggregationAction" value="${it.getAction('io.jenkins.plugins.analysis.core.model.AggregationAction')}" />
+<j:if test="${aggregationAction!=null}">
+    <table width="100%">
+        <tr><td class="bg1" colspan="5"><b>${aggregationAction.getDisplayName()}</b></td></tr>
+        <tr>
+            <td class="bg2">Tool</td>
+            <td class="bg2">Low</td>
+            <td class="bg2">Normal</td>
+            <td class="bg2">High</td>
+            <td class="bg2">Error</td>
+        </tr>
+        <j:forEach var="tool" items="${aggregationAction.getTools()}">
+            <tr>
+                <td><a href="${tool.getLatestUrl()}">${tool.getName()}</a></td>
+                <td>${tool.getLowSize()}</td>
+                <td>${tool.getNormalSize()}</td>
+                <td>${tool.getHighSize()}</td>
+                <td>${tool.getErrorSize()}</td>
+            </tr>
+        </j:forEach>
+    </table>
+    <br/>
+</j:if>
 
 <!-- CONSOLE OUTPUT -->
 
