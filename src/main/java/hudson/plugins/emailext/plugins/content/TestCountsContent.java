@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins.content;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
@@ -22,6 +23,7 @@ public class TestCountsContent extends DataBoundTokenMacro {
     private static final String VAR_DEFAULT_VALUE = "total";
 
     @Parameter
+    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "TODO needs triage")
     public String var = VAR_DEFAULT_VALUE;
 
     @Override

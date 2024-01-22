@@ -126,6 +126,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     /**
      * This is the list of email theTriggers that the project has configured
      */
+    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "TODO needs triage")
     public List<EmailTrigger> configuredTriggers = new ArrayList<>();
 
     /**
@@ -232,6 +233,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     @DataBoundConstructor
+    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "TODO needs triage")
     public ExtendedEmailPublisher(
             String project_recipient_list,
             String project_content_type,
