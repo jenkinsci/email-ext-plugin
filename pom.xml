@@ -101,7 +101,7 @@
     <revision>2.106</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
-    <jenkins.version>2.387.3</jenkins.version>
+    <jenkins.version>2.440.1</jenkins.version>
     <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
     <concurrency>1</concurrency>
     <!-- To be removed once Jenkins.MANAGE gets out of beta -->
@@ -113,22 +113,10 @@
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.387.x</artifactId>
-        <version>2543.vfb_1a_5fb_9496d</version>
+        <artifactId>bom-2.440.x</artifactId>
+        <version>2884.vc36b_64ce114a_</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <!-- TODO Remove once in BOM -->
-      <dependency>
-        <groupId>io.jenkins.plugins</groupId>
-        <artifactId>jakarta-activation-api</artifactId>
-        <version>2.1.3-1</version>
-      </dependency>
-      <!-- TODO Remove once in BOM -->
-      <dependency>
-        <groupId>io.jenkins.plugins</groupId>
-        <artifactId>jakarta-mail-api</artifactId>
-        <version>2.1.3-1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

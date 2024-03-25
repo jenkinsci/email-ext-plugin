@@ -514,6 +514,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                 context.getListener().getLogger(),
                                 "Additional account " + mailAccount.getAddress() + " has invalid SMTP server");
                     }
+                } else if (!mailAccount.isSecureAuthWhenFIPS()) {
+                    context.getListener().getLogger().println("Mail account uses insecure authentication");
+                    if (mailAccount.isDefaultAccount()) {
+                        debug(context.getListener().getLogger(), "Default account uses insecure authentication");
+                    } else {
+                        debug(
+                                context.getListener().getLogger(),
+                                "Additional account " + mailAccount.getAddress() + " uses insecure authentication");
+                    }
                 }
                 return false;
             }
@@ -879,6 +888,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     debug(
                             context.getListener().getLogger(),
                             "Ignoring additional account " + addAccount.getAddress() + " with invalid SMTP server");
+                } else if (!addAccount.isSecureAuthWhenFIPS()) {
+                    debug(
+                            context.getListener().getLogger(),
+                            "Ignoring additional account " + addAccount.getAddress() + " with insecure authentication");
                 }
                 continue;
             }
