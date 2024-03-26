@@ -200,4 +200,13 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     public boolean isPreBuild() {
         return false;
     }
+
+    /**
+     * Should this trigger bypass the email throttling? Defaults to false.
+     * Critical triggers like build failures override this to true.
+     * @return true if the trigger should bypass the email throttling.
+     */
+    public boolean shouldBypassThrottling() {
+        return false;
+    }
 }

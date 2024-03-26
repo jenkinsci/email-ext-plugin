@@ -70,6 +70,11 @@ public class NotBuiltTrigger extends EmailTrigger {
         return build.getResult() == Result.NOT_BUILT;
     }
 
+    @Override
+    public boolean shouldBypassThrottling() {
+        return true;
+    }
+
     @Extension
     public static final class DescriptorImpl extends EmailTriggerDescriptor {
 

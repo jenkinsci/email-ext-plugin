@@ -102,6 +102,11 @@ public class RegressionTrigger extends EmailTrigger {
         return false;
     }
 
+    @Override
+    public boolean shouldBypassThrottling() {
+        return true;
+    }
+
     @Extension
     public static final class DescriptorImpl extends EmailTriggerDescriptor {
 
