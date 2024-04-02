@@ -19,11 +19,13 @@ import hudson.model.Queue;
 import hudson.model.queue.Tasks;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
+import hudson.util.FormValidation.Kind;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import java.util.Collections;
 import java.util.List;
 import jenkins.model.Jenkins;
+import jenkins.security.FIPS140;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.AncestorInPath;
@@ -62,7 +64,12 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     public MailAccount() {}
 
     public boolean isValid() {
-        return isFromAddressValid() && isSmtpServerValid();
+        return isFromAddressValid() && isSmtpServerValid() && isSecureAuthWhenFIPS();
+    }
+
+    public boolean isSecureAuthWhenFIPS() {
+        // when in FIPS mode if we are using authentication we must also use TLS or SSL to protect the password
+        return !(credentialsId != null && FIPS140.useCompliantAlgorithms() && !(useSsl || useTls));
     }
 
     public boolean isFromAddressValid() {
@@ -128,7 +135,11 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
         }
 
         @SuppressWarnings("lgtm[jenkins/csrf]")
-        public FormValidation doCheckCredentialsId(@AncestorInPath Item item, @QueryParameter String value) {
+        public FormValidation doCheckCredentialsId(
+                @AncestorInPath Item item,
+                @QueryParameter String value,
+                @QueryParameter boolean useSsl,
+                @QueryParameter boolean useTls) {
             if (item == null) {
                 if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                     return FormValidation.ok();
@@ -142,6 +153,20 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                 return FormValidation.ok();
             }
 
+            // do this after the authentication check so we do not reveal the FIPS mode of the controller.
+            FormValidation insecureAuthValidation;
+            if (useSsl || useTls) {
+                insecureAuthValidation = FormValidation.ok();
+            } else {
+                if (FIPS140.useCompliantAlgorithms()) {
+                    insecureAuthValidation =
+                            FormValidation.error("Authentication requires either TLS or SSL to be enabled");
+                } else {
+                    insecureAuthValidation = FormValidation.warning(
+                            "For security when using authentication it is recommended to enable either TLS or SSL");
+                }
+            }
+
             if (CredentialsProvider.listCredentials(
                             StandardUsernamePasswordCredentials.class,
                             item,
@@ -149,9 +174,13 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                             null,
                             CredentialsMatchers.withId(value))
                     .isEmpty()) {
-                return FormValidation.error("Cannot find currently selected credentials");
+                if (insecureAuthValidation.kind == Kind.OK) {
+                    return FormValidation.error("Cannot find currently selected credentials");
+                }
+                return FormValidation.aggregate(List.of(
+                        insecureAuthValidation, FormValidation.error("Cannot find currently selected credentials")));
             }
-            return FormValidation.ok();
+            return insecureAuthValidation;
         }
     }
 
