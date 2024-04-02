@@ -126,6 +126,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     /**
      * This is the list of email theTriggers that the project has configured
      */
+    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "TODO needs triage")
     public List<EmailTrigger> configuredTriggers = new ArrayList<>();
 
     /**
@@ -232,6 +233,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     @DataBoundConstructor
+    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "TODO needs triage")
     public ExtendedEmailPublisher(
             String project_recipient_list,
             String project_content_type,
@@ -512,6 +514,15 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                 context.getListener().getLogger(),
                                 "Additional account " + mailAccount.getAddress() + " has invalid SMTP server");
                     }
+                } else if (!mailAccount.isSecureAuthWhenFIPS()) {
+                    context.getListener().getLogger().println("Mail account uses insecure authentication");
+                    if (mailAccount.isDefaultAccount()) {
+                        debug(context.getListener().getLogger(), "Default account uses insecure authentication");
+                    } else {
+                        debug(
+                                context.getListener().getLogger(),
+                                "Additional account " + mailAccount.getAddress() + " uses insecure authentication");
+                    }
                 }
                 return false;
             }
@@ -522,6 +533,12 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
             MimeMessage msg = createMail(context, fromAddress, session);
             debug(context.getListener().getLogger(), "Successfully created MimeMessage");
+            if (EmailThrottler.getInstance().isThrottlingLimitExceeded()
+                    && !context.getTrigger().shouldBypassThrottling()) {
+                context.getListener().getLogger().println("Could not send email. Throttling limit exceeded.");
+                return false;
+            }
+
             Address[] allRecipients = msg.getAllRecipients();
             int retries = 0;
             if (executePresendScript(context, msg)) {
@@ -552,6 +569,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                         try {
                             transport.connect();
                             transport.sendMessage(msg, allRecipients);
+                            EmailThrottler.getInstance().incrementEmailCount();
                             break;
                         } catch (SendFailedException e) {
                             if (e.getNextException() != null
@@ -877,6 +895,10 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                     debug(
                             context.getListener().getLogger(),
                             "Ignoring additional account " + addAccount.getAddress() + " with invalid SMTP server");
+                } else if (!addAccount.isSecureAuthWhenFIPS()) {
+                    debug(
+                            context.getListener().getLogger(),
+                            "Ignoring additional account " + addAccount.getAddress() + " with insecure authentication");
                 }
                 continue;
             }

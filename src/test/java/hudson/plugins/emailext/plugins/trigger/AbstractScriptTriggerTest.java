@@ -24,8 +24,10 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.scriptsecurity.scripts.UnapprovedUsageException;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.BuildWatcher;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
@@ -38,6 +40,9 @@ public class AbstractScriptTriggerTest {
 
     @Rule
     public JenkinsRule j = new JenkinsRule();
+
+    @ClassRule
+    public static BuildWatcher bw = new BuildWatcher();
 
     @Before
     public void setUp() {
@@ -64,7 +69,7 @@ public class AbstractScriptTriggerTest {
         publisher.setPostsendScript("");
 
         final String script =
-                "out.println('Checking before trigger')\n" + "return build.result.toString() == 'SUCCESS'";
+                "out.println('Checking before trigger')\n" + "return Jenkins.instance.systemMessage == null";
         publisher
                 .getConfiguredTriggers()
                 .add(new PreBuildScriptTrigger(
@@ -95,7 +100,8 @@ public class AbstractScriptTriggerTest {
         assertEquals(script, trigger.getSecureTriggerScript().getScript());
         assertTrue(trigger.getSecureTriggerScript().isSandbox());
 
-        ScriptApproval.get().approveSignature("method hudson.model.Run getResult");
+        ScriptApproval.get().approveSignature("staticMethod jenkins.model.Jenkins getInstance");
+        ScriptApproval.get().approveSignature("method jenkins.model.Jenkins getSystemMessage");
 
         project = j.jenkins.getItemByFullName("iMail", FreeStyleProject.class);
         FreeStyleBuild build = j.buildAndAssertSuccess(project);
@@ -172,7 +178,7 @@ public class AbstractScriptTriggerTest {
         assertThat(at.getSecureTriggerScript().getScript(), not(emptyString()));
 
         FreeStyleBuild build = j.assertBuildStatus(firstStatus, project.scheduleBuild2(0));
-        j.assertLogContains(expected.getName(), build); // TODO change whenever build.getResult() ends up in a whitelist
+        j.assertLogContains(expected.getName(), build);
 
         if (approveSignature) {
             ScriptApproval.get().preapproveAll();

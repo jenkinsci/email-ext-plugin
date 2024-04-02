@@ -26,6 +26,21 @@ CHANGE SET
 <% }
 } %>
 
+<%
+try {
+   def aggregationAction = it.getAction("io.jenkins.plugins.analysis.core.model.AggregationAction")
+   if ( aggregationAction != null ) { %>
+${aggregationAction.getDisplayName().toUpperCase()}
+      <% aggregationAction.getTools().each {
+        tool -> %>
+Tool: ${tool.getName()}
+Report: ${tool.getLatestUrl()}
+Low: ${tool.getLowSize()}, Normal: ${tool.getNormalSize()}, High: ${tool.getHighSize()}, Error: ${tool.getErrorSize()}
+<% 	}
+   }
+  } catch(e) {
+    // we don't do anything
+  } %>
 
 <% if(build.result==hudson.model.Result.FAILURE) { %>
 CONSOLE OUTPUT

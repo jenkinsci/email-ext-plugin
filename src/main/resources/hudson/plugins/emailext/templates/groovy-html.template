@@ -1,4 +1,4 @@
-<STYLE>
+<STYLE type="text/css" data-inline="true">
   BODY, TABLE, TD, TH, P {
     font-family: Calibri, Verdana, Helvetica, sans serif;
     font-size: 12px;
@@ -50,6 +50,10 @@
   }
   .test-failed {
     color: #E74C3C;
+  }
+  .td-title-issues {
+    font-weight: bold;
+    font-size: 120%;
   }
 </STYLE>
 <BODY>
@@ -235,6 +239,40 @@
   </table>
   <br/>
   <% } %>
+
+<!-- WARNINGS-NG REPORT -->
+  <%
+  try {
+    def aggregationAction = it.getAction("io.jenkins.plugins.analysis.core.model.AggregationAction")
+    if ( aggregationAction != null ) { %>
+  <table class="section">
+    <tr class="tr-title">
+      <td class="td-title" colspan="5">${hudson.Util.xmlEscape(aggregationAction.getDisplayName())}</td>
+    </tr>
+    <tr>
+      <td class="td-title-issues">Tool</td>
+      <td class="td-title-issues">Low</td>
+      <td class="td-title-issues">Normal</td>
+      <td class="td-title-issues">High</td>
+      <td class="td-title-issues">Error</td>
+    </tr>
+      <% aggregationAction.getTools().each {
+        tool -> %>
+    <tr>
+      <td><a href="${tool.getLatestUrl()}">${hudson.Util.xmlEscape(tool.getName())}</a></td>
+      <td>${tool.getLowSize()}</td>
+      <td>${tool.getNormalSize()}</td>
+      <td>${tool.getHighSize()}</td>
+      <td>${tool.getErrorSize()}</td>
+    </tr>
+    <% } %>
+    </table>
+  <br/>
+  <%
+    }
+  } catch(e) {
+    // we don't do anything
+  } %>
 
 <!-- CONSOLE OUTPUT -->
   <%
