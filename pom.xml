@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>email-ext</artifactId>
-  <version>${revision}${changelist}</version>
+  <version>${changelist}</version>
   <packaging>hpi</packaging>
   <name>Email Extension Plugin</name>
   <description>Allows to configure every aspect of email notifications: when an email is sent, who should receive it and what the email says</description>
@@ -98,8 +98,7 @@
   </issueManagement>
 
   <properties>
-    <revision>2.106</revision>
-    <changelist>-SNAPSHOT</changelist>
+    <changelist>999999-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/email-ext-plugin</gitHubRepo>
     <jenkins.version>2.440.1</jenkins.version>
     <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
