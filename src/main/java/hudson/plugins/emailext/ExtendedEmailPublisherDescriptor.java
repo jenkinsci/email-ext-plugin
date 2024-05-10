@@ -65,20 +65,9 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      */
     private String defaultSuffix;
 
-    /**
-     * Jenkins's own URL, to put into the e-mail.
-     */
-    private transient String hudsonUrl;
-
     private MailAccount mailAccount = new MailAccount();
 
     private List<MailAccount> addAccounts = new ArrayList<>();
-
-    /**
-     * The e-mail address that Jenkins puts to "From:" field in outgoing
-     * e-mails. Null if not configured.
-     */
-    private transient String adminAddress;
 
     private String charset;
 
@@ -153,8 +142,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private boolean precedenceBulk;
 
     private boolean debugMode = false;
-
-    private transient boolean enableSecurity = false;
 
     /**
      * If true, then the 'Email Template Testing' link will only be displayed
