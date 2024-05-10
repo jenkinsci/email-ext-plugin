@@ -4,6 +4,7 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cloudbees.plugins.credentials.domains.HostnamePortRequirement;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.Util;
@@ -100,12 +101,12 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     /**
      * This is the global default pre-send script.
      */
-    private String defaultPresendScript = "";
+    private String defaultPresendScript;
 
     /**
      * This is the global default post-send script.
      */
-    private String defaultPostsendScript = "";
+    private String defaultPostsendScript;
 
     private List<GroovyScriptPath> defaultClasspath = new ArrayList<>();
 
@@ -702,34 +703,38 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         return true;
     }
 
-    public String getDefaultPresendScript() {
+    public @CheckForNull String getDefaultPresendScript() {
         return defaultPresendScript;
     }
 
     @SuppressWarnings("unused")
     @DataBoundSetter
-    public void setDefaultPresendScript(String script) {
-        script = StringUtils.trim(script);
-        this.defaultPresendScript = ScriptApproval.get()
-                .configuring(
-                        script == null ? "" : script,
-                        GroovyLanguage.get(),
-                        ApprovalContext.create().withCurrentUser());
+    public void setDefaultPresendScript(@CheckForNull String script) {
+        script = StringUtils.trimToNull(script);
+        this.defaultPresendScript = script == null
+                ? null
+                : ScriptApproval.get()
+                        .configuring(
+                                script,
+                                GroovyLanguage.get(),
+                                ApprovalContext.create().withCurrentUser());
     }
 
-    public String getDefaultPostsendScript() {
+    public @CheckForNull String getDefaultPostsendScript() {
         return defaultPostsendScript;
     }
 
     @SuppressWarnings("unused")
     @DataBoundSetter
-    public void setDefaultPostsendScript(String script) {
-        script = StringUtils.trim(script);
-        this.defaultPostsendScript = ScriptApproval.get()
-                .configuring(
-                        script == null ? "" : script,
-                        GroovyLanguage.get(),
-                        ApprovalContext.create().withCurrentUser());
+    public void setDefaultPostsendScript(@CheckForNull String script) {
+        script = StringUtils.trimToNull(script);
+        this.defaultPostsendScript = script == null
+                ? null
+                : ScriptApproval.get()
+                        .configuring(
+                                script,
+                                GroovyLanguage.get(),
+                                ApprovalContext.create().withCurrentUser());
     }
 
     public List<GroovyScriptPath> getDefaultClasspath() {

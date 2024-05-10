@@ -2,6 +2,7 @@ package hudson.plugins.emailext;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.oneOf;
 import static org.junit.Assert.assertArrayEquals;
@@ -66,6 +67,7 @@ import org.htmlunit.html.HtmlPage;
 import org.htmlunit.html.HtmlSelect;
 import org.htmlunit.html.HtmlTextArea;
 import org.htmlunit.html.HtmlTextInput;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -1197,5 +1199,16 @@ public class ExtendedEmailPublisherDescriptorTest {
                         SuccessTrigger.class.getName(),
                         UnstableTrigger.class.getName(),
                         XNthFailureTrigger.class.getName()));
+    }
+
+    @Test
+    public void emptyScriptApproval() throws Exception {
+        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
+        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+                .grant(Jenkins.ADMINISTER)
+                .everywhere()
+                .to("admin"));
+        j.submit(j.createWebClient().login("admin").goTo("configure").getFormByName("config"));
+        assertThat(ScriptApproval.get().getPendingScripts(), is(empty()));
     }
 }
