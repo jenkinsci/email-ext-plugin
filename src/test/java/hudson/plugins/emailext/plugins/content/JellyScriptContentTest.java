@@ -45,10 +45,6 @@ public class JellyScriptContentTest {
             f.setAccessible(true);
             f.set(publisher.getDescriptor(), "ashlux@gmail.com");
 
-            f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("hudsonUrl");
-            f.setAccessible(true);
-            f.set(publisher.getDescriptor(), "http://localhost/");
-
             build = mock(AbstractBuild.class);
             AbstractProject<?, ?> project = mock(AbstractProject.class);
             DescribableList publishers = mock(DescribableList.class);
