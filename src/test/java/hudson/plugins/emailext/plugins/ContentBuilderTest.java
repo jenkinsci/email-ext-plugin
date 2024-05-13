@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.junit.Rule;
 import org.junit.Test;
@@ -115,20 +116,24 @@ public class ContentBuilderTest {
     public void testTransformText_shouldExpand_$DEFAULT_PRESEND_SCRIPT() {
         assertEquals(
                 publisher.getDescriptor().getDefaultPresendScript(),
-                ContentBuilder.transformText("$DEFAULT_PRESEND_SCRIPT", publisher, build, listener));
+                StringUtils.trimToNull(
+                        ContentBuilder.transformText("$DEFAULT_PRESEND_SCRIPT", publisher, build, listener)));
         assertEquals(
                 publisher.getDescriptor().getDefaultPresendScript(),
-                ContentBuilder.transformText("${DEFAULT_PRESEND_SCRIPT}", publisher, build, listener));
+                StringUtils.trimToNull(
+                        ContentBuilder.transformText("${DEFAULT_PRESEND_SCRIPT}", publisher, build, listener)));
     }
 
     @Test
     public void testTransformText_shouldExpand_$DEFAULT_POSTSEND_SCRIPT() {
         assertEquals(
                 publisher.getDescriptor().getDefaultPostsendScript(),
-                ContentBuilder.transformText("$DEFAULT_POSTSEND_SCRIPT", publisher, build, listener));
+                StringUtils.trimToNull(
+                        ContentBuilder.transformText("$DEFAULT_POSTSEND_SCRIPT", publisher, build, listener)));
         assertEquals(
                 publisher.getDescriptor().getDefaultPostsendScript(),
-                ContentBuilder.transformText("${DEFAULT_POSTSEND_SCRIPT}", publisher, build, listener));
+                StringUtils.trimToNull(
+                        ContentBuilder.transformText("${DEFAULT_POSTSEND_SCRIPT}", publisher, build, listener)));
     }
 
     @Test
