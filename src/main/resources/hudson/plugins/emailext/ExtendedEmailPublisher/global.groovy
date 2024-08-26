@@ -57,7 +57,7 @@ f.section(title: _("Extended E-mail Notification")) {
     f.textbox()
   }
   f.entry(field: "maxAttachmentSizeMb", help: "/plugin/email-ext/help/globalConfig/maxAttachmentSize.html", title: _("Maximum Attachment Size")) {
-    f.number(checkUrl: "'${rootURL}/publisher/ExtendedEmailPublisher/maxAttachmentSizeCheck?value='+encodeURIComponent(this.value)")
+    f.number(checkUrl: "${rootURL}/publisher/ExtendedEmailPublisher/maxAttachmentSizeCheck", checkDependsOn: "")
   }
   f.entry(field: "defaultBody", help: "/plugin/email-ext/help/globalConfig/defaultBody.html", title: _("Default Content")) {
     f.textarea()
