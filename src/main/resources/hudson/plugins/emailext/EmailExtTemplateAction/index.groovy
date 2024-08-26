@@ -35,7 +35,7 @@ l.layout {
             form(action: "", method: "post", name: "templateTest", onSubmit: "return onSubmit();") {
                 table {
                     f.entry(title: _("Jelly/Groovy Template File Name")) {
-                        f.textbox(name: "template_file_name", id: "template_file_name", clazz: "required", checkUrl:"'templateFileCheck?value='+this.value")
+                        f.textbox(name: "template_file_name", id: "template_file_name", clazz: "required", checkUrl:"templateFileCheck", checkDependsOn: "")
                     }
                     f.entry(title: _("Build To Test")) {
                         select(name: "template_build", id: "template_build") {
