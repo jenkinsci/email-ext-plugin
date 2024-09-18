@@ -68,12 +68,16 @@ public class MailAccountFIPSTest {
     }
 
     @Test
-    public void testFormValidationForInsecureAuth() {
+    public void testFormValidationForInsecureAuth() throws Exception {
         final String validCredentialId = "valid-id";
         SystemCredentialsProvider.getInstance()
                 .getCredentials()
                 .add(new UsernamePasswordCredentialsImpl(
-                        CredentialsScope.GLOBAL, validCredentialId, "description", "username", "password"));
+                        CredentialsScope.GLOBAL,
+                        validCredentialId,
+                        "description",
+                        "username",
+                        "password-must-be-longer-for-fips"));
 
         MailAccountDescriptor mad = (MailAccountDescriptor) Jenkins.get().getDescriptor(MailAccount.class);
 
