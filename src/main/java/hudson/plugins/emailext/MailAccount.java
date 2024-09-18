@@ -320,7 +320,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             } catch (Descriptor.FormException e) {
                 // safe to ignore as too short password should happen only in FIPS mode
                 // and migrating from no FIPS to FIPS is not supported, but only fresh start
-                throw new RuntimeException(e);
+                throw new RuntimeException("Password used for email-ext server configuration could not be migrated", e);
             }
             SystemCredentialsProvider.getInstance().getCredentials().add(newCredentials);
             credentialsId = newCredentials.getId();
