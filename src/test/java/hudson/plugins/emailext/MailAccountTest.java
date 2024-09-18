@@ -118,7 +118,7 @@ public class MailAccountTest {
     }
 
     @Test
-    public void testFormValidationForInsecureAuth() {
+    public void testFormValidationForInsecureAuth() throws Exception {
         final String validCredentialId = "valid-id";
         SystemCredentialsProvider.getInstance()
                 .getCredentials()

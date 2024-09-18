@@ -309,12 +309,19 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
         if (StringUtils.isBlank(credentialsId)) {
             // If we couldn't find any existing credentials,
             // create new credentials with the principal and secret and use it.
-            final StandardUsernamePasswordCredentials newCredentials = new UsernamePasswordCredentialsImpl(
-                    CredentialsScope.GLOBAL,
-                    null,
-                    "Migrated from email-ext username/password",
-                    smtpUsername,
-                    smtpPassword.getPlainText());
+            final StandardUsernamePasswordCredentials newCredentials;
+            try {
+                newCredentials = new UsernamePasswordCredentialsImpl(
+                        CredentialsScope.GLOBAL,
+                        null,
+                        "Migrated from email-ext username/password",
+                        smtpUsername,
+                        smtpPassword.getPlainText());
+            } catch (Descriptor.FormException e) {
+                // safe to ignore as too short password should happen only in FIPS mode
+                // and migrating from no FIPS to FIPS is not supported, but only fresh start
+                throw new RuntimeException(e);
+            }
             SystemCredentialsProvider.getInstance().getCredentials().add(newCredentials);
             credentialsId = newCredentials.getId();
         }
