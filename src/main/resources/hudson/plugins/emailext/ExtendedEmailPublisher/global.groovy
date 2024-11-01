@@ -76,6 +76,9 @@ f.section(title: _("Extended E-mail Notification")) {
     }
   }
 
+  f.entry(field: "throttlingEnabled", title: _("Enable Throttling"), help: "/plugin/email-ext/help/globalConfig/throttlingEnabled.html") {
+    f.checkbox()
+  }
   f.entry(field: "debugMode", title: _("Enable Debug Mode"), help: "/plugin/email-ext/help/globalConfig/debugMode.html") {
     f.checkbox()
   }

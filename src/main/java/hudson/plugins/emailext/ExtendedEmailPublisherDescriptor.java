@@ -160,6 +160,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      */
     private boolean enableAllowUnregistered;
 
+    /**
+     * Enables the email throttling feature
+     */
+    private boolean throttlingEnabled = false;
+
     private transient String smtpHost;
     private transient String smtpPort;
     private transient String smtpAuthUsername;
@@ -298,6 +303,15 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @DataBoundSetter
     public void setDefaultSuffix(String defaultSuffix) {
         this.defaultSuffix = Util.fixEmptyAndTrim(defaultSuffix);
+    }
+
+    public boolean isThrottlingEnabled() {
+        return throttlingEnabled;
+    }
+
+    @DataBoundSetter
+    public void setThrottlingEnabled(boolean throttlingEnabled) {
+        this.throttlingEnabled = throttlingEnabled;
     }
 
     @Restricted(NoExternalUse.class)

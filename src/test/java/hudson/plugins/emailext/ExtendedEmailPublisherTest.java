@@ -6,11 +6,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Launcher;
@@ -123,6 +119,7 @@ public class ExtendedEmailPublisherTest {
         publisher.getDescriptor().setDefaultSuffix(null);
         publisher.getDescriptor().setEmergencyReroute(null);
         publisher.getDescriptor().setAllowedDomains(null);
+        publisher.getDescriptor().setThrottlingEnabled(true);
         oldAuthorizationStrategy = j.jenkins.getAuthorizationStrategy();
         oldSecurityRealm = j.jenkins.getSecurityRealm();
         oldAdminAddress = JenkinsLocationConfiguration.get().getAdminAddress();
@@ -1702,8 +1699,8 @@ public class ExtendedEmailPublisherTest {
     }
 
     @Test
-    public void testLowerThanLimit() throws Exception {
-        FreeStyleProject prj = j.createFreeStyleProject("test");
+    public void testThrottlingLowerThanLimit() throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("throttle-test");
         prj.getPublishersList().add(publisher);
 
         publisher.recipientList = "mickey@disney.com";
@@ -1730,8 +1727,8 @@ public class ExtendedEmailPublisherTest {
     }
 
     @Test
-    public void testEqualsLimit() throws Exception {
-        FreeStyleProject prj = j.createFreeStyleProject("test2");
+    public void testThrottlingEqualsLimit() throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("throttle-test2");
         prj.getPublishersList().add(publisher);
 
         publisher.recipientList = "mickey@disney.com";
@@ -1760,8 +1757,8 @@ public class ExtendedEmailPublisherTest {
     }
 
     @Test
-    public void testOverLimit() throws Exception {
-        FreeStyleProject prj = j.createFreeStyleProject("test3");
+    public void testThrottlingOverLimit() throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("throttle-test3");
         prj.getPublishersList().add(publisher);
 
         publisher.recipientList = "mickey@disney.com";
@@ -1787,6 +1784,36 @@ public class ExtendedEmailPublisherTest {
         assertEquals(
                 EmailThrottler.THROTTLING_LIMIT,
                 Mailbox.get("mickey@disney.com").size());
+    }
+
+    @Test
+    public void testThrottlingDisabled() throws Exception {
+        FreeStyleProject prj = j.createFreeStyleProject("throttle-test4");
+        prj.getPublishersList().add(publisher);
+        publisher.getDescriptor().setThrottlingEnabled(false);
+
+        publisher.recipientList = "mickey@disney.com";
+        for (int i = 0; i < 130; i++) {
+            publisher.configuredTriggers.add(new SuccessTrigger(
+                    recProviders,
+                    "$DEFAULT_RECIPIENTS",
+                    "$DEFAULT_REPLYTO",
+                    "$DEFAULT_SUBJECT",
+                    "$DEFAULT_CONTENT",
+                    "",
+                    0,
+                    "project"));
+        }
+
+        for (EmailTrigger trigger : publisher.configuredTriggers) {
+            trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
+        }
+
+        FreeStyleBuild build = prj.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertNotEquals(EmailThrottler.THROTTLING_LIMIT, 130);
+        assertEquals(130, Mailbox.get("mickey@disney.com").size());
     }
 
     /**

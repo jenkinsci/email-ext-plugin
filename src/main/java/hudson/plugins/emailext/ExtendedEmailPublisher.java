@@ -193,6 +193,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
      */
     public boolean disabled = false;
 
+    /* If true, will check for throttling limits before sending email */
+    public boolean throttlingEnabled = false;
+
     /**
      * How to theTrigger the email if the project is a matrix project.
      */
@@ -533,7 +536,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
             MimeMessage msg = createMail(context, fromAddress, session);
             debug(context.getListener().getLogger(), "Successfully created MimeMessage");
-            if (EmailThrottler.getInstance().isThrottlingLimitExceeded()
+            if (getDescriptor().isThrottlingEnabled()
+                    && EmailThrottler.getInstance().isThrottlingLimitExceeded()
                     && !context.getTrigger().shouldBypassThrottling()) {
                 context.getListener().getLogger().println("Could not send email. Throttling limit exceeded.");
                 return false;
@@ -569,7 +573,9 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                         try {
                             transport.connect();
                             transport.sendMessage(msg, allRecipients);
-                            EmailThrottler.getInstance().incrementEmailCount();
+                            if (getDescriptor().isThrottlingEnabled()) {
+                                EmailThrottler.getInstance().incrementEmailCount();
+                            }
                             break;
                         } catch (SendFailedException e) {
                             if (e.getNextException() != null
