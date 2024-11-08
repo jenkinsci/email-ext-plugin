@@ -69,7 +69,9 @@ public class AbstractScriptTriggerTest {
         publisher.setPostsendScript("");
 
         final String script =
-                "out.println('Checking before trigger')\n" + "return Jenkins.instance.systemMessage == null";
+                """
+                out.println('Checking before trigger')
+                return Jenkins.instance.systemMessage == null""";
         publisher
                 .getConfiguredTriggers()
                 .add(new PreBuildScriptTrigger(
@@ -132,11 +134,15 @@ public class AbstractScriptTriggerTest {
         publisher.recipientList = "%DEFAULT_RECIPIENTS";
         publisher.setPresendScript("");
         publisher.setPostsendScript("");
-        String script = "class DoNotRunConstructor {\n" + "  static void main(String[] args) {}\n"
-                + "  DoNotRunConstructor() {\n"
-                + "    assert jenkins.model.Jenkins.instance.createProject(hudson.model.FreeStyleProject, 'should-not-exist')\n"
-                + "  }\n"
-                + "}\n";
+        String script =
+                """
+                class DoNotRunConstructor {
+                  static void main(String[] args) {}
+                  DoNotRunConstructor() {
+                    assert jenkins.model.Jenkins.instance.createProject(hudson.model.FreeStyleProject, 'should-not-exist')
+                  }
+                }
+                """;
         publisher
                 .getConfiguredTriggers()
                 .add(new PreBuildScriptTrigger(

@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,9 @@ import org.apache.commons.lang.StringUtils;
  */
 public class AttachmentUtils implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private final String attachmentsPattern;
 
     public AttachmentUtils(String attachmentsPattern) {
@@ -157,7 +160,7 @@ public class AttachmentUtils implements Serializable {
                     try {
                         attachmentPart.setDataHandler(new DataHandler(fileDataSource));
                         attachmentPart.setFileName(MimeUtility.encodeText(file.getName()));
-                        attachmentPart.setContentID(String.format("<%s>", file.getName()));
+                        attachmentPart.setContentID("<%s>".formatted(file.getName()));
                         attachments.add(attachmentPart);
                         totalAttachmentSize += file.length();
                     } catch (MessagingException e) {
@@ -231,9 +234,9 @@ public class AttachmentUtils implements Serializable {
                 return;
             }
 
-            if (run instanceof MatrixRun) {
+            if (run instanceof MatrixRun matrixRun) {
                 attachment.setFileName("build" + "-"
-                        + ((MatrixRun) run).getParent().getCombination().toString('-', '-') + "."
+                        + matrixRun.getParent().getCombination().toString('-', '-') + "."
                         + (compress ? "zip" : "log"));
             } else {
                 attachment.setFileName("build." + (compress ? "zip" : "log"));

@@ -63,8 +63,8 @@ public final class RecipientProviderUtilities {
         final Set<User> users = new HashSet<>();
         for (final Run<?, ?> run : runs) {
             debug.send("    build: %d", run.getNumber());
-            if (run instanceof RunWithSCM) {
-                List<ChangeLogSet<? extends ChangeLogSet.Entry>> changeSets = ((RunWithSCM<?, ?>) run).getChangeSets();
+            if (run instanceof RunWithSCM<?, ?> cM) {
+                List<ChangeLogSet<? extends ChangeLogSet.Entry>> changeSets = cM.getChangeSets();
                 for (ChangeLogSet<? extends ChangeLogSet.Entry> changeSet : changeSets) {
                     addChangeSetUsers(changeSet, users, debug);
                 }

@@ -86,10 +86,14 @@ public class JellyScriptContentTest {
 
         String output = content.evaluate(build, listener, JellyScriptContent.MACRO_NAME);
 
-        assertTrue(output.contains("CHANGE SET\n"
-                + "Revision  by Kohsuke Kawaguchi: (COMMIT MESSAGE)\n"
-                + "  change: edit path1\n"
-                + "  change: add path2\n"));
+        assertTrue(
+                output.contains(
+                        """
+                CHANGE SET
+                Revision  by Kohsuke Kawaguchi: (COMMIT MESSAGE)
+                  change: edit path1
+                  change: add path2
+                """));
     }
 
     /**

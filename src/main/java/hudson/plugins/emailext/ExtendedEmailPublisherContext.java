@@ -54,8 +54,8 @@ public class ExtendedEmailPublisherContext {
      */
     @Deprecated
     public AbstractBuild<?, ?> getBuild() {
-        if (run instanceof AbstractBuild) {
-            return (AbstractBuild<?, ?>) run;
+        if (run instanceof AbstractBuild<?, ?> build) {
+            return build;
         }
         return null;
     }

@@ -108,8 +108,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
-    public static final String DEFAULT_BODY_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:\n\n"
-            + "Check console output at $BUILD_URL to view the results.";
+    public static final String DEFAULT_BODY_TEXT =
+            """
+            $PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
+
+            Check console output at $BUILD_URL to view the results.""";
 
     public static final String DEFAULT_EMERGENCY_REROUTE_TEXT = "";
 
@@ -621,8 +624,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                             context.getListener().getLogger(),
                                             "Next " + next.getClass().getSimpleName() + " message: "
                                                     + next.getMessage());
-                                    if (next instanceof MessagingException) {
-                                        next = ((MessagingException) next).getNextException();
+                                    if (next instanceof MessagingException exception) {
+                                        next = exception.getNextException();
                                     } else {
                                         next = null;
                                     }
@@ -646,8 +649,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                                             context.getListener().getLogger(),
                                             "Next " + next.getClass().getSimpleName() + " message: "
                                                     + next.getMessage());
-                                    if (next instanceof MessagingException) {
-                                        next = ((MessagingException) next).getNextException();
+                                    if (next instanceof MessagingException exception) {
+                                        next = exception.getNextException();
                                     } else {
                                         next = null;
                                     }
@@ -1146,11 +1149,11 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 if (workspace != null) {
                     FilePath savedOutput = new FilePath(
                             workspace,
-                            String.format(
-                                    "%s-%s%s",
-                                    context.getTrigger().getDescriptor().getDisplayName(),
-                                    context.getRun().getId(),
-                                    extension));
+                            "%s-%s%s"
+                                    .formatted(
+                                            context.getTrigger().getDescriptor().getDisplayName(),
+                                            context.getRun().getId(),
+                                            extension));
                     savedOutput.write(text, charset);
                 } else {
                     context.getListener().getLogger().println("No workspace to save the email to");

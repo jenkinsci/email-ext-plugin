@@ -63,10 +63,9 @@ public class EmailExtScriptTokenMacroWhitelist extends AbstractWhitelist {
         // method groovy.lang.GroovyObject invokeMethod java.lang.String java.lang.Object (SimpleTemplateScript2
         // BUILD_ID)
         if (method.getDeclaringClass() == GroovyObject.class
-                && receiver instanceof EmailExtScript
+                && receiver instanceof EmailExtScript script
                 && "invokeMethod".equals(method.getName())
                 && args.length > 0) {
-            EmailExtScript script = (EmailExtScript) receiver;
             String name = String.valueOf(args[0]);
 
             for (TokenMacro m : macros) {

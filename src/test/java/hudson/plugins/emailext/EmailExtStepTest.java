@@ -128,9 +128,12 @@ public class EmailExtStepTest {
     public void saveOutput() throws Exception {
         WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");
         job.setDefinition(new CpsFlowDefinition(
-                "node {\n" + "  emailext(to: 'mickeymouse@disney.com', subject: 'Boo', saveOutput: true)\n"
-                        + "  archiveArtifacts '*.*'\n"
-                        + "}",
+                """
+                node {
+                  emailext(to: 'mickeymouse@disney.com', subject: 'Boo', saveOutput: true)
+                  archiveArtifacts '*.*'
+                }\
+                """,
                 true));
         Run<?, ?> run = job.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(run);

@@ -105,7 +105,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
             }
 
             if (inputStream == null) {
-                throw new FileNotFoundException(String.format("Managed file '%s' not found", managedFileName));
+                throw new FileNotFoundException("Managed file '%s' not found".formatted(managedFileName));
             }
             return inputStream;
         }

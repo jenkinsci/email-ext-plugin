@@ -110,8 +110,12 @@ public class AttachmentUtilsTest {
                 // Pad out the build log so the zip has something to compress
                 for (int i = 0; i < 1000; i++) {
                     listener.getLogger()
-                            .println("Oh Mickey, you're so fine\n" + "You're so fine you blow my mind, hey Mickey,\n"
-                                    + "Hey Mickey\n");
+                            .println(
+                                    """
+                                    Oh Mickey, you're so fine
+                                    You're so fine you blow my mind, hey Mickey,
+                                    Hey Mickey
+                                    """);
                 }
                 return true;
             }
@@ -324,8 +328,7 @@ public class AttachmentUtilsTest {
         BodyPart attach = part.getBodyPart(1);
         String attachment_filename = MimeUtility.decodeText(attach.getFileName());
         assertTrue(
-                String.format(
-                        "There should be a txt file named \"已使用红包.txt\" attached but found %s", attachment_filename),
+                "There should be a txt file named \"已使用红包.txt\" attached but found %s".formatted(attachment_filename),
                 "已使用红包.txt".equalsIgnoreCase(attachment_filename));
 
         assertTrue("The file should have the \"text/plain\" mimetype", attach.isMimeType("text/plain"));

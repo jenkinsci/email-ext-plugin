@@ -45,8 +45,8 @@ public class ScriptContentBuildWrapper {
             /* Maven Project */
             List<AggregatedTestResultAction.ChildReport> reportList = action.getChildReports();
             for (AggregatedTestResultAction.ChildReport report : reportList) {
-                if (report.result instanceof hudson.tasks.junit.TestResult) {
-                    result.add((TestResult) report.result);
+                if (report.result instanceof hudson.tasks.junit.TestResult testResult) {
+                    result.add(testResult);
                 }
             }
         }

@@ -35,7 +35,7 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
         return defaultRecipientProviders;
     }
 
-    public abstract EmailTrigger createDefault();
+    public abstract EmailTrigger createDefault() throws FormException;
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     protected EmailTrigger _createDefault() {
