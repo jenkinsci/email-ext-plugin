@@ -22,8 +22,7 @@ public abstract class EmailExtScript extends Script {
     public EmailExtScript() {}
 
     private void populateArgs(Object args, Map<String, String> map, ListMultimap<String, String> multiMap) {
-        if (args instanceof Object[]) {
-            Object[] argArray = (Object[]) args;
+        if (args instanceof Object[] argArray) {
             if (argArray.length > 0) {
                 Map<String, Object> argMap = (Map<String, Object>) argArray[0];
                 for (Map.Entry<String, Object> entry : argMap.entrySet()) {
@@ -86,6 +85,6 @@ public abstract class EmailExtScript extends Script {
             }
         }
 
-        return String.format("[Could not find content token (check your usage): %s]", name);
+        return "[Could not find content token (check your usage): %s]".formatted(name);
     }
 }

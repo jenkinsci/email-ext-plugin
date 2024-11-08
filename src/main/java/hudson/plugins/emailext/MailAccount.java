@@ -126,7 +126,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             }
             return result.includeEmptyValue()
                     .includeMatchingAs(
-                            item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
+                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf(t) : ACL.SYSTEM,
                             item,
                             StandardUsernamePasswordCredentials.class,
                             Collections.emptyList(),
@@ -170,7 +170,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             if (CredentialsProvider.listCredentials(
                             StandardUsernamePasswordCredentials.class,
                             item,
-                            item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
+                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf(t) : ACL.SYSTEM,
                             null,
                             CredentialsMatchers.withId(value))
                     .isEmpty()) {

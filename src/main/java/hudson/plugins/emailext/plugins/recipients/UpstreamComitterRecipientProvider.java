@@ -60,8 +60,8 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
     private static List<Run<?, ?>> getUpstreamBuilds(Run<?, ?> build) {
         List<Run<?, ?>> upstreams = new ArrayList<>();
         for (Cause c : build.getCauses()) {
-            if (c instanceof Cause.UpstreamCause) {
-                upstreams.addAll(upstreamCauseToRuns((Cause.UpstreamCause) c));
+            if (c instanceof Cause.UpstreamCause cause) {
+                upstreams.addAll(upstreamCauseToRuns(cause));
             }
         }
         return upstreams;
@@ -73,8 +73,8 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
         if (r != null) {
             upstreams.add(r);
             for (Cause c : cause.getUpstreamCauses()) {
-                if (c instanceof Cause.UpstreamCause) {
-                    upstreams.addAll(upstreamCauseToRuns((Cause.UpstreamCause) c));
+                if (c instanceof Cause.UpstreamCause upstreamCause) {
+                    upstreams.addAll(upstreamCauseToRuns(upstreamCause));
                 }
             }
         }
@@ -102,8 +102,8 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
                 "Adding upstream committer from job %s with build number %s",
                 run.getParent().getDisplayName(), run.getNumber());
 
-        if (run instanceof RunWithSCM) {
-            List<ChangeLogSet<? extends ChangeLogSet.Entry>> changeSets = ((RunWithSCM<?, ?>) run).getChangeSets();
+        if (run instanceof RunWithSCM<?, ?> cM) {
+            List<ChangeLogSet<? extends ChangeLogSet.Entry>> changeSets = cM.getChangeSets();
 
             for (ChangeLogSet<? extends ChangeLogSet.Entry> changeSet : changeSets) {
                 for (ChangeLogSet.Entry change : changeSet) {

@@ -114,7 +114,7 @@ public class EmailRecipientUtils {
             Mailer.UserProperty mailProperty = user.getProperty(Mailer.UserProperty.class);
             if (mailProperty != null) {
                 addr = mailProperty.getAddress();
-                String message = String.format("Resolved %s to %s", user.getId(), addr);
+                String message = "Resolved %s to %s".formatted(user.getId(), addr);
                 LOGGER.fine(message);
             }
         }

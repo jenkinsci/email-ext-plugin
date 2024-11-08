@@ -144,13 +144,12 @@ public class EmailExtWatchAction implements Action {
     }
 
     public ExtendedEmailPublisher getPublisher() {
-        ExtendedEmailPublisher p = null;
         for (Publisher pub : project.getPublishersList()) {
-            if (pub instanceof ExtendedEmailPublisher) {
-                p = (ExtendedEmailPublisher) pub;
+            if (pub instanceof ExtendedEmailPublisher publisher) {
+                return publisher;
             }
         }
-        return p;
+        return null;
     }
 
     @POST
@@ -165,8 +164,8 @@ public class EmailExtWatchAction implements Action {
 
             stopWatching();
             for (hudson.model.UserProperty property : user.getAllProperties()) {
-                if (property instanceof EmailExtWatchAction.UserProperty) {
-                    ((EmailExtWatchAction.UserProperty) property).clearTriggers();
+                if (property instanceof EmailExtWatchAction.UserProperty userProperty) {
+                    userProperty.clearTriggers();
                     break;
                 }
             }

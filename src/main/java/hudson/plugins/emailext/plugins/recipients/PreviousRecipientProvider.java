@@ -61,8 +61,8 @@ public class PreviousRecipientProvider extends RecipientProvider {
         Run<?, ?> build = context.getRun().getPreviousCompletedBuild();
 
         while (users.isEmpty() && build != null) {
-            if (build instanceof RunWithSCM) {
-                users.addAll(((RunWithSCM<?, ?>) build).getCulprits());
+            if (build instanceof RunWithSCM<?, ?> cM) {
+                users.addAll(cM.getCulprits());
             }
             users.addAll(RecipientProviderUtilities.getChangeSetAuthors(Collections.singleton(build), debug));
             users.addAll(RecipientProviderUtilities.getUsersTriggeringTheBuilds(Collections.singleton(build), debug));

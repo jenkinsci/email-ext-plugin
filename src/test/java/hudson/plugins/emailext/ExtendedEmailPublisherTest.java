@@ -746,8 +746,7 @@ public class ExtendedEmailPublisherTest {
         assertThat("Message should be multipart", msg.getContentType(), containsString("multipart/mixed"));
 
         // TODO: add more tests for getting the multipart information.
-        if (msg instanceof MimeMessage) {
-            MimeMessage mimeMsg = (MimeMessage) msg;
+        if (msg instanceof MimeMessage mimeMsg) {
             assertEquals(
                     "Message content should be a MimeMultipart instance",
                     MimeMultipart.class,
@@ -844,8 +843,10 @@ public class ExtendedEmailPublisherTest {
     @Issue("JENKINS-22777")
     public void testEmergencyRerouteOverridesPresendScript() throws Exception {
         publisher.getDescriptor().setEmergencyReroute("emergency@foo.com");
-        publisher.setPresendScript("import jakarta.mail.Message.RecipientType\n"
-                + "msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')");
+        publisher.setPresendScript(
+                """
+                import jakarta.mail.Message.RecipientType
+                msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')""");
         SuccessTrigger successTrigger = new SuccessTrigger(
                 recProviders,
                 "$DEFAULT_RECIPIENTS",
@@ -917,8 +918,10 @@ public class ExtendedEmailPublisherTest {
 
     @Test
     public void testPresendScriptModifiesTo() throws Exception {
-        publisher.setPresendScript("import jakarta.mail.Message.RecipientType\n"
-                + "msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')");
+        publisher.setPresendScript(
+                """
+                import jakarta.mail.Message.RecipientType
+                msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')""");
         SuccessTrigger successTrigger = new SuccessTrigger(
                 recProviders,
                 "$DEFAULT_RECIPIENTS",
@@ -969,9 +972,11 @@ public class ExtendedEmailPublisherTest {
     }
 
     private void verifyPresendScriptModifiesToUsingProjectExternalScript() throws Exception {
-        publisher.setPresendScript("import jakarta.mail.Message.RecipientType\n"
-                + "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n"
-                + "msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())");
+        publisher.setPresendScript(
+                """
+                import jakarta.mail.Message.RecipientType
+                import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper
+                msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())""");
         SuccessTrigger successTrigger = new SuccessTrigger(
                 recProviders,
                 "$DEFAULT_RECIPIENTS",
@@ -1018,9 +1023,11 @@ public class ExtendedEmailPublisherTest {
     }
 
     private void verifyPresendScriptModifiesToUsingGlobalExternalScript() throws Exception {
-        publisher.setPresendScript("import jakarta.mail.Message.RecipientType\n"
-                + "import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n"
-                + "msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())");
+        publisher.setPresendScript(
+                """
+                import jakarta.mail.Message.RecipientType
+                import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper
+                msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())""");
         SuccessTrigger successTrigger = new SuccessTrigger(
                 recProviders,
                 "$DEFAULT_RECIPIENTS",
@@ -1072,8 +1079,10 @@ public class ExtendedEmailPublisherTest {
     }
 
     private void verifyPostsendScriptModifiesMessageIdUsingProjectExternalScript() throws Exception {
-        publisher.setPostsendScript("import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n"
-                + "msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())");
+        publisher.setPostsendScript(
+                """
+                import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper
+                msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())""");
         verifyPostsendScriptModifiesMessageId();
     }
 
@@ -1107,8 +1116,10 @@ public class ExtendedEmailPublisherTest {
 
     @Test
     public void testPostsendScriptModifiesToUsingGlobalExternalScript() throws Exception {
-        publisher.setPostsendScript("import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper\n"
-                + "msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())");
+        publisher.setPostsendScript(
+                """
+                import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper
+                msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())""");
         List<GroovyScriptPath> classpath = new ArrayList<>();
         classpath.add(new GroovyScriptPath("src/test/postsend"));
         publisher.getDescriptor().setDefaultClasspath(classpath);
@@ -1569,16 +1580,24 @@ public class ExtendedEmailPublisherTest {
     public void testScriptConstructorsAreNotExecutedOutsideOfSandbox() throws Exception {
         setUpSecurity();
 
-        publisher.setPresendScript("class DoNotRunConstructor {\n" + "  static void main(String[] args) {}\n"
-                + "  DoNotRunConstructor() {\n"
-                + "    assert jenkins.model.Jenkins.instance.createProject(hudson.model.FreeStyleProject, 'should-not-exist1')\n"
-                + "  }\n"
-                + "}\n");
-        publisher.setPostsendScript("class DoNotRunConstructor {\n" + "  static void main(String[] args) {}\n"
-                + "  DoNotRunConstructor() {\n"
-                + "    assert jenkins.model.Jenkins.instance.createProject(hudson.model.FreeStyleProject, 'should-not-exist2')\n"
-                + "  }\n"
-                + "}\n");
+        publisher.setPresendScript(
+                """
+                class DoNotRunConstructor {
+                  static void main(String[] args) {}
+                  DoNotRunConstructor() {
+                    assert jenkins.model.Jenkins.instance.createProject(hudson.model.FreeStyleProject, 'should-not-exist1')
+                  }
+                }
+                """);
+        publisher.setPostsendScript(
+                """
+                class DoNotRunConstructor {
+                  static void main(String[] args) {}
+                  DoNotRunConstructor() {
+                    assert jenkins.model.Jenkins.instance.createProject(hudson.model.FreeStyleProject, 'should-not-exist2')
+                  }
+                }
+                """);
         SuccessTrigger successTrigger = new SuccessTrigger(
                 recProviders,
                 "$DEFAULT_RECIPIENTS",

@@ -2,6 +2,7 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import hudson.model.Descriptor;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
@@ -47,7 +48,8 @@ public class ScriptTrigger extends AbstractScriptTrigger {
             String attachmentsPattern,
             int attachBuildLog,
             String contentType,
-            String triggerScript) {
+            String triggerScript)
+            throws Descriptor.FormException {
         super(
                 recipientProviders,
                 recipientList,
@@ -113,7 +115,7 @@ public class ScriptTrigger extends AbstractScriptTrigger {
         }
 
         @Override
-        public EmailTrigger createDefault() {
+        public EmailTrigger createDefault() throws FormException {
             return new ScriptTrigger(
                     defaultRecipientProviders,
                     "",

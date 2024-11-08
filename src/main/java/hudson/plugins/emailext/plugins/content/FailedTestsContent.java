@@ -114,7 +114,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
         if (failCount == 0) {
             result.summary = "All tests passed";
         } else {
-            result.summary = String.format("%d tests failed.", failCount);
+            result.summary = "%d tests failed.".formatted(failCount);
             setMaxLength();
             if (maxTests > 0) {
                 int printSize = 0;
@@ -141,10 +141,10 @@ public class FailedTestsContent extends DataBoundTokenMacro {
                         ? StringEscapeUtils.escapeHtml(failedTest.getErrorDetails())
                         : failedTest.getErrorDetails())
                 : null;
-        String name = String.format(
-                "%s.%s",
-                failedTest instanceof CaseResult ? ((CaseResult) failedTest).getClassName() : failedTest.getFullName(),
-                failedTest.getDisplayName());
+        String name = "%s.%s"
+                .formatted(
+                        failedTest instanceof CaseResult cr ? cr.getClassName() : failedTest.getFullName(),
+                        failedTest.getDisplayName());
         FailedTest t = new FailedTest(name, failedTest.isPassed(), errorDetails, stackTrace);
         String testYaml = t.toString();
         if (printSize <= maxLength && result.tests.size() < maxTests) {
@@ -174,9 +174,8 @@ public class FailedTestsContent extends DataBoundTokenMacro {
 
         @Override
         public String toString() {
-            return String.format(
-                    "Name:%s, Status:%s, Error message: %s, Stack trace:%s",
-                    this.name, this.status, this.errorMessage, this.stackTrace);
+            return "Name:%s, Status:%s, Error message: %s, Stack trace:%s"
+                    .formatted(this.name, this.status, this.errorMessage, this.stackTrace);
         }
     }
 

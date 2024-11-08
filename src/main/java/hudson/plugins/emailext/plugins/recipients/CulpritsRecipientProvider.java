@@ -58,8 +58,8 @@ public class CulpritsRecipientProvider extends RecipientProvider {
         final Debug debug = new Debug();
         Run<?, ?> run = context.getRun();
 
-        if (run instanceof RunWithSCM) {
-            Set<User> culprits = ((RunWithSCM<?, ?>) run).getCulprits();
+        if (run instanceof RunWithSCM<?, ?> cM) {
+            Set<User> culprits = cM.getCulprits();
             RecipientProviderUtilities.addUsers(culprits, context, env, to, cc, bcc, debug);
         } else {
             List<Run<?, ?>> builds = new ArrayList<>();

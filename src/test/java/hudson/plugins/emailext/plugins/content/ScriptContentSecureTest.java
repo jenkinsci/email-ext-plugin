@@ -137,15 +137,18 @@ public class ScriptContentSecureTest extends ScriptContentTest {
                 folder.getProperties().get(FolderConfigFileProperty.class);
         folderConfigFileProperty
                 .getConfigs()
-                .add(new GroovyTemplateConfig(
-                        "long-long-id",
-                        "test.groovy",
-                        "Bad groovy template script",
-                        "<%\n" + "  // Whatever Groovy code you want\n"
-                                + "  Jenkins.get().setSystemMessage(\"You got hax0red\");\n"
-                                + "  // You can easily exfiltrate data using out.print or throwing an exception with the data in the message\n"
-                                + "  out.println(Jenkins.get().getSystemMessage());\n"
-                                + "%>"));
+                .add(
+                        new GroovyTemplateConfig(
+                                "long-long-id",
+                                "test.groovy",
+                                "Bad groovy template script",
+                                """
+                        <%
+                          // Whatever Groovy code you want
+                          Jenkins.get().setSystemMessage("You got hax0red");
+                          // You can easily exfiltrate data using out.print or throwing an exception with the data in the message
+                          out.println(Jenkins.get().getSystemMessage());
+                        %>"""));
         ScriptContent scriptContent = new ScriptContent();
         scriptContent.template = "managed:test.groovy";
         final LogTaskListener listener =
