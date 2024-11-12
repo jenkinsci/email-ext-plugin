@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import net.sf.json.JSONObject;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 /**
  * Created by acearl on 12/4/2014.
@@ -76,7 +76,7 @@ public class EmailExtWatchJobProperty extends JobProperty<Job<?, ?>> {
         }
 
         @Override
-        public JobProperty<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public JobProperty<?> newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
             return null;
         }
 

@@ -94,7 +94,7 @@ import org.kohsuke.stapler.Ancestor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.Stapler;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 /**
  * {@link Publisher} that sends notification e-mail.
@@ -281,7 +281,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             // Prepare the classpath for approval
             ScriptApproval scriptApproval = ScriptApproval.get();
             ApprovalContext context = ApprovalContext.create().withCurrentUser();
-            StaplerRequest request = Stapler.getCurrentRequest();
+            StaplerRequest2 request = Stapler.getCurrentRequest2();
             if (request != null) {
                 context = context.withItem(request.findAncestorObject(Item.class));
             }
@@ -307,7 +307,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         if (!StringUtils.isBlank(presendScript) && !"$DEFAULT_PRESEND_SCRIPT".equals(presendScript)) {
             ScriptApproval scriptApproval = ScriptApproval.get();
             ApprovalContext context = ApprovalContext.create().withCurrentUser();
-            StaplerRequest request = Stapler.getCurrentRequest();
+            StaplerRequest2 request = Stapler.getCurrentRequest2();
             if (request != null) {
                 Ancestor ancestor = request.findAncestor(Item.class);
                 if (ancestor != null) {
@@ -325,7 +325,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         if (!StringUtils.isBlank(postsendScript) && !"$DEFAULT_POSTSEND_SCRIPT".equals(postsendScript)) {
             ScriptApproval scriptApproval = ScriptApproval.get();
             ApprovalContext context = ApprovalContext.create().withCurrentUser();
-            StaplerRequest request = Stapler.getCurrentRequest();
+            StaplerRequest2 request = Stapler.getCurrentRequest2();
             if (request != null) {
                 Ancestor ancestor = request.findAncestor(Item.class);
                 if (ancestor != null) {

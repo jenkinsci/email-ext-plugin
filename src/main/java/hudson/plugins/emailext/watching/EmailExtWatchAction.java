@@ -12,15 +12,15 @@ import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
+import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.servlet.ServletException;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 import org.kohsuke.stapler.verb.POST;
@@ -71,7 +71,7 @@ public class EmailExtWatchAction implements Action {
 
             @NonNull
             @Override
-            public UserProperty newInstance(StaplerRequest req, @NonNull JSONObject json) throws FormException {
+            public UserProperty newInstance(StaplerRequest2 req, @NonNull JSONObject json) throws FormException {
                 List<EmailTrigger> triggers =
                         req != null ? req.bindJSONToList(EmailTrigger.class, json) : Collections.emptyList();
                 return new UserProperty(triggers);
@@ -153,7 +153,7 @@ public class EmailExtWatchAction implements Action {
     }
 
     @POST
-    public void doStopWatching(StaplerRequest req, StaplerResponse rsp) throws IOException {
+    public void doStopWatching(StaplerRequest2 req, StaplerResponse2 rsp) throws IOException {
         // See src/main/resources/hudson/plugins/emailext/watching/EmailExtWatchAction/{index,jobMain}.groovy
         User user = User.current();
         if (user != null
@@ -174,7 +174,7 @@ public class EmailExtWatchAction implements Action {
     }
 
     @RequirePOST
-    public void doConfigSubmit(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+    public void doConfigSubmit(StaplerRequest2 req, StaplerResponse2 rsp) throws IOException, ServletException {
         // See src/main/resources/hudson/plugins/emailext/watching/EmailExtWatchAction/{index,jobMain}.groovy
         User user = User.current();
         if (user != null

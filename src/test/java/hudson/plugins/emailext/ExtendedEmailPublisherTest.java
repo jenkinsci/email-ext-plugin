@@ -1246,7 +1246,7 @@ public class ExtendedEmailPublisherTest {
             form.put("project_replyto", "");
 
             ExtendedEmailPublisherDescriptor descriptor = new ExtendedEmailPublisherDescriptor();
-            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest(), form);
+            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
 
             assertEquals("default", publisher.contentType);
             assertEquals("ashlux@gmail.com", publisher.recipientList);
@@ -1462,7 +1462,7 @@ public class ExtendedEmailPublisherTest {
 
             JSONObject form = new JSONObject();
             form.put("project_from", "mail@test1.com");
-            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest(), form);
+            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
             assertEquals("mail@test1.com", publisher.from);
             ExtendedEmailPublisherContext context =
                     new ExtendedEmailPublisherContext(publisher, null, null, null, TaskListener.NULL);
@@ -1485,7 +1485,7 @@ public class ExtendedEmailPublisherTest {
             addaccs.add(new MailAccount(dform));
             descriptor.setAddAccounts(addaccs);
 
-            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest(), form);
+            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
             assertEquals("mail@test1.com", publisher.from);
             session = descriptor.createSession(publisher.getMailAccount(context), context);
             assertEquals("smtp.test1.com", session.getProperty("mail.smtp.host"));
@@ -1493,7 +1493,7 @@ public class ExtendedEmailPublisherTest {
             assertEquals("test1.com", session.getProperty("mail.smtp.ssl.trust"));
 
             form.put("project_from", "mail@test2.com");
-            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest(), form);
+            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
             assertEquals("mail@test2.com", publisher.from);
             session = descriptor.createSession(publisher.getMailAccount(context), context);
             assertEquals("smtp.test2.com", session.getProperty("mail.smtp.host"));
