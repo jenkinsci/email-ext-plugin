@@ -34,7 +34,7 @@ import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
 import org.kohsuke.stapler.Stapler;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 public abstract class AbstractScriptTrigger extends EmailTrigger {
 
@@ -60,7 +60,7 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
                 attachBuildLog,
                 contentType);
         this.secureTriggerScript = secureTriggerScript;
-        StaplerRequest request = Stapler.getCurrentRequest();
+        StaplerRequest2 request = Stapler.getCurrentRequest2();
         ApprovalContext context = ApprovalContext.create().withCurrentUser();
         if (request != null) {
             context = context.withItem(request.findAncestorObject(Item.class));
@@ -135,7 +135,7 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
     }
 
     @Override
-    public boolean configure(@NonNull StaplerRequest req, @NonNull JSONObject formData) {
+    public boolean configure(@NonNull StaplerRequest2 req, @NonNull JSONObject formData) {
         super.configure(req, formData);
         if (formData.containsKey("secureTriggerScript")) {
             this.secureTriggerScript =

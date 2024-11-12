@@ -22,7 +22,7 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.kohsuke.stapler.Stapler;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 public abstract class EmailTrigger implements Describable<EmailTrigger>, ExtensionPoint {
 
@@ -144,17 +144,17 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         return (EmailTriggerDescriptor) Jenkins.get().getDescriptor(getClass());
     }
 
-    public boolean configure(StaplerRequest req, JSONObject formData) {
+    public boolean configure(StaplerRequest2 req, JSONObject formData) {
         setEmail(createMailType(req, formData));
         return true;
     }
 
     @Deprecated
     protected EmailType createMailType(JSONObject formData) {
-        return createMailType(Stapler.getCurrentRequest(), formData);
+        return createMailType(Stapler.getCurrentRequest2(), formData);
     }
 
-    protected EmailType createMailType(StaplerRequest req, JSONObject formData) {
+    protected EmailType createMailType(StaplerRequest2 req, JSONObject formData) {
         return req.bindJSON(EmailType.class, formData);
     }
 
