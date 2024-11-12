@@ -704,7 +704,7 @@ newlines
 
 * Fix issue with new drop down list for post-build (https://issues.jenkins-ci.org/browse/JENKINS-13737[issue
 #13737])
-* Added a https://github.com/jenkinsci/email-ext-plugin/blob/master/src/main/resources/hudson/plugins/emailext/templates/static-analysis.jelly[new jelly
+* Added a https://github.com/jenkinsci/email-ext-plugin/blob/main/src/main/resources/hudson/plugins/emailext/templates/static-analysis.jelly[new jelly
 template]
 that shows the https://plugins.jenkins.io/analysis-core/[static analysis results]
 
