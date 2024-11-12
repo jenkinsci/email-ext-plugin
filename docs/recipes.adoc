@@ -18,7 +18,7 @@ toc::[]
 
 === Additional templates in the source code
 
-There are several simple examples referenced in the xref:/README.adoc[`README`] document; more examples can be found at https://github.com/jenkinsci/email-ext-plugin/tree/master/src/main/resources/hudson/plugins/emailext/templates[`src/main/resources/hudson/plugins/emailext/templates`].
+There are several simple examples referenced in the xref:/README.adoc[`README`] document; more examples can be found at https://github.com/jenkinsci/email-ext-plugin/tree/main/src/main/resources/hudson/plugins/emailext/templates[`src/main/resources/hudson/plugins/emailext/templates`].
 
 == Pre-send scripts
 

@@ -16,7 +16,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * This has been inspired by the Jenkins Postbuild plugin.
  *
  * @see <a href="https://github.com/jenkinsci/groovy-postbuild-plugin">https://github.com/jenkinsci/groovy-postbuild-plugin</a>
- * @see <a href="https://github.com/jenkinsci/groovy-postbuild-plugin/blob/master/src/main/java/org/jvnet/hudson/plugins/groovypostbuild/GroovyPostbuildRecorder.java">https://github.com/jenkinsci/groovy-postbuild-plugin/blob/master/src/main/java/org/jvnet/hudson/plugins/groovypostbuild/GroovyPostbuildRecorder.java</a>
+ * @see <a href="https://github.com/jenkinsci/groovy-postbuild-plugin/blob/main/src/main/java/org/jvnet/hudson/plugins/groovypostbuild/GroovyPostbuildRecorder.java">https://github.com/jenkinsci/groovy-postbuild-plugin/blob/master/src/main/java/org/jvnet/hudson/plugins/groovypostbuild/GroovyPostbuildRecorder.java</a>
  *
  */
 public class GroovyScriptPath extends AbstractDescribableImpl<GroovyScriptPath> {

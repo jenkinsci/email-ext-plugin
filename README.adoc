@@ -10,7 +10,7 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/master/[image:https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/master/badge/icon[Build Status]]
+https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/main/[image:https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/main/badge/icon[Build Status]]
 https://github.com/jenkinsci/email-ext-plugin/graphs/contributors[image:https://img.shields.io/github/contributors/jenkinsci/email-ext-plugin.svg[Contributors]]
 https://plugins.jenkins.io/email-ext[image:https://img.shields.io/jenkins/plugin/v/email-ext.svg[Jenkins Plugin]]
 https://github.com/jenkinsci/email-ext-plugin/releases/latest[image:https://img.shields.io/github/release/jenkinsci/email-ext-plugin.svg?label=changelog[GitHub release]]
@@ -40,7 +40,7 @@ Use the `email-ext-plugin` component in the `JENKINS` project.
 == Documentation
 
 * xref:docs/recipes.adoc[Recipes]
-* https://github.com/jenkinsci/.github/blob/master/CONTRIBUTING.md[Contribution guidelines]
+* https://github.com/jenkinsci/.github/blob/main/CONTRIBUTING.md[Contribution guidelines]
 * xref:CHANGELOG.adoc[Changelog]
 
 == Getting started
@@ -234,7 +234,7 @@ HTML Jelly script:: `${JELLY_SCRIPT,template="html"}`
 
 You can also write your own Jelly scripts.
 The Jelly scripts are particularly powerful since they provide a hook into the Jenkins API, including https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`] and https://javadoc.jenkins.io/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`].
-For an example on how to do this, take a look at the existing https://github.com/jenkinsci/email-ext-plugin/blob/master/src/main/resources/hudson/plugins/emailext/templates/html.jelly[`html`] and https://github.com/jenkinsci/email-ext-plugin/blob/master/src/main/resources/hudson/plugins/emailext/templates/text.jelly[`text`] scripts.
+For an example on how to do this, take a look at the existing https://github.com/jenkinsci/email-ext-plugin/blob/main/src/main/resources/hudson/plugins/emailext/templates/html.jelly[`html`] and https://github.com/jenkinsci/email-ext-plugin/blob/main/src/main/resources/hudson/plugins/emailext/templates/text.jelly[`text`] scripts.
 
 Using custom Jelly scripts (those not packaged with this plugin) requires the cooperation of your Jenkins administrator.
 The steps are relatively simple:
@@ -272,7 +272,7 @@ HTML Groovy script:: `${SCRIPT, template="groovy-html.template"}`
 
 You can also write your own scripts and templates.
 The scripts are particularly powerful since they provide a hook into the Jenkins API, including https://javadoc.jenkins.io/hudson/model/AbstractBuild.html[`hudson.model.AbstractBuild`] and https://javadoc.jenkins.io/hudson/model/AbstractProject.html[`hudson.model.AbstractProject`].
-For an example on how to do this, take a look at the existing https://github.com/jenkinsci/email-ext-plugin/blob/master/src/main/resources/hudson/plugins/emailext/templates/groovy-html.template[`html`] and https://github.com/jenkinsci/email-ext-plugin/blob/master/src/main/resources/hudson/plugins/emailext/templates/groovy-text.template[`text`] scripts.
+For an example on how to do this, take a look at the existing https://github.com/jenkinsci/email-ext-plugin/blob/main/src/main/resources/hudson/plugins/emailext/templates/groovy-html.template[`html`] and https://github.com/jenkinsci/email-ext-plugin/blob/main/src/main/resources/hudson/plugins/emailext/templates/groovy-text.template[`text`] scripts.
 
 Using custom scripts (those not packaged with this plugin) requires the cooperation of your Jenkins administrator.
 The steps are relatively simple:

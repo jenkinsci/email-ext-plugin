@@ -132,7 +132,7 @@
             <td>
               <j:choose>
                 <j:when test="${build.builtOnStr!=''}">${build.builtOnStr}</j:when>
-                <j:otherwise>master</j:otherwise>
+                <j:otherwise>built-in</j:otherwise>
               </j:choose>
             </td>
           </tr>

@@ -83,7 +83,7 @@ if (build.result == Result.SUCCESS) {
 }
 
 if (build.builtOnStr == '') {
-	built_on = 'master'
+	built_on = 'built-in'
 } else {
 	built_on = build.builtOnStr
 }
