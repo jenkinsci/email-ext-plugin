@@ -33,36 +33,42 @@ public class EmailExtWatchJobProperty extends JobProperty<Job<?, ?>> {
 
     public void addWatcher(User user) {
         String existing = null;
-        for (String u : watchers) {
-            if (u.compareTo(user.getId()) == 0) {
-                existing = u;
-                break;
+        synchronized (watchers) {
+            for (String u : watchers) {
+                if (u.compareTo(user.getId()) == 0) {
+                    existing = u;
+                    break;
+                }
             }
-        }
 
-        if (existing == null) {
-            watchers.add(user.getId());
+            if (existing == null) {
+                watchers.add(user.getId());
+            }
         }
     }
 
     public void removeWatcher(User user) {
         String remove = null;
-        for (String u : watchers) {
-            if (u.compareTo(user.getId()) == 0) {
-                remove = u;
-                break;
+        synchronized (watchers) {
+            for (String u : watchers) {
+                if (u.compareTo(user.getId()) == 0) {
+                    remove = u;
+                    break;
+                }
             }
-        }
 
-        if (remove != null) {
-            watchers.remove(user.getId());
+            if (remove != null) {
+                watchers.remove(user.getId());
+            }
         }
     }
 
     public boolean isWatching(User user) {
-        for (String u : watchers) {
-            if (u.compareTo(user.getId()) == 0) {
-                return true;
+        synchronized (watchers) {
+            for (String u : watchers) {
+                if (u.compareTo(user.getId()) == 0) {
+                    return true;
+                }
             }
         }
         return false;

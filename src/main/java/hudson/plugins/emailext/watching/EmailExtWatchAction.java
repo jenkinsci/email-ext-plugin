@@ -35,11 +35,13 @@ public class EmailExtWatchAction implements Action {
      */
     public static class UserProperty extends hudson.model.UserProperty {
         private List<EmailTrigger> triggers = new ArrayList<>();
+        private String projectName;
 
-        public UserProperty(List<EmailTrigger> triggers) {
+        public UserProperty(String projectId, List<EmailTrigger> triggers) {
             if (triggers != null) {
                 this.triggers = Collections.unmodifiableList(triggers);
             }
+            this.projectName = projectId;
         }
 
         @Exported
@@ -49,6 +51,14 @@ public class EmailExtWatchAction implements Action {
 
         private void clearTriggers() {
             triggers = Collections.emptyList();
+        }
+
+        public String getProjectName() {
+            return projectName;
+        }
+
+        public void setProjectName(String projectName) {
+            this.projectName = projectName;
         }
 
         @Extension
@@ -66,7 +76,7 @@ public class EmailExtWatchAction implements Action {
 
             @Override
             public UserProperty newInstance(User user) {
-                return new UserProperty(null);
+                return new UserProperty("", null);
             }
 
             @NonNull
@@ -74,12 +84,12 @@ public class EmailExtWatchAction implements Action {
             public UserProperty newInstance(StaplerRequest req, @NonNull JSONObject json) throws FormException {
                 List<EmailTrigger> triggers =
                         req != null ? req.bindJSONToList(EmailTrigger.class, json) : Collections.emptyList();
-                return new UserProperty(triggers);
+                return new UserProperty("", triggers);
             }
         }
     }
 
-    private AbstractProject<?, ?> project;
+    private final AbstractProject<?, ?> project;
 
     public EmailExtWatchAction(AbstractProject<?, ?> project) {
         this.project = project;
@@ -114,15 +124,14 @@ public class EmailExtWatchAction implements Action {
     }
 
     public List<EmailTrigger> getTriggers() {
-        List<EmailTrigger> triggers = null;
         User current = User.current();
         if (current != null) {
             UserProperty p = current.getProperty(UserProperty.class);
-            if (p != null) {
-                triggers = p.getTriggers();
+            if (p != null && p.getProjectName().equalsIgnoreCase(project.getFullName())) {
+                return p.getTriggers();
             }
         }
-        return triggers;
+        return null;
     }
 
     public EmailExtWatchJobProperty getJobProperty() throws IOException {
@@ -135,12 +144,11 @@ public class EmailExtWatchAction implements Action {
     }
 
     public Mailer.UserProperty getMailerProperty() {
-        Mailer.UserProperty prop = null;
         User current = User.current();
         if (current != null) {
-            prop = current.getProperty(Mailer.UserProperty.class);
+            return current.getProperty(Mailer.UserProperty.class);
         }
-        return prop;
+        return null;
     }
 
     public ExtendedEmailPublisher getPublisher() {
@@ -205,7 +213,7 @@ public class EmailExtWatchAction implements Action {
                 }
 
                 startWatching();
-                user.addProperty(new UserProperty(triggers));
+                user.addProperty(new UserProperty(project.getFullName(), triggers));
             }
         }
         rsp.sendRedirect(project.getAbsoluteUrl());

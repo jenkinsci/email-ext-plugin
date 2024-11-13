@@ -45,7 +45,7 @@ l.layout(norefresh: true) {
 
                     f.entry(title: _("Content Token Reference"), help: descriptor.getHelpFile('tokens'))
                     def triggers = hudson.plugins.emailext.plugins.EmailTrigger.all().findAll { t -> t.isWatchable() }
-                    def configuredTriggers = (my != null && my.triggers.size() > 0) ? my.triggers : []
+                    def configuredTriggers = (my != null && my?.triggers?.size() > 0) ? my.triggers : []
                     // do we want to filter the triggers somehow so that only some show up?
 
                     showSendTo = false
