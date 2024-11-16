@@ -1,10 +1,10 @@
 package hudson.plugins.emailext;
 
-import jakarta.mail.internet.InternetAddress;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
+import jakarta.mail.internet.InternetAddress;
+import org.junit.Test;
 
 public class EmailRecipientUtilsTest {
     @Test
@@ -17,7 +17,8 @@ public class EmailRecipientUtilsTest {
         assertEquals("Name Surname", addresses[0].getPersonal());
         assertEquals("n.Surname@mymail.com", addresses[0].getAddress());
 
-        output = EmailRecipientUtils.fixupDelimiters("user0, user1@email.com User Two    <user2@email.com> user3@email.com   ");
+        output = EmailRecipientUtils.fixupDelimiters(
+                "user0, user1@email.com User Two    <user2@email.com> user3@email.com   ");
         assertEquals("user0, user1@email.com, User Two <user2@email.com>, user3@email.com", output);
         addresses = InternetAddress.parse(output);
         assertEquals(4, addresses.length);

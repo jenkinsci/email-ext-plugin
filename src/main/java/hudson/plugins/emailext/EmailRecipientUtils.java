@@ -141,7 +141,7 @@ public class EmailRecipientUtils {
 
         // we only need to do more fixup if there are spaces in the string
         if (input.contains(" ")) {
-            if(!input.contains("<") && !input.contains(("("))) {
+            if (!input.contains("<") && !input.contains(("("))) {
                 input = input.replace(" ", ", ");
             } else {
                 StringBuilder builder = new StringBuilder(input);
