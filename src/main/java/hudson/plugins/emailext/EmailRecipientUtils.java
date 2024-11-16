@@ -135,13 +135,64 @@ public class EmailRecipientUtils {
         }
     }
 
-    private static String fixupDelimiters(String input) {
-        input = input.trim();
-        input = input.replaceAll("\\s+", " ");
-        if (input.contains(" ") && !input.contains(",")) {
-            input = input.replace(" ", ",");
+    static String fixupDelimiters(String input) {
+        // replace multiple whitespace with a single space
+        input = input.trim().replaceAll("\\s+", " ");
+
+        // we only need to do more fixup if there are spaces in the string
+        if (input.contains(" ")) {
+            if(!input.contains("<") && !input.contains(("("))) {
+                input = input.replace(" ", ", ");
+            } else {
+                StringBuilder builder = new StringBuilder(input);
+                boolean inQuote = false;
+                boolean sawAt = false;
+                for (int i = 0; i < builder.length(); i++) {
+                    char curr = builder.charAt(i);
+                    if (curr == '"') {
+                        inQuote = !inQuote;
+                        continue;
+                    }
+
+                    if (curr == '@') {
+                        sawAt = true;
+                        continue;
+                    }
+
+                    if (!inQuote && curr == ',') {
+                        sawAt = false;
+                        continue;
+                    }
+
+                    if (builder.charAt(i) == ' ' && !inQuote) {
+                        if (builder.charAt(i - 1) == '>' || builder.charAt(i - 1) == ')') {
+                            if (((i + 1) < builder.length()) && builder.charAt(i + 1) != ',') {
+                                builder.setCharAt(i, ',');
+                                if (builder.charAt(i + 1) != ' ') {
+                                    builder.insert(i + 1, ' ');
+                                    i++;
+                                }
+                            }
+                            continue;
+                        }
+                        if (sawAt) {
+                            if ((i + 1) < builder.length() && builder.charAt(i + 1) != ',') {
+                                builder.setCharAt(i, ',');
+                                if (builder.charAt(i + 1) != ' ') {
+                                    builder.insert(i + 1, ' ');
+                                    i++;
+                                }
+                            }
+                        }
+                        sawAt = false;
+                    }
+                }
+                input = builder.toString();
+            }
         }
 
+        // now that spaces and friends have been fixed, let's make sure we're
+        // using commas instead of semicolons as well.
         input = input.replace(';', ',');
         return input;
     }
