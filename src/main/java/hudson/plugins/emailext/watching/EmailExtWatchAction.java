@@ -127,7 +127,7 @@ public class EmailExtWatchAction implements Action {
         User current = User.current();
         if (current != null) {
             UserProperty p = current.getProperty(UserProperty.class);
-            if (p != null && p.getProjectName().equalsIgnoreCase(project.getFullName())) {
+            if (p != null && project.getFullName().equalsIgnoreCase(p.getProjectName())) {
                 return p.getTriggers();
             }
         }
