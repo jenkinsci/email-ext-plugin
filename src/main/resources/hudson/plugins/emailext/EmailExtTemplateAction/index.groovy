@@ -14,25 +14,11 @@ l.layout {
     st.include(it: my.project, page: "sidepanel")
     l.main_panel {
         st.bind(var: "templateTester", value: my)
-        script """function onSubmit() {
-                var templateFile = document.getElementById('template_file_name').value;
-                var buildId = document.getElementById('template_build').value;
-                templateTester.renderTemplate(templateFile,buildId, function(t) {
-                    document.getElementById('rendered_template').src = "data:text/html;charset=utf-8," + escape(t.responseObject()[0]);
-                    var consoleOutput = t.responseObject()[1];
-                    if(consoleOutput.length == 0) {
-                        document.getElementById('output').style.display = 'none';                        
-                    } else {
-                        document.getElementById('output').style.display = 'block';
-                        document.getElementById('console_output').innerHTML = consoleOutput;
-                    }
-                });
-                return false;
-            }"""
+        st.adjunct(includes: "hudson.plugins.emailext.EmailExtTemplateAction.template-test")
         h1(my.displayName)        
         if(hasPermission) {
             h3(_("description"))
-            form(action: "", method: "post", name: "templateTest", onSubmit: "return onSubmit();") {
+            form(action: "", method: "post", name: "templateTest", class: "test-template-form") {
                 table {
                     f.entry(title: _("Jelly/Groovy Template File Name")) {
                         f.textbox(name: "template_file_name", id: "template_file_name", clazz: "required", checkUrl:"templateFileCheck", checkDependsOn: "")
