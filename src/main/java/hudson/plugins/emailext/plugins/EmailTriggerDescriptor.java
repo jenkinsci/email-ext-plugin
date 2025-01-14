@@ -1,6 +1,5 @@
 package hudson.plugins.emailext.plugins;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.Descriptor;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -37,7 +36,6 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
 
     public abstract EmailTrigger createDefault() throws FormException;
 
-    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     protected EmailTrigger _createDefault() {
         EmailTrigger trigger;
         try {
@@ -59,7 +57,7 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
                     "",
                     0,
                     "project");
-        } catch (Exception e) {
+        } catch (RuntimeException | ReflectiveOperationException e) {
             trigger = null;
         }
         return trigger;

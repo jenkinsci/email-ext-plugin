@@ -1,10 +1,13 @@
 package hudson.plugins.emailext;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
+import hudson.model.Result;
 import hudson.model.Run;
 import jakarta.mail.BodyPart;
 import jakarta.mail.Message;
@@ -143,6 +146,45 @@ public class EmailExtStepTest {
         Message msg = mbox.get(0);
         assertEquals("Boo", msg.getSubject());
         j.assertLogContains("Archiving artifacts", run);
+    }
+
+    @Test
+    public void testErrorHandlingForTokenMacros() throws Exception {
+        assertThat(
+                getLogForMacroPipeline("any", "${FILE, path=\"no.txt\"}"),
+                containsString("File 'no.txt' does not exist"));
+        assertThat(
+                getLogForMacroPipeline("none", "${FILE, path=\"no.txt\"}"),
+                containsString("Macro 'FILE' can ony be evaluated in a workspace."));
+        assertThat(
+                getLogForMacroPipeline("any", "${TEMPLATE, file=\"no.txt\"}"),
+                containsString("Text file [no.txt] was not found in $JENKINS_HOME/email-templates"));
+        assertThat(
+                getLogForMacroPipeline("none", "${TEMPLATE, file=\"no.txt\"}"),
+                containsString("Text file [no.txt] was not found in $JENKINS_HOME/email-templates"));
+    }
+
+    private String getLogForMacroPipeline(String agent, String macro) throws Exception {
+        WorkflowJob job = j.jenkins.createProject(WorkflowJob.class, "bar" + agent + macro.hashCode());
+        job.setDefinition(new CpsFlowDefinition(getPipeline(agent, macro), true));
+        j.assertBuildStatus(Result.SUCCESS, job.scheduleBuild2(0));
+        Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
+        assertEquals(1, mbox.size());
+        Message msg = mbox.get(0);
+        Mailbox.clearAll();
+        return (String) ((MimeMultipart) msg.getContent()).getBodyPart(0).getContent();
+    }
+
+    private String getPipeline(String agent, String macro) {
+        return "pipeline {\n" + "  agent "
+                + agent + "\n" + "  stages {\n"
+                + "    stage('Cool') {\n"
+                + "      steps {\n"
+                + "       emailext(to: 'mickeymouse@disney.com', subject: 'Boo', body: '"
+                + macro + "')" + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}";
     }
 
     public static class FileCopyStep extends Step {

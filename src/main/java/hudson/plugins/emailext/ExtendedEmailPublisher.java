@@ -384,13 +384,18 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         debug(listener.getLogger(), "Checking for pre-build");
         if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
             debug(listener.getLogger(), "Executing pre-build step");
-            return _perform(build, null, listener, true);
+            try {
+                return _perform(build, null, listener, true);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
         }
         return true;
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+            throws InterruptedException {
         debug(listener.getLogger(), "Checking for post-build");
         if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
             debug(listener.getLogger(), "Performing post-build step");
@@ -399,8 +404,8 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return true;
     }
 
-    private boolean _perform(
-            AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, boolean forPreBuild) {
+    private boolean _perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener, boolean forPreBuild)
+            throws InterruptedException {
         if (disabled) {
             listener.getLogger().println("Extended Email Publisher is currently disabled in project settings");
             return true;
@@ -500,8 +505,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return true;
     }
 
-    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-    boolean sendMail(ExtendedEmailPublisherContext context) {
+    boolean sendMail(ExtendedEmailPublisherContext context) throws InterruptedException {
         try {
             InternetAddress fromAddress = getFromAddress();
             MailAccount mailAccount = getMailAccount(context);
@@ -685,7 +689,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
                 context.getListener().getLogger().println("Email sending was cancelled" + " by user script.");
             }
             return true;
-        } catch (Exception e) {
+        } catch (RuntimeException | MessagingException | UnsupportedEncodingException e) {
             LOGGER.log(Level.WARNING, "Could not send email.", e);
             Functions.printStackTrace(
                     e, context.getListener().error("Could not send email as a part of the post-build publishers."));
@@ -935,7 +939,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     }
 
     private MimeMessage createMail(ExtendedEmailPublisherContext context, InternetAddress fromAddress, Session session)
-            throws MessagingException, UnsupportedEncodingException {
+            throws MessagingException, UnsupportedEncodingException, InterruptedException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
 
         String charset = descriptor.getCharset();
@@ -987,7 +991,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         EnvVars env = null;
         try {
             env = context.getRun().getEnvironment(context.getListener());
-        } catch (Exception e) {
+        } catch (RuntimeException | IOException e) {
             context.getListener().getLogger().println("Error retrieving environment vars: " + e.getMessage());
             // create an empty set of env vars
             env = new EnvVars();
@@ -1237,7 +1241,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     public MatrixAggregator createAggregator(MatrixBuild matrixbuild, Launcher launcher, BuildListener buildlistener) {
         return new MatrixAggregator(matrixbuild, launcher, buildlistener) {
             @Override
-            public boolean endBuild() {
+            public boolean endBuild() throws InterruptedException {
                 LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
 
                 // Will be run by parent so we check if needed to be executed by parent
@@ -1248,7 +1252,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             }
 
             @Override
-            public boolean startBuild() {
+            public boolean startBuild() throws InterruptedException {
                 LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
                 // Will be run by parent so we check if needed to be executed by parent
                 if (getMatrixTriggerMode().forParent) {
