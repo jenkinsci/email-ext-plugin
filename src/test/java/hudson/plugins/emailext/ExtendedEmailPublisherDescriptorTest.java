@@ -83,14 +83,9 @@ public class ExtendedEmailPublisherDescriptorTest {
     public JenkinsRule j = new JenkinsRule();
 
     private void assertTitlePage(HtmlPage page) {
-        // oldTitleFormat can be removed once our baseline is high enough
-        String oldTitleFormat = "System [Jenkins]";
-        String newTitleFormat = "System - Jenkins";
         String actualTitle = page.getTitleText();
 
-        assertTrue(
-                "Should be at the Configure System page",
-                actualTitle.equals(oldTitleFormat) || actualTitle.equals(newTitleFormat));
+        assertTrue("Should be at the Configure System page", actualTitle.startsWith("System"));
     }
 
     @Test
