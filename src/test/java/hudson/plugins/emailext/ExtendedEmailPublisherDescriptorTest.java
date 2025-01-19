@@ -90,8 +90,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
         assertTrue(
                 "Should be at the Configure System page",
-                actualTitle.equals(oldTitleFormat) || actualTitle.equals(newTitleFormat)
-        );
+                actualTitle.equals(oldTitleFormat) || actualTitle.equals(newTitleFormat));
     }
 
     @Test
