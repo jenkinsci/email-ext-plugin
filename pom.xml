@@ -89,11 +89,10 @@
     <changelist>999999-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     <jenkins.baseline>2.479</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.1</jenkins.version>
+    <!-- REMOVE -->
+    <jenkins.version>2.494-rc35897.1f8edd4c1651</jenkins.version>
     <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
     <concurrency>1</concurrency>
-    <!-- To be removed once Jenkins.MANAGE gets out of beta -->
-    <useBeta>true</useBeta>
     <spotless.check.skip>false</spotless.check.skip>
   </properties>
 
