@@ -1,8 +1,6 @@
 package hudson.plugins.emailext.plugins.content;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,26 +13,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class FailedTestsContentTest {
+class FailedTestsContentTest {
+
     private FailedTestsContent failedTestContent;
 
     private AbstractBuild<?, ?> build;
 
     private TaskListener listener;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         failedTestContent = new FailedTestsContent();
         listener = StreamTaskListener.fromStdout();
         build = mock(AbstractBuild.class);
     }
 
     @Test
-    public void testGetContent_noTestsRanShouldGiveAMeaningfulMessage() throws Exception {
+    void testGetContent_noTestsRanShouldGiveAMeaningfulMessage() throws Exception {
         String content = failedTestContent.evaluate(build, listener, FailedTestsContent.MACRO_NAME);
 
         assertEquals("No tests ran.", content);
@@ -44,7 +43,7 @@ public class FailedTestsContentTest {
      * Verifies that token expansion works for pipeline builds (JENKINS-38519).
      */
     @Test
-    public void testGetContent_withWorkspaceAndNoTestsRanShouldGiveAMeaningfulMessage() throws Exception {
+    void testGetContent_withWorkspaceAndNoTestsRanShouldGiveAMeaningfulMessage() throws Exception {
         String content =
                 failedTestContent.evaluate(build, build.getWorkspace(), listener, FailedTestsContent.MACRO_NAME);
 
@@ -52,7 +51,7 @@ public class FailedTestsContentTest {
     }
 
     @Test
-    public void testGetContent_whenAllTestsPassedShouldGiveMeaningfulMessage() throws Exception {
+    void testGetContent_whenAllTestsPassedShouldGiveMeaningfulMessage() throws Exception {
         AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
         when(testResults.getFailCount()).thenReturn(0);
 
@@ -64,7 +63,7 @@ public class FailedTestsContentTest {
     }
 
     @Test
-    public void testGetContent_whenSomeTestsFailedShouldGiveMeaningfulMessage() throws Exception {
+    void testGetContent_whenSomeTestsFailedShouldGiveMeaningfulMessage() throws Exception {
         AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
         when(testResults.getFailCount()).thenReturn(123);
 
@@ -77,7 +76,7 @@ public class FailedTestsContentTest {
     }
 
     @Test
-    public void testGetContent_withMessage_withStack() throws Exception {
+    void testGetContent_withMessage_withStack() throws Exception {
         AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
         when(testResults.getFailCount()).thenReturn(2);
 
@@ -108,7 +107,7 @@ public class FailedTestsContentTest {
     }
 
     @Test
-    public void testGetContent_noMessage_withStack() throws Exception {
+    void testGetContent_noMessage_withStack() throws Exception {
         AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
         when(testResults.getFailCount()).thenReturn(2);
 
@@ -138,7 +137,7 @@ public class FailedTestsContentTest {
     }
 
     @Test
-    public void testGetContent_withMessage_noStack() throws Exception {
+    void testGetContent_withMessage_noStack() throws Exception {
         AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
         when(testResults.getFailCount()).thenReturn(2);
 
@@ -168,7 +167,7 @@ public class FailedTestsContentTest {
     }
 
     @Test
-    public void testGetContent_noMessage_noStack() throws Exception {
+    void testGetContent_noMessage_noStack() throws Exception {
         AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
         when(testResults.getFailCount()).thenReturn(2);
 
@@ -198,7 +197,7 @@ public class FailedTestsContentTest {
     }
 
     @Test
-    public void testGetContent_whenContentLargerThanMaxLengthShouldTruncate() throws Exception {
+    void testGetContent_whenContentLargerThanMaxLengthShouldTruncate() throws Exception {
         AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
         when(testResults.getFailCount()).thenReturn(5);
 
@@ -227,7 +226,7 @@ public class FailedTestsContentTest {
     }
 
     @Test
-    public void testGetContent_withMessage_withStack_htmlEscaped() throws Exception {
+    void testGetContent_withMessage_withStack_htmlEscaped() throws Exception {
         AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
         when(testResults.getFailCount()).thenReturn(1);
 
@@ -248,16 +247,16 @@ public class FailedTestsContentTest {
         String content = failedTestContent.evaluate(build, listener, FailedTestsContent.MACRO_NAME);
 
         assertEquals(
-                content,
                 "1 tests failed.<br/>" + "FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test<br/><br/>"
                         + "Error Message:<br/>"
                         + "expected:&lt;ABORTED&gt; but was:&lt;COMPLETED&gt; <br/><br/>"
                         + "Stack Trace:<br/>"
-                        + "at org.nexusformat.NexusFile.&lt;clinit&gt;(NexusFile.java:99)<br/><br/>");
+                        + "at org.nexusformat.NexusFile.&lt;clinit&gt;(NexusFile.java:99)<br/><br/>",
+                content);
     }
 
     @Test
-    public void testGetContent_withMessage_withStack_outputYaml() throws Exception {
+    void testGetContent_withMessage_withStack_outputYaml() throws Exception {
         AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
         when(testResults.getFailCount()).thenReturn(1);
         String testStackTrace =
@@ -352,7 +351,7 @@ public class FailedTestsContentTest {
     }
 
     @Test
-    public void testGetContent_withMessage_withStack_specificTestSuite() throws Exception {
+    void testGetContent_withMessage_withStack_specificTestSuite() throws Exception {
         AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
 
         List<TestResult> failedTests = new ArrayList<>();
@@ -398,7 +397,7 @@ public class FailedTestsContentTest {
     }
 
     @Test
-    public void testGetContent_withMessage_withStack_allTestSuites() throws Exception {
+    void testGetContent_withMessage_withStack_allTestSuites() throws Exception {
         AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
 
         List<TestResult> failedTests = new ArrayList<>();

@@ -1,10 +1,7 @@
 package hudson.plugins.emailext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
@@ -16,30 +13,23 @@ import hudson.plugins.emailext.plugins.trigger.FixedTrigger;
 import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
 import io.jenkins.plugins.casc.misc.ConfiguredWithCode;
 import io.jenkins.plugins.casc.misc.JenkinsConfiguredWithCodeRule;
+import io.jenkins.plugins.casc.misc.junit.jupiter.WithJenkinsConfiguredWithCode;
 import jakarta.mail.Authenticator;
 import jakarta.mail.PasswordAuthentication;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class ExtendedEmailPublisherDescriptorJCasCTest {
-
-    @Rule
-    public JenkinsConfiguredWithCodeRule r = new JenkinsConfiguredWithCodeRule();
-
-    @Rule
-    public TestName testName = new TestName();
+@WithJenkinsConfiguredWithCode
+class ExtendedEmailPublisherDescriptorJCasCTest {
 
     @Test
     @ConfiguredWithCode("configuration-as-code.yml")
-    public void shouldValidatedJCasCConfiguration() {
+    void shouldValidatedJCasCConfiguration(JenkinsConfiguredWithCodeRule r) {
         final ExtendedEmailPublisherDescriptor descriptor =
                 ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
         assertNotNull(descriptor);
@@ -96,7 +86,7 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
 
     @Test
     @ConfiguredWithCode("configuration-as-code-with-triggers.yml")
-    public void shouldBeAbleToConfigureTriggers() {
+    void shouldBeAbleToConfigureTriggers(JenkinsConfiguredWithCodeRule r) {
         final ExtendedEmailPublisherDescriptor descriptor =
                 ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
         assertNotNull(descriptor);
@@ -104,7 +94,7 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
         final List<String> expectedTriggers = Arrays.asList(
                 RegressionTrigger.class.getName(), AbortedTrigger.class.getName(), FixedTrigger.class.getName());
 
-        MatcherAssert.assertThat(
+        assertThat(
                 descriptor.getDefaultTriggerIds(),
                 Matchers.contains(
                         expectedTriggers.stream().map(Matchers::equalTo).collect(Collectors.toList())));
@@ -112,7 +102,7 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
 
     @Test
     @ConfiguredWithCode("configuration-as-code-upgrade.yml")
-    public void shouldValidatedJCasCConfigurationWithUpgrade() {
+    void shouldValidatedJCasCConfigurationWithUpgrade(JenkinsConfiguredWithCodeRule r) {
         final ExtendedEmailPublisherDescriptor descriptor =
                 ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
         assertNotNull(descriptor);
@@ -181,7 +171,7 @@ public class ExtendedEmailPublisherDescriptorJCasCTest {
 
     @Test
     @ConfiguredWithCode("configuration-as-code-upgrade-creds-check.yml")
-    public void shouldUseCorrectCredentialsAfterUpgrade() throws Exception {
+    void shouldUseCorrectCredentialsAfterUpgrade(JenkinsConfiguredWithCodeRule r) throws Exception {
         final ExtendedEmailPublisherDescriptor descriptor =
                 ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
 

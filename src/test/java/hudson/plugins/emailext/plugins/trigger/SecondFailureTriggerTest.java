@@ -2,9 +2,9 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.Result;
 import hudson.plugins.emailext.plugins.EmailTrigger;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class SecondFailureTriggerTest extends TriggerTestBase {
+class SecondFailureTriggerTest extends TriggerTestBase {
 
     @Override
     EmailTrigger newInstance() {
@@ -12,38 +12,38 @@ public class SecondFailureTriggerTest extends TriggerTestBase {
     }
 
     @Test
-    public void testTrigger_success() {
+    void testTrigger_success() {
         assertNotTriggered(Result.SUCCESS);
     }
 
     @Test
-    public void testTrigger_firstFailureAfterSuccess() {
+    void testTrigger_firstFailureAfterSuccess() {
         assertNotTriggered(Result.SUCCESS, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_secondFailureAfterSuccess() {
+    void testTrigger_secondFailureAfterSuccess() {
         assertTriggered(Result.SUCCESS, Result.FAILURE, Result.FAILURE);
         assertTriggered(Result.FAILURE, Result.FAILURE, Result.SUCCESS, Result.FAILURE, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_thirdFailureAfterSuccess() {
+    void testTrigger_thirdFailureAfterSuccess() {
         assertNotTriggered(Result.SUCCESS, Result.FAILURE, Result.FAILURE, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_firstBuildFails() {
+    void testTrigger_firstBuildFails() {
         assertNotTriggered(Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_firstTwoBuildsFail() {
+    void testTrigger_firstTwoBuildsFail() {
         assertTriggered(Result.FAILURE, Result.FAILURE);
     }
 
     @Test
-    public void testTrigger_firstThreeBuildsFail() {
+    void testTrigger_firstThreeBuildsFail() {
         assertNotTriggered(Result.FAILURE, Result.FAILURE, Result.FAILURE);
     }
 }

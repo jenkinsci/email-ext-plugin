@@ -1,9 +1,6 @@
 package hudson.plugins.emailext.plugins.content;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,23 +14,23 @@ import hudson.tasks.test.AggregatedTestResultAction.ChildReport;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class ScriptContentBuildWrapperTest {
+class ScriptContentBuildWrapperTest {
     private ScriptContentBuildWrapper buildWrapper;
 
     private AbstractBuild<?, ?> mockBuild;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         mockBuild = mock(AbstractBuild.class);
 
         buildWrapper = new ScriptContentBuildWrapper(mockBuild);
     }
 
     @Test
-    public void testGetTimestampString() {
+    void testGetTimestampString() {
         final Calendar calendar = Calendar.getInstance();
         when(mockBuild.getTimestamp()).thenReturn(calendar);
 
@@ -41,14 +38,14 @@ public class ScriptContentBuildWrapperTest {
     }
 
     @Test
-    public void testGetAction_whenActionNotFoundThenReturnNull() {
+    void testGetAction_whenActionNotFoundThenReturnNull() {
         when(mockBuild.getActions()).thenReturn(new LinkedList<>());
 
         assertNull(buildWrapper.getAction("class.not.found"));
     }
 
     @Test
-    public void testGetJUnitTestResult_whenMavenProjectUseMavenPluginsSurefireAggregatedReport() {
+    void testGetJUnitTestResult_whenMavenProjectUseMavenPluginsSurefireAggregatedReport() {
         final AggregatedTestResultAction surefireAggregatedReport = mock(AggregatedTestResultAction.class);
         final ChildReport childReport1 = mockChildReport();
         final ChildReport childReport2 = mockChildReport();
@@ -79,14 +76,14 @@ public class ScriptContentBuildWrapperTest {
     }
 
     @Test
-    public void testGetJUnitTestResult_listShouldBeEmptyWhenNoTestsFound() {
+    void testGetJUnitTestResult_listShouldBeEmptyWhenNoTestsFound() {
         final List<TestResult> testResults = buildWrapper.getJUnitTestResult();
 
         assertTrue(testResults.isEmpty());
     }
 
     @Test
-    public void testGetJUnitTestResult_whenFreestyleProjectShouldGetTest() {
+    void testGetJUnitTestResult_whenFreestyleProjectShouldGetTest() {
         final TestResult testResult = new TestResult();
         final TestResultAction testResultAction = mock(TestResultAction.class);
 
