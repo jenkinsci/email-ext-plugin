@@ -3,10 +3,7 @@ package hudson.plugins.emailext;
 import static hudson.plugins.emailext.FormValidationMessageMatcher.hasMessage;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.jvnet.hudson.test.JenkinsMatchers.hasKind;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
@@ -21,18 +18,17 @@ import java.util.List;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.hamcrest.Matchers;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.WithoutJenkins;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class MailAccountTest {
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class MailAccountTest {
 
     @Test
     @WithoutJenkins
-    public void testIsValidEmptyConfig() {
+    void testIsValidEmptyConfig() {
         JSONObject obj = new JSONObject();
         MailAccount account = new MailAccount(obj);
         assertFalse(account.isValid());
@@ -40,7 +36,7 @@ public class MailAccountTest {
 
     @Test
     @WithoutJenkins
-    public void testIsValidMissingAddress() {
+    void testIsValidMissingAddress() {
         JSONObject obj = new JSONObject();
         obj.put("smtpHost", "mail.bar.com");
         obj.put("smtpPort", 25);
@@ -50,7 +46,7 @@ public class MailAccountTest {
 
     @Test
     @WithoutJenkins
-    public void testIsValidNonAuthConfig() {
+    void testIsValidNonAuthConfig() {
         JSONObject obj = new JSONObject();
         obj.put("address", "foo@bar.com");
         obj.put("smtpHost", "mail.bar.com");
@@ -60,7 +56,7 @@ public class MailAccountTest {
     }
 
     @Test
-    public void testIsValidAuthConfig() {
+    void testIsValidAuthConfig(JenkinsRule j) {
         JSONObject obj = new JSONObject();
         obj.put("address", "foo@bar.com");
         obj.put("smtpHost", "mail.bar.com");
@@ -74,7 +70,7 @@ public class MailAccountTest {
 
     @Test
     @WithoutJenkins
-    public void testIsValidAuthConfigWithoutEncryption() {
+    void testIsValidAuthConfigWithoutEncryption() {
         MailAccount account = new MailAccount();
         account.setAddress("joe@example.com");
         account.setCredentialsId("foo");
@@ -83,7 +79,7 @@ public class MailAccountTest {
 
     @Test
     @WithoutJenkins
-    public void testIsValidAuthConfigAndSSL() {
+    void testIsValidAuthConfigAndSSL() {
         MailAccount account = new MailAccount();
         account.setAddress("joe@example.com");
         account.setCredentialsId("foo");
@@ -93,7 +89,7 @@ public class MailAccountTest {
 
     @Test
     @WithoutJenkins
-    public void testIsValidAuthConfigAndTLS() {
+    void testIsValidAuthConfigAndTLS() {
         MailAccount account = new MailAccount();
         account.setAddress("joe@example.com");
         account.setCredentialsId("foo");
@@ -102,7 +98,7 @@ public class MailAccountTest {
     }
 
     @Test
-    public void testUpgradeDuringCredentialsGetter() {
+    void testUpgradeDuringCredentialsGetter(JenkinsRule j) {
         MailAccount account = new MailAccount();
         account.setSmtpUsername("foo");
         account.setSmtpPassword(Secret.fromString("bar"));
@@ -118,7 +114,7 @@ public class MailAccountTest {
     }
 
     @Test
-    public void testFormValidationForInsecureAuth() throws Exception {
+    void testFormValidationForInsecureAuth(JenkinsRule j) throws Exception {
         final String validCredentialId = "valid-id";
         SystemCredentialsProvider.getInstance()
                 .getCredentials()

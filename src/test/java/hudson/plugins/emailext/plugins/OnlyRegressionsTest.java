@@ -1,7 +1,7 @@
 package hudson.plugins.emailext.plugins;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import hudson.FilePath;
 import hudson.Launcher;
@@ -14,18 +14,16 @@ import hudson.tasks.junit.JUnitResultArchiver;
 import hudson.util.StreamTaskListener;
 import java.io.IOException;
 import java.net.URL;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class OnlyRegressionsTest {
-
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class OnlyRegressionsTest {
 
     @Test
-    public void testOnlyRegressionsAreShown() throws Exception {
+    void testOnlyRegressionsAreShown(JenkinsRule j) throws Exception {
         FreeStyleProject project = j.createFreeStyleProject("onlyRegressions");
         project.getPublishersList().add(new JUnitResultArchiver("target/testreports/*.xml", true, null));
 
@@ -52,16 +50,16 @@ public class OnlyRegressionsTest {
         failedTestsContent.onlyRegressions = true;
         String content = failedTestsContent.evaluate(project.getLastBuild(), listener, FailedTestsContent.MACRO_NAME);
         assertTrue(
-                "The failing test should be reported the first time it fails",
-                content.contains("hudson.plugins.emailext"));
+                content.contains("hudson.plugins.emailext"),
+                "The failing test should be reported the first time it fails");
 
         project.scheduleBuild2(0).get();
         content = failedTestsContent.evaluate(project.getLastBuild(), listener, FailedTestsContent.MACRO_NAME);
         assertFalse(
-                "The failing test should not be reported the second time it fails",
-                content.contains("hudson.plugins.emailext"));
+                content.contains("hudson.plugins.emailext"),
+                "The failing test should not be reported the second time it fails");
         assertTrue(
-                "The content should state that there are other failing tests still",
-                content.contains("and 1 other failed test"));
+                content.contains("and 1 other failed test"),
+                "The content should state that there are other failing tests still");
     }
 }

@@ -1,6 +1,6 @@
 package hudson.plugins.emailext.plugins;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -21,47 +21,48 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class ContentBuilderTest {
+@WithJenkins
+class ContentBuilderTest {
 
     private ExtendedEmailPublisher publisher;
     private BuildListener listener;
     private AbstractBuild<?, ?> build;
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule() {
-        @Override
-        public void before() throws Throwable {
-            super.before();
+    private JenkinsRule j;
 
-            listener = new StreamBuildListener(System.out, StandardCharsets.UTF_8);
+    @BeforeEach
+    void setUp(JenkinsRule j) throws Exception {
+        this.j = j;
 
-            publisher = new ExtendedEmailPublisher();
-            publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";
-            publisher.defaultSubject = "How would you like your very own AWESOME-O 4000?";
-            publisher.recipientList = "ashlux@gmail.com";
+        listener = new StreamBuildListener(System.out, StandardCharsets.UTF_8);
 
-            Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultBody");
-            f.setAccessible(true);
-            f.set(publisher.getDescriptor(), "Give me $4000 and I'll mail you a check for $40,000!");
-            f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultSubject");
-            f.setAccessible(true);
-            f.set(publisher.getDescriptor(), "Nigerian needs your help!");
+        publisher = new ExtendedEmailPublisher();
+        publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";
+        publisher.defaultSubject = "How would you like your very own AWESOME-O 4000?";
+        publisher.recipientList = "ashlux@gmail.com";
 
-            f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("recipientList");
-            f.setAccessible(true);
-            f.set(publisher.getDescriptor(), "ashlux@gmail.com");
+        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultBody");
+        f.setAccessible(true);
+        f.set(publisher.getDescriptor(), "Give me $4000 and I'll mail you a check for $40,000!");
+        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultSubject");
+        f.setAccessible(true);
+        f.set(publisher.getDescriptor(), "Nigerian needs your help!");
 
-            build = mock(AbstractBuild.class);
-            when(build.getEnvironment(listener)).thenReturn(new EnvVars());
-        }
-    };
+        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("recipientList");
+        f.setAccessible(true);
+        f.set(publisher.getDescriptor(), "ashlux@gmail.com");
+
+        build = mock(AbstractBuild.class);
+        when(build.getEnvironment(listener)).thenReturn(new EnvVars());
+    }
 
     @Test
-    public void testTransformText_shouldExpand_$PROJECT_DEFAULT_CONTENT() {
+    void testTransformText_shouldExpand_$PROJECT_DEFAULT_CONTENT() {
         assertEquals(
                 publisher.defaultContent,
                 ContentBuilder.transformText(
@@ -73,7 +74,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testTransformText_shouldExpand_$PROJECT_DEFAULT_SUBJECT() {
+    void testTransformText_shouldExpand_$PROJECT_DEFAULT_SUBJECT() {
         assertEquals(
                 publisher.defaultSubject,
                 ContentBuilder.transformText("$PROJECT_DEFAULT_SUBJECT", publisher, build, listener));
@@ -83,7 +84,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testTransformText_shouldExpand_$DEFAULT_CONTENT() {
+    void testTransformText_shouldExpand_$DEFAULT_CONTENT() {
         assertEquals(
                 publisher.getDescriptor().getDefaultBody(),
                 ContentBuilder.transformText("$DEFAULT_CONTENT", publisher, build, listener));
@@ -93,7 +94,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testTransformText_shouldExpand_$DEFAULT_SUBJECT() {
+    void testTransformText_shouldExpand_$DEFAULT_SUBJECT() {
         assertEquals(
                 publisher.getDescriptor().getDefaultSubject(),
                 ContentBuilder.transformText("$DEFAULT_SUBJECT", publisher, build, listener));
@@ -103,7 +104,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testTransformText_shouldExpand_$DEFAULT_RECIPIENT_LIST() {
+    void testTransformText_shouldExpand_$DEFAULT_RECIPIENT_LIST() {
         assertEquals(
                 publisher.getDescriptor().getDefaultRecipients(),
                 ContentBuilder.transformText("$DEFAULT_RECIPIENTS", publisher, build, listener));
@@ -113,7 +114,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testTransformText_shouldExpand_$DEFAULT_PRESEND_SCRIPT() {
+    void testTransformText_shouldExpand_$DEFAULT_PRESEND_SCRIPT() {
         assertEquals(
                 publisher.getDescriptor().getDefaultPresendScript(),
                 StringUtils.trimToNull(
@@ -125,7 +126,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testTransformText_shouldExpand_$DEFAULT_POSTSEND_SCRIPT() {
+    void testTransformText_shouldExpand_$DEFAULT_POSTSEND_SCRIPT() {
         assertEquals(
                 publisher.getDescriptor().getDefaultPostsendScript(),
                 StringUtils.trimToNull(
@@ -137,8 +138,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testTransformText_noNPEWithNullDefaultSubjectBody()
-            throws NoSuchFieldException, IllegalAccessException {
+    void testTransformText_noNPEWithNullDefaultSubjectBody() throws NoSuchFieldException, IllegalAccessException {
         Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultBody");
         f.setAccessible(true);
         f.set(publisher.getDescriptor(), null);
@@ -150,7 +150,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testEscapedToken() throws IOException, InterruptedException {
+    void testEscapedToken() throws IOException, InterruptedException {
         build = mock(AbstractBuild.class);
         EnvVars testVars = new EnvVars();
         testVars.put("FOO", "BAR");
@@ -160,7 +160,7 @@ public class ContentBuilderTest {
     }
 
     @Test
-    public void testRuntimeMacro() {
+    void testRuntimeMacro() {
         RuntimeContent content = new RuntimeContent("Hello, world");
         assertEquals(
                 "Hello, world",
@@ -171,7 +171,7 @@ public class ContentBuilderTest {
                         Collections.singletonList(content)));
     }
 
-    public static class RuntimeContent extends TokenMacro {
+    private static class RuntimeContent extends TokenMacro {
 
         public static final String MACRO_NAME = "RUNTIME";
         private final String replacement;

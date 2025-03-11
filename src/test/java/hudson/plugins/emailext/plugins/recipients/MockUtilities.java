@@ -23,6 +23,7 @@
  */
 package hudson.plugins.emailext.plugins.recipients;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Run;
@@ -72,7 +73,8 @@ import org.mockito.stubbing.Answer;
         }
 
         @Override
-        public Iterator iterator() {
+        @NonNull
+        public Iterator<ChangeLogSet.Entry> iterator() {
             return new TransformIterator(Arrays.asList(authors).iterator(), inAuthor -> new Entry() {
                 @Override
                 public String getMsg() {

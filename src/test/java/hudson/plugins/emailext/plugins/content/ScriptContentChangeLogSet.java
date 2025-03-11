@@ -3,6 +3,7 @@ package hudson.plugins.emailext.plugins.content;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.AbstractBuild;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
@@ -27,6 +28,7 @@ public class ScriptContentChangeLogSet extends ChangeLogSet<ChangeLogSet.Entry> 
     }
 
     @Override
+    @NonNull
     public Iterator iterator() {
         return Collections.singletonList(new Entry() {
                     @Override
