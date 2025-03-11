@@ -4,8 +4,8 @@ import static hudson.plugins.emailext.FormValidationMessageMatcher.hasMessage;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.jvnet.hudson.test.JenkinsMatchers.hasKind;
 
 import com.cloudbees.plugins.credentials.CredentialsScope;
@@ -14,25 +14,33 @@ import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import hudson.plugins.emailext.MailAccount.MailAccountDescriptor;
 import hudson.util.FormValidation.Kind;
 import jenkins.model.Jenkins;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.FlagRule;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.WithoutJenkins;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class MailAccountFIPSTest {
+@WithJenkins
+class MailAccountFIPSTest {
 
-    @ClassRule
-    public static FlagRule<String> fipsSystemPropertyRule =
-            FlagRule.systemProperty("jenkins.security.FIPS140.COMPLIANCE", "true");
+    private static String fipsSystemProperty;
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    @BeforeAll
+    static void beforeClass() {
+        fipsSystemProperty = System.setProperty("jenkins.security.FIPS140.COMPLIANCE", "true");
+    }
+
+    @AfterAll
+    static void afterClass() {
+        if (fipsSystemProperty != null) {
+            System.clearProperty("jenkins.security.FIPS140.COMPLIANCE");
+        }
+    }
 
     @Test
     @WithoutJenkins
-    public void testIsValidNonAuthConfig() {
+    void testIsValidNonAuthConfig() {
         MailAccount account = new MailAccount();
         account.setAddress("joe@example.com");
         assertTrue(account.isValid());
@@ -40,7 +48,7 @@ public class MailAccountFIPSTest {
 
     @Test
     @WithoutJenkins
-    public void testIsNotValidAuthConfigWithoutEncryption() {
+    void testIsNotValidAuthConfigWithoutEncryption() {
         MailAccount account = new MailAccount();
         account.setAddress("joe@example.com");
         account.setCredentialsId("foo");
@@ -49,7 +57,7 @@ public class MailAccountFIPSTest {
 
     @Test
     @WithoutJenkins
-    public void testIsValidAuthConfigAndSSL() {
+    void testIsValidAuthConfigAndSSL() {
         MailAccount account = new MailAccount();
         account.setAddress("joe@example.com");
         account.setCredentialsId("foo");
@@ -59,7 +67,7 @@ public class MailAccountFIPSTest {
 
     @Test
     @WithoutJenkins
-    public void testIsValidAuthConfigAndTLS() {
+    void testIsValidAuthConfigAndTLS() {
         MailAccount account = new MailAccount();
         account.setAddress("joe@example.com");
         account.setCredentialsId("foo");
@@ -68,7 +76,7 @@ public class MailAccountFIPSTest {
     }
 
     @Test
-    public void testFormValidationForInsecureAuth() throws Exception {
+    void testFormValidationForInsecureAuth(JenkinsRule j) throws Exception {
         final String validCredentialId = "valid-id";
         SystemCredentialsProvider.getInstance()
                 .getCredentials()

@@ -6,24 +6,30 @@ import java.util.Collections;
 import jenkins.scm.api.metadata.ContributorMetadataAction;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.mock_javamail.Mailbox;
 
-public class ContributorMetadataRecipientProviderTest {
+@WithJenkins
+class ContributorMetadataRecipientProviderTest {
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    private JenkinsRule j;
 
-    @After
-    public void tearDown() {
+    @BeforeEach
+    void setUp(JenkinsRule j) {
+        this.j = j;
+    }
+
+    @AfterEach
+    void tearDown() {
         Mailbox.clearAll();
     }
 
     @Test
-    public void testAddRecipients() throws Exception {
+    void testAddRecipients() throws Exception {
         User user = User.get("someone", true, Collections.emptyMap());
         user.addProperty(new Mailer.UserProperty("someone@DOMAIN"));
 
@@ -35,7 +41,7 @@ public class ContributorMetadataRecipientProviderTest {
     }
 
     @Test
-    public void testAddRecipients_NotUser() throws Exception {
+    void testAddRecipients_NotUser() throws Exception {
         WorkflowJob job = j.createProject(WorkflowJob.class, "test");
         WorkflowRun run = job.scheduleBuild2(0).get();
         run.addAction(new ContributorMetadataAction("someoneelse", "Some One Else", "someoneelse@DOMAIN"));

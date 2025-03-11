@@ -1,22 +1,20 @@
 package hudson.plugins.emailext.plugins;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipInputStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ZipDataSourceTest {
+class ZipDataSourceTest {
 
     private static final int BUFFER_SIZE = 1024;
 
     @Test
-    public void testGetName() throws IOException {
+    void testGetName() throws IOException {
         String name = "myFile";
 
         ByteArrayInputStream in = new ByteArrayInputStream(new byte[0]);
@@ -26,7 +24,7 @@ public class ZipDataSourceTest {
     }
 
     @Test
-    public void testGetContentType() throws IOException {
+    void testGetContentType() throws IOException {
         String name = "myFile";
 
         ByteArrayInputStream in = new ByteArrayInputStream(new byte[0]);
@@ -36,7 +34,7 @@ public class ZipDataSourceTest {
     }
 
     @Test
-    public void testGetInputStream() throws IOException {
+    void testGetInputStream() throws IOException {
         byte[] sample = "Hello World lllllllllllots of repeated charactersssssssssssss Hello World again".getBytes();
         ZipDataSource dataSource = new ZipDataSource("name", new ByteArrayInputStream(sample));
         InputStream in = dataSource.getInputStream();
@@ -55,15 +53,15 @@ public class ZipDataSourceTest {
     }
 
     @Test
-    public void testGetOutputStream() throws IOException {
+    void testGetOutputStream() throws IOException {
         String name = "myFile";
 
         ByteArrayInputStream in = new ByteArrayInputStream(new byte[0]);
         ZipDataSource dataSource = new ZipDataSource(name, in);
 
         assertThrows(
-                "It is not possible to get an OutputStream from the ZipDataSource",
                 IOException.class,
-                dataSource::getOutputStream);
+                dataSource::getOutputStream,
+                "It is not possible to get an OutputStream from the ZipDataSource");
     }
 }

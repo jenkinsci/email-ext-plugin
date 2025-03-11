@@ -5,13 +5,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.oneOf;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
@@ -68,132 +62,138 @@ import org.htmlunit.html.HtmlSelect;
 import org.htmlunit.html.HtmlTextArea;
 import org.htmlunit.html.HtmlTextInput;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.hudson.test.recipes.LocalData;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-public class ExtendedEmailPublisherDescriptorTest {
+@WithJenkins
+class ExtendedEmailPublisherDescriptorTest {
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    private JenkinsRule j;
 
-    private void assertTitlePage(HtmlPage page) {
+    @BeforeEach
+    void setUp(JenkinsRule j) {
+        this.j = j;
+    }
+
+    private static void assertTitlePage(HtmlPage page) {
         String actualTitle = page.getTitleText();
 
-        assertTrue("Should be at the Configure System page", actualTitle.startsWith("System"));
+        assertTrue(actualTitle.startsWith("System"), "Should be at the Configure System page");
     }
 
     @Test
-    public void testGlobalConfigDefaultState() throws Exception {
+    void testGlobalConfigDefaultState() throws Exception {
         HtmlPage page = j.createWebClient().goTo("configure");
 
         assertTitlePage(page);
 
         HtmlTextInput smtpHost = page.getElementByName("_.smtpHost");
-        assertNotNull("SMTP Server should be present", smtpHost);
-        assertEquals("SMTP Server should be blank by default", "", smtpHost.getText());
+        assertNotNull(smtpHost, "SMTP Server should be present");
+        assertEquals("", smtpHost.getText(), "SMTP Server should be blank by default");
 
         HtmlNumberInput smtpPort = page.getElementByName("_.smtpPort");
-        assertNotNull("SMTP Port should be present", smtpPort);
-        assertEquals("SMTP Port should be 25 by default", "25", smtpPort.getText());
+        assertNotNull(smtpPort, "SMTP Port should be present");
+        assertEquals("25", smtpPort.getText(), "SMTP Port should be 25 by default");
 
         HtmlTextInput defaultSuffix = page.getElementByName("_.defaultSuffix");
-        assertNotNull("Default suffix should be present", defaultSuffix);
-        assertEquals("Default suffix should be blank by default", "", defaultSuffix.getText());
+        assertNotNull(defaultSuffix, "Default suffix should be present");
+        assertEquals("", defaultSuffix.getText(), "Default suffix should be blank by default");
 
         // default content type select control
         HtmlSelect contentType = page.getElementByName("_.defaultContentType");
-        assertNotNull("Content type selection should be present", contentType);
+        assertNotNull(contentType, "Content type selection should be present");
         assertEquals(
-                "Plain text should be selected by default",
                 "text/plain",
-                contentType.getSelectedOptions().get(0).getValueAttribute());
+                contentType.getSelectedOptions().get(0).getValueAttribute(),
+                "Plain text should be selected by default");
 
         HtmlCheckBoxInput precedenceBulk = page.getElementByName("_.precedenceBulk");
-        assertNotNull("Precedence Bulk should be present", precedenceBulk);
-        assertFalse("Add precedence bulk should not be checked by default", precedenceBulk.isChecked());
+        assertNotNull(precedenceBulk, "Precedence Bulk should be present");
+        assertFalse(precedenceBulk.isChecked(), "Add precedence bulk should not be checked by default");
 
         HtmlTextInput defaultRecipients = page.getElementByName("_.defaultRecipients");
-        assertNotNull("Default Recipients should be present", defaultRecipients);
-        assertEquals("Default recipients should be blank by default", "", defaultRecipients.getText());
+        assertNotNull(defaultRecipients, "Default Recipients should be present");
+        assertEquals("", defaultRecipients.getText(), "Default recipients should be blank by default");
 
         HtmlTextInput defaultReplyTo = page.getElementByName("_.defaultReplyTo");
-        assertNotNull("Default Reply-to should be present", defaultReplyTo);
-        assertEquals("Default Reply-To should be blank by default", "", defaultReplyTo.getText());
+        assertNotNull(defaultReplyTo, "Default Reply-to should be present");
+        assertEquals("", defaultReplyTo.getText(), "Default Reply-To should be blank by default");
 
         HtmlTextInput emergencyReroute = page.getElementByName("_.emergencyReroute");
-        assertNotNull("Emergency Reroute should be present", emergencyReroute);
-        assertEquals("Emergency Reroute should be blank by default", "", emergencyReroute.getText());
+        assertNotNull(emergencyReroute, "Emergency Reroute should be present");
+        assertEquals("", emergencyReroute.getText(), "Emergency Reroute should be blank by default");
 
         HtmlTextInput allowedDomains = page.getElementByName("_.allowedDomains");
-        assertNotNull("Allowed Domains should be present", allowedDomains);
-        assertEquals("Allowed Domains should be blank by default", "", allowedDomains.getText());
+        assertNotNull(allowedDomains, "Allowed Domains should be present");
+        assertEquals("", allowedDomains.getText(), "Allowed Domains should be blank by default");
 
         HtmlTextInput excludedRecipients = page.getElementByName("_.excludedCommitters");
-        assertNotNull("Excluded Recipients should be present", excludedRecipients);
-        assertEquals("Excluded Recipients should be blank by default", "", excludedRecipients.getText());
+        assertNotNull(excludedRecipients, "Excluded Recipients should be present");
+        assertEquals("", excludedRecipients.getText(), "Excluded Recipients should be blank by default");
 
         HtmlTextInput defaultSubject = page.getElementByName("_.defaultSubject");
-        assertNotNull("Default Subject should be present", defaultSubject);
+        assertNotNull(defaultSubject, "Default Subject should be present");
         assertEquals(
-                "Default Subject should be set",
                 "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!",
-                defaultSubject.getText());
+                defaultSubject.getText(),
+                "Default Subject should be set");
 
         HtmlNumberInput maxAttachmentSize = page.getElementByName("_.maxAttachmentSizeMb");
-        assertNotNull("Max attachment size should be present", maxAttachmentSize);
+        assertNotNull(maxAttachmentSize, "Max attachment size should be present");
         assertThat(
                 "Max attachment size should be blank or -1 by default",
                 maxAttachmentSize.getText(),
                 is(oneOf("", "-1")));
 
         HtmlTextArea defaultContent = page.getElementByName("_.defaultBody");
-        assertNotNull("Default content should be present", defaultContent);
+        assertNotNull(defaultContent, "Default content should be present");
         assertEquals(
-                "Default content should be set by default",
                 "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:\n\nCheck console output at $BUILD_URL to view the results.",
-                defaultContent.getText());
+                defaultContent.getText(),
+                "Default content should be set by default");
 
         HtmlTextArea defaultPresendScript = page.getElementByName("_.defaultPresendScript");
-        assertNotNull("Default presend script should be present", defaultPresendScript);
-        assertEquals("Default presend script should be blank by default", "", defaultPresendScript.getText());
+        assertNotNull(defaultPresendScript, "Default presend script should be present");
+        assertEquals("", defaultPresendScript.getText(), "Default presend script should be blank by default");
 
         HtmlTextArea defaultPostsendScript = page.getElementByName("_.defaultPostsendScript");
-        assertNotNull("Default postsend script should be present", defaultPostsendScript);
-        assertEquals("Default postsend script should be blank by default", "", defaultPostsendScript.getText());
+        assertNotNull(defaultPostsendScript, "Default postsend script should be present");
+        assertEquals("", defaultPostsendScript.getText(), "Default postsend script should be blank by default");
 
         HtmlCheckBoxInput debugMode = page.getElementByName("_.debugMode");
-        assertNotNull("Debug mode should be present", debugMode);
-        assertFalse("Debug mode should not be checked by default", debugMode.isChecked());
+        assertNotNull(debugMode, "Debug mode should be present");
+        assertFalse(debugMode.isChecked(), "Debug mode should not be checked by default");
 
         HtmlCheckBoxInput adminRequiredForTemplateTesting = page.getElementByName("_.adminRequiredForTemplateTesting");
-        assertNotNull("Admin required for template testing should be present", adminRequiredForTemplateTesting);
+        assertNotNull(adminRequiredForTemplateTesting, "Admin required for template testing should be present");
         assertFalse(
-                "Admin required for template testing should be unchecked by default",
-                adminRequiredForTemplateTesting.isChecked());
+                adminRequiredForTemplateTesting.isChecked(),
+                "Admin required for template testing should be unchecked by default");
 
         HtmlCheckBoxInput watchingEnabled = page.getElementByName("_.watchingEnabled");
-        assertNotNull("Watching enable should be present", watchingEnabled);
-        assertFalse("Watching enable should be unchecked by default", watchingEnabled.isChecked());
+        assertNotNull(watchingEnabled, "Watching enable should be present");
+        assertFalse(watchingEnabled.isChecked(), "Watching enable should be unchecked by default");
 
         HtmlCheckBoxInput allowUnregisteredEnabled = page.getElementByName("_.allowUnregisteredEnabled");
-        assertNotNull("Allow unregistered should be present", allowUnregisteredEnabled);
-        assertFalse("Allow unregistered should be unchecked by default", allowUnregisteredEnabled.isChecked());
+        assertNotNull(allowUnregisteredEnabled, "Allow unregistered should be present");
+        assertFalse(allowUnregisteredEnabled.isChecked(), "Allow unregistered should be unchecked by default");
 
         assertThrows(
-                "defaultClasspath section should not be present",
                 ElementNotFoundException.class,
-                () -> page.getElementByName("defaultClasspath"));
+                () -> page.getElementByName("defaultClasspath"),
+                "defaultClasspath section should not be present");
     }
 
     @Test
     @Issue("JENKINS-20030")
-    public void testGlobalConfigSimpleRoundTrip() throws Exception {
+    void testGlobalConfigSimpleRoundTrip() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor =
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
@@ -206,7 +206,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
     @Test
     @Issue("JENKINS-63367")
-    public void testSmtpPortRetainsSetValue() throws Exception {
+    void testSmtpPortRetainsSetValue() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor =
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         JenkinsRule.WebClient client = j.createWebClient();
@@ -224,7 +224,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
     @Test
     @Issue("JENKINS-20133")
-    public void testPrecedenceBulkSettingRoundTrip() throws Exception {
+    void testPrecedenceBulkSettingRoundTrip() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor =
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
@@ -237,7 +237,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
     @Test
     @Issue("JENKINS-20133")
-    public void testListIDRoundTrip() throws Exception {
+    void testListIDRoundTrip() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor =
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
@@ -250,7 +250,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
-    public void testAdvancedProperties() throws Exception {
+    void testAdvancedProperties() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor =
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
@@ -263,7 +263,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
-    public void defaultTriggers() throws Exception {
+    void defaultTriggers() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor =
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
@@ -302,7 +302,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
-    public void groovyClassPath() throws Exception {
+    void groovyClassPath() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor =
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         HtmlPage page = j.createWebClient().goTo("configure");
@@ -316,7 +316,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
         nodes = settingName.getByXPath(
                 "../div[contains(@class, 'setting-name')]/div[@class='repeated-container']/div[@name='defaultClasspath']");
-        assertEquals("Should not have any class path setup by default", 0, nodes.size());
+        assertEquals(0, nodes.size(), "Should not have any class path setup by default");
 
         HtmlDivision div;
         HtmlButton addButton;
@@ -377,7 +377,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
-    public void managePermissionShouldAccess() {
+    void managePermissionShouldAccess() {
         final String USER = "user";
         final String MANAGER = "manager";
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
@@ -396,19 +396,19 @@ public class ExtendedEmailPublisherDescriptorTest {
                 .to(MANAGER));
         try (ACLContext c = ACL.as(User.getById(USER, true))) {
             Collection<Descriptor> descriptors = Functions.getSortedDescriptorsForGlobalConfigUnclassified();
-            assertEquals("Global configuration should not be accessible to READ users", 0, descriptors.size());
+            assertEquals(0, descriptors.size(), "Global configuration should not be accessible to READ users");
         }
         try (ACLContext c = ACL.as(User.getById(MANAGER, true))) {
             Collection<Descriptor> descriptors = Functions.getSortedDescriptorsForGlobalConfigUnclassified();
             Optional<Descriptor> found = descriptors.stream()
                     .filter(descriptor -> descriptor instanceof ExtendedEmailPublisherDescriptor)
                     .findFirst();
-            assertTrue("Global configuration should be accessible to MANAGE users", found.isPresent());
+            assertTrue(found.isPresent(), "Global configuration should be accessible to MANAGE users");
         }
     }
 
     @Test
-    public void noAuthenticatorIsCreatedWhenCredentialsIsBlank() {
+    void noAuthenticatorIsCreatedWhenCredentialsIsBlank() {
         ExtendedEmailPublisherDescriptor descriptor =
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
@@ -438,7 +438,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
-    public void authenticatorIsCreatedWhenCredentialsIdProvided() throws Exception {
+    void authenticatorIsCreatedWhenCredentialsIdProvided() throws Exception {
         UsernamePasswordCredentials c = new UsernamePasswordCredentialsImpl(
                 CredentialsScope.GLOBAL, "email-ext-admin", "Username/password for SMTP", "admin", "honeycomb");
         CredentialsProvider.lookupStores(j.jenkins).iterator().next().addCredentials(Domain.global(), c);
@@ -471,7 +471,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
-    public void testFixEmptyAndTrimNormal() throws Exception {
+    void testFixEmptyAndTrimNormal() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor =
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         // add a credential to the GLOBAL scope
@@ -501,7 +501,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
-    public void testFixEmptyAndTrimExtraSpaces() throws Exception {
+    void testFixEmptyAndTrimExtraSpaces() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor =
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         // add a credential to the GLOBAL scope
@@ -531,7 +531,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
-    public void testFixEmptyAndTrimEmptyString() throws Exception {
+    void testFixEmptyAndTrimEmptyString() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor =
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         MailAccount ma = new MailAccount();
@@ -556,7 +556,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
-    public void testFixEmptyAndTrimNull() throws Exception {
+    void testFixEmptyAndTrimNull() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor =
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         MailAccount ma = new MailAccount();
@@ -582,7 +582,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
     @LocalData
     @Test
-    public void persistedConfigurationBeforeJCasC() {
+    void persistedConfigurationBeforeJCasC() {
         // Local data created using Email Extension 2.71 with the following code:
         /*
         HtmlPage page = j.createWebClient().goTo("configure");
@@ -771,7 +771,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     @Issue("JENKINS-63846")
     @LocalData
     @Test
-    public void persistedConfigurationBeforeDefaultAddress() {
+    void persistedConfigurationBeforeDefaultAddress() {
         // Local data created using Email Extension 2.72 with the following code:
         /*
         HtmlPage page = j.createWebClient().goTo("configure");
@@ -985,7 +985,7 @@ public class ExtendedEmailPublisherDescriptorTest {
 
     @Test
     @LocalData
-    public void persistedConfigurationWithCredentialId() {
+    void persistedConfigurationWithCredentialId() {
         // Local data created using Email Extension 2.72 with the following code:
         /*
         // add two credentials to the GLOBAL scope
@@ -1198,7 +1198,7 @@ public class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
-    public void emptyScriptApproval() throws Exception {
+    void emptyScriptApproval() throws Exception {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                 .grant(Jenkins.ADMINISTER)

@@ -1,7 +1,7 @@
 package hudson.plugins.emailext.plugins.recipients;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -16,29 +16,35 @@ import hudson.tasks.BuildTrigger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.FakeChangeLogSCM;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.SequenceLock;
 import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.mock_javamail.Mailbox;
 
-public class UpstreamComitterRecipientProviderTest {
+@WithJenkins
+class UpstreamComitterRecipientProviderTest {
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    private JenkinsRule j;
 
-    @After
-    public void tearDown() {
+    @BeforeEach
+    void setUp(JenkinsRule j) {
+        this.j = j;
+    }
+
+    @AfterEach
+    void tearDown() {
         Mailbox.clearAll();
     }
 
     @Issue("JENKINS-46821")
     @Test
-    public void multipleUpstreamJobs() throws Exception {
+    void multipleUpstreamJobs() throws Exception {
         FreeStyleProject us1 = j.createFreeStyleProject("us1");
         FakeChangeLogSCM scm = new FakeChangeLogSCM();
         scm.addChange().withAuthor("First Person <first@example.com>");

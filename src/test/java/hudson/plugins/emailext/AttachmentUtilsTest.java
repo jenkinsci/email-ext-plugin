@@ -9,13 +9,13 @@ package hudson.plugins.emailext;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import hudson.FilePath;
 import hudson.Launcher;
@@ -37,30 +37,36 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.TestBuilder;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.mock_javamail.Mailbox;
 
 /**
  *
  * @author acearl
  */
-public class AttachmentUtilsTest {
+@WithJenkins
+class AttachmentUtilsTest {
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    private JenkinsRule j;
 
-    @After
-    public void tearDown() {
+    @BeforeEach
+    void setUp(JenkinsRule j) {
+        this.j = j;
+    }
+
+    @AfterEach
+    void tearDown() {
         Mailbox.clearAll();
     }
 
     @Test
-    public void testBuildLogAttachment() throws Exception {
+    void testBuildLogAttachment() throws Exception {
         FreeStyleProject project = j.createFreeStyleProject("foo");
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
         publisher.attachBuildLog = true;
@@ -72,7 +78,7 @@ public class AttachmentUtilsTest {
         FreeStyleBuild b = j.buildAndAssertSuccess(project);
 
         Mailbox mbox = Mailbox.get("mickey@disney.com");
-        assertEquals("Should have an email from success", 1, mbox.size());
+        assertEquals(1, mbox.size(), "Should have an email from success");
 
         Message msg = mbox.get(0);
         assertThat(msg, instanceOf(MimeMessage.class));
@@ -80,7 +86,7 @@ public class AttachmentUtilsTest {
 
         MimeMultipart part = (MimeMultipart) msg.getContent();
 
-        assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
+        assertEquals(2, part.getCount(), "Should have two body items (message + attachment)");
 
         BodyPart attach = part.getBodyPart(1);
         assertThat(attach.getSize(), greaterThan(0));
@@ -90,7 +96,7 @@ public class AttachmentUtilsTest {
     }
 
     @Test
-    public void testBuildLogZipAttachment() throws Exception {
+    void testBuildLogZipAttachment() throws Exception {
         // check the size limit applies to the compressed size
         j.getInstance()
                 .getDescriptorByType(ExtendedEmailPublisherDescriptor.class)
@@ -124,7 +130,7 @@ public class AttachmentUtilsTest {
         FreeStyleBuild b = j.buildAndAssertSuccess(project);
 
         Mailbox mbox = Mailbox.get("mickey@disney.com");
-        assertEquals("Should have an email from success", 1, mbox.size());
+        assertEquals(1, mbox.size(), "Should have an email from success");
 
         Message msg = mbox.get(0);
         assertThat(msg, instanceOf(MimeMessage.class));
@@ -132,7 +138,7 @@ public class AttachmentUtilsTest {
 
         MimeMultipart part = (MimeMultipart) msg.getContent();
 
-        assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
+        assertEquals(2, part.getCount(), "Should have two body items (message + attachment)");
 
         BodyPart attach = part.getBodyPart(1);
         assertThat(
@@ -147,7 +153,7 @@ public class AttachmentUtilsTest {
     }
 
     @Test
-    public void testAttachmentFromWorkspace() throws Exception {
+    void testAttachmentFromWorkspace() throws Exception {
         URL url = this.getClass().getResource("/test.pdf");
         final File attachment = new File(url.getFile());
 
@@ -175,23 +181,23 @@ public class AttachmentUtilsTest {
         j.assertBuildStatusSuccess(b);
 
         Mailbox mbox = Mailbox.get("mickey@disney.com");
-        assertEquals("Should have an email from success", 1, mbox.size());
+        assertEquals(1, mbox.size(), "Should have an email from success");
 
         Message msg = mbox.get(0);
-        assertTrue("Message should be multipart", msg instanceof MimeMessage);
-        assertTrue("Content should be a MimeMultipart", msg.getContent() instanceof MimeMultipart);
+        assertInstanceOf(MimeMessage.class, msg, "Message should be multipart");
+        assertInstanceOf(MimeMultipart.class, msg.getContent(), "Content should be a MimeMultipart");
 
         MimeMultipart part = (MimeMultipart) msg.getContent();
 
-        assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
+        assertEquals(2, part.getCount(), "Should have two body items (message + attachment)");
 
         BodyPart attach = part.getBodyPart(1);
         assertTrue(
-                "There should be a PDF named \"test.pdf\" attached", "test.pdf".equalsIgnoreCase(attach.getFileName()));
+                "test.pdf".equalsIgnoreCase(attach.getFileName()), "There should be a PDF named \"test.pdf\" attached");
     }
 
     @Test
-    public void testAttachmentFromWorkspaceSubdir() throws Exception {
+    void testAttachmentFromWorkspaceSubdir() throws Exception {
         URL url = this.getClass().getResource("/test.pdf");
         final File attachment = new File(url.getFile());
 
@@ -220,24 +226,24 @@ public class AttachmentUtilsTest {
         j.assertBuildStatusSuccess(b);
 
         Mailbox mbox = Mailbox.get("mickey@disney.com");
-        assertEquals("Should have an email from success", 1, mbox.size());
+        assertEquals(1, mbox.size(), "Should have an email from success");
 
         Message msg = mbox.get(0);
-        assertTrue("Message should be multipart", msg instanceof MimeMessage);
-        assertTrue("Content should be a MimeMultipart", msg.getContent() instanceof MimeMultipart);
+        assertInstanceOf(MimeMessage.class, msg, "Message should be multipart");
+        assertInstanceOf(MimeMultipart.class, msg.getContent(), "Content should be a MimeMultipart");
 
         MimeMultipart part = (MimeMultipart) msg.getContent();
 
-        assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
+        assertEquals(2, part.getCount(), "Should have two body items (message + attachment)");
 
         BodyPart attach = part.getBodyPart(1);
         assertTrue(
-                "There should be a PDF named \"test.pdf\" attached", "test.pdf".equalsIgnoreCase(attach.getFileName()));
+                "test.pdf".equalsIgnoreCase(attach.getFileName()), "There should be a PDF named \"test.pdf\" attached");
     }
 
     @Test
     @Issue("JENKINS-27062")
-    public void testHtmlMimeType() throws Exception {
+    void testHtmlMimeType() throws Exception {
         URL url = this.getClass().getResource("/test.html");
         final File attachment = new File(url.getFile());
 
@@ -266,28 +272,28 @@ public class AttachmentUtilsTest {
         j.assertBuildStatusSuccess(b);
 
         Mailbox mbox = Mailbox.get("mickey@disney.com");
-        assertEquals("Should have an email from success", 1, mbox.size());
+        assertEquals(1, mbox.size(), "Should have an email from success");
 
         Message msg = mbox.get(0);
-        assertTrue("Message should be multipart", msg instanceof MimeMessage);
-        assertTrue("Content should be a MimeMultipart", msg.getContent() instanceof MimeMultipart);
+        assertInstanceOf(MimeMessage.class, msg, "Message should be multipart");
+        assertInstanceOf(MimeMultipart.class, msg.getContent(), "Content should be a MimeMultipart");
 
         MimeMultipart part = (MimeMultipart) msg.getContent();
 
-        assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
+        assertEquals(2, part.getCount(), "Should have two body items (message + attachment)");
 
         BodyPart attach = part.getBodyPart(1);
         assertTrue(
-                "There should be a HTML file named \"test.html\" attached",
-                "test.html".equalsIgnoreCase(attach.getFileName()));
+                "test.html".equalsIgnoreCase(attach.getFileName()),
+                "There should be a HTML file named \"test.html\" attached");
 
-        assertTrue("The file should have the \"text/html\" mimetype", attach.isMimeType("text/html"));
+        assertTrue(attach.isMimeType("text/html"), "The file should have the \"text/html\" mimetype");
     }
 
     @Test
     @Issue("JENKINS-33574")
-    public void testNonEnglishCharacter() throws Exception {
-        assumeThat(Charset.defaultCharset(), equalTo(StandardCharsets.UTF_8));
+    void testNonEnglishCharacter() throws Exception {
+        assumeTrue(Charset.defaultCharset().equals(StandardCharsets.UTF_8));
         FreeStyleProject project = j.createFreeStyleProject("foo");
 
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
@@ -315,22 +321,22 @@ public class AttachmentUtilsTest {
         j.assertBuildStatusSuccess(b);
 
         Mailbox mbox = Mailbox.get("mickey@disney.com");
-        assertEquals("Should have an email from success", 1, mbox.size());
+        assertEquals(1, mbox.size(), "Should have an email from success");
 
         Message msg = mbox.get(0);
-        assertTrue("Message should be multipart", msg instanceof MimeMessage);
-        assertTrue("Content should be a MimeMultipart", msg.getContent() instanceof MimeMultipart);
+        assertInstanceOf(MimeMessage.class, msg, "Message should be multipart");
+        assertInstanceOf(MimeMultipart.class, msg.getContent(), "Content should be a MimeMultipart");
 
         MimeMultipart part = (MimeMultipart) msg.getContent();
 
-        assertEquals("Should have two body items (message + attachment)", 2, part.getCount());
+        assertEquals(2, part.getCount(), "Should have two body items (message + attachment)");
 
         BodyPart attach = part.getBodyPart(1);
         String attachment_filename = MimeUtility.decodeText(attach.getFileName());
         assertTrue(
-                "There should be a txt file named \"已使用红包.txt\" attached but found %s".formatted(attachment_filename),
-                "已使用红包.txt".equalsIgnoreCase(attachment_filename));
+                "已使用红包.txt".equalsIgnoreCase(attachment_filename),
+                "There should be a txt file named \"已使用红包.txt\" attached but found %s".formatted(attachment_filename));
 
-        assertTrue("The file should have the \"text/plain\" mimetype", attach.isMimeType("text/plain"));
+        assertTrue(attach.isMimeType("text/plain"), "The file should have the \"text/plain\" mimetype");
     }
 }
