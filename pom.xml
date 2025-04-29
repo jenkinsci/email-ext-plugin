@@ -92,8 +92,6 @@
     <jenkins.version>${jenkins.baseline}.3</jenkins.version>
     <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
     <concurrency>1</concurrency>
-    <!-- To be removed once Jenkins.MANAGE gets out of beta -->
-    <useBeta>true</useBeta>
     <spotless.check.skip>false</spotless.check.skip>
   </properties>
 
