@@ -62,9 +62,9 @@ public class EmailRecipientUtils {
                         cc.add(address);
                         break;
                     case RecipientListStringAnalyser.NOT_FOUND:
-                    // Fallback: Treat NOT_FOUND like TO in case RecipientListStringAnalyser fails due to whatever
-                    // reason (maybe encoding of personal?)
                     case TO:
+                        // Fallback: Treat NOT_FOUND like TO in case RecipientListStringAnalyser fails due to whatever
+                        // reason (maybe encoding of personal?)
                         to.add(address);
                         break;
                     default:
