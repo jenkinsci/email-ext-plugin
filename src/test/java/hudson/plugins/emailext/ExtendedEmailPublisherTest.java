@@ -1239,14 +1239,14 @@ class ExtendedEmailPublisherTest {
     void testNewInstance_shouldGetBasicInformation() throws Exception {
         j.createWebClient().executeOnServer(() -> {
             JSONObject form = new JSONObject();
-            form.put("project_content_type", "default");
-            form.put("project_recipient_list", "ashlux@gmail.com");
-            form.put("project_default_subject", "Make millions in Nigeria");
-            form.put("project_default_content", "Give me a $1000 check and I'll mail you back $5000!!!");
-            form.put("project_attachments", "");
-            form.put("project_presend_script", "");
+            form.put("contentType", "default");
+            form.put("recipientList", "ashlux@gmail.com");
+            form.put("defaultSubject", "Make millions in Nigeria");
+            form.put("defaultContent", "Give me a $1000 check and I'll mail you back $5000!!!");
+            form.put("attachmentsPattern", "");
+            form.put("presendScript", "");
             form.put("postsendScript", "println 1");
-            form.put("project_replyto", "");
+            form.put("replyTo", "");
 
             ExtendedEmailPublisherDescriptor descriptor = new ExtendedEmailPublisherDescriptor();
             publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
@@ -1342,7 +1342,7 @@ class ExtendedEmailPublisherTest {
 
         final WebClient client = j.createWebClient();
         final HtmlPage page = client.goTo("job/JENKINS-15442/configure");
-        final HtmlTextArea recipientList = page.getElementByName("project_recipient_list");
+        final HtmlTextArea recipientList = page.getElementByName("recipientList");
         assertEquals("mickey@disney.com", recipientList.getText());
     }
 
@@ -1464,7 +1464,7 @@ class ExtendedEmailPublisherTest {
             descriptor.getMailAccount().setAdvProperties("mail.smtp.ssl.trust=test0.com");
 
             JSONObject form = new JSONObject();
-            form.put("project_from", "mail@test1.com");
+            form.put("from", "mail@test1.com");
             publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
             assertEquals("mail@test1.com", publisher.from);
             ExtendedEmailPublisherContext context =
@@ -1495,7 +1495,7 @@ class ExtendedEmailPublisherTest {
             assertEquals("25", session.getProperty("mail.smtp.port"));
             assertEquals("test1.com", session.getProperty("mail.smtp.ssl.trust"));
 
-            form.put("project_from", "mail@test2.com");
+            form.put("from", "mail@test2.com");
             publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
             assertEquals("mail@test2.com", publisher.from);
             session = descriptor.createSession(publisher.getMailAccount(context), context);
