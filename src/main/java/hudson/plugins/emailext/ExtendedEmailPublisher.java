@@ -319,6 +319,18 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         this.presendScript = presendScript;
     }
 
+    public int getAttachBuildLog() {
+        if (attachBuildLog) {
+            if (compressBuildLog) {
+                return 2;
+            } else {
+                return 1;
+            }
+        } else {
+            return 0;
+        }
+    }
+
     @DataBoundSetter
     public void setPostsendScript(String postsendScript) {
         postsendScript = StringUtils.trim(postsendScript);
