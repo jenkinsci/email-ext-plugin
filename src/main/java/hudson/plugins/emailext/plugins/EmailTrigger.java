@@ -139,6 +139,46 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         this.email = email;
     }
 
+    public String getRecipientList() {
+        return email.getRecipientList();
+    }
+
+    public String getReplyTo() {
+        return email.getReplyTo();
+    }
+
+    public String getAttachmentsPattern() {
+        return email.getAttachmentsPattern();
+    }
+
+    public int getAttachBuildLog() {
+        if (email.getAttachBuildLog()) {
+            if (email.getCompressBuildLog()) {
+                return 2;
+            } else {
+                return 1;
+            }
+        } else {
+            return 0;
+        }
+    }
+
+    public String getContentType() {
+        return email.getContentType();
+    }
+
+    public String getSubject() {
+        return email.getSubject();
+    }
+
+    public String getBody() {
+        return email.getBody();
+    }
+
+    public List<RecipientProvider> getRecipientProviders() {
+        return email.getRecipientProviders();
+    }
+
     @Override
     public EmailTriggerDescriptor getDescriptor() {
         return (EmailTriggerDescriptor) Jenkins.get().getDescriptor(getClass());
