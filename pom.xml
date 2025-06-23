@@ -137,7 +137,7 @@
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jsoup</artifactId>
       <!-- To remove when on bom -->
-      <version>1.20.1-46.ve5f1416988c2</version>
+      <version>1.21.1-52.v96e4041b_60fd</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
