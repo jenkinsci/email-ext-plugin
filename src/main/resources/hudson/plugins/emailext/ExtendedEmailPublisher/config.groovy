@@ -41,7 +41,7 @@ f.entry(title: _("Attachments"), help: "/plugin/email-ext/help/projectConfig/att
   f.textbox(name: "attachmentsPattern", value: configured ? instance.attachmentsPattern : "")
 }
 f.entry(title: _("Attach Build Log"), help: "/plugin/email-ext/help/projectConfig/attachBuildLog.html") {
-  select(name: "attachBuildLogSelect") {
+  select(name: "attachBuildLog") {
     f.option(value: 0, selected: instance != null ? !instance.attachBuildLog : true, _("Do Not Attach Build Log"))
     f.option(value: 1, selected: instance != null ? instance.attachBuildLog && !instance.compressBuildLog : false, _("Attach Build Log"))
     f.option(value: 2, selected: instance != null ? instance.attachBuildLog && instance.compressBuildLog : false, _("Compress and Attach Build Log"))
