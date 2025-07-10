@@ -188,6 +188,34 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>io.jenkins.lib</groupId>
+      <artifactId>mock-javamail</artifactId>
+      <version>2.3</version>
+      <scope>test</scope>
+      <exclusions>
+        <!-- Provided by jakarta-activation-api plugin -->
+        <exclusion>
+          <groupId>jakarta.activation</groupId>
+          <artifactId>jakarta.activation-api</artifactId>
+        </exclusion>
+        <!-- Provided by jakarta-mail-api plugin -->
+        <exclusion>
+          <groupId>jakarta.mail</groupId>
+          <artifactId>jakarta.mail-api</artifactId>
+        </exclusion>
+        <!-- Provided by jakarta-activation-api plugin -->
+        <exclusion>
+          <groupId>org.eclipse.angus</groupId>
+          <artifactId>angus-activation</artifactId>
+        </exclusion>
+        <!-- Provided by jakarta-mail-api plugin -->
+        <exclusion>
+          <groupId>org.eclipse.angus</groupId>
+          <artifactId>angus-mail</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>cloudbees-folder</artifactId>
       <scope>test</scope>
@@ -229,34 +257,6 @@
       <artifactId>workflow-support</artifactId>
       <classifier>tests</classifier>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jvnet.mock-javamail</groupId>
-      <artifactId>mock-javamail</artifactId>
-      <version>2.2</version>
-      <scope>test</scope>
-      <exclusions>
-        <!-- Provided by jakarta-activation-api plugin -->
-        <exclusion>
-          <groupId>jakarta.activation</groupId>
-          <artifactId>jakarta.activation-api</artifactId>
-        </exclusion>
-        <!-- Provided by jakarta-mail-api plugin -->
-        <exclusion>
-          <groupId>jakarta.mail</groupId>
-          <artifactId>jakarta.mail-api</artifactId>
-        </exclusion>
-        <!-- Provided by jakarta-activation-api plugin -->
-        <exclusion>
-          <groupId>org.eclipse.angus</groupId>
-          <artifactId>angus-activation</artifactId>
-        </exclusion>
-        <!-- Provided by jakarta-mail-api plugin -->
-        <exclusion>
-          <groupId>org.eclipse.angus</groupId>
-          <artifactId>angus-mail</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
