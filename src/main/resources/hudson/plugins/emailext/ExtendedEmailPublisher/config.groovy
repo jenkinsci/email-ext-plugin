@@ -24,11 +24,13 @@ f.entry(title: _("Project Reply-To List"), help: "/plugin/email-ext/help/project
   f.textarea(name: "replyTo", value: configured ? instance.replyTo : "\$DEFAULT_REPLYTO", checkUrl: "${rootURL}/publisher/ExtendedEmailPublisher/recipientListRecipientsCheck", checkDependsOn: "")
 }
 f.entry(title: _("Content Type"), help: "/plugin/email-ext/help/projectConfig/contentType.html") {
-  select(name: "contentType", class: "setting-input") {
-    f.option(selected: 'default'==instance?.contentType, value: "default", _("Default Content Type")) 
-    f.option(selected: 'text/plain'==instance?.contentType, value: "text/plain", _("projectContentType.plainText")) 
-    f.option(selected: 'text/html'==instance?.contentType, value: "text/html", _("projectContentType.html")) 
-    f.option(selected: 'both'==instance?.contentType, value: "both", _("projectContentType.both")) 
+  div(class: "jenkins-select") {
+    select(name: "contentType", class: "jenkins-select__input setting-input") {
+      f.option(selected: 'default'==instance?.contentType, value: "default", _("Default Content Type"))
+      f.option(selected: 'text/plain'==instance?.contentType, value: "text/plain", _("projectContentType.plainText"))
+      f.option(selected: 'text/html'==instance?.contentType, value: "text/html", _("projectContentType.html"))
+      f.option(selected: 'both'==instance?.contentType, value: "both", _("projectContentType.both"))
+    }
   }
 }
 f.entry(title: _("Default Subject"), help: "/plugin/email-ext/help/projectConfig/defaultSubject.html") {
@@ -41,11 +43,13 @@ f.entry(title: _("Attachments"), help: "/plugin/email-ext/help/projectConfig/att
   f.textbox(name: "attachmentsPattern", value: configured ? instance.attachmentsPattern : "")
 }
 f.entry(title: _("Attach Build Log"), help: "/plugin/email-ext/help/projectConfig/attachBuildLog.html") {
-  select(name: "attachBuildLog") {
-    f.option(value: 0, selected: instance != null ? !instance.attachBuildLog : true, _("Do Not Attach Build Log"))
-    f.option(value: 1, selected: instance != null ? instance.attachBuildLog && !instance.compressBuildLog : false, _("Attach Build Log"))
-    f.option(value: 2, selected: instance != null ? instance.attachBuildLog && instance.compressBuildLog : false, _("Compress and Attach Build Log"))
-  }      
+  div(class: "jenkins-select") {
+    select(name: "attachBuildLog", class: "jenkins-select__input") {
+      f.option(value: 0, selected: instance != null ? !instance.attachBuildLog : true, _("Do Not Attach Build Log"))
+      f.option(value: 1, selected: instance != null ? instance.attachBuildLog && !instance.compressBuildLog : false, _("Attach Build Log"))
+      f.option(value: 2, selected: instance != null ? instance.attachBuildLog && instance.compressBuildLog : false, _("Compress and Attach Build Log"))
+    }
+  }
 }
 
 f.entry(title: _("Content Token Reference"), field: "tokens")
