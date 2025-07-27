@@ -36,9 +36,9 @@ f.advanced() {
     div(class: "jenkins-select") {
       select(name: "contentType", class: "jenkins-select__input setting-input") {
         f.option(selected: 'project' == (instance != null ? instance.email.contentType : ""), value: "project", _("Project Content Type"))
-        f.option(selected: 'text/plain '= =(instance != null ? instance.email.contentType : ""), value: "text/plain", _("projectContentType.plainText"))
-        f.option(selected: 'text/html '= =(instance != null ? instance.email.contentType : ""), value: "text/html", _("projectContentType.html"))
-        f.option(selected: 'both '= =(instance != null ? instance.email.contentType : ""), value: "both", _("projectContentType.both"))
+        f.option(selected: 'text/plain' == (instance != null ? instance.email.contentType : ""), value: "text/plain", _("projectContentType.plainText"))
+        f.option(selected: 'text/html' == (instance != null ? instance.email.contentType : ""), value: "text/html", _("projectContentType.html"))
+        f.option(selected: 'both' == (instance != null ? instance.email.contentType : ""), value: "both", _("projectContentType.both"))
       }
     }
   }
