@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
