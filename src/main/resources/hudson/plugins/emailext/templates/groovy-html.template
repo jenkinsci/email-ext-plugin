@@ -284,7 +284,7 @@
     <% 	build.getLog(100).each() {
       line -> %>
 	  <tr>
-      <td class="console">${org.apache.commons.lang.StringEscapeUtils.escapeHtml(line)}</td>
+      <td class="console">${org.apache.commons.text.StringEscapeUtils.escapeHtml4(line)}</td>
     </tr>
     <% } %>
   </table>

@@ -16,7 +16,7 @@ import java.io.Serial;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.steps.Step;
