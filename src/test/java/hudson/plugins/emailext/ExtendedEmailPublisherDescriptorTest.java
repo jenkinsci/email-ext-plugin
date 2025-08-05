@@ -42,7 +42,6 @@ import hudson.plugins.emailext.plugins.trigger.UnstableTrigger;
 import hudson.plugins.emailext.plugins.trigger.XNthFailureTrigger;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
-import hudson.util.VersionNumber;
 import jakarta.mail.Authenticator;
 import java.util.Collection;
 import java.util.Collections;
