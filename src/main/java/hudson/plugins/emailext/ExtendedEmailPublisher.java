@@ -16,7 +16,6 @@ import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
-import hudson.matrix.MatrixRun;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
@@ -88,6 +87,7 @@ import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+import org.jenkinsci.plugins.variant.OptionalExtension;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.Ancestor;
@@ -99,7 +99,7 @@ import org.kohsuke.stapler.StaplerRequest2;
 /**
  * {@link Publisher} that sends notification e-mail.
  */
-public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatable {
+public class ExtendedEmailPublisher extends Notifier {
 
     private static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisher.class.getName());
 
@@ -394,7 +394,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         debug(listener.getLogger(), "Checking for pre-build");
-        if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
+        if (!build.getClass().getName().equals("hudson.matrix.MatrixRun") || isExecuteOnMatrixNodes()) {
             debug(listener.getLogger(), "Executing pre-build step");
             return _perform(build, null, listener, true);
         }
@@ -404,7 +404,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         debug(listener.getLogger(), "Checking for post-build");
-        if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
+        if (!build.getClass().getName().equals("hudson.matrix.MatrixRun") || isExecuteOnMatrixNodes()) {
             debug(listener.getLogger(), "Performing post-build step");
             return _perform(build, launcher, listener, false);
         }
@@ -1245,30 +1245,39 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
     }
 
-    @Override
-    public MatrixAggregator createAggregator(MatrixBuild matrixbuild, Launcher launcher, BuildListener buildlistener) {
-        return new MatrixAggregator(matrixbuild, launcher, buildlistener) {
-            @Override
-            public boolean endBuild() {
-                LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
+    @OptionalExtension(requirePlugins = "matrix-project")
+    public static final class MatrixAggregatableImpl implements MatrixAggregatable {
+        @Override
+        public MatrixAggregator createAggregator(
+                MatrixBuild matrixbuild, Launcher launcher, BuildListener buildlistener) {
+            var publisher = matrixbuild.getParent().getPublishersList().get(ExtendedEmailPublisher.class);
+            if (publisher != null) {
+                return new MatrixAggregator(matrixbuild, launcher, buildlistener) {
+                    @Override
+                    public boolean endBuild() {
+                        LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
 
-                // Will be run by parent so we check if needed to be executed by parent
-                if (getMatrixTriggerMode().forParent) {
-                    return ExtendedEmailPublisher.this._perform(this.build, this.launcher, this.listener, false);
-                }
-                return true;
-            }
+                        // Will be run by parent so we check if needed to be executed by parent
+                        if (publisher.getMatrixTriggerMode().forParent) {
+                            return publisher._perform(this.build, this.launcher, this.listener, false);
+                        }
+                        return true;
+                    }
 
-            @Override
-            public boolean startBuild() {
-                LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
-                // Will be run by parent so we check if needed to be executed by parent
-                if (getMatrixTriggerMode().forParent) {
-                    return ExtendedEmailPublisher.this._perform(this.build, this.launcher, this.listener, true);
-                }
-                return true;
+                    @Override
+                    public boolean startBuild() {
+                        LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
+                        // Will be run by parent so we check if needed to be executed by parent
+                        if (publisher.getMatrixTriggerMode().forParent) {
+                            return publisher._perform(this.build, this.launcher, this.listener, true);
+                        }
+                        return true;
+                    }
+                };
+            } else {
+                return null;
             }
-        };
+        }
     }
 
     public Object readResolve() {
