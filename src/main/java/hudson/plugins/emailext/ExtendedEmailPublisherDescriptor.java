@@ -10,7 +10,6 @@ import hudson.Extension;
 import hudson.Util;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
-import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
@@ -846,7 +845,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public boolean isMatrixProject(Object project) {
-        return project instanceof MatrixProject;
+        return project.getClass().getName().equals("hudson.matrix.MatrixProject");
     }
 
     public boolean isDebugMode() {
