@@ -1,5 +1,6 @@
 package hudson.plugins.emailext;
 
+import hudson.ExtensionList;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.matrix.MatrixBuild;
@@ -26,6 +27,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.jenkinsci.plugins.variant.OptionalExtension;
 
 /**
  * @author acearl
@@ -234,13 +236,15 @@ public class AttachmentUtils implements Serializable {
                 return;
             }
 
-            if (run instanceof MatrixRun matrixRun) {
-                attachment.setFileName("build" + "-"
-                        + matrixRun.getParent().getCombination().toString('-', '-') + "."
-                        + (compress ? "zip" : "log"));
-            } else {
-                attachment.setFileName("build." + (compress ? "zip" : "log"));
+            var suffix = "";
+            for (var ma : ExtensionList.lookup(MatrixAssist.class)) {
+                var _suffix = ma.suffix(run);
+                if (_suffix != null) {
+                    suffix = _suffix;
+                    break;
+                }
             }
+            attachment.setFileName("build" + suffix + "." + (compress ? "zip" : "log"));
             attachment.setDataHandler(new DataHandler(fileSource));
             multipart.addBodyPart(attachment);
         } catch (MessagingException | IOException e) {
@@ -249,13 +253,38 @@ public class AttachmentUtils implements Serializable {
     }
 
     public static void attachBuildLog(ExtendedEmailPublisherContext context, Multipart multipart, boolean compress) {
-        if (context.getRun() instanceof MatrixBuild) {
-            MatrixBuild build = (MatrixBuild) context.getRun();
-            for (MatrixRun run : build.getExactRuns()) {
-                attachSingleLog(context, run, multipart, compress);
+        var main = context.getRun();
+        var all = List.of(main);
+        for (var ma : ExtensionList.lookup(MatrixAssist.class)) {
+            var _all = ma.getExactRuns(main);
+            if (_all != null) {
+                all = _all;
+                break;
             }
-        } else {
-            attachSingleLog(context, context.getRun(), multipart, compress);
+        }
+        for (var run : all) {
+            attachSingleLog(context, run, multipart, compress);
+        }
+    }
+
+    public interface MatrixAssist {
+        List<? extends Run<?, ?>> getExactRuns(Run<?, ?> run);
+
+        String suffix(Run<?, ?> run);
+    }
+
+    @OptionalExtension(requirePlugins = "matrix-project")
+    public static final class MatrixAssistImpl implements MatrixAssist {
+        @Override
+        public List<? extends Run<?, ?>> getExactRuns(Run<?, ?> run) {
+            return run instanceof MatrixBuild mb ? mb.getExactRuns() : null;
+        }
+
+        @Override
+        public String suffix(Run<?, ?> run) {
+            return run instanceof MatrixRun mr
+                    ? "-" + mr.getParent().getCombination().toString('-', '-')
+                    : null;
         }
     }
 
