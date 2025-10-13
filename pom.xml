@@ -95,6 +95,7 @@
     <!-- To be removed once Jenkins.MANAGE gets out of beta -->
     <useBeta>true</useBeta>
     <spotless.check.skip>false</spotless.check.skip>
+    <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
   </properties>
 
   <dependencyManagement>
