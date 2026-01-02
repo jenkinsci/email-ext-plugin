@@ -26,50 +26,11 @@
 
   <contributors>
     <contributor>
-      <!--<id>ashlux</id>-->
-      <name>Ash Lux</name>
-      <email>ashlux@gmail.com</email>
-      <roles>
-        <role>Past Maintainer</role>
-      </roles>
-    </contributor>
-    <contributor>
-      <!--<id>kdsweeney</id>-->
-      <name>Kyle Sweeney</name>
-      <roles>
-        <role>Past Maintainer</role>
-      </roles>
-    </contributor>
-    <contributor>
-      <!--<id>krwalker</id>-->
-      <name>K. R. Walker</name>
-      <email>krwalker@stellarscience.com</email>
-      <roles>
-        <role>Past Maintainer</role>
-      </roles>
-    </contributor>
-    <contributor>
-      <!--<id>ssogabe</id>-->
-      <name>Seiji Sogabe</name>
-      <email>s.sogabe@gmail.com</email>
-      <roles>
-        <role>Past Maintainer</role>
-      </roles>
-    </contributor>
-    <contributor>
       <name>Alex Earl</name>
       <email>slide.o.mix@gmail.com</email>
       <roles>
         <role>Past Maintainer</role>
       </roles>
-    </contributor>
-    <contributor>
-      <name>David van Laatum</name>
-      <email>david@vanlaatum.id.au</email>
-      <roles>
-        <role>Past Maintainer</role>
-      </roles>
-      <timezone>9.5</timezone>
     </contributor>
   </contributors>
 
@@ -88,7 +49,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
-    <jenkins.baseline>2.479</jenkins.baseline>
+    <jenkins.baseline>2.516</jenkins.baseline>
     <jenkins.version>${jenkins.baseline}.3</jenkins.version>
     <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
     <concurrency>1</concurrency>
@@ -102,8 +63,8 @@
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.479.x</artifactId>
-        <version>5054.v620b_5d2b_d5e6</version>
+        <artifactId>bom-2.516.x</artifactId>
+        <version>5804.v80587a_38d937</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -145,8 +106,6 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jsoup</artifactId>
-      <!-- To remove when on bom -->
-      <version>1.21.1-52.v96e4041b_60fd</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
