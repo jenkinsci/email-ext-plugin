@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>5.7</version>
+    <version>5.27</version>
     <relativePath />
   </parent>
 
@@ -26,50 +26,11 @@
 
   <contributors>
     <contributor>
-      <!--<id>ashlux</id>-->
-      <name>Ash Lux</name>
-      <email>ashlux@gmail.com</email>
-      <roles>
-        <role>Past Maintainer</role>
-      </roles>
-    </contributor>
-    <contributor>
-      <!--<id>kdsweeney</id>-->
-      <name>Kyle Sweeney</name>
-      <roles>
-        <role>Past Maintainer</role>
-      </roles>
-    </contributor>
-    <contributor>
-      <!--<id>krwalker</id>-->
-      <name>K. R. Walker</name>
-      <email>krwalker@stellarscience.com</email>
-      <roles>
-        <role>Past Maintainer</role>
-      </roles>
-    </contributor>
-    <contributor>
-      <!--<id>ssogabe</id>-->
-      <name>Seiji Sogabe</name>
-      <email>s.sogabe@gmail.com</email>
-      <roles>
-        <role>Past Maintainer</role>
-      </roles>
-    </contributor>
-    <contributor>
       <name>Alex Earl</name>
       <email>slide.o.mix@gmail.com</email>
       <roles>
         <role>Past Maintainer</role>
       </roles>
-    </contributor>
-    <contributor>
-      <name>David van Laatum</name>
-      <email>david@vanlaatum.id.au</email>
-      <roles>
-        <role>Past Maintainer</role>
-      </roles>
-      <timezone>9.5</timezone>
     </contributor>
   </contributors>
 
@@ -88,21 +49,24 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
-    <jenkins.baseline>2.479</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.1</jenkins.version>
+    <hpi.bundledArtifacts>jericho-html</hpi.bundledArtifacts>
+    <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
+    <jenkins.baseline>2.516</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.3</jenkins.version>
     <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
     <concurrency>1</concurrency>
     <!-- To be removed once Jenkins.MANAGE gets out of beta -->
     <useBeta>true</useBeta>
     <spotless.check.skip>false</spotless.check.skip>
+    <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.479.x</artifactId>
-        <version>4136.vca_c3202a_7fd1</version>
+        <artifactId>bom-2.516.x</artifactId>
+        <version>5804.v80587a_38d937</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -110,6 +74,14 @@
   </dependencyManagement>
 
   <dependencies>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>commons-lang3-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>commons-text-api</artifactId>
+    </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>jakarta-mail-api</artifactId>
@@ -127,7 +99,6 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>credentials</artifactId>
-      <version>1408.va_622a_b_f5b_1b_1</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -136,8 +107,6 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jsoup</artifactId>
-      <!-- To remove when on bom -->
-      <version>1.18.3-30.v952e9442d416</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -150,6 +119,7 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>matrix-project</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -186,6 +156,34 @@
       <groupId>io.jenkins.configuration-as-code</groupId>
       <artifactId>test-harness</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.lib</groupId>
+      <artifactId>mock-javamail</artifactId>
+      <version>2.3</version>
+      <scope>test</scope>
+      <exclusions>
+        <!-- Provided by jakarta-activation-api plugin -->
+        <exclusion>
+          <groupId>jakarta.activation</groupId>
+          <artifactId>jakarta.activation-api</artifactId>
+        </exclusion>
+        <!-- Provided by jakarta-mail-api plugin -->
+        <exclusion>
+          <groupId>jakarta.mail</groupId>
+          <artifactId>jakarta.mail-api</artifactId>
+        </exclusion>
+        <!-- Provided by jakarta-activation-api plugin -->
+        <exclusion>
+          <groupId>org.eclipse.angus</groupId>
+          <artifactId>angus-activation</artifactId>
+        </exclusion>
+        <!-- Provided by jakarta-mail-api plugin -->
+        <exclusion>
+          <groupId>org.eclipse.angus</groupId>
+          <artifactId>angus-mail</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -229,34 +227,6 @@
       <artifactId>workflow-support</artifactId>
       <classifier>tests</classifier>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jvnet.mock-javamail</groupId>
-      <artifactId>mock-javamail</artifactId>
-      <version>2.2</version>
-      <scope>test</scope>
-      <exclusions>
-        <!-- Provided by jakarta-activation-api plugin -->
-        <exclusion>
-          <groupId>jakarta.activation</groupId>
-          <artifactId>jakarta.activation-api</artifactId>
-        </exclusion>
-        <!-- Provided by jakarta-mail-api plugin -->
-        <exclusion>
-          <groupId>jakarta.mail</groupId>
-          <artifactId>jakarta.mail-api</artifactId>
-        </exclusion>
-        <!-- Provided by jakarta-activation-api plugin -->
-        <exclusion>
-          <groupId>org.eclipse.angus</groupId>
-          <artifactId>angus-activation</artifactId>
-        </exclusion>
-        <!-- Provided by jakarta-mail-api plugin -->
-        <exclusion>
-          <groupId>org.eclipse.angus</groupId>
-          <artifactId>angus-mail</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>

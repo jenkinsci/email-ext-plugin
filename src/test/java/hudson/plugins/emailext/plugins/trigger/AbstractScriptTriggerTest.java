@@ -5,10 +5,7 @@ import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -23,29 +20,26 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.scriptsecurity.scripts.UnapprovedUsageException;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.BuildWatcher;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.hudson.test.recipes.LocalData;
 
 /**
  * Tests {@link PreBuildScriptTrigger} and {@link ScriptTrigger}.
  */
-public class AbstractScriptTriggerTest {
+@WithJenkins
+class AbstractScriptTriggerTest {
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    private JenkinsRule j;
 
-    @ClassRule
-    public static BuildWatcher bw = new BuildWatcher();
+    @BeforeEach
+    void setUp(JenkinsRule j) {
+        this.j = j;
 
-    @Before
-    public void setUp() {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                 // otherwise we would need to create users for each email address tested, to bypass SECURITY-372 fix:
@@ -59,7 +53,7 @@ public class AbstractScriptTriggerTest {
 
     @Test
     @Issue("SECURITY-257")
-    public void configRoundtrip() throws Exception {
+    void configRoundtrip() throws Exception {
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
         publisher.defaultSubject = "%DEFAULT_SUBJECT";
         publisher.defaultContent = "%DEFAULT_CONTENT";
@@ -113,20 +107,20 @@ public class AbstractScriptTriggerTest {
     @Test
     @LocalData
     @Issue("SECURITY-257")
-    public void beforeBuildTriggerMigration() throws Exception {
+    void beforeBuildTriggerMigration() throws Exception {
         checkTrigger(PreBuildScriptTrigger.class, "Before", Result.FAILURE, UnapprovedUsageException.class, true);
     }
 
     @Test
     @LocalData
     @Issue("SECURITY-257")
-    public void afterBuildTriggerMigration() throws Exception {
+    void afterBuildTriggerMigration() throws Exception {
         checkTrigger(ScriptTrigger.class, "After", Result.SUCCESS, UnapprovedUsageException.class, true);
     }
 
     @Test
     @Issue("SECURITY-1340")
-    public void doNotExecuteConstructorsOutsideOfSandbox() throws Exception {
+    void doNotExecuteConstructorsOutsideOfSandbox() throws Exception {
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
         publisher.defaultSubject = "%DEFAULT_SUBJECT";
         publisher.defaultContent = "%DEFAULT_CONTENT";

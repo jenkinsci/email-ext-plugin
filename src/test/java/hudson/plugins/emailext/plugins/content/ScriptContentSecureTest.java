@@ -28,10 +28,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.cloudbees.hudson.plugins.folder.Folder;
 import hudson.model.FreeStyleBuild;
@@ -46,19 +43,21 @@ import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.configfiles.folder.FolderConfigFileAction;
 import org.jenkinsci.plugins.configfiles.folder.FolderConfigFileProperty;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.CaptureEnvironmentBuilder;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Runs some {@link ScriptContentTest} in a secured Jenkins.
  */
-public class ScriptContentSecureTest extends ScriptContentTest {
+@WithJenkins
+class ScriptContentSecureTest extends ScriptContentTest {
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
 
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
@@ -72,31 +71,19 @@ public class ScriptContentSecureTest extends ScriptContentTest {
 
     @Override
     @Test
-    public void testShouldFindScriptOnClassPath() throws Exception {
-        super.testShouldFindScriptOnClassPath();
-    }
-
-    @Override
-    @Test
-    public void testShouldFindTemplateOnClassPath() throws Exception {
-        super.testShouldFindTemplateOnClassPath();
-    }
-
-    @Override
-    @Test
-    public void templateInWorkspace() throws Exception {
+    void templateInWorkspace() throws Exception {
         ScriptApproval.get().clearApprovedScripts();
         super.templateInWorkspace();
     }
 
     @Override
     @Test
-    public void templateInWorkspaceUnsafe() throws Exception {
+    void templateInWorkspaceUnsafe() throws Exception {
         ScriptApproval.get().clearApprovedScripts();
         assertThrows(
-                "Templates in the workspace should use the Groovy sandbox",
                 AssertionError.class,
-                super::templateInWorkspaceUnsafe);
+                super::templateInWorkspaceUnsafe,
+                "Templates in the workspace should use the Groovy sandbox");
         // Error message is a TokenMacro parse error and does not contain a script security warning,
         // perhaps due to EmailExtScript#methodMissing? The message looks like:
         // Error processing tokens: Error while parsing action
@@ -106,25 +93,19 @@ public class ScriptContentSecureTest extends ScriptContentTest {
 
     @Issue("SECURITY-1340")
     @Test
-    public void templateInWorkspaceWithConstructor() throws Exception {
+    void templateInWorkspaceWithConstructor() throws Exception {
         ScriptApproval.get().clearApprovedScripts();
         AssertionError e = assertThrows(
-                "Templates in the workspace should use the Groovy sandbox",
                 AssertionError.class,
-                () -> super.templateInWorkspace("/testConstructor.groovy"));
+                () -> super.templateInWorkspace("/testConstructor.groovy"),
+                "Templates in the workspace should use the Groovy sandbox");
         assertThat(e.getMessage(), containsString("staticMethod jenkins.model.Jenkins getInstance"));
         assertNull(j.jenkins.getItem("should-not-exist"));
     }
 
-    @Override
-    @Test
-    public void testGroovyTemplateWithContentToken() throws Exception {
-        super.testGroovyTemplateWithContentToken();
-    }
-
     @Test
     @Issue("SECURITY-2939")
-    public void managedBadTemplateInFolder() throws Exception {
+    void managedBadTemplateInFolder() throws Exception {
         final Folder folder = j.createProject(Folder.class, "sub");
 
         final FreeStyleProject project = folder.createProject(FreeStyleProject.class, "Free");

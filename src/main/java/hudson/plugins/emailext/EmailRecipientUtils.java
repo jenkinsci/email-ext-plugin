@@ -17,7 +17,7 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class EmailRecipientUtils {
 
@@ -62,9 +62,9 @@ public class EmailRecipientUtils {
                         cc.add(address);
                         break;
                     case RecipientListStringAnalyser.NOT_FOUND:
+                    case TO:
                         // Fallback: Treat NOT_FOUND like TO in case RecipientListStringAnalyser fails due to whatever
                         // reason (maybe encoding of personal?)
-                    case TO:
                         to.add(address);
                         break;
                     default:

@@ -10,7 +10,6 @@ import hudson.Extension;
 import hudson.Util;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
-import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
@@ -40,7 +39,7 @@ import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
@@ -846,7 +845,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     public boolean isMatrixProject(Object project) {
-        return project instanceof MatrixProject;
+        return project.getClass().getName().equals("hudson.matrix.MatrixProject");
     }
 
     public boolean isDebugMode() {

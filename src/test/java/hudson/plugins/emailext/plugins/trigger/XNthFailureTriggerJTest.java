@@ -6,19 +6,18 @@ import static org.hamcrest.Matchers.is;
 import hudson.model.FreeStyleProject;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import java.util.Collections;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * @author Kanstantsin Shautsou
  */
-public class XNthFailureTriggerJTest {
-    @Rule
-    public JenkinsRule jRule = new JenkinsRule();
+@WithJenkins
+class XNthFailureTriggerJTest {
 
     @Test
-    public void testConfigRoundTrip() throws Exception {
+    void testConfigRoundTrip(JenkinsRule jRule) throws Exception {
         FreeStyleProject project = jRule.createFreeStyleProject();
 
         final ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();

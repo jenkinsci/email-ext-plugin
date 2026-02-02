@@ -14,16 +14,16 @@ import java.util.Set;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.collection.IsCollectionWithSize;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class RecipientProviderUtilitiesTest {
-    public static class Debug implements RecipientProviderUtilities.IDebug {
+class RecipientProviderUtilitiesTest {
+    private static class Debug implements RecipientProviderUtilities.IDebug {
 
         @Override
         public void send(String format, Object... args) {}
     }
 
-    public static Set<String> usersToEMails(Set<User> users) {
+    private static Set<String> usersToEMails(Set<User> users) {
         Set<String> emails = new HashSet<>(users.size());
         for (User user : users) {
             emails.add(user.getProperty(Mailer.UserProperty.class).getAddress());
@@ -32,7 +32,7 @@ public class RecipientProviderUtilitiesTest {
     }
 
     @Test
-    public void getChangeSetAuthors() {
+    void getChangeSetAuthors() {
         Debug debug = new Debug();
         WorkflowRun run1 = mock(WorkflowRun.class);
         Set<User> authors = RecipientProviderUtilities.getChangeSetAuthors(Collections.singleton(run1), debug);
@@ -53,13 +53,4 @@ public class RecipientProviderUtilitiesTest {
                 usersToEMails(authors),
                 CoreMatchers.equalTo(new HashSet<>(Arrays.asList("A@DOMAIN", "B@DOMAIN", "C@DOMAIN"))));
     }
-
-    @Test
-    public void getUsersTriggeringTheBuilds() {}
-
-    @Test
-    public void getUserTriggeringTheBuild() {}
-
-    @Test
-    public void addUsers() {}
 }

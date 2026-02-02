@@ -2,7 +2,7 @@ package hudson.plugins.emailext.plugins.content;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -14,26 +14,27 @@ import hudson.plugins.emailext.plugins.trigger.PreBuildTrigger;
 import jakarta.mail.Message;
 import java.util.Collections;
 import java.util.List;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.mock_javamail.Mailbox;
 
 /**
  *
  * @author acearl
  */
-public class TriggerNameContentTest {
+@WithJenkins
+class TriggerNameContentTest {
     private ExtendedEmailPublisher publisher;
     private FreeStyleProject project;
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    private JenkinsRule j;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp(JenkinsRule j) throws Exception {
+        this.j = j;
         publisher = new ExtendedEmailPublisher();
         publisher.defaultSubject = "%DEFAULT_SUBJECT";
         publisher.defaultContent = "%DEFAULT_CONTENT";
@@ -46,13 +47,13 @@ public class TriggerNameContentTest {
         project.getPublishersList().add(publisher);
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         Mailbox.clearAll();
     }
 
     @Test
-    public void testTriggerName() throws Exception {
+    void testTriggerName() throws Exception {
         List<RecipientProvider> recProviders = Collections.emptyList();
         PreBuildTrigger trigger = new PreBuildTrigger(
                 recProviders,
@@ -78,7 +79,7 @@ public class TriggerNameContentTest {
         assertEquals(PreBuildTrigger.TRIGGER_NAME, message.getSubject());
     }
 
-    private void addEmailType(EmailTrigger trigger) {
+    private static void addEmailType(EmailTrigger trigger) {
         trigger.setEmail(new EmailType() {
             {
                 setRecipientList("mickey@disney.com");

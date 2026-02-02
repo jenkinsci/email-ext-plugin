@@ -1,8 +1,8 @@
 package hudson.plugins.emailext.plugins;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 
 /**
@@ -10,10 +10,10 @@ import org.jvnet.hudson.test.Issue;
  *
  * @author <a href="https://github.com/rahulsom">Rahul Somasunderam</a>
  */
-public class CssInlinerTest {
+class CssInlinerTest {
 
     @Test
-    public void testEmailWithoutCss() {
+    void testEmailWithoutCss() {
         String input = "<html>"
                 + "  <head></head>"
                 + "  <body>"
@@ -26,7 +26,7 @@ public class CssInlinerTest {
 
     @Test
     @Issue("JENKINS-25719")
-    public void testEntities() {
+    void testEntities() {
         String input = "<html>"
                 + "  <head>"
                 + "    <style data-inline='true'>"
@@ -49,7 +49,7 @@ public class CssInlinerTest {
     }
 
     @Test
-    public void testEmailWithNormalCss() {
+    void testEmailWithNormalCss() {
         String input = "<html>"
                 + "  <head>"
                 + "    <style>"
@@ -65,7 +65,7 @@ public class CssInlinerTest {
     }
 
     @Test
-    public void testEmailWithInlinedCss() {
+    void testEmailWithInlinedCss() {
         String input = "<html>"
                 + "  <head>"
                 + "    <style data-inline='true'>"
@@ -85,7 +85,7 @@ public class CssInlinerTest {
     }
 
     @Test
-    public void testEmailWithMixedCss() {
+    void testEmailWithMixedCss() {
         String input = "<html>"
                 + "  <head>"
                 + "    <style data-inline='true'>"
@@ -108,7 +108,7 @@ public class CssInlinerTest {
     }
 
     @Test
-    public void testImageInliningOff() {
+    void testImageInliningOff() {
         String input = "<html>"
                 + "  <body>"
                 + "    <img src='"
@@ -122,7 +122,7 @@ public class CssInlinerTest {
     }
 
     @Test
-    public void testImageInliningOn() {
+    void testImageInliningOn() {
         String input = "<html>"
                 + "  <body>"
                 + "    <img src='"
@@ -144,7 +144,7 @@ public class CssInlinerTest {
     }
 
     @Test
-    public void testNoPrettify() {
+    void testNoPrettify() {
         String input =
                 """
                 <html><head></head>
@@ -164,11 +164,11 @@ public class CssInlinerTest {
         assertEquals(input, output);
     }
 
-    private String process(String input) {
+    private static String process(String input) {
         return clean(new CssInliner().process(input));
     }
 
-    private String clean(String input) {
+    private static String clean(String input) {
         return input.replaceAll(" +", " ").replaceAll("\n", "").replaceAll("> *<", "><");
     }
 }

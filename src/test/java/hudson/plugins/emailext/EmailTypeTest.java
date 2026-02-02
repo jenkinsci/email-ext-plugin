@@ -1,9 +1,6 @@
 package hudson.plugins.emailext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import hudson.model.FreeStyleProject;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
@@ -14,25 +11,31 @@ import java.io.IOException;
 import java.net.URL;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class EmailTypeTest {
+@WithJenkins
+class EmailTypeTest {
 
-    @Rule
-    public final JenkinsRule j = new JenkinsRule();
+    private JenkinsRule j;
+
+    @BeforeEach
+    void setUp(JenkinsRule j) {
+        this.j = j;
+    }
 
     @Test
-    public void testHasNoRecipients() {
+    void testHasNoRecipients() {
         EmailType t = new EmailType();
 
         assertFalse(t.getHasRecipients());
     }
 
     @Test
-    public void testHasDeveloperRecipients() {
+    void testHasDeveloperRecipients() {
         EmailType t = new EmailType();
 
         t.addRecipientProvider(new DevelopersRecipientProvider());
@@ -41,7 +44,7 @@ public class EmailTypeTest {
     }
 
     @Test
-    public void testHasRecipientList() {
+    void testHasRecipientList() {
         EmailType t = new EmailType();
 
         t.addRecipientProvider(new ListRecipientProvider());
@@ -50,7 +53,7 @@ public class EmailTypeTest {
     }
 
     @Test
-    public void testHasDeveloperAndRecipientList() {
+    void testHasDeveloperAndRecipientList() {
         EmailType t = new EmailType();
 
         t.addRecipientProvider(new ListRecipientProvider());
@@ -60,7 +63,7 @@ public class EmailTypeTest {
     }
 
     @Test
-    public void testCompressBuildAttachment() {
+    void testCompressBuildAttachment() {
         EmailType t = new EmailType();
         t.setCompressBuildLog(true);
 
@@ -68,14 +71,14 @@ public class EmailTypeTest {
     }
 
     @Test
-    public void testDefaultCompressBuildAttachment() {
+    void testDefaultCompressBuildAttachment() {
         EmailType t = new EmailType();
 
         assertFalse(t.getCompressBuildLog());
     }
 
     @Test
-    public void testUpgradeToRecipientProvider() throws IOException {
+    void testUpgradeToRecipientProvider() throws IOException {
         URL url = this.getClass().getResource("/recipient-provider-upgrade.xml");
         File jobConfig = new File(url.getFile());
 
@@ -100,7 +103,7 @@ public class EmailTypeTest {
 
     @Test
     @Issue("JENKINS-24506")
-    public void testUpgradeTriggerWithNoRecipients() throws IOException {
+    void testUpgradeTriggerWithNoRecipients() throws IOException {
         URL url = this.getClass().getResource("/recipient-provider-upgrade2.xml");
         File jobConfig = new File(url.getFile());
 

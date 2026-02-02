@@ -1,7 +1,7 @@
 package hudson.plugins.emailext.plugins.trigger;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,9 +18,9 @@ import java.util.List;
 /**
  * Base class for testing
  */
-public abstract class TriggerTestBase {
+abstract class TriggerTestBase {
 
-    protected List<RecipientProvider> recProviders = Collections.emptyList();
+    protected final List<RecipientProvider> recProviders = Collections.emptyList();
 
     abstract EmailTrigger newInstance();
 
@@ -29,7 +29,7 @@ public abstract class TriggerTestBase {
     }
 
     /**
-     * Asserts the the specified result history triggers the EmailTrigger.
+     * Asserts the specified result history triggers the EmailTrigger.
      */
     void assertTriggered(Result... resultHistory) {
         EmailTrigger trigger = newInstance();
@@ -38,7 +38,7 @@ public abstract class TriggerTestBase {
     }
 
     /**
-     * Asserts the the specified result history does not trigger the
+     * Asserts the specified result history does not trigger the
      * EmailTrigger.
      */
     void assertNotTriggered(Result... resultHistory) {

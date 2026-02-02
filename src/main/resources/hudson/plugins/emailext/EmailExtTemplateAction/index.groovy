@@ -24,9 +24,11 @@ l.layout {
                         f.textbox(name: "template_file_name", id: "template_file_name", clazz: "required", checkUrl:"templateFileCheck", checkDependsOn: "")
                     }
                     f.entry(title: _("Build To Test")) {
-                        select(name: "template_build", id: "template_build") {
-                            my.project.builds.each { build ->
-                                f.option(value: build.id, "#${build.number} (${build.result})")
+                        div(class: "jenkins-select") {
+                            select(name: "template_build", id: "template_build", class: "jenkins-select__input") {
+                                my.project.builds.each { build ->
+                                    f.option(value: build.id, "#${build.number} (${build.result})")
+                                }
                             }
                         }
                     }

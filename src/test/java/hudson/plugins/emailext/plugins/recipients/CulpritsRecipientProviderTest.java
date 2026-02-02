@@ -6,19 +6,19 @@ import hudson.tasks.Mailer;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-public class CulpritsRecipientProviderTest {
+class CulpritsRecipientProviderTest {
 
     private MockedStatic<Jenkins> mockedJenkins;
     private MockedStatic<Mailer> mockedMailer;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void before() {
         final Jenkins jenkins = Mockito.mock(Jenkins.class);
         Mockito.when(jenkins.isUseSecurity()).thenReturn(false);
         final ExtendedEmailPublisherDescriptor extendedEmailPublisherDescriptor =
@@ -37,14 +37,14 @@ public class CulpritsRecipientProviderTest {
         mockedMailer.when(Mailer::descriptor).thenReturn(descriptor);
     }
 
-    @After
-    public void after() {
+    @AfterEach
+    void after() {
         mockedMailer.close();
         mockedJenkins.close();
     }
 
     @Test
-    public void testAddRecipients1() throws Exception {
+    void testAddRecipients1() throws Exception {
         final WorkflowJob j = Mockito.mock(WorkflowJob.class);
         final WorkflowRun build1 = Mockito.spy(new WorkflowRun(j));
         Mockito.when(build1.getResult()).thenReturn(Result.UNSTABLE);
@@ -70,7 +70,7 @@ public class CulpritsRecipientProviderTest {
     }
 
     @Test
-    public void testAddRecipients2() throws Exception {
+    void testAddRecipients2() throws Exception {
         final WorkflowJob j = Mockito.mock(WorkflowJob.class);
         final WorkflowRun build1 = Mockito.spy(new WorkflowRun(j));
         Mockito.when(build1.getResult()).thenReturn(Result.UNSTABLE);

@@ -1,14 +1,15 @@
 package hudson.plugins.emailext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import jakarta.mail.internet.InternetAddress;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class EmailRecipientUtilsTest {
+class EmailRecipientUtilsTest {
+
     @Test
-    public void testFixupDelimiters() throws Exception {
+    void testFixupDelimiters() throws Exception {
         String output;
         output = EmailRecipientUtils.fixupDelimiters("  Name   Surname   <n.Surname@mymail.com>   ");
         assertEquals("Name Surname <n.Surname@mymail.com>", output);

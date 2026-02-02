@@ -16,7 +16,6 @@ import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
-import hudson.matrix.MatrixRun;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
@@ -76,7 +75,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException;
@@ -88,6 +87,7 @@ import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+import org.jenkinsci.plugins.variant.OptionalExtension;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.Ancestor;
@@ -99,7 +99,7 @@ import org.kohsuke.stapler.StaplerRequest2;
 /**
  * {@link Publisher} that sends notification e-mail.
  */
-public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatable {
+public class ExtendedEmailPublisher extends Notifier {
 
     private static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisher.class.getName());
 
@@ -241,34 +241,34 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     @DataBoundConstructor
     @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "TODO needs triage")
     public ExtendedEmailPublisher(
-            String project_recipient_list,
-            String project_content_type,
-            String project_default_subject,
-            String project_default_content,
-            String project_attachments,
-            String project_presend_script,
-            int project_attach_buildlog,
-            String project_replyto,
-            String project_from,
-            boolean project_save_output,
-            List<EmailTrigger> project_triggers,
+            String recipientList,
+            String contentType,
+            String defaultSubject,
+            String defaultContent,
+            String attachmentsPattern,
+            String presendScript,
+            int attachBuildLog,
+            String replyTo,
+            String from,
+            boolean saveOutput,
+            List<EmailTrigger> configuredTriggers,
             MatrixTriggerMode matrixTriggerMode,
-            boolean project_disabled,
+            boolean disabled,
             List<GroovyScriptPath> classpath) {
-        this.recipientList = project_recipient_list;
-        this.contentType = project_content_type;
-        this.defaultSubject = project_default_subject;
-        this.defaultContent = project_default_content;
-        this.attachmentsPattern = project_attachments;
-        setPresendScript(project_presend_script);
-        this.attachBuildLog = project_attach_buildlog > 0;
-        this.compressBuildLog = project_attach_buildlog > 1;
-        this.replyTo = project_replyto;
-        this.from = project_from;
-        this.saveOutput = project_save_output;
-        this.configuredTriggers = project_triggers;
+        this.recipientList = recipientList;
+        this.contentType = contentType;
+        this.defaultSubject = defaultSubject;
+        this.defaultContent = defaultContent;
+        this.attachmentsPattern = attachmentsPattern;
+        setPresendScript(presendScript);
+        this.attachBuildLog = attachBuildLog > 0;
+        this.compressBuildLog = attachBuildLog > 1;
+        this.replyTo = replyTo;
+        this.from = from;
+        this.saveOutput = saveOutput;
+        this.configuredTriggers = configuredTriggers;
         this.matrixTriggerMode = matrixTriggerMode;
-        this.disabled = project_disabled;
+        this.disabled = disabled;
         setClasspath(classpath);
     }
 
@@ -317,6 +317,18 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
             scriptApproval.configuring(presendScript, GroovyLanguage.get(), context);
         }
         this.presendScript = presendScript;
+    }
+
+    public int getAttachBuildLog() {
+        if (attachBuildLog) {
+            if (compressBuildLog) {
+                return 2;
+            } else {
+                return 1;
+            }
+        } else {
+            return 0;
+        }
     }
 
     @DataBoundSetter
@@ -382,7 +394,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     @Override
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         debug(listener.getLogger(), "Checking for pre-build");
-        if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
+        if (!build.getClass().getName().equals("hudson.matrix.MatrixRun") || isExecuteOnMatrixNodes()) {
             debug(listener.getLogger(), "Executing pre-build step");
             return _perform(build, null, listener, true);
         }
@@ -392,7 +404,7 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         debug(listener.getLogger(), "Checking for post-build");
-        if (!(build instanceof MatrixRun) || isExecuteOnMatrixNodes()) {
+        if (!build.getClass().getName().equals("hudson.matrix.MatrixRun") || isExecuteOnMatrixNodes()) {
             debug(listener.getLogger(), "Performing post-build step");
             return _perform(build, launcher, listener, false);
         }
@@ -1233,30 +1245,39 @@ public class ExtendedEmailPublisher extends Notifier implements MatrixAggregatab
         return Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
     }
 
-    @Override
-    public MatrixAggregator createAggregator(MatrixBuild matrixbuild, Launcher launcher, BuildListener buildlistener) {
-        return new MatrixAggregator(matrixbuild, launcher, buildlistener) {
-            @Override
-            public boolean endBuild() {
-                LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
+    @OptionalExtension(requirePlugins = "matrix-project")
+    public static final class MatrixAggregatableImpl implements MatrixAggregatable {
+        @Override
+        public MatrixAggregator createAggregator(
+                MatrixBuild matrixbuild, Launcher launcher, BuildListener buildlistener) {
+            var publisher = matrixbuild.getParent().getPublishersList().get(ExtendedEmailPublisher.class);
+            if (publisher != null) {
+                return new MatrixAggregator(matrixbuild, launcher, buildlistener) {
+                    @Override
+                    public boolean endBuild() {
+                        LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
 
-                // Will be run by parent so we check if needed to be executed by parent
-                if (getMatrixTriggerMode().forParent) {
-                    return ExtendedEmailPublisher.this._perform(this.build, this.launcher, this.listener, false);
-                }
-                return true;
-            }
+                        // Will be run by parent so we check if needed to be executed by parent
+                        if (publisher.getMatrixTriggerMode().forParent) {
+                            return publisher._perform(this.build, this.launcher, this.listener, false);
+                        }
+                        return true;
+                    }
 
-            @Override
-            public boolean startBuild() {
-                LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
-                // Will be run by parent so we check if needed to be executed by parent
-                if (getMatrixTriggerMode().forParent) {
-                    return ExtendedEmailPublisher.this._perform(this.build, this.launcher, this.listener, true);
-                }
-                return true;
+                    @Override
+                    public boolean startBuild() {
+                        LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
+                        // Will be run by parent so we check if needed to be executed by parent
+                        if (publisher.getMatrixTriggerMode().forParent) {
+                            return publisher._perform(this.build, this.launcher, this.listener, true);
+                        }
+                        return true;
+                    }
+                };
+            } else {
+                return null;
             }
-        };
+        }
     }
 
     public Object readResolve() {

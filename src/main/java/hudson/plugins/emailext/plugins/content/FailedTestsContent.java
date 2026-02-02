@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jenkinsci.plugins.tokenmacro.DataBoundTokenMacro;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
@@ -133,12 +133,12 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     private int addTest(SummarizedTestResult result, int printSize, TestResult failedTest) {
         String stackTrace = showStack
                 ? (escapeHtml
-                        ? StringEscapeUtils.escapeHtml(failedTest.getErrorStackTrace())
+                        ? StringEscapeUtils.escapeHtml4(failedTest.getErrorStackTrace())
                         : failedTest.getErrorStackTrace())
                 : null;
         String errorDetails = showMessage
                 ? (escapeHtml
-                        ? StringEscapeUtils.escapeHtml(failedTest.getErrorDetails())
+                        ? StringEscapeUtils.escapeHtml4(failedTest.getErrorDetails())
                         : failedTest.getErrorDetails())
                 : null;
         String name = "%s.%s"

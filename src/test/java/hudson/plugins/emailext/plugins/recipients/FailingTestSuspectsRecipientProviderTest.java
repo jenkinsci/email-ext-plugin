@@ -31,19 +31,19 @@ import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.tasks.Mailer;
 import hudson.tasks.test.AbstractTestResultAction;
 import jenkins.model.Jenkins;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-public class FailingTestSuspectsRecipientProviderTest {
+class FailingTestSuspectsRecipientProviderTest {
 
     private MockedStatic<Jenkins> mockedJenkins;
     private MockedStatic<Mailer> mockedMailer;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void before() {
         final Jenkins jenkins = Mockito.mock(Jenkins.class);
         Mockito.when(jenkins.isUseSecurity()).thenReturn(false);
         final ExtendedEmailPublisherDescriptor extendedEmailPublisherDescriptor =
@@ -63,14 +63,14 @@ public class FailingTestSuspectsRecipientProviderTest {
         mockedMailer.when(Mailer::descriptor).thenReturn(descriptor);
     }
 
-    @After
-    public void after() {
+    @AfterEach
+    void after() {
         mockedMailer.close();
         mockedJenkins.close();
     }
 
     @Test
-    public void testAddRecipients() throws Exception {
+    void testAddRecipients() throws Exception {
 
         /*
          * Requestor: A
