@@ -246,9 +246,6 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @Initializer(after = InitMilestone.EXTENSIONS_AUGMENTED, before = InitMilestone.JOB_LOADED)
     public static void autoConfigure() {
         ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
-        if (descriptor == null) {
-            return;
-        }
 
         if (Jenkins.get().isUseSecurity() && !StringUtils.isBlank(descriptor.getDefaultPostsendScript())
                 || !StringUtils.isBlank(descriptor.getDefaultPresendScript())) {

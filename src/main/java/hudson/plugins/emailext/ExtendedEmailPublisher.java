@@ -388,10 +388,7 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     public void debug(PrintStream p, String format, Object... args) {
-        ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
-        if (descriptor != null) {
-            descriptor.debug(p, format, args);
-        }
+        getDescriptor().debug(p, format, args);
     }
 
     @Override
