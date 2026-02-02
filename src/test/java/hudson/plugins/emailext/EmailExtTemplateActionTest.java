@@ -10,7 +10,6 @@ import org.htmlunit.html.HtmlSelect;
 import org.htmlunit.html.HtmlForm;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.model.Result;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -34,7 +33,7 @@ public class EmailExtTemplateActionTest {
         publisher.defaultContent = "Test Content";
         project.getPublishersList().add(publisher);
         
-        FreeStyleBuild build = j.buildAndAssertSuccess(project);
+        j.buildAndAssertSuccess(project);
         
         JenkinsRule.WebClient webClient = j.createWebClient();
         webClient.getOptions().setJavaScriptEnabled(true);
