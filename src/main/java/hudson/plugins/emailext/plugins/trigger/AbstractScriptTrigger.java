@@ -141,8 +141,8 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
     public boolean configure(@NonNull StaplerRequest2 req, @NonNull JSONObject formData) {
         super.configure(req, formData);
         if (formData.containsKey("secureTriggerScript")) {
-            this.secureTriggerScript = req.bindJSON(SecureGroovyScript.class,
-                    formData.getJSONObject("secureTriggerScript"));
+            this.secureTriggerScript =
+                    req.bindJSON(SecureGroovyScript.class, formData.getJSONObject("secureTriggerScript"));
             this.secureTriggerScript.configuring(
                     ApprovalContext.create().withCurrentUser().withItem(req.findAncestorObject(Item.class)));
         }

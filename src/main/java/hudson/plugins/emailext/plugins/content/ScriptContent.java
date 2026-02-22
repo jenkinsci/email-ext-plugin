@@ -121,8 +121,8 @@ public class ScriptContent extends AbstractEvalContent {
         String result;
 
         final Map<String, Object> binding = new HashMap<>();
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.get()
-                .getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         binding.put("build", build);
         binding.put("listener", listener);
         binding.put("it", new ScriptContentBuildWrapper(build));
@@ -169,8 +169,8 @@ public class ScriptContent extends AbstractEvalContent {
                 result = tmplR.make(binding).toString();
             } else {
                 // unapproved script, so run in sandbox
-                StaticProxyInstanceWhitelist whitelist = new StaticProxyInstanceWhitelist(build,
-                        "templates-instances.whitelist");
+                StaticProxyInstanceWhitelist whitelist =
+                        new StaticProxyInstanceWhitelist(build, "templates-instances.whitelist");
                 result = GroovySandbox.runInSandbox(
                         // TODO there is a PrintWriter instance created in make and bound to out
                         () -> tmplR.make(binding).toString(),
@@ -201,8 +201,8 @@ public class ScriptContent extends AbstractEvalContent {
             throws IOException {
         String result = "";
         Map<String, Object> binding = new HashMap<>();
-        ExtendedEmailPublisherDescriptor descriptor = Jenkins.get()
-                .getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         Item parent = build.getParent();
 
         binding.put("build", build);
