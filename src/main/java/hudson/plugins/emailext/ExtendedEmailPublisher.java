@@ -40,6 +40,7 @@ import hudson.plugins.emailext.plugins.content.EmailExtScript;
 import hudson.plugins.emailext.plugins.content.TriggerNameContent;
 import hudson.plugins.emailext.watching.EmailExtWatchAction;
 import hudson.plugins.emailext.watching.EmailExtWatchJobProperty;
+import jakarta.mail.AuthenticationFailedException;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.MailMessageIdAction;
 import hudson.tasks.Notifier;
@@ -105,8 +106,8 @@ public class ExtendedEmailPublisher extends Notifier {
 
     private static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisher.class.getName());
 
-    private static final String CONTENT_TRANSFER_ENCODING =
-            System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
+    private static final String CONTENT_TRANSFER_ENCODING = System
+            .getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
@@ -209,7 +210,8 @@ public class ExtendedEmailPublisher extends Notifier {
      */
     public MatrixTriggerMode matrixTriggerMode;
 
-    public ExtendedEmailPublisher() {}
+    public ExtendedEmailPublisher() {
+    }
 
     @Deprecated
     public ExtendedEmailPublisher(
@@ -521,8 +523,8 @@ public class ExtendedEmailPublisher extends Notifier {
         for (String triggerName : triggered.keySet()) {
             for (EmailTrigger trigger : triggered.get(triggerName)) {
                 listener.getLogger().println("Sending email for trigger: " + triggerName);
-                final ExtendedEmailPublisherContext context =
-                        new ExtendedEmailPublisherContext(this, build, build.getWorkspace(), launcher, listener);
+                final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build,
+                        build.getWorkspace(), launcher, listener);
                 context.setTriggered(triggered);
                 context.setTrigger(trigger);
                 sendMail(context);
@@ -722,6 +724,7 @@ public class ExtendedEmailPublisher extends Notifier {
             LOGGER.log(Level.SEVERE, "SMTP authentication failed. Check username/password.", e);
             Functions.printStackTrace(
                     e, context.getListener().error("SMTP authentication failed. Check mail credentials."));
+
         } catch (SendFailedException e) {
             LOGGER.log(Level.WARNING, "Email sending failed due to invalid or rejected recipient addresses.", e);
             Functions.printStackTrace(
@@ -735,8 +738,9 @@ public class ExtendedEmailPublisher extends Notifier {
         }
 
         debug(context.getListener().getLogger(), "Email sending failed. Please check Jenkins system log for details.");
-        return false;
-    }
+		return attachBuildLog;
+
+        }
 
     public List<TokenMacro> getRuntimeMacros(ExtendedEmailPublisherContext context) {
         List<TokenMacro> macros = new ArrayList<>();
@@ -843,8 +847,8 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     private static CompilerConfiguration getCompilerConfiguration(boolean sandbox) {
-        CompilerConfiguration cc =
-                sandbox ? GroovySandbox.createSecureCompilerConfiguration() : new CompilerConfiguration();
+        CompilerConfiguration cc = sandbox ? GroovySandbox.createSecureCompilerConfiguration()
+                : new CompilerConfiguration();
         cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
         cc.addCompilationCustomizers(
                 new ImportCustomizer().addStarImports("jenkins", "jenkins.model", "hudson", "hudson.model"));
@@ -1024,8 +1028,8 @@ public class ExtendedEmailPublisher extends Notifier {
 
         // add attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getAttachmentsPattern())) {
-            AttachmentUtils typeAttachments =
-                    new AttachmentUtils(context.getTrigger().getEmail().getAttachmentsPattern());
+            AttachmentUtils typeAttachments = new AttachmentUtils(
+                    context.getTrigger().getEmail().getAttachmentsPattern());
             typeAttachments.attach(multipart, context);
         }
 
@@ -1180,10 +1184,9 @@ public class ExtendedEmailPublisher extends Notifier {
         final Multipart multipart;
         boolean doBoth = false;
 
-        String messageContentType =
-                context.getTrigger().getEmail().getContentType().equals("project")
-                        ? contentType
-                        : context.getTrigger().getEmail().getContentType();
+        String messageContentType = context.getTrigger().getEmail().getContentType().equals("project")
+                ? contentType
+                : context.getTrigger().getEmail().getContentType();
         // contentType is null if the project was not reconfigured after upgrading.
         if (messageContentType == null || "default".equals(messageContentType)) {
             messageContentType = getDescriptor().getDefaultContentType();
@@ -1268,10 +1271,17 @@ public class ExtendedEmailPublisher extends Notifier {
      * when a later build actually finishes before an earlier one.
      *
      * @param run      a run for which we may be sending mail
+<<<<<<< HEAD
      * @param listener a listener to which we may print warnings in case the actual
      *                 previous build is still in progress
      * @return the previous build, or null if that build is missing, or is still in
      *         progress
+=======
+     * @param listener a listener to which we may print warnings in case the
+     *                 actual previous build is still in progress
+     * @return the previous build, or null if that build is missing, or is still
+     *         in progress
+>>>>>>> 714e6ece (Improve logging and exception handling in sendMail)
      */
     public static @CheckForNull Run<?, ?> getPreviousRun(@NonNull Run<?, ?> run, TaskListener listener) {
         Run<?, ?> previousRun = run.getPreviousBuild();
