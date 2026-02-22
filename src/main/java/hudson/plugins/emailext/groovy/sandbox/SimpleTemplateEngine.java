@@ -51,7 +51,7 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.GroovySandbox;
  * <p>
  * Frequently, the template source will be in a file but here is a simple
  * example providing the template as a string:
- * 
+ *
  * <pre>
  * def binding = [
  *     firstname : "Grace",
@@ -72,11 +72,11 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.GroovySandbox;
  * def template = engine.createTemplate(text).make(binding)
  * println template.toString()
  * </pre>
- * 
+ *
  * This example uses a mix of the JSP style and GString style placeholders
  * but you can typically use just one style if you wish. Running this
  * example will produce this output:
- * 
+ *
  * <pre>
  * Dear Grace Hopper,
  *
@@ -85,12 +85,12 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.GroovySandbox;
  *
  * The conference committee.
  * </pre>
- * 
+ *
  * The template engine can also be used as the engine for
  * {@link groovy.servlet.TemplateServlet} by placing the
  * following in your <code>web.xml</code> file (plus a corresponding
  * servlet-mapping element):
- * 
+ *
  * <pre>
  * &lt;servlet&gt;
  *   &lt;servlet-name&gt;SimpleTemplate&lt;/servlet-name&gt;
@@ -101,7 +101,7 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.GroovySandbox;
  *   &lt;/init-param&gt;
  * &lt;/servlet&gt;
  * </pre>
- * 
+ *
  * In this case, your template source file should be HTML with the appropriate
  * embedded placeholders.
  *
@@ -120,9 +120,12 @@ public class SimpleTemplateEngine extends TemplateEngine {
      * Default: 1MB
      */
     // public for testing
-    @SuppressFBWarnings(value = "MS_SHOULD_BE_FINAL", justification = "non final to make it editable from the script console (convenient to temporarily change the value without restarting)")
-    public static int MAX_EXPANDED_SIZE_BYTES = SystemProperties
-            .getInteger(SimpleTemplateEngine.class.getName() + ".MAX_EXPANDED_SIZE_BYTES", 1024 * 1024);
+    @SuppressFBWarnings(
+            value = "MS_SHOULD_BE_FINAL",
+            justification =
+                    "non final to make it editable from the script console (convenient to temporarily change the value without restarting)")
+    public static int MAX_EXPANDED_SIZE_BYTES =
+            SystemProperties.getInteger(SimpleTemplateEngine.class.getName() + ".MAX_EXPANDED_SIZE_BYTES", 1024 * 1024);
 
     private static AtomicInteger counter = new AtomicInteger(1);
 
@@ -213,7 +216,7 @@ public class SimpleTemplateEngine extends TemplateEngine {
                         }
                     } catch (MissingPropertyException x) {
                         throw (IOException) new IOException(
-                                "did you forget to escape \\$" + x.getProperty() + " for non-Groovy variables?")
+                                        "did you forget to escape \\$" + x.getProperty() + " for non-Groovy variables?")
                                 .initCause(x);
                     }
                     pw.flush();
