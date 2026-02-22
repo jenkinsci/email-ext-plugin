@@ -58,8 +58,6 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
@@ -104,8 +102,8 @@ public class ExtendedEmailPublisher extends Notifier {
 
     private static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisher.class.getName());
 
-    private static final String CONTENT_TRANSFER_ENCODING =
-            System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
+    private static final String CONTENT_TRANSFER_ENCODING = System
+            .getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
@@ -208,7 +206,8 @@ public class ExtendedEmailPublisher extends Notifier {
      */
     public MatrixTriggerMode matrixTriggerMode;
 
-    public ExtendedEmailPublisher() {}
+    public ExtendedEmailPublisher() {
+    }
 
     @Deprecated
     public ExtendedEmailPublisher(
@@ -516,8 +515,8 @@ public class ExtendedEmailPublisher extends Notifier {
         for (String triggerName : triggered.keySet()) {
             for (EmailTrigger trigger : triggered.get(triggerName)) {
                 listener.getLogger().println("Sending email for trigger: " + triggerName);
-                final ExtendedEmailPublisherContext context =
-                        new ExtendedEmailPublisherContext(this, build, build.getWorkspace(), launcher, listener);
+                final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build,
+                        build.getWorkspace(), launcher, listener);
                 context.setTriggered(triggered);
                 context.setTrigger(trigger);
                 sendMail(context);
@@ -783,9 +782,6 @@ public class ExtendedEmailPublisher extends Notifier {
             binding.setVariable("triggered", ImmutableMultimap.copyOf(context.getTriggered())); // TODO static
             // whitelist?
 
-            StringWriter out = new StringWriter();
-            PrintWriter pw = new PrintWriter(out);
-
             try {
                 ClassLoader cl = expandClasspath(context, Jenkins.get().getPluginManager().uberClassLoader);
                 if (AbstractEvalContent.isApprovedScript(script, GroovyLanguage.get())
@@ -816,18 +812,17 @@ public class ExtendedEmailPublisher extends Notifier {
                         + e.getMessage());
                 throw e;
             } catch (Throwable t) {
-                Functions.printStackTrace(t, pw);
-                logger.println(out);
+                LOGGER.log(Level.WARNING, "Error executing " + scriptName + " script", t);
+                logger.println("Error executing " + scriptName + " script: " + t.getMessage());
                 // should we cancel the sending of the email???
             }
-            debug(logger, out.toString());
         }
         return !cancel;
     }
 
     private static CompilerConfiguration getCompilerConfiguration(boolean sandbox) {
-        CompilerConfiguration cc =
-                sandbox ? GroovySandbox.createSecureCompilerConfiguration() : new CompilerConfiguration();
+        CompilerConfiguration cc = sandbox ? GroovySandbox.createSecureCompilerConfiguration()
+                : new CompilerConfiguration();
         cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
         cc.addCompilationCustomizers(
                 new ImportCustomizer().addStarImports("jenkins", "jenkins.model", "hudson", "hudson.model"));
@@ -1007,8 +1002,8 @@ public class ExtendedEmailPublisher extends Notifier {
 
         // add attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getAttachmentsPattern())) {
-            AttachmentUtils typeAttachments =
-                    new AttachmentUtils(context.getTrigger().getEmail().getAttachmentsPattern());
+            AttachmentUtils typeAttachments = new AttachmentUtils(
+                    context.getTrigger().getEmail().getAttachmentsPattern());
             typeAttachments.attach(multipart, context);
         }
 
@@ -1163,10 +1158,9 @@ public class ExtendedEmailPublisher extends Notifier {
         final Multipart multipart;
         boolean doBoth = false;
 
-        String messageContentType =
-                context.getTrigger().getEmail().getContentType().equals("project")
-                        ? contentType
-                        : context.getTrigger().getEmail().getContentType();
+        String messageContentType = context.getTrigger().getEmail().getContentType().equals("project")
+                ? contentType
+                : context.getTrigger().getEmail().getContentType();
         // contentType is null if the project was not reconfigured after upgrading.
         if (messageContentType == null || "default".equals(messageContentType)) {
             messageContentType = getDescriptor().getDefaultContentType();

@@ -8,7 +8,6 @@ import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
 import groovy.text.TemplateEngine;
 import hudson.FilePath;
-import hudson.Functions;
 import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -23,8 +22,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.nio.charset.StandardCharsets;
@@ -113,7 +110,7 @@ public class ScriptContent extends AbstractEvalContent {
     /**
      * Renders the template using a SimpleTemplateEngine
      *
-     * @param build the build to act on
+     * @param build          the build to act on
      * @param templateStream the template file stream
      * @return the rendered template content
      */
@@ -124,8 +121,8 @@ public class ScriptContent extends AbstractEvalContent {
         String result;
 
         final Map<String, Object> binding = new HashMap<>();
-        ExtendedEmailPublisherDescriptor descriptor =
-                Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.get()
+                .getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         binding.put("build", build);
         binding.put("listener", listener);
         binding.put("it", new ScriptContentBuildWrapper(build));
@@ -172,8 +169,8 @@ public class ScriptContent extends AbstractEvalContent {
                 result = tmplR.make(binding).toString();
             } else {
                 // unapproved script, so run in sandbox
-                StaticProxyInstanceWhitelist whitelist =
-                        new StaticProxyInstanceWhitelist(build, "templates-instances.whitelist");
+                StaticProxyInstanceWhitelist whitelist = new StaticProxyInstanceWhitelist(build,
+                        "templates-instances.whitelist");
                 result = GroovySandbox.runInSandbox(
                         // TODO there is a PrintWriter instance created in make and bound to out
                         () -> tmplR.make(binding).toString(),
@@ -186,10 +183,8 @@ public class ScriptContent extends AbstractEvalContent {
             }
 
         } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            Functions.printStackTrace(e, pw);
-            result = "Exception raised during template rendering: " + e.getMessage() + "\n\n" + sw;
+            LOGGER.log(Level.WARNING, "Exception raised during template rendering", e);
+            result = "Exception raised during template rendering: " + e.getMessage();
         }
         return result;
     }
@@ -206,8 +201,8 @@ public class ScriptContent extends AbstractEvalContent {
             throws IOException {
         String result = "";
         Map<String, Object> binding = new HashMap<>();
-        ExtendedEmailPublisherDescriptor descriptor =
-                Jenkins.get().getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = Jenkins.get()
+                .getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         Item parent = build.getParent();
 
         binding.put("build", build);

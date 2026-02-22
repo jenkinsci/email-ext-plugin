@@ -3,7 +3,6 @@ package hudson.plugins.emailext.plugins.trigger;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
-import hudson.Functions;
 import hudson.model.AbstractBuild;
 import hudson.model.Descriptor;
 import hudson.model.Item;
@@ -18,6 +17,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
@@ -37,6 +38,8 @@ import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest2;
 
 public abstract class AbstractScriptTrigger extends EmailTrigger {
+
+    private static final Logger LOGGER = Logger.getLogger(AbstractScriptTrigger.class.getName());
 
     protected SecureGroovyScript secureTriggerScript;
 
@@ -138,8 +141,8 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
     public boolean configure(@NonNull StaplerRequest2 req, @NonNull JSONObject formData) {
         super.configure(req, formData);
         if (formData.containsKey("secureTriggerScript")) {
-            this.secureTriggerScript =
-                    req.bindJSON(SecureGroovyScript.class, formData.getJSONObject("secureTriggerScript"));
+            this.secureTriggerScript = req.bindJSON(SecureGroovyScript.class,
+                    formData.getJSONObject("secureTriggerScript"));
             this.secureTriggerScript.configuring(
                     ApprovalContext.create().withCurrentUser().withItem(req.findAncestorObject(Item.class)));
         }
@@ -159,8 +162,8 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
                     result = (Boolean) res;
                 }
             } catch (IOException e) {
-                Functions.printStackTrace(
-                        e, listener.fatalError("Failed evaluating script trigger %s%n", e.getMessage()));
+                listener.fatalError("Failed evaluating script trigger: %s%n", e.getMessage());
+                LOGGER.log(Level.SEVERE, "Failed evaluating script trigger", e);
             }
         }
         return result;
@@ -232,7 +235,9 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
      *
      * @return {@code this}, or a replacement for {@code this}.
      * @throws ObjectStreamException if the object cannot be restored.
-     * @see <a href="http://download.oracle.com/javase/1.3/docs/guide/serialization/spec/input.doc6.html">The Java Object Serialization Specification</a>
+     * @see <a href=
+     *      "http://download.oracle.com/javase/1.3/docs/guide/serialization/spec/input.doc6.html">The
+     *      Java Object Serialization Specification</a>
      */
     protected Object readResolve() throws ObjectStreamException, Descriptor.FormException {
         if (triggerScript != null && secureTriggerScript == null) {

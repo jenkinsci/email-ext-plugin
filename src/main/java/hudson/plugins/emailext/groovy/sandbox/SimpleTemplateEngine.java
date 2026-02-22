@@ -43,12 +43,15 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.GroovySandbox;
  * Processes template source files substituting variables and expressions into
  * placeholders in a template source text to produce the desired output.
  * <p>
- * The template engine uses JSP style &lt;% %&gt; script and &lt;%= %&gt; expression syntax
- * or GString style expressions. The variable '<code>out</code>' is bound to the writer that the template
+ * The template engine uses JSP style &lt;% %&gt; script and &lt;%= %&gt;
+ * expression syntax
+ * or GString style expressions. The variable '<code>out</code>' is bound to the
+ * writer that the template
  * is being written to.
  * <p>
  * Frequently, the template source will be in a file but here is a simple
  * example providing the template as a string:
+ * 
  * <pre>
  * def binding = [
  *     firstname : "Grace",
@@ -69,9 +72,11 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.GroovySandbox;
  * def template = engine.createTemplate(text).make(binding)
  * println template.toString()
  * </pre>
+ * 
  * This example uses a mix of the JSP style and GString style placeholders
  * but you can typically use just one style if you wish. Running this
  * example will produce this output:
+ * 
  * <pre>
  * Dear Grace Hopper,
  *
@@ -80,8 +85,12 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.GroovySandbox;
  *
  * The conference committee.
  * </pre>
- * The template engine can also be used as the engine for {@link groovy.servlet.TemplateServlet} by placing the
- * following in your <code>web.xml</code> file (plus a corresponding servlet-mapping element):
+ * 
+ * The template engine can also be used as the engine for
+ * {@link groovy.servlet.TemplateServlet} by placing the
+ * following in your <code>web.xml</code> file (plus a corresponding
+ * servlet-mapping element):
+ * 
  * <pre>
  * &lt;servlet&gt;
  *   &lt;servlet-name&gt;SimpleTemplate&lt;/servlet-name&gt;
@@ -92,7 +101,9 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.GroovySandbox;
  *   &lt;/init-param&gt;
  * &lt;/servlet&gt;
  * </pre>
- * In this case, your template source file should be HTML with the appropriate embedded placeholders.
+ * 
+ * In this case, your template source file should be HTML with the appropriate
+ * embedded placeholders.
  *
  * @author sam
  * @author Christian Stein
@@ -109,12 +120,9 @@ public class SimpleTemplateEngine extends TemplateEngine {
      * Default: 1MB
      */
     // public for testing
-    @SuppressFBWarnings(
-            value = "MS_SHOULD_BE_FINAL",
-            justification =
-                    "non final to make it editable from the script console (convenient to temporarily change the value without restarting)")
-    public static int MAX_EXPANDED_SIZE_BYTES =
-            SystemProperties.getInteger(SimpleTemplateEngine.class.getName() + ".MAX_EXPANDED_SIZE_BYTES", 1024 * 1024);
+    @SuppressFBWarnings(value = "MS_SHOULD_BE_FINAL", justification = "non final to make it editable from the script console (convenient to temporarily change the value without restarting)")
+    public static int MAX_EXPANDED_SIZE_BYTES = SystemProperties
+            .getInteger(SimpleTemplateEngine.class.getName() + ".MAX_EXPANDED_SIZE_BYTES", 1024 * 1024);
 
     private static AtomicInteger counter = new AtomicInteger(1);
 
@@ -190,7 +198,8 @@ public class SimpleTemplateEngine extends TemplateEngine {
                     PrintWriter pw = new PrintWriter(writer);
                     try {
                         if (sandbox) {
-                            // Cannot use normal GroovySandbox.runScript here because template preparation was
+                            // Cannot use normal GroovySandbox.runScript here because template preparation
+                            // was
                             // separated.
                             try (GroovySandbox.Scope scope = new GroovySandbox().enter()) {
                                 final Script scriptObject = InvokerHelper.createScript(script.getClass(), binding);
@@ -204,7 +213,7 @@ public class SimpleTemplateEngine extends TemplateEngine {
                         }
                     } catch (MissingPropertyException x) {
                         throw (IOException) new IOException(
-                                        "did you forget to escape \\$" + x.getProperty() + " for non-Groovy variables?")
+                                "did you forget to escape \\$" + x.getProperty() + " for non-Groovy variables?")
                                 .initCause(x);
                     }
                     pw.flush();
@@ -222,9 +231,7 @@ public class SimpleTemplateEngine extends TemplateEngine {
                     try {
                         writeTo(sw);
                     } catch (IOException x) {
-                        PrintWriter pw = new PrintWriter(sw);
-                        x.printStackTrace(pw);
-                        pw.flush();
+                        LOGGER.log(Level.WARNING, "Failed to render template to string", x);
                     }
                     return sw.toString();
                 }
@@ -233,7 +240,8 @@ public class SimpleTemplateEngine extends TemplateEngine {
     }
 
     /**
-     * Parse the text document looking for {@code <%} or {@code <%=} and then call out to the appropriate handler, otherwise copy the text directly
+     * Parse the text document looking for {@code <%} or {@code <%=} and then call
+     * out to the appropriate handler, otherwise copy the text directly
      * into the script while escaping quotes.
      *
      * @param reader a reader for the template text
@@ -324,7 +332,8 @@ public class SimpleTemplateEngine extends TemplateEngine {
     }
 
     /**
-     * Closes the currently open write and writes out the following text as a GString expression until it reaches an end %>.
+     * Closes the currently open write and writes out the following text as a
+     * GString expression until it reaches an end %>.
      *
      * @param reader a reader for the template text
      * @param sw     a StringWriter to write expression content
@@ -350,7 +359,8 @@ public class SimpleTemplateEngine extends TemplateEngine {
     }
 
     /**
-     * Closes the currently open write and writes the following text as normal Groovy script code until it reaches an end %>.
+     * Closes the currently open write and writes the following text as normal
+     * Groovy script code until it reaches an end %>.
      *
      * @param reader a reader for the template text
      * @param sw     a StringWriter to write expression content
@@ -368,7 +378,8 @@ public class SimpleTemplateEngine extends TemplateEngine {
                     break;
                 }
             }
-            /* Don't eat EOL chars in sections - as they are valid instruction separators.
+            /*
+             * Don't eat EOL chars in sections - as they are valid instruction separators.
              * See http://jira.codehaus.org/browse/GROOVY-980
              */
             // if (c != '\n' && c != '\r') {
