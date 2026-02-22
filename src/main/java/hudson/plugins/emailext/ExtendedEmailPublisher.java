@@ -40,7 +40,6 @@ import hudson.plugins.emailext.plugins.content.EmailExtScript;
 import hudson.plugins.emailext.plugins.content.TriggerNameContent;
 import hudson.plugins.emailext.watching.EmailExtWatchAction;
 import hudson.plugins.emailext.watching.EmailExtWatchJobProperty;
-import jakarta.mail.AuthenticationFailedException;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.MailMessageIdAction;
 import hudson.tasks.Notifier;
@@ -104,15 +103,20 @@ import org.kohsuke.stapler.StaplerRequest2;
  */
 public class ExtendedEmailPublisher extends Notifier {
 
-	private static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisher.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisher.class.getName());
 
-	private static final String CONTENT_TRANSFER_ENCODING = System
-			.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
+    private static final String CONTENT_TRANSFER_ENCODING =
+            System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
 
-	public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
+    public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     public static final String DEFAULT_BODY_TEXT = """
+=======
+    public static final String DEFAULT_BODY_TEXT =
+            """
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
             $PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
 
             Check console output at $BUILD_URL to view the results.""";
@@ -157,11 +161,14 @@ public class ExtendedEmailPublisher extends Notifier {
     public String attachmentsPattern;
 
     /**
+<<<<<<< HEAD
      * The project wide set of inline attachments.
      */
     public String inlineAttachmentsPattern;
 
     /**
+=======
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
      * The project's pre-send script.
      */
     private String presendScript;
@@ -211,8 +218,12 @@ public class ExtendedEmailPublisher extends Notifier {
      */
     public MatrixTriggerMode matrixTriggerMode;
 
+<<<<<<< HEAD
     public ExtendedEmailPublisher() {
     }
+=======
+    public ExtendedEmailPublisher() {}
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
 
     @Deprecated
     public ExtendedEmailPublisher(
@@ -367,6 +378,7 @@ public class ExtendedEmailPublisher extends Notifier {
         return postsendScript;
     }
 
+<<<<<<< HEAD
     public String getInlineAttachmentsPattern() {
         return inlineAttachmentsPattern;
     }
@@ -376,6 +388,8 @@ public class ExtendedEmailPublisher extends Notifier {
         this.inlineAttachmentsPattern = inlineAttachmentsPattern;
     }
 
+=======
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
     /**
      * Get the list of configured email theTriggers for this project.
      *
@@ -407,11 +421,15 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     public void debug(PrintStream p, String format, Object... args) {
+<<<<<<< HEAD
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
 
         if (descriptor != null) {
             descriptor.debug(p, format, args);
         }
+=======
+        getDescriptor().debug(p, format, args);
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
     }
 
     @Override
@@ -524,8 +542,13 @@ public class ExtendedEmailPublisher extends Notifier {
         for (String triggerName : triggered.keySet()) {
             for (EmailTrigger trigger : triggered.get(triggerName)) {
                 listener.getLogger().println("Sending email for trigger: " + triggerName);
+<<<<<<< HEAD
                 final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build,
                         build.getWorkspace(), launcher, listener);
+=======
+                final ExtendedEmailPublisherContext context =
+                        new ExtendedEmailPublisherContext(this, build, build.getWorkspace(), launcher, listener);
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
                 context.setTriggered(triggered);
                 context.setTrigger(trigger);
                 sendMail(context);
@@ -625,7 +648,11 @@ public class ExtendedEmailPublisher extends Notifier {
                                             || e.getNextException() instanceof ConnectException)) {
                                 context.getListener()
                                         .getLogger()
+<<<<<<< HEAD
                                         .println("SMTP connection failed. Retrying in 10 seconds...");
+=======
+                                        .println("Socket error sending email, retrying once more in 10 seconds...");
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {
@@ -675,8 +702,12 @@ public class ExtendedEmailPublisher extends Notifier {
                             if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
                                 context.getListener()
                                         .getLogger()
+<<<<<<< HEAD
                                         .println(
                                                 "SMTP connection error while sending email. Retrying once more in 10 seconds.");
+=======
+                                        .println("Connection error sending email, retrying once more in 10 seconds...");
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {
@@ -725,7 +756,10 @@ public class ExtendedEmailPublisher extends Notifier {
             LOGGER.log(Level.SEVERE, "SMTP authentication failed. Check username/password.", e);
             Functions.printStackTrace(
                     e, context.getListener().error("SMTP authentication failed. Check mail credentials."));
+<<<<<<< HEAD
 
+=======
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
         } catch (SendFailedException e) {
             LOGGER.log(Level.WARNING, "Email sending failed due to invalid or rejected recipient addresses.", e);
             Functions.printStackTrace(
@@ -739,6 +773,7 @@ public class ExtendedEmailPublisher extends Notifier {
         }
 
         debug(context.getListener().getLogger(), "Email sending failed. Please check Jenkins system log for details.");
+<<<<<<< HEAD
 		return attachBuildLog;
 
         }
@@ -756,6 +791,14 @@ public class ExtendedEmailPublisher extends Notifier {
         }
 
         macros.add(new TriggerNameContent(triggerName));
+=======
+        return false;
+    }
+
+    public List<TokenMacro> getRuntimeMacros(ExtendedEmailPublisherContext context) {
+        List<TokenMacro> macros = new ArrayList<>();
+        macros.add(new TriggerNameContent(context.getTrigger().getDescriptor().getDisplayName()));
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
         return macros;
     }
 
@@ -785,9 +828,12 @@ public class ExtendedEmailPublisher extends Notifier {
             PrintStream logger = listener.getLogger();
             debug(logger, "Executing %s script", scriptName);
 
+<<<<<<< HEAD
             StringWriter out = new StringWriter();
             PrintWriter pw = new PrintWriter(out);
 
+=======
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
             Binding binding = new Binding();
             binding.setVariable("build", context.getBuild());
             binding.setVariable("run", context.getRun());
@@ -807,6 +853,12 @@ public class ExtendedEmailPublisher extends Notifier {
             binding.setVariable("triggered", ImmutableMultimap.copyOf(context.getTriggered())); // TODO static
             // whitelist?
 
+<<<<<<< HEAD
+=======
+            StringWriter out = new StringWriter();
+            PrintWriter pw = new PrintWriter(out);
+
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
             try {
                 ClassLoader cl = expandClasspath(context, Jenkins.get().getPluginManager().uberClassLoader);
                 if (AbstractEvalContent.isApprovedScript(script, GroovyLanguage.get())
@@ -837,7 +889,10 @@ public class ExtendedEmailPublisher extends Notifier {
                         + e.getMessage());
                 throw e;
             } catch (Throwable t) {
+<<<<<<< HEAD
                 LOGGER.log(Level.WARNING, "Error executing " + scriptName + " script", t);
+=======
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
                 Functions.printStackTrace(t, pw);
                 logger.println(out);
                 // should we cancel the sending of the email???
@@ -848,8 +903,13 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     private static CompilerConfiguration getCompilerConfiguration(boolean sandbox) {
+<<<<<<< HEAD
         CompilerConfiguration cc = sandbox ? GroovySandbox.createSecureCompilerConfiguration()
                 : new CompilerConfiguration();
+=======
+        CompilerConfiguration cc =
+                sandbox ? GroovySandbox.createSecureCompilerConfiguration() : new CompilerConfiguration();
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
         cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
         cc.addCompilationCustomizers(
                 new ImportCustomizer().addStarImports("jenkins", "jenkins.model", "hudson", "hudson.model"));
@@ -1022,6 +1082,7 @@ public class ExtendedEmailPublisher extends Notifier {
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
         attachments.attach(multipart, context);
 
+<<<<<<< HEAD
         if (StringUtils.isNotBlank(inlineAttachmentsPattern)) {
             AttachmentUtils inlineAttachments = new AttachmentUtils(inlineAttachmentsPattern);
             inlineAttachments.attachInline(multipart, context);
@@ -1041,6 +1102,15 @@ public class ExtendedEmailPublisher extends Notifier {
             inlineAttachments.attachInline(multipart, context);
         }
 
+=======
+        // add attachments from the email type if they are setup
+        if (StringUtils.isNotBlank(context.getTrigger().getEmail().getAttachmentsPattern())) {
+            AttachmentUtils typeAttachments =
+                    new AttachmentUtils(context.getTrigger().getEmail().getAttachmentsPattern());
+            typeAttachments.attach(multipart, context);
+        }
+
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
         if (attachBuildLog || context.getTrigger().getEmail().getAttachBuildLog()) {
             debug(context.getListener().getLogger(), "Request made to attach build log");
             AttachmentUtils.attachBuildLog(
@@ -1185,9 +1255,16 @@ public class ExtendedEmailPublisher extends Notifier {
         final Multipart multipart;
         boolean doBoth = false;
 
+<<<<<<< HEAD
         String messageContentType = context.getTrigger().getEmail().getContentType().equals("project")
                 ? contentType
                 : context.getTrigger().getEmail().getContentType();
+=======
+        String messageContentType =
+                context.getTrigger().getEmail().getContentType().equals("project")
+                        ? contentType
+                        : context.getTrigger().getEmail().getContentType();
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
         // contentType is null if the project was not reconfigured after upgrading.
         if (messageContentType == null || "default".equals(messageContentType)) {
             messageContentType = getDescriptor().getDefaultContentType();
@@ -1273,16 +1350,22 @@ public class ExtendedEmailPublisher extends Notifier {
      *
      * @param run      a run for which we may be sending mail
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
      * @param listener a listener to which we may print warnings in case the actual
      *                 previous build is still in progress
      * @return the previous build, or null if that build is missing, or is still in
      *         progress
+<<<<<<< HEAD
 =======
      * @param listener a listener to which we may print warnings in case the
      *                 actual previous build is still in progress
      * @return the previous build, or null if that build is missing, or is still
      *         in progress
 >>>>>>> 714e6ece (Improve logging and exception handling in sendMail)
+=======
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
      */
     public static @CheckForNull Run<?, ?> getPreviousRun(@NonNull Run<?, ?> run, TaskListener listener) {
         Run<?, ?> previousRun = run.getPreviousBuild();
@@ -1349,6 +1432,7 @@ public class ExtendedEmailPublisher extends Notifier {
         }
         return this;
     }
+<<<<<<< HEAD
 =======
 	public static final String DEFAULT_BODY_TEXT = """
 			$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
@@ -2445,4 +2529,6 @@ public class ExtendedEmailPublisher extends Notifier {
 		return this;
 	}
 >>>>>>> 5b0f45f8 (Improve logging and exception handling in sendMail)
+=======
+>>>>>>> c90d3980 (Reduce diff to logging and exception handling only)
 }
