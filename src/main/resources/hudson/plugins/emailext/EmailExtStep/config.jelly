@@ -43,6 +43,9 @@ THE SOFTWARE.
         <f:entry field="attachmentsPattern" title="Attachments Pattern">
             <f:textbox />
         </f:entry>
+        <f:entry field="inlineAttachmentsPattern" title="Inline Attachments Pattern">
+            <f:textbox />
+        </f:entry>
         <f:entry field="attachLog" title="Attach Build Log">
             <f:checkbox />
         </f:entry>

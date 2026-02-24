@@ -149,10 +149,12 @@ public class ExtendedEmailPublisher extends Notifier {
      */
     public String defaultContent;
 
-    /**
-     * The project wide set of attachments.
-     */
     public String attachmentsPattern;
+
+    /**
+     * The project wide set of inline attachments.
+     */
+    public String inlineAttachmentsPattern;
 
     /**
      * The project's pre-send script.
@@ -235,7 +237,8 @@ public class ExtendedEmailPublisher extends Notifier {
                 project_triggers,
                 matrixTriggerMode,
                 false,
-                Collections.emptyList());
+                Collections.emptyList(),
+                null);
     }
 
     @DataBoundConstructor
@@ -254,12 +257,14 @@ public class ExtendedEmailPublisher extends Notifier {
             List<EmailTrigger> configuredTriggers,
             MatrixTriggerMode matrixTriggerMode,
             boolean disabled,
-            List<GroovyScriptPath> classpath) {
+            List<GroovyScriptPath> classpath,
+            String inlineAttachmentsPattern) {
         this.recipientList = recipientList;
         this.contentType = contentType;
         this.defaultSubject = defaultSubject;
         this.defaultContent = defaultContent;
         this.attachmentsPattern = attachmentsPattern;
+        this.inlineAttachmentsPattern = inlineAttachmentsPattern;
         setPresendScript(presendScript);
         this.attachBuildLog = attachBuildLog > 0;
         this.compressBuildLog = attachBuildLog > 1;
@@ -987,11 +992,23 @@ public class ExtendedEmailPublisher extends Notifier {
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
         attachments.attach(multipart, context);
 
+        if (StringUtils.isNotBlank(inlineAttachmentsPattern)) {
+            AttachmentUtils inlineAttachments = new AttachmentUtils(inlineAttachmentsPattern);
+            inlineAttachments.attachInline(multipart, context);
+        }
+
         // add attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getAttachmentsPattern())) {
             AttachmentUtils typeAttachments =
                     new AttachmentUtils(context.getTrigger().getEmail().getAttachmentsPattern());
             typeAttachments.attach(multipart, context);
+        }
+
+        // add inline attachments from the email type if they are setup
+        if (StringUtils.isNotBlank(context.getTrigger().getEmail().getInlineAttachmentsPattern())) {
+            AttachmentUtils inlineAttachments =
+                    new AttachmentUtils(context.getTrigger().getEmail().getInlineAttachmentsPattern());
+            inlineAttachments.attachInline(multipart, context);
         }
 
         if (attachBuildLog || context.getTrigger().getEmail().getAttachBuildLog()) {
