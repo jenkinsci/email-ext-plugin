@@ -92,8 +92,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         email.setContentType(contentType);
     }
 
-    protected EmailTrigger(JSONObject formData) {
-    }
+    protected EmailTrigger(JSONObject formData) {}
 
     public static DescriptorExtensionList<EmailTrigger, EmailTriggerDescriptor> all() {
         return Jenkins.get().getDescriptorList(EmailTrigger.class);
@@ -219,8 +218,8 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
      * @return The number of test failures for the Run
      */
     protected int getNumFailures(Run<?, ?> build) {
-        AbstractTestResultAction<? extends AbstractTestResultAction<?>> a = build
-                .getAction(AbstractTestResultAction.class);
+        AbstractTestResultAction<? extends AbstractTestResultAction<?>> a =
+                build.getAction(AbstractTestResultAction.class);
         if (a instanceof AggregatedTestResultAction action) {
             int result = 0;
             for (ChildReport cr : action.getChildReports()) {
@@ -244,7 +243,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
 
     /**
      * Should this trigger run before the build? Defaults to false.
-     * 
+     *
      * @return true if the trigger should be checked before the build.
      */
     public boolean isPreBuild() {
@@ -254,7 +253,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     /**
      * Should this trigger bypass the email throttling? Defaults to false.
      * Critical triggers like build failures override this to true.
-     * 
+     *
      * @return true if the trigger should bypass the email throttling.
      */
     public boolean shouldBypassThrottling() {
