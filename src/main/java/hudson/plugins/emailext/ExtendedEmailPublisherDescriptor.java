@@ -7,6 +7,7 @@ import com.cloudbees.plugins.credentials.domains.HostnamePortRequirement;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import hudson.ProxyConfiguration;
 import hudson.Util;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
@@ -25,11 +26,17 @@ import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.StringReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -170,8 +177,45 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private transient Secret smtpAuthPassword;
     private transient boolean useSsl = false;
 
-    private transient BiFunction<MailAccount, Run<?, ?>, Authenticator> authenticatorProvider =
-            (acc, run) -> new Authenticator() {
+    private transient BiFunction<MailAccount, Run<?, ?>, Authenticator> authenticatorProvider = (acc, run) -> {
+        if (acc.isUseOAuth2() && "o365".equals(acc.getOauth2Provider())) {
+            // Fetch token for O365
+            DomainRequirement domainRequirement = null;
+            if (StringUtils.isNotBlank(acc.getSmtpHost()) && StringUtils.isNotBlank(acc.getSmtpPort())) {
+                domainRequirement = new HostnamePortRequirement(acc.getSmtpHost(), Integer.parseInt(acc.getSmtpPort()));
+            }
+
+            StandardUsernamePasswordCredentials c = CredentialsProvider.findCredentialById(
+                    acc.getCredentialsId(), StandardUsernamePasswordCredentials.class, run, domainRequirement);
+
+            if (c == null) {
+                return null;
+            }
+
+            String clientId = c.getUsername();
+            String clientSecret = Secret.toString(c.getPassword());
+            String tenantId = acc.getTenantId();
+
+            if (StringUtils.isBlank(tenantId)) {
+                LOGGER.warning("Tenant ID is required for O365 OAuth2");
+                return null;
+            }
+
+            String token = fetchOAuth2Token(clientId, clientSecret, tenantId);
+
+            if (token == null) {
+                return null;
+            }
+
+            return new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(clientId, token);
+                }
+            };
+        } else {
+            // Default
+            return new Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
                     DomainRequirement domainRequirement = null;
@@ -190,6 +234,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                     return new PasswordAuthentication(c.getUsername(), Secret.toString(c.getPassword()));
                 }
             };
+        }
+    };
 
     private Object readResolve() {
         if (smtpHost != null) {
@@ -209,14 +255,22 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
 
         /*
-         * Versions 2.71 and earlier correctly left the address unset for the default account,
-         * relying solely on the system admin email address from the Jenkins Location settings for
-         * the default account and using the address specified on the account only for additional
-         * accounts. Versions 2.72 through 2.77 incorrectly set the address for the default account
-         * to the system admin email address from the Jenkins Location settings at the time the
-         * descriptor was first saved without propagating further changes from the Jenkins Location
-         * settings to the default account. To clear up this bad state, we unconditionally clear the
-         * address and rely once again solely on the system admin email address from the Jenkins
+         * Versions 2.71 and earlier correctly left the address unset for the default
+         * account,
+         * relying solely on the system admin email address from the Jenkins Location
+         * settings for
+         * the default account and using the address specified on the account only for
+         * additional
+         * accounts. Versions 2.72 through 2.77 incorrectly set the address for the
+         * default account
+         * to the system admin email address from the Jenkins Location settings at the
+         * time the
+         * descriptor was first saved without propagating further changes from the
+         * Jenkins Location
+         * settings to the default account. To clear up this bad state, we
+         * unconditionally clear the
+         * address and rely once again solely on the system admin email address from the
+         * Jenkins
          * Location settings for the default account.
          */
         if (mailAccount.getAddress() != null) {
@@ -254,7 +308,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             try {
                 descriptor.setDefaultClasspath(descriptor.getDefaultClasspath());
             } catch (FormException e) {
-                // Some of the old configured classpaths probably used some environment variable, let's clean those out
+                // Some of the old configured classpaths probably used some environment
+                // variable, let's clean those out
                 List<GroovyScriptPath> newList = new ArrayList<>();
                 for (GroovyScriptPath path : descriptor.getDefaultClasspath()) {
                     URL u = path.asURL();
@@ -327,10 +382,14 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             props.put(SMTP_PORT_PROPERTY, acc.getSmtpPort());
         }
         if (acc.isUseSsl()) {
-            /* This allows the user to override settings by setting system properties but
-             * also allows us to use the default SMTPs port of 465 if no port is already set.
-             * It would be cleaner to use smtps, but that's done by calling session.getTransport()...
-             * and thats done in mail sender, and it would be a bit of a hack to get it all to
+            /*
+             * This allows the user to override settings by setting system properties but
+             * also allows us to use the default SMTPs port of 465 if no port is already
+             * set.
+             * It would be cleaner to use smtps, but that's done by calling
+             * session.getTransport()...
+             * and thats done in mail sender, and it would be a bit of a hack to get it all
+             * to
              * coordinate, and we can make it work through setting mail.smtp properties.
              */
             if (props.getProperty(SMTP_SOCKETFACTORY_PORT_PROPERTY) == null) {
@@ -344,15 +403,18 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             props.put("mail.smtp.socketFactory.fallback", "false");
 
             // RFC 2595 specifies additional checks that must be performed on the server's
-            // certificate to ensure that the server you connected to is the server you intended
+            // certificate to ensure that the server you connected to is the server you
+            // intended
             // to connect to. This reduces the risk of "man in the middle" attacks.
             if (props.getProperty("mail.smtp.ssl.checkserveridentity") == null) {
                 props.put("mail.smtp.ssl.checkserveridentity", "true");
             }
         }
         if (acc.isUseTls()) {
-            /* This allows the user to override settings by setting system properties and
-             * also allows us to use the default STARTTLS port, 587, if no port is already set.
+            /*
+             * This allows the user to override settings by setting system properties and
+             * also allows us to use the default STARTTLS port, 587, if no port is already
+             * set.
              * Only the properties included below are required to use STARTTLS and they are
              * not expected to be enabled simultaneously with SSL (it will actually throw a
              * "javax.net.ssl.SSLException: Unrecognized SSL message, plaintext connection?"
@@ -764,7 +826,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if (defaultTriggerIds.isEmpty()) {
             if (!defaultTriggers.isEmpty()) {
                 for (EmailTriggerDescriptor t : this.defaultTriggers) {
-                    // we have to do the below because a bunch of stuff is not serialized for the Descriptor
+                    // we have to do the below because a bunch of stuff is not serialized for the
+                    // Descriptor
                     EmailTriggerDescriptor d = Jenkins.get().getDescriptorByType(t.getClass());
                     if (d != null && !defaultTriggerIds.contains(d.getId())) {
                         defaultTriggerIds.add(d.getId());
@@ -792,6 +855,13 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         ListBoxModel items = new ListBoxModel();
         items.add(Messages.contentType_plainText(), "text/plain");
         items.add(Messages.contentType_html(), "text/html");
+        return items;
+    }
+
+    @SuppressWarnings({"lgtm[jenkins/csrf]", "lgtm[jenkins/no-permission-check]", "unused"})
+    public ListBoxModel doFillOauth2ProviderItems() {
+        ListBoxModel items = new ListBoxModel();
+        items.add("Office 365", "o365");
         return items;
     }
 
@@ -875,5 +945,46 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     void setAuthenticatorProvider(BiFunction<MailAccount, Run<?, ?>, Authenticator> authenticatorProvider) {
         this.authenticatorProvider = authenticatorProvider;
+    }
+
+    private String fetchOAuth2Token(String clientId, String clientSecret, String tenantId) {
+        try {
+            String url = "https://login.microsoftonline.com/" + tenantId + "/oauth2/v2.0/token";
+            HttpURLConnection conn = (HttpURLConnection) ProxyConfiguration.open(new URL(url));
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+            String data = "grant_type=client_credentials&client_id="
+                    + URLEncoder.encode(clientId, StandardCharsets.UTF_8)
+                    + "&client_secret="
+                    + URLEncoder.encode(clientSecret, StandardCharsets.UTF_8)
+                    + "&scope=https://outlook.office365.com/.default";
+
+            try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
+                wr.writeBytes(data);
+                wr.flush();
+            }
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                try (BufferedReader in =
+                        new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        response.append(line);
+                    }
+                    JSONObject json = JSONObject.fromObject(response.toString());
+                    return json.getString("access_token");
+                }
+            } else {
+                LOGGER.warning("Failed to fetch OAuth2 token: " + responseCode);
+                return null;
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Exception fetching OAuth2 token", e);
+            return null;
+        }
     }
 }

@@ -32,6 +32,12 @@ f.advanced {
     f.entry(field: "useOAuth2", title: _("Use OAuth 2.0")) {
         f.checkbox()
     }
+    f.entry(field: "oauth2Provider", title: _("OAuth 2.0 Provider")) {
+        f.select()
+    }
+    f.entry(field: "tenantId", title: _("Tenant ID")) {
+        f.textbox()
+    }
     f.entry(field: "advProperties", title: _("Advanced Email Properties")) {
         f.textarea()
     }
