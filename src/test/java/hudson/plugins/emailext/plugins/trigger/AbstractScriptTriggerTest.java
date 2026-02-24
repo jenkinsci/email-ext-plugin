@@ -62,8 +62,7 @@ class AbstractScriptTriggerTest {
         publisher.setPresendScript("");
         publisher.setPostsendScript("");
 
-        final String script =
-                """
+        final String script = """
                 out.println('Checking before trigger')
                 return Jenkins.instance.systemMessage == null""";
         publisher
@@ -128,8 +127,7 @@ class AbstractScriptTriggerTest {
         publisher.recipientList = "%DEFAULT_RECIPIENTS";
         publisher.setPresendScript("");
         publisher.setPostsendScript("");
-        String script =
-                """
+        String script = """
                 class DoNotRunConstructor {
                   static void main(String[] args) {}
                   DoNotRunConstructor() {

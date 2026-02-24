@@ -115,9 +115,7 @@ class AttachmentUtilsTest {
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
                 // Pad out the build log so the zip has something to compress
                 for (int i = 0; i < 1000; i++) {
-                    listener.getLogger()
-                            .println(
-                                    """
+                    listener.getLogger().println("""
                                     Oh Mickey, you're so fine
                                     You're so fine you blow my mind, hey Mickey,
                                     Hey Mickey

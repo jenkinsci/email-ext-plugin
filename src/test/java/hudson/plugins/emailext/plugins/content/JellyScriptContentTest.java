@@ -85,9 +85,7 @@ class JellyScriptContentTest {
 
         String output = content.evaluate(build, listener, JellyScriptContent.MACRO_NAME);
 
-        assertTrue(
-                output.contains(
-                        """
+        assertTrue(output.contains("""
                 CHANGE SET
                 Revision  by Kohsuke Kawaguchi: (COMMIT MESSAGE)
                   change: edit path1
