@@ -43,6 +43,9 @@ public class EmailExtStep extends Step {
     private String attachmentsPattern;
 
     @CheckForNull
+    private String inlineAttachmentsPattern;
+
+    @CheckForNull
     private String to;
 
     @CheckForNull
@@ -80,6 +83,17 @@ public class EmailExtStep extends Step {
     public void setAttachmentsPattern(@CheckForNull String attachmentsPattern) {
         if (StringUtils.isNotBlank(attachmentsPattern)) {
             this.attachmentsPattern = attachmentsPattern;
+        }
+    }
+
+    public @CheckForNull String getInlineAttachmentsPattern() {
+        return inlineAttachmentsPattern == null ? "" : inlineAttachmentsPattern;
+    }
+
+    @DataBoundSetter
+    public void setInlineAttachmentsPattern(@CheckForNull String inlineAttachmentsPattern) {
+        if (StringUtils.isNotBlank(inlineAttachmentsPattern)) {
+            this.inlineAttachmentsPattern = inlineAttachmentsPattern;
         }
     }
 
@@ -229,6 +243,10 @@ public class EmailExtStep extends Step {
 
             if (StringUtils.isNotBlank(step.attachmentsPattern)) {
                 publisher.attachmentsPattern = step.attachmentsPattern;
+            }
+
+            if (StringUtils.isNotBlank(step.inlineAttachmentsPattern)) {
+                publisher.inlineAttachmentsPattern = step.inlineAttachmentsPattern;
             }
 
             if (StringUtils.isNotBlank(step.mimeType)) {

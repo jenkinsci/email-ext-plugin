@@ -21,6 +21,7 @@ import java.util.List;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest2;
 
@@ -91,7 +92,8 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         email.setContentType(contentType);
     }
 
-    protected EmailTrigger(JSONObject formData) {}
+    protected EmailTrigger(JSONObject formData) {
+    }
 
     public static DescriptorExtensionList<EmailTrigger, EmailTriggerDescriptor> all() {
         return Jenkins.get().getDescriptorList(EmailTrigger.class);
@@ -112,10 +114,10 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
      * Implementors of this method need to return true if the conditions to
      * trigger an email have been met.
      *
-     * @param build The Build object after the project has been built
+     * @param build    The Build object after the project has been built
      * @param listener Used for logging to the build log
      * @return true if the conditions have been met to trigger a build of this
-     * type
+     *         type
      */
     public abstract boolean trigger(AbstractBuild<?, ?> build, TaskListener listener);
 
@@ -149,6 +151,15 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
 
     public String getAttachmentsPattern() {
         return email.getAttachmentsPattern();
+    }
+
+    public String getInlineAttachmentsPattern() {
+        return email.getInlineAttachmentsPattern();
+    }
+
+    @DataBoundSetter
+    public void setInlineAttachmentsPattern(String inlineAttachmentsPattern) {
+        email.setInlineAttachmentsPattern(inlineAttachmentsPattern);
     }
 
     public int getAttachBuildLog() {
@@ -208,8 +219,8 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
      * @return The number of test failures for the Run
      */
     protected int getNumFailures(Run<?, ?> build) {
-        AbstractTestResultAction<? extends AbstractTestResultAction<?>> a =
-                build.getAction(AbstractTestResultAction.class);
+        AbstractTestResultAction<? extends AbstractTestResultAction<?>> a = build
+                .getAction(AbstractTestResultAction.class);
         if (a instanceof AggregatedTestResultAction action) {
             int result = 0;
             for (ChildReport cr : action.getChildReports()) {
@@ -233,6 +244,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
 
     /**
      * Should this trigger run before the build? Defaults to false.
+     * 
      * @return true if the trigger should be checked before the build.
      */
     public boolean isPreBuild() {
@@ -242,6 +254,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     /**
      * Should this trigger bypass the email throttling? Defaults to false.
      * Critical triggers like build failures override this to true.
+     * 
      * @return true if the trigger should bypass the email throttling.
      */
     public boolean shouldBypassThrottling() {

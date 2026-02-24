@@ -42,6 +42,11 @@ public class EmailType {
     private String attachmentsPattern;
 
     /**
+     * Pattern for inline attachments to be sent as part of this email type.
+     */
+    private String inlineAttachmentsPattern;
+
+    /**
      * True to attach the build log to the email
      */
     private boolean attachBuildLog;
@@ -89,6 +94,7 @@ public class EmailType {
         body = "";
         recipientList = "";
         attachmentsPattern = "";
+        inlineAttachmentsPattern = "";
         attachBuildLog = false;
         compressBuildLog = false;
         replyTo = "";
@@ -170,6 +176,16 @@ public class EmailType {
     @Whitelisted
     public void setAttachmentsPattern(String attachmentsPattern) {
         this.attachmentsPattern = attachmentsPattern;
+    }
+
+    @Whitelisted
+    public String getInlineAttachmentsPattern() {
+        return inlineAttachmentsPattern != null ? inlineAttachmentsPattern.trim() : inlineAttachmentsPattern;
+    }
+
+    @Whitelisted
+    public void setInlineAttachmentsPattern(String inlineAttachmentsPattern) {
+        this.inlineAttachmentsPattern = inlineAttachmentsPattern;
     }
 
     @Whitelisted

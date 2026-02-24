@@ -42,6 +42,9 @@ f.entry(title: _("Default Content"), help: "/plugin/email-ext/help/projectConfig
 f.entry(title: _("Attachments"), help: "/plugin/email-ext/help/projectConfig/attachments.html", description: _("description", "http://ant.apache.org/manual/Types/fileset.html")) {
   f.textbox(name: "attachmentsPattern", value: configured ? instance.attachmentsPattern : "")
 }
+f.entry(title: _("Inline Attachments"), help: "/plugin/email-ext/help/projectConfig/inlineAttachments.html", description: _("description", "http://ant.apache.org/manual/Types/fileset.html")) {
+  f.textbox(name: "inlineAttachmentsPattern", value: configured ? instance.inlineAttachmentsPattern : "")
+}
 f.entry(title: _("Attach Build Log"), help: "/plugin/email-ext/help/projectConfig/attachBuildLog.html") {
   div(class: "jenkins-select") {
     select(name: "attachBuildLog", class: "jenkins-select__input") {
