@@ -149,6 +149,9 @@ public class ExtendedEmailPublisher extends Notifier {
      */
     public String defaultContent;
 
+    /**
+     * The project wide set of attachments.
+     */
     public String attachmentsPattern;
 
     /**
@@ -237,8 +240,7 @@ public class ExtendedEmailPublisher extends Notifier {
                 project_triggers,
                 matrixTriggerMode,
                 false,
-                Collections.emptyList(),
-                null);
+                Collections.emptyList());
     }
 
     @DataBoundConstructor
@@ -257,14 +259,12 @@ public class ExtendedEmailPublisher extends Notifier {
             List<EmailTrigger> configuredTriggers,
             MatrixTriggerMode matrixTriggerMode,
             boolean disabled,
-            List<GroovyScriptPath> classpath,
-            String inlineAttachmentsPattern) {
+            List<GroovyScriptPath> classpath) {
         this.recipientList = recipientList;
         this.contentType = contentType;
         this.defaultSubject = defaultSubject;
         this.defaultContent = defaultContent;
         this.attachmentsPattern = attachmentsPattern;
-        this.inlineAttachmentsPattern = inlineAttachmentsPattern;
         setPresendScript(presendScript);
         this.attachBuildLog = attachBuildLog > 0;
         this.compressBuildLog = attachBuildLog > 1;
@@ -362,6 +362,15 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public String getPostsendScript() {
         return postsendScript;
+    }
+
+    public String getInlineAttachmentsPattern() {
+        return inlineAttachmentsPattern;
+    }
+
+    @DataBoundSetter
+    public void setInlineAttachmentsPattern(String inlineAttachmentsPattern) {
+        this.inlineAttachmentsPattern = inlineAttachmentsPattern;
     }
 
     /**
