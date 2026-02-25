@@ -4,9 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.jvnet.hudson.test.Issue;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.jvnet.hudson.test.Issue;
 
 /**
  * Test for EmailExtTemplateAction CSP compliance.
