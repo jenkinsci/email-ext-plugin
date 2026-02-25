@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 public class EmailExtTemplateActionTest {
 
     @Test
-    @Disabled("Temporarily disabled")
     @Issue("JENKINS-74891")
     public void testJavaScriptFileIsCSPCompliant() throws Exception {
         java.io.InputStream is = getClass()
