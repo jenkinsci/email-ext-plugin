@@ -109,8 +109,7 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
-    public static final String DEFAULT_BODY_TEXT =
-            """
+    public static final String DEFAULT_BODY_TEXT = """
             $PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
 
             Check console output at $BUILD_URL to view the results.""";
