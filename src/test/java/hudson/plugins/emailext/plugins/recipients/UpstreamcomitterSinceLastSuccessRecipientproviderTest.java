@@ -10,7 +10,6 @@ import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
 import hudson.tasks.BuildTrigger;
 import java.util.Collections;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.FakeChangeLogSCM;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -19,13 +18,6 @@ import org.jvnet.mock_javamail.Mailbox;
 
 @WithJenkins
 class UpstreamComitterSinceLastSuccessRecipientProviderTest {
-
-    private JenkinsRule j;
-
-    @BeforeEach
-    void setUp(JenkinsRule j) {
-        this.j = j;
-    }
 
     @AfterEach
     void tearDown() {
@@ -38,7 +30,7 @@ class UpstreamComitterSinceLastSuccessRecipientProviderTest {
      * to anyone. This tests the null-guard at the top of addRecipients().
      */
     @Test
-    void noEmailWhenJobBNeverSucceeded() throws Exception {
+    void noEmailWhenJobBNeverSucceeded(JenkinsRule j) throws Exception {
         FreeStyleProject jobA = j.createFreeStyleProject("jobA");
         FakeChangeLogSCM scm = new FakeChangeLogSCM();
         scm.addChange().withAuthor("First Person <first@example.com>");
@@ -85,7 +77,7 @@ class UpstreamComitterSinceLastSuccessRecipientProviderTest {
      * Expected: only Second Person notified, First Person is behind the anchor.
      */
     @Test
-    void onlyCommitterSinceLastSuccessIsNotified() throws Exception {
+    void onlyCommitterSinceLastSuccessIsNotified(JenkinsRule j) throws Exception {
         FreeStyleProject jobA = j.createFreeStyleProject("jobA");
         jobA.getPublishersList().add(new BuildTrigger("jobB", Result.SUCCESS));
 
@@ -115,7 +107,7 @@ class UpstreamComitterSinceLastSuccessRecipientProviderTest {
         j.waitUntilNoActivity();
         Mailbox.clearAll(); // reset — we only care about what happens after the anchor
 
-        // Build #2: Mahrous -> Job B FAILS
+        // Build #2: Second Person -> Job B FAILS
         scm = new FakeChangeLogSCM();
         scm.addChange().withAuthor("Second Person <second@example.com>");
         jobA.setScm(scm);
@@ -135,7 +127,7 @@ class UpstreamComitterSinceLastSuccessRecipientProviderTest {
      * Expected: Second Person AND Third Person notified. First Person is behind the anchor.
      */
     @Test
-    void multipleFailuresAccumulateCommitters() throws Exception {
+    void multipleFailuresAccumulateCommitters(JenkinsRule j) throws Exception {
         FreeStyleProject jobA = j.createFreeStyleProject("jobA");
         jobA.getPublishersList().add(new BuildTrigger("jobB", Result.SUCCESS));
 
@@ -204,7 +196,7 @@ class UpstreamComitterSinceLastSuccessRecipientProviderTest {
      * Expected: only Third Person notified. First Person and Second Pwerson are behind the new anchor.
      */
     @Test
-    void anchorAdvancesAndMultiLevelTreeIsTraversed() throws Exception {
+    void anchorAdvancesAndMultiLevelTreeIsTraversed(JenkinsRule j) throws Exception {
         FreeStyleProject jobA = j.createFreeStyleProject("jobA");
         jobA.getPublishersList().add(new BuildTrigger("jobB", Result.SUCCESS));
 
