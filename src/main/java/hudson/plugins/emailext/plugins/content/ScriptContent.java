@@ -8,6 +8,7 @@ import groovy.text.SimpleTemplateEngine;
 import groovy.text.Template;
 import groovy.text.TemplateEngine;
 import hudson.FilePath;
+import hudson.Functions;
 import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -22,6 +23,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.nio.charset.StandardCharsets;
@@ -184,7 +187,10 @@ public class ScriptContent extends AbstractEvalContent {
 
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Exception raised during template rendering", e);
-            result = "Exception raised during template rendering: " + e.getMessage();
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            Functions.printStackTrace(e, pw);
+            result = "Exception raised during template rendering: " + e.getMessage() + "\n\n" + sw;
         }
         return result;
     }
