@@ -3,6 +3,7 @@ package hudson.plugins.emailext.plugins.trigger;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import hudson.Functions;
 import hudson.model.AbstractBuild;
 import hudson.model.Descriptor;
 import hudson.model.Item;
@@ -13,6 +14,8 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
 import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -164,6 +167,10 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
             } catch (IOException e) {
                 listener.fatalError("Failed evaluating script trigger: %s%n", e.getMessage());
                 LOGGER.log(Level.SEVERE, "Failed evaluating script trigger", e);
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                Functions.printStackTrace(e, pw);
+                listener.getLogger().println(sw);
             }
         }
         return result;

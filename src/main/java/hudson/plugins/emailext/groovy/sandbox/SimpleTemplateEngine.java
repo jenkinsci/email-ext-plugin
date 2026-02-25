@@ -235,6 +235,9 @@ public class SimpleTemplateEngine extends TemplateEngine {
                         writeTo(sw);
                     } catch (IOException x) {
                         LOGGER.log(Level.WARNING, "Failed to render template to string", x);
+                        PrintWriter pw = new PrintWriter(sw);
+                        x.printStackTrace(pw);
+                        pw.flush();
                     }
                     return sw.toString();
                 }

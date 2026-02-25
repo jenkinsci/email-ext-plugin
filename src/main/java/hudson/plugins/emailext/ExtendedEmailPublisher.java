@@ -58,6 +58,8 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
@@ -763,6 +765,9 @@ public class ExtendedEmailPublisher extends Notifier {
             PrintStream logger = listener.getLogger();
             debug(logger, "Executing %s script", scriptName);
 
+            StringWriter out = new StringWriter();
+            PrintWriter pw = new PrintWriter(out);
+
             Binding binding = new Binding();
             binding.setVariable("build", context.getBuild());
             binding.setVariable("run", context.getRun());
@@ -813,9 +818,11 @@ public class ExtendedEmailPublisher extends Notifier {
                 throw e;
             } catch (Throwable t) {
                 LOGGER.log(Level.WARNING, "Error executing " + scriptName + " script", t);
-                logger.println("Error executing " + scriptName + " script: " + t.getMessage());
+                Functions.printStackTrace(t, pw);
+                logger.println(out);
                 // should we cancel the sending of the email???
             }
+            debug(logger, out.toString());
         }
         return !cancel;
     }
