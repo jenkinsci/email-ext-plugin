@@ -44,6 +44,7 @@ import hudson.tasks.MailMessageIdAction;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import jakarta.mail.Address;
+import jakarta.mail.AuthenticationFailedException;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Multipart;
@@ -108,8 +109,7 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
-    public static final String DEFAULT_BODY_TEXT =
-            """
+    public static final String DEFAULT_BODY_TEXT = """
             $PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
 
             Check console output at $BUILD_URL to view the results.""";
@@ -133,8 +133,7 @@ public class ExtendedEmailPublisher extends Notifier {
     public List<EmailTrigger> configuredTriggers = new ArrayList<>();
 
     /**
-     * The contentType of the emails for this project (text/html, text/plain,
-     * etc).
+     * The contentType of the emails for this project (text/html, text/plain, etc).
      */
     public String contentType;
 
@@ -289,11 +288,13 @@ public class ExtendedEmailPublisher extends Notifier {
             for (GroovyScriptPath path : classpath) {
                 URL pUrl = path.asURL();
                 if (pUrl != null) {
-                    // At least we can try to catch some of them, but some might need token expansion
+                    // At least we can try to catch some of them, but some might need token
+                    // expansion
                     try {
                         scriptApproval.configuring(new ClasspathEntry(pUrl.toString()), context);
                     } catch (MalformedURLException e) {
-                        // At least we tried, but we shouldn't end up here since path.asURL() would have returned null
+                        // At least we tried, but we shouldn't end up here since path.asURL() would have
+                        // returned null
                         assert false : e;
                     }
                 }
@@ -697,15 +698,23 @@ public class ExtendedEmailPublisher extends Notifier {
                 context.getListener().getLogger().println("Email sending was cancelled" + " by user script.");
             }
             return true;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Could not send email.", e);
+        } catch (AuthenticationFailedException e) {
+            LOGGER.log(Level.SEVERE, "SMTP authentication failed. Check username/password.", e);
             Functions.printStackTrace(
-                    e, context.getListener().error("Could not send email as a part of the post-build publishers."));
+                    e, context.getListener().error("SMTP authentication failed. Check mail credentials."));
+        } catch (SendFailedException e) {
+            LOGGER.log(Level.WARNING, "Email sending failed due to invalid or rejected recipient addresses.", e);
+            Functions.printStackTrace(
+                    e, context.getListener().error("Email sending failed due to invalid recipient address."));
+        } catch (MessagingException e) {
+            LOGGER.log(Level.WARNING, "SMTP communication error while sending email.", e);
+            Functions.printStackTrace(e, context.getListener().error("SMTP communication error while sending email."));
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Unexpected error while sending email.", e);
+            Functions.printStackTrace(e, context.getListener().error("Unexpected error while sending email."));
         }
 
-        debug(
-                context.getListener().getLogger(),
-                "Some error occurred trying to send the email...check the Jenkins log");
+        debug(context.getListener().getLogger(), "Email sending failed. Please check Jenkins system log for details.");
         return false;
     }
 
@@ -757,8 +766,8 @@ public class ExtendedEmailPublisher extends Notifier {
             binding.setVariable("logger", logger);
             binding.setVariable("cancel", cancel);
             binding.setVariable("trigger", context.getTrigger());
-            binding.setVariable(
-                    "triggered", ImmutableMultimap.copyOf(context.getTriggered())); // TODO static whitelist?
+            binding.setVariable("triggered", ImmutableMultimap.copyOf(context.getTriggered())); // TODO static
+            // whitelist?
 
             StringWriter out = new StringWriter();
             PrintWriter pw = new PrintWriter(out);
@@ -812,11 +821,11 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     /**
-     * Expand the plugin class loader with URL taken from the project descriptor
-     * and the global configuration.
+     * Expand the plugin class loader with URL taken from the project descriptor and
+     * the global configuration.
      *
      * @param context the current email context
-     * @param loader the class loader to expand
+     * @param loader  the class loader to expand
      * @return the new expanded classloader
      */
     private ClassLoader expandClasspath(ExtendedEmailPublisherContext context, ClassLoader loader) throws IOException {
@@ -931,10 +940,8 @@ public class ExtendedEmailPublisher extends Notifier {
             if (!addAccount.getAddress().equalsIgnoreCase(fromAddress.getAddress())) {
                 debug(
                         context.getListener().getLogger(),
-                        "Ignoring valid additional account "
-                                + addAccount.getAddress()
-                                + " because it is not a match for "
-                                + from);
+                        "Ignoring valid additional account " + addAccount.getAddress()
+                                + " because it is not a match for " + from);
                 continue;
             }
 
@@ -1212,17 +1219,16 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     /**
-     * Looks for a previous build, so long as that is in fact completed.
-     * Necessary since {@link #getRequiredMonitorService} does not wait for the
-     * previous build, so in the case of parallel-capable jobs, we need to
-     * behave sensibly when a later build actually finishes before an earlier
-     * one.
+     * Looks for a previous build, so long as that is in fact completed. Necessary
+     * since {@link #getRequiredMonitorService} does not wait for the previous
+     * build, so in the case of parallel-capable jobs, we need to behave sensibly
+     * when a later build actually finishes before an earlier one.
      *
-     * @param run a run for which we may be sending mail
-     * @param listener a listener to which we may print warnings in case the
-     * actual previous build is still in progress
-     * @return the previous build, or null if that build is missing, or is still
-     * in progress
+     * @param run      a run for which we may be sending mail
+     * @param listener a listener to which we may print warnings in case the actual
+     *                 previous build is still in progress
+     * @return the previous build, or null if that build is missing, or is still in
+     *         progress
      */
     public static @CheckForNull Run<?, ?> getPreviousRun(@NonNull Run<?, ?> run, TaskListener listener) {
         Run<?, ?> previousRun = run.getPreviousBuild();
