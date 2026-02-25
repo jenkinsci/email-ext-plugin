@@ -259,8 +259,7 @@ class FailedTestsContentTest {
     void testGetContent_withMessage_withStack_outputYaml() throws Exception {
         AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
         when(testResults.getFailCount()).thenReturn(1);
-        String testStackTrace =
-                """
+        String testStackTrace = """
                 javax.servlet.ServletException: Something bad happened
                     at com.example.myproject.OpenSessionInViewFilter.doFilter(OpenSessionInViewFilter.java:60)
                     at org.mortbay.jetty.servlet.ServletHandler$CachedChain.doFilter(ServletHandler.java:1157)

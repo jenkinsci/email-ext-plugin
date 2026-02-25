@@ -118,12 +118,7 @@ class ScriptContentSecureTest extends ScriptContentTest {
                 folder.getProperties().get(FolderConfigFileProperty.class);
         folderConfigFileProperty
                 .getConfigs()
-                .add(
-                        new GroovyTemplateConfig(
-                                "long-long-id",
-                                "test.groovy",
-                                "Bad groovy template script",
-                                """
+                .add(new GroovyTemplateConfig("long-long-id", "test.groovy", "Bad groovy template script", """
                         <%
                           // Whatever Groovy code you want
                           Jenkins.get().setSystemMessage("You got hax0red");

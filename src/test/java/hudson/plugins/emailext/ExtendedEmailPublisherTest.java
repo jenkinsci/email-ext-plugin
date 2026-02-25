@@ -844,8 +844,7 @@ class ExtendedEmailPublisherTest {
     @Issue("JENKINS-22777")
     void testEmergencyRerouteOverridesPresendScript() throws Exception {
         publisher.getDescriptor().setEmergencyReroute("emergency@foo.com");
-        publisher.setPresendScript(
-                """
+        publisher.setPresendScript("""
                 import jakarta.mail.Message.RecipientType
                 msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')""");
         SuccessTrigger successTrigger = new SuccessTrigger(
@@ -919,8 +918,7 @@ class ExtendedEmailPublisherTest {
 
     @Test
     void testPresendScriptModifiesTo() throws Exception {
-        publisher.setPresendScript(
-                """
+        publisher.setPresendScript("""
                 import jakarta.mail.Message.RecipientType
                 msg.setRecipients(RecipientType.TO, 'slide.o.mix@xxx.com')""");
         SuccessTrigger successTrigger = new SuccessTrigger(
@@ -973,8 +971,7 @@ class ExtendedEmailPublisherTest {
     }
 
     private void verifyPresendScriptModifiesToUsingProjectExternalScript() throws Exception {
-        publisher.setPresendScript(
-                """
+        publisher.setPresendScript("""
                 import jakarta.mail.Message.RecipientType
                 import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper
                 msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())""");
@@ -1024,8 +1021,7 @@ class ExtendedEmailPublisherTest {
     }
 
     private void verifyPresendScriptModifiesToUsingGlobalExternalScript() throws Exception {
-        publisher.setPresendScript(
-                """
+        publisher.setPresendScript("""
                 import jakarta.mail.Message.RecipientType
                 import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper
                 msg.setRecipients(RecipientType.TO, ExtendedEmailPublisherTestHelper.to())""");
@@ -1080,8 +1076,7 @@ class ExtendedEmailPublisherTest {
     }
 
     private void verifyPostsendScriptModifiesMessageIdUsingProjectExternalScript() throws Exception {
-        publisher.setPostsendScript(
-                """
+        publisher.setPostsendScript("""
                 import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper
                 msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())""");
         verifyPostsendScriptModifiesMessageId();
@@ -1117,8 +1112,7 @@ class ExtendedEmailPublisherTest {
 
     @Test
     void testPostsendScriptModifiesToUsingGlobalExternalScript() throws Exception {
-        publisher.setPostsendScript(
-                """
+        publisher.setPostsendScript("""
                 import hudson.plugins.emailext.ExtendedEmailPublisherTestHelper
                 msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())""");
         List<GroovyScriptPath> classpath = new ArrayList<>();
@@ -1581,8 +1575,7 @@ class ExtendedEmailPublisherTest {
     void testScriptConstructorsAreNotExecutedOutsideOfSandbox() throws Exception {
         setUpSecurity();
 
-        publisher.setPresendScript(
-                """
+        publisher.setPresendScript("""
                 class DoNotRunConstructor {
                   static void main(String[] args) {}
                   DoNotRunConstructor() {
@@ -1590,8 +1583,7 @@ class ExtendedEmailPublisherTest {
                   }
                 }
                 """);
-        publisher.setPostsendScript(
-                """
+        publisher.setPostsendScript("""
                 class DoNotRunConstructor {
                   static void main(String[] args) {}
                   DoNotRunConstructor() {

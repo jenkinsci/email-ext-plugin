@@ -159,6 +159,17 @@ Include Culprits:: If this recipient provider _and_ the *Developers* recipient p
 Previous:: Add this recipient provider to send an email to the the culprits, requestor and developers of the previous build(s).
 Advanced:: Configure properties at a per-trigger level:
  Recipient List::: A comma (or whitespace) separated list of email address that should receive this email if it is triggered. This list is appended to the *Project Recipient List* described above.
+**Using the `${FILE}` token**
+
+The `${FILE}` token reads recipient addresses from a file located in the build workspace.
+
+If the specified file does not exist at the time the email is generated, the token will expand to an empty or invalid value and no recipients may be resolved. This can cause the email step to be skipped.
+
+Best practices:
+
+* Ensure the file is created earlier in the build before email-ext executes.
+* Prefer relative paths (e.g. `${FILE,path="commit_authors.txt"}`) instead of absolute workspace paths.
+* Configure fallback static recipients or additional recipient providers when dynamic recipient resolution may produce no results.
  Subject::: Specify the subject line of the selected email.
  Content::: Specify the body of the selected email.
 

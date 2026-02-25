@@ -132,8 +132,7 @@ class CssInlinerTest {
                 + "</html>";
 
         String output = process(input);
-        String unprocessedExpect =
-                """
+        String unprocessedExpect = """
                 <html><head></head><body><img src="data:image/gif;base64,\
                 R0lGODlhFAAWAKEAAP///8z//wAAAAAAACH+TlRoaXMgYXJ0IGlzIGluIHRoZSBwdWJsaWMgZG9t
                 YWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAAB
@@ -145,8 +144,7 @@ class CssInlinerTest {
 
     @Test
     void testNoPrettify() {
-        String input =
-                """
+        String input = """
                 <html><head></head>
                 <body>
                 <table border="1">
