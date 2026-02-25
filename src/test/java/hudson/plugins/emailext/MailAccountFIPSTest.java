@@ -89,39 +89,39 @@ class MailAccountFIPSTest {
 
         MailAccountDescriptor mad = (MailAccountDescriptor) Jenkins.get().getDescriptor(MailAccount.class);
 
-        assertThat(mad.doCheckCredentialsId(null, "", false, false), hasKind(Kind.OK));
-        assertThat(mad.doCheckCredentialsId(null, null, false, false), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, "", false, false, false), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, null, false, false, false), hasKind(Kind.OK));
 
         // no auth but any combination of TLS/SSL is ok
-        assertThat(mad.doCheckCredentialsId(null, null, true, false), hasKind(Kind.OK));
-        assertThat(mad.doCheckCredentialsId(null, null, false, true), hasKind(Kind.OK));
-        assertThat(mad.doCheckCredentialsId(null, null, true, true), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, null, true, false, false), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, null, false, true, false), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, null, true, true, false), hasKind(Kind.OK));
 
         // valid credentials with TLS
-        assertThat(mad.doCheckCredentialsId(null, validCredentialId, true, false), hasKind(Kind.OK));
-        assertThat(mad.doCheckCredentialsId(null, validCredentialId, false, true), hasKind(Kind.OK));
-        assertThat(mad.doCheckCredentialsId(null, validCredentialId, true, true), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, validCredentialId, true, false, false), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, validCredentialId, false, true, false), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, validCredentialId, true, true, false), hasKind(Kind.OK));
 
         // valid credentials without TLS produce a error
         assertThat(
-                mad.doCheckCredentialsId(null, validCredentialId, false, false),
+                mad.doCheckCredentialsId(null, validCredentialId, false, false, false),
                 allOf(hasKind(Kind.ERROR), hasMessage("Authentication requires either TLS or SSL to be enabled")));
 
         // non-valid creds show the error regardless of SSL/TLS
         assertThat(
-                mad.doCheckCredentialsId(null, "bogus", false, false),
+                mad.doCheckCredentialsId(null, "bogus", false, false, false),
                 allOf(
                         hasKind(Kind.ERROR),
                         hasMessage(containsString("Authentication requires either TLS or SSL to be enabled")),
                         hasMessage(containsString("Cannot find currently selected credentials"))));
         assertThat(
-                mad.doCheckCredentialsId(null, "bogus", true, false),
+                mad.doCheckCredentialsId(null, "bogus", true, false, false),
                 allOf(hasKind(Kind.ERROR), hasMessage("Cannot find currently selected credentials")));
         assertThat(
-                mad.doCheckCredentialsId(null, "bogus", false, true),
+                mad.doCheckCredentialsId(null, "bogus", false, true, false),
                 allOf(hasKind(Kind.ERROR), hasMessage("Cannot find currently selected credentials")));
         assertThat(
-                mad.doCheckCredentialsId(null, "bogus", true, true),
+                mad.doCheckCredentialsId(null, "bogus", true, true, false),
                 allOf(hasKind(Kind.ERROR), hasMessage("Cannot find currently selected credentials")));
     }
 }

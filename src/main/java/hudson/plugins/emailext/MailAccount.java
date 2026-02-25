@@ -68,7 +68,8 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     }
 
     public boolean isSecureAuthWhenFIPS() {
-        // when in FIPS mode if we are using authentication we must also use TLS or SSL to protect the password
+        // when in FIPS mode if we are using authentication we must also use TLS or SSL
+        // to protect the password
         return !(credentialsId != null && FIPS140.useCompliantAlgorithms() && !(useSsl || useTls));
     }
 
@@ -139,7 +140,8 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                 @AncestorInPath Item item,
                 @QueryParameter String value,
                 @QueryParameter boolean useSsl,
-                @QueryParameter boolean useTls) {
+                @QueryParameter boolean useTls,
+                @QueryParameter boolean useOAuth2) {
             if (item == null) {
                 if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                     return FormValidation.ok();
@@ -153,10 +155,15 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                 return FormValidation.ok();
             }
 
-            // do this after the authentication check so we do not reveal the FIPS mode of the controller.
+            // do this after the authentication check so we do not reveal the FIPS mode of
+            // the controller.
             FormValidation insecureAuthValidation;
             if (useSsl || useTls) {
                 insecureAuthValidation = FormValidation.ok();
+            } else if (useOAuth2) {
+                // TLS is still recommended to protect tokens in transit
+                insecureAuthValidation = FormValidation.warning(
+                        "TLS or SSL is recommended even when using OAuth 2.0 to protect tokens in transit");
             } else {
                 if (FIPS140.useCompliantAlgorithms()) {
                     insecureAuthValidation =
