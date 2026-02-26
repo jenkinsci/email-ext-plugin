@@ -182,6 +182,39 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             }
             return insecureAuthValidation;
         }
+
+        @SuppressWarnings("lgtm[jenkins/csrf]")
+        public FormValidation doCheckSmtpPort(@QueryParameter String value) {
+
+            if (StringUtils.isBlank(value)) {
+                return FormValidation.ok();
+            }
+
+            try {
+                int port = Integer.parseInt(value);
+                if (port < 1 || port > 65535) {
+                    return FormValidation.error("SMTP port must be between 1 and 65535.");
+                }
+            } catch (NumberFormatException e) {
+                return FormValidation.error("SMTP port must be a valid number.");
+            }
+
+            return FormValidation.ok();
+        }
+
+        @SuppressWarnings("lgtm[jenkins/csrf]")
+        public FormValidation doCheckSmtpHost(@QueryParameter String value) {
+
+            if (StringUtils.isBlank(value)) {
+                return FormValidation.ok();
+            }
+
+            if (value.contains(" ")) {
+                return FormValidation.error("SMTP host must not contain spaces.");
+            }
+
+            return FormValidation.ok();
+        }
     }
 
     public String getAddress() {
