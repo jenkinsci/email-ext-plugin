@@ -75,13 +75,10 @@ public class FileContent extends DataBoundTokenMacro {
         }
 
         try {
-            // Get environment variables for expansion
             EnvVars envVars = run.getEnvironment(listener);
             
-            // Expand environment variables in the path
             String expandedPath = envVars.expand(path);
             
-            // Try to read the file
             String content = readFile(run, workspace, expandedPath, listener);
             return content;
             
@@ -103,33 +100,26 @@ public class FileContent extends DataBoundTokenMacro {
 
         FilePath fileToRead = null;
         
-        // Check if the path is absolute
         File pathFile = new File(expandedPath);
         if (pathFile.isAbsolute()) {
-            // For absolute paths, verify they're within the workspace for security
             fileToRead = new FilePath(pathFile);
             
-            // Security check: ensure the file is within the workspace
             if (!isChildOf(fileToRead, workspace)) {
                 throw new FileNotFoundException(
                     "File [" + expandedPath + "] is outside the workspace and cannot be accessed for security reasons.");
             }
         } else {
-            // For relative paths, resolve from workspace
             fileToRead = workspace.child(expandedPath);
         }
 
-        // Check if file exists
         if (!fileToRead.exists()) {
             throw new FileNotFoundException("File [" + expandedPath + "] does not exist.");
         }
 
-        // Check if it's a file (not a directory)
         if (fileToRead.isDirectory()) {
             throw new FileNotFoundException("Path [" + expandedPath + "] is a directory, not a file.");
         }
 
-        // Read the file content with timeout to prevent hanging
         final FilePath finalFileToRead = fileToRead;
         final String finalEncoding = encoding;
         try {
@@ -156,20 +146,16 @@ public class FileContent extends DataBoundTokenMacro {
     private boolean isChildOf(FilePath potentialChild, FilePath workspace) 
             throws IOException, InterruptedException {
         try {
-            // Normalize both paths
             String childPath = potentialChild.getRemote();
             String workspacePath = workspace.getRemote();
             
-            // On Windows, normalize path separators
             childPath = childPath.replace('\\', '/');
             workspacePath = workspacePath.replace('\\', '/');
             
-            // Ensure workspace path ends with /
             if (!workspacePath.endsWith("/")) {
                 workspacePath += "/";
             }
             
-            // Check if child path starts with workspace path
             return childPath.startsWith(workspacePath);
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error checking if file is child of workspace", e);

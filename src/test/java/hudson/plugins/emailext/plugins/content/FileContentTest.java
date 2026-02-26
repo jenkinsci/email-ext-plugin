@@ -7,8 +7,6 @@ import static org.mockito.Mockito.when;
 
 import hudson.EnvVars;
 import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.StreamTaskListener;
@@ -37,10 +35,8 @@ class FileContentTest {
         fileContent = new FileContent();
         listener = StreamTaskListener.fromStdout();
         
-        // Create a temporary workspace
         workspace = new FilePath(tempDir);
         
-        // Mock the run and environment variables
         run = mock(Run.class);
         EnvVars envVars = new EnvVars();
         envVars.put("WORKSPACE", workspace.getRemote());
@@ -57,11 +53,9 @@ class FileContentTest {
 
     @Test
     void testReadRelativeFile() throws Exception {
-        // Create a test file in the workspace
         FilePath testFile = workspace.child("test.txt");
         testFile.write("Hello from test file!", StandardCharsets.UTF_8.name());
 
-        // Test reading the file with relative path
         fileContent.path = "test.txt";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
         
@@ -70,13 +64,11 @@ class FileContentTest {
 
     @Test
     void testReadRelativeFileInSubdirectory() throws Exception {
-        // Create a subdirectory and file
         FilePath subdir = workspace.child("reports");
         subdir.mkdirs();
         FilePath testFile = subdir.child("report.html");
         testFile.write("<html><body>Test Report</body></html>", StandardCharsets.UTF_8.name());
 
-        // Test reading the file with relative path
         fileContent.path = "reports/report.html";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
         
@@ -85,11 +77,9 @@ class FileContentTest {
 
     @Test
     void testReadFileWithWorkspaceEnvVar() throws Exception {
-        // Create a test file
         FilePath testFile = workspace.child("build-info.txt");
         testFile.write("Build completed successfully", StandardCharsets.UTF_8.name());
 
-        // Test reading the file using $WORKSPACE environment variable
         fileContent.path = "$WORKSPACE/build-info.txt";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
         
@@ -98,11 +88,9 @@ class FileContentTest {
 
     @Test
     void testReadFileWithMultipleEnvVars() throws Exception {
-        // Create a test file
         FilePath testFile = workspace.child("build-42.log");
         testFile.write("Build log content", StandardCharsets.UTF_8.name());
 
-        // Test reading file using environment variables in the name
         fileContent.path = "$WORKSPACE/build-$BUILD_NUMBER.log";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
         
@@ -111,11 +99,9 @@ class FileContentTest {
 
     @Test
     void testReadAbsolutePathWithinWorkspace() throws Exception {
-        // Create a test file
         FilePath testFile = workspace.child("absolute-test.txt");
         testFile.write("Absolute path content", StandardCharsets.UTF_8.name());
 
-        // Test reading with absolute path
         fileContent.path = testFile.getRemote();
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
         
@@ -124,7 +110,6 @@ class FileContentTest {
 
     @Test
     void testFileNotFound() throws Exception {
-        // Test reading a non-existent file
         fileContent.path = "nonexistent.txt";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
         
@@ -133,7 +118,6 @@ class FileContentTest {
 
     @Test
     void testFileNotFoundWithCustomMessage() throws Exception {
-        // Test reading a non-existent file with custom error message
         fileContent.path = "missing.txt";
         fileContent.fileNotFoundMessage = "Custom error: File not available";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
@@ -143,7 +127,6 @@ class FileContentTest {
 
     @Test
     void testSecurityPreventAccessOutsideWorkspace() throws Exception {
-        // Try to access a file outside the workspace using absolute path
         File outsideFile = new File(tempDir.getParentFile(), "outside.txt");
         outsideFile.createNewFile();
         outsideFile.deleteOnExit();
@@ -160,28 +143,22 @@ class FileContentTest {
 
     @Test
     void testSecurityPreventParentDirectoryEscape() throws Exception {
-        // Create a test file in a subdirectory
         FilePath subdir = workspace.child("testsubdir");
         subdir.mkdirs();
         FilePath testFile = subdir.child("test.txt");
         testFile.write("Test content", StandardCharsets.UTF_8.name());
 
-        // Try to escape using ../ - workspace.child() normalizes this
-        // so it actually stays within workspace, but just to verify
         fileContent.path = "testsubdir/../test-outside.txt";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
         
-        // Should fail because test-outside.txt doesn't exist
         assertTrue(content.contains("does not exist") || content.contains("was not found"));
     }
 
     @Test
     void testDirectoryInsteadOfFile() throws Exception {
-        // Create a directory
         FilePath subdir = workspace.child("testdir");
         subdir.mkdirs();
 
-        // Try to read a directory
         fileContent.path = "testdir";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
         
@@ -190,12 +167,10 @@ class FileContentTest {
 
     @Test
     void testCustomEncoding() throws Exception {
-        // Create a file with specific encoding
         FilePath testFile = workspace.child("encoded.txt");
         String testContent = "Special chars: café, naïve, 日本語";
         testFile.write(testContent, "UTF-8");
 
-        // Read with UTF-8 encoding
         fileContent.path = "encoded.txt";
         fileContent.encoding = "UTF-8";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
@@ -205,7 +180,6 @@ class FileContentTest {
 
     @Test
     void testEmptyPath() throws Exception {
-        // Test with empty path
         fileContent.path = "";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
         
@@ -214,7 +188,6 @@ class FileContentTest {
 
     @Test
     void testNullWorkspace() throws Exception {
-        // Test when workspace is null
         fileContent.path = "test.txt";
         String content = fileContent.evaluate(run, null, listener, FileContent.MACRO_NAME);
         
@@ -223,13 +196,11 @@ class FileContentTest {
 
     @Test
     void testWindowsStylePathWithBackslashes() throws Exception {
-        // Create a test file in subdirectory
         FilePath subdir = workspace.child("reports");
         subdir.mkdirs();
         FilePath testFile = subdir.child("summary.txt");
         testFile.write("Summary content", StandardCharsets.UTF_8.name());
 
-        // Test with backslashes (Windows-style path)
         fileContent.path = "reports\\summary.txt";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
         
@@ -238,7 +209,6 @@ class FileContentTest {
 
     @Test
     void testLargeFile() throws Exception {
-        // Create a larger file
         FilePath testFile = workspace.child("large.txt");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 1000; i++) {
@@ -255,7 +225,6 @@ class FileContentTest {
 
     @Test
     void testFileWithSpecialCharactersInName() throws Exception {
-        // Create a file with special characters in its name
         FilePath testFile = workspace.child("test-file_v1.0 (copy).txt");
         testFile.write("Special name content", StandardCharsets.UTF_8.name());
 
