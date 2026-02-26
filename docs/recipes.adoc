@@ -21,6 +21,17 @@ toc::[]
 There are several simple examples referenced in the xref:/README.adoc[`README`] document; more examples can be found at https://github.com/jenkinsci/email-ext-plugin/tree/main/src/main/resources/hudson/plugins/emailext/templates[`src/main/resources/hudson/plugins/emailext/templates`].
 
 == Pre-send scripts
+[NOTE]
+====
+If the file referenced by the `${FILE}` token does not exist in the workspace,
+email delivery may be skipped.
+
+Best practices:
+
+* Ensure the file is created earlier in the build before email-ext runs.
+* Prefer relative paths when using `${FILE}`.
+* Configure fallback static recipients to avoid missing notifications.
+====
 
 === Setting a message as important
 
