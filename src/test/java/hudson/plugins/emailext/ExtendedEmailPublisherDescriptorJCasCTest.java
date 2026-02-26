@@ -184,4 +184,32 @@ class ExtendedEmailPublisherDescriptorJCasCTest {
         assertEquals("smtp-username-xyz", passwordAuthentication.getUserName());
         assertEquals("smtp-password-xyz", passwordAuthentication.getPassword());
     }
+
+    @Test
+    @ConfiguredWithCode("configuration-as-code.yml")
+    void mailAccountShouldPersistAfterMultipleAccesses(JenkinsConfiguredWithCodeRule r) {
+        final ExtendedEmailPublisherDescriptor descriptor =
+                ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
+        
+        MailAccount account = descriptor.getMailAccount();
+        assertNotNull(account, "MailAccount should not be null");
+        assertTrue(account.isDefaultAccount());
+        assertEquals("smtp-host-xyz", account.getSmtpHost());
+        assertEquals("9876", account.getSmtpPort());
+        assertEquals("smtp-credentials-xyz", account.getCredentialsId());
+        assertEquals("adv-properties-xyz", account.getAdvProperties());
+        assertTrue(account.isUseSsl());
+        assertTrue(account.isUseTls());
+        
+        for (int i = 0; i < 3; i++) {
+            account = descriptor.getMailAccount();
+            assertNotNull(account, "MailAccount should not be null on access " + (i + 2));
+            assertEquals("smtp-host-xyz", account.getSmtpHost(), "smtpHost should persist on access " + (i + 2));
+            assertEquals("9876", account.getSmtpPort(), "smtpPort should persist on access " + (i + 2));
+            assertEquals("smtp-credentials-xyz", account.getCredentialsId(), "credentialsId should persist on access " + (i + 2));
+            assertEquals("adv-properties-xyz", account.getAdvProperties(), "advProperties should persist on access " + (i + 2));
+            assertTrue(account.isUseSsl(), "useSsl should persist on access " + (i + 2));
+            assertTrue(account.isUseTls(), "useTls should persist on access " + (i + 2));
+        }
+    }
 }

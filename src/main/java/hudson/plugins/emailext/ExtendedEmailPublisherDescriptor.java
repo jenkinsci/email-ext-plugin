@@ -65,7 +65,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
      */
     private String defaultSuffix;
 
-    private MailAccount mailAccount = new MailAccount();
+    private MailAccount mailAccount;
 
     private List<MailAccount> addAccounts = new ArrayList<>();
 
@@ -228,6 +228,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     public ExtendedEmailPublisherDescriptor() {
         super(ExtendedEmailPublisher.class);
+        
+        if (mailAccount == null) {
+            mailAccount = new MailAccount();
+        }
+        
         load();
 
         if (defaultBody == null && defaultSubject == null && emergencyReroute == null) {
@@ -236,16 +241,15 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             emergencyReroute = ExtendedEmailPublisher.DEFAULT_EMERGENCY_REROUTE_TEXT;
         }
 
-        if (mailAccount == null) {
-            mailAccount = new MailAccount();
-        }
-
         mailAccount.setDefaultAccount(true);
     }
 
     @Initializer(after = InitMilestone.EXTENSIONS_AUGMENTED, before = InitMilestone.JOB_LOADED)
     public static void autoConfigure() {
         ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
+        if (descriptor == null) {
+            return;
+        }
 
         if (Jenkins.get().isUseSecurity() && !StringUtils.isBlank(descriptor.getDefaultPostsendScript())
                 || !StringUtils.isBlank(descriptor.getDefaultPresendScript())) {
