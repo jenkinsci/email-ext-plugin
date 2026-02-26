@@ -228,11 +228,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     public ExtendedEmailPublisherDescriptor() {
         super(ExtendedEmailPublisher.class);
-        
+
         if (mailAccount == null) {
             mailAccount = new MailAccount();
         }
-        
+
         load();
 
         if (defaultBody == null && defaultSubject == null && emergencyReroute == null) {
