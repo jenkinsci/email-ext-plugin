@@ -34,15 +34,15 @@ class FileContentTest {
     void setUp(JenkinsRule j) throws Exception {
         fileContent = new FileContent();
         listener = StreamTaskListener.fromStdout();
-        
+
         workspace = new FilePath(tempDir);
-        
+
         run = mock(Run.class);
         EnvVars envVars = new EnvVars();
         envVars.put("WORKSPACE", workspace.getRemote());
         envVars.put("BUILD_NUMBER", "42");
         envVars.put("JOB_NAME", "test-job");
-        
+
         when(run.getEnvironment(listener)).thenReturn(envVars);
     }
 
@@ -58,7 +58,7 @@ class FileContentTest {
 
         fileContent.path = "test.txt";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertEquals("Hello from test file!", content);
     }
 
@@ -71,7 +71,7 @@ class FileContentTest {
 
         fileContent.path = "reports/report.html";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertTrue(content.contains("Test Report"));
     }
 
@@ -82,7 +82,7 @@ class FileContentTest {
 
         fileContent.path = "$WORKSPACE/build-info.txt";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertEquals("Build completed successfully", content);
     }
 
@@ -93,7 +93,7 @@ class FileContentTest {
 
         fileContent.path = "$WORKSPACE/build-$BUILD_NUMBER.log";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertEquals("Build log content", content);
     }
 
@@ -104,7 +104,7 @@ class FileContentTest {
 
         fileContent.path = testFile.getRemote();
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertEquals("Absolute path content", content);
     }
 
@@ -112,7 +112,7 @@ class FileContentTest {
     void testFileNotFound() throws Exception {
         fileContent.path = "nonexistent.txt";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertTrue(content.contains("File [nonexistent.txt] was not found."));
     }
 
@@ -121,7 +121,7 @@ class FileContentTest {
         fileContent.path = "missing.txt";
         fileContent.fileNotFoundMessage = "Custom error: File not available";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertEquals("Custom error: File not available", content);
     }
 
@@ -130,14 +130,14 @@ class FileContentTest {
         File outsideFile = new File(tempDir.getParentFile(), "outside.txt");
         outsideFile.createNewFile();
         outsideFile.deleteOnExit();
-        
+
         try (var writer = new java.io.FileWriter(outsideFile)) {
             writer.write("Outside content");
         }
 
         fileContent.path = outsideFile.getAbsolutePath();
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertTrue(content.contains("outside the workspace") || content.contains("was not found"));
     }
 
@@ -150,7 +150,7 @@ class FileContentTest {
 
         fileContent.path = "testsubdir/../test-outside.txt";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertTrue(content.contains("does not exist") || content.contains("was not found"));
     }
 
@@ -161,7 +161,7 @@ class FileContentTest {
 
         fileContent.path = "testdir";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertTrue(content.contains("is a directory") || content.contains("was not found"));
     }
 
@@ -174,7 +174,7 @@ class FileContentTest {
         fileContent.path = "encoded.txt";
         fileContent.encoding = "UTF-8";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertEquals(testContent, content);
     }
 
@@ -182,7 +182,7 @@ class FileContentTest {
     void testEmptyPath() throws Exception {
         fileContent.path = "";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertEquals("", content);
     }
 
@@ -190,7 +190,7 @@ class FileContentTest {
     void testNullWorkspace() throws Exception {
         fileContent.path = "test.txt";
         String content = fileContent.evaluate(run, null, listener, FileContent.MACRO_NAME);
-        
+
         assertTrue(content.contains("Workspace not available") || content.contains("was not found"));
     }
 
@@ -203,7 +203,7 @@ class FileContentTest {
 
         fileContent.path = "reports\\summary.txt";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertEquals("Summary content", content);
     }
 
@@ -218,7 +218,7 @@ class FileContentTest {
 
         fileContent.path = "large.txt";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertTrue(content.contains("Line 0:"));
         assertTrue(content.contains("Line 999:"));
     }
@@ -230,7 +230,7 @@ class FileContentTest {
 
         fileContent.path = "test-file_v1.0 (copy).txt";
         String content = fileContent.evaluate(run, workspace, listener, FileContent.MACRO_NAME);
-        
+
         assertEquals("Special name content", content);
     }
 

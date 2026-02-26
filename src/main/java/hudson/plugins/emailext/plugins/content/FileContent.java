@@ -50,8 +50,7 @@ public class FileContent extends DataBoundTokenMacro {
     public String fileNotFoundMessage = "";
 
     private static final ExecutorService threadPoolForRemoting =
-            Executors.newCachedThreadPool(new ClassLoaderSanityThreadFactory(
-                    Executors.defaultThreadFactory()));
+            Executors.newCachedThreadPool(new ClassLoaderSanityThreadFactory(Executors.defaultThreadFactory()));
 
     public FileContent() {}
 
@@ -69,23 +68,23 @@ public class FileContent extends DataBoundTokenMacro {
     @Override
     public String evaluate(Run<?, ?> run, FilePath workspace, TaskListener listener, String macroName)
             throws MacroEvaluationException, IOException, InterruptedException {
-        
+
         if (StringUtils.isEmpty(path)) {
             return "";
         }
 
         try {
             EnvVars envVars = run.getEnvironment(listener);
-            
+
             String expandedPath = envVars.expand(path);
-            
+
             String content = readFile(run, workspace, expandedPath, listener);
             return content;
-            
+
         } catch (FileNotFoundException e) {
-            String errorMsg = StringUtils.isEmpty(fileNotFoundMessage) 
-                ? "File [" + path + "] was not found." 
-                : fileNotFoundMessage;
+            String errorMsg = StringUtils.isEmpty(fileNotFoundMessage)
+                    ? "File [" + path + "] was not found."
+                    : fileNotFoundMessage;
             LOGGER.log(Level.WARNING, "File not found: " + path, e);
             return errorMsg;
         }
@@ -93,20 +92,20 @@ public class FileContent extends DataBoundTokenMacro {
 
     private String readFile(Run<?, ?> run, FilePath workspace, String expandedPath, TaskListener listener)
             throws IOException, InterruptedException, FileNotFoundException {
-        
+
         if (workspace == null) {
             throw new FileNotFoundException("Workspace not available for file path: " + expandedPath);
         }
 
         FilePath fileToRead = null;
-        
+
         File pathFile = new File(expandedPath);
         if (pathFile.isAbsolute()) {
             fileToRead = new FilePath(pathFile);
-            
+
             if (!isChildOf(fileToRead, workspace)) {
-                throw new FileNotFoundException(
-                    "File [" + expandedPath + "] is outside the workspace and cannot be accessed for security reasons.");
+                throw new FileNotFoundException("File [" + expandedPath
+                        + "] is outside the workspace and cannot be accessed for security reasons.");
             }
         } else {
             fileToRead = workspace.child(expandedPath);
@@ -143,19 +142,18 @@ public class FileContent extends DataBoundTokenMacro {
      * Checks if a file is within the workspace (child of workspace).
      * This is important for security to prevent accessing files outside the workspace.
      */
-    private boolean isChildOf(FilePath potentialChild, FilePath workspace) 
-            throws IOException, InterruptedException {
+    private boolean isChildOf(FilePath potentialChild, FilePath workspace) throws IOException, InterruptedException {
         try {
             String childPath = potentialChild.getRemote();
             String workspacePath = workspace.getRemote();
-            
+
             childPath = childPath.replace('\\', '/');
             workspacePath = workspacePath.replace('\\', '/');
-            
+
             if (!workspacePath.endsWith("/")) {
                 workspacePath += "/";
             }
-            
+
             return childPath.startsWith(workspacePath);
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Error checking if file is child of workspace", e);
