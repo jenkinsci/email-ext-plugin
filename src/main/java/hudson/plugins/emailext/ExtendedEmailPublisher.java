@@ -61,6 +61,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -75,6 +76,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -562,7 +565,7 @@ public class ExtendedEmailPublisher extends Notifier {
             return null;
         }
         try {
-            java.lang.reflect.Method method = e.getClass().getMethod("getReturnCode");
+            Method method = e.getClass().getMethod("getReturnCode");
             Object result = method.invoke(e);
             if (result instanceof Integer) {
                 return (Integer) result;
@@ -585,8 +588,8 @@ public class ExtendedEmailPublisher extends Notifier {
             return null;
         }
         String message = e.getMessage();
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("^(\\d{3})\\s");
-        java.util.regex.Matcher matcher = pattern.matcher(message);
+        Pattern pattern = Pattern.compile("^(\\d{3})\\s");
+        Matcher matcher = pattern.matcher(message);
         if (matcher.find()) {
             try {
                 return Integer.parseInt(matcher.group(1));
