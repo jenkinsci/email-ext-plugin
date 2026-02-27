@@ -523,29 +523,29 @@ public class ExtendedEmailPublisher extends Notifier {
         if (e == null) {
             return false;
         }
-        
+
         Integer returnCode = getSmtpReturnCode(e);
         if (returnCode != null && returnCode >= 400 && returnCode < 500) {
             return true;
         }
-        
+
         Integer parsedCode = parseSmtpErrorCode(e);
         if (parsedCode != null && parsedCode >= 400 && parsedCode < 500) {
             return true;
         }
-        
+
         if (e instanceof MessagingException) {
             Exception nextException = ((MessagingException) e).getNextException();
             if (nextException != null && isTransientSmtpError(nextException)) {
                 return true;
             }
         }
-        
+
         Throwable cause = e.getCause();
         if (cause instanceof Exception) {
             return isTransientSmtpError((Exception) cause);
         }
-        
+
         return false;
     }
 
@@ -683,8 +683,8 @@ public class ExtendedEmailPublisher extends Notifier {
                             break;
                         } catch (SendFailedException e) {
                             if ((e.getNextException() != null
-                                    && (e.getNextException() instanceof SocketException
-                                            || e.getNextException() instanceof ConnectException))
+                                            && (e.getNextException() instanceof SocketException
+                                                    || e.getNextException() instanceof ConnectException))
                                     || isTransientSmtpError(e)) {
                                 String reason = isTransientSmtpError(e) ? "Transient SMTP error" : "Socket error";
                                 context.getListener()

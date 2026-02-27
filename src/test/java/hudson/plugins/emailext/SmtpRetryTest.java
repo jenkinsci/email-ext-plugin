@@ -22,8 +22,7 @@ class SmtpRetryTest {
      */
     private boolean callIsTransientSmtpError(Exception e) throws Exception {
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        Method method = ExtendedEmailPublisher.class.getDeclaredMethod(
-            "isTransientSmtpError", Exception.class);
+        Method method = ExtendedEmailPublisher.class.getDeclaredMethod("isTransientSmtpError", Exception.class);
         method.setAccessible(true);
         return (Boolean) method.invoke(publisher, e);
     }
@@ -36,33 +35,42 @@ class SmtpRetryTest {
         MessagingException ex451 = new MessagingException("451 Requested action aborted: error in processing");
         MessagingException ex452 = new MessagingException("452 Insufficient system storage");
 
-        assertTrue(callIsTransientSmtpError(ex421), 
-            "MessagingException with '421' in message should be identified as transient");
-        assertTrue(callIsTransientSmtpError(ex450), 
-            "MessagingException with '450' in message should be identified as transient");
-        assertTrue(callIsTransientSmtpError(ex451), 
-            "MessagingException with '451' in message should be identified as transient");
-        assertTrue(callIsTransientSmtpError(ex452), 
-            "MessagingException with '452' in message should be identified as transient");
+        assertTrue(
+                callIsTransientSmtpError(ex421),
+                "MessagingException with '421' in message should be identified as transient");
+        assertTrue(
+                callIsTransientSmtpError(ex450),
+                "MessagingException with '450' in message should be identified as transient");
+        assertTrue(
+                callIsTransientSmtpError(ex451),
+                "MessagingException with '451' in message should be identified as transient");
+        assertTrue(
+                callIsTransientSmtpError(ex452),
+                "MessagingException with '452' in message should be identified as transient");
 
         MessagingException ex500 = new MessagingException("500 Syntax error");
         MessagingException ex550 = new MessagingException("550 Requested action not taken");
 
-        assertFalse(callIsTransientSmtpError(ex500), 
-            "MessagingException with '500' in message should NOT be identified as transient");
-        assertFalse(callIsTransientSmtpError(ex550), 
-            "MessagingException with '550' in message should NOT be identified as transient");
+        assertFalse(
+                callIsTransientSmtpError(ex500),
+                "MessagingException with '500' in message should NOT be identified as transient");
+        assertFalse(
+                callIsTransientSmtpError(ex550),
+                "MessagingException with '550' in message should NOT be identified as transient");
     }
 
     @Test
     @Issue("JENKINS-68518")
     void testIsTransientSmtpErrorWithNonSmtpExceptions() throws Exception {
-        assertFalse(callIsTransientSmtpError(new IOException("Connection error")), 
-            "IOException should NOT be identified as transient SMTP error");
-        assertFalse(callIsTransientSmtpError(new MessagingException("Generic messaging error")), 
-            "MessagingException without SMTP code should NOT be identified as transient");
-        assertFalse(callIsTransientSmtpError(new SocketException("Connection reset")), 
-            "SocketException should NOT be identified as transient SMTP error");
+        assertFalse(
+                callIsTransientSmtpError(new IOException("Connection error")),
+                "IOException should NOT be identified as transient SMTP error");
+        assertFalse(
+                callIsTransientSmtpError(new MessagingException("Generic messaging error")),
+                "MessagingException without SMTP code should NOT be identified as transient");
+        assertFalse(
+                callIsTransientSmtpError(new SocketException("Connection reset")),
+                "SocketException should NOT be identified as transient SMTP error");
     }
 
     @Test
@@ -72,10 +80,12 @@ class SmtpRetryTest {
         SendFailedException wrapped = new SendFailedException("Send failed", smtpError);
         MessagingException doubleWrapped = new MessagingException("Multiple errors", wrapped);
 
-        assertTrue(callIsTransientSmtpError(wrapped), 
-            "SMTP 421 error wrapped in SendFailedException should be identified as transient");
-        assertTrue(callIsTransientSmtpError(doubleWrapped), 
-            "SMTP 421 error deep in exception chain should be identified as transient");
+        assertTrue(
+                callIsTransientSmtpError(wrapped),
+                "SMTP 421 error wrapped in SendFailedException should be identified as transient");
+        assertTrue(
+                callIsTransientSmtpError(doubleWrapped),
+                "SMTP 421 error deep in exception chain should be identified as transient");
     }
 
     @Test
@@ -86,14 +96,10 @@ class SmtpRetryTest {
         MessagingException ex499 = new MessagingException("499 Last 4xx code");
         MessagingException ex500 = new MessagingException("500 First 5xx code");
 
-        assertFalse(callIsTransientSmtpError(ex399), 
-            "SMTP 399 should NOT be identified as transient");
-        assertTrue(callIsTransientSmtpError(ex400), 
-            "SMTP 400 should be identified as transient");
-        assertTrue(callIsTransientSmtpError(ex499), 
-            "SMTP 499 should be identified as transient");
-        assertFalse(callIsTransientSmtpError(ex500), 
-            "SMTP 500 should NOT be identified as transient");
+        assertFalse(callIsTransientSmtpError(ex399), "SMTP 399 should NOT be identified as transient");
+        assertTrue(callIsTransientSmtpError(ex400), "SMTP 400 should be identified as transient");
+        assertTrue(callIsTransientSmtpError(ex499), "SMTP 499 should be identified as transient");
+        assertFalse(callIsTransientSmtpError(ex500), "SMTP 500 should NOT be identified as transient");
     }
 
     @Test
@@ -103,19 +109,16 @@ class SmtpRetryTest {
         MessagingException outer = new MessagingException("Failed to send");
         outer.setNextException(inner);
 
-        assertTrue(callIsTransientSmtpError(outer), 
-            "Should detect transient error in nextException chain");
+        assertTrue(callIsTransientSmtpError(outer), "Should detect transient error in nextException chain");
     }
 
     @Test
     @Issue("JENKINS-68518")
     void testIsTransientSmtpErrorWithNullCheck() throws Exception {
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        Method method = ExtendedEmailPublisher.class.getDeclaredMethod(
-            "isTransientSmtpError", Exception.class);
+        Method method = ExtendedEmailPublisher.class.getDeclaredMethod("isTransientSmtpError", Exception.class);
         method.setAccessible(true);
-        
-        assertFalse((Boolean) method.invoke(publisher, new Object[] {null}), 
-            "Should return false for null exception");
+
+        assertFalse((Boolean) method.invoke(publisher, new Object[] {null}), "Should return false for null exception");
     }
 }
