@@ -61,6 +61,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
@@ -570,7 +571,7 @@ public class ExtendedEmailPublisher extends Notifier {
             if (result instanceof Integer) {
                 return (Integer) result;
             }
-        } catch (Exception ignored) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
             // Method doesn't exist or couldn't be invoked
         }
         return null;
