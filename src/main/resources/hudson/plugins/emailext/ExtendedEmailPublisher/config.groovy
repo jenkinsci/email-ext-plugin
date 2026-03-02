@@ -48,9 +48,10 @@ f.entry(title: _("Inline Attachments"), help: "/plugin/email-ext/help/projectCon
 f.entry(title: _("Attach Build Log"), help: "/plugin/email-ext/help/projectConfig/attachBuildLog.html") {
   div(class: "jenkins-select") {
     select(name: "attachBuildLog", class: "jenkins-select__input") {
-      f.option(value: 0, selected: instance != null ? !instance.attachBuildLog : true, _("Do Not Attach Build Log"))
-      f.option(value: 1, selected: instance != null ? instance.attachBuildLog && !instance.compressBuildLog : false, _("Attach Build Log"))
-      f.option(value: 2, selected: instance != null ? instance.attachBuildLog && instance.compressBuildLog : false, _("Compress and Attach Build Log"))
+      def globalDefault = descriptor.getDefaultAttachBuildLog()
+      f.option(value: 0, selected: instance != null ? !instance.attachBuildLog : globalDefault == 0, _("Do Not Attach Build Log"))
+      f.option(value: 1, selected: instance != null ? instance.attachBuildLog && !instance.compressBuildLog : globalDefault == 1, _("Attach Build Log"))
+      f.option(value: 2, selected: instance != null ? instance.attachBuildLog && instance.compressBuildLog : globalDefault == 2, _("Compress and Attach Build Log"))
     }
   }
 }
