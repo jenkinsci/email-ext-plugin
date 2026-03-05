@@ -251,8 +251,9 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             return;
         }
 
-        if (Jenkins.get().isUseSecurity() && !StringUtils.isBlank(descriptor.getDefaultPostsendScript())
-                || !StringUtils.isBlank(descriptor.getDefaultPresendScript())) {
+        if (Jenkins.get().isUseSecurity()
+                && (!StringUtils.isBlank(descriptor.getDefaultPostsendScript())
+                        || !StringUtils.isBlank(descriptor.getDefaultPresendScript()))) {
             descriptor.setDefaultPostsendScript(descriptor.getDefaultPostsendScript());
             descriptor.setDefaultPresendScript(descriptor.getDefaultPresendScript());
             try {
