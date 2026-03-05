@@ -15,6 +15,7 @@ import jakarta.activation.DataSource;
 import jakarta.activation.FileTypeMap;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Multipart;
+import jakarta.mail.Part;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeUtility;
 import java.io.ByteArrayInputStream;
@@ -163,6 +164,7 @@ public class AttachmentUtils implements Serializable {
                         attachmentPart.setDataHandler(new DataHandler(fileDataSource));
                         attachmentPart.setFileName(MimeUtility.encodeText(file.getName()));
                         attachmentPart.setContentID("<%s>".formatted(file.getName()));
+                        attachmentPart.setDisposition(Part.INLINE);
                         attachments.add(attachmentPart);
                         totalAttachmentSize += file.length();
                     } catch (MessagingException e) {
