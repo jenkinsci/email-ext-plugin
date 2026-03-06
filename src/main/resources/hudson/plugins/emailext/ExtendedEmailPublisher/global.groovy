@@ -101,5 +101,5 @@ f.section(title: _("Extended E-mail Notification")) {
     }
   }
 
-  f.entry(title: _("Content Token Reference"), field:"tokens")
+  f.entry(title: _("Content Token Reference"), help: descriptor.getHelpFile("tokens"))
 }
