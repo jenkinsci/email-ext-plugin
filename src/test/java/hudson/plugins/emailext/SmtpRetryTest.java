@@ -14,6 +14,8 @@ import org.jvnet.hudson.test.Issue;
  * Unit tests for SMTP retry logic, particularly for transient SMTP errors (4xx codes).
  * Since SMTP-specific exception classes are not available at compile time, these tests
  * focus on the message parsing and exception chain traversal logic.
+ *
+ * @author Akash Manna
  */
 class SmtpRetryTest {
 
