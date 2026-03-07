@@ -186,9 +186,16 @@ public class ExtendedEmailPublisher extends Notifier {
     public String from;
 
     /**
-     * If true, save the generated email content to email-ext-message.[txt|html]
+     * If true, save the generated email content to a file in the workspace.
      */
     public boolean saveOutput = false;
+
+    /**
+     * Optional custom base filename (without extension) for the saved output file.
+     * When blank, the filename is auto-generated as
+     * &lt;trigger&gt;-&lt;buildId&gt;[.txt|.html].
+     */
+    private String saveOutputFilename;
 
     /**
      * If true, disables the publisher from running.
@@ -356,6 +363,15 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public String getPostsendScript() {
         return postsendScript;
+    }
+
+    public String getSaveOutputFilename() {
+        return saveOutputFilename;
+    }
+
+    @DataBoundSetter
+    public void setSaveOutputFilename(String saveOutputFilename) {
+        this.saveOutputFilename = saveOutputFilename;
     }
 
     /**
@@ -1170,13 +1186,16 @@ public class ExtendedEmailPublisher extends Notifier {
 
                 FilePath workspace = context.getWorkspace();
                 if (workspace != null) {
-                    FilePath savedOutput = new FilePath(
-                            workspace,
-                            "%s-%s%s"
-                                    .formatted(
-                                            context.getTrigger().getDescriptor().getDisplayName(),
-                                            context.getRun().getId(),
-                                            extension));
+                    String baseName;
+                    if (StringUtils.isNotBlank(saveOutputFilename)) {
+                        baseName = saveOutputFilename;
+                    } else {
+                        baseName = "%s-%s"
+                                .formatted(
+                                        context.getTrigger().getDescriptor().getDisplayName(),
+                                        context.getRun().getId());
+                    }
+                    FilePath savedOutput = new FilePath(workspace, baseName + extension);
                     savedOutput.write(text, charset);
                 } else {
                     context.getListener().getLogger().println("No workspace to save the email to");
