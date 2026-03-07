@@ -158,6 +158,11 @@ public class ExtendedEmailPublisher extends Notifier {
     public String attachmentsPattern;
 
     /**
+     * The project wide set of inline attachments.
+     */
+    public String inlineAttachmentsPattern;
+
+    /**
      * The project's pre-send script.
      */
     private String presendScript;
@@ -360,6 +365,15 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public String getPostsendScript() {
         return postsendScript;
+    }
+
+    public String getInlineAttachmentsPattern() {
+        return inlineAttachmentsPattern;
+    }
+
+    @DataBoundSetter
+    public void setInlineAttachmentsPattern(String inlineAttachmentsPattern) {
+        this.inlineAttachmentsPattern = inlineAttachmentsPattern;
     }
 
     /**
@@ -1080,11 +1094,23 @@ public class ExtendedEmailPublisher extends Notifier {
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
         attachments.attach(multipart, context);
 
+        if (StringUtils.isNotBlank(inlineAttachmentsPattern)) {
+            AttachmentUtils inlineAttachments = new AttachmentUtils(inlineAttachmentsPattern);
+            inlineAttachments.attachInline(multipart, context);
+        }
+
         // add attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getAttachmentsPattern())) {
             AttachmentUtils typeAttachments =
                     new AttachmentUtils(context.getTrigger().getEmail().getAttachmentsPattern());
             typeAttachments.attach(multipart, context);
+        }
+
+        // add inline attachments from the email type if they are setup
+        if (StringUtils.isNotBlank(context.getTrigger().getEmail().getInlineAttachmentsPattern())) {
+            AttachmentUtils inlineAttachments =
+                    new AttachmentUtils(context.getTrigger().getEmail().getInlineAttachmentsPattern());
+            inlineAttachments.attachInline(multipart, context);
         }
 
         if (attachBuildLog || context.getTrigger().getEmail().getAttachBuildLog()) {
