@@ -686,11 +686,12 @@ public class ExtendedEmailPublisher extends Notifier {
                             }
                             break;
                         } catch (SendFailedException e) {
+                            boolean isTransient = isTransientSmtpError(e);
                             if ((e.getNextException() != null
                                             && (e.getNextException() instanceof SocketException
                                                     || e.getNextException() instanceof ConnectException))
-                                    || isTransientSmtpError(e)) {
-                                String reason = isTransientSmtpError(e) ? "Transient SMTP error" : "Socket error";
+                                    || isTransient) {
+                                String reason = isTransient ? "Transient SMTP error" : "Socket error";
                                 context.getListener()
                                         .getLogger()
                                         .println(reason + " sending email, retrying once more in 10 seconds...");
@@ -740,9 +741,10 @@ public class ExtendedEmailPublisher extends Notifier {
                                 break;
                             }
                         } catch (MessagingException e) {
+                            boolean isTransient = isTransientSmtpError(e);
                             if ((e.getNextException() != null && e.getNextException() instanceof ConnectException)
-                                    || isTransientSmtpError(e)) {
-                                String reason = isTransientSmtpError(e) ? "Transient SMTP error" : "Connection error";
+                                    || isTransient) {
+                                String reason = isTransient ? "Transient SMTP error" : "Connection error";
                                 context.getListener()
                                         .getLogger()
                                         .println(reason + " sending email, retrying once more in 10 seconds...");
