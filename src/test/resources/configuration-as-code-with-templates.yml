@@ -1,0 +1,14 @@
+unclassified:
+  email-ext:
+    emailTemplates:
+      - name: "test-template.groovy"
+        content: |
+          def subject = "Build Result Notification"
+          def body = "Hello from CasC provisioned template"
+          return body
+      - name: "test-jelly-template.jelly"
+        content: |
+          <?jelly escape-by-default='true'?>
+          <j:jelly xmlns:j="jelly:core">
+            <p>CasC provisioned jelly template</p>
+          </j:jelly>
