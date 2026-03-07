@@ -202,6 +202,18 @@ public class ExtendedEmailPublisher extends Notifier {
      * How to theTrigger the email if the project is a matrix project.
      */
     public MatrixTriggerMode matrixTriggerMode;
+    /**
+     * Optional email priority value used to set priority headers on the outgoing email.
+     * When specified, the plugin adds the corresponding "X-Priority" and "Importance"
+     * headers to the generated MimeMessage so that email clients can mark the message
+     * as high or low importance.
+     *
+     * Typical values:
+     * 1 - High priority
+     * 3 - Normal priority
+     * 5 - Low priority
+     */
+    private String priority;
 
     public ExtendedEmailPublisher() {}
 
@@ -332,6 +344,10 @@ public class ExtendedEmailPublisher extends Notifier {
         }
     }
 
+    @DataBoundSetter
+    public void setPriority(String priority) {
+        this.priority = priority;
+    }
     @DataBoundSetter
     public void setPostsendScript(String postsendScript) {
         postsendScript = StringUtils.trim(postsendScript);
@@ -977,6 +993,15 @@ public class ExtendedEmailPublisher extends Notifier {
         final Result result = context.getRun() != null ? context.getRun().getResult() : null;
         if (result != null) {
             msg.addHeader("X-Jenkins-Result", result.toString());
+        }
+        if (StringUtils.isNotBlank(priority)) {
+            msg.addHeader("X-Priority", priority);
+
+            if ("1".equals(priority)) {
+                msg.addHeader("Importance", "High");
+            } else if ("5".equals(priority)) {
+                msg.addHeader("Importance", "Low");
+            }
         }
         msg.setSentDate(new Date());
         setSubject(context, msg, charset);
