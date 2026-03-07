@@ -348,6 +348,9 @@ public class ExtendedEmailPublisher extends Notifier {
     public void setPriority(String priority) {
         this.priority = priority;
     }
+    public String getPriority() {
+        return priority;
+    }
     @DataBoundSetter
     public void setPostsendScript(String postsendScript) {
         postsendScript = StringUtils.trim(postsendScript);
