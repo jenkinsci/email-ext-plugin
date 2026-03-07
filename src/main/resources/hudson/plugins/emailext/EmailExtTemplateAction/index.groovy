@@ -13,7 +13,6 @@ def hasPermission = requiresAdmin ? hudson.Functions.hasPermission(app.MANAGE) :
 l.layout {
     st.include(it: my.project, page: "sidepanel")
     l.main_panel {
-        st.bind(var: "templateTester", value: my)
         st.adjunct(includes: "hudson.plugins.emailext.EmailExtTemplateAction.template-test")
         h1(my.displayName)        
         if(hasPermission) {
