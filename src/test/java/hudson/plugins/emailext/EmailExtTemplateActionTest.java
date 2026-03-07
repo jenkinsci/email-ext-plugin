@@ -9,7 +9,7 @@ import org.jvnet.hudson.test.Issue;
 
 /**
  * Test for EmailExtTemplateAction CSP compliance.
- * 
+ *
  * @Author Akash Manna
  */
 public class EmailExtTemplateActionTest {
