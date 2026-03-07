@@ -15,6 +15,7 @@ import jakarta.activation.DataSource;
 import jakarta.activation.FileTypeMap;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Multipart;
+import jakarta.mail.Part;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeUtility;
 import java.io.ByteArrayInputStream;
@@ -132,7 +133,7 @@ public class AttachmentUtils implements Serializable {
         }
     }
 
-    private List<MimeBodyPart> getAttachments(final ExtendedEmailPublisherContext context)
+    private List<MimeBodyPart> getAttachments(final ExtendedEmailPublisherContext context, boolean isInline)
             throws MessagingException, InterruptedException, IOException {
         List<MimeBodyPart> attachments = null;
         FilePath ws = context.getWorkspace();
@@ -163,6 +164,7 @@ public class AttachmentUtils implements Serializable {
                         attachmentPart.setDataHandler(new DataHandler(fileDataSource));
                         attachmentPart.setFileName(MimeUtility.encodeText(file.getName()));
                         attachmentPart.setContentID("<%s>".formatted(file.getName()));
+                        attachmentPart.setDisposition(isInline ? Part.INLINE : Part.ATTACHMENT);
                         attachments.add(attachmentPart);
                         totalAttachmentSize += file.length();
                     } catch (MessagingException e) {
@@ -198,7 +200,7 @@ public class AttachmentUtils implements Serializable {
     public void attach(Multipart multipart, ExtendedEmailPublisherContext context) {
         try {
 
-            List<MimeBodyPart> attachments = getAttachments(context);
+            List<MimeBodyPart> attachments = getAttachments(context, false);
             if (attachments != null) {
                 for (MimeBodyPart attachment : attachments) {
                     multipart.addBodyPart(attachment);
@@ -210,6 +212,24 @@ public class AttachmentUtils implements Serializable {
             context.getListener().error("Error attaching items to message: " + e.getMessage());
         } catch (InterruptedException e) {
             context.getListener().error("Interrupted in processing attachments: " + e.getMessage());
+        }
+    }
+
+    public void attachInline(Multipart multipart, ExtendedEmailPublisherContext context) {
+        try {
+
+            List<MimeBodyPart> attachments = getAttachments(context, true);
+            if (attachments != null) {
+                for (MimeBodyPart attachment : attachments) {
+                    multipart.addBodyPart(attachment);
+                }
+            }
+        } catch (IOException e) {
+            context.getListener().error("Error accessing files to attach inline: " + e.getMessage());
+        } catch (MessagingException e) {
+            context.getListener().error("Error attaching inline items to message: " + e.getMessage());
+        } catch (InterruptedException e) {
+            context.getListener().error("Interrupted in processing inline attachments: " + e.getMessage());
         }
     }
 
