@@ -66,6 +66,9 @@ public class EmailExtStep extends Step {
 
     private boolean saveOutput;
 
+    @CheckForNull
+    private String saveOutputFilename;
+
     @DataBoundConstructor
     public EmailExtStep(String subject, String body) {
         this.subject = subject;
@@ -173,6 +176,16 @@ public class EmailExtStep extends Step {
         this.saveOutput = saveOutput;
     }
 
+    @CheckForNull
+    public String getSaveOutputFilename() {
+        return saveOutputFilename;
+    }
+
+    @DataBoundSetter
+    public void setSaveOutputFilename(@CheckForNull String saveOutputFilename) {
+        this.saveOutputFilename = Util.fixNull(saveOutputFilename);
+    }
+
     @Override
     public StepExecution start(StepContext context) throws Exception {
         return new EmailExtStepExecution(this, context);
@@ -208,6 +221,7 @@ public class EmailExtStep extends Step {
             publisher.configuredTriggers.add(trigger);
 
             publisher.saveOutput = step.saveOutput;
+            publisher.setSaveOutputFilename(step.saveOutputFilename);
             publisher.defaultSubject = step.subject;
             publisher.defaultContent = step.body;
             publisher.attachBuildLog = step.attachLog;
