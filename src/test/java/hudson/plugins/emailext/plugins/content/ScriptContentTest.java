@@ -184,7 +184,9 @@ class ScriptContentTest {
         assertThat(
                 scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME),
                 stringContainsInOrder(
-                        Arrays.asList("Groovy Script file [", "] was not found in the workspace, $JENKINS_HOME/email-templates, or in the plugin resources.")));
+                        Arrays.asList(
+                                "Groovy Script file [",
+                                "] was not found in the workspace, $JENKINS_HOME/email-templates, or in the plugin resources.")));
     }
 
     @Test
@@ -195,7 +197,9 @@ class ScriptContentTest {
         assertThat(
                 scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME),
                 stringContainsInOrder(
-                        Arrays.asList("Groovy Template file [", "] was not found in the workspace, $JENKINS_HOME/email-templates, or in the plugin resources.")));
+                        Arrays.asList(
+                                "Groovy Template file [",
+                                "] was not found in the workspace, $JENKINS_HOME/email-templates, or in the plugin resources.")));
     }
 
     @Test
