@@ -214,9 +214,9 @@ public class ExtendedEmailPublisher extends Notifier {
      * as high or low importance.
      *
      * Typical values:
-     * 1 - High priority
-     * 3 - Normal priority
-     * 5 - Low priority
+     * "1" - High priority
+     * "3" - Normal priority
+     * "5" - Low priority
      */
     private String priority;
 
@@ -353,6 +353,7 @@ public class ExtendedEmailPublisher extends Notifier {
     public void setPriority(String priority) {
         this.priority = priority;
     }
+
     public String getPriority() {
         return priority;
     }
