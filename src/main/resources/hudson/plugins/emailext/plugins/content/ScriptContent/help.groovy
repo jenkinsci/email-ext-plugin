@@ -1,13 +1,14 @@
 dt("\${SCRIPT}")
 dd() {
   span(_("Custom message content generated from a Groovy script. " +
-     "Custom scripts should be placed in <tt>\$JENKINS_HOME/email-templates</tt>. "+
-     "When using a custom script the plugin will look in the resources for" +
-     "the email-ext plugin first, and then in the <tt>\$JENKINS_HOME/email-templates</tt>" +
-     "directory. No other directories will be searched. " +
-     "You may also use the Config File Provider plugin to manage your scripts. " +
-     "Prefix the managed file NAME with <tt>managed:</tt> for the template or script " +
-     "parameter. (Example: <tt>\${SCRIPT, template=\"managed:ManagedFileName\"}</tt>)"))
+     "The plugin will search for scripts in the following order: " +
+     "(1) managed files (prefix with <tt>managed:</tt>), " +
+     "(2) workspace (relative path from workspace root), " +
+     "(3) plugin resources, and " +
+     "(4) <tt>\$JENKINS_HOME/email-templates</tt>. " +
+     "To use managed files (Config File Provider plugin), prefix the file NAME with <tt>managed:</tt>. " +
+     "To use workspace templates, specify a relative path from workspace root. " +
+     "(Example: <tt>\${SCRIPT, template=\"managed:ManagedFileName\"}</tt> or <tt>\${SCRIPT, template=\"email-templates/custom.groovy\"}</tt>)"))
 
   dl() {
     dt("script")

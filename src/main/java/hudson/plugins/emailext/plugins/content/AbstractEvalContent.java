@@ -189,7 +189,9 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     }
 
     protected String generateMissingFile(String type, String fileName) {
-        return type + " file [" + fileName + "] was not found in $JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY + ".";
+        return type + " file [" + fileName
+                + "] was not found in the workspace, $JENKINS_HOME/" + EMAIL_TEMPLATES_DIRECTORY
+                + ", or in the plugin resources.";
     }
 
     protected String getCharset(Run<?, ?> build) {
