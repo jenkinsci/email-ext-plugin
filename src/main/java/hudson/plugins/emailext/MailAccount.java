@@ -45,6 +45,22 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     private String advProperties;
     private boolean defaultAccount;
 
+    /**
+     * Flag to enable OAuth 2.0 authentication for SMTP.
+     * When enabled for Office365, the plugin must use the
+     * client_credentials flow to fetch a short-lived access
+     * token from:
+     * https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token
+     *
+     * This token must be used as the XOAUTH2 password during
+     * SMTP authentication, instead of using client_secret directly.
+     *
+     * Note: Basic Authentication for Office365 is being
+     * discontinued by Microsoft in March 2026.
+     *
+     * @see <a href="https://github.com/jenkinsci/email-ext-plugin/issues/1420">
+     *      JENKINS-73486: OAuth 2.0 does not work with O365</a>
+     */
     private boolean useOAuth2;
 
     @Deprecated
