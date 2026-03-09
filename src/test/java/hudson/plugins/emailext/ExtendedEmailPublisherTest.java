@@ -38,6 +38,8 @@ import hudson.plugins.emailext.plugins.trigger.SecondFailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import hudson.security.AuthorizationStrategy;
+import hudson.security.ACL;
+import hudson.security.ACLContext;
 import hudson.security.SecurityRealm;
 import hudson.tasks.Builder;
 import hudson.tasks.Mailer;
@@ -46,7 +48,6 @@ import jakarta.mail.BodyPart;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
-import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import java.io.IOException;
@@ -119,11 +120,11 @@ class ExtendedEmailPublisherTest {
 
         recProviders = Collections.emptyList();
 
-        publisher.getDescriptor().setDefaultClasspath(Collections.emptyList());
-        publisher.getDescriptor().setDefaultSuffix(null);
-        publisher.getDescriptor().setEmergencyReroute(null);
-        publisher.getDescriptor().setAllowedDomains(null);
-        publisher.getDescriptor().setThrottlingEnabled(true);
+        ExtendedEmailPublisher.descriptor().setDefaultClasspath(Collections.emptyList());
+        ExtendedEmailPublisher.descriptor().setDefaultSuffix(null);
+        ExtendedEmailPublisher.descriptor().setEmergencyReroute(null);
+        ExtendedEmailPublisher.descriptor().setAllowedDomains(null);
+        ExtendedEmailPublisher.descriptor().setThrottlingEnabled(true);
         oldAuthorizationStrategy = j.jenkins.getAuthorizationStrategy();
         oldSecurityRealm = j.jenkins.getSecurityRealm();
         oldAdminAddress = JenkinsLocationConfiguration.get().getAdminAddress();
@@ -172,7 +173,7 @@ class ExtendedEmailPublisherTest {
 
     private void setupApprovedGlobalClassPath(String resource) throws IOException, Descriptor.FormException {
         GroovyScriptPath path = new GroovyScriptPath(resource);
-        publisher.getDescriptor().setDefaultClasspath(Collections.singletonList(path));
+        ExtendedEmailPublisher.descriptor().setDefaultClasspath(Collections.singletonList(path));
         ScriptApproval approval = ScriptApproval.get();
         List<ScriptApproval.PendingClasspathEntry> entries = approval.getPendingClasspathEntries();
         assertThat(entries, not(empty()));
@@ -746,7 +747,6 @@ class ExtendedEmailPublisherTest {
         Message msg = mailbox.get(0);
         assertThat("Message should be multipart", msg.getContentType(), containsString("multipart/mixed"));
 
-        // TODO: add more tests for getting the multipart information.
         if (msg instanceof MimeMessage mimeMsg) {
             assertEquals(
                     MimeMultipart.class,
@@ -754,12 +754,44 @@ class ExtendedEmailPublisherTest {
                     "Message content should be a MimeMultipart instance");
             MimeMultipart multipart = (MimeMultipart) mimeMsg.getContent();
             assertTrue(multipart.getCount() >= 1, "There should be at least one part in the email");
-            MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(0);
-            assertThat("UTF-8 charset should be used.", bodyPart.getContentType(), containsString("charset=UTF-8"));
+            boolean foundTextPart = false;
+            for (int i = 0; i < multipart.getCount(); i++) {
+                BodyPart bodyPart = multipart.getBodyPart(i);
+                if (bodyPart.getContentType().toLowerCase().startsWith("text/")) {
+                    foundTextPart = true;
+                    assertThat(
+                            "UTF-8 charset should be used.",
+                            bodyPart.getContentType(),
+                            containsString("charset=UTF-8"));
+                }
+            }
+            assertTrue(foundTextPart, "There should be at least one text body part in the email");
         } else {
             assertThat(
                     "UTF-8 charset should be used.", mailbox.get(0).getContentType(), containsString("charset=UTF-8"));
         }
+    }
+
+    @Test
+    void testPresendScriptProjectClasspathSubmittedByAliceApprovedByBob() throws Exception {
+        setUpSecurity();
+
+        try (ACLContext ignored = ACL.as(User.getById("alice", true))) {
+            publisher.setClasspath(Collections.singletonList(new GroovyScriptPath("src/test/resources/email-ext-test-helper-0.1.jar")));
+        }
+
+        ScriptApproval approval = ScriptApproval.get();
+        List<ScriptApproval.PendingClasspathEntry> entries = approval.getPendingClasspathEntries();
+        assertThat(entries, not(empty()));
+
+        try (ACLContext ignored = ACL.as(User.getById("bob", true))) {
+            for (ScriptApproval.PendingClasspathEntry entry : entries) {
+                approval.approveClasspathEntry(entry.getHash());
+            }
+        }
+
+        assertThat(approval.getPendingClasspathEntries(), empty());
+        verifyPresendScriptModifiesToUsingProjectExternalScript();
     }
 
     @Test
@@ -1007,9 +1039,8 @@ class ExtendedEmailPublisherTest {
 
     @Test
     void testPresendScriptModifiesToUsingGlobalExternalScript() throws Exception {
-        publisher
-                .getDescriptor()
-                .setDefaultClasspath(Collections.singletonList(new GroovyScriptPath("src/test/presend")));
+        ExtendedEmailPublisher.descriptor()
+            .setDefaultClasspath(Collections.singletonList(new GroovyScriptPath("src/test/presend")));
         verifyPresendScriptModifiesToUsingGlobalExternalScript();
     }
 
@@ -1117,7 +1148,7 @@ class ExtendedEmailPublisherTest {
                 msg.setHeader('Message-ID', ExtendedEmailPublisherTestHelper.messageid())""");
         List<GroovyScriptPath> classpath = new ArrayList<>();
         classpath.add(new GroovyScriptPath("src/test/postsend"));
-        publisher.getDescriptor().setDefaultClasspath(classpath);
+        ExtendedEmailPublisher.descriptor().setDefaultClasspath(classpath);
 
         verifyPostsendScriptModifiesMessageId();
     }
