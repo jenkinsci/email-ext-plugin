@@ -12,13 +12,13 @@ import org.jvnet.mock_javamail.Mailbox;
 
 /**
  * Test for JENKINS-76109: HTML emails with attachments fail to send.
- * 
+ *
  * This test verifies that HTML emails with special characters (escaped HTML entities)
  * work correctly when combined with attachments and attachLog.
- * 
+ *
  * The issue was that CssInliner was calling StringEscapeUtils.unescapeHtml4() on
  * JSoup's output, which unescaped HTML entities like &amp; and &lt;, breaking the HTML.
- * 
+ *
  * @author Akash Manna
  */
 @WithJenkins
@@ -42,15 +42,13 @@ class HtmlEmailWithAttachmentsTest {
      */
     @Test
     void testHtmlWithEscapedEntitiesPreserved() {
-        hudson.plugins.emailext.plugins.CssInliner inliner = 
-            new hudson.plugins.emailext.plugins.CssInliner();
-        
+        hudson.plugins.emailext.plugins.CssInliner inliner = new hudson.plugins.emailext.plugins.CssInliner();
+
         String input = "<html><body><p>Hello &amp; Welcome</p><p>Price &lt; $100</p></body></html>";
-        
+
         String output = inliner.process(input);
-        
-        assertEquals(input, output, 
-            "HTML without data-inline should be returned unchanged");
+
+        assertEquals(input, output, "HTML without data-inline should be returned unchanged");
     }
 
     /**
@@ -58,20 +56,18 @@ class HtmlEmailWithAttachmentsTest {
      */
     @Test
     void testHtmlWithInlineCssPreservesEscapedEntities() {
-        hudson.plugins.emailext.plugins.CssInliner inliner = 
-            new hudson.plugins.emailext.plugins.CssInliner();
-        
-        String input = "<html><head><style data-inline=\"true\">p { color: red; }</style></head>" +
-                      "<body><p>Hello &amp; Welcome</p><p>Price &lt; $100</p></body></html>";
-        
+        hudson.plugins.emailext.plugins.CssInliner inliner = new hudson.plugins.emailext.plugins.CssInliner();
+
+        String input = "<html><head><style data-inline=\"true\">p { color: red; }</style></head>"
+                + "<body><p>Hello &amp; Welcome</p><p>Price &lt; $100</p></body></html>";
+
         String output = inliner.process(input);
-        
-        assertTrue(output.contains("&amp;"), 
-            "Escaped ampersand should remain escaped after CSS inlining");
-        assertTrue(output.contains("&lt;"), 
-            "Escaped less-than should remain escaped after CSS inlining");
-        
-        assertTrue(!output.contains("Hello & Welcome") || output.contains("&amp;"),
-            "Should not have unescaped ampersand in text content");
+
+        assertTrue(output.contains("&amp;"), "Escaped ampersand should remain escaped after CSS inlining");
+        assertTrue(output.contains("&lt;"), "Escaped less-than should remain escaped after CSS inlining");
+
+        assertTrue(
+                !output.contains("Hello & Welcome") || output.contains("&amp;"),
+                "Should not have unescaped ampersand in text content");
     }
 }
