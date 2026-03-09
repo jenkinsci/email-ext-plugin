@@ -841,6 +841,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         ListBoxModel items = new ListBoxModel();
         items.add(Messages.contentType_plainText(), "text/plain");
         items.add(Messages.contentType_html(), "text/html");
+        items.add(Messages.contentType_both(), "both");
         return items;
     }
 

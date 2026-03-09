@@ -1390,6 +1390,59 @@ class ExtendedEmailPublisherTest {
         assertEquals(content, htmlString, "Should have the same HTML body");
     }
 
+    @Test
+    @Issue("JENKINS-41473")
+    void testPlainTextAndHtmlFromGlobalDefault() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = publisher.getDescriptor();
+        descriptor.setDefaultContentType("both");
+        descriptor.save();
+
+        FreeStyleProject prj = j.createFreeStyleProject("JENKINS-41473");
+        prj.getPublishersList().add(publisher);
+
+        final String content =
+                "<html><head><title>Global Both Test</title></head><body><b>Testing global both setting</b></body></html>";
+
+        publisher.contentType = "default";
+        publisher.recipientList = "test@example.com";
+        publisher.configuredTriggers.add(new SuccessTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                content,
+                "",
+                0,
+                "project"));
+
+        for (EmailTrigger trigger : publisher.configuredTriggers) {
+            trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
+        }
+
+        FreeStyleBuild build = prj.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(1, Mailbox.get("test@example.com").size());
+
+        Message msg = Mailbox.get("test@example.com").get(0);
+        assertInstanceOf(MimeMessage.class, msg, "Message should be multipart");
+        assertInstanceOf(MimeMultipart.class, msg.getContent(), "Content should be a MimeMultipart");
+
+        MimeMultipart part = (MimeMultipart) msg.getContent();
+        assertEquals(
+                2, part.getCount(), "Should have two body items (html + plaintext) when using global 'both' default");
+
+        BodyPart plainText = part.getBodyPart(0);
+        String plainTextString = IOUtils.toString(plainText.getInputStream(), descriptor.getCharset())
+                .replace("\r", "");
+        assertEquals("Testing global both setting", plainTextString, "Should have the plain text body");
+
+        BodyPart html = part.getBodyPart(1);
+        String htmlString = IOUtils.toString(html.getInputStream(), descriptor.getCharset());
+
+        assertEquals(content, htmlString, "Should have the same HTML body");
+    }
+
     @Issue("JENKINS-16376")
     @Test
     void testConcurrentBuilds() throws Exception {
