@@ -9,7 +9,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.htmlparser.jericho.Source;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.text.StringEscapeUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -99,7 +98,7 @@ public class CssInliner {
                 .syntax(Document.OutputSettings.Syntax.xml)
                 .prettyPrint(false)
                 .escapeMode(Entities.EscapeMode.extended));
-        return StringEscapeUtils.unescapeHtml4(doc.outerHtml());
+        return doc.outerHtml();
     }
 
     /**
