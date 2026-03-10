@@ -208,7 +208,20 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
 
     @DataBoundSetter
     public void setSmtpPort(String smtpPort) {
-        this.smtpPort = Util.fixEmptyAndTrim(smtpPort);
+        smtpPort = Util.fixEmptyAndTrim(smtpPort);
+
+        if (smtpPort != null) {
+            try {
+                int port = Integer.parseInt(smtpPort);
+                if (port < 1 || port > 65535) {
+                    throw new IllegalArgumentException("SMTP port must be between 1 and 65535");
+                }
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("SMTP port must be a valid number");
+            }
+        }
+
+        this.smtpPort = smtpPort;
     }
 
     @Deprecated
