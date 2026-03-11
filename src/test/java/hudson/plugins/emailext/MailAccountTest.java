@@ -163,4 +163,12 @@ class MailAccountTest {
                 mad.doCheckCredentialsId(null, "bogus", true, true),
                 Matchers.allOf(hasKind(Kind.ERROR), hasMessage("Cannot find currently selected credentials")));
     }
+
+    @Test
+    @WithoutJenkins
+    void testOAuth2TenantIdGetterSetter() {
+        MailAccount account = new MailAccount();
+        account.setOAuth2TenantId("test-tenant-id-123");
+        assertEquals("test-tenant-id-123", account.getOAuth2TenantId());
+    }
 }
