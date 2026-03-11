@@ -46,6 +46,27 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     private boolean defaultAccount;
 
     private boolean useOAuth2;
+    /**
+     * The Azure Active Directory tenant ID for Office365.
+     * Required when useOAuth2 is enabled for Office365/Outlook.
+     * Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+     */
+    private String oAuth2TenantId;
+
+    /**
+     * The OAuth2 client ID (application ID) registered
+     * in Azure Active Directory.
+     * Required when useOAuth2 is enabled for Office365.
+     */
+    private String oAuth2ClientId;
+
+    /**
+     * The OAuth2 client secret for authenticating with
+     * Microsoft's token endpoint.
+     * Stored securely using Jenkins Secret.
+     * Required when useOAuth2 is enabled for Office365.
+     */
+    private Secret oAuth2ClientSecret;
 
     @Deprecated
     public MailAccount(JSONObject jo) {
@@ -272,6 +293,32 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     @DataBoundSetter
     public void setUseOAuth2(boolean useOAuth2) {
         this.useOAuth2 = useOAuth2;
+    }
+    public String getOAuth2TenantId() {
+        return oAuth2TenantId;
+    }
+
+    @DataBoundSetter
+    public void setOAuth2TenantId(String oAuth2TenantId) {
+        this.oAuth2TenantId = Util.fixEmptyAndTrim(oAuth2TenantId);
+    }
+
+    public String getOAuth2ClientId() {
+        return oAuth2ClientId;
+    }
+
+    @DataBoundSetter
+    public void setOAuth2ClientId(String oAuth2ClientId) {
+        this.oAuth2ClientId = Util.fixEmptyAndTrim(oAuth2ClientId);
+    }
+
+    public Secret getOAuth2ClientSecret() {
+        return oAuth2ClientSecret;
+    }
+
+    @DataBoundSetter
+    public void setOAuth2ClientSecret(Secret oAuth2ClientSecret) {
+        this.oAuth2ClientSecret = oAuth2ClientSecret;
     }
 
     public String getAdvProperties() {
