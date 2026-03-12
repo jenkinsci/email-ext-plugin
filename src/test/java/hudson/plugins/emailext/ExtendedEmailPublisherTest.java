@@ -1481,7 +1481,7 @@ class ExtendedEmailPublisherTest {
             dform.put("smtpPort", "465");
             dform.put("advProperties", "mail.smtp.ssl.trust=test2.com");
             addaccs.add(new MailAccount(dform));
-            
+
             JSONObject sslForm = new JSONObject();
             sslForm.put("address", "mail@test3.com");
             sslForm.put("smtpHost", "smtp.test3.com");
