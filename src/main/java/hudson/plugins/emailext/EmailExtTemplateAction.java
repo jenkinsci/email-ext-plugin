@@ -19,11 +19,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import jenkins.model.Jenkins;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.lib.configprovider.model.Config;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.bind.JavaScriptMethod;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 /**
  *
@@ -131,32 +134,51 @@ public class EmailExtTemplateAction implements Action {
         return providers;
     }
 
-    @JavaScriptMethod
-    public String[] renderTemplate(String templateFile, String buildId) {
-        String[] result = new String[2];
-        result[0] = StringUtils.EMPTY;
-        result[1] = StringUtils.EMPTY;
+    @RequirePOST
+    @SuppressWarnings("lgtm[jenkins/csrf]")
+    public void doRenderTemplate(StaplerRequest2 req, StaplerResponse2 rsp) throws IOException {
+        if (Jenkins.get()
+                .getDescriptorByType(ExtendedEmailPublisherDescriptor.class)
+                .isAdminRequiredForTemplateTesting()) {
+            Jenkins.get().checkPermission(Jenkins.MANAGE);
+        } else {
+            project.checkPermission(Item.CONFIGURE);
+        }
+
+        String templateFile = req.getParameter("templateFile");
+        String buildId = req.getParameter("buildId");
+
+        JSONObject result = new JSONObject();
+        result.put("renderedContent", StringUtils.EMPTY);
+        result.put("consoleOutput", StringUtils.EMPTY);
 
         try {
             AbstractBuild<?, ?> build = project.getBuild(buildId);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             StreamTaskListener listener = new StreamTaskListener(stream);
 
+            String renderedContent;
             if (templateFile.endsWith(".jelly")) {
                 JellyScriptContent jellyContent = new JellyScriptContent();
                 jellyContent.template = templateFile;
-                result[0] = jellyContent.evaluate(build, listener, "JELLY_SCRIPT");
+                renderedContent = jellyContent.evaluate(build, listener, "JELLY_SCRIPT");
             } else {
                 ScriptContent scriptContent = new ScriptContent();
                 scriptContent.template = templateFile;
-                result[0] = scriptContent.evaluate(build, listener, "SCRIPT");
+                renderedContent = scriptContent.evaluate(build, listener, "SCRIPT");
             }
-            result[1] = hudson.Util.xmlEscape(
-                    stream.toString(ExtendedEmailPublisher.descriptor().getCharset()));
+            result.put("renderedContent", renderedContent);
+            result.put(
+                    "consoleOutput",
+                    hudson.Util.xmlEscape(
+                            stream.toString(ExtendedEmailPublisher.descriptor().getCharset())));
         } catch (Exception ex) {
-            result[0] = renderError(ex);
+            result.put("renderedContent", renderError(ex));
         }
-        return result;
+
+        rsp.setContentType("application/json");
+        rsp.setCharacterEncoding("UTF-8");
+        rsp.getWriter().print(result.toString());
     }
 
     public AbstractProject<?, ?> getProject() {
