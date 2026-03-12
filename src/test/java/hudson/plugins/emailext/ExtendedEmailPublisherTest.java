@@ -1481,6 +1481,26 @@ class ExtendedEmailPublisherTest {
             dform.put("smtpPort", "465");
             dform.put("advProperties", "mail.smtp.ssl.trust=test2.com");
             addaccs.add(new MailAccount(dform));
+
+            JSONObject sslForm = new JSONObject();
+            sslForm.put("address", "mail@test3.com");
+            sslForm.put("smtpHost", "smtp.test3.com");
+            sslForm.put("smtpPort", "25");
+            sslForm.put("advProperties", "mail.smtp.ssl.trust=test3.com");
+
+            MailAccount sslAccount = new MailAccount(sslForm);
+            sslAccount.setUseSsl(true);
+            addaccs.add(sslAccount);
+
+            JSONObject tlsForm = new JSONObject();
+            tlsForm.put("address", "mail@test4.com");
+            tlsForm.put("smtpHost", "smtp.test4.com");
+            tlsForm.put("smtpPort", "465");
+            tlsForm.put("advProperties", "mail.smtp.ssl.trust=test4.com");
+
+            MailAccount tlsAccount = new MailAccount(tlsForm);
+            tlsAccount.setUseTls(true);
+            addaccs.add(tlsAccount);
             descriptor.setAddAccounts(addaccs);
 
             publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
@@ -1497,6 +1517,23 @@ class ExtendedEmailPublisherTest {
             assertEquals("smtp.test2.com", session.getProperty("mail.smtp.host"));
             assertEquals("465", session.getProperty("mail.smtp.port"));
             assertEquals("test2.com", session.getProperty("mail.smtp.ssl.trust"));
+
+            form.put("from", "mail@test3.com");
+            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
+            session = descriptor.createSession(publisher.getMailAccount(context), context);
+            assertEquals("smtp.test3.com", session.getProperty("mail.smtp.host"));
+            assertEquals("25", session.getProperty("mail.smtp.port"));
+            assertEquals("javax.net.ssl.SSLSocketFactory", session.getProperty("mail.smtp.socketFactory.class"));
+            assertEquals("25", session.getProperty("mail.smtp.socketFactory.port"));
+            assertEquals("test3.com", session.getProperty("mail.smtp.ssl.trust"));
+
+            form.put("from", "mail@test4.com");
+            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
+            session = descriptor.createSession(publisher.getMailAccount(context), context);
+            assertEquals("smtp.test4.com", session.getProperty("mail.smtp.host"));
+            assertEquals("465", session.getProperty("mail.smtp.port"));
+            assertEquals("true", session.getProperty("mail.smtp.starttls.enable"));
+            assertEquals("test4.com", session.getProperty("mail.smtp.ssl.trust"));
 
             return null;
         });
