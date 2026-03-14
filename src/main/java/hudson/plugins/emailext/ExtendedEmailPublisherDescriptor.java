@@ -33,6 +33,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -214,22 +215,14 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
 
         /*
-         * Versions 2.71 and earlier correctly left the address unset for the default
-         * account,
-         * relying solely on the system admin email address from the Jenkins Location
-         * settings for
-         * the default account and using the address specified on the account only for
-         * additional
-         * accounts. Versions 2.72 through 2.77 incorrectly set the address for the
-         * default account
-         * to the system admin email address from the Jenkins Location settings at the
-         * time the
-         * descriptor was first saved without propagating further changes from the
-         * Jenkins Location
-         * settings to the default account. To clear up this bad state, we
-         * unconditionally clear the
-         * address and rely once again solely on the system admin email address from the
-         * Jenkins
+         * Versions 2.71 and earlier correctly left the address unset for the default account,
+         * relying solely on the system admin email address from the Jenkins Location settings for
+         * the default account and using the address specified on the account only for additional
+         * accounts. Versions 2.72 through 2.77 incorrectly set the address for the default account
+         * to the system admin email address from the Jenkins Location settings at the time the
+         * descriptor was first saved without propagating further changes from the Jenkins Location
+         * settings to the default account. To clear up this bad state, we unconditionally clear the
+         * address and rely once again solely on the system admin email address from the Jenkins
          * Location settings for the default account.
          */
         if (mailAccount.getAddress() != null) {
@@ -272,8 +265,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             try {
                 descriptor.setDefaultClasspath(descriptor.getDefaultClasspath());
             } catch (FormException e) {
-                // Some of the old configured classpaths probably used some environment
-                // variable, let's clean those out
+                // Some of the old configured classpaths probably used some environment variable, let's clean those out
                 List<GroovyScriptPath> newList = new ArrayList<>();
                 for (GroovyScriptPath path : descriptor.getDefaultClasspath()) {
                     URL u = path.asURL();
@@ -346,14 +338,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             props.put(SMTP_PORT_PROPERTY, acc.getSmtpPort());
         }
         if (acc.isUseSsl()) {
-            /*
-             * This allows the user to override settings by setting system properties but
-             * also allows us to use the default SMTPs port of 465 if no port is already
-             * set.
-             * It would be cleaner to use smtps, but that's done by calling
-             * session.getTransport()...
-             * and thats done in mail sender, and it would be a bit of a hack to get it all
-             * to
+            /* This allows the user to override settings by setting system properties but
+             * also allows us to use the default SMTPs port of 465 if no port is already set.
+             * It would be cleaner to use smtps, but that's done by calling session.getTransport()...
+             * and thats done in mail sender, and it would be a bit of a hack to get it all to
              * coordinate, and we can make it work through setting mail.smtp properties.
              */
             if (props.getProperty(SMTP_SOCKETFACTORY_PORT_PROPERTY) == null) {
@@ -367,18 +355,15 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             props.put("mail.smtp.socketFactory.fallback", "false");
 
             // RFC 2595 specifies additional checks that must be performed on the server's
-            // certificate to ensure that the server you connected to is the server you
-            // intended
+            // certificate to ensure that the server you connected to is the server you intended
             // to connect to. This reduces the risk of "man in the middle" attacks.
             if (props.getProperty("mail.smtp.ssl.checkserveridentity") == null) {
                 props.put("mail.smtp.ssl.checkserveridentity", "true");
             }
         }
         if (acc.isUseTls()) {
-            /*
-             * This allows the user to override settings by setting system properties and
-             * also allows us to use the default STARTTLS port, 587, if no port is already
-             * set.
+            /* This allows the user to override settings by setting system properties and
+             * also allows us to use the default STARTTLS port, 587, if no port is already set.
              * Only the properties included below are required to use STARTTLS and they are
              * not expected to be enabled simultaneously with SSL (it will actually throw a
              * "javax.net.ssl.SSLException: Unrecognized SSL message, plaintext connection?"
@@ -790,8 +775,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if (defaultTriggerIds.isEmpty()) {
             if (!defaultTriggers.isEmpty()) {
                 for (EmailTriggerDescriptor t : this.defaultTriggers) {
-                    // we have to do the below because a bunch of stuff is not serialized for the
-                    // Descriptor
+                    // we have to do the below because a bunch of stuff is not serialized for the Descriptor
                     EmailTriggerDescriptor d = Jenkins.get().getDescriptorByType(t.getClass());
                     if (d != null && !defaultTriggerIds.contains(d.getId())) {
                         defaultTriggerIds.add(d.getId());
@@ -838,13 +822,27 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             return;
         }
 
+        // Clean up previously provisioned templates to avoid accumulation of stale/removed templates.
+        // We only delete files that match the expected template extensions to avoid deleting unrelated user files.
+        File[] existingFiles = templatesDir.listFiles(
+                (dir, name) -> name.endsWith(".groovy") || name.endsWith(".jelly") || name.endsWith(".template"));
+
+        if (existingFiles != null) {
+            for (File file : existingFiles) {
+                if (!file.delete()) {
+                    LOGGER.log(Level.WARNING, "Failed to delete old template file: {0}", file.getAbsolutePath());
+                }
+            }
+        }
+
         for (EmailTemplate template : this.emailTemplates) {
             File templateFile = new File(templatesDir, template.getName());
             try {
-                // Canonical path check: ensure resolved file is inside the templates directory
-                String canonicalDir = templatesDir.getCanonicalPath();
-                String canonicalFile = templateFile.getCanonicalPath();
-                if (!canonicalFile.startsWith(canonicalDir + File.separator)) {
+                // Canonical path check using nio.Path#startsWith to ensure resolved file is inside the templates
+                // directory
+                Path canonicalDir = templatesDir.toPath().normalize().toAbsolutePath();
+                Path canonicalFile = templateFile.toPath().normalize().toAbsolutePath();
+                if (!canonicalFile.startsWith(canonicalDir)) {
                     LOGGER.log(
                             Level.WARNING,
                             "Rejected template with path outside email-templates directory: {0}",

@@ -49,18 +49,8 @@ public class EmailTemplate extends AbstractDescribableImpl<EmailTemplate> implem
             throw new IllegalArgumentException("Template name must not be empty");
         }
 
-        // Reject path traversal and directory separators
-        if (trimmedName.contains("/") || trimmedName.contains("\\") || trimmedName.contains("..")) {
-            throw new IllegalArgumentException(
-                    "Template name must not contain path separators or relative path components: " + trimmedName);
-        }
-
-        // Reject null bytes
-        if (trimmedName.contains("\0")) {
-            throw new IllegalArgumentException("Template name must not contain null bytes");
-        }
-
         // Enforce safe filename pattern and allowed extensions
+        // This regex successfully rejects path traversals (/, \, ..) and null bytes (\0)
         if (!SAFE_NAME_PATTERN.matcher(trimmedName).matches()) {
             throw new IllegalArgumentException(
                     "Template name must be a simple filename ending with .groovy, .jelly, or .template: "
