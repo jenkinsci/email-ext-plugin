@@ -855,7 +855,7 @@ public class ExtendedEmailPublisher extends Notifier {
 
         boolean useSecurity = Jenkins.get().isUseSecurity();
         if (!classpathList.isEmpty()) {
-            GroovyClassLoader gloader = new GroovyClassLoader(loader);
+            try (GroovyClassLoader gloader = new GroovyClassLoader(loader)) {
             gloader.setShouldRecompile(true);
             for (ClasspathEntry entry : classpathList) {
                 if (useSecurity) {
@@ -864,6 +864,7 @@ public class ExtendedEmailPublisher extends Notifier {
                 gloader.addURL(entry.getURL());
             }
             loader = gloader;
+            }
         }
         if (useSecurity) {
             return GroovySandbox.createSecureClassLoader(loader);
