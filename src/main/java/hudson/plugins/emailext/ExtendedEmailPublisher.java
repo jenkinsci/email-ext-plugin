@@ -858,14 +858,14 @@ public class ExtendedEmailPublisher extends Notifier {
         boolean useSecurity = Jenkins.get().isUseSecurity();
         if (!classpathList.isEmpty()) {
             try (GroovyClassLoader gloader = new GroovyClassLoader(loader)) {
-            gloader.setShouldRecompile(true);
-            for (ClasspathEntry entry : classpathList) {
-                if (useSecurity) {
-                    ScriptApproval.get().using(entry);
+                gloader.setShouldRecompile(true);
+                for (ClasspathEntry entry : classpathList) {
+                    if (useSecurity) {
+                        ScriptApproval.get().using(entry);
+                    }
+                    gloader.addURL(entry.getURL());
                 }
-                gloader.addURL(entry.getURL());
-            }
-            loader = gloader;
+                loader = gloader;
             }
         }
         if (useSecurity) {
