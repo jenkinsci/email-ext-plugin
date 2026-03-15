@@ -163,7 +163,9 @@ public class AttachmentUtils implements Serializable {
                     try {
                         attachmentPart.setDataHandler(new DataHandler(fileDataSource));
                         attachmentPart.setFileName(MimeUtility.encodeText(file.getName()));
-                        attachmentPart.setContentID("<%s>".formatted(file.getName()));
+                        if (isInline) {
+                            attachmentPart.setContentID("<%s>".formatted(file.getName()));
+                        }
                         attachmentPart.setDisposition(isInline ? Part.INLINE : Part.ATTACHMENT);
                         attachments.add(attachmentPart);
                         totalAttachmentSize += file.length();
