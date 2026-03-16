@@ -14,10 +14,14 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
 import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
@@ -37,6 +41,8 @@ import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest2;
 
 public abstract class AbstractScriptTrigger extends EmailTrigger {
+
+    private static final Logger LOGGER = Logger.getLogger(AbstractScriptTrigger.class.getName());
 
     protected SecureGroovyScript secureTriggerScript;
 
@@ -159,8 +165,12 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
                     result = (Boolean) res;
                 }
             } catch (IOException e) {
-                Functions.printStackTrace(
-                        e, listener.fatalError("Failed evaluating script trigger %s%n", e.getMessage()));
+                listener.fatalError("Failed evaluating script trigger: %s%n", e.getMessage());
+                LOGGER.log(Level.SEVERE, "Failed evaluating script trigger", e);
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                Functions.printStackTrace(e, pw);
+                listener.getLogger().println(sw);
             }
         }
         return result;
@@ -232,7 +242,9 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
      *
      * @return {@code this}, or a replacement for {@code this}.
      * @throws ObjectStreamException if the object cannot be restored.
-     * @see <a href="http://download.oracle.com/javase/1.3/docs/guide/serialization/spec/input.doc6.html">The Java Object Serialization Specification</a>
+     * @see <a href=
+     *      "http://download.oracle.com/javase/1.3/docs/guide/serialization/spec/input.doc6.html">The
+     *      Java Object Serialization Specification</a>
      */
     protected Object readResolve() throws ObjectStreamException, Descriptor.FormException {
         if (triggerScript != null && secureTriggerScript == null) {

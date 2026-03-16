@@ -858,6 +858,9 @@ public class ExtendedEmailPublisher extends Notifier {
             PrintStream logger = listener.getLogger();
             debug(logger, "Executing %s script", scriptName);
 
+            StringWriter out = new StringWriter();
+            PrintWriter pw = new PrintWriter(out);
+
             Binding binding = new Binding();
             binding.setVariable("build", context.getBuild());
             binding.setVariable("run", context.getRun());
@@ -876,9 +879,6 @@ public class ExtendedEmailPublisher extends Notifier {
             binding.setVariable("trigger", context.getTrigger());
             binding.setVariable("triggered", ImmutableMultimap.copyOf(context.getTriggered())); // TODO static
             // whitelist?
-
-            StringWriter out = new StringWriter();
-            PrintWriter pw = new PrintWriter(out);
 
             try {
                 ClassLoader cl = expandClasspath(context, Jenkins.get().getPluginManager().uberClassLoader);
@@ -910,6 +910,7 @@ public class ExtendedEmailPublisher extends Notifier {
                         + e.getMessage());
                 throw e;
             } catch (Throwable t) {
+                LOGGER.log(Level.WARNING, "Error executing " + scriptName + " script", t);
                 Functions.printStackTrace(t, pw);
                 logger.println(out);
                 // should we cancel the sending of the email???
