@@ -1057,6 +1057,7 @@ public class ExtendedEmailPublisher extends Notifier {
             }
 
             String effectiveRecipientList = StringUtils.isNotBlank(this.recipientList)
+                    && !"$DEFAULT_RECIPIENTS".equals(this.recipientList)
                     ? this.recipientList
                     : context.getTrigger().getEmail().getRecipientList();
             descriptor.debug(context.getListener().getLogger(), "Adding recipients from recipient list");
