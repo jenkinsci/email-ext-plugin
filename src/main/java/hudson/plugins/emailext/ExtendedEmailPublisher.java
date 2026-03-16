@@ -1056,13 +1056,15 @@ public class ExtendedEmailPublisher extends Notifier {
                 provider.addRecipients(context, env, to, cc, bcc);
             }
 
-            descriptor.debug(context.getListener().getLogger(), "Adding recipients from trigger recipient list");
+            String effectiveRecipientList = StringUtils.isNotBlank(this.recipientList)
+                    ? this.recipientList
+                    : context.getTrigger().getEmail().getRecipientList();
+            descriptor.debug(context.getListener().getLogger(), "Adding recipients from recipient list");
             EmailRecipientUtils.addAddressesFromRecipientList(
                     to,
                     cc,
                     bcc,
-                    EmailRecipientUtils.getRecipientList(
-                            context, context.getTrigger().getEmail().getRecipientList()),
+                    EmailRecipientUtils.getRecipientList(context, effectiveRecipientList),
                     env,
                     context.getListener());
         }
