@@ -113,7 +113,7 @@ public class ScriptContent extends AbstractEvalContent {
     /**
      * Renders the template using a SimpleTemplateEngine
      *
-     * @param build the build to act on
+     * @param build          the build to act on
      * @param templateStream the template file stream
      * @return the rendered template content
      */
@@ -186,6 +186,7 @@ public class ScriptContent extends AbstractEvalContent {
             }
 
         } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Exception raised during template rendering", e);
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             Functions.printStackTrace(e, pw);
