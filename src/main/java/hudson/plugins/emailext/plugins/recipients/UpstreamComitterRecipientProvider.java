@@ -89,6 +89,8 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
      * @param cc the cc recipient list
      * @param bcc the bcc recipient list
      * @param env the build environment
+     * @param context the publisher context
+     * @param debug the debug logger
      */
     private void addUpstreamCommittersTriggeringBuild(
             Run<?, ?> run,
@@ -115,11 +117,14 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
 
     /**
      * Adds a user to the recipients list based on a specific SCM change set
+     *
      * @param change The ChangeLogSet.Entry to get the user information from
      * @param to The list of to addresses to add to
      * @param cc The list of cc addresses to add to
      * @param bcc The list of bcc addresses to add to
      * @param env The build environment
+     * @param context the publisher context
+     * @param debug the debug logger
      */
     private void addUserFromChangeSet(
             ChangeLogSet.Entry change,
