@@ -300,7 +300,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                         StandardUsernamePasswordCredentials.class, Jenkins.get(), ACL.SYSTEM, domainRequirement),
                 CredentialsMatchers.withUsername(smtpUsername));
         for (final StandardUsernamePasswordCredentials cred : credentials) {
-           if (smtpPassword.getPlainText().equals(Secret.toString(cred.getPassword()))) {
+            if (smtpPassword.getPlainText().equals(Secret.toString(cred.getPassword()))) {
                 // If some credentials have the same username/password, use those.
                 credentialsId = cred.getId();
                 break;
