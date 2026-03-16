@@ -54,7 +54,7 @@ public class UpstreamComitterSinceLastSuccessRecipientProvider extends Recipient
             debug.send(
                     "No previous successful build for job %s#%s, skipping upstream committers since last success.",
                     currentBuild.getParent().getName(), currentBuild.getNumber());
-            return; // No previous successful build, so we can't determine upstream committers since last success
+            return;
         }
         debug.send("Sending email to upstream committer(s) since last successful build.");
         debug.send(
@@ -64,8 +64,6 @@ public class UpstreamComitterSinceLastSuccessRecipientProvider extends Recipient
                 lastSuccessfulBuild.getParent().getName(),
                 lastSuccessfulBuild.getNumber());
 
-        // Walk back through all curr job builds since last success and collect all upstream SCM builds that triggered
-        // them
         Set<Run<?, ?>> upstreamBuilds = new HashSet<>();
         Run<?, ?> jobBuild = currentBuild;
 
@@ -84,7 +82,6 @@ public class UpstreamComitterSinceLastSuccessRecipientProvider extends Recipient
         }
     }
 
-    // Recursively collect all upstream runs across the full dependency tree
     private static void collectUpstreamBuilds(Cause.UpstreamCause cause, Set<Run<?, ?>> result) {
         Run<?, ?> r = cause.getUpstreamRun();
         if (r != null) {
@@ -102,10 +99,12 @@ public class UpstreamComitterSinceLastSuccessRecipientProvider extends Recipient
      * each commit in the upstream build.
      *
      * @param run the upstream build
-     * @param to  the to recipient list
-     * @param cc  the cc recipient list
+     * @param to the to recipient list
+     * @param cc the cc recipient list
      * @param bcc the bcc recipient list
      * @param env the build environment
+     * @param context the publisher context
+     * @param debug the debug logger
      */
     private void addUpstreamCommittersTriggeringBuild(
             Run<?, ?> run,
@@ -133,10 +132,12 @@ public class UpstreamComitterSinceLastSuccessRecipientProvider extends Recipient
      * Adds a user to the recipients list based on a specific SCM change set
      *
      * @param change The ChangeLogSet.Entry to get the user information from
-     * @param to     The list of to addresses to add to
-     * @param cc     The list of cc addresses to add to
-     * @param bcc    The list of bcc addresses to add to
-     * @param env    The build environment
+     * @param to The list of to addresses to add to
+     * @param cc The list of cc addresses to add to
+     * @param bcc The list of bcc addresses to add to
+     * @param env The build environment
+     * @param context the publisher context
+     * @param debug the debug logger
      */
     private void addUserFromChangeSet(
             ChangeLogSet.Entry change,
