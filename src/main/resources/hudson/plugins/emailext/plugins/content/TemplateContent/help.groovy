@@ -1,14 +1,14 @@
 dt("\${TEMPLATE}")
 dd() {
   span(_("Custom message content generated from a template file. " +
-     "Custom templates should be placed in <tt>\$JENKINS_HOME/email-templates</tt>. "+
-     "When using a custom script the plugin will look in the resources for" +
-     "the email-ext plugin first, and then in the <tt>\$JENKINS_HOME/email-templates</tt>" + 
-     "directory. No other directories will be searched. " +
-     "You may also use the Config File Provider plugin to manage your templates. " +
-     "Use the \"Custom File\" config type for the template. " + 
-     "Prefix the managed file NAME with \"managed:\" for the file " +
-     "parameter. (Example: <tt>\${TEMPLATE, file=\"managed:ManagedFileName\"}</tt>)"))
+     "The plugin will search for templates in the following order: " +
+     "(1) managed files (prefix with <tt>managed:</tt>), " +
+     "(2) workspace (relative path from workspace root), " +
+     "(3) plugin resources, and " +
+     "(4) <tt>\$JENKINS_HOME/email-templates</tt>. " +
+     "To use managed files (Config File Provider plugin), use the \"Custom File\" config type and prefix the file NAME with \"managed:\". " + 
+     "To use workspace templates, specify a relative path from workspace root. " +
+     "(Example: <tt>\${TEMPLATE, file=\"managed:ManagedFileName\"}</tt> or <tt>\${TEMPLATE, file=\"templates/custom.txt\"}</tt>)"))
   
   dl() {
     dt("file")
