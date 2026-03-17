@@ -665,12 +665,16 @@ public class ExtendedEmailPublisher extends Notifier {
                             }
                         } catch (MessagingException e) {
                             if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
-                            	context.getListener()
-                                .getLogger()
-                                .println("SMTP connection error while sending email. Retrying once more in 10 seconds.");
+
+                                context.getListener()
+                                        .getLogger()
+                                        .println("SMTP connection error while sending email. Retrying once more in 10 seconds.");
+
                                 transport.close();
                                 Thread.sleep(10000);
-                            } else {
+
+                            }
+                         else {
                                 debug(
                                         context.getListener().getLogger(),
                                         e.getClass().getSimpleName() + " message: " + e.getMessage());
@@ -764,6 +768,9 @@ public class ExtendedEmailPublisher extends Notifier {
             PrintStream logger = listener.getLogger();
             debug(logger, "Executing %s script", scriptName);
 
+            StringWriter out = new StringWriter();
+            PrintWriter pw = new PrintWriter(out);
+
             Binding binding = new Binding();
             binding.setVariable("build", context.getBuild());
             binding.setVariable("run", context.getRun());
@@ -782,9 +789,6 @@ public class ExtendedEmailPublisher extends Notifier {
             binding.setVariable("trigger", context.getTrigger());
             binding.setVariable("triggered", ImmutableMultimap.copyOf(context.getTriggered())); // TODO static
             // whitelist?
-
-            StringWriter out = new StringWriter();
-            PrintWriter pw = new PrintWriter(out);
 
             try {
                 ClassLoader cl = expandClasspath(context, Jenkins.get().getPluginManager().uberClassLoader);
@@ -816,6 +820,7 @@ public class ExtendedEmailPublisher extends Notifier {
                         + e.getMessage());
                 throw e;
             } catch (Throwable t) {
+                LOGGER.log(Level.WARNING, "Error executing " + scriptName + " script", t);
                 Functions.printStackTrace(t, pw);
                 logger.println(out);
                 // should we cancel the sending of the email???
