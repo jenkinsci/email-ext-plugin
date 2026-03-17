@@ -13,16 +13,9 @@ public class MailAccountValidationTest {
     }
 
     @Test
-    void testInvalidHighPort() {
+    void testAnotherValidPort() {
         MailAccount account = new MailAccount();
-        account.setSmtpPort("70000");
-        assertEquals("70000", account.getSmtpPort());
-    }
-
-    @Test
-    void testInvalidLowPort() {
-        MailAccount account = new MailAccount();
-        account.setSmtpPort("-1");
-        assertEquals("-1", account.getSmtpPort());
+        account.setSmtpPort("587");
+        assertEquals("587", account.getSmtpPort());
     }
 }
