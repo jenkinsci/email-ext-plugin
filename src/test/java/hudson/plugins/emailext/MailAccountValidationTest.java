@@ -8,7 +8,7 @@ public class MailAccountValidationTest {
     @Test
     void testSetSmtpPort() {
         MailAccount account = new MailAccount();
-        account.setSmtpPort("25");   
+        account.setSmtpPort("25");
         assertEquals("25", account.getSmtpPort());
     }
 }
