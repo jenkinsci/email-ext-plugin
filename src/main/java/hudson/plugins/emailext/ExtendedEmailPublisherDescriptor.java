@@ -420,7 +420,14 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     private Authenticator getAuthenticator(final MailAccount acc, final ExtendedEmailPublisherContext context) {
-        if (acc == null || StringUtils.isBlank(acc.getCredentialsId())) {
+        if (acc == null) {
+            return null;
+        }
+        if (acc.isUseOAuth2() && !StringUtils.isBlank(acc.getOauthCredentialsId())) {
+            // OAuth2 token-based authentication via entra-oauth-plugin
+            return null; // TODO: implement OAuth2 token fetch
+        }
+        if (StringUtils.isBlank(acc.getCredentialsId())) {
             return null;
         }
         return authenticatorProvider.apply(acc, context.getRun());

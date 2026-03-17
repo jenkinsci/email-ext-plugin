@@ -84,6 +84,12 @@
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
+      <artifactId>entra-oauth</artifactId>
+      <version>74.v7e5f89d5e7f7</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.jenkins.plugins</groupId>
       <artifactId>jakarta-mail-api</artifactId>
     </dependency>
     <dependency>
