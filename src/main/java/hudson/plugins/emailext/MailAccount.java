@@ -77,10 +77,24 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     }
 
     public boolean isSmtpServerValid() {
-        return true;
-        // Note: having no SMTP server is fine, it means localhost.
-        // More control could be implemented here when not null though,
-        // like checking the value looks like an FQDN or IP address.
+        // Empty means "localhost", which is always valid.
+        if (StringUtils.isBlank(smtpHost)) {
+            return true;
+        }
+        // Validate hostname or IP address syntax.
+        return isHostnameValid(smtpHost) || isIpAddressValid(smtpHost);
+    }
+
+    private boolean isHostnameValid(String host) {
+        String hostnamePattern =
+                "^(?![0-9]+$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$";
+        return host.matches(hostnamePattern);
+    }
+
+    private boolean isIpAddressValid(String host) {
+        String ipPattern =
+                "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+        return host.matches(ipPattern);
     }
 
     public boolean isSmtpAuthValid() {
