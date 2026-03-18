@@ -76,26 +76,29 @@ public class RegressionTrigger extends EmailTrigger {
             return build.getResult() == Result.FAILURE;
         }
 
-        if (build.getAction(AbstractTestResultAction.class) == null) {
+        // Cache test result actions to avoid repeated lookups
+        AbstractTestResultAction<?> buildAction = build.getAction(AbstractTestResultAction.class);
+        if (buildAction == null) {
             return false;
         }
 
         // if previous run didn't have test results and this one does (with failures)
-        if (previousBuild.getAction(AbstractTestResultAction.class) == null) {
-            return build.getAction(AbstractTestResultAction.class).getFailCount() > 0;
+        AbstractTestResultAction<?> prevAction = previousBuild.getAction(AbstractTestResultAction.class);
+        if (prevAction == null) {
+            return buildAction.getFailCount() > 0;
         }
 
         // if more tests failed during this run
-        if (build.getAction(AbstractTestResultAction.class).getFailCount()
-                > previousBuild.getAction(AbstractTestResultAction.class).getFailCount()) {
+        if (buildAction.getFailCount() > prevAction.getFailCount()) {
             return true;
         }
 
         // if any test failed this time, but not last time
-        for (Object result : build.getAction(AbstractTestResultAction.class).getFailedTests()) {
-            CaseResult res = (CaseResult) result;
-            if (res.getAge() == 1) {
-                return true;
+        for (Object result : buildAction.getFailedTests()) {
+            if (result instanceof CaseResult res) {
+                if (res.getAge() == 1) {
+                    return true;
+                }
             }
         }
 
