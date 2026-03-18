@@ -163,4 +163,26 @@ class MailAccountTest {
                 mad.doCheckCredentialsId(null, "bogus", true, true),
                 Matchers.allOf(hasKind(Kind.ERROR), hasMessage("Cannot find currently selected credentials")));
     }
+    @Test
+    @WithoutJenkins
+    void testOauthCredentialsIdGetterSetter() {
+    	MailAccount account = new MailAccount();
+    	assertNull(account.getOauthCredentialsId());
+
+    	account.setOauthCredentialsId("my-entra-cred-id");
+    	assertEquals("my-entra-cred-id", account.getOauthCredentialsId());
+    }
+
+    @Test
+    @WithoutJenkins
+    void testUseOAuth2WithCredentialsId() {
+    	MailAccount account = new MailAccount();
+    	account.setAddress("joe@example.com");
+    	account.setUseOAuth2(true);
+    	account.setOauthCredentialsId("my-entra-cred-id");
+
+    	assertTrue(account.isUseOAuth2());
+    	assertEquals("my-entra-cred-id", account.getOauthCredentialsId());
+    	assertTrue(account.isValid());
+    }
 }
