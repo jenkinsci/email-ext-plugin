@@ -164,7 +164,7 @@ class ScriptContentTest {
     void testWhenScriptNotFoundThrowFileNotFoundException() throws Exception {
         scriptContent.script = "script-does-not-exist";
         assertEquals(
-                "Groovy Script file [script-does-not-exist] was not found in $JENKINS_HOME/email-templates.",
+                "Groovy Script file [script-does-not-exist] was not found in the workspace, $JENKINS_HOME/email-templates, or in the plugin resources.",
                 scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
     }
 
@@ -172,7 +172,7 @@ class ScriptContentTest {
     void testWhenTemplateNotFoundThrowFileNotFoundException() throws Exception {
         scriptContent.template = "template-does-not-exist";
         assertEquals(
-                "Groovy Template file [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.",
+                "Groovy Template file [template-does-not-exist] was not found in the workspace, $JENKINS_HOME/email-templates, or in the plugin resources.",
                 scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
     }
 
@@ -184,7 +184,9 @@ class ScriptContentTest {
         assertThat(
                 scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME),
                 stringContainsInOrder(
-                        Arrays.asList("Groovy Script file [", "] was not found in $JENKINS_HOME/email-templates.")));
+                        Arrays.asList(
+                                "Groovy Script file [",
+                                "] was not found in the workspace, $JENKINS_HOME/email-templates, or in the plugin resources.")));
     }
 
     @Test
@@ -195,7 +197,9 @@ class ScriptContentTest {
         assertThat(
                 scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME),
                 stringContainsInOrder(
-                        Arrays.asList("Groovy Template file [", "] was not found in $JENKINS_HOME/email-templates.")));
+                        Arrays.asList(
+                                "Groovy Template file [",
+                                "] was not found in the workspace, $JENKINS_HOME/email-templates, or in the plugin resources.")));
     }
 
     @Test
@@ -290,11 +294,19 @@ class ScriptContentTest {
         assertEquals("2 + 2 = 4", scriptContent.evaluate(build, listener, ScriptContent.MACRO_NAME));
     }
 
+    /**
+     * Tests that templates can be loaded from the workspace (JENKINS-67566).
+     * This allows users to check templates into SCM and use them from the workspace.
+     */
     @Test
     void templateInWorkspace() throws Exception {
         templateInWorkspace("/test.groovy");
     }
 
+    /**
+     * Tests that templates can be loaded from the workspace (JENKINS-67566).
+     * This allows users to check templates into SCM and use them from the workspace.
+     */
     @Test
     void templateInWorkspaceUnsafe() throws Exception {
         templateInWorkspace("/testUnsafe.groovy");

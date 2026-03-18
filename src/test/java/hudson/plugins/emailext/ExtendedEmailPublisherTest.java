@@ -1390,6 +1390,59 @@ class ExtendedEmailPublisherTest {
         assertEquals(content, htmlString, "Should have the same HTML body");
     }
 
+    @Test
+    @Issue("JENKINS-41473")
+    void testPlainTextAndHtmlFromGlobalDefault() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor = publisher.getDescriptor();
+        descriptor.setDefaultContentType("both");
+        descriptor.save();
+
+        FreeStyleProject prj = j.createFreeStyleProject("JENKINS-41473");
+        prj.getPublishersList().add(publisher);
+
+        final String content =
+                "<html><head><title>Global Both Test</title></head><body><b>Testing global both setting</b></body></html>";
+
+        publisher.contentType = "default";
+        publisher.recipientList = "test@example.com";
+        publisher.configuredTriggers.add(new SuccessTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                content,
+                "",
+                0,
+                "project"));
+
+        for (EmailTrigger trigger : publisher.configuredTriggers) {
+            trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
+        }
+
+        FreeStyleBuild build = prj.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+
+        assertEquals(1, Mailbox.get("test@example.com").size());
+
+        Message msg = Mailbox.get("test@example.com").get(0);
+        assertInstanceOf(MimeMessage.class, msg, "Message should be multipart");
+        assertInstanceOf(MimeMultipart.class, msg.getContent(), "Content should be a MimeMultipart");
+
+        MimeMultipart part = (MimeMultipart) msg.getContent();
+        assertEquals(
+                2, part.getCount(), "Should have two body items (html + plaintext) when using global 'both' default");
+
+        BodyPart plainText = part.getBodyPart(0);
+        String plainTextString = IOUtils.toString(plainText.getInputStream(), descriptor.getCharset())
+                .replace("\r", "");
+        assertEquals("Testing global both setting", plainTextString, "Should have the plain text body");
+
+        BodyPart html = part.getBodyPart(1);
+        String htmlString = IOUtils.toString(html.getInputStream(), descriptor.getCharset());
+
+        assertEquals(content, htmlString, "Should have the same HTML body");
+    }
+
     @Issue("JENKINS-16376")
     @Test
     void testConcurrentBuilds() throws Exception {
@@ -1481,6 +1534,26 @@ class ExtendedEmailPublisherTest {
             dform.put("smtpPort", "465");
             dform.put("advProperties", "mail.smtp.ssl.trust=test2.com");
             addaccs.add(new MailAccount(dform));
+
+            JSONObject sslForm = new JSONObject();
+            sslForm.put("address", "mail@test3.com");
+            sslForm.put("smtpHost", "smtp.test3.com");
+            sslForm.put("smtpPort", "25");
+            sslForm.put("advProperties", "mail.smtp.ssl.trust=test3.com");
+
+            MailAccount sslAccount = new MailAccount(sslForm);
+            sslAccount.setUseSsl(true);
+            addaccs.add(sslAccount);
+
+            JSONObject tlsForm = new JSONObject();
+            tlsForm.put("address", "mail@test4.com");
+            tlsForm.put("smtpHost", "smtp.test4.com");
+            tlsForm.put("smtpPort", "465");
+            tlsForm.put("advProperties", "mail.smtp.ssl.trust=test4.com");
+
+            MailAccount tlsAccount = new MailAccount(tlsForm);
+            tlsAccount.setUseTls(true);
+            addaccs.add(tlsAccount);
             descriptor.setAddAccounts(addaccs);
 
             publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
@@ -1497,6 +1570,23 @@ class ExtendedEmailPublisherTest {
             assertEquals("smtp.test2.com", session.getProperty("mail.smtp.host"));
             assertEquals("465", session.getProperty("mail.smtp.port"));
             assertEquals("test2.com", session.getProperty("mail.smtp.ssl.trust"));
+
+            form.put("from", "mail@test3.com");
+            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
+            session = descriptor.createSession(publisher.getMailAccount(context), context);
+            assertEquals("smtp.test3.com", session.getProperty("mail.smtp.host"));
+            assertEquals("25", session.getProperty("mail.smtp.port"));
+            assertEquals("javax.net.ssl.SSLSocketFactory", session.getProperty("mail.smtp.socketFactory.class"));
+            assertEquals("25", session.getProperty("mail.smtp.socketFactory.port"));
+            assertEquals("test3.com", session.getProperty("mail.smtp.ssl.trust"));
+
+            form.put("from", "mail@test4.com");
+            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
+            session = descriptor.createSession(publisher.getMailAccount(context), context);
+            assertEquals("smtp.test4.com", session.getProperty("mail.smtp.host"));
+            assertEquals("465", session.getProperty("mail.smtp.port"));
+            assertEquals("true", session.getProperty("mail.smtp.starttls.enable"));
+            assertEquals("test4.com", session.getProperty("mail.smtp.ssl.trust"));
 
             return null;
         });

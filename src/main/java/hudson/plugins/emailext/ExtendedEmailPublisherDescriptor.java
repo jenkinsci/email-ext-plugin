@@ -360,7 +360,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
              * coordinate, and we can make it work through setting mail.smtp properties.
              */
             if (props.getProperty(SMTP_SOCKETFACTORY_PORT_PROPERTY) == null) {
-                String port = acc.getSmtpPort() == null ? "465" : mailAccount.getSmtpPort();
+                String port = acc.getSmtpPort() == null ? "465" : acc.getSmtpPort();
                 props.put(SMTP_PORT_PROPERTY, port);
                 props.put(SMTP_SOCKETFACTORY_PORT_PROPERTY, port);
             }
@@ -388,7 +388,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
              * if SMTP server expects only TLS).
              */
             if (props.getProperty(SMTP_SOCKETFACTORY_PORT_PROPERTY) == null) {
-                String port = acc.getSmtpPort() == null ? "587" : mailAccount.getSmtpPort();
+                String port = acc.getSmtpPort() == null ? "587" : acc.getSmtpPort();
                 props.put(SMTP_PORT_PROPERTY, port);
                 props.put(SMTP_SOCKETFACTORY_PORT_PROPERTY, port);
             }
@@ -841,6 +841,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         ListBoxModel items = new ListBoxModel();
         items.add(Messages.contentType_plainText(), "text/plain");
         items.add(Messages.contentType_html(), "text/html");
+        items.add(Messages.contentType_both(), "both");
         return items;
     }
 
