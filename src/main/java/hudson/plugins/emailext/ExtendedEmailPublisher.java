@@ -33,6 +33,7 @@ import hudson.plugins.emailext.groovy.sandbox.TaskListenerInstanceWhitelist;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.CssInliner;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.content.AbstractEvalContent;
 import hudson.plugins.emailext.plugins.content.EmailExtScript;
@@ -735,7 +736,17 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public List<TokenMacro> getRuntimeMacros(ExtendedEmailPublisherContext context) {
         List<TokenMacro> macros = new ArrayList<>();
-        macros.add(new TriggerNameContent(context.getTrigger().getDescriptor().getDisplayName()));
+
+        String triggerName = "Unknown";
+        EmailTrigger trigger = context.getTrigger();
+        if (trigger != null) {
+            EmailTriggerDescriptor descriptor = trigger.getDescriptor();
+            if (descriptor != null) {
+                triggerName = descriptor.getDisplayName();
+            }
+        }
+
+        macros.add(new TriggerNameContent(triggerName));
         return macros;
     }
 
