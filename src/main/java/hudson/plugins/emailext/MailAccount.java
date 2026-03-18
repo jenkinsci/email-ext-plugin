@@ -86,14 +86,12 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     }
 
     private boolean isHostnameValid(String host) {
-        String hostnamePattern =
-                "^(?![0-9]+$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$";
+        String hostnamePattern = "^(?![0-9]+$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$";
         return host.matches(hostnamePattern);
     }
 
     private boolean isIpAddressValid(String host) {
-        String ipPattern =
-                "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+        String ipPattern = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
         return host.matches(ipPattern);
     }
 
