@@ -218,28 +218,34 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
      * @return The number of test failures for the Run
      */
     protected int getNumFailures(Run<?, ?> build) {
-        AbstractTestResultAction<? extends AbstractTestResultAction<?>> a =
-                build.getAction(AbstractTestResultAction.class);
-        if (a instanceof AggregatedTestResultAction action) {
-            int result = 0;
-            for (ChildReport cr : action.getChildReports()) {
-                if (cr == null || cr.child == null || cr.child.getParent() == null) {
-                    continue;
-                }
-                if (cr.child.getParent().equals(build.getParent())) {
-                    if (cr.result instanceof TestResult tr) {
-                        result += tr.getFailCount();
-                    }
-                }
-            }
+    AbstractTestResultAction<? extends AbstractTestResultAction<?>> a =
+            build.getAction(AbstractTestResultAction.class);
 
-            if (result == 0 && action.getFailCount() > 0) {
-                result = action.getFailCount();
-            }
-            return result;
-        }
-        return a.getFailCount();
+    if (a == null) {
+        return 0;
     }
+
+    if (a instanceof AggregatedTestResultAction action) {
+        int result = 0;
+        for (ChildReport cr : action.getChildReports()) {
+            if (cr == null || cr.child == null || cr.child.getParent() == null) {
+                continue;
+            }
+            if (cr.child.getParent().equals(build.getParent())) {
+                if (cr.result instanceof TestResult tr) {
+                    result += tr.getFailCount();
+                }
+            }
+        }
+
+        if (result == 0 && action.getFailCount() > 0) {
+            result = action.getFailCount();
+        }
+        return result;
+    }
+
+    return a.getFailCount();
+}
 
     /**
      * Should this trigger run before the build? Defaults to false.
