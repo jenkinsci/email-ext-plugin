@@ -42,6 +42,7 @@ import hudson.plugins.emailext.plugins.trigger.UnstableTrigger;
 import hudson.plugins.emailext.plugins.trigger.XNthFailureTrigger;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
+import hudson.util.ListBoxModel;
 import jakarta.mail.Authenticator;
 import java.util.Collection;
 import java.util.Collections;
@@ -1289,5 +1290,36 @@ class ExtendedEmailPublisherDescriptorTest {
                 .to("admin"));
         j.submit(j.createWebClient().login("admin").goTo("configure").getFormByName("config"));
         assertThat(ScriptApproval.get().getPendingScripts(), is(empty()));
+    }
+
+    @Test
+    @Issue("JENKINS-41473")
+    void testBothContentTypeAvailableInGlobalConfig() {
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        ListBoxModel items = descriptor.doFillDefaultContentTypeItems();
+
+        assertEquals(3, items.size(), "Should have exactly three content type options");
+
+        List<String> values = items.stream().map(option -> option.value).toList();
+        assertTrue(values.contains("text/plain"), "Should have plain text option");
+        assertTrue(values.contains("text/html"), "Should have HTML option");
+        assertTrue(values.contains("both"), "Should have 'both' option");
+    }
+
+    @Test
+    @Issue("JENKINS-41473")
+    void testGlobalBothContentTypeCanBeSetAndInherited() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        descriptor.setDefaultContentType("both");
+        descriptor.save();
+
+        assertEquals("both", descriptor.getDefaultContentType(), "Global content type should be set to 'both'");
+
+        descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        assertEquals(
+                "both", descriptor.getDefaultContentType(), "'both' content type should persist after save and reload");
     }
 }
