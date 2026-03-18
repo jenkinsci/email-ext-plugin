@@ -9,6 +9,7 @@ import hudson.FilePath;
 import hudson.model.Run;
 import jakarta.mail.BodyPart;
 import jakarta.mail.Message;
+import jakarta.mail.Multipart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import java.io.File;
@@ -58,6 +59,7 @@ class EmailExtStepTest {
         step1.setTo("mickeymouse@disney.com");
         step1.setReplyTo("mickeymouse@disney.com");
         step1.setMimeType("text/html");
+        step1.setBodyType("groovy");
 
         EmailExtStep step2 = new StepConfigTester(j).configRoundTrip(step1);
         j.assertEqualDataBoundBeans(step1, step2);
@@ -75,6 +77,40 @@ class EmailExtStepTest {
         assertEquals(1, mbox.size());
         Message msg = mbox.get(0);
         assertEquals("Boo", msg.getSubject());
+    }
+
+    @Test
+    void inlineGroovyBodyType() throws Exception {
+        WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf-inline-groovy");
+        job.setDefinition(new CpsFlowDefinition(
+                "node { emailext(to: 'mickeymouse@disney.com', subject: 'Boo', body: 'inline-groovy-${1 + 1}', bodyType: 'groovy') }",
+                true));
+        Run<?, ?> run = job.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(run);
+
+        Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
+        assertEquals(1, mbox.size());
+        Message msg = mbox.get(0);
+        String body = extractBody(msg);
+
+        assertTrue(body.contains("inline-groovy-2"), body);
+    }
+
+    @Test
+    void inlineJellyBodyType() throws Exception {
+        WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf-inline-jelly");
+        job.setDefinition(new CpsFlowDefinition(
+                "node { emailext(to: 'mickeymouse@disney.com', subject: 'Boo', body: '<j:jelly xmlns:j=\"jelly:core\">inline-jelly-${build.number}</j:jelly>', bodyType: 'jelly') }",
+                true));
+        Run<?, ?> run = job.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(run);
+
+        Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
+        assertEquals(1, mbox.size());
+        Message msg = mbox.get(0);
+        String body = extractBody(msg);
+
+        assertTrue(body.contains("inline-jelly-1"));
     }
 
     @Test
@@ -149,6 +185,21 @@ class EmailExtStepTest {
         Message msg = mbox.get(0);
         assertEquals("Boo", msg.getSubject());
         j.assertLogContains("Archiving artifacts", run);
+    }
+
+    private static String extractBody(Message message) throws Exception {
+        Object content = message.getContent();
+        if (content instanceof String text) {
+            return text;
+        }
+        if (content instanceof Multipart multipart) {
+            BodyPart bodyPart = multipart.getBodyPart(0);
+            Object partContent = bodyPart.getContent();
+            if (partContent instanceof String text) {
+                return text;
+            }
+        }
+        return String.valueOf(content);
     }
 
     public static class FileCopyStep extends Step {

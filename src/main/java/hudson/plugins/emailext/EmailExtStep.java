@@ -18,7 +18,9 @@ import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -66,6 +68,9 @@ public class EmailExtStep extends Step {
     private String presendScript;
 
     private String postsendScript;
+
+    @CheckForNull
+    private String bodyType;
 
     private boolean saveOutput;
 
@@ -187,6 +192,15 @@ public class EmailExtStep extends Step {
         this.saveOutput = saveOutput;
     }
 
+    public @CheckForNull String getBodyType() {
+        return bodyType == null ? "" : bodyType;
+    }
+
+    @DataBoundSetter
+    public void setBodyType(@CheckForNull String bodyType) {
+        this.bodyType = Util.fixNull(bodyType);
+    }
+
     @Override
     public StepExecution start(StepContext context) throws Exception {
         return new EmailExtStepExecution(this, context);
@@ -223,7 +237,8 @@ public class EmailExtStep extends Step {
 
             publisher.saveOutput = step.saveOutput;
             publisher.defaultSubject = step.subject;
-            publisher.defaultContent = step.body;
+            publisher.defaultContent = resolveBody(
+                    step, getContext().get(FilePath.class), getContext().get(TaskListener.class));
             publisher.attachBuildLog = step.attachLog;
             publisher.compressBuildLog = step.compressLog;
             publisher.setPresendScript(step.presendScript);
@@ -265,6 +280,43 @@ public class EmailExtStep extends Step {
             ctx.setTriggered(triggered);
             publisher.sendMail(ctx);
             return null;
+        }
+
+        private static String resolveBody(EmailExtStep step, @CheckForNull FilePath workspace, TaskListener listener)
+                throws Exception {
+            String configuredBodyType = StringUtils.trimToEmpty(step.bodyType).toLowerCase(Locale.ENGLISH);
+            if (configuredBodyType.isEmpty()) {
+                return step.body;
+            }
+
+            if (workspace == null) {
+                listener.getLogger().println("emailext bodyType requires a workspace. Falling back to plain body.");
+                return step.body;
+            }
+
+            if ("groovy".equals(configuredBodyType)) {
+                String templateFile = writeInlineTemplate(workspace, step.body, ".template");
+                return "${SCRIPT, template=\"" + templateFile + "\"}";
+            }
+            if ("jelly".equals(configuredBodyType)) {
+                String templateFile = writeInlineTemplate(workspace, step.body, ".jelly");
+                return "${JELLY_SCRIPT, template=\"" + templateFile + "\"}";
+            }
+
+            listener.getLogger()
+                    .println("Unknown emailext bodyType '" + step.bodyType + "'. Falling back to plain body.");
+            return step.body;
+        }
+
+        private static String writeInlineTemplate(FilePath workspace, String content, String extension)
+                throws Exception {
+            FilePath templateDir = workspace.child(".email-ext-inline-templates");
+            templateDir.mkdirs();
+
+            String fileName = "inline-" + UUID.randomUUID() + extension;
+            FilePath templateFile = templateDir.child(fileName);
+            templateFile.write(Util.fixNull(content), "UTF-8");
+            return ".email-ext-inline-templates/" + fileName;
         }
     }
 

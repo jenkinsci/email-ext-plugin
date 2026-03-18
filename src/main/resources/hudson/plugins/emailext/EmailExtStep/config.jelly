@@ -33,6 +33,13 @@ THE SOFTWARE.
     <f:entry field="body" title="Body">
         <f:textarea />
     </f:entry>
+    <f:entry field="bodyType" title="Body Type">
+        <f:select>
+            <f:option value="" selected="${instance.bodyType == ''}">Text</f:option>
+            <f:option value="groovy" selected="${instance.bodyType == 'groovy'}">Groovy Template</f:option>
+            <f:option value="jelly" selected="${instance.bodyType == 'jelly'}">Jelly Template</f:option>
+        </f:select>
+    </f:entry>
     <f:advanced>
         <f:entry field="replyTo" title="Reply-To">
             <f:textbox />
