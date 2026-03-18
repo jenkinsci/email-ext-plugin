@@ -1593,6 +1593,35 @@ class ExtendedEmailPublisherTest {
     }
 
     @Test
+    void testAdditionalAccountUsesOwnSmtpPortWithSsl() throws Exception {
+        j.createWebClient().executeOnServer(() -> {
+            ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
+            descriptor.getMailAccount().setSmtpHost("smtp.default.com");
+            descriptor.getMailAccount().setSmtpPort("587");
+
+            List<MailAccount> addaccs = new ArrayList<>();
+            JSONObject dform = new JSONObject();
+            dform.put("address", "mail@test-ssl.com");
+            dform.put("smtpHost", "smtp.test-ssl.com");
+            dform.put("smtpPort", "4444");
+            dform.put("useSsl", true);
+            addaccs.add(new MailAccount(dform));
+            descriptor.setAddAccounts(addaccs);
+
+            JSONObject form = new JSONObject();
+            form.put("from", "mail@test-ssl.com");
+            publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
+            ExtendedEmailPublisherContext context =
+                    new ExtendedEmailPublisherContext(publisher, null, null, null, TaskListener.NULL);
+            Session session = descriptor.createSession(publisher.getMailAccount(context), context);
+            assertEquals("smtp.test-ssl.com", session.getProperty("mail.smtp.host"));
+            assertEquals("4444", session.getProperty("mail.smtp.port"));
+            assertEquals("4444", session.getProperty("mail.smtp.socketFactory.port"));
+            return null;
+        });
+    }
+
+    @Test
     void testAllowedDomains1() throws Exception {
         FreeStyleProject prj = j.createFreeStyleProject();
         prj.getPublishersList().add(publisher);
