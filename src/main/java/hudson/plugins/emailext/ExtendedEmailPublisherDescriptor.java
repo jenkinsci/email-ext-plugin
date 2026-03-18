@@ -1,6 +1,10 @@
 package hudson.plugins.emailext;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
+import io.jenkins.plugins.entraoauth.EntraOAuth2ScopeRequirement;
+import io.jenkins.plugins.entraoauth.EntraOAuthCredentials;
+import hudson.util.Secret;
+import java.util.List;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cloudbees.plugins.credentials.domains.HostnamePortRequirement;
@@ -19,7 +23,6 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import hudson.util.Secret;
 import jakarta.mail.Authenticator;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
@@ -31,7 +34,6 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
@@ -400,8 +402,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
 
         if (acc.isUseOAuth2()) {
-            props.put("mail.smtp.auth.mechanisms", "XOAUTH2");
-        }
+    		props.put("mail.smtp.auth.mechanisms", "XOAUTH2");
+    		if (acc.getOauthCredentialsId() != null) {
+        		props.put("mail.smtp.auth", "true");
+    		}
+	}
 
         // avoid hang by setting some timeout.
         props.put("mail.smtp.timeout", "60000");
@@ -420,11 +425,35 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     }
 
     private Authenticator getAuthenticator(final MailAccount acc, final ExtendedEmailPublisherContext context) {
-        if (acc == null || StringUtils.isBlank(acc.getCredentialsId())) {
-            return null;
-        }
-        return authenticatorProvider.apply(acc, context.getRun());
+    if (acc == null) {
+        return null;
     }
+    if (acc.isUseOAuth2() && !StringUtils.isBlank(acc.getOauthCredentialsId())) {
+        return new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                EntraOAuthCredentials creds = CredentialsProvider.findCredentialById(
+                        acc.getOauthCredentialsId(),
+                        EntraOAuthCredentials.class,
+                        context.getRun());
+                if (creds == null) {
+                    return null;
+                }
+                Secret token = creds.getAccessToken(
+                        new EntraOAuth2ScopeRequirement(
+                                List.of("https://outlook.office365.com/.default")));
+                if (token == null) {
+                    return null;
+                }
+                return new PasswordAuthentication(creds.getUsername(), token.getPlainText());
+            }
+        };
+    }
+    if (StringUtils.isBlank(acc.getCredentialsId())) {
+        return null;
+    }
+    return authenticatorProvider.apply(acc, context.getRun());
+}
 
     public String getHudsonUrl() {
         return Jenkins.get().getRootUrl();

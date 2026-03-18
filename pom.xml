@@ -51,8 +51,8 @@
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     <hpi.bundledArtifacts>jericho-html</hpi.bundledArtifacts>
     <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
-    <jenkins.baseline>2.516</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.3</jenkins.version>
+    <jenkins.baseline>2.541</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.1</jenkins.version>
     <hpi.compatibleSinceVersion>2.57.2</hpi.compatibleSinceVersion>
     <concurrency>1</concurrency>
     <!-- To be removed once Jenkins.MANAGE gets out of beta -->
@@ -77,6 +77,12 @@
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>commons-lang3-api</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>io.jenkins.plugins</groupId>
+    	<artifactId>entra-oauth</artifactId>
+    	<version>999999-SNAPSHOT</version>
+    	<optional>true</optional>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
