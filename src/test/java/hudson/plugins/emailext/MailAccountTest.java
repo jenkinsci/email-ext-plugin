@@ -63,7 +63,6 @@ class MailAccountTest {
         obj.put("smtpPort", 25);
         obj.put("auth", true);
         obj.put("credentialsId", "foo");
-
         MailAccount account = new MailAccount(obj);
         assertTrue(account.isValid());
     }
@@ -126,17 +125,14 @@ class MailAccountTest {
         assertThat(mad.doCheckCredentialsId(null, "", false, false), hasKind(Kind.OK));
         assertThat(mad.doCheckCredentialsId(null, null, false, false), hasKind(Kind.OK));
 
-        // no auth but any combination of TLS/SSL is ok
         assertThat(mad.doCheckCredentialsId(null, null, true, false), hasKind(Kind.OK));
         assertThat(mad.doCheckCredentialsId(null, null, false, true), hasKind(Kind.OK));
         assertThat(mad.doCheckCredentialsId(null, null, true, true), hasKind(Kind.OK));
 
-        // valid credentials with TLS
         assertThat(mad.doCheckCredentialsId(null, validCredentialId, true, false), hasKind(Kind.OK));
         assertThat(mad.doCheckCredentialsId(null, validCredentialId, false, true), hasKind(Kind.OK));
         assertThat(mad.doCheckCredentialsId(null, validCredentialId, true, true), hasKind(Kind.OK));
 
-        // valid credentials without TLS produce a warning (error in FIPS, but requires system property)
         assertThat(
                 mad.doCheckCredentialsId(null, validCredentialId, false, false),
                 Matchers.allOf(
@@ -144,7 +140,6 @@ class MailAccountTest {
                         hasMessage(
                                 "For security when using authentication it is recommended to enable either TLS or SSL")));
 
-        // non-valid creds show the error regardless of SSL/TLS
         assertThat(
                 mad.doCheckCredentialsId(null, "bogus", false, false),
                 Matchers.allOf(
@@ -162,5 +157,48 @@ class MailAccountTest {
         assertThat(
                 mad.doCheckCredentialsId(null, "bogus", true, true),
                 Matchers.allOf(hasKind(Kind.ERROR), hasMessage("Cannot find currently selected credentials")));
+    }
+
+    @Test
+    @WithoutJenkins
+    void testOAuth2FieldsDefaultNull() {
+        MailAccount account = new MailAccount();
+        assertNull(account.getTenantId());
+        assertNull(account.getClientId());
+        assertNull(account.getClientSecret());
+    }
+
+    @Test
+    @WithoutJenkins
+    void testSetAndGetTenantId() {
+        MailAccount account = new MailAccount();
+        account.setTenantId("test-tenant-id");
+        assertEquals("test-tenant-id", account.getTenantId());
+    }
+
+    @Test
+    @WithoutJenkins
+    void testSetAndGetClientId() {
+        MailAccount account = new MailAccount();
+        account.setClientId("test-client-id");
+        assertEquals("test-client-id", account.getClientId());
+    }
+
+    @Test
+    @WithoutJenkins
+    void testSetAndGetClientSecret() {
+        MailAccount account = new MailAccount();
+        account.setClientSecret("test-secret");
+        assertEquals("test-secret", account.getClientSecret());
+    }
+
+    @Test
+    @WithoutJenkins
+    void testOAuth2FieldsTrimWhitespace() {
+        MailAccount account = new MailAccount();
+        account.setTenantId("  my-tenant  ");
+        account.setClientId("  my-client  ");
+        assertEquals("my-tenant", account.getTenantId());
+        assertEquals("my-client", account.getClientId());
     }
 }

@@ -46,6 +46,9 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     private boolean defaultAccount;
 
     private boolean useOAuth2;
+    private String tenantId;
+    private String clientId;
+    private String clientSecret;
 
     @Deprecated
     public MailAccount(JSONObject jo) {
@@ -285,6 +288,33 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     @DataBoundSetter
     public void setUseOAuth2(boolean useOAuth2) {
         this.useOAuth2 = useOAuth2;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @DataBoundSetter
+    public void setTenantId(String tenantId) {
+        this.tenantId = Util.fixEmptyAndTrim(tenantId);
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    @DataBoundSetter
+    public void setClientId(String clientId) {
+        this.clientId = Util.fixEmptyAndTrim(clientId);
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    @DataBoundSetter
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = Util.fixEmptyAndTrim(clientSecret);
     }
 
     public String getAdvProperties() {
