@@ -59,6 +59,9 @@ f.section(title: _("Extended E-mail Notification")) {
   f.entry(field: "maxAttachmentSizeMb", help: "/plugin/email-ext/help/globalConfig/maxAttachmentSize.html", title: _("Maximum Attachment Size")) {
     f.number(checkUrl: "${rootURL}/publisher/ExtendedEmailPublisher/maxAttachmentSizeCheck", checkDependsOn: "")
   }
+  f.entry(field: "defaultAttachBuildLog", help: "/plugin/email-ext/help/globalConfig/defaultAttachBuildLog.html", title: _("Default Attach Build Log")) {
+    f.select()
+  }
   f.entry(field: "defaultBody", help: "/plugin/email-ext/help/globalConfig/defaultBody.html", title: _("Default Content")) {
     f.textarea()
   }

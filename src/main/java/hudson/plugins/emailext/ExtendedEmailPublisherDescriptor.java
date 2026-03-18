@@ -135,6 +135,14 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private transient boolean overrideGlobalSettings;
 
     /**
+     * This is the global default for whether to attach the build log.
+     * 0 = Do Not Attach Build Log (default)
+     * 1 = Attach Build Log
+     * 2 = Compress and Attach Build Log
+     */
+    private int defaultAttachBuildLog = 0;
+
+    /**
      * If non-null, set a List-ID email header.
      */
     private String listId;
@@ -209,14 +217,22 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
 
         /*
-         * Versions 2.71 and earlier correctly left the address unset for the default account,
-         * relying solely on the system admin email address from the Jenkins Location settings for
-         * the default account and using the address specified on the account only for additional
-         * accounts. Versions 2.72 through 2.77 incorrectly set the address for the default account
-         * to the system admin email address from the Jenkins Location settings at the time the
-         * descriptor was first saved without propagating further changes from the Jenkins Location
-         * settings to the default account. To clear up this bad state, we unconditionally clear the
-         * address and rely once again solely on the system admin email address from the Jenkins
+         * Versions 2.71 and earlier correctly left the address unset for the default
+         * account,
+         * relying solely on the system admin email address from the Jenkins Location
+         * settings for
+         * the default account and using the address specified on the account only for
+         * additional
+         * accounts. Versions 2.72 through 2.77 incorrectly set the address for the
+         * default account
+         * to the system admin email address from the Jenkins Location settings at the
+         * time the
+         * descriptor was first saved without propagating further changes from the
+         * Jenkins Location
+         * settings to the default account. To clear up this bad state, we
+         * unconditionally clear the
+         * address and rely once again solely on the system admin email address from the
+         * Jenkins
          * Location settings for the default account.
          */
         if (mailAccount.getAddress() != null) {
@@ -259,7 +275,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             try {
                 descriptor.setDefaultClasspath(descriptor.getDefaultClasspath());
             } catch (FormException e) {
-                // Some of the old configured classpaths probably used some environment variable, let's clean those out
+                // Some of the old configured classpaths probably used some environment
+                // variable, let's clean those out
                 List<GroovyScriptPath> newList = new ArrayList<>();
                 for (GroovyScriptPath path : descriptor.getDefaultClasspath()) {
                     URL u = path.asURL();
@@ -332,14 +349,18 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             props.put(SMTP_PORT_PROPERTY, acc.getSmtpPort());
         }
         if (acc.isUseSsl()) {
-            /* This allows the user to override settings by setting system properties but
-             * also allows us to use the default SMTPs port of 465 if no port is already set.
-             * It would be cleaner to use smtps, but that's done by calling session.getTransport()...
-             * and thats done in mail sender, and it would be a bit of a hack to get it all to
+            /*
+             * This allows the user to override settings by setting system properties but
+             * also allows us to use the default SMTPs port of 465 if no port is already
+             * set.
+             * It would be cleaner to use smtps, but that's done by calling
+             * session.getTransport()...
+             * and thats done in mail sender, and it would be a bit of a hack to get it all
+             * to
              * coordinate, and we can make it work through setting mail.smtp properties.
              */
             if (props.getProperty(SMTP_SOCKETFACTORY_PORT_PROPERTY) == null) {
-                String port = acc.getSmtpPort() == null ? "465" : mailAccount.getSmtpPort();
+                String port = acc.getSmtpPort() == null ? "465" : acc.getSmtpPort();
                 props.put(SMTP_PORT_PROPERTY, port);
                 props.put(SMTP_SOCKETFACTORY_PORT_PROPERTY, port);
             }
@@ -349,22 +370,25 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             props.put("mail.smtp.socketFactory.fallback", "false");
 
             // RFC 2595 specifies additional checks that must be performed on the server's
-            // certificate to ensure that the server you connected to is the server you intended
+            // certificate to ensure that the server you connected to is the server you
+            // intended
             // to connect to. This reduces the risk of "man in the middle" attacks.
             if (props.getProperty("mail.smtp.ssl.checkserveridentity") == null) {
                 props.put("mail.smtp.ssl.checkserveridentity", "true");
             }
         }
         if (acc.isUseTls()) {
-            /* This allows the user to override settings by setting system properties and
-             * also allows us to use the default STARTTLS port, 587, if no port is already set.
+            /*
+             * This allows the user to override settings by setting system properties and
+             * also allows us to use the default STARTTLS port, 587, if no port is already
+             * set.
              * Only the properties included below are required to use STARTTLS and they are
              * not expected to be enabled simultaneously with SSL (it will actually throw a
              * "javax.net.ssl.SSLException: Unrecognized SSL message, plaintext connection?"
              * if SMTP server expects only TLS).
              */
             if (props.getProperty(SMTP_SOCKETFACTORY_PORT_PROPERTY) == null) {
-                String port = acc.getSmtpPort() == null ? "587" : mailAccount.getSmtpPort();
+                String port = acc.getSmtpPort() == null ? "587" : acc.getSmtpPort();
                 props.put(SMTP_PORT_PROPERTY, port);
                 props.put(SMTP_SOCKETFACTORY_PORT_PROPERTY, port);
             }
@@ -659,6 +683,25 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         this.precedenceBulk = bulk;
     }
 
+    public int getDefaultAttachBuildLog() {
+        return defaultAttachBuildLog;
+    }
+
+    @SuppressWarnings("unused")
+    @DataBoundSetter
+    public void setDefaultAttachBuildLog(int defaultAttachBuildLog) {
+        this.defaultAttachBuildLog = defaultAttachBuildLog;
+    }
+
+    @SuppressWarnings({"lgtm[jenkins/csrf]", "lgtm[jenkins/no-permission-check]", "unused"})
+    public ListBoxModel doFillDefaultAttachBuildLogItems() {
+        ListBoxModel items = new ListBoxModel();
+        items.add(Messages.attachBuildLog_doNotAttach(), "0");
+        items.add(Messages.attachBuildLog_attach(), "1");
+        items.add(Messages.attachBuildLog_compressAndAttach(), "2");
+        return items;
+    }
+
     public String getDefaultReplyTo() {
         return defaultReplyTo;
     }
@@ -769,7 +812,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if (defaultTriggerIds.isEmpty()) {
             if (!defaultTriggers.isEmpty()) {
                 for (EmailTriggerDescriptor t : this.defaultTriggers) {
-                    // we have to do the below because a bunch of stuff is not serialized for the Descriptor
+                    // we have to do the below because a bunch of stuff is not serialized for the
+                    // Descriptor
                     EmailTriggerDescriptor d = Jenkins.get().getDescriptorByType(t.getClass());
                     if (d != null && !defaultTriggerIds.contains(d.getId())) {
                         defaultTriggerIds.add(d.getId());
@@ -797,6 +841,7 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         ListBoxModel items = new ListBoxModel();
         items.add(Messages.contentType_plainText(), "text/plain");
         items.add(Messages.contentType_html(), "text/html");
+        items.add(Messages.contentType_both(), "both");
         return items;
     }
 

@@ -42,12 +42,16 @@ f.entry(title: _("Default Content"), help: "/plugin/email-ext/help/projectConfig
 f.entry(title: _("Attachments"), help: "/plugin/email-ext/help/projectConfig/attachments.html", description: _("description", "http://ant.apache.org/manual/Types/fileset.html")) {
   f.textbox(name: "attachmentsPattern", value: configured ? instance.attachmentsPattern : "")
 }
+f.entry(title: _("Inline Attachments"), help: "/plugin/email-ext/help/projectConfig/inlineAttachments.html", description: _("description", "http://ant.apache.org/manual/Types/fileset.html")) {
+  f.textbox(name: "inlineAttachmentsPattern", value: configured ? instance.inlineAttachmentsPattern : "")
+}
 f.entry(title: _("Attach Build Log"), help: "/plugin/email-ext/help/projectConfig/attachBuildLog.html") {
   div(class: "jenkins-select") {
     select(name: "attachBuildLog", class: "jenkins-select__input") {
-      f.option(value: 0, selected: instance != null ? !instance.attachBuildLog : true, _("Do Not Attach Build Log"))
-      f.option(value: 1, selected: instance != null ? instance.attachBuildLog && !instance.compressBuildLog : false, _("Attach Build Log"))
-      f.option(value: 2, selected: instance != null ? instance.attachBuildLog && instance.compressBuildLog : false, _("Compress and Attach Build Log"))
+      def globalDefault = descriptor.getDefaultAttachBuildLog()
+      f.option(value: 0, selected: instance != null ? !instance.attachBuildLog : globalDefault == 0, _("Do Not Attach Build Log"))
+      f.option(value: 1, selected: instance != null ? instance.attachBuildLog && !instance.compressBuildLog : globalDefault == 1, _("Attach Build Log"))
+      f.option(value: 2, selected: instance != null ? instance.attachBuildLog && instance.compressBuildLog : globalDefault == 2, _("Compress and Attach Build Log"))
     }
   }
 }

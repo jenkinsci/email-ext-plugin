@@ -35,4 +35,5 @@ unclassified:
     defaultPostsendScript: "defaultpostsend-script"
     defaultClasspath: []
     defaultTriggerIds: []
+    defaultAttachBuildLog: 1
     debugMode: true
