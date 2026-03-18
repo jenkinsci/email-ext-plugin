@@ -154,6 +154,11 @@ public class ExtendedEmailPublisher extends Notifier {
     public String attachmentsPattern;
 
     /**
+     * The project wide set of inline attachments.
+     */
+    public String inlineAttachmentsPattern;
+
+    /**
      * The project's pre-send script.
      */
     private String presendScript;
@@ -356,6 +361,15 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public String getPostsendScript() {
         return postsendScript;
+    }
+
+    public String getInlineAttachmentsPattern() {
+        return inlineAttachmentsPattern;
+    }
+
+    @DataBoundSetter
+    public void setInlineAttachmentsPattern(String inlineAttachmentsPattern) {
+        this.inlineAttachmentsPattern = inlineAttachmentsPattern;
     }
 
     /**
@@ -653,7 +667,8 @@ public class ExtendedEmailPublisher extends Notifier {
                             if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
                                 context.getListener()
                                         .getLogger()
-                                        .println("Connection error sending email, retrying once more in 10 seconds...");
+                                        .println(
+                                                "SMTP connection error while sending email. Retrying once more in 10 seconds.");
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {
@@ -750,6 +765,9 @@ public class ExtendedEmailPublisher extends Notifier {
             PrintStream logger = listener.getLogger();
             debug(logger, "Executing %s script", scriptName);
 
+            StringWriter out = new StringWriter();
+            PrintWriter pw = new PrintWriter(out);
+
             Binding binding = new Binding();
             binding.setVariable("build", context.getBuild());
             binding.setVariable("run", context.getRun());
@@ -768,9 +786,6 @@ public class ExtendedEmailPublisher extends Notifier {
             binding.setVariable("trigger", context.getTrigger());
             binding.setVariable("triggered", ImmutableMultimap.copyOf(context.getTriggered())); // TODO static
             // whitelist?
-
-            StringWriter out = new StringWriter();
-            PrintWriter pw = new PrintWriter(out);
 
             try {
                 ClassLoader cl = expandClasspath(context, Jenkins.get().getPluginManager().uberClassLoader);
@@ -802,6 +817,7 @@ public class ExtendedEmailPublisher extends Notifier {
                         + e.getMessage());
                 throw e;
             } catch (Throwable t) {
+                LOGGER.log(Level.WARNING, "Error executing " + scriptName + " script", t);
                 Functions.printStackTrace(t, pw);
                 logger.println(out);
                 // should we cancel the sending of the email???
@@ -986,11 +1002,23 @@ public class ExtendedEmailPublisher extends Notifier {
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
         attachments.attach(multipart, context);
 
+        if (StringUtils.isNotBlank(inlineAttachmentsPattern)) {
+            AttachmentUtils inlineAttachments = new AttachmentUtils(inlineAttachmentsPattern);
+            inlineAttachments.attachInline(multipart, context);
+        }
+
         // add attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getAttachmentsPattern())) {
             AttachmentUtils typeAttachments =
                     new AttachmentUtils(context.getTrigger().getEmail().getAttachmentsPattern());
             typeAttachments.attach(multipart, context);
+        }
+
+        // add inline attachments from the email type if they are setup
+        if (StringUtils.isNotBlank(context.getTrigger().getEmail().getInlineAttachmentsPattern())) {
+            AttachmentUtils inlineAttachments =
+                    new AttachmentUtils(context.getTrigger().getEmail().getInlineAttachmentsPattern());
+            inlineAttachments.attachInline(multipart, context);
         }
 
         if (attachBuildLog || context.getTrigger().getEmail().getAttachBuildLog()) {

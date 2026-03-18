@@ -84,6 +84,10 @@ class ExtendedEmailPublisherDescriptorJCasCTest {
                 "hudson.plugins.emailext.plugins.trigger.FailureTrigger",
                 descriptor.getDefaultTriggerIds().get(0));
 
+        assertEquals(
+                1,
+                descriptor.getDefaultAttachBuildLog(),
+                "JCasC should configure defaultAttachBuildLog to 1 (Attach Build Log)");
         assertTrue(descriptor.isDebugMode());
     }
 
