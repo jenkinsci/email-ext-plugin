@@ -868,6 +868,9 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     @Override
     public boolean configure(StaplerRequest2 req, JSONObject formData) throws FormException {
+        if (formData.has("emailTemplates")) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+        }
         req.bindJSON(this, formData);
         save();
         return super.configure(req, formData);
