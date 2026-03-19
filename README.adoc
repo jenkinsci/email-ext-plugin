@@ -196,7 +196,7 @@ build.previousBuild.result.toString().equals('FAILURE')
 .Script - After Build:
 [source,groovy]
 ----
-// only send am email if the build failed and 'mickeymouse' had a commit
+// only send an email if the build failed and 'mickeymouse' had a commit
 build.result.toString().equals('FAILURE') && build.hasParticipant(User.get('mickeymouse'))
 ----
 
@@ -273,7 +273,7 @@ New to version 2.15 is the ability to use Groovy scripts.
 Scripts are powerful in that you can hook into the Jenkins API to get any information you want or need.
 There are two scripts with corresponding templates packaged with this plugin, and it is also possible to write your own.
 
-There are two default scripts and templates available out of the box; one is designed for HTML emails and the other is design for text emails.
+There are two default scripts and templates available out of the box; one is designed for HTML emails and the other is designed for text emails.
 You can specify which script you want by using the `script` argument; you can also leave the default script and specify a different template file using the `template` argument.
 Furthermore, you can also include a script that does some initialization using the `init` argument.
 The usage for each type of script is as follows:
@@ -307,7 +307,7 @@ You can set a maximum total attachment size in the *Extended E-mail Notification
 link:/docs/templates/jive-formatter.groovy[`jive-formatter.groovy`] contains methods for easy and convenient formatting of emails being sent from Jenkins to Jive.
 It should be called from the *Pre-send Script* area.
 
-CAUTION: Jive does not appear to  support text with multiple formats, so only call one formatting method per block of text.
+CAUTION: Jive does not appear to support text with multiple formats, so only call one formatting method per block of text.
 
 Either `formatLine` or `formatText` can and should be called on every line of text that will be sent to the Jive system prior to calling formatting methods like color or size.
 Please test on your own instances of Jive and add functionality as you find it!
