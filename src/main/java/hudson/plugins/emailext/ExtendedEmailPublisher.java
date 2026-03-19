@@ -715,9 +715,15 @@ public class ExtendedEmailPublisher extends Notifier {
             }
             return true;
         } catch (AuthenticationFailedException e) {
-            LOGGER.log(Level.SEVERE, "SMTP authentication failed. Check username/password.", e);
-            Functions.printStackTrace(
-                    e, context.getListener().error("SMTP authentication failed. Check mail credentials."));
+            LOGGER.log(Level.SEVERE, "SMTP authentication failed.", e);
+
+            context.getListener()
+                    .error("SMTP authentication failed. "
+                            + "If using OAuth2 (XOAUTH2), ensure a valid access token is used instead of client secret. "
+                            + "Office365 requires OAuth2 access tokens obtained via client_credentials flow.");
+
+            // TODO: Improve OAuth2 handling by integrating with entra-oauth-plugin
+            // See JENKINS-73486 for details
         } catch (SendFailedException e) {
             LOGGER.log(Level.WARNING, "Email sending failed due to invalid or rejected recipient addresses.", e);
             Functions.printStackTrace(
