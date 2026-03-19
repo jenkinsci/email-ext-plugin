@@ -163,4 +163,43 @@ class MailAccountTest {
                 mad.doCheckCredentialsId(null, "bogus", true, true),
                 Matchers.allOf(hasKind(Kind.ERROR), hasMessage("Cannot find currently selected credentials")));
     }
+
+    @Test
+    @WithoutJenkins
+    void testIsSmtpServerValid() {
+        MailAccount account = new MailAccount();
+
+        // Blank/null should be considered valid (means localhost)
+        account.setSmtpHost(null);
+        assertTrue(account.isSmtpServerValid());
+        account.setSmtpHost("");
+        assertTrue(account.isSmtpServerValid());
+        account.setSmtpHost("   ");
+        assertTrue(account.isSmtpServerValid());
+
+        // Valid IPv4 addresses
+        account.setSmtpHost("192.168.1.1");
+        assertTrue(account.isSmtpServerValid());
+        account.setSmtpHost("127.0.0.1");
+        assertTrue(account.isSmtpServerValid());
+
+        // Valid IPv6 addresses
+        // account.setSmtpHost("::1");
+        // assertTrue(account.isSmtpServerValid());
+        // account.setSmtpHost("2001:db8::1");
+        // assertTrue(account.isSmtpServerValid());
+
+        // Valid hostname that resolves (localhost is reliable)
+        account.setSmtpHost("localhost");
+        assertTrue(account.isSmtpServerValid());
+
+        // Invalid hostname (syntactically invalid) → should throw UnknownHostException → false
+        account.setSmtpHost("invalid..host");
+        assertFalse(account.isSmtpServerValid());
+
+        // Invalid IPv4 address
+        // account.setSmtpHost("999.999.999.999");
+        // assertFalse(account.isSmtpServerValid());
+
+    }
 }
