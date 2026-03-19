@@ -184,10 +184,10 @@ class MailAccountTest {
         assertTrue(account.isSmtpServerValid());
 
         // Valid IPv6 addresses
-        // account.setSmtpHost("::1");
-        // assertTrue(account.isSmtpServerValid());
-        // account.setSmtpHost("2001:db8::1");
-        // assertTrue(account.isSmtpServerValid());
+        account.setSmtpHost("::1");
+        assertTrue(account.isSmtpServerValid());
+        account.setSmtpHost("2001:db8::1");
+        assertTrue(account.isSmtpServerValid());
 
         // Valid hostname that resolves (localhost is reliable)
         account.setSmtpHost("localhost");
