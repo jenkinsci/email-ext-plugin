@@ -33,6 +33,7 @@ import hudson.plugins.emailext.groovy.sandbox.TaskListenerInstanceWhitelist;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.CssInliner;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.content.AbstractEvalContent;
 import hudson.plugins.emailext.plugins.content.EmailExtScript;
@@ -403,7 +404,10 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     public void debug(PrintStream p, String format, Object... args) {
-        getDescriptor().debug(p, format, args);
+        ExtendedEmailPublisherDescriptor d = descriptor();
+        if (d != null) {
+            d.debug(p, format, args);
+        }
     }
 
     @Override
@@ -439,7 +443,8 @@ public class ExtendedEmailPublisher extends Notifier {
 
         for (EmailTrigger trigger : getConfiguredTriggers()) {
             if (trigger.isPreBuild() == forPreBuild && trigger.trigger(build, listener)) {
-                String tName = trigger.getDescriptor().getDisplayName();
+                EmailTriggerDescriptor triggerDescriptor = trigger.getDescriptor();
+                String tName = triggerDescriptor != null ? triggerDescriptor.getDisplayName() : trigger.getClass().getSimpleName();
                 triggered.put(tName, trigger);
                 listener.getLogger().println("Email was triggered for: " + tName);
                 emailTriggered = true;
@@ -451,7 +456,10 @@ public class ExtendedEmailPublisher extends Notifier {
 
         for (String triggerName : triggered.keySet()) {
             for (EmailTrigger trigger : triggered.get(triggerName)) {
-                replacedTriggers.addAll(trigger.getDescriptor().getTriggerReplaceList());
+                EmailTriggerDescriptor triggerDescriptor = trigger.getDescriptor();
+                if (triggerDescriptor != null) {
+                    replacedTriggers.addAll(triggerDescriptor.getTriggerReplaceList());
+                }
             }
         }
 
@@ -473,7 +481,8 @@ public class ExtendedEmailPublisher extends Notifier {
                         final Multimap<String, EmailTrigger> watcherTriggered = ArrayListMultimap.create();
                         for (EmailTrigger trigger : prop.getTriggers()) {
                             if (trigger.isPreBuild() == forPreBuild && trigger.trigger(build, listener)) {
-                                String tName = trigger.getDescriptor().getDisplayName();
+                                EmailTriggerDescriptor triggerDescriptor = trigger.getDescriptor();
+                                String tName = triggerDescriptor != null ? triggerDescriptor.getDisplayName() : trigger.getClass().getSimpleName();
                                 watcherTriggered.put(tName, trigger);
                                 listener.getLogger()
                                         .println("Email was triggered for watcher '" + user.getDisplayName() + "' for: "
@@ -487,7 +496,10 @@ public class ExtendedEmailPublisher extends Notifier {
 
                         for (String triggerName : triggered.keySet()) {
                             for (EmailTrigger trigger : triggered.get(triggerName)) {
-                                replacedTriggers.addAll(trigger.getDescriptor().getTriggerReplaceList());
+                                EmailTriggerDescriptor triggerDescriptor = trigger.getDescriptor();
+                                if (triggerDescriptor != null) {
+                                    replacedTriggers.addAll(triggerDescriptor.getTriggerReplaceList());
+                                }
                             }
                         }
 
@@ -970,9 +982,9 @@ public class ExtendedEmailPublisher extends Notifier {
 
     private MimeMessage createMail(ExtendedEmailPublisherContext context, InternetAddress fromAddress, Session session)
             throws MessagingException, UnsupportedEncodingException {
-        ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
+        ExtendedEmailPublisherDescriptor descriptor = descriptor();
 
-        String charset = descriptor.getCharset();
+        String charset = descriptor != null ? descriptor.getCharset() : "UTF-8";
 
         MimeMessage msg = new MimeMessage(session);
 
@@ -982,7 +994,7 @@ public class ExtendedEmailPublisher extends Notifier {
 
         msg.setFrom(fromAddress);
 
-        if (descriptor.isDebugMode()) {
+        if (descriptor != null && descriptor.isDebugMode()) {
             session.setDebug(true);
             session.setDebugOut(context.getListener().getLogger());
         }
@@ -1044,7 +1056,7 @@ public class ExtendedEmailPublisher extends Notifier {
         Set<InternetAddress> cc = new LinkedHashSet<>();
         Set<InternetAddress> bcc = new LinkedHashSet<>();
 
-        String emergencyReroute = descriptor.getEmergencyReroute();
+        String emergencyReroute = descriptor != null ? descriptor.getEmergencyReroute() : "";
 
         if (StringUtils.isNotBlank(emergencyReroute)) {
             debug(context.getListener().getLogger(), "Emergency reroute turned on");
@@ -1056,11 +1068,12 @@ public class ExtendedEmailPublisher extends Notifier {
                 provider.addRecipients(context, env, to, cc, bcc);
             }
 
-            String effectiveRecipientList = StringUtils.isNotBlank(this.recipientList)
-                    && !"$DEFAULT_RECIPIENTS".equals(this.recipientList)
-                    ? this.recipientList
-                    : context.getTrigger().getEmail().getRecipientList();
-            descriptor.debug(context.getListener().getLogger(), "Adding recipients from recipient list");
+            String triggerRecipientList = context.getTrigger().getEmail().getRecipientList();
+            String effectiveRecipientList = StringUtils.isNotBlank(triggerRecipientList)
+                            && !"$DEFAULT_RECIPIENTS".equals(triggerRecipientList)
+                    ? triggerRecipientList
+                    : this.recipientList;
+            debug(context.getListener().getLogger(), "Adding recipients from recipient list");
             EmailRecipientUtils.addAddressesFromRecipientList(
                     to,
                     cc,
@@ -1137,12 +1150,12 @@ public class ExtendedEmailPublisher extends Notifier {
             msg.setHeader("Content-Transfer-Encoding", CONTENT_TRANSFER_ENCODING);
         }
 
-        String listId = descriptor.getListId();
+        String listId = descriptor != null ? descriptor.getListId() : null;
         if (listId != null) {
             msg.setHeader("List-ID", listId);
         }
 
-        if (descriptor.getPrecedenceBulk()) {
+        if (descriptor != null && descriptor.getPrecedenceBulk()) {
             msg.setHeader("Precedence", "bulk");
         }
 
