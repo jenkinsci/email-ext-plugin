@@ -93,19 +93,20 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     }
 
     private boolean isSyntacticallyValid(String host) {
-        // Hostname pattern (RFC 1123): letters, digits, hyphens, dots
-        Pattern HOSTNAME_PATTERN = Pattern.compile(
+        // Check if it looks like an IPv4 address (four dot‑separated numbers)
+        java.util.regex.Pattern ipv4Structure = java.util.regex.Pattern.compile("^(\\d{1,3}\\.){3}\\d{1,3}$");
+        if (ipv4Structure.matcher(host).matches()) {
+            // Strict IPv4 validation
+            java.util.regex.Pattern ipv4Valid = java.util.regex.Pattern.compile(
+                    "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+            );
+            return ipv4Valid.matcher(host).matches();
+        }
+        // Otherwise treat as hostname (RFC 1123)
+        java.util.regex.Pattern hostnameValid = java.util.regex.Pattern.compile(
                 "^(?![0-9]+$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$"
         );
-        // IPv4 pattern
-        Pattern IPV4_PATTERN = Pattern.compile(
-                "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-        );
-        return HOSTNAME_PATTERN.matcher(host).matches()
-                || IPV4_PATTERN.matcher(host).matches();
-        // IPv6 is not covered by fallback – but if the host was a valid IPv6 literal,
-        // InetAddress.getByName would have succeeded in a real environment.
-        // For CI tests that never use IPv6, this is fine.
+        return hostnameValid.matcher(host).matches() && host.length() <= 255;
     }
 
     public boolean isSmtpAuthValid() {
