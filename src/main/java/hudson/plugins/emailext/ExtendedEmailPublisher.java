@@ -444,7 +444,9 @@ public class ExtendedEmailPublisher extends Notifier {
         for (EmailTrigger trigger : getConfiguredTriggers()) {
             if (trigger.isPreBuild() == forPreBuild && trigger.trigger(build, listener)) {
                 EmailTriggerDescriptor triggerDescriptor = trigger.getDescriptor();
-                String tName = triggerDescriptor != null ? triggerDescriptor.getDisplayName() : trigger.getClass().getSimpleName();
+                String tName = triggerDescriptor != null
+                        ? triggerDescriptor.getDisplayName()
+                        : trigger.getClass().getSimpleName();
                 triggered.put(tName, trigger);
                 listener.getLogger().println("Email was triggered for: " + tName);
                 emailTriggered = true;
@@ -482,7 +484,9 @@ public class ExtendedEmailPublisher extends Notifier {
                         for (EmailTrigger trigger : prop.getTriggers()) {
                             if (trigger.isPreBuild() == forPreBuild && trigger.trigger(build, listener)) {
                                 EmailTriggerDescriptor triggerDescriptor = trigger.getDescriptor();
-                                String tName = triggerDescriptor != null ? triggerDescriptor.getDisplayName() : trigger.getClass().getSimpleName();
+                                String tName = triggerDescriptor != null
+                                        ? triggerDescriptor.getDisplayName()
+                                        : trigger.getClass().getSimpleName();
                                 watcherTriggered.put(tName, trigger);
                                 listener.getLogger()
                                         .println("Email was triggered for watcher '" + user.getDisplayName() + "' for: "
@@ -1069,10 +1073,10 @@ public class ExtendedEmailPublisher extends Notifier {
             }
 
             String triggerRecipientList = context.getTrigger().getEmail().getRecipientList();
-            String effectiveRecipientList = StringUtils.isNotBlank(triggerRecipientList)
-                            && !"$DEFAULT_RECIPIENTS".equals(triggerRecipientList)
-                    ? triggerRecipientList
-                    : this.recipientList;
+            String effectiveRecipientList =
+                    StringUtils.isNotBlank(triggerRecipientList) && !"$DEFAULT_RECIPIENTS".equals(triggerRecipientList)
+                            ? triggerRecipientList
+                            : this.recipientList;
             debug(context.getListener().getLogger(), "Adding recipients from recipient list");
             EmailRecipientUtils.addAddressesFromRecipientList(
                     to,
