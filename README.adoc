@@ -156,7 +156,7 @@ Recipient List:: Add this recipient provider if you would like to have the email
 Developers:: Add this recipient provider to send the email to anyone who checked in code for the last build. This plugin will generate an email address based on the committer's ID and an appended *Default user e-mail suffix* from the *Extended E-mail Notification section* of the *Configure System* page. For example, if a change was committed by someone with an ID of `first.last`, and the default user e-mail suffix is `@example.com`, then an email will be sent to `first.last@example.com`.
 Requestor:: Add this recipient provider to send an email to the user who initiated the build (if initiated by a user manually).
 Include Culprits:: If this recipient provider _and_ the *Developers* recipient provider are added, emails will include everyone who committed since the last successful build.
-Previous:: Add this recipient provider to send an email to the the culprits, requestor and developers of the previous build(s).
+Previous:: Add this recipient provider to send an email to the culprits, requestor and developers of the previous build(s).
 Advanced:: Configure properties at a per-trigger level:
  Recipient List::: A comma (or whitespace) separated list of email address that should receive this email if it is triggered. This list is appended to the *Project Recipient List* described above.
 **Using the `${FILE}` token**
@@ -216,7 +216,7 @@ For instance, the `$DEFAULT_SUBJECT` token is replaced by the text (and other to
 Similarly, the `$PROJECT_DEFAULT_SUBJECT` token will be replaced by the value of the *Default Subject* field from the project configuration page.
 
 This plugin sets the email content fields with default values when you enable it for your project.
-The *Default Subject* and *Default Content* fields on the project configuration page default to `$DEFAULT_SUBJECT` and `$DEFAULT_CONTENT` (respectively), delegating to the the system-wide configuration from the *Extended E-mail Notification* section of the *Configure System* page.
+The *Default Subject* and *Default Content* fields on the project configuration page default to `$DEFAULT_SUBJECT` and `$DEFAULT_CONTENT` (respectively), delegating to the system-wide configuration from the *Extended E-mail Notification* section of the *Configure System* page.
 Similarly, the per-trigger content fields default to `$PROJECT_DEFAULT_SUBJECT` and `$PROJECT_DEFAULT_CONTENT`, delegating to the project's configuration.
 Since the value of a token can contain other tokens, this provides different points of configuration that can allow you to quickly make changes at the broadest level (all projects), the narrowest level (individual emails), and in-between (individual projects).
 
