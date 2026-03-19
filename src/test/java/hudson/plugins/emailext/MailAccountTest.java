@@ -198,8 +198,7 @@ class MailAccountTest {
         assertFalse(account.isSmtpServerValid());
 
         // Invalid IPv4 address
-         account.setSmtpHost("999.999.999.999");
-         assertFalse(account.isSmtpServerValid());
-
+        account.setSmtpHost("999.999.999.999");
+        assertFalse(account.isSmtpServerValid());
     }
 }
