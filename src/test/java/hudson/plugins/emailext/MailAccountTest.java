@@ -200,5 +200,11 @@ class MailAccountTest {
         // Invalid IPv4 address
         account.setSmtpHost("999.999.999.999");
         assertFalse(account.isSmtpServerValid());
+
+        // Valid pattern but exceeds 255 characters
+        String longHost = "a.".repeat(200) + "com";
+        assertTrue(longHost.length() > 255); // sanity check
+        account.setSmtpHost(longHost);
+        assertFalse(account.isSmtpServerValid());
     }
 }
