@@ -400,6 +400,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         }
 
         if (acc.isUseOAuth2()) {
+            LOGGER.log(Level.FINE, "Using XOAUTH2 authentication for SMTP");
+            LOGGER.log(Level.WARNING, "XOAUTH2 is enabled, but access token handling is not implemented. This may fail for Office365. See JENKINS-73486.");
             props.put("mail.smtp.auth.mechanisms", "XOAUTH2");
         }
 
