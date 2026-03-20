@@ -3,6 +3,7 @@ package hudson.plugins.emailext;
 import hudson.ExtensionList;
 import hudson.FilePath;
 import hudson.Plugin;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
@@ -57,9 +58,15 @@ public class EmailExtTemplateAction implements Action {
     }
 
     private String renderError(Exception ex) {
-        return "<h3>An error occurred trying to render the template:</h3><br/>"
+        String message = (ex != null)
+                ? ex.getClass().getSimpleName() + ": " + ex.getMessage()
+                : "Unknown error";
+
+        String escaped = Util.xmlEscape(message).replace("\n", "<br/>");
+
+        return "<h3>An error occurred while rendering the template:</h3><br/>"
                 + "<span style=\"color:red; font-weight:bold\">"
-                + ex.toString().replace("\n", "<br/>")
+                + escaped
                 + "</span>";
     }
 
