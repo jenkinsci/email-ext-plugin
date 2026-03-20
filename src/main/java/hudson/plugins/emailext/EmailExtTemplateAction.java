@@ -58,9 +58,7 @@ public class EmailExtTemplateAction implements Action {
     }
 
     private String renderError(Exception ex) {
-        String message = (ex != null)
-                ? ex.getClass().getSimpleName() + ": " + ex.getMessage()
-                : "Unknown error";
+        String message = (ex != null) ? ex.getClass().getSimpleName() + ": " + ex.getMessage() : "Unknown error";
 
         String escaped = Util.xmlEscape(message).replace("\n", "<br/>");
 
