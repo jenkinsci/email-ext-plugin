@@ -71,34 +71,41 @@ public class RegressionTrigger extends EmailTrigger {
 
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
+
         Run<?, ?> previousBuild = ExtendedEmailPublisher.getPreviousRun(build, listener);
+
+        // ✅ cache current and previous test results
+        AbstractTestResultAction<?> currentAction =
+                build.getAction(AbstractTestResultAction.class);
+
+        AbstractTestResultAction<?> previousAction =
+                previousBuild != null ? previousBuild.getAction(AbstractTestResultAction.class) : null;
+
+        // if no previous build
         if (previousBuild == null) {
             return build.getResult() == Result.FAILURE;
         }
 
-        // Cache test result actions to avoid repeated lookups
-        AbstractTestResultAction<?> buildAction = build.getAction(AbstractTestResultAction.class);
-        if (buildAction == null) {
+        // if current build has no test results
+        if (currentAction == null) {
             return false;
         }
 
-        // if previous run didn't have test results and this one does (with failures)
-        AbstractTestResultAction<?> prevAction = previousBuild.getAction(AbstractTestResultAction.class);
-        if (prevAction == null) {
-            return buildAction.getFailCount() > 0;
+        // if previous run didn't have test results
+        if (previousAction == null) {
+            return currentAction.getFailCount() > 0;
         }
 
-        // if more tests failed during this run
-        if (buildAction.getFailCount() > prevAction.getFailCount()) {
+        // if more tests failed in current build
+        if (currentAction.getFailCount() > previousAction.getFailCount()) {
             return true;
         }
 
-        // if any test failed this time, but not last time
-        for (Object result : buildAction.getFailedTests()) {
-            if (result instanceof CaseResult res) {
-                if (res.getAge() == 1) {
-                    return true;
-                }
+        // if any new test failed
+        for (Object result : currentAction.getFailedTests()) {
+            CaseResult res = (CaseResult) result;
+            if (res.getAge() == 1) {
+                return true;
             }
         }
 
