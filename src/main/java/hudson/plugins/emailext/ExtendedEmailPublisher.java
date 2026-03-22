@@ -618,7 +618,7 @@ public class ExtendedEmailPublisher extends Notifier {
                                             || e.getNextException() instanceof ConnectException)) {
                                 context.getListener()
                                         .getLogger()
-                                        .println("Socket error sending email, retrying once more in 10 seconds...");
+                                        .println("SMTP connection failed (Socket/Connect exception). Retrying email send in 10 seconds...");
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {
