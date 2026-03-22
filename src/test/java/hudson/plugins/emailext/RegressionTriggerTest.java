@@ -1,6 +1,6 @@
 package hudson.plugins.emailext.plugins.trigger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
 
 import hudson.model.AbstractBuild;
@@ -12,25 +12,20 @@ import org.junit.jupiter.api.Test;
 public class RegressionTriggerTest {
 
     @Test
-    void testTriggerWithTestResults() {
-        // Mock build and listener
+    void testTriggerReturnsFalseWhenNoTestResults() {
         AbstractBuild<?, ?> build = mock(AbstractBuild.class);
         TaskListener listener = mock(TaskListener.class);
 
-        // Mock test result action
-        AbstractTestResultAction<?> action = mock(AbstractTestResultAction.class);
+        // Simulate no previous build
+        when(build.getResult()).thenReturn(Result.SUCCESS);
 
-        when(build.getResult()).thenReturn(Result.FAILURE);
-        when(build.getAction(AbstractTestResultAction.class)).thenReturn(action);
-        when(action.getFailCount()).thenReturn(1);
+        // Simulate no test results (IMPORTANT path)
+        when(build.getAction(AbstractTestResultAction.class)).thenReturn(null);
 
-        // Create trigger
         RegressionTrigger trigger = new RegressionTrigger(null, "", "", "", "", "", 0, "");
 
-        // Call method
         boolean result = trigger.trigger(build, listener);
 
-        // Assertion (main goal = execute path)
-        assertNotNull(result);
+        assertFalse(result);
     }
 }

@@ -75,8 +75,7 @@ public class RegressionTrigger extends EmailTrigger {
         Run<?, ?> previousBuild = ExtendedEmailPublisher.getPreviousRun(build, listener);
 
         // ✅ cache current and previous test results
-        AbstractTestResultAction<?> currentAction =
-                build.getAction(AbstractTestResultAction.class);
+        AbstractTestResultAction<?> currentAction = build.getAction(AbstractTestResultAction.class);
 
         AbstractTestResultAction<?> previousAction =
                 previousBuild != null ? previousBuild.getAction(AbstractTestResultAction.class) : null;
