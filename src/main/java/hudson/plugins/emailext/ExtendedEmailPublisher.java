@@ -403,7 +403,11 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     public void debug(PrintStream p, String format, Object... args) {
-        getDescriptor().debug(p, format, args);
+        ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
+
+        if (descriptor != null) {
+            descriptor.debug(p, format, args);
+        }
     }
 
     @Override
