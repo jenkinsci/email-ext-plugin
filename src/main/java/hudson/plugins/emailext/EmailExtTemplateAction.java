@@ -93,6 +93,7 @@ public class EmailExtTemplateAction implements Action {
                             return FormValidation.error("The file '" + value + "' does not exist");
                         }
                     } catch (IOException | InterruptedException e) {
+                        // Avoid exposing detailed file system info to prevent potential file fishing attacks
                         return FormValidation.error("I/O Error.");
                     }
                 }
