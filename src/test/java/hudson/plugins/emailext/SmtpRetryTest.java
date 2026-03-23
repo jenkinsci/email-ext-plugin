@@ -117,10 +117,6 @@ class SmtpRetryTest {
     @Test
     @Issue("JENKINS-68518")
     void testIsTransientSmtpErrorWithNullCheck() throws Exception {
-        ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        Method method = ExtendedEmailPublisher.class.getDeclaredMethod("isTransientSmtpError", Exception.class);
-        method.setAccessible(true);
-
-        assertFalse((Boolean) method.invoke(publisher, new Object[] {null}), "Should return false for null exception");
+        assertFalse(callIsTransientSmtpError(null), "Should return false for null exception");
     }
 }
