@@ -170,7 +170,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             if (CredentialsProvider.listCredentials(
                             StandardUsernamePasswordCredentials.class,
                             item,
-                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf(t) : ACL.SYSTEM,
+                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf(t) : Jenkins.getAuthentication(),
                             null,
                             CredentialsMatchers.withId(value))
                     .isEmpty()) {
@@ -313,11 +313,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                         StandardUsernamePasswordCredentials.class, Jenkins.get(), ACL.SYSTEM, domainRequirement),
                 CredentialsMatchers.withUsername(smtpUsername));
         for (final StandardUsernamePasswordCredentials cred : credentials) {
-<<<<<<< HEAD
             if (smtpPassword.getPlainText().equals(Secret.toString(cred.getPassword()))) {
-=======
-           if (smtpPassword.getPlainText().equals(Secret.toString(cred.getPassword()))) {
->>>>>>> f160fc85 (Replace deprecated ACL.SYSTEM with Jenkins.getAuthentication() in MailAccount)
                 // If some credentials have the same username/password, use those.
                 credentialsId = cred.getId();
                 break;
