@@ -37,6 +37,9 @@ THE SOFTWARE.
         <f:entry field="replyTo" title="Reply-To">
             <f:textbox />
         </f:entry>
+        <f:entry field="priority" title="Priority">
+            <f:enum />
+        </f:entry>
         <f:entry field="mimeType" title="Body MIME Type">
             <f:textbox />
         </f:entry>
