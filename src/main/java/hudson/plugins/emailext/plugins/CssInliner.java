@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.MessageFormat;
@@ -118,11 +119,11 @@ public class CssInliner {
                     urlConnection.connect();
                     String contentType = urlConnection.getContentType();
 
-                    urlConnection.getContent();
-                    byte[] srcContent = IOUtils.toByteArray(url.openStream());
-                    String base64 = Base64.getEncoder().encodeToString(srcContent);
-
-                    img.attr(IMG_SRC_ATTR, MessageFormat.format("data:{0};base64,{1}", contentType, base64));
+                    try (InputStream stream = urlConnection.getInputStream()) {
+                        byte[] srcContent = IOUtils.toByteArray(stream);
+                        String base64 = Base64.getEncoder().encodeToString(srcContent);
+                        img.attr(IMG_SRC_ATTR, MessageFormat.format("data:{0};base64,{1}", contentType, base64));
+                    }
                 } catch (Exception e) {
                     LOG.log(Level.WARNING, null, e);
                 }
