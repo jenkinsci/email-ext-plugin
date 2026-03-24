@@ -167,7 +167,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                 }
             }
 
-            if (CredentialsProvider.listCredentials(
+            if (CredentialsProvider.listCredentials2(
                             StandardUsernamePasswordCredentials.class,
                             item,
                             item instanceof Queue.Task t ? Tasks.getAuthenticationOf2(t) : Jenkins.getAuthentication(),
