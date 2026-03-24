@@ -170,7 +170,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             if (CredentialsProvider.listCredentials(
                             StandardUsernamePasswordCredentials.class,
                             item,
-                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf(t) : ACL.SYSTEM2,
+                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf2(t) : Jenkins.getAuthentication(),
                             null,
                             CredentialsMatchers.withId(value))
                     .isEmpty()) {
@@ -309,8 +309,11 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             domainRequirement = new HostnamePortRequirement(smtpHost, Integer.parseInt(smtpPort));
         }
         final List<StandardUsernamePasswordCredentials> credentials = CredentialsMatchers.filter(
-                CredentialsProvider.lookupCredentials(
-                        StandardUsernamePasswordCredentials.class, Jenkins.get(), ACL.SYSTEM2, domainRequirement),
+                CredentialsProvider.lookupCredentialsInItemGroup(
+                        StandardUsernamePasswordCredentials.class,
+                        Jenkins.get(),
+                        ACL.SYSTEM2,
+                        Collections.singletonList(domainRequirement)),
                 CredentialsMatchers.withUsername(smtpUsername));
         for (final StandardUsernamePasswordCredentials cred : credentials) {
             if (smtpPassword.getPlainText().equals(Secret.toString(cred.getPassword()))) {
