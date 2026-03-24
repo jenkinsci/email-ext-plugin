@@ -35,6 +35,29 @@ import org.kohsuke.stapler.DataBoundSetter;
  */
 public class EmailExtStep extends Step {
 
+    public enum Priority {
+        DEFAULT("(Default)", ""),
+        HIGH("High", "1"),
+        NORMAL("Normal", "3"),
+        LOW("Low", "5");
+
+        private final String displayName;
+        private final String xPriorityValue;
+
+        Priority(String displayName, String xPriorityValue) {
+            this.displayName = displayName;
+            this.xPriorityValue = xPriorityValue;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public String getXPriorityValue() {
+            return xPriorityValue;
+        }
+    }
+
     public final String subject;
 
     public final String body;
@@ -68,6 +91,9 @@ public class EmailExtStep extends Step {
     private String postsendScript;
 
     private boolean saveOutput;
+
+    @CheckForNull
+    private Priority priority;
 
     @DataBoundConstructor
     public EmailExtStep(String subject, String body) {
@@ -182,6 +208,25 @@ public class EmailExtStep extends Step {
         return saveOutput;
     }
 
+    public Priority getPriority() {
+        return priority == null ? Priority.DEFAULT : priority;
+    }
+
+    @DataBoundSetter
+    public void setPriority(@CheckForNull String priority) {
+        if (priority == null || priority.isBlank()) {
+            this.priority = Priority.DEFAULT;
+            return;
+        }
+        for (Priority p : Priority.values()) {
+            if (p.name().equalsIgnoreCase(priority)) {
+                this.priority = p;
+                return;
+            }
+        }
+        this.priority = Priority.DEFAULT; // fallback for unrecognised values like "urgent"
+    }
+
     @DataBoundSetter
     public void setSaveOutput(boolean saveOutput) {
         this.saveOutput = saveOutput;
@@ -263,6 +308,15 @@ public class EmailExtStep extends Step {
             triggered.put(AlwaysTrigger.TRIGGER_NAME, publisher.configuredTriggers.get(0));
             ctx.setTrigger(publisher.configuredTriggers.get(0));
             ctx.setTriggered(triggered);
+
+            Priority p = step.getPriority();
+            if (p != Priority.DEFAULT) {
+                String priorityScript = "msg.setHeader(\"X-Priority\", \"" + p.getXPriorityValue() + "\");\n"
+                        + "msg.setHeader(\"Importance\", \"" + p.getDisplayName() + "\");";
+                String existing = publisher.getPresendScript();
+                publisher.setPresendScript(existing.isEmpty() ? priorityScript : existing + "\n" + priorityScript);
+            }
+
             publisher.sendMail(ctx);
             return null;
         }

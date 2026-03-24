@@ -192,6 +192,20 @@ public class ExtendedEmailPublisher extends Notifier {
     public String from;
 
     /**
+     * Priority/Importance value for the e-mail.
+     */
+    private EmailExtStep.Priority priority = EmailExtStep.Priority.DEFAULT;
+
+    public EmailExtStep.Priority getPriority() {
+        return priority;
+    }
+
+    @DataBoundSetter
+    public void setPriority(EmailExtStep.Priority priority) {
+        this.priority = priority;
+    }
+
+    /**
      * If true, save the generated email content to email-ext-message.[txt|html]
      */
     public boolean saveOutput = false;
@@ -1008,6 +1022,10 @@ public class ExtendedEmailPublisher extends Notifier {
         final Result result = context.getRun() != null ? context.getRun().getResult() : null;
         if (result != null) {
             msg.addHeader("X-Jenkins-Result", result.toString());
+        }
+        if (priority != null && priority != EmailExtStep.Priority.DEFAULT) {
+            msg.addHeader("X-Priority", priority.getXPriorityValue());
+            msg.addHeader("Importance", priority.getDisplayName());
         }
         msg.setSentDate(new Date());
         setSubject(context, msg, charset);

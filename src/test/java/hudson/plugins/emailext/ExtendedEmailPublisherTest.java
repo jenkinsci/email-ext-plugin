@@ -2166,4 +2166,65 @@ class ExtendedEmailPublisherTest {
                 Mailbox.get("ashlux@gmail.com").size(),
                 "We should only have one email since the first failure doesn't count as 'still failing'.");
     }
+
+    @Test
+    void testNonDefaultPrioritySendsEmail() throws Exception {
+        publisher.setPriority(EmailExtStep.Priority.HIGH);
+        SuccessTrigger trigger = new SuccessTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
+        addEmailType(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
+
+        FreeStyleBuild build = project.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+        assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
+    }
+
+    @Test
+    void testDefaultPrioritySendsEmail() throws Exception {
+        publisher.setPriority(EmailExtStep.Priority.DEFAULT);
+        SuccessTrigger trigger = new SuccessTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
+        addEmailType(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
+
+        FreeStyleBuild build = project.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+        assertEquals(1, Mailbox.get("ashlux@gmail.com").size());
+    }
+
+    @Test
+    void testPriorityGetterSetter() {
+        ExtendedEmailPublisher pub = new ExtendedEmailPublisher();
+        assertEquals(EmailExtStep.Priority.DEFAULT, pub.getPriority());
+
+        pub.setPriority(EmailExtStep.Priority.HIGH);
+        assertEquals(EmailExtStep.Priority.HIGH, pub.getPriority());
+
+        pub.setPriority(EmailExtStep.Priority.LOW);
+        assertEquals(EmailExtStep.Priority.LOW, pub.getPriority());
+
+        pub.setPriority(EmailExtStep.Priority.NORMAL);
+        assertEquals(EmailExtStep.Priority.NORMAL, pub.getPriority());
+
+        pub.setPriority(EmailExtStep.Priority.DEFAULT);
+        assertEquals(EmailExtStep.Priority.DEFAULT, pub.getPriority());
+
+        pub.setPriority(null);
+        assertNull(pub.getPriority());
+    }
 }
