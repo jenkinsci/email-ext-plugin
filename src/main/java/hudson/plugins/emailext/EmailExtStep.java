@@ -223,7 +223,25 @@ public class EmailExtStep extends Step {
 
             publisher.saveOutput = step.saveOutput;
             publisher.defaultSubject = step.subject;
-            publisher.defaultContent = step.body;
+            String content = step.body;
+            hudson.FilePath scriptFile = null;
+
+            if ("groovy".equalsIgnoreCase(step.getMimeType())) {
+                hudson.FilePath workspace = getContext().get(hudson.FilePath.class);
+
+                if (workspace == null) {
+                    throw new hudson.AbortException("Workspace not available. Run inside node block.");
+                }
+
+                String fileName = "email-ext-temp-" + System.currentTimeMillis() + ".groovy";
+                scriptFile = workspace.child(fileName);
+
+                scriptFile.write(content, "UTF-8");
+
+                content = "${SCRIPT, script=\"" + fileName + "\"}";
+            }
+
+            publisher.defaultContent = content;
             publisher.attachBuildLog = step.attachLog;
             publisher.compressBuildLog = step.compressLog;
             publisher.setPresendScript(step.presendScript);
@@ -249,8 +267,9 @@ public class EmailExtStep extends Step {
                 publisher.inlineAttachmentsPattern = step.inlineAttachmentsPattern;
             }
 
-            if (StringUtils.isNotBlank(step.mimeType)) {
-                publisher.contentType = step.mimeType;
+            if (StringUtils.isNotBlank(step.getMimeType())) {
+                publisher.contentType =
+                        "groovy".equalsIgnoreCase(step.getMimeType()) ? "text/html" : step.getMimeType();
             }
 
             final ExtendedEmailPublisherContext ctx = new ExtendedEmailPublisherContext(
@@ -264,6 +283,13 @@ public class EmailExtStep extends Step {
             ctx.setTrigger(publisher.configuredTriggers.get(0));
             ctx.setTriggered(triggered);
             publisher.sendMail(ctx);
+            try {
+                if (scriptFile != null && scriptFile.exists()) {
+                    scriptFile.delete();
+                }
+            } catch (Exception e) {
+                // Log but don't fail the build
+            }
             return null;
         }
     }
