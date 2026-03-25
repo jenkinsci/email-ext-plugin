@@ -33,7 +33,6 @@ import hudson.plugins.emailext.groovy.sandbox.TaskListenerInstanceWhitelist;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.CssInliner;
 import hudson.plugins.emailext.plugins.EmailTrigger;
-import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.content.AbstractEvalContent;
 import hudson.plugins.emailext.plugins.content.EmailExtScript;
@@ -404,11 +403,7 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     public void debug(PrintStream p, String format, Object... args) {
-        ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
-
-        if (descriptor != null) {
-            descriptor.debug(p, format, args);
-        }
+        getDescriptor().debug(p, format, args);
     }
 
     @Override
@@ -619,10 +614,11 @@ public class ExtendedEmailPublisher extends Notifier {
                         } catch (SendFailedException e) {
                             if (e.getNextException() != null
                                     && (e.getNextException() instanceof SocketException
-                                            || e.getNextException() instanceof ConnectException)) {
+                                            || e.getNextException() instanceof ConnectException
+                                            || isTransientSmtpError(e))) {
                                 context.getListener()
                                         .getLogger()
-                                        .println("SMTP connection failed. Retrying in 10 seconds...");
+                                        .println("Socket error sending email, retrying once more in 10 seconds...");
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {
@@ -672,8 +668,7 @@ public class ExtendedEmailPublisher extends Notifier {
                             if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
                                 context.getListener()
                                         .getLogger()
-                                        .println(
-                                                "SMTP connection error while sending email. Retrying once more in 10 seconds.");
+                                        .println("Connection error sending email, retrying once more in 10 seconds...");
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {
@@ -740,18 +735,29 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public List<TokenMacro> getRuntimeMacros(ExtendedEmailPublisherContext context) {
         List<TokenMacro> macros = new ArrayList<>();
+        macros.add(new TriggerNameContent(context.getTrigger().getDescriptor().getDisplayName()));
+        return macros;
+    }
 
-        String triggerName = "Unknown";
-        EmailTrigger trigger = context.getTrigger();
-        if (trigger != null) {
-            EmailTriggerDescriptor descriptor = trigger.getDescriptor();
-            if (descriptor != null) {
-                triggerName = descriptor.getDisplayName();
+    private static boolean isTransientSmtpError(SendFailedException e) {
+        Exception next = e.getNextException();
+        while (next != null) {
+            String msg = next.getMessage();
+            if (msg != null) {
+                java.util.regex.Matcher m =
+                        java.util.regex.Pattern.compile("^(4[2-5]\\d)\\b").matcher(msg.trim());
+                if (m.find()) {
+                    int code = Integer.parseInt(m.group(1));
+                    return code == 421 || code == 450 || code == 451 || code == 452;
+                }
+            }
+            if (next instanceof MessagingException me) {
+                next = me.getNextException();
+            } else {
+                break;
             }
         }
-
-        macros.add(new TriggerNameContent(triggerName));
-        return macros;
+        return false;
     }
 
     private boolean executePresendScript(ExtendedEmailPublisherContext context, MimeMessage msg)
