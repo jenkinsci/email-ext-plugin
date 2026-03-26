@@ -665,9 +665,10 @@ public class ExtendedEmailPublisher extends Notifier {
                             }
                         } catch (MessagingException e) {
                             if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
-                            	context.getListener()
-                                .getLogger()
-                                .println("SMTP connection error while sending email. Retrying once more in 10 seconds.");
+                                context.getListener()
+                                        .getLogger()
+                                        .println(
+                                                "SMTP connection error while sending email. Retrying once more in 10 seconds.");
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {
@@ -717,14 +718,23 @@ public class ExtendedEmailPublisher extends Notifier {
             Functions.printStackTrace(
                     e, context.getListener().error("SMTP authentication failed. Check mail credentials."));
         } catch (SendFailedException e) {
-            LOGGER.log(Level.WARNING, "Email sending failed due to invalid or rejected recipient addresses.", e);
+            LOGGER.log(
+                    Level.WARNING,
+                    "Email sending failed due to invalid or rejected recipient addresses. Verify email formats and permissions.\"",
+                    e);
             Functions.printStackTrace(
                     e, context.getListener().error("Email sending failed due to invalid recipient address."));
         } catch (MessagingException e) {
-            LOGGER.log(Level.WARNING, "SMTP communication error while sending email.", e);
+            LOGGER.log(
+                    Level.WARNING,
+                    "SMTP communication error while sending email. Check SMTP host, port, and network connectivity.",
+                    e);
             Functions.printStackTrace(e, context.getListener().error("SMTP communication error while sending email."));
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Unexpected error while sending email.", e);
+            LOGGER.log(
+                    Level.WARNING,
+                    "Unexpected error while sending email. Possible causes: invalid SMTP config, network issues, or message formatting errors.\"",
+                    e);
             Functions.printStackTrace(e, context.getListener().error("Unexpected error while sending email."));
         }
 
