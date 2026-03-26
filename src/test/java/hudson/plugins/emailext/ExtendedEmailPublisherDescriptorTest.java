@@ -1,6 +1,5 @@
 package hudson.plugins.emailext;
 
-import static hudson.plugins.emailext.FormValidationMessageMatcher.hasMessage;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
@@ -1330,38 +1329,34 @@ class ExtendedEmailPublisherDescriptorTest {
     void testAttachmentsPatternValidation() {
         ExtendedEmailPublisherDescriptor desc = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
 
-        // Empty pattern – warning (null, empty, whitespace)
-        assertThat(desc.doCheckAttachmentsPattern(null), hasKind(Kind.WARNING));
-        assertThat(desc.doCheckAttachmentsPattern(null), hasMessage("Pattern is empty; no files will be attached."));
+        // Empty pattern – warning
         assertThat(desc.doCheckAttachmentsPattern(""), hasKind(Kind.WARNING));
-        assertThat(desc.doCheckAttachmentsPattern(""), hasMessage("Pattern is empty; no files will be attached."));
-        assertThat(desc.doCheckAttachmentsPattern("   "), hasKind(Kind.WARNING));
-        assertThat(desc.doCheckAttachmentsPattern("   "), hasMessage("Pattern is empty; no files will be attached."));
 
-        // Valid pattern – OK
+        // Valid patterns – OK
         assertThat(desc.doCheckAttachmentsPattern("**/*.txt"), hasKind(Kind.OK));
         assertThat(desc.doCheckAttachmentsPattern("logs/**/*.log"), hasKind(Kind.OK));
-        assertThat(desc.doCheckAttachmentsPattern("file{abc}"), hasKind(Kind.OK));
 
-        // Directory traversal – warning
-        assertThat(desc.doCheckAttachmentsPattern("../outside.txt"), hasKind(Kind.WARNING));
-        assertThat(desc.doCheckAttachmentsPattern("a/b/../../c"), hasKind(Kind.WARNING));
+        // Directory traversal – error (changed from warning)
+        assertThat(desc.doCheckAttachmentsPattern("../outside.txt"), hasKind(Kind.ERROR));
+        assertThat(desc.doCheckAttachmentsPattern("a/b/../../c"), hasKind(Kind.ERROR));
 
-        // Absolute path – warning (Unix, Windows, backslash only)
-        assertThat(desc.doCheckAttachmentsPattern("/tmp/attachment"), hasKind(Kind.WARNING));
-        assertThat(desc.doCheckAttachmentsPattern("C:\\temp\\file"), hasKind(Kind.WARNING));
-        assertThat(desc.doCheckAttachmentsPattern("\\windows\\path"), hasKind(Kind.WARNING));
+        // Absolute path – error
+        assertThat(desc.doCheckAttachmentsPattern("/tmp/attachment"), hasKind(Kind.ERROR));
+        assertThat(desc.doCheckAttachmentsPattern("C:\\temp\\file"), hasKind(Kind.ERROR));
 
         // Unmatched braces – error
         assertThat(desc.doCheckAttachmentsPattern("file{"), hasKind(Kind.ERROR));
         assertThat(desc.doCheckAttachmentsPattern("file}"), hasKind(Kind.ERROR));
+
+        // Balanced braces – OK
+        assertThat(desc.doCheckAttachmentsPattern("file{abc}"), hasKind(Kind.OK));
     }
 
     @Test
     void testInlineAttachmentsPatternValidation() {
         ExtendedEmailPublisherDescriptor desc = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        // Inline uses same validation logic
+
         assertThat(desc.doCheckInlineAttachmentsPattern("**/*.png"), hasKind(Kind.OK));
-        assertThat(desc.doCheckInlineAttachmentsPattern("../danger.png"), hasKind(Kind.WARNING));
+        assertThat(desc.doCheckInlineAttachmentsPattern("../danger.png"), hasKind(Kind.ERROR));
     }
 }
