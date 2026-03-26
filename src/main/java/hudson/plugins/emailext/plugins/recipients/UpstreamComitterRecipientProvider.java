@@ -14,8 +14,6 @@ import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.scm.ChangeLogSet;
 import jakarta.mail.internet.InternetAddress;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,33 +50,30 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
         }
         final Debug debug = new Debug();
         debug.send("Sending email to upstream committer(s).");
-        for (Run<?, ?> run : new HashSet<>(getUpstreamBuilds(context.getRun()))) {
+        for (Run<?, ?> run : getUpstreamBuilds(context.getRun())) {
             addUpstreamCommittersTriggeringBuild(run, to, cc, bcc, env, context, debug);
         }
     }
 
-    private static List<Run<?, ?>> getUpstreamBuilds(Run<?, ?> build) {
-        List<Run<?, ?>> upstreams = new ArrayList<>();
+    private static Set<Run<?, ?>> getUpstreamBuilds(Run<?, ?> build) {
+        Set<Run<?, ?>> upstreams = new HashSet<>();
         for (Cause c : build.getCauses()) {
             if (c instanceof Cause.UpstreamCause cause) {
-                upstreams.addAll(upstreamCauseToRuns(cause));
+                upstreamCauseToRuns(cause, upstreams);
             }
         }
         return upstreams;
     }
 
-    private static List<Run<?, ?>> upstreamCauseToRuns(Cause.UpstreamCause cause) {
-        List<Run<?, ?>> upstreams = new ArrayList<>();
+    private static void upstreamCauseToRuns(Cause.UpstreamCause cause, Set<Run<?, ?>> upstreams) {
         Run<?, ?> r = cause.getUpstreamRun();
-        if (r != null) {
-            upstreams.add(r);
+        if (r != null && upstreams.add(r)) {
             for (Cause c : cause.getUpstreamCauses()) {
                 if (c instanceof Cause.UpstreamCause upstreamCause) {
-                    upstreams.addAll(upstreamCauseToRuns(upstreamCause));
+                    upstreamCauseToRuns(upstreamCause, upstreams);
                 }
             }
         }
-        return upstreams;
     }
 
     /**
@@ -106,36 +101,14 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
 
         if (run instanceof RunWithSCM<?, ?> cM) {
             List<ChangeLogSet<? extends ChangeLogSet.Entry>> changeSets = cM.getChangeSets();
-
+            Set<User> users = new HashSet<>();
             for (ChangeLogSet<? extends ChangeLogSet.Entry> changeSet : changeSets) {
                 for (ChangeLogSet.Entry change : changeSet) {
-                    addUserFromChangeSet(change, to, cc, bcc, env, context, debug);
+                    users.add(change.getAuthor());
                 }
             }
+            RecipientProviderUtilities.addUsers(users, context, env, to, cc, bcc, debug);
         }
-    }
-
-    /**
-     * Adds a user to the recipients list based on a specific SCM change set
-     *
-     * @param change The ChangeLogSet.Entry to get the user information from
-     * @param to The list of to addresses to add to
-     * @param cc The list of cc addresses to add to
-     * @param bcc The list of bcc addresses to add to
-     * @param env The build environment
-     * @param context the publisher context
-     * @param debug the debug logger
-     */
-    private void addUserFromChangeSet(
-            ChangeLogSet.Entry change,
-            Set<InternetAddress> to,
-            Set<InternetAddress> cc,
-            Set<InternetAddress> bcc,
-            EnvVars env,
-            final ExtendedEmailPublisherContext context,
-            RecipientProviderUtilities.IDebug debug) {
-        User user = change.getAuthor();
-        RecipientProviderUtilities.addUsers(Collections.singleton(user), context, env, to, cc, bcc, debug);
     }
 
     @Extension
