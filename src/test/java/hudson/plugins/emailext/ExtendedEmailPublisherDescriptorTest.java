@@ -1,11 +1,13 @@
 package hudson.plugins.emailext;
 
+import static hudson.plugins.emailext.FormValidationMessageMatcher.hasMessage;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.oneOf;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.jvnet.hudson.test.JenkinsMatchers.hasKind;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
@@ -42,6 +44,7 @@ import hudson.plugins.emailext.plugins.trigger.UnstableTrigger;
 import hudson.plugins.emailext.plugins.trigger.XNthFailureTrigger;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
+import hudson.util.FormValidation.Kind;
 import hudson.util.ListBoxModel;
 import jakarta.mail.Authenticator;
 import java.util.Collection;
@@ -1321,5 +1324,39 @@ class ExtendedEmailPublisherDescriptorTest {
         descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         assertEquals(
                 "both", descriptor.getDefaultContentType(), "'both' content type should persist after save and reload");
+    }
+
+    @Test
+    void testAttachmentsPatternValidation() {
+        ExtendedEmailPublisherDescriptor desc = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        // Empty pattern – warning
+        assertThat(desc.doCheckAttachmentsPattern(""), hasKind(Kind.WARNING));
+        assertThat(desc.doCheckAttachmentsPattern(""), hasMessage("Pattern is empty; no files will be attached."));
+
+        // Valid pattern – OK
+        assertThat(desc.doCheckAttachmentsPattern("**/*.txt"), hasKind(Kind.OK));
+        assertThat(desc.doCheckAttachmentsPattern("logs/**/*.log"), hasKind(Kind.OK));
+
+        // Directory traversal – warning
+        assertThat(desc.doCheckAttachmentsPattern("../outside.txt"), hasKind(Kind.WARNING));
+        assertThat(desc.doCheckAttachmentsPattern("a/b/../../c"), hasKind(Kind.WARNING));
+
+        // Absolute path – warning
+        assertThat(desc.doCheckAttachmentsPattern("/tmp/attachment"), hasKind(Kind.WARNING));
+        assertThat(desc.doCheckAttachmentsPattern("C:\\temp\\file"), hasKind(Kind.WARNING));
+
+        // Unmatched braces – error
+        assertThat(desc.doCheckAttachmentsPattern("file{"), hasKind(Kind.ERROR));
+        assertThat(desc.doCheckAttachmentsPattern("file}"), hasKind(Kind.ERROR));
+        assertThat(desc.doCheckAttachmentsPattern("file{abc}"), hasKind(Kind.OK)); // balanced braces are fine
+    }
+
+    @Test
+    void testInlineAttachmentsPatternValidation() {
+        ExtendedEmailPublisherDescriptor desc = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        // Inline uses same validation logic
+        assertThat(desc.doCheckInlineAttachmentsPattern("**/*.png"), hasKind(Kind.OK));
+        assertThat(desc.doCheckInlineAttachmentsPattern("../danger.png"), hasKind(Kind.WARNING));
     }
 }
