@@ -14,7 +14,6 @@ import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.scm.ChangeLogSet;
 import jakarta.mail.internet.InternetAddress;
 import java.io.PrintStream;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -84,8 +83,7 @@ public class UpstreamComitterSinceLastSuccessRecipientProvider extends Recipient
 
     private static void collectUpstreamBuilds(Cause.UpstreamCause cause, Set<Run<?, ?>> result) {
         Run<?, ?> r = cause.getUpstreamRun();
-        if (r != null) {
-            result.add(r);
+        if (r != null && result.add(r)) {
             for (Cause c : cause.getUpstreamCauses()) {
                 if (c instanceof Cause.UpstreamCause upstream) {
                     collectUpstreamBuilds(upstream, result);
@@ -119,36 +117,14 @@ public class UpstreamComitterSinceLastSuccessRecipientProvider extends Recipient
                 run.getParent().getDisplayName(), run.getNumber());
         if (run instanceof RunWithSCM<?, ?> cM) {
             List<ChangeLogSet<? extends ChangeLogSet.Entry>> changeSets = cM.getChangeSets();
-
+            Set<User> users = new HashSet<>();
             for (ChangeLogSet<? extends ChangeLogSet.Entry> changeSet : changeSets) {
                 for (ChangeLogSet.Entry change : changeSet) {
-                    addUserFromChangeSet(change, to, cc, bcc, env, context, debug);
+                    users.add(change.getAuthor());
                 }
             }
+            RecipientProviderUtilities.addUsers(users, context, env, to, cc, bcc, debug);
         }
-    }
-
-    /**
-     * Adds a user to the recipients list based on a specific SCM change set
-     *
-     * @param change The ChangeLogSet.Entry to get the user information from
-     * @param to The list of to addresses to add to
-     * @param cc The list of cc addresses to add to
-     * @param bcc The list of bcc addresses to add to
-     * @param env The build environment
-     * @param context the publisher context
-     * @param debug the debug logger
-     */
-    private void addUserFromChangeSet(
-            ChangeLogSet.Entry change,
-            Set<InternetAddress> to,
-            Set<InternetAddress> cc,
-            Set<InternetAddress> bcc,
-            EnvVars env,
-            final ExtendedEmailPublisherContext context,
-            RecipientProviderUtilities.IDebug debug) {
-        User user = change.getAuthor();
-        RecipientProviderUtilities.addUsers(Collections.singleton(user), context, env, to, cc, bcc, debug);
     }
 
     @Extension
