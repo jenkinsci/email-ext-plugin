@@ -926,4 +926,44 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     void setAuthenticatorProvider(BiFunction<MailAccount, Run<?, ?>, Authenticator> authenticatorProvider) {
         this.authenticatorProvider = authenticatorProvider;
     }
+
+    @SuppressWarnings({"lgtm/jenkins/csrf", "lgtm/jenkins/no-permission-check"})
+    public FormValidation doCheckAttachmentsPattern(@QueryParameter String value) {
+        return validateAttachmentPattern(value);
+    }
+
+    @SuppressWarnings({"lgtm/jenkins/csrf", "lgtm/jenkins/no-permission-check"})
+    public FormValidation doCheckInlineAttachmentsPattern(@QueryParameter String value) {
+        return validateAttachmentPattern(value);
+    }
+
+    private FormValidation validateAttachmentPattern(String pattern) {
+        // Handle null or empty/whitespace pattern
+        if (pattern == null || pattern.trim().isEmpty()) {
+            return FormValidation.warning("Pattern is empty; no files will be attached.");
+        }
+        // Directory traversal check
+        if (pattern.contains("..")) {
+            return FormValidation.warning("Pattern contains '..' which could allow directory traversal. "
+                    + "Ensure it stays within the workspace.");
+        }
+        // Absolute path check (starting with / or \)
+        if (pattern.startsWith("/") || pattern.startsWith("\\") || pattern.matches("^[A-Za-z]:\\\\.*")) {
+            return FormValidation.warning("Pattern starts with a path separator; absolute paths may not work "
+                    + "across all build agents. Use a relative path.");
+        }
+        // Simple Ant pattern brace balance check
+        int braceCount = 0;
+        for (char c : pattern.toCharArray()) {
+            if (c == '{') braceCount++;
+            else if (c == '}') braceCount--;
+            if (braceCount < 0) {
+                return FormValidation.error("Unmatched '}' in pattern.");
+            }
+        }
+        if (braceCount != 0) {
+            return FormValidation.error("Unmatched '{' in pattern.");
+        }
+        return FormValidation.ok();
+    }
 }
