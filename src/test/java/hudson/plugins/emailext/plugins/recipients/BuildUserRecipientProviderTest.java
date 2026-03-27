@@ -9,6 +9,7 @@ import hudson.tasks.Mailer;
 import jenkins.model.Jenkins;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -43,41 +44,54 @@ class BuildUserRecipientProviderTest {
     }
 
     @Test
+    @DisplayName("User who triggered build should receive email")
     void testUserWhoTriggeredBuildReceivesEmail() throws Exception {
         try (MockedStatic<User> mockedUser = Mockito.mockStatic(User.class)) {
             final FreeStyleProject project = Mockito.mock(FreeStyleProject.class);
             final FreeStyleBuild build = Mockito.spy(new FreeStyleBuild(project));
             Mockito.doReturn(Result.FAILURE).when(build).getResult();
-            // User "A" triggered the build via UserIdCause
             MockUtilities.addRequestor(mockedUser, build, "A");
-            // User "A" should receive the email
             TestUtilities.checkRecipients(build, new BuildUserRecipientProvider(), "A");
         }
     }
 
     @Test
+    @DisplayName("No email sent when build was not triggered by a user")
     void testNoEmailWhenBuildNotTriggeredByUser() throws Exception {
         try (MockedStatic<User> mockedUser = Mockito.mockStatic(User.class)) {
             final FreeStyleProject project = Mockito.mock(FreeStyleProject.class);
             final FreeStyleBuild build = Mockito.spy(new FreeStyleBuild(project));
             Mockito.doReturn(Result.FAILURE).when(build).getResult();
-            // No UserIdCause — simulates a timer/SCM-triggered build
-            Mockito.doReturn(null).when(build).getCause(hudson.model.Cause.UserIdCause.class);
-            // No recipients expected
+
+            // Prevent deep Jenkins core calls in lightweight unit tests
+            Mockito.doReturn(null).when(build).getCause();
+
+            // No addRequestor call - simulates SCM/timer-triggered build
             TestUtilities.checkRecipients(build, new BuildUserRecipientProvider());
         }
     }
 
     @Test
+    @DisplayName("Only triggering user receives email, not changeset committers")
     void testOnlyTriggeringUserReceivesEmailNotCommitters() throws Exception {
         try (MockedStatic<User> mockedUser = Mockito.mockStatic(User.class)) {
             final FreeStyleProject project = Mockito.mock(FreeStyleProject.class);
             final FreeStyleBuild build = Mockito.spy(new FreeStyleBuild(project));
             Mockito.doReturn(Result.FAILURE).when(build).getResult();
-            // User "A" triggered the build, users "X" and "Y" made commits
             MockUtilities.addRequestor(mockedUser, build, "A");
             MockUtilities.addChangeSet(build, "X", "Y");
-            // Only "A" should receive email — not the committers X and Y
+            TestUtilities.checkRecipients(build, new BuildUserRecipientProvider(), "A");
+        }
+    }
+
+    @Test
+    @DisplayName("Triggering user receives email regardless of build result")
+    void testEmailSentRegardlessOfBuildResult() throws Exception {
+        try (MockedStatic<User> mockedUser = Mockito.mockStatic(User.class)) {
+            final FreeStyleProject project = Mockito.mock(FreeStyleProject.class);
+            final FreeStyleBuild build = Mockito.spy(new FreeStyleBuild(project));
+            Mockito.doReturn(Result.SUCCESS).when(build).getResult();
+            MockUtilities.addRequestor(mockedUser, build, "A");
             TestUtilities.checkRecipients(build, new BuildUserRecipientProvider(), "A");
         }
     }
