@@ -583,6 +583,13 @@ public class ExtendedEmailPublisher extends Notifier {
             }
 
             Address[] allRecipients = msg.getAllRecipients();
+            //edge case:suppose allrecipients is not present due too misconfiguration,accessing allRecipients[0] will crash due to NULLPointerException
+            if(allRecipients==null||allRecipients.length==0){
+                context.getListener.getLogger.println("No recipients found,email couldn't be sent.");
+            
+            return false;
+            }
+ 
             int retries = 0;
             if (executePresendScript(context, msg)) {
                 // presend script might have modified recipients:
