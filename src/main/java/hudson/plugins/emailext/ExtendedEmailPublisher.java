@@ -570,7 +570,7 @@ public class ExtendedEmailPublisher extends Notifier {
             }
             Session session = getDescriptor().createSession(mailAccount, context);
             if (session == null) {
-                context.getListener().getLogger().println("Could not create session"+mailAccount.getSmtpServer());
+                context.getListener().getLogger().println("Could not create session"+mailAccount.getSmtpHost());
                 return false;
             }
             MimeMessage msg = createMail(context, fromAddress, session);
