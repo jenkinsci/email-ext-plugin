@@ -30,6 +30,20 @@ Triggers:: Select the conditions that should cause an email notification to be s
 Content:: Specify the content of each triggered email's subject and body.
 Recipients:: Specify who should receive an email when it is triggered.
 
+== OAuth 2.0 Authentication for Microsoft Outlook (GSoC 2026)
+
+Microsoft has deprecated Basic Authentication (username/password) for Exchange Online
+and Outlook SMTP since October 2022, causing Jenkins email notifications to silently
+fail for Microsoft 365 users.
+
+This plugin is adding native OAuth 2.0 Client Credentials Flow support as part of
+https://www.jenkins.io/projects/gsoc/2026/project-ideas/jenkins-email-notifications-using-outlook-smtp-with-oath/[Google Summer of Code 2026].
+
+Once complete, Jenkins will authenticate to Outlook SMTP using short-lived Bearer tokens
+from Microsoft Entra ID — no passwords stored, no Basic Auth required.
+
+*Status:* Foundation classes in development (GSoC 2026, contributor: Murthi Haari).
+
 == Questions and issues
 
 If you need help, please post on the https://jenkins.io/mailing-lists/[Jenkins users mailing list] or https://stackoverflow.com/questions/tagged/email-ext[Stack Overflow].
