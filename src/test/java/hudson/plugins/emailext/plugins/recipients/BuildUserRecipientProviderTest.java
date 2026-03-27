@@ -1,5 +1,6 @@
 package hudson.plugins.emailext.plugins.recipients;
 
+import hudson.model.Cause.UserIdCause;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
@@ -64,7 +65,7 @@ class BuildUserRecipientProviderTest {
             Mockito.doReturn(Result.FAILURE).when(build).getResult();
 
             // Prevent deep Jenkins core calls in lightweight unit tests
-            Mockito.doReturn(null).when(build).getCause();
+            Mockito.doReturn(null).when(build).getCause(UserIdCause.class);
 
             // No addRequestor call - simulates SCM/timer-triggered build
             TestUtilities.checkRecipients(build, new BuildUserRecipientProvider());
