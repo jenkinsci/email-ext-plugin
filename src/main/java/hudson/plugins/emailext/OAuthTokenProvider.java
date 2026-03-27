@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  * <p>This class is designed as the token-management foundation for the
  * GSoC 2026 project: <em>Jenkins Email Notifications via Outlook SMTP
  * with OAuth</em>. Full MSAL4J integration and XOAUTH2 SASL wiring into
- * {@link SmtpMailer} will follow in subsequent commits once the MSAL4J
+ *  will follow in subsequent commits once the MSAL4J
  * dependency is added to {@code pom.xml}.</p>
  *
  * <p>Typical usage (once integrated):</p>
