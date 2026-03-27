@@ -1308,7 +1308,7 @@ public class ExtendedEmailPublisher extends Notifier {
 
                     @Override
                     public boolean startBuild() {
-                        LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
+                        LOGGER.log(Level.FINER, "Starting build: {0}", this.build.getDisplayName());
                         // Will be run by parent so we check if needed to be executed by parent
                         if (publisher.getMatrixTriggerMode().forParent) {
                             return publisher._perform(this.build, this.launcher, this.listener, true);
