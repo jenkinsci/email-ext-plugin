@@ -86,4 +86,11 @@ public class OAuthTokenProviderTest {
     public void refreshThreshold_isFiveMinutes() {
         assertEquals(5, OAuthTokenProvider.REFRESH_THRESHOLD_MINUTES);
     }
+
+    @Test
+    public void constructor_messageOnly_setsMessage() {
+        OAuthTokenException ex = new OAuthTokenException("test error");
+        assertEquals("test error", ex.getMessage());
+        assertNull(ex.getCause());
+}
 }

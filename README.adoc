@@ -33,7 +33,7 @@ Recipients:: Specify who should receive an email when it is triggered.
 == OAuth 2.0 Authentication for Microsoft Outlook (GSoC 2026)
 
 Microsoft has deprecated Basic Authentication (username/password) for Exchange Online
-and Outlook SMTP since October 2022, causing Jenkins email notifications to silently
+and Outlook SMTP since September 2025, causing Jenkins email notifications to silently
 fail for Microsoft 365 users.
 
 This plugin is adding native OAuth 2.0 Client Credentials Flow support as part of
