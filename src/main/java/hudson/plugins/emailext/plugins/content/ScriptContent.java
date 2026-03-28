@@ -172,20 +172,20 @@ public class ScriptContent extends AbstractEvalContent {
                 result = tmplR.make(binding).toString();
             } else {
                 // unapproved script, so run in sandbox
-                StaticProxyInstanceWhitelist whitelist =
-                        new StaticProxyInstanceWhitelist(build, "templates-instances.whitelist");
-                result = GroovySandbox.runInSandbox(
-                        // TODO there is a PrintWriter instance created in make and bound to out
-                        () -> tmplR.make(binding).toString(),
-                        new ProxyWhitelist(
-                                Whitelist.all(),
-                                new TaskListenerInstanceWhitelist(listener),
-                                new PrintStreamInstanceWhitelist(listener.getLogger()),
-                                new EmailExtScriptTokenMacroWhitelist(),
-                                whitelist));
-            }
+                ProxyWhitelist sandboxWhitelist = new ProxyWhitelist(
+                        Whitelist.all(),
+                        new TaskListenerInstanceWhitelist(listener),
+                        new PrintStreamInstanceWhitelist(listener.getLogger()),
+                        new EmailExtScriptTokenMacroWhitelist(),
+                        new StaticProxyInstanceWhitelist(build, "templates-instances.whitelist"));
 
-        } catch (Exception e) {
+                try (GroovySandbox.Scope scope =
+                        new GroovySandbox().withWhitelist(sandboxWhitelist).enter()) {
+                    // `out` is a PrintWriter over StringWriter in this rendering path; no explicit close needed.
+                    result = tmplR.make(binding).toString();
+                }
+            }
+        } catch (RuntimeException | IOException | ClassNotFoundException e) {
             LOGGER.log(Level.WARNING, "Exception raised during template rendering", e);
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
