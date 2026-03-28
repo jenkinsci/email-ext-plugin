@@ -582,19 +582,20 @@ public class ExtendedEmailPublisher extends Notifier {
                 return false;
             }
 
-            Address[] allRecipients = msg.getAllRecipients();
-            //edge case:suppose allrecipients is not present due too misconfiguration,accessing allRecipients[0] will crash due to NULLPointerException
-            if(allRecipients==null||allRecipients.length==0){
-                context.getListener.getLogger.println("No recipients found,email couldn't be sent.");
+           
             
-            return false;
-            }
  
             int retries = 0;
             if (executePresendScript(context, msg)) {
                 // presend script might have modified recipients:
+                 Address[] allRecipients;
                 allRecipients = msg.getAllRecipients();
-                if (allRecipients != null) {
+                if(allRecipients==null||allRecipients.length==0){
+                context.getListener().getLogger().println("No recipients found, email couldn't be sent.");
+            
+                 return false;
+            }
+             {
                     if (StringUtils.isNotBlank(getDescriptor().getEmergencyReroute())) {
                         // clear out all the existing recipients
                         msg.setRecipients(Message.RecipientType.TO, (Address[]) null);
@@ -716,12 +717,13 @@ public class ExtendedEmailPublisher extends Notifier {
                     if (context.getRun().getAction(MailMessageIdAction.class) == null) {
                         context.getRun().addAction(new MailMessageIdAction(msg.getMessageID()));
                     }
-                } else {
+                 else {
                     context.getListener()
                             .getLogger()
                             .println("An attempt to send an e-mail" + " to empty list of recipients, ignored.");
                 }
-            } else {
+            }
+         } else {
                 context.getListener().getLogger().println("Email sending was cancelled" + " by user script.");
             }
             return true;
