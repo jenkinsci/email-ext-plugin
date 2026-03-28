@@ -77,7 +77,16 @@ public class EmailExtScriptTokenMacroWhitelist extends AbstractWhitelist {
             Run<?, ?> build = (Run<?, ?>) script.getBinding().getVariable("build");
             TaskListener listener = (TaskListener) script.getBinding().getVariable("listener");
             try {
-                EnvVars vars = build.getEnvironment(listener);
+                EnvVars vars;
+                // Check if we've already fetched and cached the environment for this script run
+                if (script.getBinding().hasVariable("EMAILEXT_CACHED_ENV_VARS")) {
+                    vars = (EnvVars) script.getBinding().getVariable("EMAILEXT_CACHED_ENV_VARS");
+                } else {
+                    // Fetch and cache in the script's binding
+                    vars = build.getEnvironment(listener);
+                    script.getBinding().setVariable("EMAILEXT_CACHED_ENV_VARS", vars);
+                }
+
                 return vars.containsKey(name);
             } catch (IOException | InterruptedException e) {
                 Logger.getLogger(getClass().getName())
