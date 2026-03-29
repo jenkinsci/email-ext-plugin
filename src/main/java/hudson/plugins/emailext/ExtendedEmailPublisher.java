@@ -586,18 +586,17 @@ public class ExtendedEmailPublisher extends Notifier {
             }
 
             Address[] allRecipients;
-            
- 
+
             int retries = 0;
             if (executePresendScript(context, msg)) {
                 // presend script might have modified recipients:
                 allRecipients = msg.getAllRecipients();
-                if(allRecipients==null||allRecipients.length==0){
-                context.getListener().getLogger().println("No recipients found, email couldn't be sent.");
-            
-            return false;
-            }
-             {
+                if (allRecipients == null || allRecipients.length == 0) {
+                    context.getListener().getLogger().println("No recipients found, email couldn't be sent.");
+
+                    return false;
+                }
+                {
                     if (StringUtils.isNotBlank(getDescriptor().getEmergencyReroute())) {
                         // clear out all the existing recipients
                         msg.setRecipients(Message.RecipientType.TO, (Address[]) null);
@@ -718,15 +717,13 @@ public class ExtendedEmailPublisher extends Notifier {
 
                     if (context.getRun().getAction(MailMessageIdAction.class) == null) {
                         context.getRun().addAction(new MailMessageIdAction(msg.getMessageID()));
+                    } else {
+                        context.getListener()
+                                .getLogger()
+                                .println("An attempt to send an e-mail" + " to empty list of recipients, ignored.");
                     }
-                 else {
-                    context.getListener()
-                            .getLogger()
-                            .println("An attempt to send an e-mail" + " to empty list of recipients, ignored.");
                 }
-            }
-            }
-             else {
+            } else {
                 context.getListener().getLogger().println("Email sending was cancelled" + " by user script.");
             }
             return true;
@@ -1110,12 +1107,12 @@ public class ExtendedEmailPublisher extends Notifier {
         excludeNotAllowedDomains(context, to);
         excludeNotAllowedDomains(context, cc);
         excludeNotAllowedDomains(context, bcc);
-        
+
         Map<String, Set<String>> emailLocations = new HashMap<>();
 
         for (InternetAddress addr : to) {
-             String email = addr.getAddress().toLowerCase();
-             emailLocations.computeIfAbsent(email, k -> new HashSet<>()).add("TO");
+            String email = addr.getAddress().toLowerCase();
+            emailLocations.computeIfAbsent(email, k -> new HashSet<>()).add("TO");
         }
 
         for (InternetAddress addr : cc) {
@@ -1130,8 +1127,10 @@ public class ExtendedEmailPublisher extends Notifier {
 
         for (Map.Entry<String, Set<String>> entry : emailLocations.entrySet()) {
             if (entry.getValue().size() > 1) {
-                context.getListener().getLogger().println("Duplicate recipient detected: "+ entry.getKey() + " in " + entry.getValue());
-             }
+                context.getListener()
+                        .getLogger()
+                        .println("Duplicate recipient detected: " + entry.getKey() + " in " + entry.getValue());
+            }
         }
 
         //
