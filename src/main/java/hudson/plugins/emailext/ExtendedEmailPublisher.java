@@ -70,8 +70,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
@@ -105,8 +108,8 @@ public class ExtendedEmailPublisher extends Notifier {
 
     private static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisher.class.getName());
 
-    private static final String CONTENT_TRANSFER_ENCODING =
-            System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
+    private static final String CONTENT_TRANSFER_ENCODING = System
+            .getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
@@ -209,7 +212,8 @@ public class ExtendedEmailPublisher extends Notifier {
      */
     public MatrixTriggerMode matrixTriggerMode;
 
-    public ExtendedEmailPublisher() {}
+    public ExtendedEmailPublisher() {
+    }
 
     @Deprecated
     public ExtendedEmailPublisher(
@@ -521,8 +525,8 @@ public class ExtendedEmailPublisher extends Notifier {
         for (String triggerName : triggered.keySet()) {
             for (EmailTrigger trigger : triggered.get(triggerName)) {
                 listener.getLogger().println("Sending email for trigger: " + triggerName);
-                final ExtendedEmailPublisherContext context =
-                        new ExtendedEmailPublisherContext(this, build, build.getWorkspace(), launcher, listener);
+                final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build,
+                        build.getWorkspace(), launcher, listener);
                 context.setTriggered(triggered);
                 context.setTrigger(trigger);
                 sendMail(context);
@@ -582,148 +586,145 @@ public class ExtendedEmailPublisher extends Notifier {
                 return false;
             }
 
-           
-            
- 
+            Address[] allRecipients;
+
             int retries = 0;
             if (executePresendScript(context, msg)) {
                 // presend script might have modified recipients:
-                 Address[] allRecipients;
                 allRecipients = msg.getAllRecipients();
-                if(allRecipients==null||allRecipients.length==0){
-                context.getListener().getLogger().println("No recipients found, email couldn't be sent.");
-            
-                 return false;
-            }
-             {
-                    if (StringUtils.isNotBlank(getDescriptor().getEmergencyReroute())) {
-                        // clear out all the existing recipients
-                        msg.setRecipients(Message.RecipientType.TO, (Address[]) null);
-                        msg.setRecipients(Message.RecipientType.CC, (Address[]) null);
-                        msg.setRecipients(Message.RecipientType.BCC, (Address[]) null);
-                        // and set the emergency reroute
-                        msg.setRecipients(
-                                Message.RecipientType.TO, getDescriptor().getEmergencyReroute());
-                    }
+                if (allRecipients == null || allRecipients.length == 0) {
+                    context.getListener().getLogger().println("No recipients found, email couldn't be sent.");
 
-                    StringBuilder buf = new StringBuilder("Sending email to:");
-                    for (Address a : allRecipients) {
-                        buf.append(' ').append(a);
-                    }
-                    context.getListener().getLogger().println(buf);
+                    return false;
+                }
 
-                    // emergency reroute might have modified recipients:
-                    allRecipients = msg.getAllRecipients();
-                    // all email addresses are of type "rfc822", so just take first one:
-                    Transport transport = session.getTransport(allRecipients[0]);
-                    while (true) {
-                        try {
-                            transport.connect();
-                            transport.sendMessage(msg, allRecipients);
-                            if (getDescriptor().isThrottlingEnabled()) {
-                                EmailThrottler.getInstance().incrementEmailCount();
+                if (StringUtils.isNotBlank(getDescriptor().getEmergencyReroute())) {
+                    // clear out all the existing recipients
+                    msg.setRecipients(Message.RecipientType.TO, (Address[]) null);
+                    msg.setRecipients(Message.RecipientType.CC, (Address[]) null);
+                    msg.setRecipients(Message.RecipientType.BCC, (Address[]) null);
+                    // and set the emergency reroute
+                    msg.setRecipients(
+                            Message.RecipientType.TO, getDescriptor().getEmergencyReroute());
+                }
+
+                StringBuilder buf = new StringBuilder("Sending email to:");
+                for (Address a : allRecipients) {
+                    buf.append(' ').append(a);
+                }
+                context.getListener().getLogger().println(buf);
+
+                // emergency reroute might have modified recipients:
+                allRecipients = msg.getAllRecipients();
+                // all email addresses are of type "rfc822", so just take first one:
+                Transport transport = session.getTransport(allRecipients[0]);
+                while (true) {
+                    try {
+                        transport.connect();
+                        transport.sendMessage(msg, allRecipients);
+                        if (getDescriptor().isThrottlingEnabled()) {
+                            EmailThrottler.getInstance().incrementEmailCount();
+                        }
+                        break;
+                    } catch (SendFailedException e) {
+                        if (e.getNextException() != null
+                                && (e.getNextException() instanceof SocketException
+                                        || e.getNextException() instanceof ConnectException)) {
+                            context.getListener()
+                                    .getLogger()
+                                    .println("SMTP connection failed. Retrying in 10 seconds...");
+                            transport.close();
+                            Thread.sleep(10000);
+                        } else {
+                            Address[] addresses = e.getValidSentAddresses();
+                            if (addresses != null && addresses.length > 0) {
+                                buf = new StringBuilder("Successfully sent to the following addresses:");
+                                for (Address a : addresses) {
+                                    buf.append(' ').append(a);
+                                }
+                                context.getListener().getLogger().println(buf);
+                            }
+                            addresses = e.getValidUnsentAddresses();
+                            if (addresses != null && addresses.length > 0) {
+                                buf = new StringBuilder("Not sent to the following valid addresses:");
+                                for (Address a : addresses) {
+                                    buf.append(' ').append(a);
+                                }
+                                context.getListener().getLogger().println(buf);
+                            }
+                            addresses = e.getInvalidAddresses();
+                            if (addresses != null && addresses.length > 0) {
+                                buf = new StringBuilder("Could not be sent to the following addresses:");
+                                for (Address a : addresses) {
+                                    buf.append(' ').append(a);
+                                }
+                                context.getListener().getLogger().println(buf);
+                            }
+
+                            debug(
+                                    context.getListener().getLogger(),
+                                    e.getClass().getSimpleName() + " message: " + e.getMessage());
+                            Exception next = e.getNextException();
+                            while (next != null) {
+                                debug(
+                                        context.getListener().getLogger(),
+                                        "Next " + next.getClass().getSimpleName() + " message: "
+                                                + next.getMessage());
+                                if (next instanceof MessagingException exception) {
+                                    next = exception.getNextException();
+                                } else {
+                                    next = null;
+                                }
                             }
                             break;
-                        } catch (SendFailedException e) {
-                            if (e.getNextException() != null
-                                    && (e.getNextException() instanceof SocketException
-                                            || e.getNextException() instanceof ConnectException)) {
-                                context.getListener()
-                                        .getLogger()
-                                        .println("SMTP connection failed. Retrying in 10 seconds...");
-                                transport.close();
-                                Thread.sleep(10000);
-                            } else {
-                                Address[] addresses = e.getValidSentAddresses();
-                                if (addresses != null && addresses.length > 0) {
-                                    buf = new StringBuilder("Successfully sent to the following addresses:");
-                                    for (Address a : addresses) {
-                                        buf.append(' ').append(a);
-                                    }
-                                    context.getListener().getLogger().println(buf);
-                                }
-                                addresses = e.getValidUnsentAddresses();
-                                if (addresses != null && addresses.length > 0) {
-                                    buf = new StringBuilder("Not sent to the following valid addresses:");
-                                    for (Address a : addresses) {
-                                        buf.append(' ').append(a);
-                                    }
-                                    context.getListener().getLogger().println(buf);
-                                }
-                                addresses = e.getInvalidAddresses();
-                                if (addresses != null && addresses.length > 0) {
-                                    buf = new StringBuilder("Could not be sent to the following addresses:");
-                                    for (Address a : addresses) {
-                                        buf.append(' ').append(a);
-                                    }
-                                    context.getListener().getLogger().println(buf);
-                                }
-
-                                debug(
-                                        context.getListener().getLogger(),
-                                        e.getClass().getSimpleName() + " message: " + e.getMessage());
-                                Exception next = e.getNextException();
-                                while (next != null) {
-                                    debug(
-                                            context.getListener().getLogger(),
-                                            "Next " + next.getClass().getSimpleName() + " message: "
-                                                    + next.getMessage());
-                                    if (next instanceof MessagingException exception) {
-                                        next = exception.getNextException();
-                                    } else {
-                                        next = null;
-                                    }
-                                }
-                                break;
-                            }
-                        } catch (MessagingException e) {
-                            if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
-                                context.getListener()
-                                        .getLogger()
-                                        .println(
-                                                "SMTP connection error while sending email. Retrying once more in 10 seconds.");
-                                transport.close();
-                                Thread.sleep(10000);
-                            } else {
-                                debug(
-                                        context.getListener().getLogger(),
-                                        e.getClass().getSimpleName() + " message: " + e.getMessage());
-                                Exception next = e.getNextException();
-                                while (next != null) {
-                                    debug(
-                                            context.getListener().getLogger(),
-                                            "Next " + next.getClass().getSimpleName() + " message: "
-                                                    + next.getMessage());
-                                    if (next instanceof MessagingException exception) {
-                                        next = exception.getNextException();
-                                    } else {
-                                        next = null;
-                                    }
-                                }
-                                break;
-                            }
                         }
-                        retries++;
-                        if (retries > 1) {
-                            context.getListener().getLogger().println("Failed after second try sending email");
+                    } catch (MessagingException e) {
+                        if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
+                            context.getListener()
+                                    .getLogger()
+                                    .println(
+                                            "SMTP connection error while sending email. Retrying once more in 10 seconds.");
+                            transport.close();
+                            Thread.sleep(10000);
+                        } else {
+                            debug(
+                                    context.getListener().getLogger(),
+                                    e.getClass().getSimpleName() + " message: " + e.getMessage());
+                            Exception next = e.getNextException();
+                            while (next != null) {
+                                debug(
+                                        context.getListener().getLogger(),
+                                        "Next " + next.getClass().getSimpleName() + " message: "
+                                                + next.getMessage());
+                                if (next instanceof MessagingException exception) {
+                                    next = exception.getNextException();
+                                } else {
+                                    next = null;
+                                }
+                            }
                             break;
                         }
                     }
-
-                    executePostsendScript(context, msg, session, transport);
-                    // close transport after post-send script, so server response can be accessed:
-                    transport.close();
-
-                    if (context.getRun().getAction(MailMessageIdAction.class) == null) {
-                        context.getRun().addAction(new MailMessageIdAction(msg.getMessageID()));
+                    retries++;
+                    if (retries > 1) {
+                        context.getListener().getLogger().println("Failed after second try sending email");
+                        break;
                     }
-                 else {
+                }
+
+                executePostsendScript(context, msg, session, transport);
+                // close transport after post-send script, so server response can be accessed:
+                transport.close();
+
+                if (context.getRun().getAction(MailMessageIdAction.class) == null) {
+                    context.getRun().addAction(new MailMessageIdAction(msg.getMessageID()));
+                } else {
                     context.getListener()
                             .getLogger()
                             .println("An attempt to send an e-mail" + " to empty list of recipients, ignored.");
                 }
-            }
-         } else {
+
+            } else {
                 context.getListener().getLogger().println("Email sending was cancelled" + " by user script.");
             }
             return true;
@@ -852,8 +853,8 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     private static CompilerConfiguration getCompilerConfiguration(boolean sandbox) {
-        CompilerConfiguration cc =
-                sandbox ? GroovySandbox.createSecureCompilerConfiguration() : new CompilerConfiguration();
+        CompilerConfiguration cc = sandbox ? GroovySandbox.createSecureCompilerConfiguration()
+                : new CompilerConfiguration();
         cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
         cc.addCompilationCustomizers(
                 new ImportCustomizer().addStarImports("jenkins", "jenkins.model", "hudson", "hudson.model"));
@@ -1033,15 +1034,15 @@ public class ExtendedEmailPublisher extends Notifier {
 
         // add attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getAttachmentsPattern())) {
-            AttachmentUtils typeAttachments =
-                    new AttachmentUtils(context.getTrigger().getEmail().getAttachmentsPattern());
+            AttachmentUtils typeAttachments = new AttachmentUtils(
+                    context.getTrigger().getEmail().getAttachmentsPattern());
             typeAttachments.attach(multipart, context);
         }
 
         // add inline attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getInlineAttachmentsPattern())) {
-            AttachmentUtils inlineAttachments =
-                    new AttachmentUtils(context.getTrigger().getEmail().getInlineAttachmentsPattern());
+            AttachmentUtils inlineAttachments = new AttachmentUtils(
+                    context.getTrigger().getEmail().getInlineAttachmentsPattern());
             inlineAttachments.attachInline(multipart, context);
         }
 
@@ -1107,6 +1108,29 @@ public class ExtendedEmailPublisher extends Notifier {
         excludeNotAllowedDomains(context, to);
         excludeNotAllowedDomains(context, cc);
         excludeNotAllowedDomains(context, bcc);
+        Map<String, Set<String>> emailLocations = new HashMap<>();
+
+        for (InternetAddress addr : to) {
+            String email = addr.getAddress().toLowerCase();
+            emailLocations.computeIfAbsent(email, k -> new HashSet<>()).add("TO");
+        }
+
+        for (InternetAddress addr : cc) {
+            String email = addr.getAddress().toLowerCase();
+            emailLocations.computeIfAbsent(email, k -> new HashSet<>()).add("CC");
+        }
+
+        for (InternetAddress addr : bcc) {
+            String email = addr.getAddress().toLowerCase();
+            emailLocations.computeIfAbsent(email, k -> new HashSet<>()).add("BCC");
+        }
+
+        for (Map.Entry<String, Set<String>> entry : emailLocations.entrySet()) {
+            if (entry.getValue().size() > 1) {
+                context.getListener().getLogger()
+                        .println("Duplicate recipient detected: " + entry.getKey() + " in " + entry.getValue());
+            }
+        }
 
         //
         msg.setRecipients(Message.RecipientType.TO, to.toArray(new InternetAddress[0]));
@@ -1189,10 +1213,9 @@ public class ExtendedEmailPublisher extends Notifier {
         final Multipart multipart;
         boolean doBoth = false;
 
-        String messageContentType =
-                context.getTrigger().getEmail().getContentType().equals("project")
-                        ? contentType
-                        : context.getTrigger().getEmail().getContentType();
+        String messageContentType = context.getTrigger().getEmail().getContentType().equals("project")
+                ? contentType
+                : context.getTrigger().getEmail().getContentType();
         // contentType is null if the project was not reconfigured after upgrading.
         if (messageContentType == null || "default".equals(messageContentType)) {
             messageContentType = getDescriptor().getDefaultContentType();
