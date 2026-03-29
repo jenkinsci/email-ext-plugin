@@ -72,8 +72,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.HashMap;
+
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -1156,7 +1157,6 @@ public class ExtendedEmailPublisher extends Notifier {
         excludeNotAllowedDomains(context, to);
         excludeNotAllowedDomains(context, cc);
         excludeNotAllowedDomains(context, bcc);
-        Map<String, Set<String>> emailLocations = new HashMap<>();
 
         logDuplicateRecipients(context, to, cc, bcc);
 
