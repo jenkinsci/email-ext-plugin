@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
-
 import static org.mockito.Mockito.mock;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -65,10 +64,6 @@ import java.util.concurrent.TimeUnit;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
-import java.io.ByteArrayOutputStream;
-
-import java.util.LinkedHashSet;
-import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.htmlunit.html.HtmlPage;
 import org.htmlunit.html.HtmlTextArea;
@@ -2178,7 +2173,6 @@ class ExtendedEmailPublisherTest {
                 Mailbox.get("ashlux@gmail.com").size(),
                 "We should only have one email since the first failure doesn't count as 'still failing'.");
     }
-   
 
     @Test
     public void testDuplicateLoggedForCcAndBcc() throws Exception {
