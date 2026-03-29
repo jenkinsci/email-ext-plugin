@@ -11,6 +11,7 @@ import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import hudson.EnvVars;
 import hudson.FilePath;
+import java.util.LinkedHashSet;
 import hudson.Functions;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregatable;
@@ -992,6 +993,40 @@ public class ExtendedEmailPublisher extends Notifier {
         debug(context.getListener().getLogger(), "Sending mail from default account using custom from address " + from);
         return descriptor.getMailAccount();
     }
+    void logDuplicateRecipients(
+        ExtendedEmailPublisherContext context,
+        Set<InternetAddress> to,
+        Set<InternetAddress> cc,
+        Set<InternetAddress> bcc) {
+
+    Map<String, Set<String>> emailLocations = new HashMap<>();
+
+    for (InternetAddress addr : to) {
+        String email = addr.getAddress().toLowerCase();
+        emailLocations.computeIfAbsent(email, k -> new LinkedHashSet<>()).add("TO");
+    }
+
+    for (InternetAddress addr : cc) {
+        String email = addr.getAddress().toLowerCase();
+        emailLocations.computeIfAbsent(email, k -> new LinkedHashSet<>()).add("CC");
+    }
+
+    for (InternetAddress addr : bcc) {
+        String email = addr.getAddress().toLowerCase();
+        emailLocations.computeIfAbsent(email, k -> new LinkedHashSet<>()).add("BCC");
+    }
+
+    for (Map.Entry<String, Set<String>> entry : emailLocations.entrySet()) {
+        if (entry.getValue().size() > 1) {
+            context.getListener()
+                    .getLogger()
+                    .println("Duplicate recipient detected: "
+                            + entry.getKey()
+                            + " in "
+                            + entry.getValue());
+        }
+    }
+}
 
     private MimeMessage createMail(ExtendedEmailPublisherContext context, InternetAddress fromAddress, Session session)
             throws MessagingException, UnsupportedEncodingException {
@@ -1107,31 +1142,9 @@ public class ExtendedEmailPublisher extends Notifier {
         excludeNotAllowedDomains(context, to);
         excludeNotAllowedDomains(context, cc);
         excludeNotAllowedDomains(context, bcc);
-
         Map<String, Set<String>> emailLocations = new HashMap<>();
 
-        for (InternetAddress addr : to) {
-            String email = addr.getAddress().toLowerCase();
-            emailLocations.computeIfAbsent(email, k -> new HashSet<>()).add("TO");
-        }
-
-        for (InternetAddress addr : cc) {
-            String email = addr.getAddress().toLowerCase();
-            emailLocations.computeIfAbsent(email, k -> new HashSet<>()).add("CC");
-        }
-
-        for (InternetAddress addr : bcc) {
-            String email = addr.getAddress().toLowerCase();
-            emailLocations.computeIfAbsent(email, k -> new HashSet<>()).add("BCC");
-        }
-
-        for (Map.Entry<String, Set<String>> entry : emailLocations.entrySet()) {
-            if (entry.getValue().size() > 1) {
-                context.getListener()
-                        .getLogger()
-                        .println("Duplicate recipient detected: " + entry.getKey() + " in " + entry.getValue());
-            }
-        }
+       logDuplicateRecipients(context, to, cc, bcc);
 
         //
         msg.setRecipients(Message.RecipientType.TO, to.toArray(new InternetAddress[0]));
