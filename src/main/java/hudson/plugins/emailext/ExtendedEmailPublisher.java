@@ -108,8 +108,8 @@ public class ExtendedEmailPublisher extends Notifier {
 
     private static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisher.class.getName());
 
-    private static final String CONTENT_TRANSFER_ENCODING = System
-            .getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
+    private static final String CONTENT_TRANSFER_ENCODING =
+            System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
@@ -212,8 +212,7 @@ public class ExtendedEmailPublisher extends Notifier {
      */
     public MatrixTriggerMode matrixTriggerMode;
 
-    public ExtendedEmailPublisher() {
-    }
+    public ExtendedEmailPublisher() {}
 
     @Deprecated
     public ExtendedEmailPublisher(
@@ -525,8 +524,8 @@ public class ExtendedEmailPublisher extends Notifier {
         for (String triggerName : triggered.keySet()) {
             for (EmailTrigger trigger : triggered.get(triggerName)) {
                 listener.getLogger().println("Sending email for trigger: " + triggerName);
-                final ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(this, build,
-                        build.getWorkspace(), launcher, listener);
+                final ExtendedEmailPublisherContext context =
+                        new ExtendedEmailPublisherContext(this, build, build.getWorkspace(), launcher, listener);
                 context.setTriggered(triggered);
                 context.setTrigger(trigger);
                 sendMail(context);
@@ -604,8 +603,7 @@ public class ExtendedEmailPublisher extends Notifier {
                     msg.setRecipients(Message.RecipientType.CC, (Address[]) null);
                     msg.setRecipients(Message.RecipientType.BCC, (Address[]) null);
                     // and set the emergency reroute
-                    msg.setRecipients(
-                            Message.RecipientType.TO, getDescriptor().getEmergencyReroute());
+                    msg.setRecipients(Message.RecipientType.TO, getDescriptor().getEmergencyReroute());
                 }
 
                 StringBuilder buf = new StringBuilder("Sending email to:");
@@ -668,8 +666,7 @@ public class ExtendedEmailPublisher extends Notifier {
                             while (next != null) {
                                 debug(
                                         context.getListener().getLogger(),
-                                        "Next " + next.getClass().getSimpleName() + " message: "
-                                                + next.getMessage());
+                                        "Next " + next.getClass().getSimpleName() + " message: " + next.getMessage());
                                 if (next instanceof MessagingException exception) {
                                     next = exception.getNextException();
                                 } else {
@@ -694,8 +691,7 @@ public class ExtendedEmailPublisher extends Notifier {
                             while (next != null) {
                                 debug(
                                         context.getListener().getLogger(),
-                                        "Next " + next.getClass().getSimpleName() + " message: "
-                                                + next.getMessage());
+                                        "Next " + next.getClass().getSimpleName() + " message: " + next.getMessage());
                                 if (next instanceof MessagingException exception) {
                                     next = exception.getNextException();
                                 } else {
@@ -853,8 +849,8 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     private static CompilerConfiguration getCompilerConfiguration(boolean sandbox) {
-        CompilerConfiguration cc = sandbox ? GroovySandbox.createSecureCompilerConfiguration()
-                : new CompilerConfiguration();
+        CompilerConfiguration cc =
+                sandbox ? GroovySandbox.createSecureCompilerConfiguration() : new CompilerConfiguration();
         cc.setScriptBaseClass(EmailExtScript.class.getCanonicalName());
         cc.addCompilationCustomizers(
                 new ImportCustomizer().addStarImports("jenkins", "jenkins.model", "hudson", "hudson.model"));
@@ -1034,15 +1030,15 @@ public class ExtendedEmailPublisher extends Notifier {
 
         // add attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getAttachmentsPattern())) {
-            AttachmentUtils typeAttachments = new AttachmentUtils(
-                    context.getTrigger().getEmail().getAttachmentsPattern());
+            AttachmentUtils typeAttachments =
+                    new AttachmentUtils(context.getTrigger().getEmail().getAttachmentsPattern());
             typeAttachments.attach(multipart, context);
         }
 
         // add inline attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getInlineAttachmentsPattern())) {
-            AttachmentUtils inlineAttachments = new AttachmentUtils(
-                    context.getTrigger().getEmail().getInlineAttachmentsPattern());
+            AttachmentUtils inlineAttachments =
+                    new AttachmentUtils(context.getTrigger().getEmail().getInlineAttachmentsPattern());
             inlineAttachments.attachInline(multipart, context);
         }
 
@@ -1127,7 +1123,8 @@ public class ExtendedEmailPublisher extends Notifier {
 
         for (Map.Entry<String, Set<String>> entry : emailLocations.entrySet()) {
             if (entry.getValue().size() > 1) {
-                context.getListener().getLogger()
+                context.getListener()
+                        .getLogger()
                         .println("Duplicate recipient detected: " + entry.getKey() + " in " + entry.getValue());
             }
         }
@@ -1213,9 +1210,10 @@ public class ExtendedEmailPublisher extends Notifier {
         final Multipart multipart;
         boolean doBoth = false;
 
-        String messageContentType = context.getTrigger().getEmail().getContentType().equals("project")
-                ? contentType
-                : context.getTrigger().getEmail().getContentType();
+        String messageContentType =
+                context.getTrigger().getEmail().getContentType().equals("project")
+                        ? contentType
+                        : context.getTrigger().getEmail().getContentType();
         // contentType is null if the project was not reconfigured after upgrading.
         if (messageContentType == null || "default".equals(messageContentType)) {
             messageContentType = getDescriptor().getDefaultContentType();
