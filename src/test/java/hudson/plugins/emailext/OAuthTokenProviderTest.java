@@ -92,5 +92,5 @@ public class OAuthTokenProviderTest {
         OAuthTokenException ex = new OAuthTokenException("test error");
         assertEquals("test error", ex.getMessage());
         assertNull(ex.getCause());
-}
+    }
 }
