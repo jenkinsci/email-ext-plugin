@@ -61,6 +61,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
@@ -79,6 +81,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -990,6 +994,63 @@ public class ExtendedEmailPublisher extends Notifier {
         return descriptor.getMailAccount();
     }
 
+    void logDuplicateRecipients(
+        ExtendedEmailPublisherContext context,
+        Set<InternetAddress> to,
+        Set<InternetAddress> cc,
+        Set<InternetAddress> bcc) {
+
+  
+    Set<String> toEmails = to.stream()
+            .map(a -> a.getAddress().toLowerCase())
+            .collect(Collectors.toSet());
+
+   
+    Set<String> seen = new HashSet<>();
+    to.removeIf(addr -> !seen.add(addr.getAddress().toLowerCase()));
+
+   
+    seen.clear();
+    cc.removeIf(addr -> {
+        String email = addr.getAddress().toLowerCase();
+        return !seen.add(email) || toEmails.contains(email);
+    });
+
+   
+    Set<String> ccEmails = cc.stream()
+            .map(a -> a.getAddress().toLowerCase())
+            .collect(Collectors.toSet());
+
+    List<String> order = Arrays.asList("TO", "CC", "BCC");
+
+   
+    bcc.removeIf(addr -> {
+        String email = addr.getAddress().toLowerCase();
+
+       
+        if (toEmails.contains(email)) {
+            return true;
+        }
+
+       
+        if (ccEmails.contains(email)) {
+
+            List<String> locations = new ArrayList<>(Arrays.asList("CC", "BCC"));
+            locations.sort(Comparator.comparingInt(order::indexOf));
+
+            context.getListener()
+                    .getLogger()
+                    .println("Duplicate recipient detected: "
+                            + email
+                            + " in "
+                            + locations);
+
+            return false;
+        }
+
+        return false;
+    });
+}
     private MimeMessage createMail(ExtendedEmailPublisherContext context, InternetAddress fromAddress, Session session)
             throws MessagingException, UnsupportedEncodingException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
@@ -1104,6 +1165,8 @@ public class ExtendedEmailPublisher extends Notifier {
         excludeNotAllowedDomains(context, to);
         excludeNotAllowedDomains(context, cc);
         excludeNotAllowedDomains(context, bcc);
+
+        logDuplicateRecipients(context, to, cc, bcc);
         Map<String, Set<String>> emailLocations = new HashMap<>();
 
         for (InternetAddress addr : to) {
