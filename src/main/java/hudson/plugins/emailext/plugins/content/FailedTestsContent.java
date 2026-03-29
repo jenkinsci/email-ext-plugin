@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
@@ -43,8 +42,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     public boolean onlyRegressions = false;
 
     @Parameter
-    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "TODO needs triage")
-    public int maxLength = Integer.MAX_VALUE;
+    public long maxLength = Long.MAX_VALUE;
 
     @Parameter
     public String outputFormat = "";
@@ -86,7 +84,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     }
 
     private void setMaxLength() {
-        if (maxLength < Integer.MAX_VALUE) {
+        if (maxLength < Long.MAX_VALUE) {
             maxLength *= 1024;
         }
     }
@@ -131,15 +129,14 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     }
 
     private int addTest(SummarizedTestResult result, int printSize, TestResult failedTest) {
+        String rawStack = failedTest.getErrorStackTrace();
         String stackTrace = showStack
-                ? (escapeHtml
-                        ? StringEscapeUtils.escapeHtml4(failedTest.getErrorStackTrace())
-                        : failedTest.getErrorStackTrace())
+                ? (escapeHtml && rawStack != null ? StringEscapeUtils.escapeHtml4(rawStack) : rawStack)
                 : null;
+
+        String rawDetails = failedTest.getErrorDetails();
         String errorDetails = showMessage
-                ? (escapeHtml
-                        ? StringEscapeUtils.escapeHtml4(failedTest.getErrorDetails())
-                        : failedTest.getErrorDetails())
+                ? (escapeHtml && rawDetails != null ? StringEscapeUtils.escapeHtml4(rawDetails) : rawDetails)
                 : null;
         String name = "%s.%s"
                 .formatted(
