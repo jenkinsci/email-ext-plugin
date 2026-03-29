@@ -61,13 +61,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.*;
-import java.util.stream.Collectors;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -82,7 +81,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -995,62 +993,51 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     void logDuplicateRecipients(
-        ExtendedEmailPublisherContext context,
-        Set<InternetAddress> to,
-        Set<InternetAddress> cc,
-        Set<InternetAddress> bcc) {
+            ExtendedEmailPublisherContext context,
+            Set<InternetAddress> to,
+            Set<InternetAddress> cc,
+            Set<InternetAddress> bcc) {
 
-  
-    Set<String> toEmails = to.stream()
-            .map(a -> a.getAddress().toLowerCase())
-            .collect(Collectors.toSet());
+        Set<String> toEmails =
+                to.stream().map(a -> a.getAddress().toLowerCase()).collect(Collectors.toSet());
 
-   
-    Set<String> seen = new HashSet<>();
-    to.removeIf(addr -> !seen.add(addr.getAddress().toLowerCase()));
+        Set<String> seen = new HashSet<>();
+        to.removeIf(addr -> !seen.add(addr.getAddress().toLowerCase()));
 
-   
-    seen.clear();
-    cc.removeIf(addr -> {
-        String email = addr.getAddress().toLowerCase();
-        return !seen.add(email) || toEmails.contains(email);
-    });
+        seen.clear();
+        cc.removeIf(addr -> {
+            String email = addr.getAddress().toLowerCase();
+            return !seen.add(email) || toEmails.contains(email);
+        });
 
-   
-    Set<String> ccEmails = cc.stream()
-            .map(a -> a.getAddress().toLowerCase())
-            .collect(Collectors.toSet());
+        Set<String> ccEmails =
+                cc.stream().map(a -> a.getAddress().toLowerCase()).collect(Collectors.toSet());
 
-    List<String> order = Arrays.asList("TO", "CC", "BCC");
+        List<String> order = Arrays.asList("TO", "CC", "BCC");
 
-   
-    bcc.removeIf(addr -> {
-        String email = addr.getAddress().toLowerCase();
+        bcc.removeIf(addr -> {
+            String email = addr.getAddress().toLowerCase();
 
-       
-        if (toEmails.contains(email)) {
-            return true;
-        }
+            if (toEmails.contains(email)) {
+                return true;
+            }
 
-       
-        if (ccEmails.contains(email)) {
+            if (ccEmails.contains(email)) {
 
-            List<String> locations = new ArrayList<>(Arrays.asList("CC", "BCC"));
-            locations.sort(Comparator.comparingInt(order::indexOf));
+                List<String> locations = new ArrayList<>(Arrays.asList("CC", "BCC"));
+                locations.sort(Comparator.comparingInt(order::indexOf));
 
-            context.getListener()
-                    .getLogger()
-                    .println("Duplicate recipient detected: "
-                            + email
-                            + " in "
-                            + locations);
+                context.getListener()
+                        .getLogger()
+                        .println("Duplicate recipient detected: " + email + " in " + locations);
+
+                return false;
+            }
 
             return false;
-        }
+        });
+    }
 
-        return false;
-    });
-}
     private MimeMessage createMail(ExtendedEmailPublisherContext context, InternetAddress fromAddress, Session session)
             throws MessagingException, UnsupportedEncodingException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
