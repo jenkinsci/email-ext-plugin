@@ -49,6 +49,8 @@ public class EmailExtScriptTokenMacroWhitelist extends AbstractWhitelist {
 
     private final List<TokenMacro> macros;
 
+    private static final String ENV_CACHE_KEY = EmailExtScriptTokenMacroWhitelist.class.getName() + "_ENV_CACHE";
+
     public EmailExtScriptTokenMacroWhitelist() {
         List<TokenMacro> list = new ArrayList<>();
 
@@ -78,13 +80,13 @@ public class EmailExtScriptTokenMacroWhitelist extends AbstractWhitelist {
             TaskListener listener = (TaskListener) script.getBinding().getVariable("listener");
             try {
                 EnvVars vars;
-                // Check if we've already fetched and cached the environment for this script run
-                if (script.getBinding().hasVariable("EMAILEXT_CACHED_ENV_VARS")) {
-                    vars = (EnvVars) script.getBinding().getVariable("EMAILEXT_CACHED_ENV_VARS");
+                // Safely check for existence AND type to completely eliminate collision risks
+                if (script.getBinding().hasVariable(ENV_CACHE_KEY)
+                        && script.getBinding().getVariable(ENV_CACHE_KEY) instanceof EnvVars) {
+                    vars = (EnvVars) script.getBinding().getVariable(ENV_CACHE_KEY);
                 } else {
-                    // Fetch and cache in the script's binding
                     vars = build.getEnvironment(listener);
-                    script.getBinding().setVariable("EMAILEXT_CACHED_ENV_VARS", vars);
+                    script.getBinding().setVariable(ENV_CACHE_KEY, vars);
                 }
 
                 return vars.containsKey(name);

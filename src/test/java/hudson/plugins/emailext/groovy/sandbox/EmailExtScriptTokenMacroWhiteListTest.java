@@ -11,12 +11,15 @@ import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.content.EmailExtScript;
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 @WithJenkins
 public class EmailExtScriptTokenMacroWhiteListTest {
+
+    private static final String CACHE_KEY = EmailExtScriptTokenMacroWhitelist.class.getName() + "_ENV_CACHE";
 
     private EmailExtScriptTokenMacroWhitelist whitelist;
     private EmailExtScript mockScript;
@@ -63,10 +66,11 @@ public class EmailExtScriptTokenMacroWhiteListTest {
         assertFalse(result2, "Should not permit access to a non-existent variable");
         verify(mockRun, times(1)).getEnvironment(mockListener);
 
-        assertTrue(binding.hasVariable("EMAILEXT_CACHED_ENV_VARS"));
+        assertTrue(binding.hasVariable(CACHE_KEY));
     }
 
     @Test
+    @Tag("performance")
     public void testPerformanceGain_PrintOnly() throws Exception {
 
         when(mockRun.getEnvironment(mockListener)).thenAnswer(invocation -> {
@@ -79,12 +83,12 @@ public class EmailExtScriptTokenMacroWhiteListTest {
         long startOld = System.currentTimeMillis();
         for (int i = 0; i < iterations; i++) {
 
-            binding.getVariables().remove("EMAILEXT_CACHED_ENV_VARS");
+            binding.getVariables().remove(CACHE_KEY);
             whitelist.permitsMethod(invokeMethod, mockScript, new Object[] {"SOME_VAR_" + i});
         }
         long timeOld = System.currentTimeMillis() - startOld;
 
-        binding.getVariables().remove("EMAILEXT_CACHED_ENV_VARS");
+        binding.getVariables().remove(CACHE_KEY);
 
         long startNew = System.currentTimeMillis();
         for (int i = 0; i < iterations; i++) {
