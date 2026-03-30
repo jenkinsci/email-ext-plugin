@@ -68,6 +68,7 @@ public class EmailExtTemplateAction implements Action {
 
     @SuppressWarnings("lgtm[jenkins/csrf]")
     public FormValidation doTemplateFileCheck(@QueryParameter final String value) {
+        // See src/main/resources/hudson/plugins/emailext/EmailExtTemplateAction/{index,action}.groovy
         if (Jenkins.get()
                 .getDescriptorByType(ExtendedEmailPublisherDescriptor.class)
                 .isAdminRequiredForTemplateTesting()) {
@@ -93,7 +94,7 @@ public class EmailExtTemplateAction implements Action {
                             return FormValidation.error("The file '" + value + "' does not exist");
                         }
                     } catch (IOException | InterruptedException e) {
-                        // Avoid exposing detailed file system info to prevent potential file fishing attacks
+                        // Don't want to expose too much info to a potential file fishing attempt
                         return FormValidation.error("I/O Error.");
                     }
                 }
