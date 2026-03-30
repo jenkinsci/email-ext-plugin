@@ -106,6 +106,7 @@ public class EmailExtTemplateAction implements Action {
     private FormValidation checkForManagedFile(final String value) {
         Plugin plugin = Jenkins.get().getPlugin("config-file-provider");
         if (plugin != null) {
+            Config config = null;
             Collection<ConfigProvider> providers = getTemplateConfigProviders();
             for (ConfigProvider provider : providers) {
                 for (Config c : provider.getAllConfigs()) {
