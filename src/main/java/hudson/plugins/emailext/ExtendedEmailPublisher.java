@@ -594,12 +594,7 @@ public class ExtendedEmailPublisher extends Notifier {
             if (executePresendScript(context, msg)) {
                 // presend script might have modified recipients:
                 allRecipients = msg.getAllRecipients();
-                if (allRecipients == null || allRecipients.length == 0) {
-                    context.getListener().getLogger().println("No recipients found, email couldn't be sent.");
-
-                    return false;
-                }
-
+                
                 if (StringUtils.isNotBlank(getDescriptor().getEmergencyReroute())) {
                     // clear out all the existing recipients
                     msg.setRecipients(Message.RecipientType.TO, (Address[]) null);
@@ -607,6 +602,12 @@ public class ExtendedEmailPublisher extends Notifier {
                     msg.setRecipients(Message.RecipientType.BCC, (Address[]) null);
                     // and set the emergency reroute
                     msg.setRecipients(Message.RecipientType.TO, getDescriptor().getEmergencyReroute());
+                }
+
+                 if (allRecipients == null || allRecipients.length == 0) {
+                    context.getListener().getLogger().println("No recipients found, email couldn't be sent.");
+
+                    return false;
                 }
 
                 StringBuilder buf = new StringBuilder("Sending email to:");
