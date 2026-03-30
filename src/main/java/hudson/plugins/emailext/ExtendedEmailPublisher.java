@@ -66,8 +66,8 @@ import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -594,7 +594,7 @@ public class ExtendedEmailPublisher extends Notifier {
             if (executePresendScript(context, msg)) {
                 // presend script might have modified recipients:
                 allRecipients = msg.getAllRecipients();
-                
+
                 if (StringUtils.isNotBlank(getDescriptor().getEmergencyReroute())) {
                     // clear out all the existing recipients
                     msg.setRecipients(Message.RecipientType.TO, (Address[]) null);
@@ -604,7 +604,7 @@ public class ExtendedEmailPublisher extends Notifier {
                     msg.setRecipients(Message.RecipientType.TO, getDescriptor().getEmergencyReroute());
                 }
 
-                 if (allRecipients == null || allRecipients.length == 0) {
+                if (allRecipients == null || allRecipients.length == 0) {
                     context.getListener().getLogger().println("No recipients found, email couldn't be sent.");
 
                     return false;
