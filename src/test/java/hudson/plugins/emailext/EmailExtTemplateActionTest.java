@@ -17,8 +17,7 @@ class EmailExtTemplateActionTest {
 
         String[] result = action.renderTemplate("nonexistent.groovy", "invalid-build-id");
 
-        assertTrue(result[0].contains("<h3>An error occurred"),
-            "Should contain error heading from renderError()");
+        assertTrue(result[0].contains("<h3>An error occurred"), "Should contain error heading from renderError()");
     }
 
     @Test
@@ -28,8 +27,7 @@ class EmailExtTemplateActionTest {
 
         String[] result = action.renderTemplate("nonexistent.groovy", "invalid-build-id");
 
-        assertTrue(result[0].contains("<span style=\"color:red"),
-            "Should contain red span from renderError()");
+        assertTrue(result[0].contains("<span style=\"color:red"), "Should contain red span from renderError()");
     }
 
     @Test
@@ -39,7 +37,6 @@ class EmailExtTemplateActionTest {
 
         String[] result = action.renderTemplate("nonexistent.groovy", "invalid-build-id");
 
-        assertTrue(result[0].contains("<br/>"),
-            "Newlines should be converted to <br/> by renderError()");
+        assertTrue(result[0].contains("<br/>"), "Newlines should be converted to <br/> by renderError()");
     }
 }
