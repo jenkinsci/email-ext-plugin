@@ -54,7 +54,6 @@ f.entry(title: _("Attach Build Log"), help: "/plugin/email-ext/help/projectConfi
     }
   }
 }
-
 f.entry(title: _("Content Token Reference"), field: "tokens")
 
 if(descriptor.isMatrixProject(my)) {
