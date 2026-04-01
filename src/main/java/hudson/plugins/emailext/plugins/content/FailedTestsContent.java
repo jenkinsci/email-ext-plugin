@@ -86,9 +86,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     }
 
     private void setMaxLength() {
-        if (maxLength < Long.MAX_VALUE) {
-            maxLength *= 1024;
-        }
+        maxLength = (maxLength <= Long.MAX_VALUE / 1024) ? maxLength * 1024 : Long.MAX_VALUE;
     }
 
     private int getTestAge(TestResult result) {
