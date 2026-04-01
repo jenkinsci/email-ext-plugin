@@ -152,6 +152,10 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             if (StringUtils.isBlank(value)) {
                 return FormValidation.ok();
             }
+            if (useSsl && useTls) {
+                return FormValidation.warning(
+                    "Both SSL and TLS are enabled. Usually only one should be selected.");
+            }
 
             // do this after the authentication check so we do not reveal the FIPS mode of the controller.
             FormValidation insecureAuthValidation;
