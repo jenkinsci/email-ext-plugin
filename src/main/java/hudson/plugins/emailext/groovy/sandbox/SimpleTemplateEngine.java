@@ -214,10 +214,23 @@ public class SimpleTemplateEngine extends TemplateEngine {
                             scriptObject.setProperty("out", pw);
                             scriptObject.run();
                         }
+
                     } catch (MissingPropertyException x) {
                         throw (IOException) new IOException(
                                         "did you forget to escape \\$" + x.getProperty() + " for non-Groovy variables?")
                                 .initCause(x);
+                    } catch (RuntimeException x) {
+                        if (x.getCause() instanceof java.io.NotSerializableException) {
+                            throw new GroovyRuntimeException(
+                                    "Template rendering failed due to a serialization error. "
+                                            + "This can happen when using a Groovy template inside a Jenkins Pipeline 'node' block — "
+                                            + "the Pipeline CPS engine attempts to serialize the template execution state, including "
+                                            + "the internal PrintWriter, which is not serializable. "
+                                            + "To fix this, move the template rendering outside the 'node' block, "
+                                            + "or annotate the enclosing method with @NonCPS.",
+                                    x);
+                        }
+                        throw x;
                     }
                     pw.flush();
                     return writer;
