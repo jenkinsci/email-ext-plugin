@@ -22,13 +22,10 @@ import jenkins.scm.RunWithSCM;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-/**
- * Sends emails to committers of upstream builds which triggered this build.
- */
-public class UpstreamComitterRecipientProvider extends RecipientProvider {
+public class UpstreamComitterSinceLastSuccessRecipientProvider extends RecipientProvider {
 
     @DataBoundConstructor
-    public UpstreamComitterRecipientProvider() {}
+    public UpstreamComitterSinceLastSuccessRecipientProvider() {}
 
     @Override
     public void addRecipients(
@@ -48,36 +45,56 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
                 descriptor.debug(logger, format, args);
             }
         }
+
         final Debug debug = new Debug();
-        debug.send("Sending email to upstream committer(s).");
-        for (Run<?, ?> run : getUpstreamBuilds(context.getRun())) {
+        Run<?, ?> currentBuild = context.getRun();
+        Run<?, ?> lastSuccessfulBuild = currentBuild.getPreviousSuccessfulBuild();
+        if (lastSuccessfulBuild == null) {
+            debug.send(
+                    "No previous successful build for job %s#%s, skipping upstream committers since last success.",
+                    currentBuild.getParent().getName(), currentBuild.getNumber());
+            return;
+        }
+        debug.send("Sending email to upstream committer(s) since last successful build.");
+        debug.send(
+                "Collecting upstream builds for job %s#%s since last success (%s#%s).",
+                currentBuild.getParent().getName(),
+                currentBuild.getNumber(),
+                lastSuccessfulBuild.getParent().getName(),
+                lastSuccessfulBuild.getNumber());
+
+        Set<Run<?, ?>> upstreamBuilds = new HashSet<>();
+        Run<?, ?> jobBuild = currentBuild;
+
+        while (jobBuild != null && jobBuild != lastSuccessfulBuild) {
+            for (Cause c : jobBuild.getCauses()) {
+                if (c instanceof Cause.UpstreamCause cause) {
+                    collectUpstreamBuilds(cause, upstreamBuilds);
+                }
+            }
+            jobBuild = jobBuild.getPreviousBuild();
+        }
+
+        debug.send("Found %d upstream builds in the time window.", upstreamBuilds.size());
+        for (Run<?, ?> run : upstreamBuilds) {
             addUpstreamCommittersTriggeringBuild(run, to, cc, bcc, env, context, debug);
         }
     }
 
-    private static Set<Run<?, ?>> getUpstreamBuilds(Run<?, ?> build) {
-        Set<Run<?, ?>> upstreams = new HashSet<>();
-        for (Cause c : build.getCauses()) {
-            if (c instanceof Cause.UpstreamCause cause) {
-                upstreamCauseToRuns(cause, upstreams);
-            }
-        }
-        return upstreams;
-    }
-
-    private static void upstreamCauseToRuns(Cause.UpstreamCause cause, Set<Run<?, ?>> upstreams) {
+    private static void collectUpstreamBuilds(Cause.UpstreamCause cause, Set<Run<?, ?>> result) {
         Run<?, ?> r = cause.getUpstreamRun();
-        if (r != null && upstreams.add(r)) {
+        if (r != null && result.add(r)) {
             for (Cause c : cause.getUpstreamCauses()) {
-                if (c instanceof Cause.UpstreamCause upstreamCause) {
-                    upstreamCauseToRuns(upstreamCause, upstreams);
+                if (c instanceof Cause.UpstreamCause upstream) {
+                    collectUpstreamBuilds(upstream, result);
                 }
             }
         }
     }
 
     /**
-     * Adds for the given upstream build the committers to the recipient list for each commit in the upstream build.
+     * Adds for the given upstream build the committers to the recipient list for
+     * each commit in the upstream build.
      *
      * @param run the upstream build
      * @param to the to recipient list
@@ -98,7 +115,6 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
         debug.send(
                 "Adding upstream committer from job %s with build number %s",
                 run.getParent().getDisplayName(), run.getNumber());
-
         if (run instanceof RunWithSCM<?, ?> cM) {
             List<ChangeLogSet<? extends ChangeLogSet.Entry>> changeSets = cM.getChangeSets();
             Set<User> users = new HashSet<>();
@@ -112,13 +128,12 @@ public class UpstreamComitterRecipientProvider extends RecipientProvider {
     }
 
     @Extension
-    @Symbol("upstreamDevelopers")
+    @Symbol("upstreamDevelopersSinceLastSuccess")
     public static final class DescriptorImpl extends RecipientProviderDescriptor {
-
         @NonNull
         @Override
         public String getDisplayName() {
-            return Messages.UpstreamComitterRecipientProvider_DisplayName();
+            return Messages.UpstreamComitterSinceLastSuccessRecipientProvider_DisplayName();
         }
     }
 }

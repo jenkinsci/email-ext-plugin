@@ -69,7 +69,9 @@ class JellyScriptContentTest {
         content.template = "template-does-not-exist";
         String output = content.evaluate(build, listener, JellyScriptContent.MACRO_NAME);
 
-        assertEquals("Jelly file [template-does-not-exist] was not found in $JENKINS_HOME/email-templates.", output);
+        assertEquals(
+                "Jelly file [template-does-not-exist] was not found in the workspace, $JENKINS_HOME/email-templates, or in the plugin resources.",
+                output);
     }
 
     /**
@@ -85,9 +87,7 @@ class JellyScriptContentTest {
 
         String output = content.evaluate(build, listener, JellyScriptContent.MACRO_NAME);
 
-        assertTrue(
-                output.contains(
-                        """
+        assertTrue(output.contains("""
                 CHANGE SET
                 Revision  by Kohsuke Kawaguchi: (COMMIT MESSAGE)
                   change: edit path1

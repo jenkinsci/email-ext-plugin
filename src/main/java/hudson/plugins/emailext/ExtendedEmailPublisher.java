@@ -34,6 +34,7 @@ import hudson.plugins.emailext.groovy.sandbox.TaskListenerInstanceWhitelist;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.CssInliner;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.content.AbstractEvalContent;
 import hudson.plugins.emailext.plugins.content.EmailExtScript;
@@ -110,8 +111,7 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
-    public static final String DEFAULT_BODY_TEXT =
-            """
+    public static final String DEFAULT_BODY_TEXT = """
             $PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
 
             Check console output at $BUILD_URL to view the results.""";
@@ -405,7 +405,11 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     public void debug(PrintStream p, String format, Object... args) {
-        getDescriptor().debug(p, format, args);
+        ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
+
+        if (descriptor != null) {
+            descriptor.debug(p, format, args);
+        }
     }
 
     @Override
@@ -619,7 +623,7 @@ public class ExtendedEmailPublisher extends Notifier {
                                             || e.getNextException() instanceof ConnectException)) {
                                 context.getListener()
                                         .getLogger()
-                                        .println("Socket error sending email, retrying once more in 10 seconds...");
+                                        .println("SMTP connection failed. Retrying in 10 seconds...");
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {
@@ -669,7 +673,8 @@ public class ExtendedEmailPublisher extends Notifier {
                             if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
                                 context.getListener()
                                         .getLogger()
-                                        .println("Connection error sending email, retrying once more in 10 seconds...");
+                                        .println(
+                                                "SMTP connection error while sending email. Retrying once more in 10 seconds.");
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {
@@ -736,7 +741,17 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public List<TokenMacro> getRuntimeMacros(ExtendedEmailPublisherContext context) {
         List<TokenMacro> macros = new ArrayList<>();
-        macros.add(new TriggerNameContent(context.getTrigger().getDescriptor().getDisplayName()));
+
+        String triggerName = "Unknown";
+        EmailTrigger trigger = context.getTrigger();
+        if (trigger != null) {
+            EmailTriggerDescriptor descriptor = trigger.getDescriptor();
+            if (descriptor != null) {
+                triggerName = descriptor.getDisplayName();
+            }
+        }
+
+        macros.add(new TriggerNameContent(triggerName));
         return macros;
     }
 
@@ -766,6 +781,9 @@ public class ExtendedEmailPublisher extends Notifier {
             PrintStream logger = listener.getLogger();
             debug(logger, "Executing %s script", scriptName);
 
+            StringWriter out = new StringWriter();
+            PrintWriter pw = new PrintWriter(out);
+
             Binding binding = new Binding();
             binding.setVariable("build", context.getBuild());
             binding.setVariable("run", context.getRun());
@@ -784,9 +802,6 @@ public class ExtendedEmailPublisher extends Notifier {
             binding.setVariable("trigger", context.getTrigger());
             binding.setVariable("triggered", ImmutableMultimap.copyOf(context.getTriggered())); // TODO static
             // whitelist?
-
-            StringWriter out = new StringWriter();
-            PrintWriter pw = new PrintWriter(out);
 
             try {
                 ClassLoader cl = expandClasspath(context, Jenkins.get().getPluginManager().uberClassLoader);
@@ -818,6 +833,7 @@ public class ExtendedEmailPublisher extends Notifier {
                         + e.getMessage());
                 throw e;
             } catch (Throwable t) {
+                LOGGER.log(Level.WARNING, "Error executing " + scriptName + " script", t);
                 Functions.printStackTrace(t, pw);
                 logger.println(out);
                 // should we cancel the sending of the email???
@@ -1007,11 +1023,23 @@ public class ExtendedEmailPublisher extends Notifier {
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
         attachments.attach(topMultipart, context);
 
+        if (StringUtils.isNotBlank(inlineAttachmentsPattern)) {
+            AttachmentUtils inlineAttachments = new AttachmentUtils(inlineAttachmentsPattern);
+            inlineAttachments.attachInline(multipart, context);
+        }
+
         // add attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getAttachmentsPattern())) {
             AttachmentUtils typeAttachments =
                     new AttachmentUtils(context.getTrigger().getEmail().getAttachmentsPattern());
             typeAttachments.attach(topMultipart, context);
+        }
+
+        // add inline attachments from the email type if they are setup
+        if (StringUtils.isNotBlank(context.getTrigger().getEmail().getInlineAttachmentsPattern())) {
+            AttachmentUtils inlineAttachments =
+                    new AttachmentUtils(context.getTrigger().getEmail().getInlineAttachmentsPattern());
+            inlineAttachments.attachInline(multipart, context);
         }
 
         if (attachBuildLog || context.getTrigger().getEmail().getAttachBuildLog()) {
