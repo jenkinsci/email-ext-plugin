@@ -73,7 +73,6 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.MockBuilder;
-import org.jvnet.hudson.test.SleepBuilder;
 import org.jvnet.hudson.test.junit.jupiter.BuildWatcherExtension;
 import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.mock_javamail.Mailbox;
@@ -145,11 +144,9 @@ class ExtendedEmailPublisherTest {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
 
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
-                // otherwise we would need to create users for each email address tested, to bypass SECURITY-372 fix:
                 .grant(Jenkins.READ, Item.READ)
                 .everywhere()
                 .toAuthenticated()
-                // TODO I had plans for tests where bob would approve scripts written by alice
                 .grant(Jenkins.ADMINISTER)
                 .everywhere()
                 .to("bob")
@@ -369,12 +366,10 @@ class ExtendedEmailPublisherTest {
 
     @Test
     void testFixedTriggerShouldNotSendEmailWhenBuildSucceedsAfterAbortedBuild() throws Exception {
-        // fail
         project.getBuildersList().add(new FailureBuilder());
         FreeStyleBuild build1 = project.scheduleBuild2(0).get();
         j.assertBuildStatus(Result.FAILURE, build1);
 
-        // abort
         project.getBuildersList().clear();
         project.getBuildersList().add(new MockBuilder(Result.ABORTED));
         FreeStyleBuild build2 = project.scheduleBuild2(0).get();
@@ -392,7 +387,6 @@ class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        // succeed
         project.getBuildersList().clear();
         FreeStyleBuild build3 = project.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(build3);
@@ -468,12 +462,10 @@ class ExtendedEmailPublisherTest {
 
     @Test
     void testFixedUnhealthyTriggerShouldSendEmailWhenBuildSucceedsAfterAbortedBuild() throws Exception {
-        // fail
         project.getBuildersList().add(new FailureBuilder());
         FreeStyleBuild build1 = project.scheduleBuild2(0).get();
         j.assertBuildStatus(Result.FAILURE, build1);
 
-        // abort
         project.getBuildersList().clear();
         project.getBuildersList().add(new MockBuilder(Result.ABORTED));
         FreeStyleBuild build2 = project.scheduleBuild2(0).get();
@@ -491,7 +483,6 @@ class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        // succeed
         project.getBuildersList().clear();
         FreeStyleBuild build3 = project.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(build3);
@@ -543,7 +534,6 @@ class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        // only fail once
         FreeStyleBuild build = project.scheduleBuild2(0).get();
         j.assertBuildStatus(Result.FAILURE, build);
 
@@ -570,10 +560,8 @@ class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        // only fail once
         FreeStyleBuild build1 = project.scheduleBuild2(0).get();
         j.assertBuildStatus(Result.FAILURE, build1);
-        // then succeed
         project.getBuildersList().clear();
         FreeStyleBuild build2 = project.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(build2);
@@ -601,10 +589,8 @@ class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        // first failure
         FreeStyleBuild build1 = project.scheduleBuild2(0).get();
         j.assertBuildStatus(Result.FAILURE, build1);
-        // second failure
         FreeStyleBuild build2 = project.scheduleBuild2(0).get();
         j.assertBuildStatus(Result.FAILURE, build2);
 
@@ -746,7 +732,6 @@ class ExtendedEmailPublisherTest {
         Message msg = mailbox.get(0);
         assertThat("Message should be multipart", msg.getContentType(), containsString("multipart/mixed"));
 
-        // TODO: add more tests for getting the multipart information.
         if (msg instanceof MimeMessage mimeMsg) {
             assertEquals(
                     MimeMultipart.class,
@@ -1921,11 +1906,6 @@ class ExtendedEmailPublisherTest {
         assertEquals(130, Mailbox.get("mickey@disney.com").size());
     }
 
-    /**
-     * Similar to {@link SleepBuilder} but only on the first build. (Removing
-     * the builder between builds is tricky since you would have to wait for the
-     * first one to actually start it.)
-     */
     private static final class SleepOnceBuilder extends Builder {
 
         @Override
@@ -2150,10 +2130,8 @@ class ExtendedEmailPublisherTest {
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
 
-        // first failure
         FreeStyleBuild build1 = project.scheduleBuild2(0).get();
         j.assertBuildStatus(Result.FAILURE, build1);
-        // second failure
         FreeStyleBuild build2 = project.scheduleBuild2(0).get();
         j.assertBuildStatus(Result.FAILURE, build2);
 
@@ -2169,7 +2147,7 @@ class ExtendedEmailPublisherTest {
 
     @Test
     void testNonDefaultPrioritySendsEmail() throws Exception {
-        publisher.setPriority(EmailExtStep.Priority.HIGH);
+        publisher.setPriority(Priority.HIGH);
         SuccessTrigger trigger = new SuccessTrigger(
                 recProviders,
                 "$DEFAULT_RECIPIENTS",
@@ -2189,7 +2167,7 @@ class ExtendedEmailPublisherTest {
 
     @Test
     void testDefaultPrioritySendsEmail() throws Exception {
-        publisher.setPriority(EmailExtStep.Priority.DEFAULT);
+        publisher.setPriority(Priority.DEFAULT);
         SuccessTrigger trigger = new SuccessTrigger(
                 recProviders,
                 "$DEFAULT_RECIPIENTS",
@@ -2210,19 +2188,19 @@ class ExtendedEmailPublisherTest {
     @Test
     void testPriorityGetterSetter() {
         ExtendedEmailPublisher pub = new ExtendedEmailPublisher();
-        assertEquals(EmailExtStep.Priority.DEFAULT, pub.getPriority());
+        assertEquals(Priority.DEFAULT, pub.getPriority());
 
-        pub.setPriority(EmailExtStep.Priority.HIGH);
-        assertEquals(EmailExtStep.Priority.HIGH, pub.getPriority());
+        pub.setPriority(Priority.HIGH);
+        assertEquals(Priority.HIGH, pub.getPriority());
 
-        pub.setPriority(EmailExtStep.Priority.LOW);
-        assertEquals(EmailExtStep.Priority.LOW, pub.getPriority());
+        pub.setPriority(Priority.LOW);
+        assertEquals(Priority.LOW, pub.getPriority());
 
-        pub.setPriority(EmailExtStep.Priority.NORMAL);
-        assertEquals(EmailExtStep.Priority.NORMAL, pub.getPriority());
+        pub.setPriority(Priority.NORMAL);
+        assertEquals(Priority.NORMAL, pub.getPriority());
 
-        pub.setPriority(EmailExtStep.Priority.DEFAULT);
-        assertEquals(EmailExtStep.Priority.DEFAULT, pub.getPriority());
+        pub.setPriority(Priority.DEFAULT);
+        assertEquals(Priority.DEFAULT, pub.getPriority());
 
         pub.setPriority(null);
         assertNull(pub.getPriority());

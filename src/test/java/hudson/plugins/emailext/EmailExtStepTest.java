@@ -153,48 +153,48 @@ class EmailExtStepTest {
 
     @Test
     void priorityEnumGetters() {
-        assertEquals("(Default)", EmailExtStep.Priority.DEFAULT.getDisplayName());
-        assertEquals("", EmailExtStep.Priority.DEFAULT.getXPriorityValue());
-        assertEquals("High", EmailExtStep.Priority.HIGH.getDisplayName());
-        assertEquals("1", EmailExtStep.Priority.HIGH.getXPriorityValue());
-        assertEquals("Normal", EmailExtStep.Priority.NORMAL.getDisplayName());
-        assertEquals("3", EmailExtStep.Priority.NORMAL.getXPriorityValue());
-        assertEquals("Low", EmailExtStep.Priority.LOW.getDisplayName());
-        assertEquals("5", EmailExtStep.Priority.LOW.getXPriorityValue());
+        assertEquals("(Default)", Priority.DEFAULT.getDisplayName());
+        assertEquals("", Priority.DEFAULT.getXPriorityValue());
+        assertEquals("High", Priority.HIGH.getDisplayName());
+        assertEquals("1", Priority.HIGH.getXPriorityValue());
+        assertEquals("Normal", Priority.NORMAL.getDisplayName());
+        assertEquals("3", Priority.NORMAL.getXPriorityValue());
+        assertEquals("Low", Priority.LOW.getDisplayName());
+        assertEquals("5", Priority.LOW.getXPriorityValue());
     }
 
     @Test
     void setPriorityNull() {
         EmailExtStep step = new EmailExtStep("subject", "body");
         step.setPriority(null);
-        assertEquals(EmailExtStep.Priority.DEFAULT, step.getPriority());
+        assertEquals(Priority.DEFAULT, step.getPriority());
     }
 
     @Test
     void setPriorityBlank() {
         EmailExtStep step = new EmailExtStep("subject", "body");
         step.setPriority("   ");
-        assertEquals(EmailExtStep.Priority.DEFAULT, step.getPriority());
+        assertEquals(Priority.DEFAULT, step.getPriority());
     }
 
     @Test
     void setPriorityValidValue() {
         EmailExtStep step = new EmailExtStep("subject", "body");
         step.setPriority("HIGH");
-        assertEquals(EmailExtStep.Priority.HIGH, step.getPriority());
+        assertEquals(Priority.HIGH, step.getPriority());
 
         step.setPriority("normal");
-        assertEquals(EmailExtStep.Priority.NORMAL, step.getPriority());
+        assertEquals(Priority.NORMAL, step.getPriority());
 
         step.setPriority("Low");
-        assertEquals(EmailExtStep.Priority.LOW, step.getPriority());
+        assertEquals(Priority.LOW, step.getPriority());
     }
 
     @Test
     void setPriorityUnrecognisedFallsBackToDefault() {
         EmailExtStep step = new EmailExtStep("subject", "body");
         step.setPriority("urgent");
-        assertEquals(EmailExtStep.Priority.DEFAULT, step.getPriority());
+        assertEquals(Priority.DEFAULT, step.getPriority());
     }
 
     public static class FileCopyStep extends Step {

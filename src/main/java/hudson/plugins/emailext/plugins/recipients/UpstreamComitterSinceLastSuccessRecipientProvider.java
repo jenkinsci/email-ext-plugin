@@ -84,8 +84,7 @@ public class UpstreamComitterSinceLastSuccessRecipientProvider extends Recipient
 
     private static void collectUpstreamBuilds(Cause.UpstreamCause cause, Set<Run<?, ?>> result) {
         Run<?, ?> r = cause.getUpstreamRun();
-        if (r != null) {
-            result.add(r);
+        if (r != null && result.add(r)) {
             for (Cause c : cause.getUpstreamCauses()) {
                 if (c instanceof Cause.UpstreamCause upstream) {
                     collectUpstreamBuilds(upstream, result);
@@ -94,18 +93,6 @@ public class UpstreamComitterSinceLastSuccessRecipientProvider extends Recipient
         }
     }
 
-    /**
-     * Adds for the given upstream build the committers to the recipient list for
-     * each commit in the upstream build.
-     *
-     * @param run the upstream build
-     * @param to the to recipient list
-     * @param cc the cc recipient list
-     * @param bcc the bcc recipient list
-     * @param env the build environment
-     * @param context the publisher context
-     * @param debug the debug logger
-     */
     private void addUpstreamCommittersTriggeringBuild(
             Run<?, ?> run,
             Set<InternetAddress> to,
@@ -128,17 +115,6 @@ public class UpstreamComitterSinceLastSuccessRecipientProvider extends Recipient
         }
     }
 
-    /**
-     * Adds a user to the recipients list based on a specific SCM change set
-     *
-     * @param change The ChangeLogSet.Entry to get the user information from
-     * @param to The list of to addresses to add to
-     * @param cc The list of cc addresses to add to
-     * @param bcc The list of bcc addresses to add to
-     * @param env The build environment
-     * @param context the publisher context
-     * @param debug the debug logger
-     */
     private void addUserFromChangeSet(
             ChangeLogSet.Entry change,
             Set<InternetAddress> to,

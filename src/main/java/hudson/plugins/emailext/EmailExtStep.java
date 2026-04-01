@@ -15,6 +15,7 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
+import hudson.util.ListBoxModel;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -34,29 +35,6 @@ import org.kohsuke.stapler.DataBoundSetter;
  * Created by acearl on 9/14/2015.
  */
 public class EmailExtStep extends Step {
-
-    public enum Priority {
-        DEFAULT("(Default)", ""),
-        HIGH("High", "1"),
-        NORMAL("Normal", "3"),
-        LOW("Low", "5");
-
-        private final String displayName;
-        private final String xPriorityValue;
-
-        Priority(String displayName, String xPriorityValue) {
-            this.displayName = displayName;
-            this.xPriorityValue = xPriorityValue;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
-
-        public String getXPriorityValue() {
-            return xPriorityValue;
-        }
-    }
 
     public final String subject;
 
@@ -208,6 +186,11 @@ public class EmailExtStep extends Step {
         return saveOutput;
     }
 
+    @DataBoundSetter
+    public void setSaveOutput(boolean saveOutput) {
+        this.saveOutput = saveOutput;
+    }
+
     public Priority getPriority() {
         return priority == null ? Priority.DEFAULT : priority;
     }
@@ -224,12 +207,7 @@ public class EmailExtStep extends Step {
                 return;
             }
         }
-        this.priority = Priority.DEFAULT; // fallback for unrecognised values like "urgent"
-    }
-
-    @DataBoundSetter
-    public void setSaveOutput(boolean saveOutput) {
-        this.saveOutput = saveOutput;
+        this.priority = Priority.DEFAULT;
     }
 
     @Override
@@ -273,6 +251,7 @@ public class EmailExtStep extends Step {
             publisher.compressBuildLog = step.compressLog;
             publisher.setPresendScript(step.presendScript);
             publisher.setPostsendScript(step.postsendScript);
+            publisher.setPriority(step.getPriority());
 
             if (StringUtils.isNotBlank(step.to)) {
                 publisher.recipientList = step.to;
@@ -308,15 +287,6 @@ public class EmailExtStep extends Step {
             triggered.put(AlwaysTrigger.TRIGGER_NAME, publisher.configuredTriggers.get(0));
             ctx.setTrigger(publisher.configuredTriggers.get(0));
             ctx.setTriggered(triggered);
-
-            Priority p = step.getPriority();
-            if (p != Priority.DEFAULT) {
-                String priorityScript = "msg.setHeader(\"X-Priority\", \"" + p.getXPriorityValue() + "\");\n"
-                        + "msg.setHeader(\"Importance\", \"" + p.getDisplayName() + "\");";
-                String existing = publisher.getPresendScript();
-                publisher.setPresendScript(existing.isEmpty() ? priorityScript : existing + "\n" + priorityScript);
-            }
-
             publisher.sendMail(ctx);
             return null;
         }
@@ -326,6 +296,14 @@ public class EmailExtStep extends Step {
     public static final class DescriptorImpl extends StepDescriptor {
 
         public static final String defaultMimeType = "text/plain";
+
+        public ListBoxModel doFillPriorityItems() {
+            ListBoxModel items = new ListBoxModel();
+            for (Priority p : Priority.values()) {
+                items.add(p.getDisplayName(), p.name());
+            }
+            return items;
+        }
 
         @Override
         public Set<? extends Class<?>> getRequiredContext() {
