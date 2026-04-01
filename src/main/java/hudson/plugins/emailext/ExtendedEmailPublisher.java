@@ -1023,10 +1023,6 @@ public class ExtendedEmailPublisher extends Notifier {
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
         attachments.attach(topMultipart, context);
 
-        if (StringUtils.isNotBlank(inlineAttachmentsPattern)) {
-            AttachmentUtils inlineAttachments = new AttachmentUtils(inlineAttachmentsPattern);
-            inlineAttachments.attachInline(multipart, context);
-        }
 
         // add attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getAttachmentsPattern())) {
@@ -1035,12 +1031,6 @@ public class ExtendedEmailPublisher extends Notifier {
             typeAttachments.attach(topMultipart, context);
         }
 
-        // add inline attachments from the email type if they are setup
-        if (StringUtils.isNotBlank(context.getTrigger().getEmail().getInlineAttachmentsPattern())) {
-            AttachmentUtils inlineAttachments =
-                    new AttachmentUtils(context.getTrigger().getEmail().getInlineAttachmentsPattern());
-            inlineAttachments.attachInline(multipart, context);
-        }
 
         if (attachBuildLog || context.getTrigger().getEmail().getAttachBuildLog()) {
             debug(context.getListener().getLogger(), "Request made to attach build log");
