@@ -11,8 +11,7 @@ import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 class EmailExtTemplateActionTest {
 
     @Test
-    void testRenderTemplateInterruptedExceptionRestoresInterruptFlag(JenkinsRule j)
-            throws Exception {
+    void testRenderTemplateInterruptedExceptionRestoresInterruptFlag(JenkinsRule j) throws Exception {
         FreeStyleProject project = j.createFreeStyleProject();
         EmailExtTemplateAction action = new EmailExtTemplateAction(project);
 
@@ -20,9 +19,6 @@ class EmailExtTemplateActionTest {
 
         String[] result = action.renderTemplate("nonexistent.template", "1");
 
-        assertTrue(
-            Thread.interrupted(),
-            "Interrupt flag should be restored after InterruptedException"
-        );
+        assertTrue(Thread.interrupted(), "Interrupt flag should be restored after InterruptedException");
     }
 }
