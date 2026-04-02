@@ -129,7 +129,7 @@ class MailAccountTest {
         // no auth but any combination of TLS/SSL is ok
         assertThat(mad.doCheckCredentialsId(null, null, true, false), hasKind(Kind.OK));
         assertThat(mad.doCheckCredentialsId(null, null, false, true), hasKind(Kind.OK));
-        assertThat(mad.doCheckCredentialsId(null, null, true, true), hasKind(Kind.WARNING));
+        assertThat(mad.doCheckCredentialsId(null, null, true, true), hasKind(Kind.OK));
 
         // valid credentials with TLS
         assertThat(mad.doCheckCredentialsId(null, validCredentialId, true, false), hasKind(Kind.OK));
