@@ -88,7 +88,10 @@ public class EmailExtTemplateAction implements Action {
                                         new FilePath(scriptFile), new FilePath(scriptsFolder))) {
                             return FormValidation.error("The file '" + value + "' does not exist");
                         }
-                    } catch (IOException | InterruptedException e) {
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return FormValidation.error("I/O Error.");
+                    } catch (IOException e) {
                         // Don't want to expose too much info to a potential file fishing attempt
                         return FormValidation.error("I/O Error.");
                     }
@@ -153,6 +156,9 @@ public class EmailExtTemplateAction implements Action {
             }
             result[1] = hudson.Util.xmlEscape(
                     stream.toString(ExtendedEmailPublisher.descriptor().getCharset()));
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            result[0] = renderError(ex);
         } catch (Exception ex) {
             result[0] = renderError(ex);
         }
