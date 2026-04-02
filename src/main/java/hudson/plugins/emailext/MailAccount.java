@@ -126,7 +126,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             }
             return result.includeEmptyValue()
                     .includeMatchingAs(
-                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf(t) : Jenkins.getAuthentication(),
+                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf(t) : ACL.SYSTEM,
                             item,
                             StandardUsernamePasswordCredentials.class,
                             Collections.emptyList(),
@@ -152,6 +152,10 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             if (StringUtils.isBlank(value)) {
                 return FormValidation.ok();
             }
+            if (useSsl && useTls) {
+                return FormValidation.warning(
+                    "Both SSL and TLS are enabled. Usually only one should be selected.");
+            }
 
             // do this after the authentication check so we do not reveal the FIPS mode of the controller.
             FormValidation insecureAuthValidation;
@@ -170,7 +174,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             if (CredentialsProvider.listCredentials(
                             StandardUsernamePasswordCredentials.class,
                             item,
-                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf(t) : Jenkins.getAuthentication(),
+                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf(t) : ACL.SYSTEM,
                             null,
                             CredentialsMatchers.withId(value))
                     .isEmpty()) {
@@ -208,20 +212,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
 
     @DataBoundSetter
     public void setSmtpPort(String smtpPort) {
-        smtpPort = Util.fixEmptyAndTrim(smtpPort);
-
-        if (smtpPort != null) {
-            try {
-                int port = Integer.parseInt(smtpPort);
-                if (port < 1 || port > 65535) {
-                    throw new IllegalArgumentException("SMTP port must be between 1 and 65535");
-                }
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("SMTP port must be a valid number");
-            }
-        }
-
-        this.smtpPort = smtpPort;
+        this.smtpPort = Util.fixEmptyAndTrim(smtpPort);
     }
 
     @Deprecated
@@ -309,14 +300,11 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             domainRequirement = new HostnamePortRequirement(smtpHost, Integer.parseInt(smtpPort));
         }
         final List<StandardUsernamePasswordCredentials> credentials = CredentialsMatchers.filter(
-                CredentialsProvider.lookupCredentialsInItemGroup(
-                        StandardUsernamePasswordCredentials.class,
-                        Jenkins.get(),
-                        ACL.SYSTEM2,
-                        Collections.singletonList(domainRequirement)),
+                CredentialsProvider.lookupCredentials(
+                        StandardUsernamePasswordCredentials.class, Jenkins.get(), ACL.SYSTEM, domainRequirement),
                 CredentialsMatchers.withUsername(smtpUsername));
         for (final StandardUsernamePasswordCredentials cred : credentials) {
-            if (smtpPassword.getPlainText().equals(Secret.toString(cred.getPassword()))) {
+            if (StringUtils.equals(smtpPassword.getPlainText(), Secret.toString(cred.getPassword()))) {
                 // If some credentials have the same username/password, use those.
                 credentialsId = cred.getId();
                 break;
