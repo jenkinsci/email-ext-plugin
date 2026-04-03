@@ -147,7 +147,8 @@ class EmailExtStepTest {
 
         FilePath workspace = j.jenkins.getWorkspaceFor(job);
         assertNotNull(workspace, "Workspace should be available after the build");
-        assertTrue(workspace.child("email-ext-message.txt").exists(), "Should save the text output under a stable name");
+        assertTrue(
+                workspace.child("email-ext-message.txt").exists(), "Should save the text output under a stable name");
 
         Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
         assertEquals(1, mbox.size());
@@ -169,7 +170,8 @@ class EmailExtStepTest {
 
         FilePath workspace = j.jenkins.getWorkspaceFor(job);
         assertNotNull(workspace, "Workspace should be available after the build");
-        assertTrue(workspace.child("email-ext-message.html").exists(), "Should save the HTML output under a stable name");
+        assertTrue(
+                workspace.child("email-ext-message.html").exists(), "Should save the HTML output under a stable name");
     }
 
     public static class FileCopyStep extends Step {
