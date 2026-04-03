@@ -63,7 +63,7 @@ In the *Post-build Actions* section, click on *Add post-build action* and then s
 
 There are three main fields that you can edit when this plugin is enabled:
 
-Project Recipient List:: This is a comma (or whitespace) separated list of email recipients. Allows you to specify a single recipient list for each email that is sent.
+Project Recipient List:: This is a comma (or whitespace) separated list of email recipients. It allows you to specify a single recipient list for each email that is sent.
 Default Subject:: This allows you to configure a token (more about tokens later) that can be used to easily configure all email subjects for the project.
 Default Content:: Same as *Default Subject*, but for the email body instead of the subject.
 
@@ -124,12 +124,12 @@ To see what conditions must be met for this plugin to send an email, click on th
 
 ==== Extended Email Publisher Triggers
 
-The following triggers are available as part of the Extended Email Publisher plugin, other plugins can provide triggers as well through the extension point defined in the Extended Email Publisher:
+The following triggers are available as part of the Extended Email Publisher plugin, other plugins can provide triggers as well, through the extension point defined in the Extended Email Publisher:
 
 Aborted:: An email will be sent if the build status is "Aborted". A build is aborted via the UI or API, but normally requires some sort of user intervention to occur. An aborted build is stopped during its execution.
 Always:: Always triggers an email after the build, regardless of the status of the build.
 Before Build:: An email will be sent when the build begins, but after SCM polling has completed.
-Failure -> Unstable (Test Failures):: An email will be sent any time the build goes from failing (compilation or build step failures), to unstable (unit test failures). This basically means that all the builds steps were successful, but there are still tests failing.
+Failure -> Unstable (Test Failures):: An email will be sent any time the build goes from failing (compilation or build step failures) to unstable (unit test failures). This basically means that all the builds steps were successful, but there are still tests failing.
 Failure - Any:: An email will be sent any time the build fails.  If the "Failure - Still" trigger is configured, and the previous build status was "Failure", then the "Failure - Still" trigger will send an email instead.
 Failure - 1st:: An email will be sent when the build status changes from "Success" to "Failure".
 Failure - 2nd:: An email will be sent when the build fails twice in a row after a successful build.
@@ -153,12 +153,12 @@ Unstable (Test Failures)/Failure -> Success:: An email will be sent when the bui
 Once you have added a trigger, you have several common options (there may be additional options available depending on the trigger implementation):
 
 Recipient List:: Add this recipient provider if you would like to have the email sent to the *Project Recipient List* configured above.
-Developers:: Add this recipient provider to send the email to anyone who checked in code for the last build. This plugin will generate an email address based on the committer's ID and an appended *Default user e-mail suffix* from the *Extended E-mail Notification section* of the *Configure System* page. For example, if a change was committed by someone with an ID of `first.last`, and the default user e-mail suffix is `@example.com`, then an email will be sent to `first.last@example.com`.
+Developers:: Add this recipient provider to send the email to anyone who checked in code for the last build. This plugin will generate an email address based on the committer's ID and the appended *Default user e-mail suffix* from the *Extended E-mail Notification section* of the *Configure System* page. For example, if a change was committed by someone with an ID of `first.last`, and the default user e-mail suffix is `@example.com`, then an email will be sent to `first.last@example.com`.
 Requestor:: Add this recipient provider to send an email to the user who initiated the build (if initiated by a user manually).
 Include Culprits:: If this recipient provider _and_ the *Developers* recipient provider are added, emails will include everyone who committed since the last successful build.
 Previous:: Add this recipient provider to send an email to the the culprits, requestor and developers of the previous build(s).
 Advanced:: Configure properties at a per-trigger level:
- Recipient List::: A comma (or whitespace) separated list of email address that should receive this email if it is triggered. This list is appended to the *Project Recipient List* described above.
+ Recipient List::: A comma (or whitespace) separated list of email addresses that should receive this email when it is triggered. This list is appended to the *Project Recipient List* described above.
 **Using the `${FILE}` token**
 
 The `${FILE}` token reads recipient addresses from a file located in the build workspace.
