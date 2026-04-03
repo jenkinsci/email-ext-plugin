@@ -170,6 +170,7 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
         }
         return parent.isDescendant(relative);
     }
+
     private InputStream getManagedFile(Run<?, ?> run, String fileName) {
         InputStream stream;
         Plugin plugin = Jenkins.get().getPlugin("config-file-provider");
