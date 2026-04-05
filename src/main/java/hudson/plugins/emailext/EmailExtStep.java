@@ -15,7 +15,6 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
-import hudson.util.ListBoxModel;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -296,14 +295,6 @@ public class EmailExtStep extends Step {
     public static final class DescriptorImpl extends StepDescriptor {
 
         public static final String defaultMimeType = "text/plain";
-
-        public ListBoxModel doFillPriorityItems() {
-            ListBoxModel items = new ListBoxModel();
-            for (Priority p : Priority.values()) {
-                items.add(p.getDisplayName(), p.name());
-            }
-            return items;
-        }
 
         @Override
         public Set<? extends Class<?>> getRequiredContext() {

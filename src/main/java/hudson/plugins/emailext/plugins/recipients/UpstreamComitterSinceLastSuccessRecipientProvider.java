@@ -14,7 +14,6 @@ import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.scm.ChangeLogSet;
 import jakarta.mail.internet.InternetAddress;
 import java.io.PrintStream;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -93,6 +92,18 @@ public class UpstreamComitterSinceLastSuccessRecipientProvider extends Recipient
         }
     }
 
+    /**
+     * Adds for the given upstream build the committers to the recipient list for
+     * each commit in the upstream build.
+     *
+     * @param run the upstream build
+     * @param to the to recipient list
+     * @param cc the cc recipient list
+     * @param bcc the bcc recipient list
+     * @param env the build environment
+     * @param context the publisher context
+     * @param debug the debug logger
+     */
     private void addUpstreamCommittersTriggeringBuild(
             Run<?, ?> run,
             Set<InternetAddress> to,
@@ -106,25 +117,14 @@ public class UpstreamComitterSinceLastSuccessRecipientProvider extends Recipient
                 run.getParent().getDisplayName(), run.getNumber());
         if (run instanceof RunWithSCM<?, ?> cM) {
             List<ChangeLogSet<? extends ChangeLogSet.Entry>> changeSets = cM.getChangeSets();
-
+            Set<User> users = new HashSet<>();
             for (ChangeLogSet<? extends ChangeLogSet.Entry> changeSet : changeSets) {
                 for (ChangeLogSet.Entry change : changeSet) {
-                    addUserFromChangeSet(change, to, cc, bcc, env, context, debug);
+                    users.add(change.getAuthor());
                 }
             }
+            RecipientProviderUtilities.addUsers(users, context, env, to, cc, bcc, debug);
         }
-    }
-
-    private void addUserFromChangeSet(
-            ChangeLogSet.Entry change,
-            Set<InternetAddress> to,
-            Set<InternetAddress> cc,
-            Set<InternetAddress> bcc,
-            EnvVars env,
-            final ExtendedEmailPublisherContext context,
-            RecipientProviderUtilities.IDebug debug) {
-        User user = change.getAuthor();
-        RecipientProviderUtilities.addUsers(Collections.singleton(user), context, env, to, cc, bcc, debug);
     }
 
     @Extension
