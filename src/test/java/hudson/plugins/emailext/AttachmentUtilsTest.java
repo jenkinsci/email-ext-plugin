@@ -12,17 +12,12 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
+import hudson.model.*;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import jakarta.mail.BodyPart;
@@ -336,5 +331,40 @@ class AttachmentUtilsTest {
                 "There should be a txt file named \"已使用红包.txt\" attached but found %s".formatted(attachment_filename));
 
         assertTrue(attach.isMimeType("text/plain"), "The file should have the \"text/plain\" mimetype");
+    }
+
+    @Test
+    void shouldAttachBuildLog() throws Exception {
+        FreeStyleProject project = j.createFreeStyleProject();
+
+        ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
+        publisher.attachBuildLog = true;
+        publisher.recipientList = "test@example.com";
+
+        publisher
+                .getConfiguredTriggers()
+                .add(new SuccessTrigger(
+                        Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project"));
+
+        project.getPublishersList().add(publisher);
+
+        j.buildAndAssertSuccess(project);
+
+        Mailbox mbox = Mailbox.get("test@example.com");
+        assertFalse(mbox.isEmpty(), "Expected email to be sent");
+
+        MimeMultipart part = (MimeMultipart) mbox.get(0).getContent();
+
+        boolean hasLog = false;
+
+        for (int i = 0; i < part.getCount(); i++) {
+            String name = part.getBodyPart(i).getFileName();
+            if (name != null && name.contains("log")) {
+                hasLog = true;
+                break;
+            }
+        }
+
+        assertTrue(hasLog);
     }
 }
