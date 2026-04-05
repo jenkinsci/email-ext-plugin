@@ -22,6 +22,8 @@ import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import jenkins.model.Jenkins;
@@ -183,20 +185,15 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             return insecureAuthValidation;
         }
 
-        @SuppressWarnings("lgtm[jenkins/csrf]")
-        public FormValidation doCheckSmtpPort(@QueryParameter String value) {
+        @SuppressWarnings({"lgtm[jenkins/csrf]", "lgtm[jenkins/no-permission-check]"})
+        public FormValidation doCheckSmtpPort(@QueryParameter Integer value) {
 
-            if (StringUtils.isBlank(value)) {
+            if (value == null) {
                 return FormValidation.ok();
             }
 
-            try {
-                int port = Integer.parseInt(value);
-                if (port < 1 || port > 65535) {
-                    return FormValidation.error("SMTP port must be between 1 and 65535.");
-                }
-            } catch (NumberFormatException e) {
-                return FormValidation.error("SMTP port must be a valid number.");
+            if (value < 1 || value > 65535) {
+                return FormValidation.error("SMTP port must be between 1 and 65535.");
             }
 
             return FormValidation.ok();
@@ -209,11 +206,12 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                 return FormValidation.ok();
             }
 
-            if (value.contains(" ")) {
-                return FormValidation.error("SMTP host must not contain spaces.");
+            try {
+                InetAddress.getByName(value);
+                return FormValidation.ok();
+            } catch (UnknownHostException e) {
+                return FormValidation.error("Invalid hostname or IP address.");
             }
-
-            return FormValidation.ok();
         }
     }
 

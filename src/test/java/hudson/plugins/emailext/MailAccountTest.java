@@ -169,10 +169,10 @@ class MailAccountTest {
     void testSmtpPortValidation() {
         MailAccountDescriptor mad = new MailAccountDescriptor();
 
-        assertThat(mad.doCheckSmtpPort("abc"), hasKind(Kind.ERROR));
-        assertThat(mad.doCheckSmtpPort("70000"), hasKind(Kind.ERROR));
-        assertThat(mad.doCheckSmtpPort("0"), hasKind(Kind.ERROR));
-        assertThat(mad.doCheckSmtpPort("25"), hasKind(Kind.OK));
+        assertThat(mad.doCheckSmtpPort(null), hasKind(Kind.OK));
+        assertThat(mad.doCheckSmtpPort(0), hasKind(Kind.ERROR));
+        assertThat(mad.doCheckSmtpPort(70000), hasKind(Kind.ERROR));
+        assertThat(mad.doCheckSmtpPort(25), hasKind(Kind.OK));
     }
 
     @Test
