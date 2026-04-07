@@ -1,9 +1,34 @@
 package hudson.plugins.emailext;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.function.BiFunction;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.lang3.StringUtils;
+import org.jenkinsci.Symbol;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
+import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
+import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest2;
+
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cloudbees.plugins.credentials.domains.HostnamePortRequirement;
+
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
@@ -25,31 +50,9 @@ import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StringReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.function.BiFunction;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang3.StringUtils;
-import org.jenkinsci.Symbol;
-import org.jenkinsci.plugins.scriptsecurity.scripts.ApprovalContext;
-import org.jenkinsci.plugins.scriptsecurity.scripts.ClasspathEntry;
-import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
-import org.jenkinsci.plugins.scriptsecurity.scripts.languages.GroovyLanguage;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest2;
 
 /**
  * These settings are global configurations
@@ -937,7 +940,26 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     void setAuthenticatorProvider(BiFunction<MailAccount, Run<?, ?>, Authenticator> authenticatorProvider) {
         this.authenticatorProvider = authenticatorProvider;
     }
+    public FormValidation doCheckTenantId(@QueryParameter String value) {
+        if (StringUtils.isBlank(value)) {
+            return FormValidation.error("Tenant ID is required");
+        }
+        return FormValidation.ok();
+    }
 
+    public FormValidation doCheckClientId(@QueryParameter String value) {
+        if (StringUtils.isBlank(value)) {
+            return FormValidation.error("Client ID is required");
+        }
+        return FormValidation.ok();
+    }
+
+    public FormValidation doCheckClientSecretId(@QueryParameter String value) {
+        if (StringUtils.isBlank(value)) {
+            return FormValidation.error("Client Secret is required");
+        }
+        return FormValidation.ok();
+    }
     @SuppressWarnings({"lgtm/jenkins/csrf", "lgtm/jenkins/no-permission-check"})
     public FormValidation doCheckAttachmentsPattern(@QueryParameter String value) {
         return validateAttachmentPattern(value);

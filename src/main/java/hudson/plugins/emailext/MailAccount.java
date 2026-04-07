@@ -44,6 +44,42 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     private boolean useTls;
     private String advProperties;
     private boolean defaultAccount;
+    private boolean useOAuth;
+    public boolean isUseOAuth() {
+		return useOAuth;
+	}
+
+	public void setUseOAuth(boolean useOAuth) {
+		this.useOAuth = useOAuth;
+	}
+
+	public String getTenantId() {
+		return tenantId;
+	}
+
+	public void setTenantId(String tenantId) {
+		this.tenantId = tenantId;
+	}
+
+	public String getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+
+	public String getClientSecretId() {
+		return clientSecretId;
+	}
+
+	public void setClientSecretId(String clientSecretId) {
+		this.clientSecretId = clientSecretId;
+	}
+
+	private String tenantId;
+    private String clientId;
+    private String clientSecretId;
 
     private boolean useOAuth2;
 
