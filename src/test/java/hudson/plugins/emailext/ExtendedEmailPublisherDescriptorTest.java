@@ -1358,5 +1358,9 @@ class ExtendedEmailPublisherDescriptorTest {
 
         assertThat(desc.doCheckInlineAttachmentsPattern("**/*.png"), hasKind(Kind.OK));
         assertThat(desc.doCheckInlineAttachmentsPattern("../danger.png"), hasKind(Kind.ERROR));
-    }
+        assertThat(desc.doCheckAttachmentsPattern(""), hasKind(Kind.WARNING));
+        assertThat(desc.doCheckAttachmentsPattern("../file.txt"), hasKind(Kind.ERROR));
+        assertThat(desc.doCheckAttachmentsPattern("/tmp/file.txt"), hasKind(Kind.ERROR));
+        assertThat(desc.doCheckAttachmentsPattern("logs/*.txt"), hasKind(Kind.OK));
+    }   
 }
