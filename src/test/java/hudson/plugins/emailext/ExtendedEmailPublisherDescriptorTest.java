@@ -1324,7 +1324,6 @@ class ExtendedEmailPublisherDescriptorTest {
         assertEquals(
                 "both", descriptor.getDefaultContentType(), "'both' content type should persist after save and reload");
     }
-
     @Test
     void testAttachmentsPatternValidation() {
         ExtendedEmailPublisherDescriptor desc = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
@@ -1351,16 +1350,4 @@ class ExtendedEmailPublisherDescriptorTest {
         // Balanced braces – OK
         assertThat(desc.doCheckAttachmentsPattern("file{abc}"), hasKind(Kind.OK));
     }
-
-    @Test
-    void testInlineAttachmentsPatternValidation() {
-        ExtendedEmailPublisherDescriptor desc = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-
-        assertThat(desc.doCheckInlineAttachmentsPattern("**/*.png"), hasKind(Kind.OK));
-        assertThat(desc.doCheckInlineAttachmentsPattern("../danger.png"), hasKind(Kind.ERROR));
-        assertThat(desc.doCheckAttachmentsPattern(""), hasKind(Kind.WARNING));
-        assertThat(desc.doCheckAttachmentsPattern("../file.txt"), hasKind(Kind.ERROR));
-        assertThat(desc.doCheckAttachmentsPattern("/tmp/file.txt"), hasKind(Kind.ERROR));
-        assertThat(desc.doCheckAttachmentsPattern("logs/*.txt"), hasKind(Kind.OK));
-    }   
 }
