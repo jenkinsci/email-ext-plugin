@@ -121,74 +121,32 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public static final String PROJECT_DEFAULT_BODY_TEXT = "$PROJECT_DEFAULT_CONTENT";
 
-    /**
-     * A comma-separated list of email recipient that will be used for every
-     * theTrigger.
-     */
     public String recipientList = "";
 
-    /**
-     * This is the list of email theTriggers that the project has configured
-     */
     @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "TODO needs triage")
     public List<EmailTrigger> configuredTriggers = new ArrayList<>();
 
-    /**
-     * The contentType of the emails for this project (text/html, text/plain, etc).
-     */
     public String contentType;
 
-    /**
-     * The default subject of the emails for this project.
-     * ($PROJECT_DEFAULT_SUBJECT)
-     */
     public String defaultSubject;
 
-    /**
-     * The default body of the emails for this project. ($PROJECT_DEFAULT_BODY)
-     */
     public String defaultContent;
 
-    /**
-     * The project wide set of attachments.
-     */
     public String attachmentsPattern;
 
-    /**
-     * The project wide set of inline attachments.
-     */
     public String inlineAttachmentsPattern;
 
-    /**
-     * The project's pre-send script.
-     */
     private String presendScript;
-
-    /**
-     * The project's post-send script.
-     */
     private String postsendScript;
 
     private List<GroovyScriptPath> classpath;
 
-    /**
-     * True to attach the log from the build to the email.
-     */
     public boolean attachBuildLog;
 
-    /**
-     * True to compress the log from the build before attaching to the email
-     */
     public boolean compressBuildLog;
 
-    /**
-     * Reply-To value for the e-mail
-     */
     public String replyTo;
 
-    /**
-     * From value for the e-mail
-     */
     public String from;
 
     /**
@@ -205,22 +163,12 @@ public class ExtendedEmailPublisher extends Notifier {
         this.priority = priority;
     }
 
-    /**
-     * If true, save the generated email content to email-ext-message.[txt|html]
-     */
     public boolean saveOutput = false;
 
-    /**
-     * If true, disables the publisher from running.
-     */
     public boolean disabled = false;
 
-    /* If true, will check for throttling limits before sending email */
     public boolean throttlingEnabled = false;
 
-    /**
-     * How to theTrigger the email if the project is a matrix project.
-     */
     public MatrixTriggerMode matrixTriggerMode;
 
     public ExtendedEmailPublisher() {}
@@ -382,11 +330,6 @@ public class ExtendedEmailPublisher extends Notifier {
         this.inlineAttachmentsPattern = inlineAttachmentsPattern;
     }
 
-    /**
-     * Get the list of configured email theTriggers for this project.
-     *
-     * @return The list of triggers configure for this publisher instance
-     */
     public List<EmailTrigger> getConfiguredTriggers() {
         if (configuredTriggers == null) {
             configuredTriggers = new ArrayList<>();
@@ -999,6 +942,7 @@ public class ExtendedEmailPublisher extends Notifier {
         if (result != null) {
             msg.addHeader("X-Jenkins-Result", result.toString());
         }
+        // Add priority headers if priority is set and non-default
         if (priority != null && priority != Priority.DEFAULT) {
             msg.addHeader("X-Priority", priority.getXPriorityValue());
             msg.addHeader("Importance", priority.getDisplayName());

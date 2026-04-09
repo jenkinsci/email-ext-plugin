@@ -30,9 +30,6 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-/**
- * Created by acearl on 9/14/2015.
- */
 public class EmailExtStep extends Step {
 
     public final String subject;
