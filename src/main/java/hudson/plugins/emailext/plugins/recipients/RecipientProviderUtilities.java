@@ -101,15 +101,10 @@ public final class RecipientProviderUtilities {
     }
 
     private static User getByUserIdCause(Run<?, ?> run) {
-        try {
-            Cause.UserIdCause cause = run.getCause(Cause.UserIdCause.class);
-            if (cause != null) {
-                String id = cause.getUserId();
-                return User.get(id, false, Collections.emptyMap());
-            }
-
-        } catch (Exception e) {
-            LOGGER.info(e.getMessage());
+        Cause.UserIdCause cause = run.getCause(Cause.UserIdCause.class);
+        if (cause != null) {
+            String id = cause.getUserId();
+            return User.get(id, false, Collections.emptyMap());
         }
         return null;
     }
@@ -126,8 +121,10 @@ public final class RecipientProviderUtilities {
                 String name = (String) authenticationName.get(userCause);
                 return User.get(name, false, Collections.emptyMap());
             }
-        } catch (Exception e) {
-            LOGGER.info(e.getMessage());
+        } catch (NoSuchFieldException e) {
+            LOGGER.warning("Could not find authenticationName field in UserCause: " + e.getMessage());
+        } catch (IllegalAccessException e) {
+            LOGGER.warning("Could not access authenticationName field in UserCause: " + e.getMessage());
         }
         return null;
     }
