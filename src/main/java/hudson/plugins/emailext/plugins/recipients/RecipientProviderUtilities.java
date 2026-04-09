@@ -101,10 +101,14 @@ public final class RecipientProviderUtilities {
     }
 
     private static User getByUserIdCause(Run<?, ?> run) {
-        Cause.UserIdCause cause = run.getCause(Cause.UserIdCause.class);
-        if (cause != null) {
-            String id = cause.getUserId();
-            return User.get(id, false, Collections.emptyMap());
+        try {
+            Cause.UserIdCause cause = run.getCause(Cause.UserIdCause.class);
+            if (cause != null) {
+                String id = cause.getUserId();
+                return User.get(id, false, Collections.emptyMap());
+            }
+        } catch (IllegalStateException e) {
+            LOGGER.warning("Could not retrieve UserIdCause: " + e.getMessage());
         }
         return null;
     }
