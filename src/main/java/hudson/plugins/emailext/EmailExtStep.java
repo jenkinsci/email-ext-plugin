@@ -15,6 +15,7 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
+import hudson.util.ListBoxModel;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -314,6 +315,15 @@ public class EmailExtStep extends Step {
         @SuppressWarnings("unused")
         public List<RecipientProviderDescriptor> getRecipientProvidersDescriptors() {
             return RecipientProvider.allSupporting(WorkflowJob.class);
+        }
+
+        public ListBoxModel doFillPriorityItems() {
+            Jenkins.get().checkPermission(Jenkins.READ); // Security best practice!
+            ListBoxModel items = new ListBoxModel();
+            for (Priority value : Priority.values()) {
+                items.add(value.getDisplayName(), value.name());
+            }
+            return items;
         }
     }
 }
