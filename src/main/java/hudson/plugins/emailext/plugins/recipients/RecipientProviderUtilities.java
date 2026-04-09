@@ -129,6 +129,8 @@ public final class RecipientProviderUtilities {
             LOGGER.warning("Could not find authenticationName field in UserCause: " + e.getMessage());
         } catch (IllegalAccessException e) {
             LOGGER.warning("Could not access authenticationName field in UserCause: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            LOGGER.warning("Could not retrieve UserCause: " + e.getMessage());
         }
         return null;
     }
