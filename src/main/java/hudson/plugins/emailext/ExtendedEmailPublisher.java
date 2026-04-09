@@ -945,7 +945,7 @@ public class ExtendedEmailPublisher extends Notifier {
         // Add priority headers if priority is set and non-default
         if (priority != null && priority != Priority.DEFAULT) {
             msg.addHeader("X-Priority", priority.getXPriorityValue());
-            msg.addHeader("Importance", priority.getDisplayName());
+            msg.addHeader("Importance", priority.getDisplayName().toLowerCase());
         }
         msg.setSentDate(new Date());
         setSubject(context, msg, charset);
