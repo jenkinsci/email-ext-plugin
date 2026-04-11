@@ -9,8 +9,9 @@ import hudson.model.CauseAction;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.model.User;
 import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
-import java.util.Collections;
+import hudson.tasks.Mailer;
 import java.util.Set;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -18,8 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
-import hudson.model.User;
-import hudson.tasks.Mailer;
 
 /**
  * Tests the class {@link EmailExtRecipientStep}.
@@ -46,9 +45,8 @@ class EmailExtRecipientStepTest {
         assertTrue(requiredContext.contains(TaskListener.class));
         assertTrue(requiredContext.contains(EnvVars.class));
 
-        assertTrue(
-                descriptor.getRecipientProvidersDescriptors().stream()
-                        .anyMatch(d -> d instanceof RequesterRecipientProvider.DescriptorImpl));
+        assertTrue(descriptor.getRecipientProvidersDescriptors().stream()
+                .anyMatch(d -> d instanceof RequesterRecipientProvider.DescriptorImpl));
     }
 
     @Test
@@ -76,7 +74,8 @@ class EmailExtRecipientStepTest {
                         + " }",
                 true));
 
-        Run<?, ?> run = job.scheduleBuild2(0, new CauseAction(new Cause.UserIdCause("kutzi"))).get();
+        Run<?, ?> run = job.scheduleBuild2(0, new CauseAction(new Cause.UserIdCause("kutzi")))
+                .get();
         j.assertBuildStatusSuccess(run);
 
         String log = String.join("\n", run.getLog(2000));
