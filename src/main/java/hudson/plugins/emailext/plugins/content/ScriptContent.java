@@ -179,10 +179,13 @@ public class ScriptContent extends AbstractEvalContent {
                         new EmailExtScriptTokenMacroWhitelist(),
                         new StaticProxyInstanceWhitelist(build, "templates-instances.whitelist"));
 
+                EmailExtScriptTokenMacroWhitelist.beginExecution(build, listener);
                 try (GroovySandbox.Scope scope =
                         new GroovySandbox().withWhitelist(sandboxWhitelist).enter()) {
                     // `out` is a PrintWriter over StringWriter in this rendering path; no explicit close needed.
                     result = tmplR.make(binding).toString();
+                } finally {
+                    EmailExtScriptTokenMacroWhitelist.endExecution();
                 }
             }
         } catch (RuntimeException | IOException | ClassNotFoundException e) {
@@ -233,15 +236,20 @@ public class ScriptContent extends AbstractEvalContent {
                 && !AbstractEvalContent.isApprovedScript(scriptContent, GroovyLanguage.get())) {
             // Unapproved script, run it in the sandbox
             GroovyShell shell = createEngine(descriptor, binding, true);
-            Object res = GroovySandbox.run(
-                    shell,
-                    scriptContent,
-                    new ProxyWhitelist(
-                            Whitelist.all(),
-                            new PrintStreamInstanceWhitelist(logger),
-                            new EmailExtScriptTokenMacroWhitelist()));
-            if (res != null) {
-                result = res.toString();
+            EmailExtScriptTokenMacroWhitelist.beginExecution(build, listener);
+            try {
+                Object res = GroovySandbox.run(
+                        shell,
+                        scriptContent,
+                        new ProxyWhitelist(
+                                Whitelist.all(),
+                                new PrintStreamInstanceWhitelist(logger),
+                                new EmailExtScriptTokenMacroWhitelist()));
+                if (res != null) {
+                    result = res.toString();
+                }
+            } finally {
+                EmailExtScriptTokenMacroWhitelist.endExecution();
             }
         } else {
             if (scriptStream instanceof UserProvidedContentInputStream) {
