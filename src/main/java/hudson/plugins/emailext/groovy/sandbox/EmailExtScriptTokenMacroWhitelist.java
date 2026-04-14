@@ -56,7 +56,7 @@ public class EmailExtScriptTokenMacroWhitelist extends AbstractWhitelist {
      * try-finally block in ScriptContent, ensuring no memory leak and no
      * script-side mutation (lives purely in Java, not in the Groovy Binding).
      */
-    public static final ThreadLocal<EnvVars> ENV_CACHE = new ThreadLocal<>();
+    private static final ThreadLocal<EnvVars> ENV_CACHE = new ThreadLocal<>();
 
     private final List<TokenMacro> macros;
 
@@ -65,6 +65,10 @@ public class EmailExtScriptTokenMacroWhitelist extends AbstractWhitelist {
         list.addAll(TokenMacro.all());
         list.addAll(ContentBuilder.getPrivateMacros());
         this.macros = Collections.unmodifiableList(list);
+    }
+
+    public static EnvVars getCachedEnvVars() {
+        return ENV_CACHE.get();
     }
 
     /**

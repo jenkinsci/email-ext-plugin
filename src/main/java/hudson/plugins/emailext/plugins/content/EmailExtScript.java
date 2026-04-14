@@ -80,7 +80,7 @@ public abstract class EmailExtScript extends Script {
             // Get the build and listener from the binding.
             Run<?, ?> build = (Run<?, ?>) this.getBinding().getVariable("build");
             TaskListener listener = (TaskListener) this.getBinding().getVariable("listener");
-            EnvVars vars = EmailExtScriptTokenMacroWhitelist.ENV_CACHE.get();
+            EnvVars vars = EmailExtScriptTokenMacroWhitelist.getCachedEnvVars();
             if (vars == null) {
                 // Fallback if called outside sandbox context
                 vars = build.getEnvironment(listener);

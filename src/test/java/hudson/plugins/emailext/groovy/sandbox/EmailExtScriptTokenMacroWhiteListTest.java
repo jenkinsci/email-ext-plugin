@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import hudson.EnvVars;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import java.io.IOException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -37,9 +38,9 @@ public class EmailExtScriptTokenMacroWhiteListTest {
     void testGetEnvironmentCalledOnlyOnce() throws Exception {
         EmailExtScriptTokenMacroWhitelist.beginExecution(mockRun, mockListener);
 
-        EnvVars cached1 = EmailExtScriptTokenMacroWhitelist.ENV_CACHE.get();
-        EnvVars cached2 = EmailExtScriptTokenMacroWhitelist.ENV_CACHE.get();
-        EnvVars cached3 = EmailExtScriptTokenMacroWhitelist.ENV_CACHE.get();
+        EnvVars cached1 = EmailExtScriptTokenMacroWhitelist.getCachedEnvVars();
+        EnvVars cached2 = EmailExtScriptTokenMacroWhitelist.getCachedEnvVars();
+        EnvVars cached3 = EmailExtScriptTokenMacroWhitelist.getCachedEnvVars();
 
         assertEquals(cached1, cached2);
         assertEquals(cached2, cached3);
@@ -53,13 +54,13 @@ public class EmailExtScriptTokenMacroWhiteListTest {
         EmailExtScriptTokenMacroWhitelist.endExecution();
 
         // Cache must be null after cleanup
-        assertNull(EmailExtScriptTokenMacroWhitelist.ENV_CACHE.get());
+        assertNull(EmailExtScriptTokenMacroWhitelist.getCachedEnvVars());
     }
 
     @Test
     void testFallbackWhenCacheNotInitialized() {
 
-        assertNull(EmailExtScriptTokenMacroWhitelist.ENV_CACHE.get());
+        assertNull(EmailExtScriptTokenMacroWhitelist.getCachedEnvVars());
     }
 
     @Test
@@ -96,6 +97,24 @@ public class EmailExtScriptTokenMacroWhiteListTest {
         System.out.printf("Reduction:           %.0f%%%n", (1.0 - (double) cachedMs / baselineMs) * 100);
     }
 
+    @Test
+    void testBeginExecutionHandlesIOException() throws Exception {
+        when(mockRun.getEnvironment(mockListener)).thenThrow(new IOException("simulated failure"));
+
+        EmailExtScriptTokenMacroWhitelist.beginExecution(mockRun, mockListener);
+
+        assertNull(EmailExtScriptTokenMacroWhitelist.getCachedEnvVars());
+    }
+
+    @Test
+    void testBeginExecutionHandlesInterruptedException() throws Exception {
+        when(mockRun.getEnvironment(mockListener)).thenThrow(new InterruptedException("simulated interrupt"));
+
+        EmailExtScriptTokenMacroWhitelist.beginExecution(mockRun, mockListener);
+
+        assertNull(EmailExtScriptTokenMacroWhitelist.getCachedEnvVars());
+    }
+
     private void runBaseline(int iterations) throws Exception {
         for (int i = 0; i < iterations; i++) {
             mockRun.getEnvironment(mockListener);
@@ -106,7 +125,7 @@ public class EmailExtScriptTokenMacroWhiteListTest {
         EmailExtScriptTokenMacroWhitelist.beginExecution(mockRun, mockListener);
         try {
             for (int i = 0; i < iterations; i++) {
-                EmailExtScriptTokenMacroWhitelist.ENV_CACHE.get();
+                EmailExtScriptTokenMacroWhitelist.getCachedEnvVars();
             }
         } finally {
             EmailExtScriptTokenMacroWhitelist.endExecution();
