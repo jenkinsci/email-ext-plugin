@@ -10,7 +10,7 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/main/[image:https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/main/badge/icon[Build Status]]
+https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/main/[image:https://ci.jenkins.io/buildStatus/icon?job=Plugins%2Femail-ext-plugin%2Fmain[Build Status]]
 https://github.com/jenkinsci/email-ext-plugin/graphs/contributors[image:https://img.shields.io/github/contributors/jenkinsci/email-ext-plugin.svg[Contributors]]
 https://plugins.jenkins.io/email-ext[image:https://img.shields.io/jenkins/plugin/v/email-ext.svg[Jenkins Plugin]]
 https://github.com/jenkinsci/email-ext-plugin/releases/latest[image:https://img.shields.io/github/release/jenkinsci/email-ext-plugin.svg?label=changelog[GitHub release]]
