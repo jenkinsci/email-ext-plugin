@@ -22,8 +22,11 @@ import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 import jenkins.model.Jenkins;
 import jenkins.security.FIPS140;
 import net.sf.json.JSONObject;
@@ -77,10 +80,31 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     }
 
     public boolean isSmtpServerValid() {
-        return true;
-        // Note: having no SMTP server is fine, it means localhost.
-        // More control could be implemented here when not null though,
-        // like checking the value looks like an FQDN or IP address.
+        if (StringUtils.isBlank(smtpHost)) {
+            return true; // empty means localhost
+        }
+        try {
+            InetAddress.getByName(smtpHost);
+            return true; // resolved successfully (IPv4, IPv6, or hostname)
+        } catch (UnknownHostException e) {
+            // Offline or unresolvable – fall back to syntax checks
+            return isSyntacticallyValid(smtpHost);
+        }
+    }
+
+    private boolean isSyntacticallyValid(String host) {
+        // Check if it looks like an IPv4 address (four dot‑separated numbers)
+        Pattern ipv4Structure = Pattern.compile("^(\\d{1,3}\\.){3}\\d{1,3}$");
+        if (ipv4Structure.matcher(host).matches()) {
+            // Strict IPv4 validation
+            Pattern ipv4Valid = Pattern.compile(
+                    "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
+            return ipv4Valid.matcher(host).matches();
+        }
+        // Otherwise treat as hostname (RFC 1123)
+        Pattern hostnameValid =
+                Pattern.compile("^(?![0-9]+$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$");
+        return hostnameValid.matcher(host).matches() && host.length() <= 255;
     }
 
     public boolean isSmtpAuthValid() {
