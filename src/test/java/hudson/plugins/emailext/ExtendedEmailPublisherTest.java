@@ -74,6 +74,7 @@ import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.MockBuilder;
 import org.jvnet.hudson.test.SleepBuilder;
+import org.jvnet.hudson.test.TestBuilder;
 import org.jvnet.hudson.test.junit.jupiter.BuildWatcherExtension;
 import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.mock_javamail.Mailbox;
@@ -2165,5 +2166,63 @@ class ExtendedEmailPublisherTest {
                 1,
                 Mailbox.get("ashlux@gmail.com").size(),
                 "We should only have one email since the first failure doesn't count as 'still failing'.");
+    }
+
+    @Test
+    void testInlineAttachmentsMimeStructure() throws Exception {
+        // Create a file in the workspace
+        project.getBuildersList().add(new TestBuilder() {
+            @Override
+            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+                    throws InterruptedException, IOException {
+                build.getWorkspace().child("test.txt").write("This is a test file", "UTF-8");
+                return true;
+            }
+        });
+
+        AlwaysTrigger trigger = new AlwaysTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "<html><body><img src=\"cid:test.txt\"></body></html>",
+                "",
+                0,
+                "project");
+        addEmailType(trigger);
+        trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
+        publisher.getConfiguredTriggers().add(trigger);
+        publisher.inlineAttachmentsPattern = "test.txt";
+        publisher.recipientList = "mickey@disney.com";
+        publisher.contentType = "text/html";
+
+        FreeStyleBuild build = j.buildAndAssertSuccess(project);
+
+        Mailbox mailbox = Mailbox.get("mickey@disney.com");
+        assertEquals(1, mailbox.size(), "Email should have been sent to mickey@disney.com");
+        Message msg = mailbox.get(0);
+
+        Object content = msg.getContent();
+        assertInstanceOf(MimeMultipart.class, content, "Content should be a MimeMultipart");
+        MimeMultipart topMultipart = (MimeMultipart) content;
+
+        // Top level should be mixed
+        assertThat(topMultipart.getContentType(), containsString("multipart/mixed"));
+
+        // Child 0 should be the body content (wrapped because we added a mixed top level)
+        BodyPart bodyPart = topMultipart.getBodyPart(0);
+        Object bodyContent = bodyPart.getContent();
+        assertInstanceOf(MimeMultipart.class, bodyContent, "Body part content should be a MimeMultipart (related)");
+        MimeMultipart relatedMultipart = (MimeMultipart) bodyContent;
+        assertThat(relatedMultipart.getContentType(), containsString("multipart/related"));
+
+        assertEquals(2, relatedMultipart.getCount(), "Should have two parts: HTML body and one inline attachment");
+
+        BodyPart htmlPart = relatedMultipart.getBodyPart(0);
+        assertThat(htmlPart.getContentType(), containsString("text/html"));
+
+        BodyPart inlinePart = relatedMultipart.getBodyPart(1);
+        assertEquals("inline", inlinePart.getDisposition().toLowerCase());
+        assertEquals("<test.txt>", inlinePart.getHeader("Content-ID")[0]);
     }
 }

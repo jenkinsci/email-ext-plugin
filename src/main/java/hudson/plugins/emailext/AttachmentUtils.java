@@ -217,7 +217,6 @@ public class AttachmentUtils implements Serializable {
 
     public void attachInline(Multipart multipart, ExtendedEmailPublisherContext context) {
         try {
-
             List<MimeBodyPart> attachments = getAttachments(context, true);
             if (attachments != null) {
                 for (MimeBodyPart attachment : attachments) {
