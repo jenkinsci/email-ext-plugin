@@ -7,6 +7,7 @@ import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.groovy.sandbox.EmailExtScriptTokenMacroWhitelist;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import java.io.IOException;
 import java.util.HashMap;
@@ -79,7 +80,11 @@ public abstract class EmailExtScript extends Script {
             // Get the build and listener from the binding.
             Run<?, ?> build = (Run<?, ?>) this.getBinding().getVariable("build");
             TaskListener listener = (TaskListener) this.getBinding().getVariable("listener");
-            EnvVars vars = build.getEnvironment(listener);
+            EnvVars vars = EmailExtScriptTokenMacroWhitelist.getCachedEnvVars();
+            if (vars == null) {
+                // Fallback if called outside sandbox context
+                vars = build.getEnvironment(listener);
+            }
             if (vars.containsKey(name)) {
                 return vars.get(name, "");
             }
