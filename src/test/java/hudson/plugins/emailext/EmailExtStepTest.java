@@ -64,6 +64,30 @@ class EmailExtStepTest {
     }
 
     @Test
+    void groovyTemplateExecution() throws Exception {
+        WorkflowJob job = j.createProject(WorkflowJob.class, "wf");
+
+        job.setDefinition(new CpsFlowDefinition(
+                "node {\n" + "  def content = 'return \"Hello \" + (1+1)'\n"
+                        + "  emailext(to: 'test@test.com', subject: 'Test', body: content, mimeType: 'groovy')\n"
+                        + "}",
+                true));
+
+        Run<?, ?> run = job.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(run);
+
+        Mailbox mbox = Mailbox.get("test@test.com");
+        assertEquals(1, mbox.size());
+
+        Message msg = mbox.get(0);
+        Object contentObj = msg.getContent();
+        String bodyText = contentObj instanceof MimeMultipart
+                ? ((MimeMultipart) contentObj).getBodyPart(0).getContent().toString()
+                : contentObj.toString();
+        assertTrue(bodyText.contains("Hello 2"), "Expected Hello 2 but was: " + bodyText);
+    }
+
+    @Test
     void simpleEmail() throws Exception {
         WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");
         job.setDefinition(
