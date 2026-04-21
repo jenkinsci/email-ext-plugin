@@ -804,29 +804,35 @@ public class ExtendedEmailPublisher extends Notifier {
 
             try {
                 ClassLoader cl = expandClasspath(context, Jenkins.get().getPluginManager().uberClassLoader);
-                if (AbstractEvalContent.isApprovedScript(script, GroovyLanguage.get())
-                        || !Jenkins.get().isUseSecurity()) {
-                    GroovyShell shell = new GroovyShell(cl, binding, getCompilerConfiguration(false));
-                    shell.parse(script).run();
-                    cancel = (Boolean) shell.getVariable("cancel");
-                } else {
-                    GroovyShell shell = new GroovyShell(cl, binding, getCompilerConfiguration(true));
-                    try {
-                        new GroovySandbox()
-                                .withWhitelist(new ProxyWhitelist(
-                                        Whitelist.all(),
-                                        new MimeMessageInstanceWhitelist(msg),
-                                        new PropertiesInstanceWhitelist(props),
-                                        new TaskListenerInstanceWhitelist(listener),
-                                        new PrintStreamInstanceWhitelist(logger),
-                                        new EmailExtScriptTokenMacroWhitelist()))
-                                .runScript(shell, script);
+                try {
+                    if (AbstractEvalContent.isApprovedScript(script, GroovyLanguage.get())
+                            || !Jenkins.get().isUseSecurity()) {
+                        GroovyShell shell = new GroovyShell(cl, binding, getCompilerConfiguration(false));
+                        shell.parse(script).run();
                         cancel = (Boolean) shell.getVariable("cancel");
-                    } catch (RejectedAccessException x) {
-                        throw ScriptApproval.get().accessRejected(x, ApprovalContext.create());
+                    } else {
+                        GroovyShell shell = new GroovyShell(cl, binding, getCompilerConfiguration(true));
+                        try {
+                            new GroovySandbox()
+                                    .withWhitelist(new ProxyWhitelist(
+                                            Whitelist.all(),
+                                            new MimeMessageInstanceWhitelist(msg),
+                                            new PropertiesInstanceWhitelist(props),
+                                            new TaskListenerInstanceWhitelist(listener),
+                                            new PrintStreamInstanceWhitelist(logger),
+                                            new EmailExtScriptTokenMacroWhitelist()))
+                                    .runScript(shell, script);
+                            cancel = (Boolean) shell.getVariable("cancel");
+                        } catch (RejectedAccessException x) {
+                            throw ScriptApproval.get().accessRejected(x, ApprovalContext.create());
+                        }
+                    }
+                    debug(logger, "%s script set cancel to %b", StringUtils.capitalize(scriptName), cancel);
+                } finally {
+                    if (cl instanceof GroovyClassLoader gcl) {
+                        gcl.close();
                     }
                 }
-                debug(logger, "%s script set cancel to %b", StringUtils.capitalize(scriptName), cancel);
             } catch (SecurityException e) {
                 logger.println(StringUtils.capitalize(scriptName) + " script tried to access secured objects: "
                         + e.getMessage());
@@ -884,9 +890,8 @@ public class ExtendedEmailPublisher extends Notifier {
         }
         if (useSecurity) {
             return GroovySandbox.createSecureClassLoader(loader);
-        } else {
-            return loader;
         }
+        return loader;
     }
 
     private void transformToClasspathEntries(
