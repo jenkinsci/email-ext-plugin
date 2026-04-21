@@ -1012,39 +1012,51 @@ public class ExtendedEmailPublisher extends Notifier {
         msg.setSentDate(new Date());
         setSubject(context, msg, charset);
 
-        Multipart multipart = addContent(context, charset);
+        MimeMultipart rootMultipart = new MimeMultipart("mixed");
+        MimeMultipart relatedMultipart = new MimeMultipart("related");
+        
+        MimeBodyPart contentPart = createTextContentPart(context, charset);
+        relatedMultipart.addBodyPart(contentPart);
 
         AttachmentUtils attachments = new AttachmentUtils(attachmentsPattern);
-        attachments.attach(multipart, context);
+        attachments.attach(rootMultipart, context);
 
         if (StringUtils.isNotBlank(inlineAttachmentsPattern)) {
             AttachmentUtils inlineAttachments = new AttachmentUtils(inlineAttachmentsPattern);
-            inlineAttachments.attachInline(multipart, context);
+            inlineAttachments.attachInline(relatedMultipart, context);
         }
 
         // add attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getAttachmentsPattern())) {
             AttachmentUtils typeAttachments =
                     new AttachmentUtils(context.getTrigger().getEmail().getAttachmentsPattern());
-            typeAttachments.attach(multipart, context);
+            typeAttachments.attach(rootMultipart, context);
         }
 
         // add inline attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getInlineAttachmentsPattern())) {
             AttachmentUtils inlineAttachments =
                     new AttachmentUtils(context.getTrigger().getEmail().getInlineAttachmentsPattern());
-            inlineAttachments.attachInline(multipart, context);
+            inlineAttachments.attachInline(relatedMultipart, context);
         }
 
         if (attachBuildLog || context.getTrigger().getEmail().getAttachBuildLog()) {
             debug(context.getListener().getLogger(), "Request made to attach build log");
             AttachmentUtils.attachBuildLog(
                     context,
-                    multipart,
+                    rootMultipart,
                     compressBuildLog || context.getTrigger().getEmail().getCompressBuildLog());
         }
 
-        msg.setContent(multipart);
+        if (relatedMultipart.getCount() > 1) {
+            MimeBodyPart relatedBodyPart = new MimeBodyPart();
+            relatedBodyPart.setContent(relatedMultipart);
+            rootMultipart.addBodyPart(relatedBodyPart, 0); // Insert body at the beginning
+        } else {
+            rootMultipart.addBodyPart(contentPart, 0); // Insert body at the beginning
+        }
+
+        msg.setContent(rootMultipart);
 
         EnvVars env = null;
         try {
@@ -1174,10 +1186,9 @@ public class ExtendedEmailPublisher extends Notifier {
         return MatrixTriggerMode.BOTH == mtm || MatrixTriggerMode.ONLY_CONFIGURATIONS == mtm;
     }
 
-    private Multipart addContent(ExtendedEmailPublisherContext context, String charset) throws MessagingException {
+    private MimeBodyPart createTextContentPart(ExtendedEmailPublisherContext context, String charset) throws MessagingException {
         final String text = ContentBuilder.transformText(
                 context.getTrigger().getEmail().getBody(), context, getRuntimeMacros(context));
-        final Multipart multipart;
         boolean doBoth = false;
 
         String messageContentType =
@@ -1194,12 +1205,11 @@ public class ExtendedEmailPublisher extends Notifier {
             }
         }
 
+        Multipart alternative = null;
         if ("both".equals(messageContentType)) {
             doBoth = true;
-            multipart = new MimeMultipart("alternative");
+            alternative = new MimeMultipart("alternative");
             messageContentType = "text/html";
-        } else {
-            multipart = new MimeMultipart();
         }
 
         messageContentType += "; charset=" + charset;
@@ -1238,7 +1248,7 @@ public class ExtendedEmailPublisher extends Notifier {
             if (doBoth) {
                 MimeBodyPart plainTextPart = new MimeBodyPart();
                 plainTextPart.setContent(inliner.stripHtml(text), "text/plain; charset=" + charset);
-                multipart.addBodyPart(plainTextPart);
+                alternative.addBodyPart(plainTextPart);
             }
             String inlinedCssHtml = inliner.process(text);
             msgPart.setContent(inlinedCssHtml, messageContentType);
@@ -1246,9 +1256,14 @@ public class ExtendedEmailPublisher extends Notifier {
             msgPart.setContent(text, messageContentType);
         }
 
-        multipart.addBodyPart(msgPart);
-
-        return multipart;
+        if (doBoth) {
+            alternative.addBodyPart(msgPart);
+            MimeBodyPart contentPart = new MimeBodyPart();
+            contentPart.setContent(alternative);
+            return contentPart;
+        } else {
+            return msgPart;
+        }
     }
 
     @Override
