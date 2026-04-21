@@ -114,7 +114,7 @@ public final class RecipientProviderUtilities {
         return null;
     }
 
-    @SuppressWarnings("deprecated")
+    @SuppressWarnings("deprecation")
     private static User getByLegacyUserCause(Run<?, ?> run) {
         try {
             Cause.UserCause userCause = run.getCause(Cause.UserCause.class);
