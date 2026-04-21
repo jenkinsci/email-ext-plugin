@@ -2166,4 +2166,34 @@ class ExtendedEmailPublisherTest {
                 Mailbox.get("ashlux@gmail.com").size(),
                 "We should only have one email since the first failure doesn't count as 'still failing'.");
     }
+    @Test
+    void testPriorityHeaderIsAdded() throws Exception {
+        publisher.setPriority("1");
+
+        FailureTrigger trigger = new FailureTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
+
+        addEmailType(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
+
+        project.getBuildersList().add(new FailureBuilder());
+
+        FreeStyleBuild build = project.scheduleBuild2(0).get();
+        j.assertBuildStatus(Result.FAILURE, build);
+
+        Mailbox mailbox = Mailbox.get("ashlux@gmail.com");
+        assertEquals(1, mailbox.size());
+
+        Message msg = mailbox.get(0);
+
+        assertEquals("1", getHeader(msg, "X-Priority"));
+        assertEquals("High", getHeader(msg, "Importance"));
+    }
 }
