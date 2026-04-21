@@ -30,7 +30,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.remoting.VirtualChannel;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,7 +38,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import jenkins.MasterToSlaveFileCallable;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
@@ -155,8 +153,22 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     @Restricted(NoExternalUse.class)
     public static boolean isChildOf(final FilePath potentialChild, final FilePath parent)
             throws IOException, InterruptedException {
-        // TODO JENKINS-26838 use API when available in core
-        return parent.act(new IsChildFileCallable(potentialChild));
+        // JENKINS-26838 now resolved: FilePath.isDescendant() available in core
+        // isDescendant() requires a relative path so we derive it from the absolute paths
+        String parentPath = parent.getRemote();
+        String childPath = potentialChild.getRemote();
+        if (!childPath.startsWith(parentPath)) {
+            return false;
+        }
+        String relative = childPath.substring(parentPath.length());
+        if (relative.isEmpty()) {
+            return false;
+        }
+        // Strip leading separator to make it truly relative
+        if (relative.startsWith("/") || relative.startsWith("\\")) {
+            relative = relative.substring(1);
+        }
+        return parent.isDescendant(relative);
     }
 
     private InputStream getManagedFile(Run<?, ?> run, String fileName) {
@@ -202,27 +214,5 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     public static boolean isApprovedScript(final String script, final Language language) {
         final ScriptApproval approval = ScriptApproval.get();
         return approval.isScriptApproved(script, language);
-    }
-
-    private static class IsChildFileCallable extends MasterToSlaveFileCallable<Boolean> {
-        private final FilePath potentialChild;
-
-        private IsChildFileCallable(FilePath potentialChild) {
-            this.potentialChild = potentialChild;
-        }
-
-        @Override
-        public Boolean invoke(File parent, VirtualChannel channel) {
-            if (potentialChild.isRemote()) {
-                // Not on the same machine so can't be a child of the local file
-                return false;
-            }
-            FilePath test = potentialChild.getParent();
-            FilePath target = new FilePath(parent);
-            while (test != null && !target.equals(test)) {
-                test = test.getParent();
-            }
-            return target.equals(test);
-        }
     }
 }
