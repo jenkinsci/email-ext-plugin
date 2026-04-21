@@ -62,6 +62,8 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -76,6 +78,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -532,6 +536,90 @@ public class ExtendedEmailPublisher extends Notifier {
         return true;
     }
 
+    /**
+     * Checks if an exception represents a transient SMTP error (4xx code) that should be retried.
+     *
+     * @param e the exception to check
+     * @return true if the exception represents a transient SMTP error (4xx code), false otherwise
+     */
+    boolean isTransientSmtpError(Exception e) {
+        if (e == null) {
+            return false;
+        }
+
+        Integer returnCode = getSmtpReturnCode(e);
+        if (returnCode != null && returnCode >= 400 && returnCode < 500) {
+            return true;
+        }
+
+        Integer parsedCode = parseSmtpErrorCode(e);
+        if (parsedCode != null && parsedCode >= 400 && parsedCode < 500) {
+            return true;
+        }
+
+        if (e instanceof MessagingException) {
+            Exception nextException = ((MessagingException) e).getNextException();
+            if (nextException != null && isTransientSmtpError(nextException)) {
+                return true;
+            }
+        }
+
+        Throwable cause = e.getCause();
+        if (cause instanceof Exception) {
+            return isTransientSmtpError((Exception) cause);
+        }
+
+        return false;
+    }
+
+    /**
+     * Tries to get SMTP return code from an exception using reflection.
+     * This works with SMTPAddressFailedException and SMTPSendFailedException
+     * without requiring a compile-time dependency.
+     *
+     * @param e the exception
+     * @return the SMTP return code, or null if not available
+     */
+    private Integer getSmtpReturnCode(Exception e) {
+        if (e == null) {
+            return null;
+        }
+        try {
+            Method method = e.getClass().getMethod("getReturnCode");
+            Object result = method.invoke(e);
+            if (result instanceof Integer) {
+                return (Integer) result;
+            }
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+            // Method doesn't exist or couldn't be invoked
+        }
+        return null;
+    }
+
+    /**
+     * Parses SMTP error code from exception message.
+     * Looks for patterns like "421 Service not available" in the message.
+     *
+     * @param e the exception
+     * @return the SMTP error code, or null if not found
+     */
+    private Integer parseSmtpErrorCode(Exception e) {
+        if (e == null || e.getMessage() == null) {
+            return null;
+        }
+        String message = e.getMessage();
+        Pattern pattern = Pattern.compile("^(\\d{3})\\s");
+        Matcher matcher = pattern.matcher(message);
+        if (matcher.find()) {
+            try {
+                return Integer.parseInt(matcher.group(1));
+            } catch (NumberFormatException ignored) {
+                // Not a valid number
+            }
+        }
+        return null;
+    }
+
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     boolean sendMail(ExtendedEmailPublisherContext context) {
         try {
@@ -617,12 +705,15 @@ public class ExtendedEmailPublisher extends Notifier {
                             }
                             break;
                         } catch (SendFailedException e) {
-                            if (e.getNextException() != null
-                                    && (e.getNextException() instanceof SocketException
-                                            || e.getNextException() instanceof ConnectException)) {
+                            boolean isTransient = isTransientSmtpError(e);
+                            if ((e.getNextException() != null
+                                            && (e.getNextException() instanceof SocketException
+                                                    || e.getNextException() instanceof ConnectException))
+                                    || isTransient) {
+                                String reason = isTransient ? "Transient SMTP error" : "Socket error";
                                 context.getListener()
                                         .getLogger()
-                                        .println("SMTP connection failed. Retrying in 10 seconds...");
+                                        .println(reason + " sending email, retrying once more in 10 seconds...");
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {
@@ -669,11 +760,13 @@ public class ExtendedEmailPublisher extends Notifier {
                                 break;
                             }
                         } catch (MessagingException e) {
-                            if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
+                            boolean isTransient = isTransientSmtpError(e);
+                            if ((e.getNextException() != null && e.getNextException() instanceof ConnectException)
+                                    || isTransient) {
+                                String reason = isTransient ? "Transient SMTP error" : "Connection error";
                                 context.getListener()
                                         .getLogger()
-                                        .println(
-                                                "SMTP connection error while sending email. Retrying once more in 10 seconds.");
+                                        .println(reason + " sending email, retrying once more in 10 seconds...");
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {
