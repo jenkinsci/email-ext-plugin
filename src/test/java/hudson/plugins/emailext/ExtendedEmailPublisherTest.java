@@ -45,8 +45,8 @@ import jakarta.mail.Address;
 import jakarta.mail.BodyPart;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
+import jakarta.mail.Part;
 import jakarta.mail.Session;
-import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import java.io.IOException;
@@ -746,20 +746,20 @@ class ExtendedEmailPublisherTest {
         Message msg = mailbox.get(0);
         assertThat("Message should be multipart", msg.getContentType(), containsString("multipart/mixed"));
 
-        // TODO: add more tests for getting the multipart information.
-        if (msg instanceof MimeMessage mimeMsg) {
-            assertEquals(
-                    MimeMultipart.class,
-                    mimeMsg.getContent().getClass(),
-                    "Message content should be a MimeMultipart instance");
-            MimeMultipart multipart = (MimeMultipart) mimeMsg.getContent();
-            assertTrue(multipart.getCount() >= 1, "There should be at least one part in the email");
-            MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(0);
-            assertThat("UTF-8 charset should be used.", bodyPart.getContentType(), containsString("charset=UTF-8"));
-        } else {
-            assertThat(
-                    "UTF-8 charset should be used.", mailbox.get(0).getContentType(), containsString("charset=UTF-8"));
-        }
+        MimeMessage mimeMsg = assertInstanceOf(MimeMessage.class, msg, "Message should be a MimeMessage instance");
+        MimeMultipart multipart = assertInstanceOf(
+                MimeMultipart.class, mimeMsg.getContent(), "Message content should be a MimeMultipart instance");
+        assertMultipartSubtype(msg, multipart, "mixed");
+        assertEquals(1, multipart.getCount(), "The email body should contain exactly one body part");
+
+        BodyPart bodyPart = multipart.getBodyPart(0);
+        assertThat("Body part should be plain text.", bodyPart.getContentType(), containsString("text/plain"));
+        assertThat("UTF-8 charset should be used.", bodyPart.getContentType(), containsString("charset=UTF-8"));
+
+        String plainText = IOUtils.toString(
+                        bodyPart.getInputStream(), publisher.getDescriptor().getCharset())
+                .replace("\r", "");
+        assertEquals("Boom goes the dynamite.", plainText, "Body content should match the configured trigger content");
     }
 
     @Test
@@ -1375,15 +1375,18 @@ class ExtendedEmailPublisherTest {
         assertInstanceOf(MimeMultipart.class, msg.getContent(), "Content should be a MimeMultipart");
 
         MimeMultipart part = (MimeMultipart) msg.getContent();
+        assertMultipartSubtype(msg, part, "alternative");
         assertEquals(2, part.getCount(), "Should have two body items (html + plaintext)");
 
         BodyPart plainText = part.getBodyPart(0);
+        assertNull(plainText.getFileName(), "Plain text body should not be an attachment");
         String plainTextString = IOUtils.toString(
                         plainText.getInputStream(), publisher.getDescriptor().getCharset())
                 .replace("\r", "");
         assertEquals("This is a test\nHello world", plainTextString, "Should have the same plain text body");
 
         BodyPart html = part.getBodyPart(1);
+        assertNull(html.getFileName(), "HTML body should not be an attachment");
         String htmlString = IOUtils.toString(
                 html.getInputStream(), publisher.getDescriptor().getCharset());
 
@@ -1429,6 +1432,7 @@ class ExtendedEmailPublisherTest {
         assertInstanceOf(MimeMultipart.class, msg.getContent(), "Content should be a MimeMultipart");
 
         MimeMultipart part = (MimeMultipart) msg.getContent();
+        assertMultipartSubtype(msg, part, "alternative");
         assertEquals(
                 2, part.getCount(), "Should have two body items (html + plaintext) when using global 'both' default");
 
@@ -1494,13 +1498,25 @@ class ExtendedEmailPublisherTest {
         assertInstanceOf(MimeMultipart.class, msg.getContent(), "Content should be a MimeMultipart");
 
         MimeMultipart part = (MimeMultipart) msg.getContent();
+        assertMultipartSubtype(msg, part, "mixed");
 
         assertEquals(2, part.getCount(), "Should have two body items (message + attachment)");
+
+        BodyPart body = part.getBodyPart(0);
+        assertThat("Body part should be plain text.", body.getContentType(), containsString("text/plain"));
+        assertNull(body.getFileName(), "Body part should not have a file name");
 
         BodyPart attach = part.getBodyPart(1);
         assertTrue(
                 "build.log".equalsIgnoreCase(attach.getFileName()),
                 "There should be a log named \"build.log\" attached");
+        assertEquals(Part.ATTACHMENT, attach.getDisposition(), "Build log should be attached as attachment");
+        assertNotNull(
+                attach.getHeader("Content-Transfer-Encoding"),
+                "Attachment should include a Content-Transfer-Encoding header");
+
+        BodyPart textPart = findFirstPartByContentType(part, "text/plain");
+        assertNotNull(textPart, "Multipart should contain a plain text body part");
     }
 
     @Test
@@ -1962,6 +1978,38 @@ class ExtendedEmailPublisherTest {
         assertNotNull(headers);
         assertEquals(1, headers.length);
         return headers[0];
+    }
+
+    private static void assertMultipartSubtype(Message message, MimeMultipart multipart, String subtype)
+            throws MessagingException {
+        String expected = "multipart/" + subtype;
+        assertThat(
+                "Message should have " + expected + " content type",
+                message.getContentType(),
+                containsString(expected));
+        assertThat(
+                "MimeMultipart should report " + expected + " content type",
+                multipart.getContentType(),
+                containsString(expected));
+    }
+
+    private static BodyPart findFirstPartByContentType(MimeMultipart multipart, String contentTypeToken)
+            throws Exception {
+        for (int i = 0; i < multipart.getCount(); i++) {
+            BodyPart bodyPart = multipart.getBodyPart(i);
+            if (bodyPart.getContentType().contains(contentTypeToken)) {
+                return bodyPart;
+            }
+
+            Object nestedContent = bodyPart.getContent();
+            if (nestedContent instanceof MimeMultipart nestedMultipart) {
+                BodyPart nestedPart = findFirstPartByContentType(nestedMultipart, contentTypeToken);
+                if (nestedPart != null) {
+                    return nestedPart;
+                }
+            }
+        }
+        return null;
     }
 
     @Test
