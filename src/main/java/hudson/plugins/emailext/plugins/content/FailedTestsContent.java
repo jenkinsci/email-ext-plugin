@@ -44,7 +44,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
 
     @Parameter
     @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "TODO needs triage")
-    public int maxLength = Integer.MAX_VALUE;
+    public long maxLength = Long.MAX_VALUE;
 
     @Parameter
     public String outputFormat = "";
@@ -86,9 +86,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     }
 
     private void setMaxLength() {
-        if (maxLength < Integer.MAX_VALUE) {
-            maxLength *= 1024;
-        }
+        maxLength = (maxLength <= Long.MAX_VALUE / 1024) ? maxLength * 1024 : Long.MAX_VALUE;
     }
 
     private int getTestAge(TestResult result) {
@@ -131,15 +129,14 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     }
 
     private int addTest(SummarizedTestResult result, int printSize, TestResult failedTest) {
+        String rawStack = failedTest.getErrorStackTrace();
         String stackTrace = showStack
-                ? (escapeHtml
-                        ? StringEscapeUtils.escapeHtml4(failedTest.getErrorStackTrace())
-                        : failedTest.getErrorStackTrace())
+                ? (escapeHtml && rawStack != null ? StringEscapeUtils.escapeHtml4(rawStack) : rawStack)
                 : null;
+
+        String rawDetails = failedTest.getErrorDetails();
         String errorDetails = showMessage
-                ? (escapeHtml
-                        ? StringEscapeUtils.escapeHtml4(failedTest.getErrorDetails())
-                        : failedTest.getErrorDetails())
+                ? (escapeHtml && rawDetails != null ? StringEscapeUtils.escapeHtml4(rawDetails) : rawDetails)
                 : null;
         String name = "%s.%s"
                 .formatted(
