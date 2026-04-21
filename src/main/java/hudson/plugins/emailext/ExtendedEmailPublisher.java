@@ -1225,7 +1225,10 @@ public class ExtendedEmailPublisher extends Notifier {
                     context.getListener().getLogger().println("No workspace to save the email to");
                 }
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            context.getListener().getLogger().println("Error trying to save email output to file. " + e.getMessage());
+        } catch (IOException e) {
             context.getListener().getLogger().println("Error trying to save email output to file. " + e.getMessage());
         }
 
