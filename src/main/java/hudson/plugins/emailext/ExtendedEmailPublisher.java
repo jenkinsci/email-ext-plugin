@@ -1213,13 +1213,7 @@ public class ExtendedEmailPublisher extends Notifier {
 
                 FilePath workspace = context.getWorkspace();
                 if (workspace != null) {
-                    FilePath savedOutput = new FilePath(
-                            workspace,
-                            "%s-%s%s"
-                                    .formatted(
-                                            context.getTrigger().getDescriptor().getDisplayName(),
-                                            context.getRun().getId(),
-                                            extension));
+                    FilePath savedOutput = workspace.child("email-ext-message%s".formatted(extension));
                     savedOutput.write(text, charset);
                 } else {
                     context.getListener().getLogger().println("No workspace to save the email to");

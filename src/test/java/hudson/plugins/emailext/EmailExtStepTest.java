@@ -2,6 +2,7 @@ package hudson.plugins.emailext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -144,11 +145,33 @@ class EmailExtStepTest {
         Run<?, ?> run = job.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(run);
 
+        FilePath workspace = j.jenkins.getWorkspaceFor(job);
+        assertNotNull(workspace, "Workspace should be available after the build");
+        assertTrue(
+                workspace.child("email-ext-message.txt").exists(), "Should save the text output under a stable name");
+
         Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
         assertEquals(1, mbox.size());
         Message msg = mbox.get(0);
         assertEquals("Boo", msg.getSubject());
         j.assertLogContains("Archiving artifacts", run);
+    }
+
+    @Test
+    void saveOutputHtml() throws Exception {
+        WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf-html");
+        job.setDefinition(new CpsFlowDefinition("""
+                node {
+                  emailext(to: 'mickeymouse@disney.com', subject: 'Boo', saveOutput: true, mimeType: 'text/html')
+                }\
+                """, true));
+        Run<?, ?> run = job.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(run);
+
+        FilePath workspace = j.jenkins.getWorkspaceFor(job);
+        assertNotNull(workspace, "Workspace should be available after the build");
+        assertTrue(
+                workspace.child("email-ext-message.html").exists(), "Should save the HTML output under a stable name");
     }
 
     public static class FileCopyStep extends Step {
