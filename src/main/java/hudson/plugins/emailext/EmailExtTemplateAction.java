@@ -15,6 +15,7 @@ import hudson.util.StreamTaskListener;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,6 +25,7 @@ import org.jenkinsci.lib.configprovider.ConfigProvider;
 import org.jenkinsci.lib.configprovider.model.Config;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
+import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 
 /**
  *
@@ -153,7 +155,14 @@ public class EmailExtTemplateAction implements Action {
             }
             result[1] = hudson.Util.xmlEscape(
                     stream.toString(ExtendedEmailPublisher.descriptor().getCharset()));
-        } catch (Exception ex) {
+       } catch (MacroEvaluationException ex) {
+            result[0] = renderError(ex);
+        } catch (UnsupportedEncodingException ex) {
+            result[0] = renderError(ex);
+        } catch (IOException ex) {
+            result[0] = renderError(ex);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
             result[0] = renderError(ex);
         }
         return result;
