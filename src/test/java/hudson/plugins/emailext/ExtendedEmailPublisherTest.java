@@ -7,6 +7,8 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Launcher;
@@ -18,6 +20,7 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.EmailTrigger;
@@ -41,18 +44,23 @@ import hudson.security.AuthorizationStrategy;
 import hudson.security.SecurityRealm;
 import hudson.tasks.Builder;
 import hudson.tasks.Mailer;
+import hudson.util.StreamTaskListener;
 import jakarta.mail.Address;
 import jakarta.mail.BodyPart;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
@@ -2165,5 +2173,100 @@ class ExtendedEmailPublisherTest {
                 1,
                 Mailbox.get("ashlux@gmail.com").size(),
                 "We should only have one email since the first failure doesn't count as 'still failing'.");
+    }
+
+    @Test
+    public void testDuplicateRemovedFromCcWhenPresentInTo() throws Exception {
+
+        ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
+
+        ByteArrayOutputStream logStream = new ByteArrayOutputStream();
+        TaskListener listener = new StreamTaskListener(logStream);
+
+        Run<?, ?> run = mock(Run.class);
+
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, run, null, null, listener);
+
+        InternetAddress addr1 = new InternetAddress("test@example.com");
+        InternetAddress addr2 = new InternetAddress("test@example.com");
+
+        Set<InternetAddress> to = new LinkedHashSet<>();
+        to.add(addr1);
+
+        Set<InternetAddress> cc = new LinkedHashSet<>();
+        cc.add(addr2);
+
+        Set<InternetAddress> bcc = new LinkedHashSet<>();
+
+        publisher.logDuplicateRecipients(context, to, cc, bcc);
+
+        // CC should be removed
+        assertTrue(cc.isEmpty());
+    }
+
+    @Test
+    public void testDuplicateLoggedForCcAndBcc() throws Exception {
+
+        ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
+
+        ByteArrayOutputStream logStream = new ByteArrayOutputStream();
+        TaskListener listener = new StreamTaskListener(logStream);
+
+        Run<?, ?> run = mock(Run.class);
+
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, run, null, null, listener);
+
+        InternetAddress addr1 = new InternetAddress("test@example.com");
+        InternetAddress addr2 = new InternetAddress("test@example.com");
+
+        Set<InternetAddress> to = new LinkedHashSet<>();
+
+        Set<InternetAddress> cc = new LinkedHashSet<>();
+        cc.add(addr1);
+
+        Set<InternetAddress> bcc = new LinkedHashSet<>();
+        bcc.add(addr2);
+
+        publisher.logDuplicateRecipients(context, to, cc, bcc);
+
+        String logs = logStream.toString();
+
+        assertTrue(logs.contains("Duplicate recipient detected"));
+        assertTrue(logs.contains("test@example.com"));
+        assertTrue(logs.contains("CC"));
+        assertTrue(logs.contains("BCC"));
+    }
+
+    @Test
+    public void testDuplicateRemovedFromBccWhenPresentInTo() throws Exception {
+
+        ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
+
+        ByteArrayOutputStream logStream = new ByteArrayOutputStream();
+        TaskListener listener = new StreamTaskListener(logStream);
+
+        Run<?, ?> run = mock(Run.class);
+
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(publisher, run, null, null, listener);
+
+        InternetAddress addr1 = new InternetAddress("test@example.com");
+        InternetAddress addr2 = new InternetAddress("test@example.com");
+
+        Set<InternetAddress> to = new LinkedHashSet<>();
+        to.add(addr1);
+
+        Set<InternetAddress> cc = new LinkedHashSet<>();
+
+        Set<InternetAddress> bcc = new LinkedHashSet<>();
+        bcc.add(addr2);
+
+        publisher.logDuplicateRecipients(context, to, cc, bcc);
+
+        // BCC should be removed
+        assertTrue(bcc.isEmpty());
+
+        // No logging expected
+        String logs = logStream.toString();
+        assertTrue(!logs.contains("Duplicate recipient detected"));
     }
 }

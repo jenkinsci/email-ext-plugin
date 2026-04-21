@@ -67,15 +67,21 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -582,138 +588,142 @@ public class ExtendedEmailPublisher extends Notifier {
                 return false;
             }
 
-            Address[] allRecipients = msg.getAllRecipients();
+            Address[] allRecipients;
+
             int retries = 0;
             if (executePresendScript(context, msg)) {
                 // presend script might have modified recipients:
                 allRecipients = msg.getAllRecipients();
-                if (allRecipients != null) {
-                    if (StringUtils.isNotBlank(getDescriptor().getEmergencyReroute())) {
-                        // clear out all the existing recipients
-                        msg.setRecipients(Message.RecipientType.TO, (Address[]) null);
-                        msg.setRecipients(Message.RecipientType.CC, (Address[]) null);
-                        msg.setRecipients(Message.RecipientType.BCC, (Address[]) null);
-                        // and set the emergency reroute
-                        msg.setRecipients(
-                                Message.RecipientType.TO, getDescriptor().getEmergencyReroute());
-                    }
 
-                    StringBuilder buf = new StringBuilder("Sending email to:");
-                    for (Address a : allRecipients) {
-                        buf.append(' ').append(a);
-                    }
-                    context.getListener().getLogger().println(buf);
+                if (StringUtils.isNotBlank(getDescriptor().getEmergencyReroute())) {
+                    // clear out all the existing recipients
+                    msg.setRecipients(Message.RecipientType.TO, (Address[]) null);
+                    msg.setRecipients(Message.RecipientType.CC, (Address[]) null);
+                    msg.setRecipients(Message.RecipientType.BCC, (Address[]) null);
+                    // and set the emergency reroute
+                    msg.setRecipients(Message.RecipientType.TO, getDescriptor().getEmergencyReroute());
+                }
 
-                    // emergency reroute might have modified recipients:
-                    allRecipients = msg.getAllRecipients();
-                    // all email addresses are of type "rfc822", so just take first one:
-                    Transport transport = session.getTransport(allRecipients[0]);
-                    while (true) {
-                        try {
-                            transport.connect();
-                            transport.sendMessage(msg, allRecipients);
-                            if (getDescriptor().isThrottlingEnabled()) {
-                                EmailThrottler.getInstance().incrementEmailCount();
+                if (allRecipients == null || allRecipients.length == 0) {
+                    context.getListener().getLogger().println("No recipients found, email couldn't be sent.");
+
+                    return false;
+                }
+
+                StringBuilder buf = new StringBuilder("Sending email to:");
+                for (Address a : allRecipients) {
+                    buf.append(' ').append(a);
+                }
+                context.getListener().getLogger().println(buf);
+
+                // emergency reroute might have modified recipients:
+                allRecipients = msg.getAllRecipients();
+                // all email addresses are of type "rfc822", so just take first one:
+                Transport transport = session.getTransport(allRecipients[0]);
+                while (true) {
+                    try {
+                        transport.connect();
+                        transport.sendMessage(msg, allRecipients);
+                        if (getDescriptor().isThrottlingEnabled()) {
+                            EmailThrottler.getInstance().incrementEmailCount();
+                        }
+                        break;
+                    } catch (SendFailedException e) {
+                        if (e.getNextException() != null
+                                && (e.getNextException() instanceof SocketException
+                                        || e.getNextException() instanceof ConnectException)) {
+                            context.getListener()
+                                    .getLogger()
+                                    .println("SMTP connection failed. Retrying in 10 seconds...");
+                            transport.close();
+                            Thread.sleep(10000);
+                        } else {
+                            Address[] addresses = e.getValidSentAddresses();
+                            if (addresses != null && addresses.length > 0) {
+                                buf = new StringBuilder("Successfully sent to the following addresses:");
+                                for (Address a : addresses) {
+                                    buf.append(' ').append(a);
+                                }
+                                context.getListener().getLogger().println(buf);
+                            }
+                            addresses = e.getValidUnsentAddresses();
+                            if (addresses != null && addresses.length > 0) {
+                                buf = new StringBuilder("Not sent to the following valid addresses:");
+                                for (Address a : addresses) {
+                                    buf.append(' ').append(a);
+                                }
+                                context.getListener().getLogger().println(buf);
+                            }
+                            addresses = e.getInvalidAddresses();
+                            if (addresses != null && addresses.length > 0) {
+                                buf = new StringBuilder("Could not be sent to the following addresses:");
+                                for (Address a : addresses) {
+                                    buf.append(' ').append(a);
+                                }
+                                context.getListener().getLogger().println(buf);
+                            }
+
+                            debug(
+                                    context.getListener().getLogger(),
+                                    e.getClass().getSimpleName() + " message: " + e.getMessage());
+                            Exception next = e.getNextException();
+                            while (next != null) {
+                                debug(
+                                        context.getListener().getLogger(),
+                                        "Next " + next.getClass().getSimpleName() + " message: " + next.getMessage());
+                                if (next instanceof MessagingException exception) {
+                                    next = exception.getNextException();
+                                } else {
+                                    next = null;
+                                }
                             }
                             break;
-                        } catch (SendFailedException e) {
-                            if (e.getNextException() != null
-                                    && (e.getNextException() instanceof SocketException
-                                            || e.getNextException() instanceof ConnectException)) {
-                                context.getListener()
-                                        .getLogger()
-                                        .println("SMTP connection failed. Retrying in 10 seconds...");
-                                transport.close();
-                                Thread.sleep(10000);
-                            } else {
-                                Address[] addresses = e.getValidSentAddresses();
-                                if (addresses != null && addresses.length > 0) {
-                                    buf = new StringBuilder("Successfully sent to the following addresses:");
-                                    for (Address a : addresses) {
-                                        buf.append(' ').append(a);
-                                    }
-                                    context.getListener().getLogger().println(buf);
-                                }
-                                addresses = e.getValidUnsentAddresses();
-                                if (addresses != null && addresses.length > 0) {
-                                    buf = new StringBuilder("Not sent to the following valid addresses:");
-                                    for (Address a : addresses) {
-                                        buf.append(' ').append(a);
-                                    }
-                                    context.getListener().getLogger().println(buf);
-                                }
-                                addresses = e.getInvalidAddresses();
-                                if (addresses != null && addresses.length > 0) {
-                                    buf = new StringBuilder("Could not be sent to the following addresses:");
-                                    for (Address a : addresses) {
-                                        buf.append(' ').append(a);
-                                    }
-                                    context.getListener().getLogger().println(buf);
-                                }
-
-                                debug(
-                                        context.getListener().getLogger(),
-                                        e.getClass().getSimpleName() + " message: " + e.getMessage());
-                                Exception next = e.getNextException();
-                                while (next != null) {
-                                    debug(
-                                            context.getListener().getLogger(),
-                                            "Next " + next.getClass().getSimpleName() + " message: "
-                                                    + next.getMessage());
-                                    if (next instanceof MessagingException exception) {
-                                        next = exception.getNextException();
-                                    } else {
-                                        next = null;
-                                    }
-                                }
-                                break;
-                            }
-                        } catch (MessagingException e) {
-                            if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
-                                context.getListener()
-                                        .getLogger()
-                                        .println(
-                                                "SMTP connection error while sending email. Retrying once more in 10 seconds.");
-                                transport.close();
-                                Thread.sleep(10000);
-                            } else {
-                                debug(
-                                        context.getListener().getLogger(),
-                                        e.getClass().getSimpleName() + " message: " + e.getMessage());
-                                Exception next = e.getNextException();
-                                while (next != null) {
-                                    debug(
-                                            context.getListener().getLogger(),
-                                            "Next " + next.getClass().getSimpleName() + " message: "
-                                                    + next.getMessage());
-                                    if (next instanceof MessagingException exception) {
-                                        next = exception.getNextException();
-                                    } else {
-                                        next = null;
-                                    }
-                                }
-                                break;
-                            }
                         }
-                        retries++;
-                        if (retries > 1) {
-                            context.getListener().getLogger().println("Failed after second try sending email");
+                    } catch (MessagingException e) {
+                        if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
+                            context.getListener()
+                                    .getLogger()
+                                    .println(
+                                            "SMTP connection error while sending email. Retrying once more in 10 seconds.");
+                            transport.close();
+                            Thread.sleep(10000);
+                        } else {
+                            debug(
+                                    context.getListener().getLogger(),
+                                    e.getClass().getSimpleName() + " message: " + e.getMessage());
+                            Exception next = e.getNextException();
+                            while (next != null) {
+                                debug(
+                                        context.getListener().getLogger(),
+                                        "Next " + next.getClass().getSimpleName() + " message: " + next.getMessage());
+                                if (next instanceof MessagingException exception) {
+                                    next = exception.getNextException();
+                                } else {
+                                    next = null;
+                                }
+                            }
                             break;
                         }
                     }
-
-                    executePostsendScript(context, msg, session, transport);
-                    // close transport after post-send script, so server response can be accessed:
-                    transport.close();
-
-                    if (context.getRun().getAction(MailMessageIdAction.class) == null) {
-                        context.getRun().addAction(new MailMessageIdAction(msg.getMessageID()));
+                    retries++;
+                    if (retries > 1) {
+                        context.getListener().getLogger().println("Failed after second try sending email");
+                        break;
                     }
+                }
+
+                executePostsendScript(context, msg, session, transport);
+                // close transport after post-send script, so server response can be accessed:
+                transport.close();
+
+                if (context.getRun().getAction(MailMessageIdAction.class) == null) {
+                    context.getRun().addAction(new MailMessageIdAction(msg.getMessageID()));
                 } else {
                     context.getListener()
                             .getLogger()
                             .println("An attempt to send an e-mail" + " to empty list of recipients, ignored.");
                 }
+
             } else {
                 context.getListener().getLogger().println("Email sending was cancelled" + " by user script.");
             }
@@ -984,6 +994,52 @@ public class ExtendedEmailPublisher extends Notifier {
         return descriptor.getMailAccount();
     }
 
+    void logDuplicateRecipients(
+            ExtendedEmailPublisherContext context,
+            Set<InternetAddress> to,
+            Set<InternetAddress> cc,
+            Set<InternetAddress> bcc) {
+
+        Set<String> toEmails =
+                to.stream().map(a -> a.getAddress().toLowerCase()).collect(Collectors.toSet());
+
+        Set<String> seen = new HashSet<>();
+        to.removeIf(addr -> !seen.add(addr.getAddress().toLowerCase()));
+
+        seen.clear();
+        cc.removeIf(addr -> {
+            String email = addr.getAddress().toLowerCase();
+            return !seen.add(email) || toEmails.contains(email);
+        });
+
+        Set<String> ccEmails =
+                cc.stream().map(a -> a.getAddress().toLowerCase()).collect(Collectors.toSet());
+
+        List<String> order = Arrays.asList("TO", "CC", "BCC");
+
+        bcc.removeIf(addr -> {
+            String email = addr.getAddress().toLowerCase();
+
+            if (toEmails.contains(email)) {
+                return true;
+            }
+
+            if (ccEmails.contains(email)) {
+
+                List<String> locations = new ArrayList<>(Arrays.asList("CC", "BCC"));
+                locations.sort(Comparator.comparingInt(order::indexOf));
+
+                context.getListener()
+                        .getLogger()
+                        .println("Duplicate recipient detected: " + email + " in " + locations);
+
+                return false;
+            }
+
+            return false;
+        });
+    }
+
     private MimeMessage createMail(ExtendedEmailPublisherContext context, InternetAddress fromAddress, Session session)
             throws MessagingException, UnsupportedEncodingException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
@@ -1098,6 +1154,32 @@ public class ExtendedEmailPublisher extends Notifier {
         excludeNotAllowedDomains(context, to);
         excludeNotAllowedDomains(context, cc);
         excludeNotAllowedDomains(context, bcc);
+
+        logDuplicateRecipients(context, to, cc, bcc);
+        Map<String, Set<String>> emailLocations = new HashMap<>();
+
+        for (InternetAddress addr : to) {
+            String email = addr.getAddress().toLowerCase();
+            emailLocations.computeIfAbsent(email, k -> new HashSet<>()).add("TO");
+        }
+
+        for (InternetAddress addr : cc) {
+            String email = addr.getAddress().toLowerCase();
+            emailLocations.computeIfAbsent(email, k -> new HashSet<>()).add("CC");
+        }
+
+        for (InternetAddress addr : bcc) {
+            String email = addr.getAddress().toLowerCase();
+            emailLocations.computeIfAbsent(email, k -> new HashSet<>()).add("BCC");
+        }
+
+        for (Map.Entry<String, Set<String>> entry : emailLocations.entrySet()) {
+            if (entry.getValue().size() > 1) {
+                context.getListener()
+                        .getLogger()
+                        .println("Duplicate recipient detected: " + entry.getKey() + " in " + entry.getValue());
+            }
+        }
 
         //
         msg.setRecipients(Message.RecipientType.TO, to.toArray(new InternetAddress[0]));
