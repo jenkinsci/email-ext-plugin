@@ -69,7 +69,9 @@ public class RequesterRecipientProvider extends RecipientProvider {
             }
             upc = cur.getCause(Cause.UpstreamCause.class);
         }
-        addUserTriggeringTheBuild(cur, to, cc, bcc, env, context, debug);
+        if (cur != null) {
+            addUserTriggeringTheBuild(cur, to, cc, bcc, env, context, debug);
+        }
     }
 
     private static void addUserTriggeringTheBuild(
