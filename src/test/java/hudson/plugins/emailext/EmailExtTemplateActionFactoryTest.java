@@ -9,9 +9,9 @@ import hudson.model.FreeStyleProject;
 import hudson.util.DescribableList;
 import java.util.Collection;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
+import org.mockito.Mockito;
 
 @WithJenkins
 class EmailExtTemplateActionFactoryTest {
