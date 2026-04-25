@@ -63,6 +63,19 @@ import org.kohsuke.stapler.StaplerRequest2;
 public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<Publisher> {
 
     public static final Logger LOGGER = Logger.getLogger(ExtendedEmailPublisherDescriptor.class.getName());
+    // SMTP property key constants
+    private static final String SMTP_HOST_PROPERTY = "mail.smtp.host";
+    private static final String SMTP_AUTH_PROPERTY = "mail.smtp.auth";
+    private static final String SMTP_AUTH_MECHANISMS_PROPERTY = "mail.smtp.auth.mechanisms";
+    private static final String SMTP_TIMEOUT_PROPERTY = "mail.smtp.timeout";
+    private static final String SMTP_CONNECTION_TIMEOUT_PROPERTY = "mail.smtp.connectiontimeout";
+    private static final String SMTP_PORT_PROPERTY = "mail.smtp.port";
+    private static final String SMTP_SOCKETFACTORY_PORT_PROPERTY = "mail.smtp.socketFactory.port";
+    private static final String SMTP_SOCKETFACTORY_CLASS_PROPERTY = "mail.smtp.socketFactory.class";
+    private static final String SMTP_SOCKETFACTORY_FALLBACK_PROPERTY = "mail.smtp.socketFactory.fallback";
+    private static final String SMTP_SSL_CHECK_SERVER_IDENTITY_PROPERTY = "mail.smtp.ssl.checkserveridentity";
+    private static final String SMTP_STARTTLS_ENABLE_PROPERTY = "mail.smtp.starttls.enable";
+    private static final String SMTP_STARTTLS_REQUIRED_PROPERTY = "mail.smtp.starttls.required";
     /**
      * The default e-mail address suffix appended to the user name found from
      * changelog, to send e-mails. Null if not configured.
@@ -343,13 +356,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     @Restricted(NoExternalUse.class)
     Session createSession(MailAccount acc, ExtendedEmailPublisherContext context) {
-        final String SMTP_PORT_PROPERTY = "mail.smtp.port";
-        final String SMTP_SOCKETFACTORY_PORT_PROPERTY = "mail.smtp.socketFactory.port";
 
         Properties props = new Properties(System.getProperties());
 
         if (acc.getSmtpHost() != null) {
-            props.put("mail.smtp.host", acc.getSmtpHost());
+            props.put(SMTP_HOST_PROPERTY, acc.getSmtpHost());
         }
         if (acc.getSmtpPort() != null) {
             props.put(SMTP_PORT_PROPERTY, acc.getSmtpPort());
@@ -370,17 +381,17 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                 props.put(SMTP_PORT_PROPERTY, port);
                 props.put(SMTP_SOCKETFACTORY_PORT_PROPERTY, port);
             }
-            if (props.getProperty("mail.smtp.socketFactory.class") == null) {
-                props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+            if (props.getProperty(SMTP_SOCKETFACTORY_CLASS_PROPERTY) == null) {
+                props.put(SMTP_SOCKETFACTORY_CLASS_PROPERTY, "javax.net.ssl.SSLSocketFactory");
             }
-            props.put("mail.smtp.socketFactory.fallback", "false");
+            props.put(SMTP_SOCKETFACTORY_FALLBACK_PROPERTY, "false");
 
             // RFC 2595 specifies additional checks that must be performed on the server's
             // certificate to ensure that the server you connected to is the server you
             // intended
             // to connect to. This reduces the risk of "man in the middle" attacks.
-            if (props.getProperty("mail.smtp.ssl.checkserveridentity") == null) {
-                props.put("mail.smtp.ssl.checkserveridentity", "true");
+            if (props.getProperty(SMTP_SSL_CHECK_SERVER_IDENTITY_PROPERTY) == null) {
+                props.put(SMTP_SSL_CHECK_SERVER_IDENTITY_PROPERTY, "true");
             }
         }
         if (acc.isUseTls()) {
@@ -398,20 +409,20 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                 props.put(SMTP_PORT_PROPERTY, port);
                 props.put(SMTP_SOCKETFACTORY_PORT_PROPERTY, port);
             }
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.starttls.required", "true");
+            props.put(SMTP_STARTTLS_ENABLE_PROPERTY, "true");
+            props.put(SMTP_STARTTLS_REQUIRED_PROPERTY, "true");
         }
         if (!StringUtils.isBlank(acc.getCredentialsId())) {
-            props.put("mail.smtp.auth", "true");
+            props.put(SMTP_AUTH_PROPERTY, "true");
         }
 
         if (acc.isUseOAuth2()) {
-            props.put("mail.smtp.auth.mechanisms", "XOAUTH2");
+            props.put(SMTP_AUTH_MECHANISMS_PROPERTY, "XOAUTH2");
         }
 
         // avoid hang by setting some timeout.
-        props.put("mail.smtp.timeout", "60000");
-        props.put("mail.smtp.connectiontimeout", "60000");
+        props.put(SMTP_TIMEOUT_PROPERTY, "60000");
+        props.put(SMTP_CONNECTION_TIMEOUT_PROPERTY, "60000");
 
         try {
             String ap = acc.getAdvProperties();
@@ -994,5 +1005,39 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     void setAuthenticatorProvider(BiFunction<MailAccount, Run<?, ?>, Authenticator> authenticatorProvider) {
         this.authenticatorProvider = authenticatorProvider;
+    }
+
+    @SuppressWarnings({"lgtm/jenkins/csrf", "lgtm/jenkins/no-permission-check"})
+    public FormValidation doCheckAttachmentsPattern(@QueryParameter String value) {
+        return validateAttachmentPattern(value);
+    }
+
+    @SuppressWarnings({"lgtm/jenkins/csrf", "lgtm/jenkins/no-permission-check"})
+    public FormValidation doCheckInlineAttachmentsPattern(@QueryParameter String value) {
+        return validateAttachmentPattern(value);
+    }
+
+    private FormValidation validateAttachmentPattern(String pattern) {
+        if (pattern == null || pattern.trim().isEmpty()) {
+            return FormValidation.warning(Messages.AttachmentUtils_PatternEmpty());
+        }
+        if (pattern.contains("..")) {
+            return FormValidation.error(Messages.AttachmentUtils_PatternDirectoryTraversal());
+        }
+        if (pattern.startsWith("/") || pattern.startsWith("\\") || pattern.matches("^[A-Za-z]:\\\\.*")) {
+            return FormValidation.error(Messages.AttachmentUtils_PatternAbsolutePath());
+        }
+        int braceCount = 0;
+        for (char c : pattern.toCharArray()) {
+            if (c == '{') braceCount++;
+            else if (c == '}') braceCount--;
+            if (braceCount < 0) {
+                return FormValidation.error(Messages.AttachmentUtils_PatternUnmatchedCloseBrace());
+            }
+        }
+        if (braceCount != 0) {
+            return FormValidation.error(Messages.AttachmentUtils_PatternUnmatchedOpenBrace());
+        }
+        return FormValidation.ok();
     }
 }
