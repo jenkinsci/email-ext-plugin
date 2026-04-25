@@ -25,11 +25,15 @@ import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -110,6 +114,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private String defaultPostsendScript;
 
     private List<GroovyScriptPath> defaultClasspath = new ArrayList<>();
+
+    private List<EmailTemplate> emailTemplates = new ArrayList<>();
 
     private transient List<EmailTriggerDescriptor> defaultTriggers = new ArrayList<>();
 
@@ -847,6 +853,66 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         defaultTriggerIds = triggerIds;
     }
 
+    public List<EmailTemplate> getEmailTemplates() {
+        return emailTemplates;
+    }
+
+    /**
+     * Sets and provisions email templates from Configuration as Code.
+     *
+     * <p>
+     * Each template is validated for security (safe filename, allowed extension,
+     * no path traversal) and then written to
+     * {@code $JENKINS_HOME/email-templates/}.
+     *
+     * @param emailTemplates the list of templates to provision
+     */
+    @DataBoundSetter
+    public void setEmailTemplates(List<EmailTemplate> emailTemplates) {
+        this.emailTemplates = emailTemplates != null ? emailTemplates : new ArrayList<>();
+
+        File templatesDir = new File(Jenkins.get().getRootDir(), "email-templates");
+        if (!templatesDir.exists() && !templatesDir.mkdirs()) {
+            LOGGER.log(Level.WARNING, "Failed to create email-templates directory: {0}", templatesDir);
+            return;
+        }
+
+        // Clean up previously provisioned templates to avoid accumulation of stale/removed templates.
+        // We only delete files that match the expected template extensions to avoid deleting unrelated user files.
+        File[] existingFiles = templatesDir.listFiles(
+                (dir, name) -> name.endsWith(".groovy") || name.endsWith(".jelly") || name.endsWith(".template"));
+
+        if (existingFiles != null) {
+            for (File file : existingFiles) {
+                if (!file.delete()) {
+                    LOGGER.log(Level.WARNING, "Failed to delete old template file: {0}", file.getAbsolutePath());
+                }
+            }
+        }
+
+        for (EmailTemplate template : this.emailTemplates) {
+            File templateFile = new File(templatesDir, template.getName());
+            try {
+                // Canonical path check using nio.Path#startsWith to ensure resolved file is inside the templates
+                // directory
+                Path canonicalDir = templatesDir.toPath().normalize().toAbsolutePath();
+                Path canonicalFile = templateFile.toPath().normalize().toAbsolutePath();
+                if (!canonicalFile.startsWith(canonicalDir)) {
+                    LOGGER.log(
+                            Level.WARNING,
+                            "Rejected template with path outside email-templates directory: {0}",
+                            template.getName());
+                    continue;
+                }
+
+                Files.writeString(templateFile.toPath(), template.getContent(), StandardCharsets.UTF_8);
+                LOGGER.log(Level.INFO, "Provisioned email template: {0}", template.getName());
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "Failed to write email template: " + template.getName(), e);
+            }
+        }
+    }
+
     @SuppressWarnings({"lgtm[jenkins/csrf]", "lgtm[jenkins/no-permission-check]", "unused"})
     public ListBoxModel doFillDefaultContentTypeItems() {
         ListBoxModel items = new ListBoxModel();
@@ -858,6 +924,9 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     @Override
     public boolean configure(StaplerRequest2 req, JSONObject formData) throws FormException {
+        if (formData.has("emailTemplates")) {
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+        }
         req.bindJSON(this, formData);
         save();
         return super.configure(req, formData);
