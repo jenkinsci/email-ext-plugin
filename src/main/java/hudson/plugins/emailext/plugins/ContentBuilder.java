@@ -93,10 +93,7 @@ public final class ContentBuilder {
             }
         } catch (MacroEvaluationException e) {
             context.getListener().getLogger().println("Error evaluating token: " + e.getMessage());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            Logger.getLogger(ContentBuilder.class.getName()).log(Level.SEVERE, null, e);
-        } catch (IOException e) {
+        } catch (Exception e) {
             Logger.getLogger(ContentBuilder.class.getName()).log(Level.SEVERE, null, e);
         }
         return newText != null ? newText.trim() : "";
