@@ -532,6 +532,23 @@ public class ExtendedEmailPublisher extends Notifier {
         return true;
     }
 
+    /**
+     * Returns true if the SMTP error is transient (4xx response code) and the
+     * send should be retried (fixes JENKINS-68518).
+     */
+    private static boolean isTransientSmtpError(Exception e) {
+        String msg = e.getMessage();
+        if (msg == null) {
+            return false;
+        }
+        // SMTP 4xx codes indicate transient server-side failures
+        return msg.matches("^4\\d\\d.*")
+                || msg.contains("421")
+                || msg.contains("450")
+                || msg.contains("451")
+                || msg.contains("452");
+    }
+
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     boolean sendMail(ExtendedEmailPublisherContext context) {
         try {
@@ -625,6 +642,13 @@ public class ExtendedEmailPublisher extends Notifier {
                                         .println("SMTP connection failed. Retrying in 10 seconds...");
                                 transport.close();
                                 Thread.sleep(10000);
+                            } else if (isTransientSmtpError(e)) {
+                                context.getListener()
+                                        .getLogger()
+                                        .println(
+                                                "Transient SMTP error sending email, retrying once more in 10 seconds...");
+                                transport.close();
+                                Thread.sleep(10000);
                             } else {
                                 Address[] addresses = e.getValidSentAddresses();
                                 if (addresses != null && addresses.length > 0) {
@@ -674,6 +698,13 @@ public class ExtendedEmailPublisher extends Notifier {
                                         .getLogger()
                                         .println(
                                                 "SMTP connection error while sending email. Retrying once more in 10 seconds.");
+                                transport.close();
+                                Thread.sleep(10000);
+                            } else if (isTransientSmtpError(e)) {
+                                context.getListener()
+                                        .getLogger()
+                                        .println(
+                                                "Transient SMTP error while sending email. Retrying once more in 10 seconds.");
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {
