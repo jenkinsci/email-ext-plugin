@@ -61,8 +61,17 @@ public final class ContentBuilder {
                 noNull(context.getPublisher().getDescriptor().getDefaultBody()));
         String defaultExtSubject = Matcher.quoteReplacement(
                 noNull(context.getPublisher().getDescriptor().getDefaultSubject()));
+        // If the project has explicitly set its own recipient list (not delegating
+        // to $DEFAULT_RECIPIENTS), honour that override by not expanding
+        // $DEFAULT_RECIPIENTS in the trigger-level list either (fixes JENKINS-71828).
+        String projectRecipientList = noNull(context.getPublisher().recipientList);
+        boolean projectOverridesRecipients = !projectRecipientList.isEmpty()
+                && !projectRecipientList.contains("$DEFAULT_RECIPIENTS")
+                && !projectRecipientList.contains("${DEFAULT_RECIPIENTS}");
         String defaultRecipients = Matcher.quoteReplacement(
-                noNull(context.getPublisher().getDescriptor().getDefaultRecipients()));
+                projectOverridesRecipients
+                        ? projectRecipientList
+                        : noNull(context.getPublisher().getDescriptor().getDefaultRecipients()));
         String defaultExtReplyTo = Matcher.quoteReplacement(
                 noNull(context.getPublisher().getDescriptor().getDefaultReplyTo()));
         String defaultPresendScript = Matcher.quoteReplacement(
