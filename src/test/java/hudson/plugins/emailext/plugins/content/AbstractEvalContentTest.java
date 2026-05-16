@@ -44,4 +44,18 @@ class AbstractEvalContentTest {
 
         assertFalse(AbstractEvalContent.isChildOf(parent, parent));
     }
+
+    @Test
+    void isChildOf_returnsFalseForSiblingWithSimilarPrefix() throws Exception {
+        File parentDir = new File(System.getProperty("java.io.tmpdir"), "parent");
+        File siblingDir = new File(System.getProperty("java.io.tmpdir"), "parent-sibling");
+        File childOfSibling = new File(siblingDir, "child");
+        parentDir.mkdirs();
+        childOfSibling.mkdirs();
+
+        FilePath parent = new FilePath(parentDir);
+        FilePath falseChild = new FilePath(childOfSibling);
+
+        assertFalse(AbstractEvalContent.isChildOf(falseChild, parent));
+    }
 }

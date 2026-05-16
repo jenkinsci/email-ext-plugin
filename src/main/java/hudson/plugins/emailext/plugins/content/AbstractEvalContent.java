@@ -153,22 +153,17 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     @Restricted(NoExternalUse.class)
     public static boolean isChildOf(final FilePath potentialChild, final FilePath parent)
             throws IOException, InterruptedException {
-        // JENKINS-26838 now resolved: FilePath.isDescendant() available in core
-        // isDescendant() requires a relative path so we derive it from the absolute paths
-        String parentPath = parent.getRemote();
-        String childPath = potentialChild.getRemote();
-        if (!childPath.startsWith(parentPath)) {
+        java.nio.file.Path parentNio = java.nio.file.Paths.get(parent.getRemote()).normalize();
+        java.nio.file.Path childNio = java.nio.file.Paths.get(potentialChild.getRemote()).normalize();
+        try {
+            java.nio.file.Path relative = parentNio.relativize(childNio);
+            if (relative.toString().isEmpty()) {
+                return false;
+            }
+            return parent.isDescendant(relative.toString());
+        } catch (IllegalArgumentException e) {
             return false;
         }
-        String relative = childPath.substring(parentPath.length());
-        if (relative.isEmpty()) {
-            return false;
-        }
-        // Strip leading separator to make it truly relative
-        if (relative.startsWith("/") || relative.startsWith("\\")) {
-            relative = relative.substring(1);
-        }
-        return parent.isDescendant(relative);
     }
 
     private InputStream getManagedFile(Run<?, ?> run, String fileName) {
