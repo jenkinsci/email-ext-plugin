@@ -178,7 +178,8 @@ class ContentBuilderTest {
 
         String result = ContentBuilder.transformText("$PROJECT_DEFAULT_CONTENT", publisher, build, listener);
 
-        assertTrue(Thread.currentThread().isInterrupted(), "Interrupt flag should be restored after InterruptedException");
+        assertTrue(
+                Thread.currentThread().isInterrupted(), "Interrupt flag should be restored after InterruptedException");
         Thread.interrupted(); // clear the flag for test isolation
     }
 
