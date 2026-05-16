@@ -158,7 +158,7 @@ public class EmailExtTemplateAction implements Action {
                     stream.toString(ExtendedEmailPublisher.descriptor().getCharset()));
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            result[0] = renderError(ex);
+            return result;
         } catch (Exception ex) {
             result[0] = renderError(ex);
         }

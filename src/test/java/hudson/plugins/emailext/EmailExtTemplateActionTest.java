@@ -1,5 +1,7 @@
 package hudson.plugins.emailext;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import hudson.model.FreeStyleProject;
@@ -20,5 +22,8 @@ class EmailExtTemplateActionTest {
         String[] result = action.renderTemplate("nonexistent.template", "1");
 
         assertTrue(Thread.interrupted(), "Interrupt flag should be restored after InterruptedException");
+        assertNotNull(result);
+        assertEquals("", result[0]);
+        assertEquals("", result[1]);
     }
 }
