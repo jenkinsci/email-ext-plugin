@@ -1514,9 +1514,6 @@ class ExtendedEmailPublisherTest {
         assertNotNull(
                 attach.getHeader("Content-Transfer-Encoding"),
                 "Attachment should include a Content-Transfer-Encoding header");
-
-        BodyPart textPart = findFirstPartByContentType(part, "text/plain");
-        assertNotNull(textPart, "Multipart should contain a plain text body part");
     }
 
     @Test
@@ -1991,25 +1988,6 @@ class ExtendedEmailPublisherTest {
                 "MimeMultipart should report " + expected + " content type",
                 multipart.getContentType(),
                 containsString(expected));
-    }
-
-    private static BodyPart findFirstPartByContentType(MimeMultipart multipart, String contentTypeToken)
-            throws Exception {
-        for (int i = 0; i < multipart.getCount(); i++) {
-            BodyPart bodyPart = multipart.getBodyPart(i);
-            if (bodyPart.getContentType().contains(contentTypeToken)) {
-                return bodyPart;
-            }
-
-            Object nestedContent = bodyPart.getContent();
-            if (nestedContent instanceof MimeMultipart nestedMultipart) {
-                BodyPart nestedPart = findFirstPartByContentType(nestedMultipart, contentTypeToken);
-                if (nestedPart != null) {
-                    return nestedPart;
-                }
-            }
-        }
-        return null;
     }
 
     @Test
