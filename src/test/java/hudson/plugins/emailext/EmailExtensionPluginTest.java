@@ -59,4 +59,11 @@ class EmailExtensionPluginTest {
         assertEquals("false", System.getProperty("mail.smtp.sendpartial"));
         assertEquals("false", System.getProperty("mail.smtps.sendpartial"));
     }
+@Test
+    void whenOnlyOnePropertySet_shouldSetTheOther() {
+        System.setProperty("mail.smtp.sendpartial", "false");
+        EmailExtensionPlugin.initializeSendPartialProperties();
+        assertEquals("false", System.getProperty("mail.smtp.sendpartial"));
+        assertEquals("true", System.getProperty("mail.smtps.sendpartial"));
+    }
 }
