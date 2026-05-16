@@ -2166,7 +2166,8 @@ class ExtendedEmailPublisherTest {
                 Mailbox.get("ashlux@gmail.com").size(),
                 "We should only have one email since the first failure doesn't count as 'still failing'.");
     }
-@Test
+
+    @Test
     void testAddContent_restoresInterruptFlagWhenInterrupted() throws Exception {
         publisher.saveOutput = true;
 
@@ -2186,7 +2187,9 @@ class ExtendedEmailPublisherTest {
 
         try {
             FreeStyleBuild build = project.scheduleBuild2(0).get();
-            assertTrue(Thread.currentThread().isInterrupted(), "Interrupt flag should be restored after InterruptedException");
+            assertTrue(
+                    Thread.currentThread().isInterrupted(),
+                    "Interrupt flag should be restored after InterruptedException");
         } finally {
             Thread.interrupted(); // clear the flag for test isolation
         }
