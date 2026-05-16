@@ -1227,7 +1227,7 @@ public class ExtendedEmailPublisher extends Notifier {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            context.getListener().getLogger().println("Error trying to save email output to file. " + e.getMessage());
+            context.getListener().getLogger().println("Email output save interrupted; build may be aborting.");
         } catch (IOException e) {
             context.getListener().getLogger().println("Error trying to save email output to file. " + e.getMessage());
         }
