@@ -109,6 +109,8 @@ public final class RecipientProviderUtilities {
             }
         } catch (IllegalStateException e) {
             LOGGER.warning("Could not retrieve UserIdCause: " + e.getMessage());
+        } catch (Exception e) {
+            LOGGER.warning("Unexpected error retrieving UserIdCause: " + e.getMessage());
         }
         return null;
     }
@@ -126,7 +128,7 @@ public final class RecipientProviderUtilities {
                 return User.get(name, false, Collections.emptyMap());
             }
         } catch (NoSuchFieldException e) {
-            LOGGER.warning("Could not find authenticationName field in UserCause: " + e.getMessage());
+            LOGGER.fine("Could not find authenticationName field in UserCause: " + e.getMessage());
         } catch (IllegalAccessException e) {
             LOGGER.warning("Could not access authenticationName field in UserCause: " + e.getMessage());
         } catch (IllegalStateException e) {
