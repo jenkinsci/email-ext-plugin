@@ -153,8 +153,10 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     @Restricted(NoExternalUse.class)
     public static boolean isChildOf(final FilePath potentialChild, final FilePath parent)
             throws IOException, InterruptedException {
-        java.nio.file.Path parentNio = java.nio.file.Paths.get(parent.getRemote()).normalize();
-        java.nio.file.Path childNio = java.nio.file.Paths.get(potentialChild.getRemote()).normalize();
+        java.nio.file.Path parentNio =
+                java.nio.file.Paths.get(parent.getRemote()).normalize();
+        java.nio.file.Path childNio =
+                java.nio.file.Paths.get(potentialChild.getRemote()).normalize();
         try {
             java.nio.file.Path relative = parentNio.relativize(childNio);
             if (relative.toString().isEmpty()) {
