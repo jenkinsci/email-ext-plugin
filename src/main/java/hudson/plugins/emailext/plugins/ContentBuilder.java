@@ -7,6 +7,7 @@ import hudson.model.BuildListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
 import hudson.tasks.Publisher;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -92,7 +93,10 @@ public final class ContentBuilder {
             }
         } catch (MacroEvaluationException e) {
             context.getListener().getLogger().println("Error evaluating token: " + e.getMessage());
-        } catch (Exception e) {
+        } catch (IOException e) {
+            Logger.getLogger(ContentBuilder.class.getName()).log(Level.SEVERE, null, e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             Logger.getLogger(ContentBuilder.class.getName()).log(Level.SEVERE, null, e);
         }
         return newText != null ? newText.trim() : "";
