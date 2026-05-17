@@ -37,15 +37,12 @@ class StaticProxyInstanceWhitelistTest {
     void constructorThrowsOnOneOfMultipleMissingResources() {
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
-                () -> new StaticProxyInstanceWhitelist(instance,
-                        "test-whitelist.txt",
-                        "no/such/resource.txt"
-                )
-        );
+                () -> new StaticProxyInstanceWhitelist(instance, "test-whitelist.txt", "no/such/resource.txt"));
         assertTrue(
                 ex.getMessage().contains("no/such/resource.txt"),
                 "Exception message should mention the missing resource path");
     }
+
     @Test
     void permitsMethodReturnsFalseForUnwhitelistedMethod() throws Exception {
         // empty whitelist — no resources, so nothing is permitted
