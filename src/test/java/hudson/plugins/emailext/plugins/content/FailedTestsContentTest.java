@@ -257,6 +257,7 @@ class FailedTestsContentTest {
 
     @Test
     void testGetContent_withMessage_withStack_htmlEscaped_nullValues() throws Exception {
+
         AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
         when(testResults.getFailCount()).thenReturn(1);
 
@@ -275,13 +276,15 @@ class FailedTestsContentTest {
         failedTestContent.showStack = true;
         failedTestContent.escapeHtml = true;
 
-        // This execution validates the added null checks so that StringEscapeUtils doesn't throw a
-        // NullPointerException.
         String content = failedTestContent.evaluate(build, listener, FailedTestsContent.MACRO_NAME);
 
         assertEquals(
                 "1 tests failed.<br/>" + "FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test<br/>",
                 content);
+
+        assertFalse(
+                content.contains("Error Message:"), "Output should not contain error messages since they were null");
+        assertFalse(content.contains("Stack Trace:"), "Output should not contain stack traces since they were null");
     }
 
     @Test

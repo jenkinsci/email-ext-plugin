@@ -86,6 +86,7 @@ public class FailedTestsContent extends DataBoundTokenMacro {
     }
 
     private void setMaxLength() {
+        // Multiply by 1024 to convert KB to bytes; cap at Long.MAX_VALUE to prevent overflow
         maxLength = (maxLength <= Long.MAX_VALUE / 1024) ? maxLength * 1024 : Long.MAX_VALUE;
     }
 
