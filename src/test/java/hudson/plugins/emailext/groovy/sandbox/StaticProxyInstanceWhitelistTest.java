@@ -11,6 +11,10 @@ import org.junit.jupiter.api.Test;
 
 class StaticProxyInstanceWhitelistTest {
 
+    private static class FieldHolder {
+        public String name;
+    }
+
     private Object instance;
 
     @BeforeEach
@@ -31,18 +35,17 @@ class StaticProxyInstanceWhitelistTest {
 
     @Test
     void constructorThrowsOnOneOfMultipleMissingResources() {
-        // verifies the check works when multiple resources are passed
-        // and one of them is missing
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
-                () -> new StaticProxyInstanceWhitelist(
-                        instance, "/non/existent/resource.txt", "/another/missing/resource.txt"));
-
+                () -> new StaticProxyInstanceWhitelist(instance,
+                        "test-whitelist.txt",
+                        "no/such/resource.txt"
+                )
+        );
         assertTrue(
-                ex.getMessage().contains("not found on classpath"),
-                "Exception message should indicate the resource was not found");
+                ex.getMessage().contains("no/such/resource.txt"),
+                "Exception message should mention the missing resource path");
     }
-
     @Test
     void permitsMethodReturnsFalseForUnwhitelistedMethod() throws Exception {
         // empty whitelist — no resources, so nothing is permitted
@@ -71,7 +74,7 @@ class StaticProxyInstanceWhitelistTest {
     void permitsFieldGetReturnsFalseForUnwhitelistedField() throws Exception {
         StaticProxyInstanceWhitelist whitelist = new StaticProxyInstanceWhitelist(instance);
 
-        Field field = String.class.getDeclaredField("value");
+        Field field = FieldHolder.class.getDeclaredField("name");
 
         assertFalse(
                 whitelist.permitsFieldGet(field, instance),
@@ -82,7 +85,7 @@ class StaticProxyInstanceWhitelistTest {
     void permitsFieldSetAlwaysReturnsFalse() throws Exception {
         StaticProxyInstanceWhitelist whitelist = new StaticProxyInstanceWhitelist(instance);
 
-        Field field = String.class.getDeclaredField("value");
+        Field field = FieldHolder.class.getDeclaredField("name");
 
         assertFalse(
                 whitelist.permitsFieldSet(field, instance, null),
