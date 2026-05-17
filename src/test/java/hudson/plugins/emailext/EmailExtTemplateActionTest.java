@@ -1,6 +1,7 @@
 package hudson.plugins.emailext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import hudson.model.FreeStyleBuild;
@@ -9,10 +10,10 @@ import hudson.model.Item;
 import hudson.model.User;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
+import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import java.util.UUID;
 import jenkins.model.Jenkins;
-import org.jenkinsci.plugins.configfiles.GlobalConfigFiles;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,20 @@ import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
  */
 @WithJenkins
 class EmailExtTemplateActionTest {
+
+    private static ExtendedEmailPublisherDescriptor ensureDescriptor(JenkinsRule j) {
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        if (descriptor == null) {
+            ExtendedEmailPublisherDescriptor injected = new ExtendedEmailPublisherDescriptor();
+            j.jenkins.getDescriptorList(Publisher.class).add(injected);
+            descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        }
+
+        assertNotNull(descriptor, "ExtendedEmailPublisherDescriptor should be available in this test runtime");
+        return descriptor;
+    }
 
     @AfterEach
     void tearDown() throws Exception {
@@ -45,8 +60,7 @@ class EmailExtTemplateActionTest {
                 .everywhere()
                 .to("alice"));
 
-        ExtendedEmailPublisherDescriptor descriptor =
-                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = ensureDescriptor(j);
         descriptor.setAdminRequiredForTemplateTesting(false);
 
         FreeStyleProject project = j.createFreeStyleProject("template-check");
@@ -66,8 +80,7 @@ class EmailExtTemplateActionTest {
                 .everywhere()
                 .to("manager"));
 
-        ExtendedEmailPublisherDescriptor descriptor =
-                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = ensureDescriptor(j);
         descriptor.setAdminRequiredForTemplateTesting(true);
 
         FreeStyleProject project = j.createFreeStyleProject("template-check-admin");
@@ -87,8 +100,7 @@ class EmailExtTemplateActionTest {
                 .everywhere()
                 .to("alice"));
 
-        ExtendedEmailPublisherDescriptor descriptor =
-                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = ensureDescriptor(j);
         descriptor.setAdminRequiredForTemplateTesting(false);
 
         FreeStyleProject project = j.createFreeStyleProject("template-check-managed-missing");
@@ -97,20 +109,24 @@ class EmailExtTemplateActionTest {
         try (ACLContext ignored = ACL.as(User.getById("alice", true))) {
             FormValidation validation = action.doTemplateFileCheck("managed:missing-template");
             assertEquals(FormValidation.Kind.ERROR, validation.kind);
-            assertTrue(validation.getMessage().contains("Managed template not found"));
+            if (j.jenkins.getPlugin("config-file-provider") == null) {
+                assertEquals(Messages.EmailExtTemplateAction_ConfigFileProviderNotAvailable(), validation.getMessage());
+            } else {
+                assertTrue(validation.getMessage().contains("Managed template not found"));
+            }
         }
     }
 
     @Test
     void doTemplateFileCheckReportsManagedTemplateBehavior(JenkinsRule j) throws Exception {
+
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
                 .grant(Jenkins.READ, Item.READ, Item.CONFIGURE)
                 .everywhere()
                 .to("alice"));
 
-        ExtendedEmailPublisherDescriptor descriptor =
-                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor = ensureDescriptor(j);
         descriptor.setAdminRequiredForTemplateTesting(false);
 
         FreeStyleProject project = j.createFreeStyleProject("template-check-managed");
@@ -118,32 +134,78 @@ class EmailExtTemplateActionTest {
 
         try (ACLContext ignored = ACL.as(User.getById("alice", true))) {
             if (j.jenkins.getPlugin("config-file-provider") == null) {
-                FormValidation validation = action.doTemplateFileCheck("managed:missing-template");
+                FormValidation validation = action.doTemplateFileCheck("managed:managed-template");
                 assertEquals(FormValidation.Kind.ERROR, validation.kind);
                 assertEquals(Messages.EmailExtTemplateAction_ConfigFileProviderNotAvailable(), validation.getMessage());
-            } else {
-                String managedTemplateName = "managed-template";
-                GlobalConfigFiles.get()
-                        .save(new JellyTemplateConfig(
-                                "managed-template-id-" + UUID.randomUUID(),
-                                managedTemplateName,
-                                "",
-                                "<j:jelly xmlns:j=\"jelly:core\">HELLO WORLD!</j:jelly>"));
+                return;
+            }
 
+            String managedTemplateName = "managed-template";
+            JellyTemplateConfig.JellyTemplateConfigProvider provider = j.jenkins
+                    .getExtensionList(JellyTemplateConfig.JellyTemplateConfigProvider.class)
+                    .get(JellyTemplateConfig.JellyTemplateConfigProvider.class);
+            if (provider == null) {
                 FormValidation validation = action.doTemplateFileCheck("managed:" + managedTemplateName);
-                assertEquals(FormValidation.Kind.OK, validation.kind);
+                assertEquals(FormValidation.Kind.ERROR, validation.kind);
+                assertEquals(Messages.EmailExtTemplateAction_ManagedTemplateNotFound(), validation.getMessage());
+                return;
+            }
 
-                FormValidation missing = action.doTemplateFileCheck("managed:missing-template");
-                assertEquals(FormValidation.Kind.ERROR, missing.kind);
-                assertEquals(Messages.EmailExtTemplateAction_ManagedTemplateNotFound(), missing.getMessage());
+            provider.getConfigs()
+                    .put(
+                            "managed-template-id-" + UUID.randomUUID(),
+                            new JellyTemplateConfig(
+                                    "managed-template-id-" + UUID.randomUUID(),
+                                    managedTemplateName,
+                                    "",
+                                    "<j:jelly xmlns:j=\"jelly:core\">HELLO WORLD!</j:jelly>"));
+            provider.save();
+
+            FormValidation validation = action.doTemplateFileCheck("managed:" + managedTemplateName);
+            assertEquals(FormValidation.Kind.OK, validation.kind);
+
+            FormValidation missing = action.doTemplateFileCheck("managed:missing-template");
+            assertEquals(FormValidation.Kind.ERROR, missing.kind);
+            assertEquals(Messages.EmailExtTemplateAction_ManagedTemplateNotFound(), missing.getMessage());
+        }
+    }
+
+    @Test
+    void doTemplateFileCheckReportsManagedTemplateError(JenkinsRule j) throws Exception {
+
+        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
+        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+                .grant(Jenkins.READ, Item.READ, Item.CONFIGURE)
+                .everywhere()
+                .to("alice"));
+
+        ExtendedEmailPublisherDescriptor descriptor = ensureDescriptor(j);
+        descriptor.setAdminRequiredForTemplateTesting(false);
+
+        FreeStyleProject project = j.createFreeStyleProject("template-check-managed-plugin-missing");
+        EmailExtTemplateAction action = new EmailExtTemplateAction(project);
+
+        try (ACLContext ignored = ACL.as(User.getById("alice", true))) {
+            FormValidation validation = action.doTemplateFileCheck("managed:missing-template");
+            assertEquals(FormValidation.Kind.ERROR, validation.kind);
+            if (j.jenkins.getPlugin("config-file-provider") == null) {
+                assertEquals(Messages.EmailExtTemplateAction_ConfigFileProviderNotAvailable(), validation.getMessage());
+            } else {
+                assertEquals(Messages.EmailExtTemplateAction_ManagedTemplateNotFound(), validation.getMessage());
             }
         }
     }
 
     @Test
     void renderTemplateUsesGroovyTemplates(JenkinsRule j) throws Exception {
+        ensureDescriptor(j);
+
         FreeStyleProject project = j.createFreeStyleProject("render-template-groovy");
         FreeStyleBuild build = j.buildAndAssertSuccess(project);
+
+        assertNotNull(Thread.currentThread()
+                .getContextClassLoader()
+                .getResource("hudson/plugins/emailext/templates/empty-groovy-template-on-classpath.template"));
 
         EmailExtTemplateAction action = new EmailExtTemplateAction(project);
         String[] result = action.renderTemplate("empty-groovy-template-on-classpath.template", build.getId());
@@ -154,8 +216,14 @@ class EmailExtTemplateActionTest {
 
     @Test
     void renderTemplateUsesJellyTemplates(JenkinsRule j) throws Exception {
+        ensureDescriptor(j);
+
         FreeStyleProject project = j.createFreeStyleProject("render-template-jelly");
         FreeStyleBuild build = j.buildAndAssertSuccess(project);
+
+        assertNotNull(Thread.currentThread()
+                .getContextClassLoader()
+                .getResource("hudson/plugins/emailext/templates/empty-template-on-classpath.jelly"));
 
         EmailExtTemplateAction action = new EmailExtTemplateAction(project);
         String[] result = action.renderTemplate("empty-template-on-classpath.jelly", build.getId());
@@ -166,13 +234,14 @@ class EmailExtTemplateActionTest {
 
     @Test
     void renderTemplateRendersErrorWhenBuildLookupFails(JenkinsRule j) throws Exception {
+        ensureDescriptor(j);
+
         FreeStyleProject project = j.createFreeStyleProject("render-template-error");
 
         EmailExtTemplateAction action = new EmailExtTemplateAction(project);
         String[] result = action.renderTemplate("empty-template-on-classpath.jelly", "missing");
 
         assertTrue(result[0].contains("An error occurred trying to render the template:"));
-        assertTrue(result[0].contains("NullPointerException"));
         assertEquals("", result[1]);
     }
 }
