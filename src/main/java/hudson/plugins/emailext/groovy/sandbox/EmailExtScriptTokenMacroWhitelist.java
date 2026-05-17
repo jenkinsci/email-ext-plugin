@@ -78,7 +78,10 @@ public class EmailExtScriptTokenMacroWhitelist extends AbstractWhitelist {
     public static void beginExecution(Run<?, ?> build, TaskListener listener) {
         try {
             ENV_CACHE.set(build.getEnvironment(listener));
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, e, () -> "Failed to pre-load environment for " + build.getExternalizableId());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             LOGGER.log(Level.WARNING, e, () -> "Failed to pre-load environment for " + build.getExternalizableId());
         }
     }

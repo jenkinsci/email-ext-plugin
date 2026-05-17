@@ -260,6 +260,7 @@
             <mail.pop3.class>org.jvnet.mock_javamail.MockStore</mail.pop3.class>
             <mail.imap.class>org.jvnet.mock_javamail.MockStore</mail.imap.class>
           </systemPropertyVariables>
+          <excludedGroups>performance</excludedGroups>
         </configuration>
       </plugin>
     </plugins>

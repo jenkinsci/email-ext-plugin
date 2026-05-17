@@ -2,7 +2,11 @@ package hudson.plugins.emailext.groovy.sandbox;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import hudson.EnvVars;
 import hudson.model.Run;
@@ -30,8 +34,8 @@ public class EmailExtScriptTokenMacroWhiteListTest {
 
     @AfterEach
     void tearDown() {
-        // clean up ThreadLocal even if test fails
         EmailExtScriptTokenMacroWhitelist.endExecution();
+        Thread.interrupted();
     }
 
     @Test
@@ -112,7 +116,11 @@ public class EmailExtScriptTokenMacroWhiteListTest {
 
         EmailExtScriptTokenMacroWhitelist.beginExecution(mockRun, mockListener);
 
+        // Cache must be null — fallback handles it
         assertNull(EmailExtScriptTokenMacroWhitelist.getCachedEnvVars());
+        // Interrupt flag must be restored
+        assertTrue(
+                Thread.currentThread().isInterrupted(), "Interrupt flag should be restored after InterruptedException");
     }
 
     private void runBaseline(int iterations) throws Exception {
