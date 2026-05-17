@@ -14,6 +14,7 @@ import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import java.util.UUID;
 import jenkins.model.Jenkins;
+import org.jenkinsci.plugins.configfiles.GlobalConfigFiles;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -151,15 +152,13 @@ class EmailExtTemplateActionTest {
                 return;
             }
 
-            provider.getConfigs()
-                    .put(
-                            "managed-template-id-" + UUID.randomUUID(),
-                            new JellyTemplateConfig(
-                                    "managed-template-id-" + UUID.randomUUID(),
-                                    managedTemplateName,
-                                    "",
-                                    "<j:jelly xmlns:j=\"jelly:core\">HELLO WORLD!</j:jelly>"));
-            provider.save();
+            String managedTemplateId = "managed-template-id-" + UUID.randomUUID();
+            GlobalConfigFiles.get()
+                    .save(new JellyTemplateConfig(
+                            managedTemplateId,
+                            managedTemplateName,
+                            "",
+                            "<j:jelly xmlns:j=\"jelly:core\">HELLO WORLD!</j:jelly>"));
 
             FormValidation validation = action.doTemplateFileCheck("managed:" + managedTemplateName);
             assertEquals(FormValidation.Kind.OK, validation.kind);
