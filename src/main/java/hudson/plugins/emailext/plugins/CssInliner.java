@@ -1,14 +1,7 @@
 package hudson.plugins.emailext.plugins;
 
-import java.net.URL;
-import java.net.URLConnection;
-import java.text.MessageFormat;
-import java.util.Base64;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.htmlparser.jericho.Source;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -28,22 +21,15 @@ import org.jsoup.select.Elements;
  * When used in conjunction with the <code>style</code> tag, it inlines the
  * stylesheet defined there into all html elements matching the rules.
  * </li>
- * <li>
- * When used with the <code>img</code> tag, it base64 encodes the image it found
- * to make it visible in the email.
- * </li>
  * </ul>
  *
  * @author <a href="https://github.com/rahulsom">Rahul Somasunderam</a>
  */
 public class CssInliner {
-    private static final Logger LOG = Logger.getLogger(CssInliner.class.getName());
 
     public static final String CSS_STYLE = "cssstyle";
     public static final String STYLE_ATTR = "style";
     public static final String STYLE_TAG = "style";
-    public static final String IMG_TAG = "img";
-    public static final String IMG_SRC_ATTR = "src";
     public static final String DATA_INLINE_ATTR = "data-inline";
 
     private static String concatenateProperties(String oldProp, String newProp) {
@@ -93,41 +79,12 @@ public class CssInliner {
 
         extractStyles(doc);
         applyStyles(doc);
-        inlineImages(doc);
 
         doc.outputSettings(doc.outputSettings()
                 .syntax(Document.OutputSettings.Syntax.xml)
                 .prettyPrint(false)
                 .escapeMode(Entities.EscapeMode.extended));
         return StringEscapeUtils.unescapeHtml4(doc.outerHtml());
-    }
-
-    /**
-     * Inlines images marked with <code>data-inline="true"</code>
-     *
-     * @param doc the html document
-     */
-    private void inlineImages(Document doc) {
-        Elements allImages = doc.getElementsByTag(IMG_TAG);
-        for (Element img : allImages) {
-            if (img.attr(DATA_INLINE_ATTR).equals("true")) {
-                String src = img.attr(IMG_SRC_ATTR);
-                try {
-                    URL url = new URL(src);
-                    URLConnection urlConnection = url.openConnection();
-                    urlConnection.connect();
-                    String contentType = urlConnection.getContentType();
-
-                    urlConnection.getContent();
-                    byte[] srcContent = IOUtils.toByteArray(url.openStream());
-                    String base64 = Base64.getEncoder().encodeToString(srcContent);
-
-                    img.attr(IMG_SRC_ATTR, MessageFormat.format("data:{0};base64,{1}", contentType, base64));
-                } catch (Exception e) {
-                    LOG.log(Level.WARNING, null, e);
-                }
-            }
-        }
     }
 
     /**

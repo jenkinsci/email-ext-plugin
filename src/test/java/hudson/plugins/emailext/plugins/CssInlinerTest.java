@@ -1,7 +1,13 @@
 package hudson.plugins.emailext.plugins;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import com.sun.net.httpserver.HttpServer;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 
@@ -108,39 +114,44 @@ class CssInlinerTest {
     }
 
     @Test
-    void testImageInliningOff() {
-        String input = "<html>"
-                + "  <body>"
-                + "    <img src='"
-                + getClass().getClassLoader().getResource("blank.gif").toExternalForm()
-                + "' />"
-                + "  </body>"
-                + "</html>";
-
-        String output = process(input);
-        assertEquals(clean(input), output);
-    }
-
-    @Test
-    void testImageInliningOn() {
-        String input = "<html>"
-                + "  <body>"
-                + "    <img src='"
-                + getClass().getClassLoader().getResource("blank.gif").toExternalForm()
-                + "' data-inline='true' />"
-                + "  </body>"
-                + "</html>";
-
-        String output = process(input);
-        String unprocessedExpect =
-                """
-                <html><head></head><body><img src="data:image/gif;base64,\
-                R0lGODlhFAAWAKEAAP///8z//wAAAAAAACH+TlRoaXMgYXJ0IGlzIGluIHRoZSBwdWJsaWMgZG9t
-                YWluLiBLZXZpbiBIdWdoZXMsIGtldmluaEBlaXQuY29tLCBTZXB0ZW1iZXIgMTk5NQAh+QQBAAAB
-                ACwAAAAAFAAWAAACE4yPqcvtD6OctNqLs968+w+GSQEAOw==
-                " data-inline="true" /></body></html>""";
-
-        assertEquals(unprocessedExpect.replaceAll("[\r\n]", ""), output.replaceAll("[\r\n]", ""));
+    @Issue("SECURITY-3705")
+    void testImgDataInlineNotFetched() throws Exception {
+        AtomicBoolean contacted = new AtomicBoolean(false);
+        InetAddress loopback = InetAddress.getLoopbackAddress();
+        HttpServer server = HttpServer.create(new InetSocketAddress(loopback, 0), 0);
+        server.createContext("/", exchange -> {
+            contacted.set(true);
+            exchange.sendResponseHeaders(204, -1);
+            exchange.close();
+        });
+        server.start();
+        try {
+            String url = new URI(
+                            "http",
+                            null,
+                            loopback.getHostAddress(),
+                            server.getAddress().getPort(),
+                            "/pixel.gif",
+                            null,
+                            null)
+                    .toASCIIString();
+            String input = "<html>"
+                    + "  <head>"
+                    + "    <style data-inline='true'>"
+                    + "      span {font-size: 10px;}"
+                    + "    </style>"
+                    + "  </head>"
+                    + "  <body>"
+                    + "    <img src='" + url + "' data-inline='true' />"
+                    + "  </body>"
+                    + "</html>";
+            String output = new CssInliner().process(input);
+            assertFalse(output.contains("data:"), "image must not be fetched and inlined as a data: URI");
+            assertFalse(output.contains("base64"), "image must not be base64-encoded into the body");
+        } finally {
+            server.stop(0);
+        }
+        assertFalse(contacted.get(), "CssInliner must not contact the URL referenced by <img data-inline='true'>");
     }
 
     @Test
