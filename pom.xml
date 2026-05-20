@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>email-ext</artifactId>
-  <version>${changelist}</version>
+  <version>1933.${changelist}</version>
   <packaging>hpi</packaging>
   <name>Email Extension Plugin</name>
   <description>Allows to configure every aspect of email notifications: when an email is sent, who should receive it and what the email says</description>
