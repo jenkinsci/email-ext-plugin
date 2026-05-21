@@ -111,7 +111,7 @@ public class AttachmentUtils implements Serializable {
                         try (out) {
                             long logFileLength = run.getLogText().length();
                             long pos = 0;
-                                pos = run.getLogText().writeLogTo(pos, out);
+                            pos = run.getLogText().writeLogTo(pos, out);
                         } catch (IOException e) {
                             LOGGER.log(Level.FINE, "Error streaming build log", e);
                         }
