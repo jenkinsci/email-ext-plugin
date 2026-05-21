@@ -21,7 +21,7 @@ f.entry(field: "smtpPort", title: _("SMTP Port")) {
 
 f.advanced {
     f.entry(field: "credentialsId", title: _("Credentials")) {
-        c.select()
+        c.select(checkDependsOn: "useOAuth2")
     }
     f.entry(field: "useSsl", title: _("Use SSL")) {
         f.checkbox()
