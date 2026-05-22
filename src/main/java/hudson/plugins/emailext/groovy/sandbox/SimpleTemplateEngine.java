@@ -24,6 +24,7 @@ import groovy.lang.Script;
 import groovy.lang.Writable;
 import groovy.text.Template;
 import groovy.text.TemplateEngine;
+import hudson.plugins.emailext.Messages;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -214,10 +215,16 @@ public class SimpleTemplateEngine extends TemplateEngine {
                             scriptObject.setProperty("out", pw);
                             scriptObject.run();
                         }
+
                     } catch (MissingPropertyException x) {
                         throw (IOException) new IOException(
                                         "did you forget to escape \\$" + x.getProperty() + " for non-Groovy variables?")
                                 .initCause(x);
+                    } catch (RuntimeException x) {
+                        if (x.getCause() instanceof java.io.NotSerializableException) {
+                            throw new GroovyRuntimeException(Messages.SimpleTemplateEngine_NotSerializableError(), x);
+                        }
+                        throw x;
                     }
                     pw.flush();
                     return writer;
