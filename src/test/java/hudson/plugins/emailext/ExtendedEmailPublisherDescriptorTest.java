@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.oneOf;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.jvnet.hudson.test.JenkinsMatchers.hasKind;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
@@ -42,6 +43,7 @@ import hudson.plugins.emailext.plugins.trigger.UnstableTrigger;
 import hudson.plugins.emailext.plugins.trigger.XNthFailureTrigger;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
+import hudson.util.FormValidation.Kind;
 import hudson.util.ListBoxModel;
 import jakarta.mail.Authenticator;
 import java.util.Collection;
@@ -1321,5 +1323,40 @@ class ExtendedEmailPublisherDescriptorTest {
         descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         assertEquals(
                 "both", descriptor.getDefaultContentType(), "'both' content type should persist after save and reload");
+    }
+
+    @Test
+    void testAttachmentsPatternValidation() {
+        ExtendedEmailPublisherDescriptor desc = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        // Empty pattern – warning
+        assertThat(desc.doCheckAttachmentsPattern(""), hasKind(Kind.WARNING));
+
+        // Valid patterns – OK
+        assertThat(desc.doCheckAttachmentsPattern("**/*.txt"), hasKind(Kind.OK));
+        assertThat(desc.doCheckAttachmentsPattern("logs/**/*.log"), hasKind(Kind.OK));
+
+        // Directory traversal – error (changed from warning)
+        assertThat(desc.doCheckAttachmentsPattern("../outside.txt"), hasKind(Kind.ERROR));
+        assertThat(desc.doCheckAttachmentsPattern("a/b/../../c"), hasKind(Kind.ERROR));
+
+        // Absolute path – error
+        assertThat(desc.doCheckAttachmentsPattern("/tmp/attachment"), hasKind(Kind.ERROR));
+        assertThat(desc.doCheckAttachmentsPattern("C:\\temp\\file"), hasKind(Kind.ERROR));
+
+        // Unmatched braces – error
+        assertThat(desc.doCheckAttachmentsPattern("file{"), hasKind(Kind.ERROR));
+        assertThat(desc.doCheckAttachmentsPattern("file}"), hasKind(Kind.ERROR));
+
+        // Balanced braces – OK
+        assertThat(desc.doCheckAttachmentsPattern("file{abc}"), hasKind(Kind.OK));
+    }
+
+    @Test
+    void testInlineAttachmentsPatternValidation() {
+        ExtendedEmailPublisherDescriptor desc = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        assertThat(desc.doCheckInlineAttachmentsPattern("**/*.png"), hasKind(Kind.OK));
+        assertThat(desc.doCheckInlineAttachmentsPattern("../danger.png"), hasKind(Kind.ERROR));
     }
 }
