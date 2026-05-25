@@ -118,7 +118,8 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                 @AncestorInPath Item item, @QueryParameter String credentialsId, @QueryParameter boolean useOAuth2) {
 
             final StandardListBoxModel result = new StandardListBoxModel();
-            Class<? extends StandardUsernameCredentials> credentialType = useOAuth2 ? StandardUsernameOAuth2Credentials.class : StandardUsernamePasswordCredentials.class;
+            Class<? extends StandardUsernameCredentials> credentialType =
+                    useOAuth2 ? StandardUsernameOAuth2Credentials.class : StandardUsernamePasswordCredentials.class;
             if (item == null) {
                 if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                     return result.includeCurrentValue(credentialsId);
@@ -145,7 +146,8 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                 @QueryParameter boolean useSsl,
                 @QueryParameter boolean useTls,
                 @QueryParameter boolean useOAuth2) {
-            Class<? extends StandardUsernameCredentials> credentialType = useOAuth2 ? StandardUsernameOAuth2Credentials.class : StandardUsernamePasswordCredentials.class;
+            Class<? extends StandardUsernameCredentials> credentialType =
+                    useOAuth2 ? StandardUsernameOAuth2Credentials.class : StandardUsernamePasswordCredentials.class;
             if (item == null) {
                 if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                     return FormValidation.ok();
