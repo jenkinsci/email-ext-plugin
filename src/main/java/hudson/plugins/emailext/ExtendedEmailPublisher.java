@@ -67,15 +67,19 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -582,12 +586,18 @@ public class ExtendedEmailPublisher extends Notifier {
                 return false;
             }
 
-            Address[] allRecipients = msg.getAllRecipients();
+            Address[] allRecipients;
+
             int retries = 0;
             if (executePresendScript(context, msg)) {
                 // presend script might have modified recipients:
                 allRecipients = msg.getAllRecipients();
-                if (allRecipients != null) {
+                if (allRecipients == null || allRecipients.length == 0) {
+                    context.getListener().getLogger().println("No recipients found, email couldn't be sent.");
+
+                    return false;
+                }
+                {
                     if (StringUtils.isNotBlank(getDescriptor().getEmergencyReroute())) {
                         // clear out all the existing recipients
                         msg.setRecipients(Message.RecipientType.TO, (Address[]) null);
@@ -708,11 +718,11 @@ public class ExtendedEmailPublisher extends Notifier {
 
                     if (context.getRun().getAction(MailMessageIdAction.class) == null) {
                         context.getRun().addAction(new MailMessageIdAction(msg.getMessageID()));
+                    } else {
+                        context.getListener()
+                                .getLogger()
+                                .println("An attempt to send an e-mail" + " to empty list of recipients, ignored.");
                     }
-                } else {
-                    context.getListener()
-                            .getLogger()
-                            .println("An attempt to send an e-mail" + " to empty list of recipients, ignored.");
                 }
             } else {
                 context.getListener().getLogger().println("Email sending was cancelled" + " by user script.");
@@ -984,6 +994,52 @@ public class ExtendedEmailPublisher extends Notifier {
         return descriptor.getMailAccount();
     }
 
+    void logDuplicateRecipients(
+            ExtendedEmailPublisherContext context,
+            Set<InternetAddress> to,
+            Set<InternetAddress> cc,
+            Set<InternetAddress> bcc) {
+
+        Set<String> toEmails =
+                to.stream().map(a -> a.getAddress().toLowerCase()).collect(Collectors.toSet());
+
+        Set<String> seen = new HashSet<>();
+        to.removeIf(addr -> !seen.add(addr.getAddress().toLowerCase()));
+
+        seen.clear();
+        cc.removeIf(addr -> {
+            String email = addr.getAddress().toLowerCase();
+            return !seen.add(email) || toEmails.contains(email);
+        });
+
+        Set<String> ccEmails =
+                cc.stream().map(a -> a.getAddress().toLowerCase()).collect(Collectors.toSet());
+
+        List<String> order = Arrays.asList("TO", "CC", "BCC");
+
+        bcc.removeIf(addr -> {
+            String email = addr.getAddress().toLowerCase();
+
+            if (toEmails.contains(email)) {
+                return true;
+            }
+
+            if (ccEmails.contains(email)) {
+
+                List<String> locations = new ArrayList<>(Arrays.asList("CC", "BCC"));
+                locations.sort(Comparator.comparingInt(order::indexOf));
+
+                context.getListener()
+                        .getLogger()
+                        .println("Duplicate recipient detected: " + email + " in " + locations);
+
+                return false;
+            }
+
+            return false;
+        });
+    }
+
     private MimeMessage createMail(ExtendedEmailPublisherContext context, InternetAddress fromAddress, Session session)
             throws MessagingException, UnsupportedEncodingException {
         ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
@@ -1098,6 +1154,8 @@ public class ExtendedEmailPublisher extends Notifier {
         excludeNotAllowedDomains(context, to);
         excludeNotAllowedDomains(context, cc);
         excludeNotAllowedDomains(context, bcc);
+
+        logDuplicateRecipients(context, to, cc, bcc);
 
         //
         msg.setRecipients(Message.RecipientType.TO, to.toArray(new InternetAddress[0]));
