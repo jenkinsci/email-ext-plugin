@@ -126,7 +126,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             }
             return result.includeEmptyValue()
                     .includeMatchingAs(
-                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf(t) : Jenkins.getAuthentication(),
+                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf2(t) : ACL.SYSTEM2,
                             item,
                             StandardUsernamePasswordCredentials.class,
                             Collections.emptyList(),
@@ -167,10 +167,10 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                 }
             }
 
-            if (CredentialsProvider.listCredentials(
+            if (CredentialsProvider.listCredentialsInItem(
                             StandardUsernamePasswordCredentials.class,
                             item,
-                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf(t) : Jenkins.getAuthentication(),
+                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf2(t) : ACL.SYSTEM2,
                             null,
                             CredentialsMatchers.withId(value))
                     .isEmpty()) {
