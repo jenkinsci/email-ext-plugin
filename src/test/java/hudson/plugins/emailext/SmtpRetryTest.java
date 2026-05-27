@@ -1,6 +1,8 @@
 package hudson.plugins.emailext;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.SendFailedException;
@@ -24,9 +26,7 @@ class SmtpRetryTest {
      */
     private boolean callIsTransientSmtpError(Exception e) throws Exception {
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        Method method = ExtendedEmailPublisher.class.getDeclaredMethod("isTransientSmtpError", Exception.class);
-        method.setAccessible(true);
-        return (Boolean) method.invoke(publisher, e);
+        return publisher.isTransientSmtpError(e);
     }
 
     @Test

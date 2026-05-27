@@ -112,6 +112,8 @@ public class ExtendedEmailPublisher extends Notifier {
     private static final String CONTENT_TRANSFER_ENCODING =
             System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
 
+    private static final Pattern SMTP_CODE_PATTERN = Pattern.compile("^(\\d{3})\\s");
+
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
     public static final String DEFAULT_BODY_TEXT = """
@@ -608,8 +610,7 @@ public class ExtendedEmailPublisher extends Notifier {
             return null;
         }
         String message = e.getMessage();
-        Pattern pattern = Pattern.compile("^(\\d{3})\\s");
-        Matcher matcher = pattern.matcher(message);
+        Matcher matcher = SMTP_CODE_PATTERN.matcher(message);
         if (matcher.find()) {
             try {
                 return Integer.parseInt(matcher.group(1));
