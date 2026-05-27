@@ -14,7 +14,8 @@ l.layout {
     st.include(it: my.project, page: "sidepanel")
     l.main_panel {
         st.adjunct(includes: "hudson.plugins.emailext.EmailExtTemplateAction.template-test")
-        h1(my.displayName)        
+        h1(my.displayName)
+        div("data-root-url": rootURL, "data-project-url": my.project.url) {        
         if(hasPermission) {
             h3(_("description"))
             form(action: "", method: "post", name: "templateTest", class: "test-template-form") {
@@ -46,6 +47,7 @@ l.layout {
             // redirect to the root in the case that someone tries to do
             // bad stuff...
             st.redirect(url: "${rootURL}")
+        }
         }
     }
 }

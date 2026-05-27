@@ -135,7 +135,6 @@ public class EmailExtTemplateAction implements Action {
     }
 
     @RequirePOST
-    @SuppressWarnings("lgtm[jenkins/csrf]")
     public void doRenderTemplate(StaplerRequest2 req, StaplerResponse2 rsp) throws IOException {
         if (Jenkins.get()
                 .getDescriptorByType(ExtendedEmailPublisherDescriptor.class)

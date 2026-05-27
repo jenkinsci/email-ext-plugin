@@ -6,13 +6,19 @@ function onSubmit() {
     formData.append('templateFile', templateFile);
     formData.append('buildId', buildId);
     
-    fetch('renderTemplate', {
+    var rootURL = document.body.getAttribute('data-root-url') || '';
+    var projectUrl = document.body.getAttribute('data-project-url') || '';
+    var renderUrl = rootURL + projectUrl + 'templateTest/renderTemplate';
+    
+    fetch(renderUrl, {
         method: 'POST',
         body: formData
     })
     .then(function(response) {
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            return response.text().then(function(text) {
+                throw new Error('HTTP ' + response.status + ': ' + (text || response.statusText));
+            });
         }
         return response.json();
     })
@@ -28,7 +34,8 @@ function onSubmit() {
     })
     .catch(function(error) {
         console.error('Error rendering template:', error);
-        document.getElementById('console_output').textContent = 'Error: ' + error.message;
+        var errorMsg = error.message || 'Unknown error';
+        document.getElementById('console_output').textContent = 'Error: ' + errorMsg;
         document.getElementById('output').style.display = 'block';
     });
 }
