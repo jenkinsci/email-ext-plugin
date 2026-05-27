@@ -1,7 +1,7 @@
 package hudson.plugins.emailext;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.SendFailedException;
