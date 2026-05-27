@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import hudson.model.FreeStyleProject;
 import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
-import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 /**
  * Test for EmailExtTemplateAction CSP compliance.
@@ -36,20 +36,16 @@ public class EmailExtTemplateActionTest {
 
         assertTrue(jsContent.contains("textContent"), "JavaScript should use textContent instead of innerHTML");
         assertTrue(
-                jsContent.contains("encodeURIComponent"),
-                "JavaScript should use encodeURIComponent instead of escape");
+                jsContent.contains("encodeURIComponent"), "JavaScript should use encodeURIComponent instead of escape");
         assertTrue(jsContent.contains("fetch("), "JavaScript should use fetch API for AJAX calls");
 
         assertTrue(
-                jsContent.contains("data-root-url"),
-                "JavaScript should use data-root-url for absolute URL resolution");
+                jsContent.contains("data-root-url"), "JavaScript should use data-root-url for absolute URL resolution");
         assertTrue(
                 jsContent.contains("data-project-url"),
                 "JavaScript should use data-project-url for project path resolution");
 
-        assertTrue(
-                jsContent.contains("HTTP"),
-                "JavaScript should include HTTP status code in error messages");
+        assertTrue(jsContent.contains("HTTP"), "JavaScript should include HTTP status code in error messages");
     }
 
     @Test
@@ -78,7 +74,8 @@ public class EmailExtTemplateActionTest {
                         .anyMatch(m -> m.getName().equals("doRenderTemplate")),
                 "EmailExtTemplateAction should have doRenderTemplate endpoint");
 
-        assertTrue(action.getUrlName().equals("templateTest"),
+        assertTrue(
+                action.getUrlName().equals("templateTest"),
                 "Action URL name should be 'templateTest' but got: " + action.getUrlName());
     }
 
