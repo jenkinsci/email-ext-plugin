@@ -71,28 +71,37 @@ public class RegressionTrigger extends EmailTrigger {
 
     @Override
     public boolean trigger(AbstractBuild<?, ?> build, TaskListener listener) {
+
         Run<?, ?> previousBuild = ExtendedEmailPublisher.getPreviousRun(build, listener);
+
+        // ✅ cache current and previous test results
+        AbstractTestResultAction<?> currentAction = build.getAction(AbstractTestResultAction.class);
+
+        AbstractTestResultAction<?> previousAction =
+                previousBuild != null ? previousBuild.getAction(AbstractTestResultAction.class) : null;
+
+        // if no previous build
         if (previousBuild == null) {
             return build.getResult() == Result.FAILURE;
         }
 
-        if (build.getAction(AbstractTestResultAction.class) == null) {
+        // if current build has no test results
+        if (currentAction == null) {
             return false;
         }
 
-        // if previous run didn't have test results and this one does (with failures)
-        if (previousBuild.getAction(AbstractTestResultAction.class) == null) {
-            return build.getAction(AbstractTestResultAction.class).getFailCount() > 0;
+        // if previous run didn't have test results
+        if (previousAction == null) {
+            return currentAction.getFailCount() > 0;
         }
 
-        // if more tests failed during this run
-        if (build.getAction(AbstractTestResultAction.class).getFailCount()
-                > previousBuild.getAction(AbstractTestResultAction.class).getFailCount()) {
+        // if more tests failed in current build
+        if (currentAction.getFailCount() > previousAction.getFailCount()) {
             return true;
         }
 
-        // if any test failed this time, but not last time
-        for (Object result : build.getAction(AbstractTestResultAction.class).getFailedTests()) {
+        // if any new test failed
+        for (Object result : currentAction.getFailedTests()) {
             CaseResult res = (CaseResult) result;
             if (res.getAge() == 1) {
                 return true;

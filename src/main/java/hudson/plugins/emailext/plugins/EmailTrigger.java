@@ -220,6 +220,11 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
     protected int getNumFailures(Run<?, ?> build) {
         AbstractTestResultAction<? extends AbstractTestResultAction<?>> a =
                 build.getAction(AbstractTestResultAction.class);
+
+        if (a == null) {
+            return 0;
+        }
+
         if (a instanceof AggregatedTestResultAction action) {
             int result = 0;
             for (ChildReport cr : action.getChildReports()) {
@@ -238,6 +243,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
             }
             return result;
         }
+
         return a.getFailCount();
     }
 

@@ -33,6 +33,7 @@ import hudson.plugins.emailext.groovy.sandbox.TaskListenerInstanceWhitelist;
 import hudson.plugins.emailext.plugins.ContentBuilder;
 import hudson.plugins.emailext.plugins.CssInliner;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.content.AbstractEvalContent;
 import hudson.plugins.emailext.plugins.content.EmailExtScript;
@@ -403,7 +404,11 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     public void debug(PrintStream p, String format, Object... args) {
-        getDescriptor().debug(p, format, args);
+        ExtendedEmailPublisherDescriptor descriptor = getDescriptor();
+
+        if (descriptor != null) {
+            descriptor.debug(p, format, args);
+        }
     }
 
     @Override
@@ -617,7 +622,7 @@ public class ExtendedEmailPublisher extends Notifier {
                                             || e.getNextException() instanceof ConnectException)) {
                                 context.getListener()
                                         .getLogger()
-                                        .println("Socket error sending email, retrying once more in 10 seconds...");
+                                        .println("SMTP connection failed. Retrying in 10 seconds...");
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {
@@ -735,7 +740,17 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public List<TokenMacro> getRuntimeMacros(ExtendedEmailPublisherContext context) {
         List<TokenMacro> macros = new ArrayList<>();
-        macros.add(new TriggerNameContent(context.getTrigger().getDescriptor().getDisplayName()));
+
+        String triggerName = "Unknown";
+        EmailTrigger trigger = context.getTrigger();
+        if (trigger != null) {
+            EmailTriggerDescriptor descriptor = trigger.getDescriptor();
+            if (descriptor != null) {
+                triggerName = descriptor.getDisplayName();
+            }
+        }
+
+        macros.add(new TriggerNameContent(triggerName));
         return macros;
     }
 

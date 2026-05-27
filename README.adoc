@@ -10,7 +10,7 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/main/[image:https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/main/badge/icon[Build Status]]
+https://ci.jenkins.io/job/Plugins/job/email-ext-plugin/job/main/[image:https://ci.jenkins.io/buildStatus/icon?job=Plugins%2Femail-ext-plugin%2Fmain[Build Status]]
 https://github.com/jenkinsci/email-ext-plugin/graphs/contributors[image:https://img.shields.io/github/contributors/jenkinsci/email-ext-plugin.svg[Contributors]]
 https://plugins.jenkins.io/email-ext[image:https://img.shields.io/jenkins/plugin/v/email-ext.svg[Jenkins Plugin]]
 https://github.com/jenkinsci/email-ext-plugin/releases/latest[image:https://img.shields.io/github/release/jenkinsci/email-ext-plugin.svg?label=changelog[GitHub release]]
@@ -63,7 +63,7 @@ In the *Post-build Actions* section, click on *Add post-build action* and then s
 
 There are three main fields that you can edit when this plugin is enabled:
 
-Project Recipient List:: This is a comma (or whitespace) separated list of email recipients. Allows you to specify a single recipient list for each email that is sent.
+Project Recipient List:: This is a comma (or whitespace) separated list of email recipients. It allows you to specify a single recipient list for each email that is sent.
 Default Subject:: This allows you to configure a token (more about tokens later) that can be used to easily configure all email subjects for the project.
 Default Content:: Same as *Default Subject*, but for the email body instead of the subject.
 
@@ -124,12 +124,12 @@ To see what conditions must be met for this plugin to send an email, click on th
 
 ==== Extended Email Publisher Triggers
 
-The following triggers are available as part of the Extended Email Publisher plugin, other plugins can provide triggers as well through the extension point defined in the Extended Email Publisher:
+The following triggers are available as part of the Extended Email Publisher plugin, other plugins can provide triggers as well, through the extension point defined in the Extended Email Publisher:
 
 Aborted:: An email will be sent if the build status is "Aborted". A build is aborted via the UI or API, but normally requires some sort of user intervention to occur. An aborted build is stopped during its execution.
 Always:: Always triggers an email after the build, regardless of the status of the build.
 Before Build:: An email will be sent when the build begins, but after SCM polling has completed.
-Failure -> Unstable (Test Failures):: An email will be sent any time the build goes from failing (compilation or build step failures), to unstable (unit test failures). This basically means that all the builds steps were successful, but there are still tests failing.
+Failure -> Unstable (Test Failures):: An email will be sent any time the build goes from failing (compilation or build step failures) to unstable (unit test failures). This basically means that all the builds steps were successful, but there are still tests failing.
 Failure - Any:: An email will be sent any time the build fails.  If the "Failure - Still" trigger is configured, and the previous build status was "Failure", then the "Failure - Still" trigger will send an email instead.
 Failure - 1st:: An email will be sent when the build status changes from "Success" to "Failure".
 Failure - 2nd:: An email will be sent when the build fails twice in a row after a successful build.
@@ -153,12 +153,12 @@ Unstable (Test Failures)/Failure -> Success:: An email will be sent when the bui
 Once you have added a trigger, you have several common options (there may be additional options available depending on the trigger implementation):
 
 Recipient List:: Add this recipient provider if you would like to have the email sent to the *Project Recipient List* configured above.
-Developers:: Add this recipient provider to send the email to anyone who checked in code for the last build. This plugin will generate an email address based on the committer's ID and an appended *Default user e-mail suffix* from the *Extended E-mail Notification section* of the *Configure System* page. For example, if a change was committed by someone with an ID of `first.last`, and the default user e-mail suffix is `@example.com`, then an email will be sent to `first.last@example.com`.
+Developers:: Add this recipient provider to send the email to anyone who checked in code for the last build. This plugin will generate an email address based on the committer's ID and the appended *Default user e-mail suffix* from the *Extended E-mail Notification section* of the *Configure System* page. For example, if a change was committed by someone with an ID of `first.last`, and the default user e-mail suffix is `@example.com`, then an email will be sent to `first.last@example.com`.
 Requestor:: Add this recipient provider to send an email to the user who initiated the build (if initiated by a user manually).
 Include Culprits:: If this recipient provider _and_ the *Developers* recipient provider are added, emails will include everyone who committed since the last successful build.
-Previous:: Add this recipient provider to send an email to the the culprits, requestor and developers of the previous build(s).
+Previous:: Add this recipient provider to send an email to the culprits, requestor and developers of the previous build(s).
 Advanced:: Configure properties at a per-trigger level:
- Recipient List::: A comma (or whitespace) separated list of email address that should receive this email if it is triggered. This list is appended to the *Project Recipient List* described above.
+ Recipient List::: A comma (or whitespace) separated list of email addresses that should receive this email when it is triggered. This list is appended to the *Project Recipient List* described above.
 **Using the `${FILE}` token**
 
 The `${FILE}` token reads recipient addresses from a file located in the build workspace.
@@ -196,7 +196,7 @@ build.previousBuild.result.toString().equals('FAILURE')
 .Script - After Build:
 [source,groovy]
 ----
-// only send am email if the build failed and 'mickeymouse' had a commit
+// only send an email if the build failed and 'mickeymouse' had a commit
 build.result.toString().equals('FAILURE') && build.hasParticipant(User.get('mickeymouse'))
 ----
 
@@ -216,7 +216,7 @@ For instance, the `$DEFAULT_SUBJECT` token is replaced by the text (and other to
 Similarly, the `$PROJECT_DEFAULT_SUBJECT` token will be replaced by the value of the *Default Subject* field from the project configuration page.
 
 This plugin sets the email content fields with default values when you enable it for your project.
-The *Default Subject* and *Default Content* fields on the project configuration page default to `$DEFAULT_SUBJECT` and `$DEFAULT_CONTENT` (respectively), delegating to the the system-wide configuration from the *Extended E-mail Notification* section of the *Configure System* page.
+The *Default Subject* and *Default Content* fields on the project configuration page default to `$DEFAULT_SUBJECT` and `$DEFAULT_CONTENT` (respectively), delegating to the system-wide configuration from the *Extended E-mail Notification* section of the *Configure System* page.
 Similarly, the per-trigger content fields default to `$PROJECT_DEFAULT_SUBJECT` and `$PROJECT_DEFAULT_CONTENT`, delegating to the project's configuration.
 Since the value of a token can contain other tokens, this provides different points of configuration that can allow you to quickly make changes at the broadest level (all projects), the narrowest level (individual emails), and in-between (individual projects).
 
@@ -273,7 +273,7 @@ New to version 2.15 is the ability to use Groovy scripts.
 Scripts are powerful in that you can hook into the Jenkins API to get any information you want or need.
 There are two scripts with corresponding templates packaged with this plugin, and it is also possible to write your own.
 
-There are two default scripts and templates available out of the box; one is designed for HTML emails and the other is design for text emails.
+There are two default scripts and templates available out of the box; one is designed for HTML emails and the other is designed for text emails.
 You can specify which script you want by using the `script` argument; you can also leave the default script and specify a different template file using the `template` argument.
 Furthermore, you can also include a script that does some initialization using the `init` argument.
 The usage for each type of script is as follows:
@@ -307,7 +307,7 @@ You can set a maximum total attachment size in the *Extended E-mail Notification
 link:/docs/templates/jive-formatter.groovy[`jive-formatter.groovy`] contains methods for easy and convenient formatting of emails being sent from Jenkins to Jive.
 It should be called from the *Pre-send Script* area.
 
-CAUTION: Jive does not appear to  support text with multiple formats, so only call one formatting method per block of text.
+CAUTION: Jive does not appear to support text with multiple formats, so only call one formatting method per block of text.
 
 Either `formatLine` or `formatText` can and should be called on every line of text that will be sent to the Jive system prior to calling formatting methods like color or size.
 Please test on your own instances of Jive and add functionality as you find it!
