@@ -15,6 +15,7 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
+import hudson.util.ListBoxModel;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -30,9 +31,6 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-/**
- * Created by acearl on 9/14/2015.
- */
 public class EmailExtStep extends Step {
 
     public final String subject;
@@ -68,6 +66,9 @@ public class EmailExtStep extends Step {
     private String postsendScript;
 
     private boolean saveOutput;
+
+    @CheckForNull
+    private Priority priority;
 
     @DataBoundConstructor
     public EmailExtStep(String subject, String body) {
@@ -187,6 +188,25 @@ public class EmailExtStep extends Step {
         this.saveOutput = saveOutput;
     }
 
+    public Priority getPriority() {
+        return priority == null ? Priority.DEFAULT : priority;
+    }
+
+    @DataBoundSetter
+    public void setPriority(@CheckForNull String priority) {
+        if (priority == null || priority.isBlank()) {
+            this.priority = Priority.DEFAULT;
+            return;
+        }
+        for (Priority p : Priority.values()) {
+            if (p.name().equalsIgnoreCase(priority)) {
+                this.priority = p;
+                return;
+            }
+        }
+        this.priority = Priority.DEFAULT;
+    }
+
     @Override
     public StepExecution start(StepContext context) throws Exception {
         return new EmailExtStepExecution(this, context);
@@ -228,6 +248,7 @@ public class EmailExtStep extends Step {
             publisher.compressBuildLog = step.compressLog;
             publisher.setPresendScript(step.presendScript);
             publisher.setPostsendScript(step.postsendScript);
+            publisher.setPriority(step.getPriority());
 
             if (StringUtils.isNotBlank(step.to)) {
                 publisher.recipientList = step.to;
@@ -294,6 +315,15 @@ public class EmailExtStep extends Step {
         @SuppressWarnings("unused")
         public List<RecipientProviderDescriptor> getRecipientProvidersDescriptors() {
             return RecipientProvider.allSupporting(WorkflowJob.class);
+        }
+
+        public ListBoxModel doFillPriorityItems() {
+            Jenkins.get().checkPermission(Jenkins.READ); // Security best practice!
+            ListBoxModel items = new ListBoxModel();
+            for (Priority value : Priority.values()) {
+                items.add(value.getDisplayName(), value.name());
+            }
+            return items;
         }
     }
 }

@@ -121,92 +121,54 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public static final String PROJECT_DEFAULT_BODY_TEXT = "$PROJECT_DEFAULT_CONTENT";
 
-    /**
-     * A comma-separated list of email recipient that will be used for every
-     * theTrigger.
-     */
     public String recipientList = "";
 
-    /**
-     * This is the list of email theTriggers that the project has configured
-     */
     @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "TODO needs triage")
     public List<EmailTrigger> configuredTriggers = new ArrayList<>();
 
-    /**
-     * The contentType of the emails for this project (text/html, text/plain, etc).
-     */
     public String contentType;
 
-    /**
-     * The default subject of the emails for this project.
-     * ($PROJECT_DEFAULT_SUBJECT)
-     */
     public String defaultSubject;
 
-    /**
-     * The default body of the emails for this project. ($PROJECT_DEFAULT_BODY)
-     */
     public String defaultContent;
 
-    /**
-     * The project wide set of attachments.
-     */
     public String attachmentsPattern;
 
-    /**
-     * The project wide set of inline attachments.
-     */
     public String inlineAttachmentsPattern;
 
-    /**
-     * The project's pre-send script.
-     */
     private String presendScript;
-
-    /**
-     * The project's post-send script.
-     */
     private String postsendScript;
 
     private List<GroovyScriptPath> classpath;
 
-    /**
-     * True to attach the log from the build to the email.
-     */
     public boolean attachBuildLog;
 
-    /**
-     * True to compress the log from the build before attaching to the email
-     */
     public boolean compressBuildLog;
 
-    /**
-     * Reply-To value for the e-mail
-     */
     public String replyTo;
 
-    /**
-     * From value for the e-mail
-     */
     public String from;
 
     /**
-     * If true, save the generated email content to email-ext-message.[txt|html]
+     * Priority/Importance value for the e-mail.
      */
+    private Priority priority = Priority.DEFAULT;
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    @DataBoundSetter
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
+
     public boolean saveOutput = false;
 
-    /**
-     * If true, disables the publisher from running.
-     */
     public boolean disabled = false;
 
-    /* If true, will check for throttling limits before sending email */
     public boolean throttlingEnabled = false;
 
-    /**
-     * How to theTrigger the email if the project is a matrix project.
-     */
     public MatrixTriggerMode matrixTriggerMode;
 
     public ExtendedEmailPublisher() {}
@@ -283,7 +245,6 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public void setClasspath(List<GroovyScriptPath> classpath) {
         if (classpath != null && !classpath.isEmpty() && Jenkins.get().isUseSecurity()) {
-            // Prepare the classpath for approval
             ScriptApproval scriptApproval = ScriptApproval.get();
             ApprovalContext context = ApprovalContext.create().withCurrentUser();
             StaplerRequest2 request = Stapler.getCurrentRequest2();
@@ -294,13 +255,9 @@ public class ExtendedEmailPublisher extends Notifier {
             for (GroovyScriptPath path : classpath) {
                 URL pUrl = path.asURL();
                 if (pUrl != null) {
-                    // At least we can try to catch some of them, but some might need token
-                    // expansion
                     try {
                         scriptApproval.configuring(new ClasspathEntry(pUrl.toString()), context);
                     } catch (MalformedURLException e) {
-                        // At least we tried, but we shouldn't end up here since path.asURL() would have
-                        // returned null
                         assert false : e;
                     }
                 }
@@ -373,11 +330,6 @@ public class ExtendedEmailPublisher extends Notifier {
         this.inlineAttachmentsPattern = inlineAttachmentsPattern;
     }
 
-    /**
-     * Get the list of configured email theTriggers for this project.
-     *
-     * @return The list of triggers configure for this publisher instance
-     */
     public List<EmailTrigger> getConfiguredTriggers() {
         if (configuredTriggers == null) {
             configuredTriggers = new ArrayList<>();
@@ -451,7 +403,6 @@ public class ExtendedEmailPublisher extends Notifier {
             }
         }
 
-        // Go through and remove triggers that are replaced by others
         List<String> replacedTriggers = new ArrayList<>();
 
         for (String triggerName : triggered.keySet()) {
@@ -487,7 +438,6 @@ public class ExtendedEmailPublisher extends Notifier {
                             }
                         }
 
-                        // Go through and remove triggers that are replaced by others
                         replacedTriggers = new ArrayList<>();
 
                         for (String triggerName : triggered.keySet()) {
@@ -585,15 +535,12 @@ public class ExtendedEmailPublisher extends Notifier {
             Address[] allRecipients = msg.getAllRecipients();
             int retries = 0;
             if (executePresendScript(context, msg)) {
-                // presend script might have modified recipients:
                 allRecipients = msg.getAllRecipients();
                 if (allRecipients != null) {
                     if (StringUtils.isNotBlank(getDescriptor().getEmergencyReroute())) {
-                        // clear out all the existing recipients
                         msg.setRecipients(Message.RecipientType.TO, (Address[]) null);
                         msg.setRecipients(Message.RecipientType.CC, (Address[]) null);
                         msg.setRecipients(Message.RecipientType.BCC, (Address[]) null);
-                        // and set the emergency reroute
                         msg.setRecipients(
                                 Message.RecipientType.TO, getDescriptor().getEmergencyReroute());
                     }
@@ -604,9 +551,7 @@ public class ExtendedEmailPublisher extends Notifier {
                     }
                     context.getListener().getLogger().println(buf);
 
-                    // emergency reroute might have modified recipients:
                     allRecipients = msg.getAllRecipients();
-                    // all email addresses are of type "rfc822", so just take first one:
                     Transport transport = session.getTransport(allRecipients[0]);
                     while (true) {
                         try {
@@ -703,7 +648,6 @@ public class ExtendedEmailPublisher extends Notifier {
                     }
 
                     executePostsendScript(context, msg, session, transport);
-                    // close transport after post-send script, so server response can be accessed:
                     transport.close();
 
                     if (context.getRun().getAction(MailMessageIdAction.class) == null) {
@@ -793,14 +737,13 @@ public class ExtendedEmailPublisher extends Notifier {
                 binding.setVariable("props", props);
             }
             if (transport != null) {
-                binding.setVariable("transport", transport); // Can't really figure out what to whitelist in this object
+                binding.setVariable("transport", transport);
             }
             binding.setVariable("listener", listener);
             binding.setVariable("logger", logger);
             binding.setVariable("cancel", cancel);
             binding.setVariable("trigger", context.getTrigger());
-            binding.setVariable("triggered", ImmutableMultimap.copyOf(context.getTriggered())); // TODO static
-            // whitelist?
+            binding.setVariable("triggered", ImmutableMultimap.copyOf(context.getTriggered()));
 
             try {
                 ClassLoader cl = expandClasspath(context, Jenkins.get().getPluginManager().uberClassLoader);
@@ -835,7 +778,6 @@ public class ExtendedEmailPublisher extends Notifier {
                 LOGGER.log(Level.WARNING, "Error executing " + scriptName + " script", t);
                 Functions.printStackTrace(t, pw);
                 logger.println(out);
-                // should we cancel the sending of the email???
             }
             debug(logger, out.toString());
         }
@@ -851,14 +793,6 @@ public class ExtendedEmailPublisher extends Notifier {
         return cc;
     }
 
-    /**
-     * Expand the plugin class loader with URL taken from the project descriptor and
-     * the global configuration.
-     *
-     * @param context the current email context
-     * @param loader  the class loader to expand
-     * @return the new expanded classloader
-     */
     private ClassLoader expandClasspath(ExtendedEmailPublisherContext context, ClassLoader loader) throws IOException {
         List<ClasspathEntry> classpathList = new ArrayList<>();
         if (classpath != null && !classpath.isEmpty()) {
@@ -1003,11 +937,15 @@ public class ExtendedEmailPublisher extends Notifier {
             session.setDebugOut(context.getListener().getLogger());
         }
 
-        // Set the contents of the email
         msg.addHeader("X-Jenkins-Job", context.getRun().getParent().getDisplayName());
         final Result result = context.getRun() != null ? context.getRun().getResult() : null;
         if (result != null) {
             msg.addHeader("X-Jenkins-Result", result.toString());
+        }
+        // Add priority headers if priority is set and non-default
+        if (priority != null && priority != Priority.DEFAULT) {
+            msg.addHeader("X-Priority", priority.getXPriorityValue());
+            msg.addHeader("Importance", priority.getDisplayName().toLowerCase());
         }
         msg.setSentDate(new Date());
         setSubject(context, msg, charset);
@@ -1022,14 +960,12 @@ public class ExtendedEmailPublisher extends Notifier {
             inlineAttachments.attachInline(multipart, context);
         }
 
-        // add attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getAttachmentsPattern())) {
             AttachmentUtils typeAttachments =
                     new AttachmentUtils(context.getTrigger().getEmail().getAttachmentsPattern());
             typeAttachments.attach(multipart, context);
         }
 
-        // add inline attachments from the email type if they are setup
         if (StringUtils.isNotBlank(context.getTrigger().getEmail().getInlineAttachmentsPattern())) {
             AttachmentUtils inlineAttachments =
                     new AttachmentUtils(context.getTrigger().getEmail().getInlineAttachmentsPattern());
@@ -1051,11 +987,9 @@ public class ExtendedEmailPublisher extends Notifier {
             env = context.getRun().getEnvironment(context.getListener());
         } catch (Exception e) {
             context.getListener().getLogger().println("Error retrieving environment vars: " + e.getMessage());
-            // create an empty set of env vars
             env = new EnvVars();
         }
 
-        // Get the recipients from the global list of addresses
         Set<InternetAddress> to = new LinkedHashSet<>();
         Set<InternetAddress> cc = new LinkedHashSet<>();
         Set<InternetAddress> bcc = new LinkedHashSet<>();
@@ -1083,7 +1017,6 @@ public class ExtendedEmailPublisher extends Notifier {
                     context.getListener());
         }
 
-        // remove the excluded recipients
         Set<InternetAddress> excludedRecipients = new LinkedHashSet<>();
         for (InternetAddress recipient : to) {
             if (EmailRecipientUtils.isExcludedRecipient(recipient.getAddress(), context.getListener())) {
@@ -1094,12 +1027,10 @@ public class ExtendedEmailPublisher extends Notifier {
         cc.removeAll(excludedRecipients);
         bcc.removeAll(excludedRecipients);
 
-        // remove not allowed domains
         excludeNotAllowedDomains(context, to);
         excludeNotAllowedDomains(context, cc);
         excludeNotAllowedDomains(context, bcc);
 
-        //
         msg.setRecipients(Message.RecipientType.TO, to.toArray(new InternetAddress[0]));
         if (!cc.isEmpty()) {
             msg.setRecipients(Message.RecipientType.CC, cc.toArray(new InternetAddress[0]));
@@ -1137,7 +1068,6 @@ public class ExtendedEmailPublisher extends Notifier {
 
         Run<?, ?> pb = getPreviousRun(context.getRun(), context.getListener());
         if (pb != null) {
-            // Send mails as replies until next successful build
             MailMessageIdAction b = pb.getAction(MailMessageIdAction.class);
             if (b != null && pb.getResult() != Result.SUCCESS) {
                 debug(context.getListener().getLogger(), "Setting In-Reply-To since last build was not successful");
@@ -1184,11 +1114,8 @@ public class ExtendedEmailPublisher extends Notifier {
                 context.getTrigger().getEmail().getContentType().equals("project")
                         ? contentType
                         : context.getTrigger().getEmail().getContentType();
-        // contentType is null if the project was not reconfigured after upgrading.
         if (messageContentType == null || "default".equals(messageContentType)) {
             messageContentType = getDescriptor().getDefaultContentType();
-            // The defaultContentType is null if the main Jenkins configuration
-            // was not reconfigured after upgrading.
             if (messageContentType == null) {
                 messageContentType = "text/plain";
             }
@@ -1229,8 +1156,6 @@ public class ExtendedEmailPublisher extends Notifier {
             context.getListener().getLogger().println("Error trying to save email output to file. " + e.getMessage());
         }
 
-        // set the email message text
-        // (plain text or HTML depending on the content type)
         MimeBodyPart msgPart = new MimeBodyPart();
         debug(context.getListener().getLogger(), "messageContentType = %s", messageContentType);
         if (messageContentType.startsWith("text/html")) {
@@ -1261,18 +1186,6 @@ public class ExtendedEmailPublisher extends Notifier {
         return BuildStepMonitor.NONE;
     }
 
-    /**
-     * Looks for a previous build, so long as that is in fact completed. Necessary
-     * since {@link #getRequiredMonitorService} does not wait for the previous
-     * build, so in the case of parallel-capable jobs, we need to behave sensibly
-     * when a later build actually finishes before an earlier one.
-     *
-     * @param run      a run for which we may be sending mail
-     * @param listener a listener to which we may print warnings in case the actual
-     *                 previous build is still in progress
-     * @return the previous build, or null if that build is missing, or is still in
-     *         progress
-     */
     public static @CheckForNull Run<?, ?> getPreviousRun(@NonNull Run<?, ?> run, TaskListener listener) {
         Run<?, ?> previousRun = run.getPreviousBuild();
         if (previousRun != null && previousRun.isBuilding()) {
@@ -1305,8 +1218,6 @@ public class ExtendedEmailPublisher extends Notifier {
                     @Override
                     public boolean endBuild() {
                         LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
-
-                        // Will be run by parent so we check if needed to be executed by parent
                         if (publisher.getMatrixTriggerMode().forParent) {
                             return publisher._perform(this.build, this.launcher, this.listener, false);
                         }
@@ -1316,7 +1227,6 @@ public class ExtendedEmailPublisher extends Notifier {
                     @Override
                     public boolean startBuild() {
                         LOGGER.log(Level.FINER, "end build of {0}", this.build.getDisplayName());
-                        // Will be run by parent so we check if needed to be executed by parent
                         if (publisher.getMatrixTriggerMode().forParent) {
                             return publisher._perform(this.build, this.launcher, this.listener, true);
                         }
