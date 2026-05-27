@@ -2,12 +2,10 @@ package hudson.plugins.emailext;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.SendFailedException;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.SocketException;
 import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
