@@ -10,7 +10,6 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
