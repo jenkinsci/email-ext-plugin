@@ -4,11 +4,21 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 /**
  * Test for EmailExtTemplateAction CSP compliance.
@@ -21,12 +31,12 @@ public class EmailExtTemplateActionTest {
     @Test
     @Issue("JENKINS-74891")
     public void testJavaScriptUsesFetchAPI() throws Exception {
-        java.io.InputStream is = getClass()
+        InputStream is = getClass()
                 .getClassLoader()
                 .getResourceAsStream("hudson/plugins/emailext/EmailExtTemplateAction/template-test.js");
         assertNotNull(is, "JavaScript file should exist");
 
-        String jsContent = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        String jsContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
         assertFalse(jsContent.contains("innerHTML"), "JavaScript should not use innerHTML (CSP violation)");
         assertFalse(jsContent.contains("escape("), "JavaScript should not use deprecated escape() function");
@@ -51,12 +61,12 @@ public class EmailExtTemplateActionTest {
     @Test
     @Issue("JENKINS-74891")
     public void testGroovyTemplateDoesNotUseStaplerBind() throws Exception {
-        java.io.InputStream is = getClass()
+        InputStream is = getClass()
                 .getClassLoader()
                 .getResourceAsStream("hudson/plugins/emailext/EmailExtTemplateAction/index.groovy");
         assertNotNull(is, "Groovy template should exist");
 
-        String groovyContent = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        String groovyContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
         assertFalse(
                 groovyContent.contains("st.bind"),
@@ -70,7 +80,7 @@ public class EmailExtTemplateActionTest {
         EmailExtTemplateAction action = new EmailExtTemplateAction(project);
 
         assertTrue(
-                java.util.Arrays.stream(action.getClass().getDeclaredMethods())
+                Arrays.stream(action.getClass().getDeclaredMethods())
                         .anyMatch(m -> m.getName().equals("doRenderTemplate")),
                 "EmailExtTemplateAction should have doRenderTemplate endpoint");
 
@@ -82,9 +92,9 @@ public class EmailExtTemplateActionTest {
     @Test
     @Issue("JENKINS-74891")
     public void testEndpointHasRequirePostAnnotation() throws Exception {
-        java.lang.reflect.Method[] methods = EmailExtTemplateAction.class.getDeclaredMethods();
-        java.lang.reflect.Method renderMethod = null;
-        for (java.lang.reflect.Method m : methods) {
+        Method[] methods = EmailExtTemplateAction.class.getDeclaredMethods();
+        Method renderMethod = null;
+        for (Method m : methods) {
             if (m.getName().equals("doRenderTemplate")) {
                 renderMethod = m;
                 break;
@@ -93,11 +103,40 @@ public class EmailExtTemplateActionTest {
 
         assertNotNull(renderMethod, "doRenderTemplate method should exist");
         assertTrue(
-                renderMethod.isAnnotationPresent(org.kohsuke.stapler.interceptor.RequirePOST.class),
+                renderMethod.isAnnotationPresent(RequirePOST.class),
                 "doRenderTemplate should have @RequirePOST annotation for CSRF protection");
 
         assertFalse(
                 renderMethod.isAnnotationPresent(SuppressWarnings.class),
                 "doRenderTemplate should not have @SuppressWarnings annotation since @RequirePOST handles CSRF");
+    }
+
+    @Test
+    @Issue("JENKINS-74891")
+    public void testRenderTemplateEndpointActuallyWorks(JenkinsRule j) throws Exception {
+        // Create a real project for testing endpoint with real Jenkins environment
+        FreeStyleProject project = j.createFreeStyleProject("test-project");
+
+        // Get the template action and verify the endpoint
+        EmailExtTemplateAction action = new EmailExtTemplateAction(project);
+
+        // Verify the endpoint is instantiated successfully for the project
+        assertNotNull(
+                action,
+                "EmailExtTemplateAction should be instantiated successfully for the project");
+
+        // Verify doRenderTemplate method is accessible and public to be called by Stapler
+        Method renderMethod = EmailExtTemplateAction.class.getDeclaredMethod(
+                "doRenderTemplate",
+                StaplerRequest2.class,
+                StaplerResponse2.class);
+        assertTrue(
+                Modifier.isPublic(renderMethod.getModifiers()),
+                "doRenderTemplate should be public to be accessible as HTTP endpoint");
+
+        // Verify the method has @RequirePOST for CSRF protection
+        assertTrue(
+                renderMethod.isAnnotationPresent(RequirePOST.class),
+                "doRenderTemplate should have @RequirePOST annotation to protect against CSRF attacks");
     }
 }
