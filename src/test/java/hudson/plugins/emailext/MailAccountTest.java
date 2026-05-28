@@ -169,7 +169,7 @@ class MailAccountTest {
     void testIsSmtpServerValid() {
         MailAccount account = new MailAccount();
 
-        // Blank/null should be considered valid (means localhost)
+        // Blank / null
         account.setSmtpHost(null);
         assertTrue(account.isSmtpServerValid());
         account.setSmtpHost("");
@@ -177,33 +177,43 @@ class MailAccountTest {
         account.setSmtpHost("   ");
         assertTrue(account.isSmtpServerValid());
 
-        // Valid IPv4 addresses
+        // Valid hostnames
+        account.setSmtpHost("mail.bar.com");
+        assertTrue(account.isSmtpServerValid());
+        account.setSmtpHost("localhost");
+        assertTrue(account.isSmtpServerValid());
+        account.setSmtpHost("smtp.gmail.com");
+        assertTrue(account.isSmtpServerValid());
+
+        // Valid IPv4
         account.setSmtpHost("192.168.1.1");
         assertTrue(account.isSmtpServerValid());
         account.setSmtpHost("127.0.0.1");
         assertTrue(account.isSmtpServerValid());
 
-        // Valid IPv6 addresses
+        // Valid IPv6 literals (no DNS)
         account.setSmtpHost("::1");
         assertTrue(account.isSmtpServerValid());
         account.setSmtpHost("2001:db8::1");
         assertTrue(account.isSmtpServerValid());
 
-        // Valid hostname that resolves (localhost is reliable)
-        account.setSmtpHost("localhost");
-        assertTrue(account.isSmtpServerValid());
-
-        // Invalid hostname (syntactically invalid) → should throw UnknownHostException → false
-        account.setSmtpHost("invalid..host");
-        assertFalse(account.isSmtpServerValid());
-
-        // Invalid IPv4 address
+        // Invalid IPv4
         account.setSmtpHost("999.999.999.999");
         assertFalse(account.isSmtpServerValid());
+        account.setSmtpHost("256.0.0.1");
+        assertFalse(account.isSmtpServerValid());
 
-        // Valid pattern but exceeds 255 characters
+        // Invalid hostnames
+        account.setSmtpHost("invalid..host");
+        assertFalse(account.isSmtpServerValid());
+        account.setSmtpHost("-bad.com");
+        assertFalse(account.isSmtpServerValid());
+        account.setSmtpHost("bad-.com");
+        assertFalse(account.isSmtpServerValid());
+
+        // Too long hostname (valid pattern but > 255 chars)
         String longHost = "a.".repeat(200) + "com";
-        assertTrue(longHost.length() > 255); // sanity check
+        assertTrue(longHost.length() > 255);
         account.setSmtpHost(longHost);
         assertFalse(account.isSmtpServerValid());
     }
