@@ -49,13 +49,8 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     private boolean defaultAccount;
 
     private boolean useOAuth2;
-    private static final Pattern IPV4_STRUCTURE = Pattern.compile("^(\\d{1,3}\\.){3}\\d{1,3}$");
-    private static final Pattern IPV4_VALID = Pattern.compile(
-            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-    );
-    private static final Pattern HOSTNAME_VALID = Pattern.compile(
-            "^(?![0-9]+$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$"
-    );
+    private static final Pattern HOSTNAME_VALID =
+            Pattern.compile("^(?![0-9]+$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$");
 
     @Deprecated
     public MailAccount(JSONObject jo) {
@@ -95,11 +90,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
 
     private boolean isSyntacticallyValid(String host) {
         // 1) IPv4 check
-        if (IPV4_STRUCTURE.matcher(host).matches()) {
-            return IPV4_VALID.matcher(host).matches();
-        }
-        // 2) IPv6 literal check (no DNS – the JVM parses literals locally)
-        if (host.contains(":")) {
+        if (host.contains(":") || host.matches("^(\\d{1,3}\\.){3}\\d{1,3}$")) {
             try {
                 InetAddress.getByName(host);
                 return true;
@@ -107,7 +98,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                 return false;
             }
         }
-        // 3) Hostname (RFC 1123)
+        // Otherwise treat as hostname
         return HOSTNAME_VALID.matcher(host).matches() && host.length() <= 255;
     }
 
