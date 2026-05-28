@@ -115,10 +115,10 @@ public class AttachmentUtils implements Serializable {
                                 pos = run.getLogText().writeLogTo(pos, out);
                             }
                         } catch (IOException e) {
-                            LOGGER.log(Level.FINE, "Error streaming build log", e);
+                            LOGGER.log(Level.WARNING, "Error streaming build log", e);
                         }
                     },
-                    "email-ext-log-writer-" + run.getFullDisplayName());
+                    "email-ext-log-writer-" + run.getNumber());
             writer.setDaemon(true);
             writer.start();
 

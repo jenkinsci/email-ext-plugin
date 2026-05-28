@@ -150,6 +150,8 @@ class AttachmentUtilsTest {
                 containsString("build.log")); // zips have plain text filename in them
     }
 
+    // To verify this test actually catches the regression, run with -Xmx128m
+    // Without a heap limit the default JVM heap is large enough that the OOM may not trigger
     @Test
     void testLargeBuildLogDoesNotExhaustMemory() throws Exception {
         FreeStyleProject project = j.createFreeStyleProject("large-log");
