@@ -49,6 +49,13 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     private boolean defaultAccount;
 
     private boolean useOAuth2;
+    private static final Pattern IPV4_STRUCTURE = Pattern.compile("^(\\d{1,3}\\.){3}\\d{1,3}$");
+    private static final Pattern IPV4_VALID = Pattern.compile(
+            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+    );
+    private static final Pattern HOSTNAME_VALID = Pattern.compile(
+            "^(?![0-9]+$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$"
+    );
 
     @Deprecated
     public MailAccount(JSONObject jo) {
@@ -83,28 +90,25 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
         if (StringUtils.isBlank(smtpHost)) {
             return true; // empty means localhost
         }
-        try {
-            InetAddress.getByName(smtpHost);
-            return true; // resolved successfully (IPv4, IPv6, or hostname)
-        } catch (UnknownHostException e) {
-            // Offline or unresolvable – fall back to syntax checks
-            return isSyntacticallyValid(smtpHost);
-        }
+        return isSyntacticallyValid(smtpHost);
     }
 
     private boolean isSyntacticallyValid(String host) {
-        // Check if it looks like an IPv4 address (four dot‑separated numbers)
-        Pattern ipv4Structure = Pattern.compile("^(\\d{1,3}\\.){3}\\d{1,3}$");
-        if (ipv4Structure.matcher(host).matches()) {
-            // Strict IPv4 validation
-            Pattern ipv4Valid = Pattern.compile(
-                    "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
-            return ipv4Valid.matcher(host).matches();
+        // 1) IPv4 check
+        if (IPV4_STRUCTURE.matcher(host).matches()) {
+            return IPV4_VALID.matcher(host).matches();
         }
-        // Otherwise treat as hostname (RFC 1123)
-        Pattern hostnameValid =
-                Pattern.compile("^(?![0-9]+$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$");
-        return hostnameValid.matcher(host).matches() && host.length() <= 255;
+        // 2) IPv6 literal check (no DNS – the JVM parses literals locally)
+        if (host.contains(":")) {
+            try {
+                InetAddress.getByName(host);
+                return true;
+            } catch (UnknownHostException e) {
+                return false;
+            }
+        }
+        // 3) Hostname (RFC 1123)
+        return HOSTNAME_VALID.matcher(host).matches() && host.length() <= 255;
     }
 
     public boolean isSmtpAuthValid() {
