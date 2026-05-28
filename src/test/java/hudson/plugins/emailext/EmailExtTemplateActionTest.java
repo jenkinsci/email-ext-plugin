@@ -4,13 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import hudson.model.FreeStyleProject;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-
-import hudson.model.FreeStyleProject;
 import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -120,15 +119,11 @@ public class EmailExtTemplateActionTest {
         EmailExtTemplateAction action = new EmailExtTemplateAction(project);
 
         // Verify the endpoint is instantiated successfully for the project
-        assertNotNull(
-                action,
-                "EmailExtTemplateAction should be instantiated successfully for the project");
+        assertNotNull(action, "EmailExtTemplateAction should be instantiated successfully for the project");
 
         // Verify doRenderTemplate method is accessible and public to be called by Stapler
         Method renderMethod = EmailExtTemplateAction.class.getDeclaredMethod(
-                "doRenderTemplate",
-                StaplerRequest2.class,
-                StaplerResponse2.class);
+                "doRenderTemplate", StaplerRequest2.class, StaplerResponse2.class);
         assertTrue(
                 Modifier.isPublic(renderMethod.getModifiers()),
                 "doRenderTemplate should be public to be accessible as HTTP endpoint");
