@@ -113,7 +113,7 @@ public class AttachmentUtils implements Serializable {
                             long pos = 0;
                             while (pos < logFileLength) {
                                 pos = run.getLogText().writeLogTo(pos, out);
-                            }q
+                            }
                         } catch (IOException e) {
                             // Any IOException here is pipe-related (reader closed or died)
                             // a genuine read error surfaces to the caller via PipedInputStream
