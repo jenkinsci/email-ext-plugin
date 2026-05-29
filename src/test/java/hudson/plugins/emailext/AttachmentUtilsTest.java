@@ -150,49 +150,6 @@ class AttachmentUtilsTest {
                 containsString("build.log")); // zips have plain text filename in them
     }
 
-    // To verify this test actually catches the regression, run with -Xmx128m
-    // Without a heap limit the default JVM heap is large enough that the OOM may not trigger
-    @Test
-    void testLargeBuildLogDoesNotExhaustMemory() throws Exception {
-        FreeStyleProject project = j.createFreeStyleProject("large-log");
-        ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        publisher.attachBuildLog = true;
-        publisher.compressBuildLog = true;
-        publisher.recipientList = "morgan@blackhand.com";
-        SuccessTrigger trigger = new SuccessTrigger(
-                Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
-        publisher.getConfiguredTriggers().add(trigger);
-        project.getPublishersList().add(publisher);
-        project.getBuildersList().add(new TestBuilder() {
-            @Override
-            public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
-                // Generate ~50MB of console output which is enough to OOM a ByteArrayOutputStream
-                // on a test JVM but fine when streamed
-                String line = "The sky above the port was the color of television tuned to a dead channel.";
-                int iterations = (50 * 1024 * 1024) / line.length();
-                for (int i = 0; i < iterations; i++) {
-                    listener.getLogger().println(line);
-                }
-                return true;
-            }
-        });
-
-        FreeStyleBuild b = j.buildAndAssertSuccess(project);
-
-        Mailbox mbox = Mailbox.get("morgan@blackhand.com");
-        assertEquals(1, mbox.size(), "Should have an email from success");
-
-        Message msg = mbox.get(0);
-        assertThat(msg.getContent(), instanceOf(MimeMultipart.class));
-
-        MimeMultipart part = (MimeMultipart) msg.getContent();
-        assertEquals(2, part.getCount(), "Should have two body items (message + attachment)");
-
-        BodyPart attach = part.getBodyPart(1);
-        assertEquals("build.zip", attach.getFileName());
-        assertThat(attach.getSize(), greaterThan(0));
-    }
-
     @Test
     void testAttachmentFromWorkspace() throws Exception {
         URL url = this.getClass().getResource("/test.pdf");

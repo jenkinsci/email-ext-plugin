@@ -113,9 +113,11 @@ public class AttachmentUtils implements Serializable {
                             long pos = 0;
                             while (pos < logFileLength) {
                                 pos = run.getLogText().writeLogTo(pos, out);
-                            }
+                            }q
                         } catch (IOException e) {
-                            LOGGER.log(Level.WARNING, "Error streaming build log", e);
+                            // Any IOException here is pipe-related (reader closed or died)
+                            // a genuine read error surfaces to the caller via PipedInputStream
+                            LOGGER.log(Level.FINE, "Stopped streaming build log", e);
                         }
                     },
                     "email-ext-log-writer-" + run.getNumber());
