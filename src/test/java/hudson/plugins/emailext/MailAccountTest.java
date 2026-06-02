@@ -13,7 +13,6 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import hudson.plugins.emailext.MailAccount.MailAccountDescriptor;
 import hudson.util.FormValidation.Kind;
-import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import java.util.List;
 import jenkins.model.Jenkins;
@@ -124,22 +123,22 @@ class MailAccountTest {
 
         MailAccountDescriptor mad = (MailAccountDescriptor) Jenkins.get().getDescriptor(MailAccount.class);
 
-        assertThat(mad.doCheckCredentialsId(null, "", false, false, false), hasKind(Kind.OK));
-        assertThat(mad.doCheckCredentialsId(null, null, false, false, false), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, "", false, false), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, null, false, false), hasKind(Kind.OK));
 
         // no auth but any combination of TLS/SSL is ok
-        assertThat(mad.doCheckCredentialsId(null, null, true, false, false), hasKind(Kind.OK));
-        assertThat(mad.doCheckCredentialsId(null, null, false, true, false), hasKind(Kind.OK));
-        assertThat(mad.doCheckCredentialsId(null, null, true, true, false), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, null, true, false), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, null, false, true), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, null, true, true), hasKind(Kind.OK));
 
         // valid credentials with TLS
-        assertThat(mad.doCheckCredentialsId(null, validCredentialId, true, false, false), hasKind(Kind.OK));
-        assertThat(mad.doCheckCredentialsId(null, validCredentialId, false, true, false), hasKind(Kind.OK));
-        assertThat(mad.doCheckCredentialsId(null, validCredentialId, true, true, false), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, validCredentialId, true, false), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, validCredentialId, false, true), hasKind(Kind.OK));
+        assertThat(mad.doCheckCredentialsId(null, validCredentialId, true, true), hasKind(Kind.OK));
 
         // valid credentials without TLS produce a warning (error in FIPS, but requires system property)
         assertThat(
-                mad.doCheckCredentialsId(null, validCredentialId, false, false, false),
+                mad.doCheckCredentialsId(null, validCredentialId, false, false),
                 Matchers.allOf(
                         hasKind(Kind.WARNING),
                         hasMessage(
@@ -147,7 +146,7 @@ class MailAccountTest {
 
         // non-valid creds show the error regardless of SSL/TLS
         assertThat(
-                mad.doCheckCredentialsId(null, "bogus", false, false, false),
+                mad.doCheckCredentialsId(null, "bogus", false, false),
                 Matchers.allOf(
                         hasKind(Kind.ERROR),
                         hasMessage(
@@ -155,53 +154,13 @@ class MailAccountTest {
                                         "For security when using authentication it is recommended to enable either TLS or SSL")),
                         hasMessage(containsString("Cannot find currently selected credentials"))));
         assertThat(
-                mad.doCheckCredentialsId(null, "bogus", true, false, false),
+                mad.doCheckCredentialsId(null, "bogus", true, false),
                 Matchers.allOf(hasKind(Kind.ERROR), hasMessage("Cannot find currently selected credentials")));
         assertThat(
-                mad.doCheckCredentialsId(null, "bogus", false, true, false),
+                mad.doCheckCredentialsId(null, "bogus", false, true),
                 Matchers.allOf(hasKind(Kind.ERROR), hasMessage("Cannot find currently selected credentials")));
         assertThat(
-                mad.doCheckCredentialsId(null, "bogus", true, true, false),
+                mad.doCheckCredentialsId(null, "bogus", true, true),
                 Matchers.allOf(hasKind(Kind.ERROR), hasMessage("Cannot find currently selected credentials")));
-    }
-
-    @Test
-    void testFiltersByUseOAuthFlag(JenkinsRule j) throws Exception {
-        final String pwdId = "pwd-filter-id";
-        SystemCredentialsProvider.getInstance()
-                .getCredentials()
-                .add(new UsernamePasswordCredentialsImpl(
-                        CredentialsScope.GLOBAL, pwdId, "description", "username", "password"));
-
-        MailAccountDescriptor mad = (MailAccountDescriptor) Jenkins.get().getDescriptor(MailAccount.class);
-
-        // When OAuth is disabled the username/password credential should appear
-        ListBoxModel itemsWhenPassword = mad.doFillCredentialsIdItems(null, null, false);
-        boolean foundWhenPassword = itemsWhenPassword.stream().anyMatch(o -> pwdId.equals(o.value));
-        assertTrue(foundWhenPassword, "Expected username/password credential to be present when useOAuth2=false");
-
-        // When OAuth is enabled the username/password credential should not appear
-        ListBoxModel itemsWhenOAuth = mad.doFillCredentialsIdItems(null, null, true);
-        boolean foundWhenOAuth = itemsWhenOAuth.stream().anyMatch(o -> pwdId.equals(o.value));
-        assertFalse(foundWhenOAuth, "Expected username/password credential to be absent when useOAuth2=true");
-    }
-
-    @Test
-    void testInvalidatesPasswordCredentialWhenOAuthEnabled(JenkinsRule j) throws Exception {
-        final String pwdId = "pwd-invalid-id";
-        SystemCredentialsProvider.getInstance()
-                .getCredentials()
-                .add(new UsernamePasswordCredentialsImpl(
-                        CredentialsScope.GLOBAL, pwdId, "description", "username", "password"));
-
-        MailAccountDescriptor mad = (MailAccountDescriptor) Jenkins.get().getDescriptor(MailAccount.class);
-
-        // When OAuth is enabled, a password credential id should not validate
-        assertThat(mad.doCheckCredentialsId(null, pwdId, false, false, true), hasKind(Kind.ERROR));
-
-        // When OAuth is disabled, the same id validates (produce OK/WARNING depending on TLS/SSL)
-        assertThat(
-                mad.doCheckCredentialsId(null, pwdId, false, false, false),
-                Matchers.anyOf(hasKind(Kind.OK), hasKind(Kind.WARNING)));
     }
 }
