@@ -47,8 +47,6 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     private String advProperties;
     private boolean defaultAccount;
 
-    private boolean useOAuth2;
-
     @Deprecated
     public MailAccount(JSONObject jo) {
         address = Util.nullify(jo.optString("address", null));
@@ -114,12 +112,9 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
         }
 
         @SuppressWarnings({"lgtm[jenkins/csrf]", "unused"}) // Used by stapler
-        public ListBoxModel doFillCredentialsIdItems(
-                @AncestorInPath Item item, @QueryParameter String credentialsId, @QueryParameter boolean useOAuth2) {
+        public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
 
             final StandardListBoxModel result = new StandardListBoxModel();
-            Class<? extends StandardUsernameCredentials> credentialType =
-                    useOAuth2 ? StandardUsernameOAuth2Credentials.class : StandardUsernamePasswordCredentials.class;
             if (item == null) {
                 if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                     return result.includeCurrentValue(credentialsId);
@@ -133,9 +128,11 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                     .includeMatchingAs(
                             item instanceof Queue.Task t ? Tasks.getAuthenticationOf2(t) : ACL.SYSTEM2,
                             item,
-                            credentialType,
+                            StandardUsernameCredentials.class,
                             Collections.emptyList(),
-                            CredentialsMatchers.instanceOf(credentialType))
+                            CredentialsMatchers.anyOf(
+                                    CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class),
+                                    CredentialsMatchers.instanceOf(StandardUsernameOAuth2Credentials.class)))
                     .includeCurrentValue(credentialsId);
         }
 
@@ -144,10 +141,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                 @AncestorInPath Item item,
                 @QueryParameter String value,
                 @QueryParameter boolean useSsl,
-                @QueryParameter boolean useTls,
-                @QueryParameter boolean useOAuth2) {
-            Class<? extends StandardUsernameCredentials> credentialType =
-                    useOAuth2 ? StandardUsernameOAuth2Credentials.class : StandardUsernamePasswordCredentials.class;
+                @QueryParameter boolean useTls) {
             if (item == null) {
                 if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                     return FormValidation.ok();
@@ -176,7 +170,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             }
 
             if (CredentialsProvider.listCredentialsInItem(
-                            credentialType,
+                            StandardUsernameCredentials.class,
                             item,
                             item instanceof Queue.Task t ? Tasks.getAuthenticationOf2(t) : ACL.SYSTEM2,
                             null,
@@ -284,15 +278,6 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     @DataBoundSetter
     public void setUseTls(boolean useTls) {
         this.useTls = useTls;
-    }
-
-    public boolean isUseOAuth2() {
-        return useOAuth2;
-    }
-
-    @DataBoundSetter
-    public void setUseOAuth2(boolean useOAuth2) {
-        this.useOAuth2 = useOAuth2;
     }
 
     public String getAdvProperties() {
