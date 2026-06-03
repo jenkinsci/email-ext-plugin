@@ -15,39 +15,39 @@ l.layout {
     l.main_panel {
         st.adjunct(includes: "hudson.plugins.emailext.EmailExtTemplateAction.template-test")
         h1(my.displayName)
-        div("data-root-url": rootURL, "data-project-url": my.project.url) {        
-        if(hasPermission) {
-            h3(_("description"))
-            form(action: "", method: "post", name: "templateTest", class: "test-template-form") {
-                table {
-                    f.entry(title: _("Jelly/Groovy Template File Name")) {
-                        f.textbox(name: "template_file_name", id: "template_file_name", clazz: "required", checkUrl:"templateFileCheck", checkDependsOn: "")
-                    }
-                    f.entry(title: _("Build To Test")) {
-                        div(class: "jenkins-select") {
-                            select(name: "template_build", id: "template_build", class: "jenkins-select__input") {
-                                my.project.builds.each { build ->
-                                    f.option(value: build.id, "#${build.number} (${build.result})")
+        div("data-root-url": rootURL, "data-project-url": my.project.url) {
+            if(hasPermission) {
+                h3(_("description"))
+                form(action: "", method: "post", name: "templateTest", class: "test-template-form") {
+                    table {
+                        f.entry(title: _("Jelly/Groovy Template File Name")) {
+                            f.textbox(name: "template_file_name", id: "template_file_name", clazz: "required", checkUrl:"templateFileCheck", checkDependsOn: "")
+                        }
+                        f.entry(title: _("Build To Test")) {
+                            div(class: "jenkins-select") {
+                                select(name: "template_build", id: "template_build", class: "jenkins-select__input") {
+                                    my.project.builds.each { build ->
+                                        f.option(value: build.id, "#${build.number} (${build.result})")
+                                    }
                                 }
                             }
                         }
-                    }
-                    f.entry {
-                        f.submit(value: _("Go!"))
+                        f.entry {
+                            f.submit(value: _("Go!"))
+                        }
                     }
                 }
+                iframe(id:"rendered_template", width:"80%", height:"500px", frameBorder:"0", sandbox:"")
+                div(id: "output", style: "display:none;") {
+                    hr()
+                    h3(_("Template Console Output"))
+                    pre(id: "console_output", clazz: "console-output")
+                }
+            } else {
+                // redirect to the root in the case that someone tries to do
+                // bad stuff...
+                st.redirect(url: "${rootURL}")
             }
-            iframe(id:"rendered_template", width:"80%", height:"500px", frameBorder:"0", sandbox:"")
-            div(id: "output", style: "display:none;") {
-                hr()
-                h3(_("Template Console Output"))
-                pre(id: "console_output", clazz: "console-output")
-            }
-        } else {
-            // redirect to the root in the case that someone tries to do
-            // bad stuff...
-            st.redirect(url: "${rootURL}")
-        }
         }
     }
 }
