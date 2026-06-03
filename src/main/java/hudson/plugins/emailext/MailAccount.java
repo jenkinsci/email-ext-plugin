@@ -22,6 +22,8 @@ import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import jenkins.model.Jenkins;
@@ -181,6 +183,35 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                         insecureAuthValidation, FormValidation.error("Cannot find currently selected credentials")));
             }
             return insecureAuthValidation;
+        }
+
+        @SuppressWarnings({"lgtm[jenkins/csrf]", "lgtm[jenkins/no-permission-check]"})
+        public FormValidation doCheckSmtpPort(@QueryParameter Integer value) {
+
+            if (value == null) {
+                return FormValidation.ok();
+            }
+
+            if (value < 1 || value > 65535) {
+                return FormValidation.error("SMTP port must be between 1 and 65535.");
+            }
+
+            return FormValidation.ok();
+        }
+
+        @SuppressWarnings("lgtm[jenkins/csrf]")
+        public FormValidation doCheckSmtpHost(@QueryParameter String value) {
+
+            if (StringUtils.isBlank(value)) {
+                return FormValidation.ok();
+            }
+
+            try {
+                InetAddress.getByName(value);
+                return FormValidation.ok();
+            } catch (UnknownHostException e) {
+                return FormValidation.error("Invalid hostname or IP address.");
+            }
         }
     }
 

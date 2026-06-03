@@ -163,4 +163,24 @@ class MailAccountTest {
                 mad.doCheckCredentialsId(null, "bogus", true, true),
                 Matchers.allOf(hasKind(Kind.ERROR), hasMessage("Cannot find currently selected credentials")));
     }
+
+    @Test
+    @WithoutJenkins
+    void testSmtpPortValidation() {
+        MailAccountDescriptor mad = new MailAccountDescriptor();
+
+        assertThat(mad.doCheckSmtpPort(null), hasKind(Kind.OK));
+        assertThat(mad.doCheckSmtpPort(0), hasKind(Kind.ERROR));
+        assertThat(mad.doCheckSmtpPort(70000), hasKind(Kind.ERROR));
+        assertThat(mad.doCheckSmtpPort(25), hasKind(Kind.OK));
+    }
+
+    @Test
+    @WithoutJenkins
+    void testSmtpHostValidation() {
+        MailAccountDescriptor mad = new MailAccountDescriptor();
+
+        assertThat(mad.doCheckSmtpHost("bad host"), hasKind(Kind.ERROR));
+        assertThat(mad.doCheckSmtpHost("smtp.gmail.com"), hasKind(Kind.OK));
+    }
 }
