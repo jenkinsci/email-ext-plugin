@@ -3,6 +3,7 @@ package hudson.plugins.emailext;
 import hudson.ExtensionList;
 import hudson.FilePath;
 import hudson.Plugin;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
@@ -53,10 +54,15 @@ public class EmailExtTemplateAction implements Action {
         return "templateTest";
     }
 
+    // ✅ FIXED METHOD (XSS SAFE)
     private String renderError(Exception ex) {
+        String message = (ex != null && ex.getMessage() != null) ? ex.toString() : "Unknown error";
+
+        String escaped = Util.xmlEscape(message).replace("\n", "<br/>");
+
         return "<h3>An error occurred trying to render the template:</h3><br/>"
                 + "<span style=\"color:red; font-weight:bold\">"
-                + ex.toString().replace("\n", "<br/>")
+                + escaped
                 + "</span>";
     }
 
@@ -75,7 +81,6 @@ public class EmailExtTemplateAction implements Action {
             if (value.startsWith("managed:")) {
                 return checkForManagedFile(StringUtils.removeStart(value, "managed:"));
             } else {
-                // first check in the default resources area...
                 InputStream inputStream = Thread.currentThread()
                         .getContextClassLoader()
                         .getResourceAsStream("hudson/plugins/emailext/templates/" + value);
