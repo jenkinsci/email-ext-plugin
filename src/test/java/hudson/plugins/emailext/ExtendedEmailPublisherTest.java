@@ -104,15 +104,15 @@ class ExtendedEmailPublisherTest {
     @BeforeEach
     void setUp(TestInfo info) throws Exception {
         publisher = new ExtendedEmailPublisher();
-        publisher.from = "";
-        publisher.contentType = "default";
-        publisher.defaultSubject = "$DEFAULT_SUBJECT";
-        publisher.defaultContent = "$DEFAULT_CONTENT";
-        publisher.attachmentsPattern = "";
-        publisher.recipientList = "$DEFAULT_RECIPIENTS";
+        publisher.setFrom("");
+        publisher.setContentType("default");
+        publisher.setDefaultSubject("$DEFAULT_SUBJECT");
+        publisher.setDefaultContent("$DEFAULT_CONTENT");
+        publisher.setAttachmentsPattern("");
+        publisher.setRecipientList("$DEFAULT_RECIPIENTS");
         publisher.setPresendScript("$DEFAULT_PRESEND_SCRIPT");
         publisher.setPostsendScript("$DEFAULT_POSTSEND_SCRIPT");
-        publisher.replyTo = "$DEFAULT_REPLYTO";
+        publisher.setReplyTo("$DEFAULT_REPLYTO");
 
         project = j.createFreeStyleProject(info.getTestMethod().orElseThrow().getName());
         project.getPublishersList().add(publisher);
@@ -1170,7 +1170,7 @@ class ExtendedEmailPublisherTest {
             }
         });
         publisher.getConfiguredTriggers().add(successTrigger);
-        publisher.replyTo = "ashlux@gmail.com";
+        publisher.setReplyTo("ashlux@gmail.com");
 
         User u = User.getById("kutzi", true);
         u.setFullName("Christoph Kutzinski");
@@ -1246,12 +1246,12 @@ class ExtendedEmailPublisherTest {
             ExtendedEmailPublisherDescriptor descriptor = new ExtendedEmailPublisherDescriptor();
             publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
 
-            assertEquals("default", publisher.contentType);
-            assertEquals("ashlux@gmail.com", publisher.recipientList);
-            assertEquals("Make millions in Nigeria", publisher.defaultSubject);
-            assertEquals("Give me a $1000 check and I'll mail you back $5000!!!", publisher.defaultContent);
-            assertEquals("", publisher.attachmentsPattern);
-            assertEquals("", publisher.replyTo);
+            assertEquals("default", publisher.getContentType());
+            assertEquals("ashlux@gmail.com", publisher.getRecipientList());
+            assertEquals("Make millions in Nigeria", publisher.getDefaultSubject());
+            assertEquals("Give me a $1000 check and I'll mail you back $5000!!!", publisher.getDefaultContent());
+            assertEquals("", publisher.getAttachmentsPattern());
+            assertEquals("", publisher.getReplyTo());
             assertEquals("println 1", publisher.getPostsendScript());
 
             return null;
@@ -1264,27 +1264,31 @@ class ExtendedEmailPublisherTest {
         FreeStyleProject prj = j.createFreeStyleProject("JENKINS-20524");
         prj.getPublishersList().add(publisher);
 
-        publisher.recipientList = "mickey@disney.com";
-        publisher.configuredTriggers.add(new SuccessTrigger(
-                recProviders,
-                "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO",
-                "$DEFAULT_SUBJECT",
-                "$DEFAULT_CONTENT",
-                "",
-                0,
-                "project"));
-        publisher.configuredTriggers.add(new SuccessTrigger(
-                recProviders,
-                "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO",
-                "$DEFAULT_SUBJECT",
-                "$DEFAULT_CONTENT",
-                "",
-                0,
-                "project"));
+        publisher.setRecipientList("mickey@disney.com");
+        publisher
+                .getConfiguredTriggers()
+                .add(new SuccessTrigger(
+                        recProviders,
+                        "$DEFAULT_RECIPIENTS",
+                        "$DEFAULT_REPLYTO",
+                        "$DEFAULT_SUBJECT",
+                        "$DEFAULT_CONTENT",
+                        "",
+                        0,
+                        "project"));
+        publisher
+                .getConfiguredTriggers()
+                .add(new SuccessTrigger(
+                        recProviders,
+                        "$DEFAULT_RECIPIENTS",
+                        "$DEFAULT_REPLYTO",
+                        "$DEFAULT_SUBJECT",
+                        "$DEFAULT_CONTENT",
+                        "",
+                        0,
+                        "project"));
 
-        for (EmailTrigger trigger : publisher.configuredTriggers) {
+        for (EmailTrigger trigger : publisher.getConfiguredTriggers()) {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
@@ -1300,19 +1304,21 @@ class ExtendedEmailPublisherTest {
         FreeStyleProject prj = j.createFreeStyleProject("JENKINS-22154");
         prj.getPublishersList().add(publisher);
 
-        publisher.disabled = true;
-        publisher.recipientList = "mickey@disney.com";
-        publisher.configuredTriggers.add(new SuccessTrigger(
-                recProviders,
-                "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO",
-                "$DEFAULT_SUBJECT",
-                "$DEFAULT_CONTENT",
-                "",
-                0,
-                "project"));
+        publisher.setDisabled(true);
+        publisher.setRecipientList("mickey@disney.com");
+        publisher
+                .getConfiguredTriggers()
+                .add(new SuccessTrigger(
+                        recProviders,
+                        "$DEFAULT_RECIPIENTS",
+                        "$DEFAULT_REPLYTO",
+                        "$DEFAULT_SUBJECT",
+                        "$DEFAULT_CONTENT",
+                        "",
+                        0,
+                        "project"));
 
-        for (EmailTrigger trigger : publisher.configuredTriggers) {
+        for (EmailTrigger trigger : publisher.getConfiguredTriggers()) {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
@@ -1332,8 +1338,8 @@ class ExtendedEmailPublisherTest {
         FreeStyleProject prj = j.createFreeStyleProject("JENKINS-15442");
         prj.getPublishersList().add(publisher);
 
-        publisher.recipientList = "mickey@disney.com";
-        publisher.configuredTriggers.clear();
+        publisher.setRecipientList("mickey@disney.com");
+        publisher.getConfiguredTriggers().clear();
 
         final WebClient client = j.createWebClient();
         final HtmlPage page = client.goTo("job/JENKINS-15442/configure");
@@ -1349,19 +1355,21 @@ class ExtendedEmailPublisherTest {
 
         final String content =
                 "<html><head><title>Foo</title></head><body><b>This is a test</b><br/>Hello world</body></html>";
-        publisher.contentType = "both";
-        publisher.recipientList = "mickey@disney.com";
-        publisher.configuredTriggers.add(new SuccessTrigger(
-                recProviders,
-                "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO",
-                "$DEFAULT_SUBJECT",
-                content,
-                "",
-                0,
-                "project"));
+        publisher.setContentType("both");
+        publisher.setRecipientList("mickey@disney.com");
+        publisher
+                .getConfiguredTriggers()
+                .add(new SuccessTrigger(
+                        recProviders,
+                        "$DEFAULT_RECIPIENTS",
+                        "$DEFAULT_REPLYTO",
+                        "$DEFAULT_SUBJECT",
+                        content,
+                        "",
+                        0,
+                        "project"));
 
-        for (EmailTrigger trigger : publisher.configuredTriggers) {
+        for (EmailTrigger trigger : publisher.getConfiguredTriggers()) {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
@@ -1406,19 +1414,21 @@ class ExtendedEmailPublisherTest {
         final String content =
                 "<html><head><title>Global Both Test</title></head><body><b>Testing global both setting</b></body></html>";
 
-        publisher.contentType = "default";
-        publisher.recipientList = "test@example.com";
-        publisher.configuredTriggers.add(new SuccessTrigger(
-                recProviders,
-                "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO",
-                "$DEFAULT_SUBJECT",
-                content,
-                "",
-                0,
-                "project"));
+        publisher.setContentType("default");
+        publisher.setRecipientList("test@example.com");
+        publisher
+                .getConfiguredTriggers()
+                .add(new SuccessTrigger(
+                        recProviders,
+                        "$DEFAULT_RECIPIENTS",
+                        "$DEFAULT_REPLYTO",
+                        "$DEFAULT_SUBJECT",
+                        content,
+                        "",
+                        0,
+                        "project"));
 
-        for (EmailTrigger trigger : publisher.configuredTriggers) {
+        for (EmailTrigger trigger : publisher.getConfiguredTriggers()) {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
@@ -1450,7 +1460,7 @@ class ExtendedEmailPublisherTest {
     @Issue("JENKINS-16376")
     @Test
     void testConcurrentBuilds() throws Exception {
-        publisher.configuredTriggers.add(new RegressionTrigger(recProviders, "", "", "", "", "", 0, ""));
+        publisher.getConfiguredTriggers().add(new RegressionTrigger(recProviders, "", "", "", "", "", 0, ""));
         project.setConcurrentBuild(true);
         project.getBuildersList().add(new SleepOnceBuilder());
         FreeStyleBuild build1 = project.scheduleBuild2(0).waitForStart();
@@ -1469,7 +1479,7 @@ class ExtendedEmailPublisherTest {
 
     @Test
     void testAttachBuildLog() throws Exception {
-        publisher.attachBuildLog = true;
+        publisher.setAttachBuildLog(true);
         AlwaysTrigger trigger = new AlwaysTrigger(
                 recProviders,
                 "$DEFAULT_RECIPIENTS",
@@ -1527,7 +1537,7 @@ class ExtendedEmailPublisherTest {
             JSONObject form = new JSONObject();
             form.put("from", "mail@test1.com");
             publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
-            assertEquals("mail@test1.com", publisher.from);
+            assertEquals("mail@test1.com", publisher.getFrom());
             ExtendedEmailPublisherContext context =
                     new ExtendedEmailPublisherContext(publisher, null, null, null, TaskListener.NULL);
             Session session = descriptor.createSession(publisher.getMailAccount(context), context);
@@ -1570,7 +1580,7 @@ class ExtendedEmailPublisherTest {
             descriptor.setAddAccounts(addaccs);
 
             publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
-            assertEquals("mail@test1.com", publisher.from);
+            assertEquals("mail@test1.com", publisher.getFrom());
             session = descriptor.createSession(publisher.getMailAccount(context), context);
             assertEquals("smtp.test1.com", session.getProperty("mail.smtp.host"));
             assertEquals("25", session.getProperty("mail.smtp.port"));
@@ -1578,7 +1588,7 @@ class ExtendedEmailPublisherTest {
 
             form.put("from", "mail@test2.com");
             publisher = (ExtendedEmailPublisher) descriptor.newInstance(Stapler.getCurrentRequest2(), form);
-            assertEquals("mail@test2.com", publisher.from);
+            assertEquals("mail@test2.com", publisher.getFrom());
             session = descriptor.createSession(publisher.getMailAccount(context), context);
             assertEquals("smtp.test2.com", session.getProperty("mail.smtp.host"));
             assertEquals("465", session.getProperty("mail.smtp.port"));
@@ -1611,19 +1621,21 @@ class ExtendedEmailPublisherTest {
         prj.getPublishersList().add(publisher);
 
         publisher.getDescriptor().setAllowedDomains("x1x.com,x2x.com");
-        publisher.recipientList =
-                "user1@x1x.com,user2@x2x.com,user3@foo.com,cc:user4@info.x1x.com,cc:user5@foo3.com,bcc:user6@foo1.com,bcc:user7@info.x2x.com";
-        publisher.configuredTriggers.add(new SuccessTrigger(
-                recProviders,
-                "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO",
-                "$DEFAULT_SUBJECT",
-                "$DEFAULT_CONTENT",
-                "",
-                0,
-                "project"));
+        publisher.setRecipientList(
+                "user1@x1x.com,user2@x2x.com,user3@foo.com,cc:user4@info.x1x.com,cc:user5@foo3.com,bcc:user6@foo1.com,bcc:user7@info.x2x.com");
+        publisher
+                .getConfiguredTriggers()
+                .add(new SuccessTrigger(
+                        recProviders,
+                        "$DEFAULT_RECIPIENTS",
+                        "$DEFAULT_REPLYTO",
+                        "$DEFAULT_SUBJECT",
+                        "$DEFAULT_CONTENT",
+                        "",
+                        0,
+                        "project"));
 
-        for (EmailTrigger trigger : publisher.configuredTriggers) {
+        for (EmailTrigger trigger : publisher.getConfiguredTriggers()) {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
@@ -1645,19 +1657,21 @@ class ExtendedEmailPublisherTest {
         prj.getPublishersList().add(publisher);
 
         publisher.getDescriptor().setAllowedDomains("@x1x.com,@x2x.com");
-        publisher.recipientList =
-                "user1@x1x.com,user2@x2x.com,user3@foo.com,cc:user4@info.x1x.com,cc:user5@foo3.com,bcc:user6@foo1.com,bcc:user7@info.x2x.com";
-        publisher.configuredTriggers.add(new SuccessTrigger(
-                recProviders,
-                "$DEFAULT_RECIPIENTS",
-                "$DEFAULT_REPLYTO",
-                "$DEFAULT_SUBJECT",
-                "$DEFAULT_CONTENT",
-                "",
-                0,
-                "project"));
+        publisher.setRecipientList(
+                "user1@x1x.com,user2@x2x.com,user3@foo.com,cc:user4@info.x1x.com,cc:user5@foo3.com,bcc:user6@foo1.com,bcc:user7@info.x2x.com");
+        publisher
+                .getConfiguredTriggers()
+                .add(new SuccessTrigger(
+                        recProviders,
+                        "$DEFAULT_RECIPIENTS",
+                        "$DEFAULT_REPLYTO",
+                        "$DEFAULT_SUBJECT",
+                        "$DEFAULT_CONTENT",
+                        "",
+                        0,
+                        "project"));
 
-        for (EmailTrigger trigger : publisher.configuredTriggers) {
+        for (EmailTrigger trigger : publisher.getConfiguredTriggers()) {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
@@ -1770,7 +1784,7 @@ class ExtendedEmailPublisherTest {
                 "project");
         addEmailType(successTrigger);
         publisher.getConfiguredTriggers().add(successTrigger);
-        publisher.from = "custom@example.com";
+        publisher.setFrom("custom@example.com");
 
         FreeStyleBuild build = j.buildAndAssertSuccess(project);
         j.assertLogContains("Email was triggered for: Success", build);
@@ -1801,7 +1815,7 @@ class ExtendedEmailPublisherTest {
                 "project");
         addEmailType(successTrigger);
         publisher.getConfiguredTriggers().add(successTrigger);
-        publisher.from = "custom";
+        publisher.setFrom("custom");
 
         FreeStyleBuild build = j.buildAndAssertSuccess(project);
         j.assertLogContains("Email was triggered for: Success", build);
@@ -1821,20 +1835,22 @@ class ExtendedEmailPublisherTest {
         FreeStyleProject prj = j.createFreeStyleProject("throttle-test");
         prj.getPublishersList().add(publisher);
 
-        publisher.recipientList = "mickey@disney.com";
+        publisher.setRecipientList("mickey@disney.com");
         for (int i = 0; i < 90; i++) {
-            publisher.configuredTriggers.add(new SuccessTrigger(
-                    recProviders,
-                    "$DEFAULT_RECIPIENTS",
-                    "$DEFAULT_REPLYTO",
-                    "$DEFAULT_SUBJECT",
-                    "$DEFAULT_CONTENT",
-                    "",
-                    0,
-                    "project"));
+            publisher
+                    .getConfiguredTriggers()
+                    .add(new SuccessTrigger(
+                            recProviders,
+                            "$DEFAULT_RECIPIENTS",
+                            "$DEFAULT_REPLYTO",
+                            "$DEFAULT_SUBJECT",
+                            "$DEFAULT_CONTENT",
+                            "",
+                            0,
+                            "project"));
         }
 
-        for (EmailTrigger trigger : publisher.configuredTriggers) {
+        for (EmailTrigger trigger : publisher.getConfiguredTriggers()) {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
@@ -1849,20 +1865,22 @@ class ExtendedEmailPublisherTest {
         FreeStyleProject prj = j.createFreeStyleProject("throttle-test2");
         prj.getPublishersList().add(publisher);
 
-        publisher.recipientList = "mickey@disney.com";
+        publisher.setRecipientList("mickey@disney.com");
         for (int i = 0; i < EmailThrottler.THROTTLING_LIMIT; i++) {
-            publisher.configuredTriggers.add(new SuccessTrigger(
-                    recProviders,
-                    "$DEFAULT_RECIPIENTS",
-                    "$DEFAULT_REPLYTO",
-                    "$DEFAULT_SUBJECT",
-                    "$DEFAULT_CONTENT",
-                    "",
-                    0,
-                    "project"));
+            publisher
+                    .getConfiguredTriggers()
+                    .add(new SuccessTrigger(
+                            recProviders,
+                            "$DEFAULT_RECIPIENTS",
+                            "$DEFAULT_REPLYTO",
+                            "$DEFAULT_SUBJECT",
+                            "$DEFAULT_CONTENT",
+                            "",
+                            0,
+                            "project"));
         }
 
-        for (EmailTrigger trigger : publisher.configuredTriggers) {
+        for (EmailTrigger trigger : publisher.getConfiguredTriggers()) {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
@@ -1879,20 +1897,22 @@ class ExtendedEmailPublisherTest {
         FreeStyleProject prj = j.createFreeStyleProject("throttle-test3");
         prj.getPublishersList().add(publisher);
 
-        publisher.recipientList = "mickey@disney.com";
+        publisher.setRecipientList("mickey@disney.com");
         for (int i = 0; i < 120; i++) {
-            publisher.configuredTriggers.add(new SuccessTrigger(
-                    recProviders,
-                    "$DEFAULT_RECIPIENTS",
-                    "$DEFAULT_REPLYTO",
-                    "$DEFAULT_SUBJECT",
-                    "$DEFAULT_CONTENT",
-                    "",
-                    0,
-                    "project"));
+            publisher
+                    .getConfiguredTriggers()
+                    .add(new SuccessTrigger(
+                            recProviders,
+                            "$DEFAULT_RECIPIENTS",
+                            "$DEFAULT_REPLYTO",
+                            "$DEFAULT_SUBJECT",
+                            "$DEFAULT_CONTENT",
+                            "",
+                            0,
+                            "project"));
         }
 
-        for (EmailTrigger trigger : publisher.configuredTriggers) {
+        for (EmailTrigger trigger : publisher.getConfiguredTriggers()) {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
@@ -1910,20 +1930,22 @@ class ExtendedEmailPublisherTest {
         prj.getPublishersList().add(publisher);
         publisher.getDescriptor().setThrottlingEnabled(false);
 
-        publisher.recipientList = "mickey@disney.com";
+        publisher.setRecipientList("mickey@disney.com");
         for (int i = 0; i < 130; i++) {
-            publisher.configuredTriggers.add(new SuccessTrigger(
-                    recProviders,
-                    "$DEFAULT_RECIPIENTS",
-                    "$DEFAULT_REPLYTO",
-                    "$DEFAULT_SUBJECT",
-                    "$DEFAULT_CONTENT",
-                    "",
-                    0,
-                    "project"));
+            publisher
+                    .getConfiguredTriggers()
+                    .add(new SuccessTrigger(
+                            recProviders,
+                            "$DEFAULT_RECIPIENTS",
+                            "$DEFAULT_REPLYTO",
+                            "$DEFAULT_SUBJECT",
+                            "$DEFAULT_CONTENT",
+                            "",
+                            0,
+                            "project"));
         }
 
-        for (EmailTrigger trigger : publisher.configuredTriggers) {
+        for (EmailTrigger trigger : publisher.getConfiguredTriggers()) {
             trigger.getEmail().addRecipientProvider(new ListRecipientProvider());
         }
 
