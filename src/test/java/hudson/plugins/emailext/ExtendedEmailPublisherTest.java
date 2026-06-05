@@ -183,6 +183,14 @@ class ExtendedEmailPublisherTest {
     }
 
     @Test
+    void testSetConfiguredTriggers() {
+        List<EmailTrigger> triggers = new ArrayList<>();
+        triggers.add(new SuccessTrigger(recProviders, "", "", "", "", "", 0, "project"));
+        publisher.setConfiguredTriggers(triggers);
+        assertEquals(triggers, publisher.getConfiguredTriggers());
+    }
+
+    @Test
     void testShouldNotSendEmailWhenNoTriggerEnabled() throws Exception {
         FreeStyleBuild build = project.scheduleBuild2(0).get();
         j.assertBuildStatusSuccess(build);
