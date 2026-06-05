@@ -131,39 +131,38 @@ public class ExtendedEmailPublisher extends Notifier {
      * A comma-separated list of email recipient that will be used for every
      * theTrigger.
      */
-    public String recipientList = "";
+    private String recipientList = "";
 
     /**
      * This is the list of email theTriggers that the project has configured
      */
-    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "TODO needs triage")
-    public List<EmailTrigger> configuredTriggers = new ArrayList<>();
+    private List<EmailTrigger> configuredTriggers = new ArrayList<>();
 
     /**
      * The contentType of the emails for this project (text/html, text/plain, etc).
      */
-    public String contentType;
+    private String contentType;
 
     /**
      * The default subject of the emails for this project.
      * ($PROJECT_DEFAULT_SUBJECT)
      */
-    public String defaultSubject;
+    private String defaultSubject;
 
     /**
      * The default body of the emails for this project. ($PROJECT_DEFAULT_BODY)
      */
-    public String defaultContent;
+    private String defaultContent;
 
     /**
      * The project wide set of attachments.
      */
-    public String attachmentsPattern;
+    private String attachmentsPattern;
 
     /**
      * The project wide set of inline attachments.
      */
-    public String inlineAttachmentsPattern;
+    private String inlineAttachmentsPattern;
 
     /**
      * The project's pre-send script.
@@ -180,40 +179,40 @@ public class ExtendedEmailPublisher extends Notifier {
     /**
      * True to attach the log from the build to the email.
      */
-    public boolean attachBuildLog;
+    private boolean attachBuildLog;
 
     /**
      * True to compress the log from the build before attaching to the email
      */
-    public boolean compressBuildLog;
+    private boolean compressBuildLog;
 
     /**
      * Reply-To value for the e-mail
      */
-    public String replyTo;
+    private String replyTo;
 
     /**
      * From value for the e-mail
      */
-    public String from;
+    private String from;
 
     /**
      * If true, save the generated email content to email-ext-message.[txt|html]
      */
-    public boolean saveOutput = false;
+    private boolean saveOutput = false;
 
     /**
      * If true, disables the publisher from running.
      */
-    public boolean disabled = false;
+    private boolean disabled = false;
 
     /* If true, will check for throttling limits before sending email */
-    public boolean throttlingEnabled = false;
+    private boolean throttlingEnabled = false;
 
     /**
      * How to theTrigger the email if the project is a matrix project.
      */
-    public MatrixTriggerMode matrixTriggerMode;
+    private MatrixTriggerMode matrixTriggerMode;
 
     public ExtendedEmailPublisher() {}
 
@@ -250,7 +249,6 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     @DataBoundConstructor
-    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "TODO needs triage")
     public ExtendedEmailPublisher(
             String recipientList,
             String contentType,
@@ -397,6 +395,106 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public void setMatrixTriggerMode(MatrixTriggerMode matrixTriggerMode) {
         this.matrixTriggerMode = matrixTriggerMode;
+    }
+
+    public String getRecipientList() {
+        return recipientList;
+    }
+
+    public void setRecipientList(String recipientList) {
+        this.recipientList = recipientList;
+    }
+
+    public void setConfiguredTriggers(List<EmailTrigger> configuredTriggers) {
+        this.configuredTriggers = configuredTriggers;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public String getDefaultSubject() {
+        return defaultSubject;
+    }
+
+    public void setDefaultSubject(String defaultSubject) {
+        this.defaultSubject = defaultSubject;
+    }
+
+    public String getDefaultContent() {
+        return defaultContent;
+    }
+
+    public void setDefaultContent(String defaultContent) {
+        this.defaultContent = defaultContent;
+    }
+
+    public String getAttachmentsPattern() {
+        return attachmentsPattern;
+    }
+
+    public void setAttachmentsPattern(String attachmentsPattern) {
+        this.attachmentsPattern = attachmentsPattern;
+    }
+
+    public boolean isAttachBuildLog() {
+        return attachBuildLog;
+    }
+
+    public void setAttachBuildLog(boolean attachBuildLog) {
+        this.attachBuildLog = attachBuildLog;
+    }
+
+    public boolean isCompressBuildLog() {
+        return compressBuildLog;
+    }
+
+    public void setCompressBuildLog(boolean compressBuildLog) {
+        this.compressBuildLog = compressBuildLog;
+    }
+
+    public String getReplyTo() {
+        return replyTo;
+    }
+
+    public void setReplyTo(String replyTo) {
+        this.replyTo = replyTo;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public boolean isSaveOutput() {
+        return saveOutput;
+    }
+
+    public void setSaveOutput(boolean saveOutput) {
+        this.saveOutput = saveOutput;
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
+    public boolean isThrottlingEnabled() {
+        return throttlingEnabled;
+    }
+
+    public void setThrottlingEnabled(boolean throttlingEnabled) {
+        this.throttlingEnabled = throttlingEnabled;
     }
 
     @NonNull

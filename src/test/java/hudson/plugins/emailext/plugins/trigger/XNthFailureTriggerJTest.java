@@ -24,7 +24,7 @@ class XNthFailureTriggerJTest {
         XNthFailureTrigger trigger = new XNthFailureTrigger(Collections.emptyList(), "", "", "", "", "", 0, "project");
         trigger.setRequiredFailureCount(5);
 
-        publisher.configuredTriggers.add(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
         project.getPublishersList().add(publisher);
         project.save();
 
