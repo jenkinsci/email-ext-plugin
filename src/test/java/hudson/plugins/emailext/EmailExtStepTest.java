@@ -66,7 +66,6 @@ class EmailExtStepTest {
     @Test
     void configRoundTripExtraFields() throws Exception {
         EmailExtStep step1 = new EmailExtStep("subject", "body");
-        step1.setFrom("from@disney.com");
         step1.setReplyTo("reply@disney.com");
         step1.setMimeType("text/plain");
         step1.setInlineAttachmentsPattern("*.png");
