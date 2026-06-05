@@ -2214,4 +2214,56 @@ class ExtendedEmailPublisherTest {
                 Mailbox.get("ashlux@gmail.com").size(),
                 "We should only have one email since the first failure doesn't count as 'still failing'.");
     }
+
+    @Test
+    void testLoadOldConfigurationAndGetterSetters() throws Exception {
+        java.net.URL url = this.getClass().getResource("/extended-email-publisher-old-format.xml");
+        java.io.File jobConfig = new java.io.File(url.getFile());
+
+        ExtendedEmailPublisherDescriptor desc = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        FreeStyleProject prj = j.createFreeStyleProject();
+        prj.updateByXml((javax.xml.transform.Source)
+                new javax.xml.transform.stream.StreamSource(new java.io.FileReader(jobConfig)));
+
+        ExtendedEmailPublisher pub = (ExtendedEmailPublisher) prj.getPublisher(desc);
+
+        // Verify the old configuration loaded properly into encapsulated fields
+        assertEquals("test@example.com", pub.getRecipientList());
+        assertEquals("text/html", pub.getContentType());
+        assertEquals("test subject", pub.getDefaultSubject());
+        assertEquals("test content", pub.getDefaultContent());
+        assertEquals("*.pdf", pub.getAttachmentsPattern());
+        assertEquals("*.png", pub.getInlineAttachmentsPattern());
+        assertEquals("presend", pub.getPresendScript());
+        assertEquals("postsend", pub.getPostsendScript());
+        assertTrue(pub.isAttachBuildLog());
+        assertTrue(pub.isCompressBuildLog());
+        assertEquals("replyto@example.com", pub.getReplyTo());
+        assertEquals("from@example.com", pub.getFrom());
+        assertTrue(pub.isSaveOutput());
+        assertTrue(pub.isDisabled());
+        assertTrue(pub.isThrottlingEnabled());
+        assertEquals(MatrixTriggerMode.BOTH, pub.getMatrixTriggerMode());
+
+        // Cover setters that the user reported as uncovered
+        pub.setContentType("text/plain");
+        assertEquals("text/plain", pub.getContentType());
+
+        pub.setAttachBuildLog(false);
+        assertFalse(pub.isAttachBuildLog());
+
+        pub.setCompressBuildLog(false);
+        assertFalse(pub.isCompressBuildLog());
+
+        pub.setDisabled(false);
+        assertFalse(pub.isDisabled());
+
+        pub.setThrottlingEnabled(false);
+        assertFalse(pub.isThrottlingEnabled());
+
+        // Cover getProjectActions
+        java.util.Collection<? extends hudson.model.Action> actions = pub.getProjectActions(prj);
+        assertEquals(1, actions.size());
+        assertTrue(actions.iterator().next() instanceof hudson.plugins.emailext.watching.EmailExtWatchAction);
+    }
 }
