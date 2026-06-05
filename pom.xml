@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>6.2138.v03274d462c13</version>
+    <version>6.2189.v695a_c41f5249</version>
     <relativePath />
   </parent>
 
@@ -260,6 +260,7 @@
             <mail.pop3.class>org.jvnet.mock_javamail.MockStore</mail.pop3.class>
             <mail.imap.class>org.jvnet.mock_javamail.MockStore</mail.imap.class>
           </systemPropertyVariables>
+          <excludedGroups>performance</excludedGroups>
         </configuration>
       </plugin>
     </plugins>
