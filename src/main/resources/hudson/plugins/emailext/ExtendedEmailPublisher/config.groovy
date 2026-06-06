@@ -85,6 +85,9 @@ f.advanced(title: _("Advanced Settings")) {
   f.entry(title: _("Save to Workspace"), help: "/plugin/email-ext/help/projectConfig/saveOutput.html") {
     f.checkbox(name: "saveOutput", checked: instance?.saveOutput)
   }
+  f.entry(title: _("Save Output File Name"), help: "/plugin/email-ext/help/projectConfig/saveOutputFileName.html") {
+    f.textbox(name: "saveOutputFileName", value: configured ? instance.saveOutputFileName : "")
+  }
   
   def configuredTriggers = []
   if(instance != null) {

@@ -59,6 +59,7 @@ class EmailExtStepTest {
         step1.setTo("mickeymouse@disney.com");
         step1.setReplyTo("mickeymouse@disney.com");
         step1.setMimeType("text/html");
+        step1.setSaveOutputFileName("email-ext-message.html");
 
         EmailExtStep step2 = new StepConfigTester(j).configRoundTrip(step1);
         j.assertEqualDataBoundBeans(step1, step2);
@@ -174,7 +175,8 @@ class EmailExtStepTest {
         FilePath workspace = j.jenkins.getWorkspaceFor(job);
         assertNotNull(workspace, "Workspace should be available after the build");
         assertTrue(
-                workspace.child("email-ext-message.txt").exists(), "Should save the text output under a stable name");
+                workspace.child("Always-1.txt").exists(),
+                "Should save the text output under the backward-compatible trigger/build name");
 
         Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
         assertEquals(1, mbox.size());
@@ -197,7 +199,32 @@ class EmailExtStepTest {
         FilePath workspace = j.jenkins.getWorkspaceFor(job);
         assertNotNull(workspace, "Workspace should be available after the build");
         assertTrue(
-                workspace.child("email-ext-message.html").exists(), "Should save the HTML output under a stable name");
+                workspace.child("Always-1.html").exists(),
+                "Should save the HTML output under the backward-compatible trigger/build name");
+    }
+
+    @Test
+    void saveOutputCustomFileName() throws Exception {
+        WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf-custom-output");
+        job.setDefinition(new CpsFlowDefinition("""
+                node {
+                  emailext(
+                    to: 'mickeymouse@disney.com',
+                    subject: 'Boo',
+                    saveOutput: true,
+                    saveOutputFileName: 'email-ext-message.txt')
+                  archiveArtifacts 'email-ext-message.txt'
+                }\
+                """, true));
+        Run<?, ?> run = job.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(run);
+
+        FilePath workspace = j.jenkins.getWorkspaceFor(job);
+        assertNotNull(workspace, "Workspace should be available after the build");
+        assertTrue(
+                workspace.child("email-ext-message.txt").exists(),
+                "Should save the text output under the configured name");
+        j.assertLogContains("Archiving artifacts", run);
     }
 
     public static class FileCopyStep extends Step {
