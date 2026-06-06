@@ -56,9 +56,9 @@ class ExtendedEmailPublisherMatrixTest {
     @BeforeEach
     void setUp(TestInfo info) throws Exception {
         publisher = new ExtendedEmailPublisher();
-        publisher.defaultSubject = "%DEFAULT_SUBJECT";
-        publisher.defaultContent = "%DEFAULT_CONTENT";
-        publisher.attachBuildLog = false;
+        publisher.setDefaultSubject("%DEFAULT_SUBJECT");
+        publisher.setDefaultContent("%DEFAULT_CONTENT");
+        publisher.setAttachBuildLog(false);
 
         project = j.createProject(
                 MatrixProject.class, info.getTestMethod().orElseThrow().getName());
@@ -142,7 +142,7 @@ class ExtendedEmailPublisherMatrixTest {
     @Test
     void testAttachBuildLogForAllAxes() throws Exception {
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_PARENT);
-        publisher.attachBuildLog = true;
+        publisher.setAttachBuildLog(true);
         addAgentToProject(0, 1, 2);
         List<RecipientProvider> recProviders = Collections.emptyList();
         AlwaysTrigger trigger = new AlwaysTrigger(
