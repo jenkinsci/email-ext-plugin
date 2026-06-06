@@ -62,6 +62,8 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -76,6 +78,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -108,6 +112,8 @@ public class ExtendedEmailPublisher extends Notifier {
     private static final String CONTENT_TRANSFER_ENCODING =
             System.getProperty(ExtendedEmailPublisher.class.getName() + ".Content-Transfer-Encoding");
 
+    private static final Pattern SMTP_CODE_PATTERN = Pattern.compile("^(\\d{3})\\s");
+
     public static final String DEFAULT_SUBJECT_TEXT = "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!";
 
     public static final String DEFAULT_BODY_TEXT = """
@@ -125,39 +131,38 @@ public class ExtendedEmailPublisher extends Notifier {
      * A comma-separated list of email recipient that will be used for every
      * theTrigger.
      */
-    public String recipientList = "";
+    private String recipientList = "";
 
     /**
      * This is the list of email theTriggers that the project has configured
      */
-    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "TODO needs triage")
-    public List<EmailTrigger> configuredTriggers = new ArrayList<>();
+    private List<EmailTrigger> configuredTriggers = new ArrayList<>();
 
     /**
      * The contentType of the emails for this project (text/html, text/plain, etc).
      */
-    public String contentType;
+    private String contentType;
 
     /**
      * The default subject of the emails for this project.
      * ($PROJECT_DEFAULT_SUBJECT)
      */
-    public String defaultSubject;
+    private String defaultSubject;
 
     /**
      * The default body of the emails for this project. ($PROJECT_DEFAULT_BODY)
      */
-    public String defaultContent;
+    private String defaultContent;
 
     /**
      * The project wide set of attachments.
      */
-    public String attachmentsPattern;
+    private String attachmentsPattern;
 
     /**
      * The project wide set of inline attachments.
      */
-    public String inlineAttachmentsPattern;
+    private String inlineAttachmentsPattern;
 
     /**
      * The project's pre-send script.
@@ -174,40 +179,40 @@ public class ExtendedEmailPublisher extends Notifier {
     /**
      * True to attach the log from the build to the email.
      */
-    public boolean attachBuildLog;
+    private boolean attachBuildLog;
 
     /**
      * True to compress the log from the build before attaching to the email
      */
-    public boolean compressBuildLog;
+    private boolean compressBuildLog;
 
     /**
      * Reply-To value for the e-mail
      */
-    public String replyTo;
+    private String replyTo;
 
     /**
      * From value for the e-mail
      */
-    public String from;
+    private String from;
 
     /**
      * If true, save the generated email content to email-ext-message.[txt|html]
      */
-    public boolean saveOutput = false;
+    private boolean saveOutput = false;
 
     /**
      * If true, disables the publisher from running.
      */
-    public boolean disabled = false;
+    private boolean disabled = false;
 
     /* If true, will check for throttling limits before sending email */
-    public boolean throttlingEnabled = false;
+    private boolean throttlingEnabled = false;
 
     /**
      * How to theTrigger the email if the project is a matrix project.
      */
-    public MatrixTriggerMode matrixTriggerMode;
+    private MatrixTriggerMode matrixTriggerMode;
 
     public ExtendedEmailPublisher() {}
 
@@ -244,7 +249,6 @@ public class ExtendedEmailPublisher extends Notifier {
     }
 
     @DataBoundConstructor
-    @SuppressFBWarnings(value = "PA_PUBLIC_PRIMITIVE_ATTRIBUTE", justification = "TODO needs triage")
     public ExtendedEmailPublisher(
             String recipientList,
             String contentType,
@@ -393,6 +397,106 @@ public class ExtendedEmailPublisher extends Notifier {
         this.matrixTriggerMode = matrixTriggerMode;
     }
 
+    public String getRecipientList() {
+        return recipientList;
+    }
+
+    public void setRecipientList(String recipientList) {
+        this.recipientList = recipientList;
+    }
+
+    public void setConfiguredTriggers(List<EmailTrigger> configuredTriggers) {
+        this.configuredTriggers = configuredTriggers;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public String getDefaultSubject() {
+        return defaultSubject;
+    }
+
+    public void setDefaultSubject(String defaultSubject) {
+        this.defaultSubject = defaultSubject;
+    }
+
+    public String getDefaultContent() {
+        return defaultContent;
+    }
+
+    public void setDefaultContent(String defaultContent) {
+        this.defaultContent = defaultContent;
+    }
+
+    public String getAttachmentsPattern() {
+        return attachmentsPattern;
+    }
+
+    public void setAttachmentsPattern(String attachmentsPattern) {
+        this.attachmentsPattern = attachmentsPattern;
+    }
+
+    public boolean isAttachBuildLog() {
+        return attachBuildLog;
+    }
+
+    public void setAttachBuildLog(boolean attachBuildLog) {
+        this.attachBuildLog = attachBuildLog;
+    }
+
+    public boolean isCompressBuildLog() {
+        return compressBuildLog;
+    }
+
+    public void setCompressBuildLog(boolean compressBuildLog) {
+        this.compressBuildLog = compressBuildLog;
+    }
+
+    public String getReplyTo() {
+        return replyTo;
+    }
+
+    public void setReplyTo(String replyTo) {
+        this.replyTo = replyTo;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public boolean isSaveOutput() {
+        return saveOutput;
+    }
+
+    public void setSaveOutput(boolean saveOutput) {
+        this.saveOutput = saveOutput;
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
+    public boolean isThrottlingEnabled() {
+        return throttlingEnabled;
+    }
+
+    public void setThrottlingEnabled(boolean throttlingEnabled) {
+        this.throttlingEnabled = throttlingEnabled;
+    }
+
     @NonNull
     @Override
     public Collection<? extends Action> getProjectActions(AbstractProject<?, ?> project) {
@@ -532,6 +636,89 @@ public class ExtendedEmailPublisher extends Notifier {
         return true;
     }
 
+    /**
+     * Checks if an exception represents a transient SMTP error (4xx code) that should be retried.
+     *
+     * @param e the exception to check
+     * @return true if the exception represents a transient SMTP error (4xx code), false otherwise
+     */
+    boolean isTransientSmtpError(Exception e) {
+        if (e == null) {
+            return false;
+        }
+
+        Integer returnCode = getSmtpReturnCode(e);
+        if (returnCode != null && returnCode >= 400 && returnCode < 500) {
+            return true;
+        }
+
+        Integer parsedCode = parseSmtpErrorCode(e);
+        if (parsedCode != null && parsedCode >= 400 && parsedCode < 500) {
+            return true;
+        }
+
+        if (e instanceof MessagingException) {
+            Exception nextException = ((MessagingException) e).getNextException();
+            if (nextException != null && isTransientSmtpError(nextException)) {
+                return true;
+            }
+        }
+
+        Throwable cause = e.getCause();
+        if (cause instanceof Exception) {
+            return isTransientSmtpError((Exception) cause);
+        }
+
+        return false;
+    }
+
+    /**
+     * Tries to get SMTP return code from an exception using reflection.
+     * This works with SMTPAddressFailedException and SMTPSendFailedException
+     * without requiring a compile-time dependency.
+     *
+     * @param e the exception
+     * @return the SMTP return code, or null if not available
+     */
+    private Integer getSmtpReturnCode(Exception e) {
+        if (e == null) {
+            return null;
+        }
+        try {
+            Method method = e.getClass().getMethod("getReturnCode");
+            Object result = method.invoke(e);
+            if (result instanceof Integer) {
+                return (Integer) result;
+            }
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+            // Method doesn't exist or couldn't be invoked
+        }
+        return null;
+    }
+
+    /**
+     * Parses SMTP error code from exception message.
+     * Looks for patterns like "421 Service not available" in the message.
+     *
+     * @param e the exception
+     * @return the SMTP error code, or null if not found
+     */
+    private Integer parseSmtpErrorCode(Exception e) {
+        if (e == null || e.getMessage() == null) {
+            return null;
+        }
+        String message = e.getMessage();
+        Matcher matcher = SMTP_CODE_PATTERN.matcher(message);
+        if (matcher.find()) {
+            try {
+                return Integer.parseInt(matcher.group(1));
+            } catch (NumberFormatException ignored) {
+                // Not a valid number
+            }
+        }
+        return null;
+    }
+
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     boolean sendMail(ExtendedEmailPublisherContext context) {
         try {
@@ -617,12 +804,15 @@ public class ExtendedEmailPublisher extends Notifier {
                             }
                             break;
                         } catch (SendFailedException e) {
-                            if (e.getNextException() != null
-                                    && (e.getNextException() instanceof SocketException
-                                            || e.getNextException() instanceof ConnectException)) {
+                            boolean isTransient = isTransientSmtpError(e);
+                            if ((e.getNextException() != null
+                                            && (e.getNextException() instanceof SocketException
+                                                    || e.getNextException() instanceof ConnectException))
+                                    || isTransient) {
+                                String reason = isTransient ? "Transient SMTP error" : "Socket error";
                                 context.getListener()
                                         .getLogger()
-                                        .println("SMTP connection failed. Retrying in 10 seconds...");
+                                        .println(reason + " sending email, retrying once more in 10 seconds...");
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {
@@ -669,11 +859,13 @@ public class ExtendedEmailPublisher extends Notifier {
                                 break;
                             }
                         } catch (MessagingException e) {
-                            if (e.getNextException() != null && e.getNextException() instanceof ConnectException) {
+                            boolean isTransient = isTransientSmtpError(e);
+                            if ((e.getNextException() != null && e.getNextException() instanceof ConnectException)
+                                    || isTransient) {
+                                String reason = isTransient ? "Transient SMTP error" : "Connection error";
                                 context.getListener()
                                         .getLogger()
-                                        .println(
-                                                "SMTP connection error while sending email. Retrying once more in 10 seconds.");
+                                        .println(reason + " sending email, retrying once more in 10 seconds...");
                                 transport.close();
                                 Thread.sleep(10000);
                             } else {

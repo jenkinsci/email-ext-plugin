@@ -55,10 +55,10 @@ class AbstractScriptTriggerTest {
     @Issue("SECURITY-257")
     void configRoundtrip() throws Exception {
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        publisher.defaultSubject = "%DEFAULT_SUBJECT";
-        publisher.defaultContent = "%DEFAULT_CONTENT";
-        publisher.attachmentsPattern = "";
-        publisher.recipientList = "%DEFAULT_RECIPIENTS";
+        publisher.setDefaultSubject("%DEFAULT_SUBJECT");
+        publisher.setDefaultContent("%DEFAULT_CONTENT");
+        publisher.setAttachmentsPattern("");
+        publisher.setRecipientList("%DEFAULT_RECIPIENTS");
         publisher.setPresendScript("");
         publisher.setPostsendScript("");
 
@@ -121,10 +121,10 @@ class AbstractScriptTriggerTest {
     @Issue("SECURITY-1340")
     void doNotExecuteConstructorsOutsideOfSandbox() throws Exception {
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        publisher.defaultSubject = "%DEFAULT_SUBJECT";
-        publisher.defaultContent = "%DEFAULT_CONTENT";
-        publisher.attachmentsPattern = "";
-        publisher.recipientList = "%DEFAULT_RECIPIENTS";
+        publisher.setDefaultSubject("%DEFAULT_SUBJECT");
+        publisher.setDefaultContent("%DEFAULT_CONTENT");
+        publisher.setAttachmentsPattern("");
+        publisher.setRecipientList("%DEFAULT_RECIPIENTS");
         publisher.setPresendScript("");
         publisher.setPostsendScript("");
         String script = """
