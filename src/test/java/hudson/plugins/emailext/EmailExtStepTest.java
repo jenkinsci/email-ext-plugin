@@ -227,6 +227,29 @@ class EmailExtStepTest {
         j.assertLogContains("Archiving artifacts", run);
     }
 
+    @Test
+    void saveOutputCustomFileNameWithoutExtension() throws Exception {
+        WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf-custom-output-no-extension");
+        job.setDefinition(new CpsFlowDefinition("""
+                node {
+                  emailext(
+                    to: 'mickeymouse@disney.com',
+                    subject: 'Boo',
+                    saveOutput: true,
+                    saveOutputFileName: 'email-ext-message')
+                }
+                """, true));
+
+        Run<?, ?> run = job.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(run);
+
+        FilePath workspace = j.jenkins.getWorkspaceFor(job);
+
+        assertNotNull(workspace);
+
+        assertTrue(workspace.child("email-ext-message.txt").exists(), "Should automatically append the text extension");
+    }
+
     public static class FileCopyStep extends Step {
 
         private final String file;
