@@ -1454,7 +1454,13 @@ public class ExtendedEmailPublisher extends Notifier {
 
     private String getSaveOutputFileName(ExtendedEmailPublisherContext context, String extension) {
         if (StringUtils.isNotBlank(saveOutputFileName)) {
-            return ContentBuilder.transformText(saveOutputFileName, context, getRuntimeMacros(context));
+            String fileName = ContentBuilder.transformText(saveOutputFileName, context, getRuntimeMacros(context));
+
+            if (!fileName.endsWith(".txt") && !fileName.endsWith(".html")) {
+                fileName += extension;
+            }
+
+            return fileName;
         }
         return "%s-%s%s"
                 .formatted(

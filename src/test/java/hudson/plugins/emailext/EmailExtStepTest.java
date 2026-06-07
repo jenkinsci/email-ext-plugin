@@ -175,7 +175,7 @@ class EmailExtStepTest {
         FilePath workspace = j.jenkins.getWorkspaceFor(job);
         assertNotNull(workspace, "Workspace should be available after the build");
         assertTrue(
-                workspace.child("Always-1.txt").exists(),
+                workspace.child("Always-" + run.getId() + ".txt").exists(),
                 "Should save the text output under the backward-compatible trigger/build name");
 
         Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
@@ -199,7 +199,7 @@ class EmailExtStepTest {
         FilePath workspace = j.jenkins.getWorkspaceFor(job);
         assertNotNull(workspace, "Workspace should be available after the build");
         assertTrue(
-                workspace.child("Always-1.html").exists(),
+                workspace.child("Always-" + run.getId() + ".html").exists(),
                 "Should save the HTML output under the backward-compatible trigger/build name");
     }
 
