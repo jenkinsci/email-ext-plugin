@@ -190,15 +190,14 @@ public class EmailExtStep extends Step {
         this.saveOutput = saveOutput;
     }
 
-    public @CheckForNull String getSaveOutputFileName() {
-        return saveOutputFileName == null ? "" : saveOutputFileName;
+    @CheckForNull
+    public String getSaveOutputFileName() {
+        return saveOutputFileName;
     }
 
     @DataBoundSetter
     public void setSaveOutputFileName(@CheckForNull String saveOutputFileName) {
-        if (StringUtils.isNotBlank(saveOutputFileName)) {
-            this.saveOutputFileName = saveOutputFileName;
-        }
+        this.saveOutputFileName = Util.fixEmptyAndTrim(saveOutputFileName);
     }
 
     @Override
