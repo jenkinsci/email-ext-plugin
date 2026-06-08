@@ -1,10 +1,10 @@
 package hudson.plugins.emailext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
@@ -271,7 +271,9 @@ class EmailExtStepTest {
 
         assertNotNull(workspace);
 
-        assertTrue(workspace.child("email-ext-message.txt").exists(), "Should use the configured filename without appending another extension");
+        assertTrue(
+                workspace.child("email-ext-message.txt").exists(),
+                "Should use the configured filename without appending another extension");
 
         assertFalse(workspace.child("email-ext-message.txt.txt").exists(), "Should not append the extension twice");
     }
