@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
@@ -248,6 +249,31 @@ class EmailExtStepTest {
         assertNotNull(workspace);
 
         assertTrue(workspace.child("email-ext-message.txt").exists(), "Should automatically append the text extension");
+    }
+
+    @Test
+    void saveOutputCustomFileNameWithExtension() throws Exception {
+        WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf-custom-output-with-extension");
+        job.setDefinition(new CpsFlowDefinition("""
+                node {
+                  emailext(
+                    to: 'mickeymouse@disney.com',
+                    subject: 'Boo',
+                    saveOutput: true,
+                    saveOutputFileName: 'email-ext-message.txt')
+                }
+                """, true));
+
+        Run<?, ?> run = job.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(run);
+
+        FilePath workspace = j.jenkins.getWorkspaceFor(job);
+
+        assertNotNull(workspace);
+
+        assertTrue(workspace.child("email-ext-message.txt").exists(), "Should use the configured filename without appending another extension");
+
+        assertFalse(workspace.child("email-ext-message.txt.txt").exists(), "Should not append the extension twice");
     }
 
     public static class FileCopyStep extends Step {
