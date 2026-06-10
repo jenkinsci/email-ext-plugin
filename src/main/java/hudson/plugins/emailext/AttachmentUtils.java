@@ -288,7 +288,7 @@ public class AttachmentUtils implements Serializable {
     }
 
     public static void attachBuildLog(ExtendedEmailPublisherContext context, Multipart multipart, boolean compress) {
-        Run<?,?> main = context.getRun();
+        Run<?, ?> main = context.getRun();
         List<? extends Run<?, ?>> all = List.of(main);
         for (var ma : ExtensionList.lookup(MatrixAssist.class)) {
             List<? extends Run<?, ?>> _all = ma.getExactRuns(main);
