@@ -1,9 +1,13 @@
 package hudson.plugins.emailext;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cloudbees.plugins.credentials.domains.HostnamePortRequirement;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.jenkins.plugins.credentials.oauth.GoogleRobotPrivateKeyCredentials;
+import com.google.jenkins.plugins.credentials.oauth.StandardUsernameOAuth2Credentials;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
@@ -191,24 +195,64 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private transient Secret smtpAuthPassword;
     private transient boolean useSsl = false;
 
+    private StandardUsernameCredentials getCredential(MailAccount acc, Run<?, ?> run) {
+
+        if (StringUtils.isBlank(acc.getCredentialsId())) {
+            return null;
+        }
+
+        DomainRequirement domainRequirement = null;
+
+        if (StringUtils.isNotBlank(acc.getSmtpHost()) && StringUtils.isNotBlank(acc.getSmtpPort())) {
+            domainRequirement = new HostnamePortRequirement(acc.getSmtpHost(), Integer.parseInt(acc.getSmtpPort()));
+        }
+
+        return CredentialsProvider.findCredentialById(
+                acc.getCredentialsId(), StandardUsernameCredentials.class, run, domainRequirement);
+    }
+
     private transient BiFunction<MailAccount, Run<?, ?>, Authenticator> authenticatorProvider =
             (acc, run) -> new Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
-                    DomainRequirement domainRequirement = null;
-                    if (StringUtils.isNotBlank(acc.getSmtpHost()) && StringUtils.isNotBlank(acc.getSmtpPort())) {
-                        domainRequirement =
-                                new HostnamePortRequirement(acc.getSmtpHost(), Integer.parseInt(acc.getSmtpPort()));
-                    }
 
-                    StandardUsernamePasswordCredentials c = CredentialsProvider.findCredentialById(
-                            acc.getCredentialsId(), StandardUsernamePasswordCredentials.class, run, domainRequirement);
+                    StandardUsernameCredentials c = getCredential(acc, run);
+                    LOGGER.info("Credential id: " + acc.getCredentialsId());
+                    LOGGER.info("isDefault=" + acc.isDefaultAccount());
+                    LOGGER.info("adminAddress=" + getAdminAddress());
+                    LOGGER.info("address: " + acc.getAddress());
 
                     if (c == null) {
                         return null;
                     }
 
-                    return new PasswordAuthentication(c.getUsername(), Secret.toString(c.getPassword()));
+                    if (c instanceof GoogleRobotPrivateKeyCredentials googleCred) {
+                        GoogleCredential credential = googleCred.getGoogleCredential(new MailScopeRequirement())
+                                                        .createDelegated(acc.isDefaultAccount() ? getAdminAddress() :
+                         acc.getAddress());
+                        try {
+                            credential.refreshToken();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        String token = credential.getAccessToken();
+                        LOGGER.info("token email = " + credential.getServiceAccountUser());
+                        LOGGER.info("Token length = " + token.length());
+                        return new PasswordAuthentication(
+                                acc.isDefaultAccount() ? getAdminAddress() : acc.getAddress(), token);
+                    }
+
+                    if (c instanceof StandardUsernamePasswordCredentials passwordCred) {
+                        return new PasswordAuthentication(
+                                passwordCred.getUsername(), Secret.toString(passwordCred.getPassword()));
+                    }
+                    if (c instanceof StandardUsernameOAuth2Credentials oauthCred) {
+                        return new PasswordAuthentication(
+                                acc.isDefaultAccount() ? getAdminAddress() : acc.getAddress(),
+                                Secret.toString(oauthCred.getAccessToken(null)));
+                    }
+
+                    return null;
                 }
             };
 
@@ -410,10 +454,17 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             props.put(SMTP_AUTH_PROPERTY, "true");
         }
 
-        //        TODO: set the auth mechanism to XOAUTH2 by resolving credential type
-        //        if (acc.isUseOAuth2()) {
-        //            props.put(SMTP_AUTH_MECHANISMS_PROPERTY, "XOAUTH2");
-        //        }
+        if (!StringUtils.isBlank(acc.getCredentialsId())) {
+            props.put(SMTP_AUTH_PROPERTY, "true");
+        }
+
+        props.put("mail.debug.auth", "true");
+
+        StandardUsernameCredentials c = getCredential(acc, context.getRun());
+        if (c instanceof StandardUsernameOAuth2Credentials) {
+            LOGGER.info("Oauth credential found");
+            props.put(SMTP_AUTH_MECHANISMS_PROPERTY, "XOAUTH2");
+        }
 
         // avoid hang by setting some timeout.
         props.put(SMTP_TIMEOUT_PROPERTY, "60000");
