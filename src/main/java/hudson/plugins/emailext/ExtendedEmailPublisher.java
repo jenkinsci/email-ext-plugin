@@ -534,6 +534,7 @@ public class ExtendedEmailPublisher extends Notifier {
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     boolean sendMail(ExtendedEmailPublisherContext context) {
+        boolean sent = false;
         try {
             InternetAddress fromAddress = getFromAddress();
             MailAccount mailAccount = getMailAccount(context);
@@ -612,6 +613,7 @@ public class ExtendedEmailPublisher extends Notifier {
                         try {
                             transport.connect();
                             transport.sendMessage(msg, allRecipients);
+                            sent = true;
                             if (getDescriptor().isThrottlingEnabled()) {
                                 EmailThrottler.getInstance().incrementEmailCount();
                             }
@@ -702,6 +704,15 @@ public class ExtendedEmailPublisher extends Notifier {
                         }
                     }
 
+                    if (!sent) {
+                        context.getListener()
+                                .getLogger()
+                                .println("Email was not successfully sent."
+                                        + (getDescriptor().isDebugMode()
+                                                ? ""
+                                                : " Enable debug mode for more details."));
+                    }
+
                     executePostsendScript(context, msg, session, transport);
                     // close transport after post-send script, so server response can be accessed:
                     transport.close();
@@ -717,7 +728,7 @@ public class ExtendedEmailPublisher extends Notifier {
             } else {
                 context.getListener().getLogger().println("Email sending was cancelled" + " by user script.");
             }
-            return true;
+            return sent;
         } catch (AuthenticationFailedException e) {
             LOGGER.log(Level.SEVERE, "SMTP authentication failed. Check username/password.", e);
             Functions.printStackTrace(
@@ -734,7 +745,10 @@ public class ExtendedEmailPublisher extends Notifier {
             Functions.printStackTrace(e, context.getListener().error("Unexpected error while sending email."));
         }
 
-        debug(context.getListener().getLogger(), "Email sending failed. Please check Jenkins system log for details.");
+        context.getListener()
+                .getLogger()
+                .println("Email was not successfully sent."
+                        + (getDescriptor().isDebugMode() ? "" : " Enable debug mode for more details."));
         return false;
     }
 
@@ -1271,7 +1285,7 @@ public class ExtendedEmailPublisher extends Notifier {
      * @param listener a listener to which we may print warnings in case the actual
      *                 previous build is still in progress
      * @return the previous build, or null if that build is missing, or is still in
-     *         progress
+     * progress
      */
     public static @CheckForNull Run<?, ?> getPreviousRun(@NonNull Run<?, ?> run, TaskListener listener) {
         Run<?, ?> previousRun = run.getPreviousBuild();
