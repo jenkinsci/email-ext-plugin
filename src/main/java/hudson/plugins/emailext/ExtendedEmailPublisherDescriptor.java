@@ -24,6 +24,7 @@ import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import io.jenkins.plugins.entraoauth.EntraOAuthCredentials;
 import jakarta.mail.Authenticator;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
@@ -217,39 +218,36 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                 protected PasswordAuthentication getPasswordAuthentication() {
 
                     StandardUsernameCredentials c = getCredential(acc, run);
-                    LOGGER.info("Credential id: " + acc.getCredentialsId());
-                    LOGGER.info("isDefault=" + acc.isDefaultAccount());
-                    LOGGER.info("adminAddress=" + getAdminAddress());
-                    LOGGER.info("address: " + acc.getAddress());
 
                     if (c == null) {
                         return null;
                     }
 
                     if (c instanceof GoogleRobotPrivateKeyCredentials googleCred) {
-                        GoogleCredential credential = googleCred.getGoogleCredential(new MailScopeRequirement())
-                                                        .createDelegated(acc.isDefaultAccount() ? getAdminAddress() :
-                         acc.getAddress());
+                        GoogleCredential credential = googleCred
+                                .getGoogleCredential(new MailScopeRequirement())
+                                .createDelegated(acc.isDefaultAccount() ? getAdminAddress() : acc.getAddress());
                         try {
                             credential.refreshToken();
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            LOGGER.log(Level.WARNING, "Failed to obtain access token.", e);
+                            return null;
                         }
                         String token = credential.getAccessToken();
-                        LOGGER.info("token email = " + credential.getServiceAccountUser());
-                        LOGGER.info("Token length = " + token.length());
                         return new PasswordAuthentication(
                                 acc.isDefaultAccount() ? getAdminAddress() : acc.getAddress(), token);
                     }
 
+                    if (c instanceof EntraOAuthCredentials entraCred) {
+                        return new PasswordAuthentication(
+                                acc.isDefaultAccount() ? getAdminAddress() : acc.getAddress(),
+                                Secret.toString(entraCred.getAccessToken(null)));
+                    }
+
+                    // maintain using username from credential for backwards compatibility
                     if (c instanceof StandardUsernamePasswordCredentials passwordCred) {
                         return new PasswordAuthentication(
                                 passwordCred.getUsername(), Secret.toString(passwordCred.getPassword()));
-                    }
-                    if (c instanceof StandardUsernameOAuth2Credentials oauthCred) {
-                        return new PasswordAuthentication(
-                                acc.isDefaultAccount() ? getAdminAddress() : acc.getAddress(),
-                                Secret.toString(oauthCred.getAccessToken(null)));
                     }
 
                     return null;
@@ -454,15 +452,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             props.put(SMTP_AUTH_PROPERTY, "true");
         }
 
-        if (!StringUtils.isBlank(acc.getCredentialsId())) {
-            props.put(SMTP_AUTH_PROPERTY, "true");
-        }
-
-        props.put("mail.debug.auth", "true");
-
         StandardUsernameCredentials c = getCredential(acc, context.getRun());
         if (c instanceof StandardUsernameOAuth2Credentials) {
-            LOGGER.info("Oauth credential found");
             props.put(SMTP_AUTH_MECHANISMS_PROPERTY, "XOAUTH2");
         }
 
