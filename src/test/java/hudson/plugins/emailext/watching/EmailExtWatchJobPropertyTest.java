@@ -11,6 +11,7 @@ import hudson.model.Job;
 import hudson.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.kohsuke.stapler.StaplerRequest2;
 
 /**
  * Tests the class {@link EmailExtWatchJobProperty}.
@@ -92,8 +93,6 @@ class EmailExtWatchJobPropertyTest {
         EmailExtWatchJobProperty.DescriptorImpl descriptor = new EmailExtWatchJobProperty.DescriptorImpl();
         assertTrue(descriptor.isApplicable(Job.class), "Should be applicable to any Job");
         assertEquals("", descriptor.getDisplayName(), "Display name should be empty");
-        assertNull(
-                descriptor.newInstance((org.kohsuke.stapler.StaplerRequest2) null, null),
-                "New instance should be null");
+        assertNull(descriptor.newInstance((StaplerRequest2) null, null), "New instance should be null");
     }
 }
