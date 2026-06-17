@@ -223,25 +223,57 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                         return null;
                     }
 
+                    String address = acc.isDefaultAccount() ? getAdminAddress() : acc.getAddress();
+
                     if (c instanceof GoogleRobotPrivateKeyCredentials googleCred) {
                         GoogleCredential credential = googleCred
                                 .getGoogleCredential(new MailScopeRequirement())
-                                .createDelegated(acc.isDefaultAccount() ? getAdminAddress() : acc.getAddress());
+                                .createDelegated(address);
+
                         try {
                             credential.refreshToken();
                         } catch (IOException e) {
-                            LOGGER.log(Level.WARNING, "Failed to obtain access token.", e);
-                            return null;
+                            LOGGER.log(Level.WARNING, "Failed to obtain access token, retrying once.", e);
+
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                return null;
+                            }
+
+                            try {
+                                credential.refreshToken();
+                            } catch (IOException re) {
+                                LOGGER.log(Level.WARNING, "Failed to obtain access token after retry.", re);
+                                return null;
+                            }
                         }
+
                         String token = credential.getAccessToken();
-                        return new PasswordAuthentication(
-                                acc.isDefaultAccount() ? getAdminAddress() : acc.getAddress(), token);
+
+                        return new PasswordAuthentication(address, token);
                     }
 
                     if (c instanceof EntraOAuthCredentials entraCred) {
-                        return new PasswordAuthentication(
-                                acc.isDefaultAccount() ? getAdminAddress() : acc.getAddress(),
-                                Secret.toString(entraCred.getAccessToken(null)));
+                        Secret tokenSecret = entraCred.getAccessToken(null);
+
+                        if (tokenSecret == null) {
+                            LOGGER.log(Level.WARNING, "Failed to obtain access token, retrying once.");
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                                return null;
+                            }
+                            tokenSecret = entraCred.getAccessToken(null);
+                            if (tokenSecret == null) {
+                                LOGGER.log(Level.WARNING, "Failed to obtain access token after retry.");
+                                return null;
+                            }
+                        }
+
+                        return new PasswordAuthentication(address, Secret.toString(tokenSecret));
                     }
 
                     // maintain using username from credential for backwards compatibility
