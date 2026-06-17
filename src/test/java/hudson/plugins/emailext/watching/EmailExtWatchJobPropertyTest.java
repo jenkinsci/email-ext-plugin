@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Tests the class {@link EmailExtWatchJobProperty}.
- * 
+ *
  * @author Akash Manna
  */
 class EmailExtWatchJobPropertyTest {
@@ -54,7 +54,7 @@ class EmailExtWatchJobPropertyTest {
     void testRemoveWatcher() {
         User user1 = mock(User.class);
         when(user1.getId()).thenReturn("user1");
-        
+
         User user2 = mock(User.class);
         when(user2.getId()).thenReturn("user2");
 
@@ -92,6 +92,8 @@ class EmailExtWatchJobPropertyTest {
         EmailExtWatchJobProperty.DescriptorImpl descriptor = new EmailExtWatchJobProperty.DescriptorImpl();
         assertTrue(descriptor.isApplicable(Job.class), "Should be applicable to any Job");
         assertEquals("", descriptor.getDisplayName(), "Display name should be empty");
-        assertNull(descriptor.newInstance((org.kohsuke.stapler.StaplerRequest2) null, null), "New instance should be null");
+        assertNull(
+                descriptor.newInstance((org.kohsuke.stapler.StaplerRequest2) null, null),
+                "New instance should be null");
     }
 }
