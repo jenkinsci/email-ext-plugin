@@ -59,7 +59,9 @@ class EmailExtWatchActionTest {
         action = new EmailExtWatchAction(project);
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
-                .grant(Jenkins.READ, Item.READ).everywhere().to("alice"));
+                .grant(Jenkins.READ, Item.READ)
+                .everywhere()
+                .to("alice"));
     }
 
     @Test
@@ -73,11 +75,11 @@ class EmailExtWatchActionTest {
     @Test
     void testGetPublisher() throws Exception {
         assertNull(action.getPublisher());
-        
+
         ArtifactArchiver archiver = new ArtifactArchiver("*.jar");
         project.getPublishersList().add(archiver);
         assertNull(action.getPublisher());
-        
+
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
         project.getPublishersList().add(publisher);
         assertEquals(publisher, action.getPublisher());
@@ -88,25 +90,26 @@ class EmailExtWatchActionTest {
         EmailExtWatchJobProperty prop = action.getJobProperty();
         assertNotNull(prop);
         assertEquals(prop, project.getProperty(EmailExtWatchJobProperty.class));
-        
+
         assertEquals(prop, action.getJobProperty());
     }
 
     @Test
     void testUserProperty() throws Exception {
-        EmailExtWatchAction.UserProperty.DescriptorImpl descriptor = new EmailExtWatchAction.UserProperty.DescriptorImpl();
+        EmailExtWatchAction.UserProperty.DescriptorImpl descriptor =
+                new EmailExtWatchAction.UserProperty.DescriptorImpl();
         assertEquals("Extended Email Job Watching", descriptor.getDisplayName());
-        
+
         EmailExtWatchAction.UserProperty prop = (EmailExtWatchAction.UserProperty) descriptor.newInstance((User) null);
         assertNotNull(prop);
         assertTrue(prop.getTriggers().isEmpty());
-        
+
         List<EmailTrigger> triggers = new ArrayList<>();
         triggers.add(new AlwaysTrigger(Collections.emptyList(), "", "", "", "", "", 0, ""));
         prop = new EmailExtWatchAction.UserProperty("test-project", triggers);
         assertEquals("test-project", prop.getProjectName());
         assertEquals(1, prop.getTriggers().size());
-        
+
         prop.setProjectName("another-project");
         assertEquals("another-project", prop.getProjectName());
 
@@ -115,7 +118,7 @@ class EmailExtWatchActionTest {
         when(req.bindJSONToList(EmailTrigger.class, json)).thenReturn(triggers);
         EmailExtWatchAction.UserProperty prop2 = descriptor.newInstance(req, json);
         assertEquals(1, prop2.getTriggers().size());
-        
+
         EmailExtWatchAction.UserProperty prop3 = descriptor.newInstance((StaplerRequest2) null, json);
         assertTrue(prop3.getTriggers().isEmpty());
     }
@@ -123,36 +126,40 @@ class EmailExtWatchActionTest {
     @Test
     void testUserSpecificMethods() throws Exception {
         User user = User.getById("alice", true);
-        
+
         try (ACLContext ctx = ACL.as(user)) {
             Mailer.UserProperty mailerProp = new Mailer.UserProperty("alice@example.com");
             user.addProperty(mailerProp);
             assertNotNull(action.getMailerProperty());
             assertEquals("alice@example.com", action.getMailerProperty().getAddress());
-            
+
             assertNull(action.getTriggers());
             assertFalse(action.isWatching());
-            
+
             action.startWatching();
             assertTrue(action.isWatching(user));
             assertTrue(action.getJobProperty().isWatching(user));
-            
+
             action.stopWatching();
             assertFalse(action.isWatching(user));
-            
+
             List<EmailTrigger> triggers = new ArrayList<>();
             triggers.add(new AlwaysTrigger(Collections.emptyList(), "", "", "", "", "", 0, ""));
-            EmailExtWatchAction.UserProperty userPropWrongProject = new EmailExtWatchAction.UserProperty("wrong-project", triggers);
+            EmailExtWatchAction.UserProperty userPropWrongProject =
+                    new EmailExtWatchAction.UserProperty("wrong-project", triggers);
             user.addProperty(userPropWrongProject);
-            
+
             assertNull(action.getTriggers());
-            
-            EmailExtWatchAction.UserProperty userProp = new EmailExtWatchAction.UserProperty(project.getFullName(), triggers);
+
+            EmailExtWatchAction.UserProperty userProp =
+                    new EmailExtWatchAction.UserProperty(project.getFullName(), triggers);
             user.addProperty(userProp);
-            
+
             assertEquals(triggers, action.getTriggers());
             assertTrue(action.isWatching());
-            assertEquals(hudson.plugins.emailext.Messages.EmailExtWatchAction_DisplayNameWatching(), action.getDisplayName());
+            assertEquals(
+                    hudson.plugins.emailext.Messages.EmailExtWatchAction_DisplayNameWatching(),
+                    action.getDisplayName());
         }
     }
 
@@ -160,12 +167,13 @@ class EmailExtWatchActionTest {
     void testIsWatching_EmptyTriggers() throws Exception {
         User user = User.getById("alice", true);
         try (ACLContext ctx = ACL.as(user)) {
-            EmailExtWatchAction.UserProperty userProp = new EmailExtWatchAction.UserProperty(project.getFullName(), new ArrayList<>());
+            EmailExtWatchAction.UserProperty userProp =
+                    new EmailExtWatchAction.UserProperty(project.getFullName(), new ArrayList<>());
             user.addProperty(userProp);
-            
+
             assertNotNull(action.getTriggers());
             assertTrue(action.getTriggers().isEmpty());
-            
+
             assertFalse(action.isWatching());
         }
     }
@@ -176,7 +184,7 @@ class EmailExtWatchActionTest {
             assertNull(action.getTriggers());
             assertNull(action.getMailerProperty());
             assertFalse(action.isWatching());
-            
+
             action.startWatching();
             action.stopWatching();
         }
@@ -184,32 +192,34 @@ class EmailExtWatchActionTest {
 
     @Test
     void testDoStopWatching() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
             j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(true);
-        
+
         AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
         j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
-        
+
         User user = User.getById("alice", true);
         try (ACLContext ctx = ACL.as(user)) {
             List<EmailTrigger> triggers = new ArrayList<>();
             triggers.add(new AlwaysTrigger(Collections.emptyList(), "", "", "", "", "", 0, ""));
-            EmailExtWatchAction.UserProperty userProp = new EmailExtWatchAction.UserProperty(project.getFullName(), triggers);
+            EmailExtWatchAction.UserProperty userProp =
+                    new EmailExtWatchAction.UserProperty(project.getFullName(), triggers);
             user.addProperty(userProp);
-            
+
             action.startWatching();
             assertTrue(action.isWatching(user));
             assertFalse(userProp.getTriggers().isEmpty());
-            
+
             StaplerRequest2 req = mock(StaplerRequest2.class);
             StaplerResponse2 rsp = mock(StaplerResponse2.class);
-            
+
             action.doStopWatching(req, rsp);
-            
+
             assertFalse(action.isWatching(user));
             assertTrue(userProp.getTriggers().isEmpty());
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
@@ -218,65 +228,70 @@ class EmailExtWatchActionTest {
 
     @Test
     void testDoConfigSubmit() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
             j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(true);
-        
+
         AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
         j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
-        
+
         User user = User.getById("alice", true);
         try (ACLContext ctx = ACL.as(user)) {
             Mailer.UserProperty mailerProp = new Mailer.UserProperty("alice@example.com");
             user.addProperty(mailerProp);
-            
+
             StaplerRequest2 req = mock(StaplerRequest2.class);
             StaplerResponse2 rsp = mock(StaplerResponse2.class);
             JSONObject form = new JSONObject();
             when(req.getSubmittedForm()).thenReturn(form);
-            
+
             List<EmailTrigger> triggers = new ArrayList<>();
             AlwaysTrigger watchableTrigger = new AlwaysTrigger(Collections.emptyList(), "", "", "", "", "", 0, "");
             triggers.add(watchableTrigger);
-            
+
             when(req.bindJSONToList(EmailTrigger.class, form.get("triggers"))).thenReturn(triggers);
-            
+
             action.doConfigSubmit(req, rsp);
-            
+
             assertTrue(action.isWatching(user));
             EmailExtWatchAction.UserProperty userProp = user.getProperty(EmailExtWatchAction.UserProperty.class);
             assertNotNull(userProp);
             assertEquals(1, userProp.getTriggers().size());
-            assertEquals("alice@example.com", userProp.getTriggers().get(0).getEmail().getRecipientList());
-            
+            assertEquals(
+                    "alice@example.com",
+                    userProp.getTriggers().get(0).getEmail().getRecipientList());
+
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
         }
     }
 
     @Test
     void testDoStopWatching_Disabled() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
             j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(false);
-        
+
         User user = User.getById("alice", true);
         try (ACLContext ctx = ACL.as(user)) {
             List<EmailTrigger> triggers = new ArrayList<>();
             triggers.add(new AlwaysTrigger(Collections.emptyList(), "", "", "", "", "", 0, ""));
-            EmailExtWatchAction.UserProperty userProp = new EmailExtWatchAction.UserProperty(project.getFullName(), triggers);
+            EmailExtWatchAction.UserProperty userProp =
+                    new EmailExtWatchAction.UserProperty(project.getFullName(), triggers);
             user.addProperty(userProp);
-            
+
             StaplerRequest2 req = mock(StaplerRequest2.class);
             StaplerResponse2 rsp = mock(StaplerResponse2.class);
-            
+
             action.doStopWatching(req, rsp);
-            
+
             assertFalse(userProp.getTriggers().isEmpty());
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
         }
@@ -284,65 +299,68 @@ class EmailExtWatchActionTest {
 
     @Test
     void testDoStopWatching_Anonymous() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
             j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(true);
-        
+
         try (MockedStatic<User> userMock = mockStatic(User.class)) {
             userMock.when(User::current).thenReturn(null);
-            
+
             StaplerRequest2 req = mock(StaplerRequest2.class);
             StaplerResponse2 rsp = mock(StaplerResponse2.class);
-            
+
             action.doStopWatching(req, rsp);
-            
+
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
         }
     }
 
     @Test
     void testDoStopWatching_NonMatchingProperty() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
             j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(true);
-        
+
         User mockUser = mock(User.class);
         when(mockUser.getAllProperties()).thenReturn(Collections.emptyList());
-        
+
         try (MockedStatic<User> userMock = mockStatic(User.class)) {
             userMock.when(User::current).thenReturn(mockUser);
-            
+
             StaplerRequest2 req = mock(StaplerRequest2.class);
             StaplerResponse2 rsp = mock(StaplerResponse2.class);
-            
+
             action.doStopWatching(req, rsp);
-            
+
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
         }
     }
 
     @Test
     void testDoConfigSubmit_Disabled() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
             j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(false);
-        
+
         User user = User.getById("alice", true);
         try (ACLContext ctx = ACL.as(user)) {
             StaplerRequest2 req = mock(StaplerRequest2.class);
             StaplerResponse2 rsp = mock(StaplerResponse2.class);
-            
+
             action.doConfigSubmit(req, rsp);
-            
+
             assertNull(user.getProperty(EmailExtWatchAction.UserProperty.class));
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
         }
@@ -350,54 +368,56 @@ class EmailExtWatchActionTest {
 
     @Test
     void testDoConfigSubmit_Anonymous() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
             j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(true);
-        
+
         try (MockedStatic<User> userMock = mockStatic(User.class)) {
             userMock.when(User::current).thenReturn(null);
-            
+
             StaplerRequest2 req = mock(StaplerRequest2.class);
             StaplerResponse2 rsp = mock(StaplerResponse2.class);
-            
+
             action.doConfigSubmit(req, rsp);
-            
+
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
         }
     }
 
     @Test
     void testDoConfigSubmit_NullMailerProperty() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
             j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(true);
-        
+
         AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
         j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
-        
+
         User mockUser = mock(User.class);
         when(mockUser.getProperty(Mailer.UserProperty.class)).thenReturn(null);
-        
+
         try (MockedStatic<User> userMock = mockStatic(User.class)) {
             userMock.when(User::current).thenReturn(mockUser);
-            
+
             StaplerRequest2 req = mock(StaplerRequest2.class);
             StaplerResponse2 rsp = mock(StaplerResponse2.class);
             JSONObject form = new JSONObject();
             when(req.getSubmittedForm()).thenReturn(form);
-            
+
             List<EmailTrigger> triggers = new ArrayList<>();
             triggers.add(new AlwaysTrigger(Collections.emptyList(), "", "", "", "", "", 0, ""));
             when(req.bindJSONToList(EmailTrigger.class, form.get("triggers"))).thenReturn(triggers);
-            
+
             action.doConfigSubmit(req, rsp);
-            
+
             verify(mockUser, never()).addProperty(any(UserProperty.class));
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
         }
@@ -405,34 +425,35 @@ class EmailExtWatchActionTest {
 
     @Test
     void testDoConfigSubmit_UnwatchableTrigger() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
             j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(true);
-        
+
         User user = User.getById("alice", true);
         try (ACLContext ctx = ACL.as(user)) {
             Mailer.UserProperty mailerProp = new Mailer.UserProperty("alice@example.com");
             user.addProperty(mailerProp);
-            
+
             StaplerRequest2 req = mock(StaplerRequest2.class);
             StaplerResponse2 rsp = mock(StaplerResponse2.class);
             JSONObject form = new JSONObject();
             when(req.getSubmittedForm()).thenReturn(form);
-            
+
             List<EmailTrigger> triggers = new ArrayList<>();
             EmailTrigger unwatchableTrigger = mock(EmailTrigger.class);
             EmailTriggerDescriptor triggerDesc = mock(EmailTriggerDescriptor.class);
             when(unwatchableTrigger.getDescriptor()).thenReturn(triggerDesc);
             when(triggerDesc.isWatchable()).thenReturn(false);
             triggers.add(unwatchableTrigger);
-            
+
             when(req.bindJSONToList(EmailTrigger.class, form.get("triggers"))).thenReturn(triggers);
-            
+
             action.doConfigSubmit(req, rsp);
-            
+
             EmailExtWatchAction.UserProperty userProp = user.getProperty(EmailExtWatchAction.UserProperty.class);
             assertNotNull(userProp);
             assertTrue(userProp.getTriggers().isEmpty());
