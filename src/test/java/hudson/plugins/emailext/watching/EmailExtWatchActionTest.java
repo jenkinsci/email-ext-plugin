@@ -5,19 +5,26 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import hudson.model.Descriptor;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.model.User;
+import hudson.model.UserProperty;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.EmailTrigger;
+import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
+import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.Mailer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +38,7 @@ import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.kohsuke.stapler.StaplerRequest2;
 import org.kohsuke.stapler.StaplerResponse2;
+import org.mockito.MockedStatic;
 
 /**
  * Tests the class {@link EmailExtWatchAction}.
@@ -66,7 +74,7 @@ class EmailExtWatchActionTest {
     void testGetPublisher() throws Exception {
         assertNull(action.getPublisher());
         
-        hudson.tasks.ArtifactArchiver archiver = new hudson.tasks.ArtifactArchiver("*.jar");
+        ArtifactArchiver archiver = new ArtifactArchiver("*.jar");
         project.getPublishersList().add(archiver);
         assertNull(action.getPublisher());
         
@@ -179,12 +187,12 @@ class EmailExtWatchActionTest {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(hudson.model.Descriptor.class).add(0, descriptor);
+            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(true);
         
-        hudson.plugins.emailext.plugins.trigger.AlwaysTrigger.DescriptorImpl alwaysDesc = new hudson.plugins.emailext.plugins.trigger.AlwaysTrigger.DescriptorImpl();
-        j.jenkins.getExtensionList(hudson.model.Descriptor.class).add(0, alwaysDesc);
+        AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
+        j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
         
         User user = User.getById("alice", true);
         try (ACLContext ctx = ACL.as(user)) {
@@ -213,12 +221,12 @@ class EmailExtWatchActionTest {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(hudson.model.Descriptor.class).add(0, descriptor);
+            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(true);
         
-        hudson.plugins.emailext.plugins.trigger.AlwaysTrigger.DescriptorImpl alwaysDesc = new hudson.plugins.emailext.plugins.trigger.AlwaysTrigger.DescriptorImpl();
-        j.jenkins.getExtensionList(hudson.model.Descriptor.class).add(0, alwaysDesc);
+        AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
+        j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
         
         User user = User.getById("alice", true);
         try (ACLContext ctx = ACL.as(user)) {
@@ -253,7 +261,7 @@ class EmailExtWatchActionTest {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(hudson.model.Descriptor.class).add(0, descriptor);
+            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(false);
         
@@ -279,11 +287,11 @@ class EmailExtWatchActionTest {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(hudson.model.Descriptor.class).add(0, descriptor);
+            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(true);
         
-        try (org.mockito.MockedStatic<User> userMock = org.mockito.Mockito.mockStatic(User.class)) {
+        try (MockedStatic<User> userMock = mockStatic(User.class)) {
             userMock.when(User::current).thenReturn(null);
             
             StaplerRequest2 req = mock(StaplerRequest2.class);
@@ -300,14 +308,14 @@ class EmailExtWatchActionTest {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(hudson.model.Descriptor.class).add(0, descriptor);
+            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(true);
         
         User mockUser = mock(User.class);
         when(mockUser.getAllProperties()).thenReturn(Collections.emptyList());
         
-        try (org.mockito.MockedStatic<User> userMock = org.mockito.Mockito.mockStatic(User.class)) {
+        try (MockedStatic<User> userMock = mockStatic(User.class)) {
             userMock.when(User::current).thenReturn(mockUser);
             
             StaplerRequest2 req = mock(StaplerRequest2.class);
@@ -324,7 +332,7 @@ class EmailExtWatchActionTest {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(hudson.model.Descriptor.class).add(0, descriptor);
+            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(false);
         
@@ -345,11 +353,11 @@ class EmailExtWatchActionTest {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(hudson.model.Descriptor.class).add(0, descriptor);
+            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(true);
         
-        try (org.mockito.MockedStatic<User> userMock = org.mockito.Mockito.mockStatic(User.class)) {
+        try (MockedStatic<User> userMock = mockStatic(User.class)) {
             userMock.when(User::current).thenReturn(null);
             
             StaplerRequest2 req = mock(StaplerRequest2.class);
@@ -366,17 +374,17 @@ class EmailExtWatchActionTest {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(hudson.model.Descriptor.class).add(0, descriptor);
+            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(true);
         
-        hudson.plugins.emailext.plugins.trigger.AlwaysTrigger.DescriptorImpl alwaysDesc = new hudson.plugins.emailext.plugins.trigger.AlwaysTrigger.DescriptorImpl();
-        j.jenkins.getExtensionList(hudson.model.Descriptor.class).add(0, alwaysDesc);
+        AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
+        j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
         
         User mockUser = mock(User.class);
         when(mockUser.getProperty(Mailer.UserProperty.class)).thenReturn(null);
         
-        try (org.mockito.MockedStatic<User> userMock = org.mockito.Mockito.mockStatic(User.class)) {
+        try (MockedStatic<User> userMock = mockStatic(User.class)) {
             userMock.when(User::current).thenReturn(mockUser);
             
             StaplerRequest2 req = mock(StaplerRequest2.class);
@@ -390,7 +398,7 @@ class EmailExtWatchActionTest {
             
             action.doConfigSubmit(req, rsp);
             
-            verify(mockUser, org.mockito.Mockito.never()).addProperty(org.mockito.ArgumentMatchers.any(hudson.model.UserProperty.class));
+            verify(mockUser, never()).addProperty(any(UserProperty.class));
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
         }
     }
@@ -400,7 +408,7 @@ class EmailExtWatchActionTest {
         ExtendedEmailPublisherDescriptor descriptor = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
         if (descriptor == null) {
             descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(hudson.model.Descriptor.class).add(0, descriptor);
+            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
         }
         descriptor.setWatchingEnabled(true);
         
@@ -416,7 +424,7 @@ class EmailExtWatchActionTest {
             
             List<EmailTrigger> triggers = new ArrayList<>();
             EmailTrigger unwatchableTrigger = mock(EmailTrigger.class);
-            hudson.plugins.emailext.plugins.EmailTriggerDescriptor triggerDesc = mock(hudson.plugins.emailext.plugins.EmailTriggerDescriptor.class);
+            EmailTriggerDescriptor triggerDesc = mock(EmailTriggerDescriptor.class);
             when(unwatchableTrigger.getDescriptor()).thenReturn(triggerDesc);
             when(triggerDesc.isWatchable()).thenReturn(false);
             triggers.add(unwatchableTrigger);
