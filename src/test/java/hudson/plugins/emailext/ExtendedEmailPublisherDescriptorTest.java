@@ -46,6 +46,7 @@ import hudson.security.ACLContext;
 import hudson.util.FormValidation.Kind;
 import hudson.util.ListBoxModel;
 import jakarta.mail.Authenticator;
+import jakarta.mail.Session;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -308,6 +309,32 @@ class ExtendedEmailPublisherDescriptorTest {
     }
 
     @Test
+    void advancedPropertiesAreAppliedToSession() {
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        MailAccount ma = new MailAccount();
+        ma.setAddress("test@example.com");
+        ma.setSmtpHost("smtp.example.com");
+        ma.setSmtpPort("25");
+        ma.setAdvProperties("mail.smtp.timeout=1234\n" + "mail.smtp.connectiontimeout=5678");
+
+        ExtendedEmailPublisher publisher = Mockito.mock(ExtendedEmailPublisher.class);
+        Run<?, ?> run = Mockito.mock(Run.class);
+        FilePath workspace = Mockito.mock(FilePath.class);
+        Launcher launcher = Mockito.mock(Launcher.class);
+        TaskListener listener = Mockito.mock(TaskListener.class);
+
+        ExtendedEmailPublisherContext context =
+                new ExtendedEmailPublisherContext(publisher, run, workspace, launcher, listener);
+
+        Session session = descriptor.createSession(ma, context);
+
+        assertEquals("1234", session.getProperties().getProperty("mail.smtp.timeout"));
+        assertEquals("5678", session.getProperties().getProperty("mail.smtp.connectiontimeout"));
+    }
+
+    @Test
     void defaultTriggers() throws Exception {
         ExtendedEmailPublisherDescriptor descriptor =
                 j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
@@ -504,6 +531,37 @@ class ExtendedEmailPublisherDescriptorTest {
         ArgumentCaptor<Run<?, ?>> runCaptor = ArgumentCaptor.forClass(Run.class);
         Mockito.verify(authenticatorProvider, Mockito.atLeast(1))
                 .apply(mailAccountCaptor.capture(), runCaptor.capture());
+    }
+
+    @Test
+    void oauthCredentialsEnableXOauth2Mechanism() throws Exception {
+        TestOAuth2CredentialsImpl credential = new TestOAuth2CredentialsImpl(
+                CredentialsScope.GLOBAL, "oauth-creds", "OAuth credentials", "test@example.com", "access-token");
+
+        CredentialsProvider.lookupStores(j.jenkins).iterator().next().addCredentials(Domain.global(), credential);
+
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        MailAccount ma = new MailAccount();
+        ma.setAddress("test@example.com");
+        ma.setSmtpHost("smtp.example.com");
+        ma.setSmtpPort("25");
+        ma.setCredentialsId("oauth-creds");
+
+        ExtendedEmailPublisher publisher = Mockito.mock(ExtendedEmailPublisher.class);
+        Run<?, ?> run = Mockito.mock(Run.class);
+        FilePath workspace = Mockito.mock(FilePath.class);
+        Launcher launcher = Mockito.mock(Launcher.class);
+        TaskListener listener = Mockito.mock(TaskListener.class);
+
+        ExtendedEmailPublisherContext context =
+                new ExtendedEmailPublisherContext(publisher, run, workspace, launcher, listener);
+
+        Session session = descriptor.createSession(ma, context);
+
+        assertEquals("XOAUTH2", session.getProperties().getProperty("mail.smtp.auth.mechanisms"));
+        assertEquals("true", session.getProperties().getProperty("mail.smtp.auth"));
     }
 
     @Test
