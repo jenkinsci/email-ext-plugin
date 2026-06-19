@@ -224,52 +224,65 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                     }
 
                     String address = acc.isDefaultAccount() ? getAdminAddress() : acc.getAddress();
+                    final int TOKEN_ATTEMPTS = 2;
+                    final long RETRY_DELAY_MS = 2000;
 
                     if (c instanceof GoogleRobotPrivateKeyCredentials googleCred) {
                         GoogleCredential credential = googleCred
                                 .getGoogleCredential(new MailScopeRequirement())
                                 .createDelegated(address);
 
-                        try {
-                            credential.refreshToken();
-                        } catch (IOException e) {
-                            LOGGER.log(Level.WARNING, "Failed to obtain access token, retrying once.", e);
-
-                            try {
-                                Thread.sleep(2000);
-                            } catch (InterruptedException ie) {
-                                Thread.currentThread().interrupt();
-                                return null;
-                            }
-
+                        String token = null;
+                        for (int attempt = 1; attempt <= TOKEN_ATTEMPTS && token == null; attempt++) {
                             try {
                                 credential.refreshToken();
-                            } catch (IOException re) {
-                                LOGGER.log(Level.WARNING, "Failed to obtain access token after retry.", re);
-                                return null;
+                                token = credential.getAccessToken();
+                            } catch (IOException e) {
+                                LOGGER.log(
+                                        Level.WARNING,
+                                        "Failed to obtain Google OAuth access token"
+                                                + (attempt == 1 ? ", retrying once." : " after retry."),
+                                        e);
+
+                                if (attempt == TOKEN_ATTEMPTS) {
+                                    return null;
+                                }
+
+                                try {
+                                    Thread.sleep(RETRY_DELAY_MS);
+                                } catch (InterruptedException ie) {
+                                    Thread.currentThread().interrupt();
+                                    return null;
+                                }
                             }
                         }
-
-                        String token = credential.getAccessToken();
 
                         return new PasswordAuthentication(address, token);
                     }
 
                     if (c instanceof EntraOAuthCredentials entraCred) {
-                        Secret tokenSecret = entraCred.getAccessToken(null);
+                        Secret tokenSecret = null;
 
-                        if (tokenSecret == null) {
-                            LOGGER.log(Level.WARNING, "Failed to obtain access token, retrying once.");
-                            try {
-                                Thread.sleep(2000);
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                                return null;
-                            }
+                        for (int attempt = 1; attempt <= TOKEN_ATTEMPTS && tokenSecret == null; attempt++) {
+
                             tokenSecret = entraCred.getAccessToken(null);
+
                             if (tokenSecret == null) {
-                                LOGGER.log(Level.WARNING, "Failed to obtain access token after retry.");
-                                return null;
+                                LOGGER.log(
+                                        Level.WARNING,
+                                        "Failed to obtain Entra OAuth access token"
+                                                + (attempt == 1 ? ", retrying once." : " after retry."));
+
+                                if (attempt == TOKEN_ATTEMPTS) {
+                                    return null;
+                                }
+
+                                try {
+                                    Thread.sleep(RETRY_DELAY_MS);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                    return null;
+                                }
                             }
                         }
 
