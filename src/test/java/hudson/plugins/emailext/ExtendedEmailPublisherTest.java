@@ -8,6 +8,12 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.domains.Domain;
+import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
+import com.icegreen.greenmail.junit5.GreenMailExtension;
+import com.icegreen.greenmail.util.ServerSetupTest;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -41,12 +47,7 @@ import hudson.security.AuthorizationStrategy;
 import hudson.security.SecurityRealm;
 import hudson.tasks.Builder;
 import hudson.tasks.Mailer;
-import jakarta.mail.Address;
-import jakarta.mail.BodyPart;
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
-import jakarta.mail.Part;
-import jakarta.mail.Session;
+import jakarta.mail.*;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import java.io.IOException;
@@ -81,6 +82,8 @@ import org.kohsuke.stapler.Stapler;
 
 @WithJenkins
 class ExtendedEmailPublisherTest {
+    @RegisterExtension
+    static GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP);
 
     @SuppressWarnings("unused")
     @RegisterExtension
@@ -192,6 +195,58 @@ class ExtendedEmailPublisherTest {
                 "No emails should have been trigger during pre-build or post-build.",
                 log,
                 hasItems("No emails were triggered.", "No emails were triggered."));
+    }
+
+    @Test
+    void authenticationFailuresAreReportedAsAuthenticationErrors() throws Exception {
+        greenMail.setUser("user@example.com", "correct-password");
+
+        UsernamePasswordCredentialsImpl credentials = new UsernamePasswordCredentialsImpl(
+                CredentialsScope.GLOBAL,
+                "bad-smtp-creds",
+                "Bad SMTP credentials",
+                "user@example.com",
+                "wrong-password");
+
+        CredentialsProvider.lookupStores(j.jenkins).iterator().next().addCredentials(Domain.global(), credentials);
+
+        ExtendedEmailPublisherDescriptor descriptor = publisher.getDescriptor();
+        descriptor.getMailAccount().setSmtpHost("localhost");
+        descriptor
+                .getMailAccount()
+                .setSmtpPort(String.valueOf(greenMail.getSmtp().getPort()));
+        descriptor.getMailAccount().setCredentialsId("bad-smtp-creds");
+        descriptor.getMailAccount().setAdvProperties("mail.smtp.class=org.eclipse.angus.mail.smtp.SMTPTransport");
+
+        AlwaysTrigger trigger = new AlwaysTrigger(
+                recProviders,
+                "$DEFAULT_RECIPIENTS",
+                "$DEFAULT_REPLYTO",
+                "$DEFAULT_SUBJECT",
+                "$DEFAULT_CONTENT",
+                "",
+                0,
+                "project");
+        addEmailType(trigger);
+        publisher.getConfiguredTriggers().add(trigger);
+
+        FreeStyleBuild build = project.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(build);
+
+        List<String> log = build.getLog(100);
+        assertThat(
+                "Auth failure should be reported with the right message",
+                log,
+                hasItem(containsString("SMTP authentication failed. Check mail credentials.")));
+        assertThat(
+                "Auth failure should not be misreported as a generic communication error",
+                log,
+                not(hasItem(containsString("SMTP communication error while sending email."))));
+
+        assertEquals(
+                0,
+                greenMail.getReceivedMessages().length,
+                "No email should be accepted when SMTP authentication fails");
     }
 
     @Test
