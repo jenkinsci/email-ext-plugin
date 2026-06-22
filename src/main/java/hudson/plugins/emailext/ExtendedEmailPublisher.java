@@ -618,6 +618,8 @@ public class ExtendedEmailPublisher extends Notifier {
                                 EmailThrottler.getInstance().incrementEmailCount();
                             }
                             break;
+                        } catch (AuthenticationFailedException e) {
+                            throw e;
                         } catch (SendFailedException e) {
                             if (e.getNextException() != null
                                     && (e.getNextException() instanceof SocketException
