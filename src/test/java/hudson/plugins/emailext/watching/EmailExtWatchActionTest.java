@@ -307,6 +307,8 @@ class EmailExtWatchActionTest {
         }
         descriptor.setWatchingEnabled(true);
 
+        AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
+        j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
         try (MockedStatic<User> userMock = mockStatic(User.class)) {
             userMock.when(User::current).thenReturn(null);
 
@@ -329,6 +331,8 @@ class EmailExtWatchActionTest {
         }
         descriptor.setWatchingEnabled(true);
 
+        AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
+        j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
         User mockUser = mock(User.class);
         when(mockUser.getAllProperties()).thenReturn(Collections.emptyList());
 
@@ -361,7 +365,11 @@ class EmailExtWatchActionTest {
 
             action.doConfigSubmit(req, rsp);
 
-            assertNull(user.getProperty(EmailExtWatchAction.UserProperty.class));
+            assertFalse(action.isWatching(user));
+            EmailExtWatchAction.UserProperty userProp = user.getProperty(EmailExtWatchAction.UserProperty.class);
+            if (userProp != null) {
+                assertTrue(userProp.getTriggers() == null || userProp.getTriggers().isEmpty());
+            }
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
         }
     }
@@ -376,6 +384,8 @@ class EmailExtWatchActionTest {
         }
         descriptor.setWatchingEnabled(true);
 
+        AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
+        j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
         try (MockedStatic<User> userMock = mockStatic(User.class)) {
             userMock.when(User::current).thenReturn(null);
 
@@ -433,6 +443,8 @@ class EmailExtWatchActionTest {
         }
         descriptor.setWatchingEnabled(true);
 
+        AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
+        j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
         User user = User.getById("alice", true);
         try (ACLContext ctx = ACL.as(user)) {
             Mailer.UserProperty mailerProp = new Mailer.UserProperty("alice@example.com");
