@@ -215,13 +215,17 @@ class ExtendedEmailPublisherTest {
 
         CredentialsProvider.lookupStores(j.jenkins).iterator().next().addCredentials(Domain.global(), credentials);
 
+        MailAccount badAccount = new MailAccount();
+        badAccount.setAddress("smtp-test@example.com");
+        badAccount.setSmtpHost("localhost");
+        badAccount.setSmtpPort(String.valueOf(greenMail.getSmtp().getPort()));
+        badAccount.setCredentialsId("bad-smtp-creds");
+        badAccount.setAdvProperties("mail.smtp.class=org.eclipse.angus.mail.smtp.SMTPTransport");
+
+        publisher.from = "smtp-test@example.com";
+
         ExtendedEmailPublisherDescriptor descriptor = publisher.getDescriptor();
-        descriptor.getMailAccount().setSmtpHost("localhost");
-        descriptor
-                .getMailAccount()
-                .setSmtpPort(String.valueOf(greenMail.getSmtp().getPort()));
-        descriptor.getMailAccount().setCredentialsId("bad-smtp-creds");
-        descriptor.getMailAccount().setAdvProperties("mail.smtp.class=org.eclipse.angus.mail.smtp.SMTPTransport");
+        descriptor.setAddAccounts(List.of(badAccount));
 
         AlwaysTrigger trigger = new AlwaysTrigger(
                 recProviders,
