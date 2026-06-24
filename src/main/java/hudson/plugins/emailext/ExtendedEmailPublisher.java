@@ -742,6 +742,10 @@ public class ExtendedEmailPublisher extends Notifier {
         } catch (MessagingException e) {
             LOGGER.log(Level.WARNING, "SMTP communication error while sending email.", e);
             Functions.printStackTrace(e, context.getListener().error("SMTP communication error while sending email."));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOGGER.log(Level.WARNING, "Email sending interrupted during retry delay.", e);
+            Functions.printStackTrace(e, context.getListener().error("Email sending was interrupted."));
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Unexpected error while sending email.", e);
             Functions.printStackTrace(e, context.getListener().error("Unexpected error while sending email."));
