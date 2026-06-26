@@ -64,6 +64,25 @@ class EmailExtWatchActionTest {
                 .to("alice"));
     }
 
+    /**
+     * Helper method to set up the ExtendedEmailPublisherDescriptor with watching enabled/disabled
+     * and register the AlwaysTrigger descriptor. Eliminates boilerplate repeated across tests.
+     */
+    private void setupWatchingEnabled(boolean enabled) {
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+        if (descriptor == null) {
+            descriptor = new ExtendedEmailPublisherDescriptor();
+            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
+        }
+        descriptor.setWatchingEnabled(enabled);
+
+        if (enabled) {
+            AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
+            j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
+        }
+    }
+
     @Test
     void testBasicProperties() {
         assertNull(action.getIconFileName());
@@ -124,7 +143,7 @@ class EmailExtWatchActionTest {
     }
 
     @Test
-    void testUserSpecificMethods() throws Exception {
+    void testStartStopWatching() throws Exception {
         User user = User.getById("alice", true);
 
         try (ACLContext ctx = ACL.as(user)) {
@@ -142,7 +161,14 @@ class EmailExtWatchActionTest {
 
             action.stopWatching();
             assertFalse(action.isWatching(user));
+        }
+    }
 
+    @Test
+    void testGetTriggersIgnoresWrongProject() throws Exception {
+        User user = User.getById("alice", true);
+
+        try (ACLContext ctx = ACL.as(user)) {
             List<EmailTrigger> triggers = new ArrayList<>();
             triggers.add(new AlwaysTrigger(Collections.emptyList(), "", "", "", "", "", 0, ""));
             EmailExtWatchAction.UserProperty userPropWrongProject =
@@ -150,7 +176,16 @@ class EmailExtWatchActionTest {
             user.addProperty(userPropWrongProject);
 
             assertNull(action.getTriggers());
+        }
+    }
 
+    @Test
+    void testDisplayNameChangesWhenWatching() throws Exception {
+        User user = User.getById("alice", true);
+
+        try (ACLContext ctx = ACL.as(user)) {
+            List<EmailTrigger> triggers = new ArrayList<>();
+            triggers.add(new AlwaysTrigger(Collections.emptyList(), "", "", "", "", "", 0, ""));
             EmailExtWatchAction.UserProperty userProp =
                     new EmailExtWatchAction.UserProperty(project.getFullName(), triggers);
             user.addProperty(userProp);
@@ -192,28 +227,23 @@ class EmailExtWatchActionTest {
 
     @Test
     void testDoStopWatching() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor =
-                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        if (descriptor == null) {
-            descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
-        }
-        descriptor.setWatchingEnabled(true);
-
-        AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
-        j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
+        setupWatchingEnabled(true);
 
         User user = User.getById("alice", true);
         try (ACLContext ctx = ACL.as(user)) {
+            Mailer.UserProperty mailerProp = new Mailer.UserProperty("alice@example.com");
+            user.addProperty(mailerProp);
+
+            // Use doConfigSubmit to follow the full flow and set up the watch properly
+            StaplerRequest2 submitReq = mock(StaplerRequest2.class);
+            StaplerResponse2 submitRsp = mock(StaplerResponse2.class);
+            JSONObject form = new JSONObject();
+            when(submitReq.getSubmittedForm()).thenReturn(form);
             List<EmailTrigger> triggers = new ArrayList<>();
             triggers.add(new AlwaysTrigger(Collections.emptyList(), "", "", "", "", "", 0, ""));
-            EmailExtWatchAction.UserProperty userProp =
-                    new EmailExtWatchAction.UserProperty(project.getFullName(), triggers);
-            user.addProperty(userProp);
-
-            action.startWatching();
+            when(submitReq.bindJSONToList(EmailTrigger.class, form.get("triggers"))).thenReturn(triggers);
+            action.doConfigSubmit(submitReq, submitRsp);
             assertTrue(action.isWatching(user));
-            assertFalse(userProp.getTriggers().isEmpty());
 
             StaplerRequest2 req = mock(StaplerRequest2.class);
             StaplerResponse2 rsp = mock(StaplerResponse2.class);
@@ -221,6 +251,10 @@ class EmailExtWatchActionTest {
             action.doStopWatching(req, rsp);
 
             assertFalse(action.isWatching(user));
+            // Fetch the property from Jenkins (not a local reference) to verify it's updated
+            EmailExtWatchAction.UserProperty userProp =
+                    user.getProperty(EmailExtWatchAction.UserProperty.class);
+            assertNotNull(userProp);
             assertTrue(userProp.getTriggers().isEmpty());
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
         }
@@ -228,16 +262,7 @@ class EmailExtWatchActionTest {
 
     @Test
     void testDoConfigSubmit() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor =
-                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        if (descriptor == null) {
-            descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
-        }
-        descriptor.setWatchingEnabled(true);
-
-        AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
-        j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
+        setupWatchingEnabled(true);
 
         User user = User.getById("alice", true);
         try (ACLContext ctx = ACL.as(user)) {
@@ -271,13 +296,7 @@ class EmailExtWatchActionTest {
 
     @Test
     void testDoStopWatching_Disabled() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor =
-                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        if (descriptor == null) {
-            descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
-        }
-        descriptor.setWatchingEnabled(false);
+        setupWatchingEnabled(false);
 
         User user = User.getById("alice", true);
         try (ACLContext ctx = ACL.as(user)) {
@@ -299,16 +318,8 @@ class EmailExtWatchActionTest {
 
     @Test
     void testDoStopWatching_Anonymous() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor =
-                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        if (descriptor == null) {
-            descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
-        }
-        descriptor.setWatchingEnabled(true);
+        setupWatchingEnabled(true);
 
-        AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
-        j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
         try (MockedStatic<User> userMock = mockStatic(User.class)) {
             userMock.when(User::current).thenReturn(null);
 
@@ -323,16 +334,8 @@ class EmailExtWatchActionTest {
 
     @Test
     void testDoStopWatching_NonMatchingProperty() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor =
-                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        if (descriptor == null) {
-            descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
-        }
-        descriptor.setWatchingEnabled(true);
+        setupWatchingEnabled(true);
 
-        AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
-        j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
         User mockUser = mock(User.class);
         when(mockUser.getAllProperties()).thenReturn(Collections.emptyList());
 
@@ -350,13 +353,7 @@ class EmailExtWatchActionTest {
 
     @Test
     void testDoConfigSubmit_Disabled() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor =
-                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        if (descriptor == null) {
-            descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
-        }
-        descriptor.setWatchingEnabled(false);
+        setupWatchingEnabled(false);
 
         User user = User.getById("alice", true);
         try (ACLContext ctx = ACL.as(user)) {
@@ -366,27 +363,16 @@ class EmailExtWatchActionTest {
             action.doConfigSubmit(req, rsp);
 
             assertFalse(action.isWatching(user));
-            EmailExtWatchAction.UserProperty userProp = user.getProperty(EmailExtWatchAction.UserProperty.class);
-            if (userProp != null) {
-                assertTrue(
-                        userProp.getTriggers() == null || userProp.getTriggers().isEmpty());
-            }
+            // When watching is disabled, no UserProperty should have been created
+            assertNull(user.getProperty(EmailExtWatchAction.UserProperty.class));
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
         }
     }
 
     @Test
     void testDoConfigSubmit_Anonymous() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor =
-                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        if (descriptor == null) {
-            descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
-        }
-        descriptor.setWatchingEnabled(true);
+        setupWatchingEnabled(true);
 
-        AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
-        j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
         try (MockedStatic<User> userMock = mockStatic(User.class)) {
             userMock.when(User::current).thenReturn(null);
 
@@ -401,16 +387,7 @@ class EmailExtWatchActionTest {
 
     @Test
     void testDoConfigSubmit_NullMailerProperty() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor =
-                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        if (descriptor == null) {
-            descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
-        }
-        descriptor.setWatchingEnabled(true);
-
-        AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
-        j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
+        setupWatchingEnabled(true);
 
         User mockUser = mock(User.class);
         when(mockUser.getProperty(Mailer.UserProperty.class)).thenReturn(null);
@@ -436,16 +413,8 @@ class EmailExtWatchActionTest {
 
     @Test
     void testDoConfigSubmit_UnwatchableTrigger() throws Exception {
-        ExtendedEmailPublisherDescriptor descriptor =
-                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
-        if (descriptor == null) {
-            descriptor = new ExtendedEmailPublisherDescriptor();
-            j.jenkins.getExtensionList(Descriptor.class).add(0, descriptor);
-        }
-        descriptor.setWatchingEnabled(true);
+        setupWatchingEnabled(true);
 
-        AlwaysTrigger.DescriptorImpl alwaysDesc = new AlwaysTrigger.DescriptorImpl();
-        j.jenkins.getExtensionList(Descriptor.class).add(0, alwaysDesc);
         User user = User.getById("alice", true);
         try (ACLContext ctx = ACL.as(user)) {
             Mailer.UserProperty mailerProp = new Mailer.UserProperty("alice@example.com");
