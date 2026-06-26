@@ -234,7 +234,6 @@ class EmailExtWatchActionTest {
             Mailer.UserProperty mailerProp = new Mailer.UserProperty("alice@example.com");
             user.addProperty(mailerProp);
 
-            // Use doConfigSubmit to follow the full flow and set up the watch properly
             StaplerRequest2 submitReq = mock(StaplerRequest2.class);
             StaplerResponse2 submitRsp = mock(StaplerResponse2.class);
             JSONObject form = new JSONObject();
@@ -251,7 +250,6 @@ class EmailExtWatchActionTest {
             action.doStopWatching(req, rsp);
 
             assertFalse(action.isWatching(user));
-            // Fetch the property from Jenkins (not a local reference) to verify it's updated
             EmailExtWatchAction.UserProperty userProp =
                     user.getProperty(EmailExtWatchAction.UserProperty.class);
             assertNotNull(userProp);
@@ -363,7 +361,6 @@ class EmailExtWatchActionTest {
             action.doConfigSubmit(req, rsp);
 
             assertFalse(action.isWatching(user));
-            // When watching is disabled, no UserProperty should have been created
             assertNull(user.getProperty(EmailExtWatchAction.UserProperty.class));
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
         }
