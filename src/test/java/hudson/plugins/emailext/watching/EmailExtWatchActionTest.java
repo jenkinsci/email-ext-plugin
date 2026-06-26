@@ -240,7 +240,8 @@ class EmailExtWatchActionTest {
             when(submitReq.getSubmittedForm()).thenReturn(form);
             List<EmailTrigger> triggers = new ArrayList<>();
             triggers.add(new AlwaysTrigger(Collections.emptyList(), "", "", "", "", "", 0, ""));
-            when(submitReq.bindJSONToList(EmailTrigger.class, form.get("triggers"))).thenReturn(triggers);
+            when(submitReq.bindJSONToList(EmailTrigger.class, form.get("triggers")))
+                    .thenReturn(triggers);
             action.doConfigSubmit(submitReq, submitRsp);
             assertTrue(action.isWatching(user));
 
@@ -250,8 +251,7 @@ class EmailExtWatchActionTest {
             action.doStopWatching(req, rsp);
 
             assertFalse(action.isWatching(user));
-            EmailExtWatchAction.UserProperty userProp =
-                    user.getProperty(EmailExtWatchAction.UserProperty.class);
+            EmailExtWatchAction.UserProperty userProp = user.getProperty(EmailExtWatchAction.UserProperty.class);
             assertNotNull(userProp);
             assertTrue(userProp.getTriggers().isEmpty());
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
