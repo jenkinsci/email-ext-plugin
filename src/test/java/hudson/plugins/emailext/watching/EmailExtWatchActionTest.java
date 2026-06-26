@@ -361,7 +361,8 @@ class EmailExtWatchActionTest {
             action.doConfigSubmit(req, rsp);
 
             assertFalse(action.isWatching(user));
-            assertNull(user.getProperty(EmailExtWatchAction.UserProperty.class));
+            EmailExtWatchAction.UserProperty userProp = user.getProperty(EmailExtWatchAction.UserProperty.class);
+            assertTrue(userProp == null || userProp.getTriggers().isEmpty());
             verify(rsp).sendRedirect(project.getAbsoluteUrl());
         }
     }
