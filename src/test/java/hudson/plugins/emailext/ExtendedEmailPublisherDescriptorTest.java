@@ -11,9 +11,14 @@ import static org.jvnet.hudson.test.JenkinsMatchers.hasKind;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
+import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.Domain;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.jenkins.plugins.credentials.oauth.GoogleRobotPrivateKeyCredentials;
 import hudson.FilePath;
 import hudson.Functions;
 import hudson.Launcher;
@@ -45,8 +50,13 @@ import hudson.security.ACL;
 import hudson.security.ACLContext;
 import hudson.util.FormValidation.Kind;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
+import io.jenkins.plugins.entraoauth.EntraOAuthCredentials;
 import jakarta.mail.Authenticator;
+import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
+import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -73,6 +83,7 @@ import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import org.jvnet.hudson.test.recipes.LocalData;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 @WithJenkins
@@ -89,6 +100,13 @@ class ExtendedEmailPublisherDescriptorTest {
         String actualTitle = page.getTitleText();
 
         assertTrue(actualTitle.startsWith("System"), "Should be at the Configure System page");
+    }
+
+    private static PasswordAuthentication invokeGetPasswordAuthentication(Authenticator authenticator)
+            throws Exception {
+        Method method = Authenticator.class.getDeclaredMethod("getPasswordAuthentication");
+        method.setAccessible(true);
+        return (PasswordAuthentication) method.invoke(authenticator);
     }
 
     @Test
@@ -498,6 +516,272 @@ class ExtendedEmailPublisherDescriptorTest {
         ArgumentCaptor<MailAccount> mailAccountCaptor = ArgumentCaptor.forClass(MailAccount.class);
         ArgumentCaptor<Run<?, ?>> runCaptor = ArgumentCaptor.forClass(Run.class);
         Mockito.verify(authenticatorProvider, Mockito.never()).apply(mailAccountCaptor.capture(), runCaptor.capture());
+    }
+
+    @Test
+    void noCredentialFoundReturnsNullPasswordAuthentication() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        MailAccount ma = new MailAccount();
+        ma.setAddress("test@example.com");
+        ma.setCredentialsId("missing-creds");
+
+        Run<?, ?> run = Mockito.mock(Run.class);
+
+        try (MockedStatic<CredentialsProvider> mocked = Mockito.mockStatic(CredentialsProvider.class)) {
+            mocked.when(() -> CredentialsProvider.findCredentialById(
+                            Mockito.eq("missing-creds"),
+                            Mockito.eq(StandardUsernameCredentials.class),
+                            Mockito.eq(run),
+                            (DomainRequirement) Mockito.isNull()))
+                    .thenReturn(null);
+
+            Authenticator authenticator = descriptor.getAuthenticatorProvider().apply(ma, run);
+            PasswordAuthentication auth = invokeGetPasswordAuthentication(authenticator);
+
+            assertNull(auth, "No PasswordAuthentication should be created when no credential is found");
+        }
+    }
+
+    @Test
+    void usernamePasswordCredentialsAuthenticateWithCredentialUsername() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        StandardUsernamePasswordCredentials credential = new UsernamePasswordCredentialsImpl(
+                CredentialsScope.GLOBAL, "plain-creds", "Plain username/password", "admin", "password");
+
+        MailAccount ma = new MailAccount();
+        ma.setAddress("test@example.com");
+        ma.setCredentialsId("plain-creds");
+
+        Run<?, ?> run = Mockito.mock(Run.class);
+
+        try (MockedStatic<CredentialsProvider> mocked = Mockito.mockStatic(CredentialsProvider.class)) {
+            mocked.when(() -> CredentialsProvider.findCredentialById(
+                            Mockito.eq("plain-creds"),
+                            Mockito.eq(StandardUsernameCredentials.class),
+                            Mockito.eq(run),
+                            (DomainRequirement) Mockito.isNull()))
+                    .thenReturn(credential);
+
+            Authenticator authenticator = descriptor.getAuthenticatorProvider().apply(ma, run);
+            PasswordAuthentication auth = invokeGetPasswordAuthentication(authenticator);
+
+            assertEquals("admin", auth.getUserName(), "Username should come from the credential, not the mail account");
+            assertEquals("password", auth.getPassword());
+        }
+    }
+
+    @Test
+    void entraOAuthAuthenticationSucceedsOnFirstAttempt() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        EntraOAuthCredentials entraCred = Mockito.mock(EntraOAuthCredentials.class);
+        Mockito.when(entraCred.getAccessToken(null)).thenReturn(Secret.fromString("good-token"));
+
+        MailAccount ma = new MailAccount();
+        ma.setAddress("test@example.com");
+        ma.setCredentialsId("entra-creds");
+
+        Run<?, ?> run = Mockito.mock(Run.class);
+
+        try (MockedStatic<CredentialsProvider> mocked = Mockito.mockStatic(CredentialsProvider.class)) {
+            mocked.when(() -> CredentialsProvider.findCredentialById(
+                            Mockito.eq("entra-creds"),
+                            Mockito.eq(StandardUsernameCredentials.class),
+                            Mockito.eq(run),
+                            (DomainRequirement) Mockito.isNull()))
+                    .thenReturn(entraCred);
+
+            Authenticator authenticator = descriptor.getAuthenticatorProvider().apply(ma, run);
+            PasswordAuthentication auth = invokeGetPasswordAuthentication(authenticator);
+
+            assertEquals("test@example.com", auth.getUserName());
+            assertEquals("good-token", auth.getPassword());
+            Mockito.verify(entraCred, Mockito.times(1)).getAccessToken(null);
+        }
+    }
+
+    @Test
+    void entraOAuthAuthenticationRetriesOnceThenSucceeds() throws Exception {
+        // test performs a 2-second delay
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        EntraOAuthCredentials entraCred = Mockito.mock(EntraOAuthCredentials.class);
+        Mockito.when(entraCred.getAccessToken(null))
+                .thenReturn(null)
+                .thenReturn(Secret.fromString("token-after-retry"));
+
+        MailAccount ma = new MailAccount();
+        ma.setAddress("test@example.com");
+        ma.setCredentialsId("entra-creds");
+
+        Run<?, ?> run = Mockito.mock(Run.class);
+
+        try (MockedStatic<CredentialsProvider> mocked = Mockito.mockStatic(CredentialsProvider.class)) {
+            mocked.when(() -> CredentialsProvider.findCredentialById(
+                            Mockito.eq("entra-creds"),
+                            Mockito.eq(StandardUsernameCredentials.class),
+                            Mockito.eq(run),
+                            (DomainRequirement) Mockito.isNull()))
+                    .thenReturn(entraCred);
+
+            Authenticator authenticator = descriptor.getAuthenticatorProvider().apply(ma, run);
+            PasswordAuthentication auth = invokeGetPasswordAuthentication(authenticator);
+
+            assertEquals(
+                    "token-after-retry", auth.getPassword(), "Should succeed using the token from the retried attempt");
+            Mockito.verify(entraCred, Mockito.times(2)).getAccessToken(null);
+        }
+    }
+
+    @Test
+    void entraOAuthAuthenticationReturnsNullAfterExhaustingRetries() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        EntraOAuthCredentials entraCred = Mockito.mock(EntraOAuthCredentials.class);
+        Mockito.when(entraCred.getAccessToken(null)).thenReturn(null);
+
+        MailAccount ma = new MailAccount();
+        ma.setAddress("test@example.com");
+        ma.setCredentialsId("entra-creds");
+
+        Run<?, ?> run = Mockito.mock(Run.class);
+
+        try (MockedStatic<CredentialsProvider> mocked = Mockito.mockStatic(CredentialsProvider.class)) {
+            mocked.when(() -> CredentialsProvider.findCredentialById(
+                            Mockito.eq("entra-creds"),
+                            Mockito.eq(StandardUsernameCredentials.class),
+                            Mockito.eq(run),
+                            (DomainRequirement) Mockito.isNull()))
+                    .thenReturn(entraCred);
+
+            Authenticator authenticator = descriptor.getAuthenticatorProvider().apply(ma, run);
+            PasswordAuthentication auth = invokeGetPasswordAuthentication(authenticator);
+
+            assertNull(auth, "Should give up and return null after exhausting both attempts");
+            Mockito.verify(entraCred, Mockito.times(2)).getAccessToken(null);
+        }
+    }
+
+    @Test
+    void googleOAuthAuthenticationSucceedsOnFirstAttempt() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        GoogleRobotPrivateKeyCredentials googleCred = Mockito.mock(GoogleRobotPrivateKeyCredentials.class);
+        GoogleCredential baseCredential = Mockito.mock(GoogleCredential.class);
+        GoogleCredential delegatedCredential = Mockito.mock(GoogleCredential.class);
+
+        Mockito.when(googleCred.getGoogleCredential(Mockito.any(MailScopeRequirement.class)))
+                .thenReturn(baseCredential);
+        Mockito.when(baseCredential.createDelegated("test@example.com")).thenReturn(delegatedCredential);
+        Mockito.when(delegatedCredential.getAccessToken()).thenReturn("good-token");
+
+        MailAccount ma = new MailAccount();
+        ma.setAddress("test@example.com");
+        ma.setCredentialsId("google-creds");
+
+        Run<?, ?> run = Mockito.mock(Run.class);
+
+        try (MockedStatic<CredentialsProvider> mocked = Mockito.mockStatic(CredentialsProvider.class)) {
+            mocked.when(() -> CredentialsProvider.findCredentialById(
+                            Mockito.eq("google-creds"),
+                            Mockito.eq(StandardUsernameCredentials.class),
+                            Mockito.eq(run),
+                            (DomainRequirement) Mockito.isNull()))
+                    .thenReturn(googleCred);
+
+            Authenticator authenticator = descriptor.getAuthenticatorProvider().apply(ma, run);
+            PasswordAuthentication auth = invokeGetPasswordAuthentication(authenticator);
+
+            assertEquals("test@example.com", auth.getUserName());
+            assertEquals("good-token", auth.getPassword());
+            Mockito.verify(delegatedCredential, Mockito.times(1)).refreshToken();
+        }
+    }
+
+    @Test
+    void googleOAuthAuthenticationRetriesAfterIOExceptionThenSucceeds() throws Exception {
+        // test performs a 2-second delay
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        GoogleRobotPrivateKeyCredentials googleCred = Mockito.mock(GoogleRobotPrivateKeyCredentials.class);
+        GoogleCredential baseCredential = Mockito.mock(GoogleCredential.class);
+        GoogleCredential delegatedCredential = Mockito.mock(GoogleCredential.class);
+
+        Mockito.when(googleCred.getGoogleCredential(Mockito.any(MailScopeRequirement.class)))
+                .thenReturn(baseCredential);
+        Mockito.when(baseCredential.createDelegated("test@example.com")).thenReturn(delegatedCredential);
+        Mockito.when(delegatedCredential.refreshToken())
+                .thenThrow(new IOException("network blip"))
+                .thenReturn(true);
+        Mockito.when(delegatedCredential.getAccessToken()).thenReturn("token-after-retry");
+
+        MailAccount ma = new MailAccount();
+        ma.setAddress("test@example.com");
+        ma.setCredentialsId("google-creds");
+
+        Run<?, ?> run = Mockito.mock(Run.class);
+
+        try (MockedStatic<CredentialsProvider> mocked = Mockito.mockStatic(CredentialsProvider.class)) {
+            mocked.when(() -> CredentialsProvider.findCredentialById(
+                            Mockito.eq("google-creds"),
+                            Mockito.eq(StandardUsernameCredentials.class),
+                            Mockito.eq(run),
+                            (DomainRequirement) Mockito.isNull()))
+                    .thenReturn(googleCred);
+
+            Authenticator authenticator = descriptor.getAuthenticatorProvider().apply(ma, run);
+            PasswordAuthentication auth = invokeGetPasswordAuthentication(authenticator);
+
+            assertEquals("token-after-retry", auth.getPassword());
+            Mockito.verify(delegatedCredential, Mockito.times(2)).refreshToken();
+        }
+    }
+
+    @Test
+    void googleOAuthAuthenticationReturnsNullAfterExhaustingRetries() throws Exception {
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        GoogleRobotPrivateKeyCredentials googleCred = Mockito.mock(GoogleRobotPrivateKeyCredentials.class);
+        GoogleCredential baseCredential = Mockito.mock(GoogleCredential.class);
+        GoogleCredential delegatedCredential = Mockito.mock(GoogleCredential.class);
+
+        Mockito.when(googleCred.getGoogleCredential(Mockito.any(MailScopeRequirement.class)))
+                .thenReturn(baseCredential);
+        Mockito.when(baseCredential.createDelegated("test@example.com")).thenReturn(delegatedCredential);
+        Mockito.when(delegatedCredential.refreshToken())
+                .thenThrow(new IOException("network blip"))
+                .thenThrow(new IOException("network blip"));
+
+        MailAccount ma = new MailAccount();
+        ma.setAddress("test@example.com");
+        ma.setCredentialsId("google-creds");
+
+        Run<?, ?> run = Mockito.mock(Run.class);
+
+        try (MockedStatic<CredentialsProvider> mocked = Mockito.mockStatic(CredentialsProvider.class)) {
+            mocked.when(() -> CredentialsProvider.findCredentialById(
+                            Mockito.eq("google-creds"),
+                            Mockito.eq(StandardUsernameCredentials.class),
+                            Mockito.eq(run),
+                            (DomainRequirement) Mockito.isNull()))
+                    .thenReturn(googleCred);
+
+            Authenticator authenticator = descriptor.getAuthenticatorProvider().apply(ma, run);
+            PasswordAuthentication auth = invokeGetPasswordAuthentication(authenticator);
+
+            assertNull(auth, "Should give up and return null after exhausting both attempts");
+            Mockito.verify(delegatedCredential, Mockito.times(2)).refreshToken();
+        }
     }
 
     @Test
