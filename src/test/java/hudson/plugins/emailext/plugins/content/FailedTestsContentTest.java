@@ -215,7 +215,7 @@ class FailedTestsContentTest {
         Mockito.<List<? extends TestResult>>when(testResults.getFailedTests()).thenReturn(failedTests);
         when(build.getAction(AbstractTestResultAction.class)).thenReturn(testResults);
 
-        failedTestContent.maxLength = 10;
+        failedTestContent.maxLength = 10L;
         String content = failedTestContent.evaluate(build, listener, FailedTestsContent.MACRO_NAME);
         assertTrue(content.length() < (3 * 1024 * 5));
 
@@ -253,6 +253,38 @@ class FailedTestsContentTest {
                         + "Stack Trace:<br/>"
                         + "at org.nexusformat.NexusFile.&lt;clinit&gt;(NexusFile.java:99)<br/><br/>",
                 content);
+    }
+
+    @Test
+    void testGetContent_withMessage_withStack_htmlEscaped_nullValues() throws Exception {
+
+        AbstractTestResultAction<?> testResults = mock(AbstractTestResultAction.class);
+        when(testResults.getFailCount()).thenReturn(1);
+
+        TestResult result = mock(TestResult.class);
+        when(result.isPassed()).thenReturn(false);
+        when(result.getFullName()).thenReturn("hudson.plugins.emailext.ExtendedEmailPublisherTest");
+        when(result.getDisplayName()).thenReturn("Test");
+        when(result.getErrorDetails()).thenReturn(null);
+        when(result.getErrorStackTrace()).thenReturn(null);
+
+        Mockito.<List<? extends TestResult>>when(testResults.getFailedTests())
+                .thenReturn(Collections.singletonList(result));
+        when(build.getAction(AbstractTestResultAction.class)).thenReturn(testResults);
+
+        failedTestContent.showMessage = true;
+        failedTestContent.showStack = true;
+        failedTestContent.escapeHtml = true;
+
+        String content = failedTestContent.evaluate(build, listener, FailedTestsContent.MACRO_NAME);
+
+        assertEquals(
+                "1 tests failed.<br/>" + "FAILED:  hudson.plugins.emailext.ExtendedEmailPublisherTest.Test<br/>",
+                content);
+
+        assertFalse(
+                content.contains("Error Message:"), "Output should not contain error messages since they were null");
+        assertFalse(content.contains("Stack Trace:"), "Output should not contain stack traces since they were null");
     }
 
     @Test
