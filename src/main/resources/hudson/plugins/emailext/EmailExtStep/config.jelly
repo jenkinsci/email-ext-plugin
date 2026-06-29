@@ -24,37 +24,56 @@ THE SOFTWARE.
     <f:entry field="to" title="To">
         <f:textbox />
     </f:entry>
+
     <f:entry field="recipientProviders" title="Recipient Providers">
-        <f:repeatableHeteroProperty field="recipientProviders" oneEach="true" hasHeader="true"/>
+        <f:repeatableHeteroProperty field="recipientProviders" oneEach="true" hasHeader="true" />
     </f:entry>
+
     <f:entry field="subject" title="Subject">
         <f:textbox />
     </f:entry>
+
     <f:entry field="body" title="Body">
         <f:textarea />
     </f:entry>
+
     <f:advanced>
         <f:entry field="replyTo" title="Reply-To">
             <f:textbox />
         </f:entry>
+
         <f:entry field="mimeType" title="Body MIME Type">
             <f:textbox />
         </f:entry>
+
+        <f:entry field="saveOutput" title="Save to Workspace">
+            <f:checkbox />
+        </f:entry>
+
+        <f:entry field="saveOutputFileName" title="Save Output File Name">
+            <f:textbox />
+        </f:entry>
+
         <f:entry field="attachmentsPattern" title="Attachments Pattern">
             <f:textbox />
         </f:entry>
+
         <f:entry field="inlineAttachmentsPattern" title="Inline Attachments Pattern">
             <f:textbox />
         </f:entry>
+
         <f:entry field="attachLog" title="Attach Build Log">
             <f:checkbox />
         </f:entry>
+
         <f:entry field="compressLog" title="Compress Build Log">
             <f:checkbox />
         </f:entry>
+
         <f:entry field="presendScript" title="Pre-send Script">
             <f:textarea />
         </f:entry>
+
         <f:entry field="postsendScript" title="Post-send Script">
             <f:textarea />
         </f:entry>
