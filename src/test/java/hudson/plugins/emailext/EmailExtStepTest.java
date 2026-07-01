@@ -64,6 +64,17 @@ class EmailExtStepTest {
     }
 
     @Test
+    void configRoundTripExtraFields() throws Exception {
+        EmailExtStep step1 = new EmailExtStep("subject", "body");
+        step1.setReplyTo("reply@disney.com");
+        step1.setMimeType("text/plain");
+        step1.setInlineAttachmentsPattern("*.png");
+
+        EmailExtStep step2 = new StepConfigTester(j).configRoundTrip(step1);
+        j.assertEqualDataBoundBeans(step1, step2);
+    }
+
+    @Test
     void simpleEmail() throws Exception {
         WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");
         job.setDefinition(
@@ -101,6 +112,21 @@ class EmailExtStepTest {
         assertTrue(
                 "build.log".equalsIgnoreCase(attach.getFileName()),
                 "There should be a log named \"build.log\" attached");
+    }
+
+    @Test
+    void extraFieldsExecution() throws Exception {
+        WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");
+        job.setDefinition(new CpsFlowDefinition(
+                "node { emailext(to: 'mickeymouse@disney.com', subject: 'Boo', from: 'from@disney.com', replyTo: 'reply@disney.com', mimeType: 'text/html', inlineAttachmentsPattern: '*.png') }",
+                true));
+        Run<?, ?> run = job.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(run);
+
+        Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
+        assertEquals(1, mbox.size());
+        Message msg = mbox.get(0);
+        assertEquals("Boo", msg.getSubject());
     }
 
     @Test

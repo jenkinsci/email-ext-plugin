@@ -163,4 +163,58 @@ class MailAccountTest {
                 mad.doCheckCredentialsId(null, "bogus", true, true),
                 Matchers.allOf(hasKind(Kind.ERROR), hasMessage("Cannot find currently selected credentials")));
     }
+
+    @Test
+    @WithoutJenkins
+    void testIsSmtpServerValid() {
+        MailAccount account = new MailAccount();
+
+        // Blank / null
+        account.setSmtpHost(null);
+        assertTrue(account.isSmtpServerValid());
+        account.setSmtpHost("");
+        assertTrue(account.isSmtpServerValid());
+        account.setSmtpHost("   ");
+        assertTrue(account.isSmtpServerValid());
+
+        // Valid hostnames
+        account.setSmtpHost("mail.bar.com");
+        assertTrue(account.isSmtpServerValid());
+        account.setSmtpHost("localhost");
+        assertTrue(account.isSmtpServerValid());
+        account.setSmtpHost("smtp.gmail.com");
+        assertTrue(account.isSmtpServerValid());
+
+        // Valid IPv4
+        account.setSmtpHost("192.168.1.1");
+        assertTrue(account.isSmtpServerValid());
+        account.setSmtpHost("127.0.0.1");
+        assertTrue(account.isSmtpServerValid());
+
+        // Valid IPv6 literals (no DNS)
+        account.setSmtpHost("::1");
+        assertTrue(account.isSmtpServerValid());
+        account.setSmtpHost("2001:db8::1");
+        assertTrue(account.isSmtpServerValid());
+
+        // Invalid IPv4
+        account.setSmtpHost("999.999.999.999");
+        assertFalse(account.isSmtpServerValid());
+        account.setSmtpHost("256.0.0.1");
+        assertFalse(account.isSmtpServerValid());
+
+        // Invalid hostnames
+        account.setSmtpHost("invalid..host");
+        assertFalse(account.isSmtpServerValid());
+        account.setSmtpHost("-bad.com");
+        assertFalse(account.isSmtpServerValid());
+        account.setSmtpHost("bad-.com");
+        assertFalse(account.isSmtpServerValid());
+
+        // Too long hostname (valid pattern but > 255 chars)
+        String longHost = "a.".repeat(200) + "com";
+        assertTrue(longHost.length() > 255);
+        account.setSmtpHost(longHost);
+        assertFalse(account.isSmtpServerValid());
+    }
 }

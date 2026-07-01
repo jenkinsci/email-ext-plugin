@@ -56,7 +56,7 @@ f.entry(title: _("Attach Build Log"), help: "/plugin/email-ext/help/projectConfi
   }
 }
 
-f.entry(title: _("Content Token Reference"), field: "tokens")
+f.entry(title: _("Content Token Reference"), help: descriptor.getHelpFile("tokens"))
 
 if(descriptor.isMatrixProject(my)) {
   f.entry(field: "matrixTriggerMode", title: _("Trigger for matrix projects"), name: "project_matrix_trigger_mode") {

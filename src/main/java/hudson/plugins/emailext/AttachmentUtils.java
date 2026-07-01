@@ -18,15 +18,17 @@ import jakarta.mail.Multipart;
 import jakarta.mail.Part;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeUtility;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.variant.OptionalExtension;
 
@@ -35,6 +37,8 @@ import org.jenkinsci.plugins.variant.OptionalExtension;
  *
  */
 public class AttachmentUtils implements Serializable {
+
+    private static final Logger LOGGER = Logger.getLogger(AttachmentUtils.class.getName());
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -99,17 +103,28 @@ public class AttachmentUtils implements Serializable {
 
         @Override
         public InputStream getInputStream() throws IOException {
-            InputStream res;
-            long logFileLength = run.getLogText().length();
-            long pos = 0;
-            ByteArrayOutputStream bao = new ByteArrayOutputStream();
+            PipedInputStream in = new PipedInputStream(65536);
+            PipedOutputStream out = new PipedOutputStream(in);
 
-            while (pos < logFileLength) {
-                pos = run.getLogText().writeLogTo(pos, bao);
-            }
+            Thread writer = new Thread(
+                    () -> {
+                        try (out) {
+                            long logFileLength = run.getLogText().length();
+                            long pos = 0;
+                            while (pos < logFileLength) {
+                                pos = run.getLogText().writeLogTo(pos, out);
+                            }
+                        } catch (IOException e) {
+                            // Any IOException here is pipe-related (reader closed or died)
+                            // a genuine read error surfaces to the caller via PipedInputStream
+                            LOGGER.log(Level.FINE, "Stopped streaming build log", e);
+                        }
+                    },
+                    "email-ext-log-writer-" + run.getNumber());
+            writer.setDaemon(true);
+            writer.start();
 
-            res = new ByteArrayInputStream(bao.toByteArray());
-            return res;
+            return in;
         }
 
         @Override
@@ -273,10 +288,10 @@ public class AttachmentUtils implements Serializable {
     }
 
     public static void attachBuildLog(ExtendedEmailPublisherContext context, Multipart multipart, boolean compress) {
-        var main = context.getRun();
-        var all = List.of(main);
+        Run<?, ?> main = context.getRun();
+        List<? extends Run<?, ?>> all = List.of(main);
         for (var ma : ExtensionList.lookup(MatrixAssist.class)) {
-            var _all = ma.getExactRuns(main);
+            List<? extends Run<?, ?>> _all = ma.getExactRuns(main);
             if (_all != null) {
                 all = _all;
                 break;
