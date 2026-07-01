@@ -16,7 +16,10 @@ import io.jenkins.plugins.casc.misc.JenkinsConfiguredWithCodeRule;
 import io.jenkins.plugins.casc.misc.junit.jupiter.WithJenkinsConfiguredWithCode;
 import jakarta.mail.Authenticator;
 import jakarta.mail.PasswordAuthentication;
+import java.io.File;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -221,5 +224,60 @@ class ExtendedEmailPublisherDescriptorJCasCTest {
             assertTrue(account.isUseSsl(), "useSsl should persist on access " + (i + 2));
             assertTrue(account.isUseTls(), "useTls should persist on access " + (i + 2));
         }
+    }
+
+    @Test
+    @ConfiguredWithCode("configuration-as-code-with-templates.yml")
+    void shouldProvisionEmailTemplates(JenkinsConfiguredWithCodeRule r) throws Exception {
+        final ExtendedEmailPublisherDescriptor descriptor =
+                ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
+        assertNotNull(descriptor);
+
+        // Verify templates are stored in the descriptor
+        List<EmailTemplate> templates = descriptor.getEmailTemplates();
+        assertEquals(2, templates.size());
+        assertEquals("test-template.groovy", templates.get(0).getName());
+        assertEquals("test-jelly-template.jelly", templates.get(1).getName());
+
+        // Verify template files were written to disk
+        File templatesDir = new File(r.jenkins.getRootDir(), "email-templates");
+        assertTrue(templatesDir.exists(), "email-templates directory should exist");
+
+        File groovyTemplate = new File(templatesDir, "test-template.groovy");
+        assertTrue(groovyTemplate.exists(), "Groovy template file should exist");
+        String groovyContent = Files.readString(groovyTemplate.toPath(), StandardCharsets.UTF_8);
+        assertTrue(
+                groovyContent.contains("CasC provisioned template"), "Groovy template should contain expected content");
+
+        File jellyTemplate = new File(templatesDir, "test-jelly-template.jelly");
+        assertTrue(jellyTemplate.exists(), "Jelly template file should exist");
+        String jellyContent = Files.readString(jellyTemplate.toPath(), StandardCharsets.UTF_8);
+        assertTrue(
+                jellyContent.contains("CasC provisioned jelly template"),
+                "Jelly template should contain expected content");
+    }
+
+    @Test
+    void shouldRejectInvalidTemplateNames() {
+        // Path traversal
+        assertThrows(IllegalArgumentException.class, () -> new EmailTemplate("../../etc/passwd.groovy", "content"));
+
+        // Directory separators
+        assertThrows(IllegalArgumentException.class, () -> new EmailTemplate("subdir/template.groovy", "content"));
+        assertThrows(IllegalArgumentException.class, () -> new EmailTemplate("subdir\\template.groovy", "content"));
+
+        // Bad extensions
+        assertThrows(IllegalArgumentException.class, () -> new EmailTemplate("script.sh", "content"));
+        assertThrows(IllegalArgumentException.class, () -> new EmailTemplate("script.py", "content"));
+        assertThrows(IllegalArgumentException.class, () -> new EmailTemplate("noextension", "content"));
+
+        // Empty and whitespace
+        assertThrows(IllegalArgumentException.class, () -> new EmailTemplate("", "content"));
+        assertThrows(IllegalArgumentException.class, () -> new EmailTemplate("   ", "content"));
+
+        // Valid names should not throw
+        assertDoesNotThrow(() -> new EmailTemplate("valid-template.groovy", "content"));
+        assertDoesNotThrow(() -> new EmailTemplate("my_template.jelly", "content"));
+        assertDoesNotThrow(() -> new EmailTemplate("report.template", "content"));
     }
 }
