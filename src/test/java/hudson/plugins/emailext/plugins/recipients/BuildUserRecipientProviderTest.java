@@ -33,8 +33,7 @@ class BuildUserRecipientProviderTest {
         final Jenkins jenkins = Mockito.mock(Jenkins.class);
         Mockito.when(jenkins.isUseSecurity()).thenReturn(false);
 
-        final ExtendedEmailPublisherDescriptor descriptor =
-                Mockito.mock(ExtendedEmailPublisherDescriptor.class);
+        final ExtendedEmailPublisherDescriptor descriptor = Mockito.mock(ExtendedEmailPublisherDescriptor.class);
         descriptor.setDebugMode(true);
         Mockito.when(descriptor.getExcludedCommitters()).thenReturn("");
         Mockito.when(jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class))
@@ -161,8 +160,7 @@ class BuildUserRecipientProviderTest {
      */
     @Test
     void testDescriptorDisplayName() {
-        final BuildUserRecipientProvider.DescriptorImpl descriptor =
-                new BuildUserRecipientProvider.DescriptorImpl();
+        final BuildUserRecipientProvider.DescriptorImpl descriptor = new BuildUserRecipientProvider.DescriptorImpl();
         assertEquals("Build User", descriptor.getDisplayName());
     }
 
