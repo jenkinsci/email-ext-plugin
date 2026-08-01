@@ -1,10 +1,13 @@
 package hudson.plugins.emailext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.util.Arrays;
-import org.junit.jupiter.api.BeforeAll;
+import hudson.Plugin;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.junit.jupiter.api.Test;
 
 /**
@@ -16,18 +19,43 @@ class EmailExtensionPluginTest {
 
     private static final String SMTP_SENDPARTIAL = "mail.smtp.sendpartial";
     private static final String SMTPS_SENDPARTIAL = "mail.smtps.sendpartial";
+    private static final String PLUGIN_CLASS_NAME = EmailExtensionPlugin.class.getName();
 
-    @BeforeAll
-    static void init() throws ClassNotFoundException {
-        Class.forName(EmailExtensionPlugin.class.getName());
-    }
-
-    private static void runInitializerLogic() {
-        for (String property : Arrays.asList(SMTP_SENDPARTIAL, SMTPS_SENDPARTIAL)) {
-            if (System.getProperty(property) == null) {
-                System.setProperty(property, "true");
+    /**
+     * Loads a fresh copy of {@link EmailExtensionPlugin} in an isolated
+     * {@link ClassLoader} so its static initializer runs again.
+     */
+    private static Class<?> loadFreshPluginClass() throws ReflectiveOperationException {
+        ClassLoader parent = EmailExtensionPluginTest.class.getClassLoader();
+        ClassLoader isolated = new ClassLoader(parent) {
+            @Override
+            protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+                if (!name.equals(PLUGIN_CLASS_NAME)) {
+                    return super.loadClass(name, resolve);
+                }
+                synchronized (getClassLoadingLock(name)) {
+                    Class<?> alreadyLoaded = findLoadedClass(name);
+                    if (alreadyLoaded != null) {
+                        return alreadyLoaded;
+                    }
+                    String resourcePath = name.replace('.', '/') + ".class";
+                    try (InputStream classBytes = parent.getResourceAsStream(resourcePath)) {
+                        if (classBytes == null) {
+                            throw new ClassNotFoundException(name);
+                        }
+                        byte[] bytecode = classBytes.readAllBytes();
+                        Class<?> defined = defineClass(name, bytecode, 0, bytecode.length);
+                        if (resolve) {
+                            resolveClass(defined);
+                        }
+                        return defined;
+                    } catch (IOException e) {
+                        throw new ClassNotFoundException(name, e);
+                    }
+                }
             }
-        }
+        };
+        return Class.forName(PLUGIN_CLASS_NAME, true, isolated);
     }
 
     /**
@@ -35,14 +63,14 @@ class EmailExtensionPluginTest {
      * {@code "true"} when the property is absent.
      */
     @Test
-    void staticInitializerSetsSmtpSendPartialToTrue() {
+    void staticInitializerSetsSmtpSendPartialToTrue() throws ReflectiveOperationException {
         String originalSmtp = System.getProperty(SMTP_SENDPARTIAL);
         String originalSmtps = System.getProperty(SMTPS_SENDPARTIAL);
         try {
             System.clearProperty(SMTP_SENDPARTIAL);
             System.clearProperty(SMTPS_SENDPARTIAL);
 
-            runInitializerLogic();
+            loadFreshPluginClass();
 
             assertEquals("true", System.getProperty(SMTP_SENDPARTIAL), SMTP_SENDPARTIAL + " should be \"true\"");
         } finally {
@@ -56,14 +84,14 @@ class EmailExtensionPluginTest {
      * {@code "true"} when the property is absent.
      */
     @Test
-    void staticInitializerSetsSmtpsSendPartialToTrue() {
+    void staticInitializerSetsSmtpsSendPartialToTrue() throws ReflectiveOperationException {
         String originalSmtp = System.getProperty(SMTP_SENDPARTIAL);
         String originalSmtps = System.getProperty(SMTPS_SENDPARTIAL);
         try {
             System.clearProperty(SMTP_SENDPARTIAL);
             System.clearProperty(SMTPS_SENDPARTIAL);
 
-            runInitializerLogic();
+            loadFreshPluginClass();
 
             assertEquals("true", System.getProperty(SMTPS_SENDPARTIAL), SMTPS_SENDPARTIAL + " should be \"true\"");
         } finally {
@@ -77,14 +105,14 @@ class EmailExtensionPluginTest {
      * preserved – i.e. the initializer only writes the value when the property is absent.
      */
     @Test
-    void staticInitializerDoesNotOverridePreexistingSmtpProperty() {
+    void staticInitializerDoesNotOverridePreexistingSmtpProperty() throws ReflectiveOperationException {
         String originalSmtp = System.getProperty(SMTP_SENDPARTIAL);
         String originalSmtps = System.getProperty(SMTPS_SENDPARTIAL);
         try {
             System.setProperty(SMTP_SENDPARTIAL, "false");
             System.clearProperty(SMTPS_SENDPARTIAL);
 
-            runInitializerLogic();
+            loadFreshPluginClass();
 
             assertEquals(
                     "false",
@@ -106,14 +134,14 @@ class EmailExtensionPluginTest {
      * set to a custom value before the initializer logic runs.
      */
     @Test
-    void staticInitializerDoesNotOverrideBothPreexistingProperties() {
+    void staticInitializerDoesNotOverrideBothPreexistingProperties() throws ReflectiveOperationException {
         String originalSmtp = System.getProperty(SMTP_SENDPARTIAL);
         String originalSmtps = System.getProperty(SMTPS_SENDPARTIAL);
         try {
             System.setProperty(SMTP_SENDPARTIAL, "false");
             System.setProperty(SMTPS_SENDPARTIAL, "false");
 
-            runInitializerLogic();
+            loadFreshPluginClass();
 
             assertEquals(
                     "false",
@@ -135,9 +163,12 @@ class EmailExtensionPluginTest {
      * fired (properties are set).
      */
     @Test
-    void pluginCanBeInstantiated() {
-        EmailExtensionPlugin plugin = new EmailExtensionPlugin();
+    void pluginCanBeInstantiated() throws ReflectiveOperationException {
+        Class<?> freshPluginClass = loadFreshPluginClass();
+        Object plugin = freshPluginClass.getDeclaredConstructor().newInstance();
+
         assertNotNull(plugin, "EmailExtensionPlugin instance must not be null");
+        assertInstanceOf(Plugin.class, plugin, "EmailExtensionPlugin must extend hudson.Plugin");
     }
 
     private static void restoreProperty(String key, String originalValue) {
