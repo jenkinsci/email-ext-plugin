@@ -24,8 +24,19 @@ import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import jakarta.mail.AuthenticationFailedException;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 import jenkins.security.FIPS140;
 import net.sf.json.JSONObject;
@@ -36,6 +47,9 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 public class MailAccount extends AbstractDescribableImpl<MailAccount> {
+
+    private static final Logger LOGGER = Logger.getLogger(MailAccount.class.getName());
+
     private String address;
     private String smtpHost;
     private String smtpPort = "25";
@@ -134,6 +148,81 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                                     CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class),
                                     CredentialsMatchers.instanceOf(StandardUsernameOAuth2Credentials.class)))
                     .includeCurrentValue(credentialsId);
+        }
+
+        @SuppressWarnings("lgtm[jenkins/csrf]")
+        public FormValidation doTestConfig(
+                @QueryParameter String smtpHost,
+                @QueryParameter String smtpPort,
+                @QueryParameter boolean useSsl,
+                @QueryParameter boolean useTls,
+                @QueryParameter String credentialsId,
+                @QueryParameter String defaultSuffix,
+                @QueryParameter String test_recipient) {
+
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+
+            if (StringUtils.isBlank(test_recipient)) {
+                return FormValidation.error(Messages.ExtendedEmailPublisherDescriptor_TestEmail_NoRecipient());
+            }
+
+            try {
+                new InternetAddress(test_recipient);
+            } catch (AddressException e) {
+                return FormValidation.error(Messages.ExtendedEmailPublisherDescriptor_TestEmail_InvalidRecipient());
+            }
+
+            MailAccount testAccount = new MailAccount();
+            testAccount.setDefaultAccount(true);
+            testAccount.setSmtpHost(smtpHost);
+            testAccount.setSmtpPort(smtpPort);
+            testAccount.setUseSsl(useSsl);
+            testAccount.setUseTls(useTls);
+            testAccount.setCredentialsId(credentialsId);
+
+            try {
+                ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
+                Session session = descriptor.createSession(testAccount, null);
+
+                MimeMessage msg = new MimeMessage(session);
+                String senderAddress = descriptor.getAdminAddress();
+                if (StringUtils.isBlank(senderAddress)) {
+                    senderAddress = "jenkins@localhost";
+                } else if (!senderAddress.contains("@")
+                        && StringUtils.isNotBlank(defaultSuffix)
+                        && defaultSuffix.contains("@")) {
+                    senderAddress += defaultSuffix;
+                }
+
+                msg.setFrom(new InternetAddress(senderAddress));
+                msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(test_recipient));
+                msg.setSubject(Messages.ExtendedEmailPublisherDescriptor_TestEmail_Subject());
+                msg.setText(Messages.ExtendedEmailPublisherDescriptor_TestEmail_Body());
+                msg.setSentDate(new Date());
+
+                Transport.send(msg);
+                LOGGER.log(
+                        Level.INFO,
+                        "Test email sent successfully to " + test_recipient + " using SMTP host: " + smtpHost);
+                return FormValidation.ok(Messages.ExtendedEmailPublisherDescriptor_TestEmail_Success());
+            } catch (AuthenticationFailedException e) {
+                LOGGER.log(
+                        Level.WARNING,
+                        "Failed to send test email to " + test_recipient + " using SMTP host: " + smtpHost,
+                        e);
+                return FormValidation.error(
+                        e, Messages.ExtendedEmailPublisherDescriptor_TestEmail_AuthenticationFailed());
+            } catch (MessagingException e) {
+                LOGGER.log(
+                        Level.WARNING,
+                        "Failed to send test email to " + test_recipient + " using SMTP host: " + smtpHost,
+                        e);
+                return FormValidation.error(
+                        e, Messages.ExtendedEmailPublisherDescriptor_TestEmail_Failed() + ": " + e.getMessage());
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Unexpected error sending test email", e);
+                return FormValidation.error(e, Messages.ExtendedEmailPublisherDescriptor_TestEmail_UnexpectedError());
+            }
         }
 
         @SuppressWarnings("lgtm[jenkins/csrf]")

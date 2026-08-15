@@ -1,5 +1,6 @@
 package hudson.plugins.emailext;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
@@ -18,6 +19,7 @@ import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
+import hudson.security.ACL;
 import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
@@ -36,6 +38,7 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.BiFunction;
@@ -208,8 +211,19 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             domainRequirement = new HostnamePortRequirement(acc.getSmtpHost(), Integer.parseInt(acc.getSmtpPort()));
         }
 
-        return CredentialsProvider.findCredentialById(
-                acc.getCredentialsId(), StandardUsernameCredentials.class, run, domainRequirement);
+        if (run != null) {
+            return CredentialsProvider.findCredentialById(
+                    acc.getCredentialsId(), StandardUsernameCredentials.class, run, domainRequirement);
+        }
+
+        // No Run available - e.g. testing configuration from the system config page.
+        List<DomainRequirement> domainRequirements =
+                domainRequirement == null ? Collections.emptyList() : Collections.singletonList(domainRequirement);
+
+        return CredentialsMatchers.firstOrNull(
+                CredentialsProvider.lookupCredentialsInItemGroup(
+                        StandardUsernameCredentials.class, Jenkins.get(), ACL.SYSTEM2, domainRequirements),
+                CredentialsMatchers.withId(acc.getCredentialsId()));
     }
 
     private transient BiFunction<MailAccount, Run<?, ?>, Authenticator> authenticatorProvider =
@@ -497,7 +511,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             props.put(SMTP_AUTH_PROPERTY, "true");
         }
 
-        StandardUsernameCredentials c = getCredential(acc, context.getRun());
+        Run<?, ?> run = context != null ? context.getRun() : null;
+        StandardUsernameCredentials c = getCredential(acc, run);
         if (c instanceof StandardUsernameOAuth2Credentials) {
             props.put(SMTP_AUTH_MECHANISMS_PROPERTY, "XOAUTH2");
         }
@@ -522,7 +537,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if (acc == null || StringUtils.isBlank(acc.getCredentialsId())) {
             return null;
         }
-        return authenticatorProvider.apply(acc, context.getRun());
+        Run<?, ?> run = context != null ? context.getRun() : null;
+        return authenticatorProvider.apply(acc, run);
     }
 
     public String getHudsonUrl() {
