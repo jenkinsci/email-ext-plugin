@@ -34,16 +34,14 @@ f.advanced {
     }
 }
 
-if(instance?.defaultAccount) {
-    f.section(title: _("Test Configuration")) {
-        f.entry(field: "test_recipient", title: _("Test email recipient")) {
-            f.textbox()
-        }
-        f.validateButton(
-            title: _("Send Test Email"),
-            progress: _("Sending..."),
-            method: "testConfig",
-            with: "smtpHost,smtpPort,useSsl,useTls,credentialsId,test_recipient,defaultSuffix")
+f.section(title: _("Test Configuration")) {
+    f.entry(field: "test_recipient", title: _("Test email recipient")) {
+        f.textbox()
     }
+    f.validateButton(
+        title: _("Send Test Email"),
+        progress: _("Sending..."),
+        method: "testConfig",
+        with: "smtpHost,smtpPort,useSsl,useTls,credentialsId,test_recipient,defaultSuffix")
 }
 
