@@ -24,7 +24,7 @@ function onSubmit() {
         return response.json();
     })
     .then(function(data) {
-        document.getElementById('rendered_template').src = "data:text/html;charset=utf-8," + encodeURIComponent(data.renderedContent);
+        document.getElementById('rendered_template').srcdoc = data.renderedContent;
         var consoleOutput = data.consoleOutput;
         if(consoleOutput.length === 0) {
             document.getElementById('output').style.display = 'none';
