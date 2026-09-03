@@ -45,6 +45,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 public class MailAccount extends AbstractDescribableImpl<MailAccount> {
 
@@ -150,7 +151,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                     .includeCurrentValue(credentialsId);
         }
 
-        @SuppressWarnings("lgtm[jenkins/csrf]")
+        @RequirePOST
         public FormValidation doTestConfig(
                 @QueryParameter String smtpHost,
                 @QueryParameter String smtpPort,
