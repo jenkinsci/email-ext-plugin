@@ -13,6 +13,7 @@ import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Functions;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.matrix.MatrixAggregatable;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
@@ -197,9 +198,14 @@ public class ExtendedEmailPublisher extends Notifier {
     private String from;
 
     /**
-     * If true, save the generated email content to email-ext-message.[txt|html]
+     * If true, save the generated email content to a file in the workspace.
      */
     private boolean saveOutput = false;
+
+    /**
+     * Optional file name for saved email content.
+     */
+    private String saveOutputFileName;
 
     /**
      * If true, disables the publisher from running.
@@ -479,6 +485,15 @@ public class ExtendedEmailPublisher extends Notifier {
 
     public void setSaveOutput(boolean saveOutput) {
         this.saveOutput = saveOutput;
+    }
+
+    public String getSaveOutputFileName() {
+        return saveOutputFileName;
+    }
+
+    @DataBoundSetter
+    public void setSaveOutputFileName(String saveOutputFileName) {
+        this.saveOutputFileName = Util.fixEmptyAndTrim(saveOutputFileName);
     }
 
     public boolean isDisabled() {
@@ -1405,13 +1420,7 @@ public class ExtendedEmailPublisher extends Notifier {
 
                 FilePath workspace = context.getWorkspace();
                 if (workspace != null) {
-                    FilePath savedOutput = new FilePath(
-                            workspace,
-                            "%s-%s%s"
-                                    .formatted(
-                                            context.getTrigger().getDescriptor().getDisplayName(),
-                                            context.getRun().getId(),
-                                            extension));
+                    FilePath savedOutput = workspace.child(getSaveOutputFileName(context, extension));
                     savedOutput.write(text, charset);
                 } else {
                     context.getListener().getLogger().println("No workspace to save the email to");
@@ -1441,6 +1450,23 @@ public class ExtendedEmailPublisher extends Notifier {
         multipart.addBodyPart(msgPart);
 
         return multipart;
+    }
+
+    private String getSaveOutputFileName(ExtendedEmailPublisherContext context, String extension) {
+        if (StringUtils.isNotBlank(saveOutputFileName)) {
+            String fileName = ContentBuilder.transformText(saveOutputFileName, context, getRuntimeMacros(context));
+
+            if (!fileName.endsWith(".txt") && !fileName.endsWith(".html")) {
+                fileName += extension;
+            }
+
+            return fileName;
+        }
+        return "%s-%s%s"
+                .formatted(
+                        context.getTrigger().getDescriptor().getDisplayName(),
+                        context.getRun().getId(),
+                        extension);
     }
 
     @Override
