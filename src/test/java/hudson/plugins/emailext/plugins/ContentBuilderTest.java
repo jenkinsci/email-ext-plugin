@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -169,6 +170,17 @@ class ContentBuilderTest {
                         new ExtendedEmailPublisherContext(
                                 publisher, build, build.getWorkspace(), j.createLocalLauncher(), listener),
                         Collections.singletonList(content)));
+    }
+
+    @Test
+    void testTransformText_restoresInterruptFlagWhenInterrupted() {
+        Thread.currentThread().interrupt();
+
+        String result = ContentBuilder.transformText("$PROJECT_DEFAULT_CONTENT", publisher, build, listener);
+
+        assertTrue(
+                Thread.currentThread().isInterrupted(), "Interrupt flag should be restored after InterruptedException");
+        Thread.interrupted(); // clear the flag for test isolation
     }
 
     private static class RuntimeContent extends TokenMacro {
