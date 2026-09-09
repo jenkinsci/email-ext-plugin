@@ -25,11 +25,15 @@ import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -110,6 +114,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private String defaultPostsendScript;
 
     private List<GroovyScriptPath> defaultClasspath = new ArrayList<>();
+
+    private List<EmailTemplate> emailTemplates = new ArrayList<>();
 
     private transient List<EmailTriggerDescriptor> defaultTriggers = new ArrayList<>();
 
@@ -845,6 +851,97 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     @DataBoundSetter
     public void setDefaultTriggerIds(List<String> triggerIds) {
         defaultTriggerIds = triggerIds;
+    }
+
+    public List<EmailTemplate> getEmailTemplates() {
+        return emailTemplates;
+    }
+
+    /** Name of the manifest file that tracks CasC-provisioned templates. */
+    private static final String CASC_MANIFEST_FILE = ".casc-managed";
+
+    /**
+     * Sets and provisions email templates from Configuration as Code.
+     *
+     * <p>
+     * Each template is validated for security (safe filename, allowed extension,
+     * no path traversal) and then written to
+     * {@code $JENKINS_HOME/email-templates/}. A manifest file
+     * ({@code .casc-managed}) tracks which templates were provisioned by CasC
+     * so that only those are removed on reload, leaving user-managed templates
+     * untouched.
+     *
+     * @param emailTemplates the list of templates to provision
+     */
+    @DataBoundSetter
+    public void setEmailTemplates(List<EmailTemplate> emailTemplates) {
+        Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+
+        this.emailTemplates = emailTemplates != null ? emailTemplates : new ArrayList<>();
+
+        File templatesDir = new File(Jenkins.get().getRootDir(), "email-templates");
+        if (!templatesDir.exists() && !templatesDir.mkdirs()) {
+            LOGGER.log(Level.WARNING, "Failed to create email-templates directory: {0}", templatesDir);
+            return;
+        }
+
+        // Read the previous manifest to find out which files were provisioned by CasC.
+        // Only those files are eligible for cleanup — user-managed templates are left untouched.
+        File manifestFile = new File(templatesDir, CASC_MANIFEST_FILE);
+        List<String> previouslyManaged = new ArrayList<>();
+        if (manifestFile.exists()) {
+            try {
+                previouslyManaged = new ArrayList<>(Files.readAllLines(manifestFile.toPath(), StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "Failed to read CasC manifest file", e);
+            }
+        }
+
+        // Remove only previously CasC-managed template files
+        for (String managedName : previouslyManaged) {
+            if (managedName.isBlank()) {
+                continue;
+            }
+            File managed = new File(templatesDir, managedName);
+            if (managed.exists() && !managed.delete()) {
+                LOGGER.log(
+                        Level.WARNING,
+                        "Failed to delete old CasC-managed template file: {0}",
+                        managed.getAbsolutePath());
+            }
+        }
+
+        // Write the new templates and build the updated manifest
+        List<String> newManifest = new ArrayList<>();
+        for (EmailTemplate template : this.emailTemplates) {
+            File templateFile = new File(templatesDir, template.getName());
+            try {
+                // Canonical path check using nio.Path#startsWith to ensure resolved file is inside the templates
+                // directory
+                Path canonicalDir = templatesDir.toPath().normalize().toAbsolutePath();
+                Path canonicalFile = templateFile.toPath().normalize().toAbsolutePath();
+                if (!canonicalFile.startsWith(canonicalDir)) {
+                    LOGGER.log(
+                            Level.WARNING,
+                            "Rejected template with path outside email-templates directory: {0}",
+                            template.getName());
+                    continue;
+                }
+
+                Files.writeString(templateFile.toPath(), template.getContent(), StandardCharsets.UTF_8);
+                newManifest.add(template.getName());
+                LOGGER.log(Level.INFO, "Provisioned email template: {0}", template.getName());
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "Failed to write email template: " + template.getName(), e);
+            }
+        }
+
+        // Persist the manifest so subsequent reloads know which files to clean up
+        try {
+            Files.writeString(manifestFile.toPath(), String.join("\n", newManifest) + "\n", StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Failed to write CasC manifest file", e);
+        }
     }
 
     @SuppressWarnings({"lgtm[jenkins/csrf]", "lgtm[jenkins/no-permission-check]", "unused"})

@@ -1,0 +1,8 @@
+unclassified:
+  email-ext:
+    emailTemplates:
+      - name: "test-template.groovy"
+        content: |
+          def subject = "Build Result Notification"
+          def body = "Hello from CasC provisioned template"
+          return body
