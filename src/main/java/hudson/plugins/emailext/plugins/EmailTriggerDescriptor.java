@@ -2,6 +2,7 @@ package hudson.plugins.emailext.plugins;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.Descriptor;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,7 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
                     String.class,
                     String.class,
                     String.class,
-                    int.class,
+                    AttachBuildLogMode.class,
                     String.class);
             trigger = ctor.newInstance(
                     defaultRecipientProviders,
@@ -57,7 +58,7 @@ public abstract class EmailTriggerDescriptor extends Descriptor<EmailTrigger> {
                     "$PROJECT_DEFAULT_SUBJECT",
                     "$PROJECT_DEFAULT_CONTENT",
                     "",
-                    0,
+                    AttachBuildLogMode.NONE,
                     "project");
         } catch (Exception e) {
             trigger = null;

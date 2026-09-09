@@ -15,9 +15,9 @@ import hudson.plugins.emailext.plugins.RecipientProvider;
 import hudson.plugins.emailext.plugins.RecipientProviderDescriptor;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
-import java.util.Collections;
-import java.util.HashSet;
+import java.io.Serial;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
@@ -57,9 +57,7 @@ public class EmailExtStep extends Step {
     @CheckForNull
     private String mimeType;
 
-    private boolean attachLog;
-
-    private boolean compressLog;
+    private AttachBuildLogMode attachBuildLogMode;
 
     private List<RecipientProvider> recipientProviders;
 
@@ -133,22 +131,37 @@ public class EmailExtStep extends Step {
         this.mimeType = Util.fixNull(mimeType);
     }
 
-    public boolean getAttachLog() {
-        return attachLog;
+    @Deprecated
+    public boolean isAttachLog() {
+        return getAttachBuildLogMode().isAttaching();
     }
 
     @DataBoundSetter
+    @Deprecated
     public void setAttachLog(boolean attachLog) {
-        this.attachLog = attachLog;
+        this.attachBuildLogMode = AttachBuildLogMode.fromLegacyBool(
+                attachLog, getAttachBuildLogMode().isCompressing());
     }
 
-    public boolean getCompressLog() {
-        return compressLog;
+    @Deprecated
+    public boolean isCompressLog() {
+        return getAttachBuildLogMode().isCompressing();
     }
 
     @DataBoundSetter
+    @Deprecated
     public void setCompressLog(boolean compressLog) {
-        this.compressLog = compressLog;
+        this.attachBuildLogMode =
+                AttachBuildLogMode.fromLegacyBool(getAttachBuildLogMode().isAttaching(), compressLog);
+    }
+
+    @DataBoundSetter
+    public void setAttachBuildLogMode(AttachBuildLogMode attachBuildLogMode) {
+        this.attachBuildLogMode = attachBuildLogMode == null ? AttachBuildLogMode.NONE : attachBuildLogMode;
+    }
+
+    public AttachBuildLogMode getAttachBuildLogMode() {
+        return Objects.requireNonNullElse(attachBuildLogMode, AttachBuildLogMode.NONE);
     }
 
     @DataBoundSetter
@@ -194,6 +207,7 @@ public class EmailExtStep extends Step {
 
     public static class EmailExtStepExecution extends SynchronousNonBlockingStepExecution<Void> {
 
+        @Serial
         private static final long serialVersionUID = 1L;
 
         private final transient EmailExtStep step;
@@ -224,8 +238,7 @@ public class EmailExtStep extends Step {
             publisher.setSaveOutput(step.saveOutput);
             publisher.setDefaultSubject(step.subject);
             publisher.setDefaultContent(step.body);
-            publisher.setAttachBuildLog(step.attachLog);
-            publisher.setCompressBuildLog(step.compressLog);
+            publisher.setAttachBuildLogMode(step.getAttachBuildLogMode());
             publisher.setPresendScript(step.presendScript);
             publisher.setPostsendScript(step.postsendScript);
 
@@ -277,9 +290,7 @@ public class EmailExtStep extends Step {
 
         @Override
         public Set<? extends Class<?>> getRequiredContext() {
-            Set<Class<?>> context = new HashSet<>();
-            Collections.addAll(context, Run.class, TaskListener.class);
-            return Collections.unmodifiableSet(context);
+            return Set.of(Run.class, TaskListener.class);
         }
 
         @Override

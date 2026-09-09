@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -69,7 +70,7 @@ class AttachmentUtilsTest {
     void testBuildLogAttachment() throws Exception {
         FreeStyleProject project = j.createFreeStyleProject("foo");
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        publisher.setAttachBuildLog(true);
+        publisher.setAttachBuildLogMode(AttachBuildLogMode.ATTACH);
         publisher.setRecipientList("mickey@disney.com");
         SuccessTrigger trigger = new SuccessTrigger(
                 Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
@@ -103,8 +104,7 @@ class AttachmentUtilsTest {
                 .setMaxAttachmentSize(80000);
         FreeStyleProject project = j.createFreeStyleProject("foo");
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        publisher.setAttachBuildLog(true);
-        publisher.setCompressBuildLog(true);
+        publisher.setAttachBuildLogMode(AttachBuildLogMode.COMPRESS_AND_ATTACH);
         publisher.setRecipientList("mickey@disney.com");
         SuccessTrigger trigger = new SuccessTrigger(
                 Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
@@ -143,7 +143,7 @@ class AttachmentUtilsTest {
                 attach.getSize(),
                 allOf(
                         greaterThan(0),
-                        lessThanOrEqualTo(Long.valueOf(b.getLogFile().length()).intValue())));
+                        lessThanOrEqualTo(Long.valueOf(b.getLogText().length()).intValue())));
         assertEquals("build.zip", attach.getFileName());
         assertThat(
                 IOUtils.toString(attach.getInputStream(), StandardCharsets.UTF_8),
@@ -153,6 +153,7 @@ class AttachmentUtilsTest {
     @Test
     void testAttachmentFromWorkspace() throws Exception {
         URL url = this.getClass().getResource("/test.pdf");
+        assertNotNull(url);
         final File attachment = new File(url.getFile());
 
         FreeStyleProject project = j.createFreeStyleProject("foo");
@@ -171,6 +172,7 @@ class AttachmentUtilsTest {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
+                assertNotNull(build.getWorkspace());
                 build.getWorkspace().child("test.pdf").copyFrom(new FilePath(attachment));
                 return true;
             }
@@ -195,8 +197,9 @@ class AttachmentUtilsTest {
     }
 
     @Test
-    void testAttachmentFromWorkspaceSubdir() throws Exception {
+    void testAttachmentFromWorkspaceSubdirectory() throws Exception {
         URL url = this.getClass().getResource("/test.pdf");
+        assertNotNull(url);
         final File attachment = new File(url.getFile());
 
         FreeStyleProject project = j.createFreeStyleProject("foo");
@@ -205,7 +208,14 @@ class AttachmentUtilsTest {
         publisher.setRecipientList("mickey@disney.com");
 
         SuccessTrigger trigger = new SuccessTrigger(
-                Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
+                Collections.singletonList(new ListRecipientProvider()),
+                "",
+                "",
+                "",
+                "",
+                "",
+                AttachBuildLogMode.NONE,
+                "project");
 
         publisher.getConfiguredTriggers().add(trigger);
 
@@ -215,6 +225,7 @@ class AttachmentUtilsTest {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
+                assertNotNull(build.getWorkspace());
                 build.getWorkspace().child("testreport").mkdirs();
                 build.getWorkspace().child("testreport").child("test.pdf").copyFrom(new FilePath(attachment));
                 return true;
@@ -243,6 +254,7 @@ class AttachmentUtilsTest {
     @Issue("JENKINS-27062")
     void testHtmlMimeType() throws Exception {
         URL url = this.getClass().getResource("/test.html");
+        assertNotNull(url);
         final File attachment = new File(url.getFile());
 
         FreeStyleProject project = j.createFreeStyleProject("foo");
@@ -261,6 +273,7 @@ class AttachmentUtilsTest {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
+                assertNotNull(build.getWorkspace());
                 build.getWorkspace().child("testreport").mkdirs();
                 build.getWorkspace().child("testreport").child("test.html").copyFrom(new FilePath(attachment));
                 return true;
@@ -309,6 +322,7 @@ class AttachmentUtilsTest {
             @Override
             public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
                     throws InterruptedException, IOException {
+                assertNotNull(build.getWorkspace());
                 build.getWorkspace().child("已使用红包.txt").write("test.property=success", "UTF-8");
                 return build.getWorkspace().child("已使用红包.txt").exists();
             }

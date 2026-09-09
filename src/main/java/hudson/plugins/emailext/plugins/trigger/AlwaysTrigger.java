@@ -4,6 +4,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
@@ -28,7 +29,7 @@ public class AlwaysTrigger extends EmailTrigger {
             String subject,
             String body,
             String attachmentsPattern,
-            int attachBuildLog,
+            AttachBuildLogMode attachBuildLogMode,
             String contentType) {
         super(
                 recipientProviders,
@@ -37,7 +38,28 @@ public class AlwaysTrigger extends EmailTrigger {
                 subject,
                 body,
                 attachmentsPattern,
-                attachBuildLog,
+                attachBuildLogMode,
+                contentType);
+    }
+
+    @Deprecated
+    public AlwaysTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        this(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                AttachBuildLogMode.fromLegacyValue(attachBuildLog),
                 contentType);
     }
 

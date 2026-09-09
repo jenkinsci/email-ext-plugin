@@ -5,17 +5,23 @@ import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Item;
 import hudson.model.Result;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import java.util.Collections;
 import java.util.List;
 import jenkins.model.Jenkins;
+import org.htmlunit.html.HtmlForm;
+import org.htmlunit.html.HtmlPage;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.groovy.SecureGroovyScript;
 import org.jenkinsci.plugins.scriptsecurity.scripts.ScriptApproval;
@@ -49,11 +55,12 @@ class AbstractScriptTriggerTest {
                 .grant(Jenkins.ADMINISTER)
                 .everywhere()
                 .to("bob"));
+        // j.jenkins.setCrumbIssuer(null);
     }
 
     @Test
     @Issue("SECURITY-257")
-    void configRoundtrip() throws Exception {
+    void configRoundTrip() throws Exception {
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
         publisher.setDefaultSubject("%DEFAULT_SUBJECT");
         publisher.setDefaultContent("%DEFAULT_CONTENT");
@@ -74,15 +81,21 @@ class AbstractScriptTriggerTest {
                         "subject",
                         "body",
                         "attachmentsPattern",
-                        0,
+                        AttachBuildLogMode.NONE,
                         "text/plain",
                         new SecureGroovyScript(script, true, null)));
 
         FreeStyleProject project = j.createFreeStyleProject("iMail");
         project.getPublishersList().add(publisher);
 
-        JenkinsRule.WebClient client = j.createWebClient().login("alice");
-        j.submit(client.getPage(project, "configure").getFormByName("config"));
+        try (JenkinsRule.WebClient client = j.createWebClient().login("alice")) {
+            // client.setJavaScriptEnabled(false);
+            HtmlPage page = client.getPage(project, "configure");
+            assertNotNull(page);
+            HtmlForm form = page.getFormByName("config");
+            assertNotNull(form);
+            j.submit(form);
+        }
 
         PreBuildScriptTrigger trigger = checkTrigger(
                 PreBuildScriptTrigger.class, "iMail", Result.FAILURE, RejectedAccessException.class, false);
@@ -144,7 +157,7 @@ class AbstractScriptTriggerTest {
                         "subject",
                         "body",
                         "attachmentsPattern",
-                        0,
+                        AttachBuildLogMode.NONE,
                         "text/plain",
                         new SecureGroovyScript(script, true, null)));
 

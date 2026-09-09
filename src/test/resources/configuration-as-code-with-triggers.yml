@@ -1,5 +1,5 @@
 unclassified:
-  email-ext:
+  extendedEmailPublisher:
     defaultTriggerIds:
       - hudson.plugins.emailext.plugins.trigger.RegressionTrigger
       - hudson.plugins.emailext.plugins.trigger.AbortedTrigger

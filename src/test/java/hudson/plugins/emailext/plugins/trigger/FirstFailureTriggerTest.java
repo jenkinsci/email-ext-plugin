@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.Result;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import org.junit.jupiter.api.Test;
 
@@ -8,7 +9,7 @@ class FirstFailureTriggerTest extends TriggerTestBase {
 
     @Override
     EmailTrigger newInstance() {
-        return new FirstFailureTrigger(recProviders, "", "", "", "", "", 0, "project");
+        return new FirstFailureTrigger(recProviders, "", "", "", "", "", AttachBuildLogMode.NONE, "project");
     }
 
     @Test

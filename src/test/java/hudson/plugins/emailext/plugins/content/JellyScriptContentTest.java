@@ -8,8 +8,8 @@ import static org.mockito.Mockito.when;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.ExtendedEmailGlobalConfiguration;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.util.DescribableList;
 import hudson.util.StreamTaskListener;
 import java.lang.reflect.Field;
@@ -39,16 +39,16 @@ class JellyScriptContentTest {
         publisher.setDefaultSubject("How would you like your very own AWESOME-O 4000?");
         publisher.setRecipientList("ashlux@gmail.com");
 
-        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultBody");
+        Field f = ExtendedEmailGlobalConfiguration.class.getDeclaredField("defaultBody");
         f.setAccessible(true);
-        f.set(publisher.getDescriptor(), "Give me $4000 and I'll mail you a check for $40,000!");
-        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultSubject");
+        f.set(ExtendedEmailGlobalConfiguration.get(), "Give me $4000 and I'll mail you a check for $40,000!");
+        f = ExtendedEmailGlobalConfiguration.class.getDeclaredField("defaultSubject");
         f.setAccessible(true);
-        f.set(publisher.getDescriptor(), "Nigerian needs your help!");
+        f.set(ExtendedEmailGlobalConfiguration.get(), "Nigerian needs your help!");
 
-        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("recipientList");
+        f = ExtendedEmailGlobalConfiguration.class.getDeclaredField("recipientList");
         f.setAccessible(true);
-        f.set(publisher.getDescriptor(), "ashlux@gmail.com");
+        f.set(ExtendedEmailGlobalConfiguration.get(), "ashlux@gmail.com");
 
         build = mock(AbstractBuild.class);
         AbstractProject<?, ?> project = mock(AbstractProject.class);

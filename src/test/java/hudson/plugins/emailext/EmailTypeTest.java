@@ -1,6 +1,9 @@
 package hudson.plugins.emailext;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import hudson.model.FreeStyleProject;
 import hudson.plugins.emailext.plugins.recipients.DevelopersRecipientProvider;
@@ -65,21 +68,22 @@ class EmailTypeTest {
     @Test
     void testCompressBuildAttachment() {
         EmailType t = new EmailType();
-        t.setCompressBuildLog(true);
+        t.setAttachBuildLogMode(AttachBuildLogMode.COMPRESS_AND_ATTACH);
 
-        assertTrue(t.getCompressBuildLog());
+        assertTrue(t.getAttachBuildLogMode().isCompressing());
     }
 
     @Test
     void testDefaultCompressBuildAttachment() {
         EmailType t = new EmailType();
 
-        assertFalse(t.getCompressBuildLog());
+        assertFalse(t.getAttachBuildLogMode().isCompressing());
     }
 
     @Test
     void testUpgradeToRecipientProvider() throws IOException {
         URL url = this.getClass().getResource("/recipient-provider-upgrade.xml");
+        assertNotNull(url);
         File jobConfig = new File(url.getFile());
 
         final ExtendedEmailPublisherDescriptor desc =
@@ -92,7 +96,7 @@ class EmailTypeTest {
         // make sure the publisher got picked up
         assertNotNull(pub);
 
-        // make sure the trigger was marshalled
+        // make sure the trigger was marshaled
         assertFalse(pub.getConfiguredTriggers().isEmpty());
 
         // should have developers, requestor and culprits
@@ -109,6 +113,7 @@ class EmailTypeTest {
     @Issue("JENKINS-24506")
     void testUpgradeTriggerWithNoRecipients() throws IOException {
         URL url = this.getClass().getResource("/recipient-provider-upgrade2.xml");
+        assertNotNull(url);
         File jobConfig = new File(url.getFile());
 
         final ExtendedEmailPublisherDescriptor desc =

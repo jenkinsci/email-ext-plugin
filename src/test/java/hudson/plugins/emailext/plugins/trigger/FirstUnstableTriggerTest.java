@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.Result;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +12,7 @@ class FirstUnstableTriggerTest extends TriggerTestBase {
 
     @Override
     EmailTrigger newInstance() {
-        return new FirstUnstableTrigger(recProviders, "", "", "", "", "", 0, "");
+        return new FirstUnstableTrigger(recProviders, "", "", "", "", "", AttachBuildLogMode.NONE, "");
     }
 
     @Test

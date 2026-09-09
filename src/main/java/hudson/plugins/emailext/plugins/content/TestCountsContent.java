@@ -46,19 +46,12 @@ public class TestCountsContent extends DataBoundTokenMacro {
             return "";
         }
 
-        var = var.toLowerCase();
-
-        switch (var) {
-            case "total":
-                return String.valueOf(action.getTotalCount());
-            case "pass":
-                return String.valueOf(action.getTotalCount() - action.getFailCount() - action.getSkipCount());
-            case "fail":
-                return String.valueOf(action.getFailCount());
-            case "skip":
-                return String.valueOf(action.getSkipCount());
-        }
-
-        return "";
+        return switch (var.toLowerCase()) {
+            case "total" -> String.valueOf(action.getTotalCount());
+            case "pass" -> String.valueOf(action.getTotalCount() - action.getFailCount() - action.getSkipCount());
+            case "fail" -> String.valueOf(action.getFailCount());
+            case "skip" -> String.valueOf(action.getSkipCount());
+            default -> "";
+        };
     }
 }

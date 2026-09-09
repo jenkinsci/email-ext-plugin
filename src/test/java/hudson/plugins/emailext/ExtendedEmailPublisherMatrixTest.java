@@ -58,7 +58,7 @@ class ExtendedEmailPublisherMatrixTest {
         publisher = new ExtendedEmailPublisher();
         publisher.setDefaultSubject("%DEFAULT_SUBJECT");
         publisher.setDefaultContent("%DEFAULT_CONTENT");
-        publisher.setAttachBuildLog(false);
+        publisher.setAttachBuildLogMode(AttachBuildLogMode.NONE);
 
         project = j.createProject(
                 MatrixProject.class, info.getTestMethod().orElseThrow().getName());
@@ -81,7 +81,7 @@ class ExtendedEmailPublisherMatrixTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -107,7 +107,7 @@ class ExtendedEmailPublisherMatrixTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -129,7 +129,7 @@ class ExtendedEmailPublisherMatrixTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -142,7 +142,7 @@ class ExtendedEmailPublisherMatrixTest {
     @Test
     void testAttachBuildLogForAllAxes() throws Exception {
         publisher.setMatrixTriggerMode(MatrixTriggerMode.ONLY_PARENT);
-        publisher.setAttachBuildLog(true);
+        publisher.setAttachBuildLogMode(AttachBuildLogMode.ATTACH);
         addAgentToProject(0, 1, 2);
         List<RecipientProvider> recProviders = Collections.emptyList();
         AlwaysTrigger trigger = new AlwaysTrigger(
@@ -152,7 +152,7 @@ class ExtendedEmailPublisherMatrixTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);

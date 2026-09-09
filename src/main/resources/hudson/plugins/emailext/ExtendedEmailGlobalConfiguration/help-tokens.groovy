@@ -5,7 +5,7 @@ tm = namespace("/lib/token-macro")
 f = namespace("/lib/form")
 st = namespace("jelly:stapler")
 
-p(_("instructions"))  
+p(_("instructions"))
 p("Examples: \$TOKEN, \${TOKEN}, \${TOKEN, count=100}, \${ENV, var=\"PATH\"}")
 h3(_("Project Tokens"))
 dl() {

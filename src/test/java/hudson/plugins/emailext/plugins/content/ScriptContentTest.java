@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -16,14 +17,16 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.Descriptor;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.ExtendedEmailGlobalConfiguration;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
+import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
 import hudson.util.StreamTaskListener;
 import jakarta.mail.Message;
@@ -50,15 +53,14 @@ import org.jvnet.mock_javamail.Mailbox;
 class ScriptContentTest {
     private ScriptContent scriptContent;
 
-    private ExtendedEmailPublisher publisher;
-
-    private AbstractBuild build;
+    private AbstractBuild<?, ?> build;
 
     private TaskListener listener;
 
     protected JenkinsRule j;
 
     @BeforeEach
+    @SuppressWarnings("unchecked")
     void setUp(JenkinsRule j) throws Exception {
         this.j = j;
         Mailbox.clearAll();
@@ -68,28 +70,28 @@ class ScriptContentTest {
 
         JenkinsLocationConfiguration.get().setUrl("http://localhost");
 
-        publisher = new ExtendedEmailPublisher();
+        ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
         publisher.setDefaultContent("For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!");
         publisher.setDefaultSubject("How would you like your very own AWESOME-O 4000?");
         publisher.setRecipientList("ashlux@gmail.com");
 
-        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultBody");
+        Field f = ExtendedEmailGlobalConfiguration.class.getDeclaredField("defaultBody");
         f.setAccessible(true);
-        f.set(publisher.getDescriptor(), "Give me $4000 and I'll mail you a check for $40,000!");
-        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultSubject");
+        f.set(ExtendedEmailGlobalConfiguration.get(), "Give me $4000 and I'll mail you a check for $40,000!");
+        f = ExtendedEmailGlobalConfiguration.class.getDeclaredField("defaultSubject");
         f.setAccessible(true);
-        f.set(publisher.getDescriptor(), "Nigerian needs your help!");
+        f.set(ExtendedEmailGlobalConfiguration.get(), "Nigerian needs your help!");
 
-        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("recipientList");
+        f = ExtendedEmailGlobalConfiguration.class.getDeclaredField("recipientList");
         f.setAccessible(true);
-        f.set(publisher.getDescriptor(), "ashlux@gmail.com");
+        f.set(ExtendedEmailGlobalConfiguration.get(), "ashlux@gmail.com");
 
         build = mock(AbstractBuild.class);
         AbstractProject<?, ?> project = mock(AbstractProject.class);
-        DescribableList publishers = mock(DescribableList.class);
+        DescribableList<Publisher, Descriptor<Publisher>> publishers = mock(DescribableList.class);
         when(publishers.get(ExtendedEmailPublisher.class)).thenReturn(publisher);
         when(project.getPublishersList()).thenReturn(publishers);
-        when(build.getProject()).thenReturn(project);
+        doReturn(project).when(build).getProject();
     }
 
     @Test

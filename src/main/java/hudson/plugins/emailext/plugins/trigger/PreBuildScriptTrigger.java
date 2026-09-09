@@ -3,6 +3,7 @@ package hudson.plugins.emailext.plugins.trigger;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.Descriptor;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
@@ -22,7 +23,7 @@ public class PreBuildScriptTrigger extends AbstractScriptTrigger {
             String subject,
             String body,
             String attachmentsPattern,
-            int attachBuildLog,
+            AttachBuildLogMode attachBuildLogMode,
             String contentType,
             SecureGroovyScript secureTriggerScript) {
         super(
@@ -32,7 +33,30 @@ public class PreBuildScriptTrigger extends AbstractScriptTrigger {
                 subject,
                 body,
                 attachmentsPattern,
-                attachBuildLog,
+                attachBuildLogMode,
+                contentType,
+                secureTriggerScript);
+    }
+
+    @Deprecated
+    public PreBuildScriptTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType,
+            SecureGroovyScript secureTriggerScript) {
+        this(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                AttachBuildLogMode.fromLegacyValue(attachBuildLog),
                 contentType,
                 secureTriggerScript);
     }
@@ -118,7 +142,7 @@ public class PreBuildScriptTrigger extends AbstractScriptTrigger {
                     "$PROJECT_DEFAULT_SUBJECT",
                     "$PROJECT_DEFAULT_CONTENT",
                     "",
-                    0,
+                    AttachBuildLogMode.NONE,
                     "project",
                     new SecureGroovyScript("", false, null));
         }

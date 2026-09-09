@@ -124,8 +124,9 @@ class EmailExtTemplateActionTest {
                         .anyMatch(m -> m.getName().equals("doRenderTemplate")),
                 "EmailExtTemplateAction should have doRenderTemplate endpoint");
 
-        assertTrue(
-                action.getUrlName().equals("templateTest"),
+        assertEquals(
+                "templateTest",
+                action.getUrlName(),
                 "Action URL name should be 'templateTest' but got: " + action.getUrlName());
     }
 

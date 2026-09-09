@@ -46,15 +46,19 @@ public class EmailType {
      */
     private String inlineAttachmentsPattern;
 
+    private AttachBuildLogMode attachBuildLogMode;
+
     /**
      * True to attach the build log to the email
      */
-    private boolean attachBuildLog;
+    @Deprecated
+    private transient boolean attachBuildLog;
 
     /**
      * True to compress the build log before attaching it to the email
      */
-    private boolean compressBuildLog;
+    @Deprecated
+    private transient boolean compressBuildLog;
 
     /**
      * List of email addresses to put into the Reply-To header
@@ -85,7 +89,7 @@ public class EmailType {
     private transient boolean includeCulprits;
 
     /**
-     * Specifies whether or not we should send this email to the recipient list
+     * Specifies whether we should send this email to the recipient list or not
      */
     private transient boolean sendToRecipientList;
 
@@ -95,8 +99,7 @@ public class EmailType {
         recipientList = "";
         attachmentsPattern = "";
         inlineAttachmentsPattern = "";
-        attachBuildLog = false;
-        compressBuildLog = false;
+        attachBuildLogMode = AttachBuildLogMode.NONE;
         replyTo = "";
         contentType = "project";
         recipientProviders = new ArrayList<>();
@@ -125,7 +128,7 @@ public class EmailType {
     @Whitelisted
     public boolean getHasRecipients() {
         return (recipientProviders != null && !recipientProviders.isEmpty())
-                || (recipientList != null && recipientList.trim().length() != 0);
+                || (recipientList != null && !recipientList.trim().isEmpty());
     }
 
     @Whitelisted
@@ -189,21 +192,35 @@ public class EmailType {
     }
 
     @Whitelisted
+    public AttachBuildLogMode getAttachBuildLogMode() {
+        return attachBuildLogMode;
+    }
+
+    @Whitelisted
+    public void setAttachBuildLogMode(AttachBuildLogMode attachBuildLogMode) {
+        this.attachBuildLogMode = attachBuildLogMode;
+    }
+
+    @Whitelisted
+    @Deprecated
     public boolean getAttachBuildLog() {
         return attachBuildLog;
     }
 
     @Whitelisted
+    @Deprecated
     public boolean getCompressBuildLog() {
         return compressBuildLog;
     }
 
     @Whitelisted
+    @Deprecated
     public void setAttachBuildLog(boolean attachBuildLog) {
         this.attachBuildLog = attachBuildLog;
     }
 
     @Whitelisted
+    @Deprecated
     public void setCompressBuildLog(boolean compressBuildLog) {
         this.compressBuildLog = compressBuildLog;
     }
@@ -248,6 +265,10 @@ public class EmailType {
             recipientProviders.add(new ListRecipientProvider());
         }
 
+        if (this.attachBuildLogMode == null) {
+            this.attachBuildLogMode = AttachBuildLogMode.fromLegacyBool(attachBuildLog, compressBuildLog);
+        }
+
         return this;
     }
 
@@ -274,7 +295,7 @@ public class EmailType {
                 }
             }
 
-            if (index >= 0 && index < recipientProviders.size()) {
+            if (index < recipientProviders.size()) {
                 recipientProviders.remove(index);
             }
         }
@@ -303,7 +324,7 @@ public class EmailType {
                 }
             }
 
-            if (index >= 0 && index < recipientProviders.size()) {
+            if (index < recipientProviders.size()) {
                 recipientProviders.remove(index);
             }
         }
@@ -332,7 +353,7 @@ public class EmailType {
                 }
             }
 
-            if (index >= 0 && index < recipientProviders.size()) {
+            if (index < recipientProviders.size()) {
                 recipientProviders.remove(index);
             }
         }
@@ -361,7 +382,7 @@ public class EmailType {
                 }
             }
 
-            if (index >= 0 && index < recipientProviders.size()) {
+            if (index < recipientProviders.size()) {
                 recipientProviders.remove(index);
             }
         }

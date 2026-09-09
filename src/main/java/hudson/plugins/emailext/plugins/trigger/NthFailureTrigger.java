@@ -4,6 +4,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
@@ -20,6 +21,47 @@ public abstract class NthFailureTrigger extends EmailTrigger {
 
     @Deprecated
     protected int failureCount;
+
+    public NthFailureTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            AttachBuildLogMode attachBuildLogMode,
+            String contentType) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLogMode,
+                contentType);
+    }
+
+    @Deprecated
+    public NthFailureTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        this(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                AttachBuildLogMode.fromLegacyValue(attachBuildLog),
+                contentType);
+    }
 
     /** @deprecated override getRequiredFailureCount instead of passing in failureCount */
     @Deprecated
@@ -43,26 +85,6 @@ public abstract class NthFailureTrigger extends EmailTrigger {
                 attachBuildLog,
                 contentType);
         this.failureCount = failureCount;
-    }
-
-    public NthFailureTrigger(
-            List<RecipientProvider> recipientProviders,
-            String recipientList,
-            String replyTo,
-            String subject,
-            String body,
-            String attachmentsPattern,
-            int attachBuildLog,
-            String contentType) {
-        super(
-                recipientProviders,
-                recipientList,
-                replyTo,
-                subject,
-                body,
-                attachmentsPattern,
-                attachBuildLog,
-                contentType);
     }
 
     @Deprecated

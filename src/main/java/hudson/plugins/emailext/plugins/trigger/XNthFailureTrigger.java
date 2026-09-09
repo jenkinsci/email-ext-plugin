@@ -2,6 +2,7 @@ package hudson.plugins.emailext.plugins.trigger;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
 import java.util.List;
@@ -24,7 +25,7 @@ public class XNthFailureTrigger extends NthFailureTrigger {
             String subject,
             String body,
             String attachmentsPattern,
-            int attachBuildLog,
+            AttachBuildLogMode attachBuildLogMode,
             String contentType) {
         super(
                 recipientProviders,
@@ -33,7 +34,28 @@ public class XNthFailureTrigger extends NthFailureTrigger {
                 subject,
                 body,
                 attachmentsPattern,
-                attachBuildLog,
+                attachBuildLogMode,
+                contentType);
+    }
+
+    @Deprecated
+    public XNthFailureTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        this(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                AttachBuildLogMode.fromLegacyValue(attachBuildLog),
                 contentType);
     }
 

@@ -9,4 +9,3 @@ if(app.getDescriptor('hudson.plugins.emailext.ExtendedEmailPublisher').watchingE
         t.summary(icon: "/plugin/email-ext/images/add-watch.svg", href: my.urlName, permission: my.project.READ, my.displayName)
     }
 }
-

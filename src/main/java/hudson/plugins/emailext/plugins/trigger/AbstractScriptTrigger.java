@@ -8,6 +8,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.Descriptor;
 import hudson.model.Item;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.groovy.sandbox.PrintStreamInstanceWhitelist;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.RecipientProvider;
@@ -46,6 +47,32 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
 
     protected SecureGroovyScript secureTriggerScript;
 
+    @Deprecated
+    protected transient String triggerScript;
+
+    public AbstractScriptTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            AttachBuildLogMode attachBuildLogMode,
+            String contentType,
+            SecureGroovyScript secureTriggerScript) {
+        super(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                attachBuildLogMode,
+                contentType);
+        setSecureTriggerScript(secureTriggerScript);
+    }
+
+    @Deprecated
     public AbstractScriptTrigger(
             List<RecipientProvider> recipientProviders,
             String recipientList,
@@ -56,22 +83,16 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
             int attachBuildLog,
             String contentType,
             SecureGroovyScript secureTriggerScript) {
-        super(
+        this(
                 recipientProviders,
                 recipientList,
                 replyTo,
                 subject,
                 body,
                 attachmentsPattern,
-                attachBuildLog,
-                contentType);
-        this.secureTriggerScript = secureTriggerScript;
-        StaplerRequest2 request = Stapler.getCurrentRequest2();
-        ApprovalContext context = ApprovalContext.create().withCurrentUser();
-        if (request != null) {
-            context = context.withItem(request.findAncestorObject(Item.class));
-        }
-        this.secureTriggerScript.configuring(context);
+                AttachBuildLogMode.fromLegacyValue(attachBuildLog),
+                contentType,
+                secureTriggerScript);
     }
 
     @Deprecated
@@ -136,6 +157,16 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
         return secureTriggerScript;
     }
 
+    private void setSecureTriggerScript(SecureGroovyScript secureTriggerScript) {
+        this.secureTriggerScript = secureTriggerScript;
+        StaplerRequest2 request = Stapler.getCurrentRequest2();
+        ApprovalContext context = ApprovalContext.create().withCurrentUser();
+        if (request != null) {
+            context = context.withItem(request.findAncestorObject(Item.class));
+        }
+        this.secureTriggerScript.configuring(context);
+    }
+
     private boolean hasScript() {
         return secureTriggerScript != null && StringUtils.isNotEmpty(secureTriggerScript.getScript());
     }
@@ -180,7 +211,6 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
     private Object evaluate(AbstractBuild<?, ?> build, TaskListener listener) throws IOException {
         ClassLoader loader = Jenkins.get().getPluginManager().uberClassLoader;
         JenkinsLocationConfiguration configuration = JenkinsLocationConfiguration.get();
-        assert configuration != null;
 
         URLClassLoader urlcl = null;
         List<ClasspathEntry> cp = secureTriggerScript.getClasspath();
@@ -234,17 +264,14 @@ public abstract class AbstractScriptTrigger extends EmailTrigger {
         }
     }
 
-    @Deprecated
-    protected transient String triggerScript;
-
     /**
      * Called when object has been deserialized from a stream.
      *
      * @return {@code this}, or a replacement for {@code this}.
      * @throws ObjectStreamException if the object cannot be restored.
      * @see <a href=
-     *      "http://download.oracle.com/javase/1.3/docs/guide/serialization/spec/input.doc6.html">The
-     *      Java Object Serialization Specification</a>
+     * "http://download.oracle.com/javase/1.3/docs/guide/serialization/spec/input.doc6.html">The
+     * Java Object Serialization Specification</a>
      */
     protected Object readResolve() throws ObjectStreamException, Descriptor.FormException {
         if (triggerScript != null && secureTriggerScript == null) {

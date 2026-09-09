@@ -14,3 +14,9 @@ work
 .classpath
 .project
 /bin/
+
+# VS Code project files
+.vscode
+
+# AI project files
+.claude

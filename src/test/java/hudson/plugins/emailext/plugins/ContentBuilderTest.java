@@ -10,9 +10,9 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.StreamBuildListener;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.ExtendedEmailGlobalConfiguration;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.ExtendedEmailPublisherContext;
-import hudson.plugins.emailext.ExtendedEmailPublisherDescriptor;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
@@ -46,16 +46,16 @@ class ContentBuilderTest {
         publisher.setDefaultSubject("How would you like your very own AWESOME-O 4000?");
         publisher.setRecipientList("ashlux@gmail.com");
 
-        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultBody");
+        Field f = ExtendedEmailGlobalConfiguration.class.getDeclaredField("defaultBody");
         f.setAccessible(true);
-        f.set(publisher.getDescriptor(), "Give me $4000 and I'll mail you a check for $40,000!");
-        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultSubject");
+        f.set(ExtendedEmailGlobalConfiguration.get(), "Give me $4000 and I'll mail you a check for $40,000!");
+        f = ExtendedEmailGlobalConfiguration.class.getDeclaredField("defaultSubject");
         f.setAccessible(true);
-        f.set(publisher.getDescriptor(), "Nigerian needs your help!");
+        f.set(ExtendedEmailGlobalConfiguration.get(), "Nigerian needs your help!");
 
-        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("recipientList");
+        f = ExtendedEmailGlobalConfiguration.class.getDeclaredField("recipientList");
         f.setAccessible(true);
-        f.set(publisher.getDescriptor(), "ashlux@gmail.com");
+        f.set(ExtendedEmailGlobalConfiguration.get(), "ashlux@gmail.com");
 
         build = mock(AbstractBuild.class);
         when(build.getEnvironment(listener)).thenReturn(new EnvVars());
@@ -86,41 +86,41 @@ class ContentBuilderTest {
     @Test
     void testTransformText_shouldExpand_$DEFAULT_CONTENT() {
         assertEquals(
-                publisher.getDescriptor().getDefaultBody(),
+                ExtendedEmailGlobalConfiguration.get().getDefaultBody(),
                 ContentBuilder.transformText("$DEFAULT_CONTENT", publisher, build, listener));
         assertEquals(
-                publisher.getDescriptor().getDefaultBody(),
+                ExtendedEmailGlobalConfiguration.get().getDefaultBody(),
                 ContentBuilder.transformText("${DEFAULT_CONTENT}", publisher, build, listener));
     }
 
     @Test
     void testTransformText_shouldExpand_$DEFAULT_SUBJECT() {
         assertEquals(
-                publisher.getDescriptor().getDefaultSubject(),
+                ExtendedEmailGlobalConfiguration.get().getDefaultSubject(),
                 ContentBuilder.transformText("$DEFAULT_SUBJECT", publisher, build, listener));
         assertEquals(
-                publisher.getDescriptor().getDefaultSubject(),
+                ExtendedEmailGlobalConfiguration.get().getDefaultSubject(),
                 ContentBuilder.transformText("${DEFAULT_SUBJECT}", publisher, build, listener));
     }
 
     @Test
     void testTransformText_shouldExpand_$DEFAULT_RECIPIENT_LIST() {
         assertEquals(
-                publisher.getDescriptor().getDefaultRecipients(),
+                ExtendedEmailGlobalConfiguration.get().getDefaultRecipients(),
                 ContentBuilder.transformText("$DEFAULT_RECIPIENTS", publisher, build, listener));
         assertEquals(
-                publisher.getDescriptor().getDefaultRecipients(),
+                ExtendedEmailGlobalConfiguration.get().getDefaultRecipients(),
                 ContentBuilder.transformText("${DEFAULT_RECIPIENTS}", publisher, build, listener));
     }
 
     @Test
     void testTransformText_shouldExpand_$DEFAULT_PRESEND_SCRIPT() {
         assertEquals(
-                publisher.getDescriptor().getDefaultPresendScript(),
+                ExtendedEmailGlobalConfiguration.get().getDefaultPresendScript(),
                 StringUtils.trimToNull(
                         ContentBuilder.transformText("$DEFAULT_PRESEND_SCRIPT", publisher, build, listener)));
         assertEquals(
-                publisher.getDescriptor().getDefaultPresendScript(),
+                ExtendedEmailGlobalConfiguration.get().getDefaultPresendScript(),
                 StringUtils.trimToNull(
                         ContentBuilder.transformText("${DEFAULT_PRESEND_SCRIPT}", publisher, build, listener)));
     }
@@ -128,23 +128,23 @@ class ContentBuilderTest {
     @Test
     void testTransformText_shouldExpand_$DEFAULT_POSTSEND_SCRIPT() {
         assertEquals(
-                publisher.getDescriptor().getDefaultPostsendScript(),
+                ExtendedEmailGlobalConfiguration.get().getDefaultPostsendScript(),
                 StringUtils.trimToNull(
                         ContentBuilder.transformText("$DEFAULT_POSTSEND_SCRIPT", publisher, build, listener)));
         assertEquals(
-                publisher.getDescriptor().getDefaultPostsendScript(),
+                ExtendedEmailGlobalConfiguration.get().getDefaultPostsendScript(),
                 StringUtils.trimToNull(
                         ContentBuilder.transformText("${DEFAULT_POSTSEND_SCRIPT}", publisher, build, listener)));
     }
 
     @Test
     void testTransformText_noNPEWithNullDefaultSubjectBody() throws NoSuchFieldException, IllegalAccessException {
-        Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultBody");
+        Field f = ExtendedEmailGlobalConfiguration.class.getDeclaredField("defaultBody");
         f.setAccessible(true);
-        f.set(publisher.getDescriptor(), null);
-        f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultSubject");
+        f.set(ExtendedEmailGlobalConfiguration.get(), null);
+        f = ExtendedEmailGlobalConfiguration.class.getDeclaredField("defaultSubject");
         f.setAccessible(true);
-        f.set(publisher.getDescriptor(), null);
+        f.set(ExtendedEmailGlobalConfiguration.get(), null);
         assertEquals("", ContentBuilder.transformText("$DEFAULT_SUBJECT", publisher, build, listener));
         assertEquals("", ContentBuilder.transformText("$DEFAULT_CONTENT", publisher, build, listener));
     }

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
@@ -62,7 +63,7 @@ class TriggerNameContentTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);

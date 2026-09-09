@@ -55,20 +55,14 @@ public class EmailRecipientUtils {
             for (InternetAddress address : all) {
                 int typeForAddress = recipientsAnalyser.getType(address);
                 switch (typeForAddress) {
-                    case BCC:
-                        bcc.add(address);
-                        break;
-                    case CC:
-                        cc.add(address);
-                        break;
-                    case RecipientListStringAnalyser.NOT_FOUND:
-                    case TO:
+                    case BCC -> bcc.add(address);
+                    case CC -> cc.add(address);
+                    case RecipientListStringAnalyser.NOT_FOUND, TO -> {
                         // Fallback: Treat NOT_FOUND like TO in case RecipientListStringAnalyser fails due to whatever
                         // reason (maybe encoding of personal?)
                         to.add(address);
-                        break;
-                    default:
-                        throw new IllegalStateException("Got unsupported recipient type: " + typeForAddress);
+                    }
+                    default -> throw new IllegalStateException("Got unsupported recipient type: " + typeForAddress);
                 }
             }
 

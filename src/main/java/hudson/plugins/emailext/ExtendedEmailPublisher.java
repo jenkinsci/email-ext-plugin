@@ -176,15 +176,17 @@ public class ExtendedEmailPublisher extends Notifier {
 
     private List<GroovyScriptPath> classpath;
 
+    private AttachBuildLogMode attachBuildLogMode = null;
+
     /**
      * True to attach the log from the build to the email.
      */
-    private boolean attachBuildLog;
+    private transient boolean attachBuildLog;
 
     /**
      * True to compress the log from the build before attaching to the email
      */
-    private boolean compressBuildLog;
+    private transient boolean compressBuildLog;
 
     /**
      * Reply-To value for the e-mail
@@ -214,6 +216,7 @@ public class ExtendedEmailPublisher extends Notifier {
      */
     private MatrixTriggerMode matrixTriggerMode;
 
+    @DataBoundConstructor
     public ExtendedEmailPublisher() {}
 
     @Deprecated
@@ -248,7 +251,7 @@ public class ExtendedEmailPublisher extends Notifier {
                 Collections.emptyList());
     }
 
-    @DataBoundConstructor
+    @Deprecated
     public ExtendedEmailPublisher(
             String recipientList,
             String contentType,
@@ -270,8 +273,7 @@ public class ExtendedEmailPublisher extends Notifier {
         this.defaultContent = defaultContent;
         this.attachmentsPattern = attachmentsPattern;
         setPresendScript(presendScript);
-        this.attachBuildLog = attachBuildLog > 0;
-        this.compressBuildLog = attachBuildLog > 1;
+        this.attachBuildLogMode = AttachBuildLogMode.fromLegacyValue(attachBuildLog);
         this.replyTo = replyTo;
         this.from = from;
         this.saveOutput = saveOutput;
@@ -285,6 +287,7 @@ public class ExtendedEmailPublisher extends Notifier {
         return classpath;
     }
 
+    @DataBoundSetter
     public void setClasspath(List<GroovyScriptPath> classpath) {
         if (classpath != null && !classpath.isEmpty() && Jenkins.get().isUseSecurity()) {
             // Prepare the classpath for approval
@@ -313,6 +316,7 @@ public class ExtendedEmailPublisher extends Notifier {
         this.classpath = classpath;
     }
 
+    @DataBoundSetter
     public void setPresendScript(String presendScript) {
         presendScript = StringUtils.trim(presendScript);
         if (!StringUtils.isBlank(presendScript) && !"$DEFAULT_PRESEND_SCRIPT".equals(presendScript)) {
@@ -325,21 +329,26 @@ public class ExtendedEmailPublisher extends Notifier {
                     context = context.withItem((Item) ancestor.getObject());
                 }
             }
-            scriptApproval.configuring(presendScript, GroovyLanguage.get(), context);
+            scriptApproval.configuring(presendScript, GroovyLanguage.get(), context, true);
         }
         this.presendScript = presendScript;
     }
 
+    @Deprecated
     public int getAttachBuildLog() {
-        if (attachBuildLog) {
-            if (compressBuildLog) {
-                return 2;
-            } else {
-                return 1;
-            }
-        } else {
-            return 0;
+        return attachBuildLogMode.toLegacyValue();
+    }
+
+    public AttachBuildLogMode getAttachBuildLogMode() {
+        if (attachBuildLogMode == null) {
+            attachBuildLogMode = AttachBuildLogMode.NONE;
         }
+        return attachBuildLogMode;
+    }
+
+    @DataBoundSetter
+    public void setAttachBuildLogMode(AttachBuildLogMode attachBuildLogMode) {
+        this.attachBuildLogMode = attachBuildLogMode;
     }
 
     @DataBoundSetter
@@ -355,7 +364,7 @@ public class ExtendedEmailPublisher extends Notifier {
                     context = context.withItem((Item) ancestor.getObject());
                 }
             }
-            scriptApproval.configuring(postsendScript, GroovyLanguage.get(), context);
+            scriptApproval.configuring(postsendScript, GroovyLanguage.get(), context, true);
         }
         this.postsendScript = postsendScript;
     }
@@ -393,6 +402,7 @@ public class ExtendedEmailPublisher extends Notifier {
         return matrixTriggerMode == null ? MatrixTriggerMode.BOTH : matrixTriggerMode;
     }
 
+    @DataBoundSetter
     public void setMatrixTriggerMode(MatrixTriggerMode matrixTriggerMode) {
         this.matrixTriggerMode = matrixTriggerMode;
     }
@@ -401,10 +411,12 @@ public class ExtendedEmailPublisher extends Notifier {
         return recipientList;
     }
 
+    @DataBoundSetter
     public void setRecipientList(String recipientList) {
         this.recipientList = recipientList;
     }
 
+    @DataBoundSetter
     public void setConfiguredTriggers(List<EmailTrigger> configuredTriggers) {
         this.configuredTriggers = configuredTriggers;
     }
@@ -413,6 +425,7 @@ public class ExtendedEmailPublisher extends Notifier {
         return contentType;
     }
 
+    @DataBoundSetter
     public void setContentType(String contentType) {
         this.contentType = contentType;
     }
@@ -421,6 +434,7 @@ public class ExtendedEmailPublisher extends Notifier {
         return defaultSubject;
     }
 
+    @DataBoundSetter
     public void setDefaultSubject(String defaultSubject) {
         this.defaultSubject = defaultSubject;
     }
@@ -429,6 +443,7 @@ public class ExtendedEmailPublisher extends Notifier {
         return defaultContent;
     }
 
+    @DataBoundSetter
     public void setDefaultContent(String defaultContent) {
         this.defaultContent = defaultContent;
     }
@@ -437,30 +452,40 @@ public class ExtendedEmailPublisher extends Notifier {
         return attachmentsPattern;
     }
 
+    @DataBoundSetter
     public void setAttachmentsPattern(String attachmentsPattern) {
         this.attachmentsPattern = attachmentsPattern;
     }
 
+    @Deprecated
     public boolean isAttachBuildLog() {
-        return attachBuildLog;
+        return attachBuildLogMode.isAttaching();
     }
 
+    @DataBoundSetter
+    @Deprecated
     public void setAttachBuildLog(boolean attachBuildLog) {
-        this.attachBuildLog = attachBuildLog;
+        attachBuildLogMode = AttachBuildLogMode.fromLegacyBool(
+                attachBuildLog, getAttachBuildLogMode().isCompressing());
     }
 
+    @Deprecated
     public boolean isCompressBuildLog() {
-        return compressBuildLog;
+        return attachBuildLogMode.isCompressing();
     }
 
+    @Deprecated
+    @DataBoundSetter
     public void setCompressBuildLog(boolean compressBuildLog) {
-        this.compressBuildLog = compressBuildLog;
+        attachBuildLogMode =
+                AttachBuildLogMode.fromLegacyBool(getAttachBuildLogMode().isAttaching(), compressBuildLog);
     }
 
     public String getReplyTo() {
         return replyTo;
     }
 
+    @DataBoundSetter
     public void setReplyTo(String replyTo) {
         this.replyTo = replyTo;
     }
@@ -469,6 +494,7 @@ public class ExtendedEmailPublisher extends Notifier {
         return from;
     }
 
+    @DataBoundSetter
     public void setFrom(String from) {
         this.from = from;
     }
@@ -477,6 +503,7 @@ public class ExtendedEmailPublisher extends Notifier {
         return saveOutput;
     }
 
+    @DataBoundSetter
     public void setSaveOutput(boolean saveOutput) {
         this.saveOutput = saveOutput;
     }
@@ -485,6 +512,7 @@ public class ExtendedEmailPublisher extends Notifier {
         return disabled;
     }
 
+    @DataBoundSetter
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
     }
@@ -493,6 +521,7 @@ public class ExtendedEmailPublisher extends Notifier {
         return throttlingEnabled;
     }
 
+    @DataBoundSetter
     public void setThrottlingEnabled(boolean throttlingEnabled) {
         this.throttlingEnabled = throttlingEnabled;
     }
@@ -1228,12 +1257,17 @@ public class ExtendedEmailPublisher extends Notifier {
             inlineAttachments.attachInline(multipart, context);
         }
 
-        if (attachBuildLog || context.getTrigger().getEmail().getAttachBuildLog()) {
+        if (getAttachBuildLogMode().isAttaching()
+                || context.getTrigger().getEmail().getAttachBuildLogMode().isAttaching()) {
             debug(context.getListener().getLogger(), "Request made to attach build log");
             AttachmentUtils.attachBuildLog(
                     context,
                     multipart,
-                    compressBuildLog || context.getTrigger().getEmail().getCompressBuildLog());
+                    getAttachBuildLogMode().isCompressing()
+                            || context.getTrigger()
+                                    .getEmail()
+                                    .getAttachBuildLogMode()
+                                    .isCompressing());
         }
 
         msg.setContent(multipart);
@@ -1527,6 +1561,10 @@ public class ExtendedEmailPublisher extends Notifier {
             setPostsendScript(this.postsendScript);
             setPresendScript(this.presendScript);
             setClasspath(this.classpath);
+        }
+
+        if (this.attachBuildLogMode == null) {
+            this.attachBuildLogMode = AttachBuildLogMode.fromLegacyBool(attachBuildLog, compressBuildLog);
         }
         return this;
     }

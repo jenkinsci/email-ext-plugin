@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.trigger.AlwaysTrigger;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
@@ -51,7 +52,7 @@ class UpstreamComitterSinceLastSuccessRecipientProviderTest {
                         "",
                         "",
                         "",
-                        0,
+                        AttachBuildLogMode.NONE,
                         "project"));
         jobB.getPublishersList().add(publisher);
         j.jenkins.rebuildDependencyGraph();
@@ -63,17 +64,15 @@ class UpstreamComitterSinceLastSuccessRecipientProviderTest {
     }
 
     /**
-     * Covers: happy path — single committer in window.
-     *
+     * Covers: happy path — single committer in a window.
      * Exercises the full addRecipients() main path:
      *   - lastSuccessfulBuild found (not null)
-     *   - while loop walks back one Job B build
+     *   - While loop walks back one Job B build
      *   - collectUpstreamBuilds() finds Job A build
      *   - addUpstreamCommittersTriggeringBuild() iterates the change set
      *   - addUserFromChangeSet() resolves and adds Second Person
-     *
-     * Job A #1 (First Person)   -> Job B #1 SUCCESS  (anchor established)
-     * Job A #2 (Second Person) -> Job B #2 FAILS    (current)
+     * Job A #1 (First Person) -> Job B #1 SUCCESS (anchor established)
+     * Job A #2 (Second Person) -> Job B #2 FAILS (current)
      * Expected: only Second Person notified, First Person is behind the anchor.
      */
     @Test
@@ -94,7 +93,7 @@ class UpstreamComitterSinceLastSuccessRecipientProviderTest {
                         "",
                         "",
                         "",
-                        0,
+                        AttachBuildLogMode.NONE,
                         "project"));
         jobB.getPublishersList().add(publisher);
         j.jenkins.rebuildDependencyGraph();
@@ -144,7 +143,7 @@ class UpstreamComitterSinceLastSuccessRecipientProviderTest {
                         "",
                         "",
                         "",
-                        0,
+                        AttachBuildLogMode.NONE,
                         "project"));
         jobB.getPublishersList().add(publisher);
         j.jenkins.rebuildDependencyGraph();
@@ -184,15 +183,13 @@ class UpstreamComitterSinceLastSuccessRecipientProviderTest {
     /**
      * Covers: anchor advances after recovery AND recursive collectUpstreamBuilds()
      * via a multi-level chain (Job A -> Job B -> Job C, email on Job C).
-     *
      * Two Checks in one test:
      *   1. After Job C succeeds, the anchor moves forward — old committers drop out.
      *   2. collectUpstreamBuilds() recursively walks Job C -> Job B -> Job A
      *      to find the actual SCM commits (Job B and Job C have no SCM themselves).
-     *
-     * Job A #1 (First Person)   -> Job B #1 -> Job C #1 SUCCESS (anchor)
+     * Job A #1 (First Person) -> Job B #1 -> Job C #1 SUCCESS (anchor)
      * Job A #2 (Second Person) -> Job B #2 -> Job C #2 SUCCESS (anchor advances)
-     * Job A #3 (Third Person)   -> Job B #3 -> Job C #3 FAILS
+     * Job A #3 (Third Person) -> Job B #3 -> Job C #3 FAILS
      * Expected: only Third Person notified. First Person and Second Pwerson are behind the new anchor.
      */
     @Test
@@ -217,7 +214,7 @@ class UpstreamComitterSinceLastSuccessRecipientProviderTest {
                         "",
                         "",
                         "",
-                        0,
+                        AttachBuildLogMode.NONE,
                         "project"));
         jobC.getPublishersList().add(publisher);
         j.jenkins.rebuildDependencyGraph();

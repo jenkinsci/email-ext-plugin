@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout"
+         xmlns:f="/lib/form">
+  <l:layout title="${it.displayName}" permission="${app.MANAGE}">
+    <st:include it="${app}" page="sidepanel"/>
+    <l:main-panel>
+      <h1>${it.displayName}</h1>
+      <div class="behavior-loading">${%LOADING}</div>
+      <f:form action="configure" method="post" name="config">
+        <j:set var="instance" value="${it}"/>
+        <j:set var="descriptor" value="${it.descriptor}"/>
+        <j:forEach var="descriptor" items="${h.getSortedDescriptorsForGlobalConfigByDescriptor(it.FILTER)}">
+          <j:set var="instance" value="${descriptor}"/>
+          <f:rowSet name="${descriptor.jsonSafeClassName}">
+            <st:include from="${descriptor}" page="${descriptor.globalConfigPage}"/>
+          </f:rowSet>
+        </j:forEach>
+        <f:bottomButtonBar>
+          <f:submit value="${%Save}"/>
+          <f:apply/>
+        </f:bottomButtonBar>
+      </f:form>
+    </l:main-panel>
+  </l:layout>
+</j:jelly>

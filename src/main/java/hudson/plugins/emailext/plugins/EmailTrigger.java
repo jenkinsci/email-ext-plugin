@@ -6,6 +6,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.Describable;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.EmailType;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.recipients.CulpritsRecipientProvider;
@@ -28,6 +29,26 @@ import org.kohsuke.stapler.StaplerRequest2;
 public abstract class EmailTrigger implements Describable<EmailTrigger>, ExtensionPoint {
 
     private EmailType email;
+
+    protected EmailTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            AttachBuildLogMode attachBuildLogMode,
+            String contentType) {
+        email = new EmailType();
+        email.addRecipientProviders(recipientProviders);
+        email.setRecipientList(recipientList);
+        email.setReplyTo(replyTo);
+        email.setSubject(subject);
+        email.setBody(body);
+        email.setAttachmentsPattern(attachmentsPattern);
+        email.setAttachBuildLogMode(attachBuildLogMode);
+        email.setContentType(contentType);
+    }
 
     @Deprecated
     protected EmailTrigger(
@@ -66,11 +87,11 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         email.setSubject(subject);
         email.setBody(body);
         email.setAttachmentsPattern(attachmentsPattern);
-        email.setAttachBuildLog(attachBuildLog > 0);
-        email.setCompressBuildLog(attachBuildLog > 1);
+        email.setAttachBuildLogMode(AttachBuildLogMode.fromLegacyValue(attachBuildLog));
         email.setContentType(contentType);
     }
 
+    @Deprecated
     protected EmailTrigger(
             List<RecipientProvider> recipientProviders,
             String recipientList,
@@ -87,8 +108,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         email.setSubject(subject);
         email.setBody(body);
         email.setAttachmentsPattern(attachmentsPattern);
-        email.setAttachBuildLog(attachBuildLog > 0);
-        email.setCompressBuildLog(attachBuildLog > 1);
+        email.setAttachBuildLogMode(AttachBuildLogMode.fromLegacyValue(attachBuildLog));
         email.setContentType(contentType);
     }
 
@@ -116,7 +136,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
      * @param build    The Build object after the project has been built
      * @param listener Used for logging to the build log
      * @return true if the conditions have been met to trigger a build of this
-     *         type
+     * type
      */
     public abstract boolean trigger(AbstractBuild<?, ?> build, TaskListener listener);
 
@@ -161,16 +181,18 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         email.setInlineAttachmentsPattern(inlineAttachmentsPattern);
     }
 
+    public AttachBuildLogMode getAttachBuildLogMode() {
+        return email.getAttachBuildLogMode();
+    }
+
+    @DataBoundSetter
+    public void setAttachBuildLogMode(AttachBuildLogMode attachBuildLogMode) {
+        email.setAttachBuildLogMode(attachBuildLogMode);
+    }
+
+    @Deprecated
     public int getAttachBuildLog() {
-        if (email.getAttachBuildLog()) {
-            if (email.getCompressBuildLog()) {
-                return 2;
-            } else {
-                return 1;
-            }
-        } else {
-            return 0;
-        }
+        return email.getAttachBuildLogMode().toLegacyValue();
     }
 
     public String getContentType() {
@@ -218,8 +240,7 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
      * @return The number of test failures for the Run
      */
     protected int getNumFailures(Run<?, ?> build) {
-        AbstractTestResultAction<? extends AbstractTestResultAction<?>> a =
-                build.getAction(AbstractTestResultAction.class);
+        AbstractTestResultAction a = build.getAction(AbstractTestResultAction.class);
 
         if (a == null) {
             return 0;
@@ -228,10 +249,10 @@ public abstract class EmailTrigger implements Describable<EmailTrigger>, Extensi
         if (a instanceof AggregatedTestResultAction action) {
             int result = 0;
             for (ChildReport cr : action.getChildReports()) {
-                if (cr == null || cr.child == null || cr.child.getParent() == null) {
+                if (cr == null || cr.run == null) {
                     continue;
                 }
-                if (cr.child.getParent().equals(build.getParent())) {
+                if (cr.run.getParent().equals(build.getParent())) {
                     if (cr.result instanceof TestResult tr) {
                         result += tr.getFailCount();
                     }

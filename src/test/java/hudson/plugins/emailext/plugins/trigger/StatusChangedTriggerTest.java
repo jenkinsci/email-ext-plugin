@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.Result;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +14,7 @@ class StatusChangedTriggerTest extends TriggerTestBase {
 
     @Override
     EmailTrigger newInstance() {
-        return new StatusChangedTrigger(recProviders, "", "", "", "", "", 0, "project");
+        return new StatusChangedTrigger(recProviders, "", "", "", "", "", AttachBuildLogMode.NONE, "project");
     }
 
     // --- Transitions from <no-status> to <status> --- //

@@ -2,6 +2,7 @@ package hudson.plugins.emailext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -15,6 +16,7 @@ import java.io.File;
 import java.io.Serial;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
@@ -79,7 +81,7 @@ class EmailExtStepTest {
         WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");
         job.setDefinition(
                 new CpsFlowDefinition("node { emailext(to: 'mickeymouse@disney.com', subject: 'Boo') }", true));
-        Run<?, ?> run = job.scheduleBuild2(0).get();
+        Run<?, ?> run = Objects.requireNonNull(job.scheduleBuild2(0)).get();
         j.assertBuildStatusSuccess(run);
 
         Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
@@ -94,6 +96,32 @@ class EmailExtStepTest {
         job.setDefinition(new CpsFlowDefinition(
                 "node { emailext(to: 'mickeymouse@disney.com', subject: 'Boo', attachLog: true) }", true));
         Run<?, ?> run = job.scheduleBuild2(0).get();
+        j.assertBuildStatusSuccess(run);
+
+        Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
+        assertEquals(1, mbox.size());
+        Message msg = mbox.get(0);
+        assertEquals("Boo", msg.getSubject());
+
+        assertInstanceOf(MimeMessage.class, msg, "Message should be multipart");
+        assertInstanceOf(MimeMultipart.class, msg.getContent(), "Content should be a MimeMultipart");
+
+        MimeMultipart part = (MimeMultipart) msg.getContent();
+
+        assertEquals(2, part.getCount(), "Should have two body items (message + attachment)");
+
+        BodyPart attach = part.getBodyPart(1);
+        assertTrue(
+                "build.log".equalsIgnoreCase(attach.getFileName()),
+                "There should be a log named \"build.log\" attached");
+    }
+
+    @Test
+    void attachLogMode() throws Exception {
+        WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");
+        job.setDefinition(new CpsFlowDefinition(
+                "node { emailext(to: 'mickeymouse@disney.com', subject: 'Boo', attachBuildLogMode: 'ATTACH') }", true));
+        Run<?, ?> run = Objects.requireNonNull(job.scheduleBuild2(0)).get();
         j.assertBuildStatusSuccess(run);
 
         Mailbox mbox = Mailbox.get("mickeymouse@disney.com");
@@ -132,6 +160,7 @@ class EmailExtStepTest {
     @Test
     void attachment() throws Exception {
         URL url = this.getClass().getResource("/test.pdf");
+        assertNotNull(url);
         final File attachment = new File(url.getFile());
 
         WorkflowJob job = j.getInstance().createProject(WorkflowJob.class, "wf");

@@ -1,15 +1,13 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<hudson.plugins.emailext.ExtendedEmailPublisherDescriptor>
+<hudson.plugins.emailext.ExtendedEmailGlobalConfiguration>
   <defaultSuffix>@example.com</defaultSuffix>
   <mailAccount>
-    <address>address not configured yet &lt;nobody@nowhere&gt;</address>
     <smtpHost>smtp.example.com</smtpHost>
     <smtpPort>2525</smtpPort>
     <smtpUsername>admin</smtpUsername>
     <smtpPassword>honeycomb</smtpPassword>
     <useSsl>true</useSsl>
     <advProperties>mail.smtp.ssl.trust=example.com</advProperties>
-    <defaultAccount>true</defaultAccount>
   </mailAccount>
   <addAccounts>
     <hudson.plugins.emailext.MailAccount>
@@ -20,7 +18,6 @@
       <smtpPassword>honeycomb2</smtpPassword>
       <useSsl>true</useSsl>
       <advProperties>mail.smtp.ssl.trust=example2.com</advProperties>
-      <defaultAccount>false</defaultAccount>
     </hudson.plugins.emailext.MailAccount>
   </addAccounts>
   <charset>UTF-8</charset>
@@ -62,11 +59,11 @@
   <defaultReplyTo>noreply@example.com</defaultReplyTo>
   <allowedDomains>@example.com</allowedDomains>
   <excludedCommitters>excluded@example.com</excludedCommitters>
-  <overrideGlobalSettings>false</overrideGlobalSettings>
+  <overrideGlobalSettings>true</overrideGlobalSettings>
   <listId>&lt;list.example.com&gt;</listId>
   <precedenceBulk>true</precedenceBulk>
   <debugMode>true</debugMode>
   <requireAdminForTemplateTesting>true</requireAdminForTemplateTesting>
   <enableWatching>true</enableWatching>
   <enableAllowUnregistered>true</enableAllowUnregistered>
-</hudson.plugins.emailext.ExtendedEmailPublisherDescriptor>
+</hudson.plugins.emailext.ExtendedEmailGlobalConfiguration>

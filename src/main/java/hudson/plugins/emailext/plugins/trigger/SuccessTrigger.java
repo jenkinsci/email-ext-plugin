@@ -5,6 +5,7 @@ import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.RecipientProvider;
@@ -24,7 +25,7 @@ public class SuccessTrigger extends EmailTrigger {
             String subject,
             String body,
             String attachmentsPattern,
-            int attachBuildLog,
+            AttachBuildLogMode attachBuildLogMode,
             String contentType) {
         super(
                 recipientProviders,
@@ -33,7 +34,28 @@ public class SuccessTrigger extends EmailTrigger {
                 subject,
                 body,
                 attachmentsPattern,
-                attachBuildLog,
+                attachBuildLogMode,
+                contentType);
+    }
+
+    @Deprecated
+    public SuccessTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        this(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                AttachBuildLogMode.fromLegacyValue(attachBuildLog),
                 contentType);
     }
 

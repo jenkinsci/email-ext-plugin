@@ -6,7 +6,13 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Launcher;
@@ -37,6 +43,7 @@ import hudson.plugins.emailext.plugins.trigger.RegressionTrigger;
 import hudson.plugins.emailext.plugins.trigger.SecondFailureTrigger;
 import hudson.plugins.emailext.plugins.trigger.StillFailingTrigger;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
+import hudson.plugins.emailext.watching.EmailExtWatchAction;
 import hudson.security.AuthorizationStrategy;
 import hudson.security.SecurityRealm;
 import hudson.tasks.Builder;
@@ -185,7 +192,7 @@ class ExtendedEmailPublisherTest {
     @Test
     void testSetConfiguredTriggers() {
         List<EmailTrigger> triggers = new ArrayList<>();
-        triggers.add(new SuccessTrigger(recProviders, "", "", "", "", "", 0, "project"));
+        triggers.add(new SuccessTrigger(recProviders, "", "", "", "", "", AttachBuildLogMode.NONE, "project"));
         publisher.setConfiguredTriggers(triggers);
         assertEquals(triggers, publisher.getConfiguredTriggers());
     }
@@ -211,7 +218,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -241,7 +248,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(successTrigger);
         publisher.getConfiguredTriggers().add(successTrigger);
@@ -267,7 +274,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -293,7 +300,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -327,7 +334,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -356,7 +363,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -395,7 +402,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -426,7 +433,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -455,7 +462,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -494,7 +501,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -520,7 +527,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -546,7 +553,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -573,7 +580,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -604,7 +611,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -637,7 +644,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(abortedTrigger);
         publisher.getConfiguredTriggers().add(abortedTrigger);
@@ -663,7 +670,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -689,7 +696,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(notbuiltTrigger);
         publisher.getConfiguredTriggers().add(notbuiltTrigger);
@@ -715,7 +722,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -741,7 +748,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -780,7 +787,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         successTrigger.setEmail(new EmailType() {
             {
@@ -790,6 +797,7 @@ class ExtendedEmailPublisherTest {
         publisher.getConfiguredTriggers().add(successTrigger);
 
         User u = User.getById("kutzi", true);
+        assertNotNull(u);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -819,7 +827,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         successTrigger.setEmail(new EmailType() {
             {
@@ -829,6 +837,7 @@ class ExtendedEmailPublisherTest {
         publisher.getConfiguredTriggers().add(successTrigger);
 
         User u = User.getById("kutzi", true);
+        assertNotNull(u);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -862,7 +871,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         successTrigger.setEmail(new EmailType() {
             {
@@ -872,6 +881,7 @@ class ExtendedEmailPublisherTest {
         publisher.getConfiguredTriggers().add(successTrigger);
 
         User u = User.getById("kutzi", true);
+        assertNotNull(u);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -896,7 +906,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         successTrigger.setEmail(new EmailType() {
             {
@@ -906,6 +916,7 @@ class ExtendedEmailPublisherTest {
         publisher.getConfiguredTriggers().add(successTrigger);
 
         User u = User.getById("kutzi", true);
+        assertNotNull(u);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -936,7 +947,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         successTrigger.setEmail(new EmailType() {
             {
@@ -946,6 +957,7 @@ class ExtendedEmailPublisherTest {
         publisher.getConfiguredTriggers().add(successTrigger);
 
         User u = User.getById("kutzi", true);
+        assertNotNull(u);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -990,7 +1002,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         successTrigger.setEmail(new EmailType() {
             {
@@ -1000,6 +1012,7 @@ class ExtendedEmailPublisherTest {
         publisher.getConfiguredTriggers().add(successTrigger);
 
         User u = User.getById("kutzi", true);
+        assertNotNull(u);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -1040,7 +1053,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         successTrigger.setEmail(new EmailType() {
             {
@@ -1050,6 +1063,7 @@ class ExtendedEmailPublisherTest {
         publisher.getConfiguredTriggers().add(successTrigger);
 
         User u = User.getById("kutzi", true);
+        assertNotNull(u);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -1099,7 +1113,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -1139,7 +1153,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         successTrigger.setEmail(new EmailType() {
             {
@@ -1149,6 +1163,7 @@ class ExtendedEmailPublisherTest {
         publisher.getConfiguredTriggers().add(successTrigger);
 
         User u = User.getById("kutzi", true);
+        assertNotNull(u);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -1170,7 +1185,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         successTrigger.setEmail(new EmailType() {
             {
@@ -1181,6 +1196,7 @@ class ExtendedEmailPublisherTest {
         publisher.setReplyTo("ashlux@gmail.com");
 
         User u = User.getById("kutzi", true);
+        assertNotNull(u);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -1209,7 +1225,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         successTrigger.setEmail(new EmailType() {
             {
@@ -1219,6 +1235,7 @@ class ExtendedEmailPublisherTest {
         publisher.getConfiguredTriggers().add(successTrigger);
 
         User u = User.getById("kutzi", true);
+        assertNotNull(u);
         u.setFullName("Christoph Kutzinski");
         Mailer.UserProperty prop = new Mailer.UserProperty("kutzi@xxx.com");
         u.addProperty(prop);
@@ -1282,7 +1299,7 @@ class ExtendedEmailPublisherTest {
                         "$DEFAULT_SUBJECT",
                         "$DEFAULT_CONTENT",
                         "",
-                        0,
+                        AttachBuildLogMode.NONE,
                         "project"));
         publisher
                 .getConfiguredTriggers()
@@ -1293,7 +1310,7 @@ class ExtendedEmailPublisherTest {
                         "$DEFAULT_SUBJECT",
                         "$DEFAULT_CONTENT",
                         "",
-                        0,
+                        AttachBuildLogMode.NONE,
                         "project"));
 
         for (EmailTrigger trigger : publisher.getConfiguredTriggers()) {
@@ -1323,7 +1340,7 @@ class ExtendedEmailPublisherTest {
                         "$DEFAULT_SUBJECT",
                         "$DEFAULT_CONTENT",
                         "",
-                        0,
+                        AttachBuildLogMode.NONE,
                         "project"));
 
         for (EmailTrigger trigger : publisher.getConfiguredTriggers()) {
@@ -1351,7 +1368,7 @@ class ExtendedEmailPublisherTest {
 
         final WebClient client = j.createWebClient();
         final HtmlPage page = client.goTo("job/JENKINS-15442/configure");
-        final HtmlTextArea recipientList = page.getElementByName("recipientList");
+        final HtmlTextArea recipientList = page.getElementByName("_.recipientList");
         assertEquals("mickey@disney.com", recipientList.getText());
     }
 
@@ -1374,7 +1391,7 @@ class ExtendedEmailPublisherTest {
                         "$DEFAULT_SUBJECT",
                         content,
                         "",
-                        0,
+                        AttachBuildLogMode.NONE,
                         "project"));
 
         for (EmailTrigger trigger : publisher.getConfiguredTriggers()) {
@@ -1487,7 +1504,7 @@ class ExtendedEmailPublisherTest {
 
     @Test
     void testAttachBuildLog() throws Exception {
-        publisher.setAttachBuildLog(true);
+        publisher.setAttachBuildLogMode(AttachBuildLogMode.ATTACH);
         AlwaysTrigger trigger = new AlwaysTrigger(
                 recProviders,
                 "$DEFAULT_RECIPIENTS",
@@ -1495,7 +1512,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -2035,7 +2052,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -2065,7 +2082,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -2095,7 +2112,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -2133,7 +2150,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -2201,7 +2218,7 @@ class ExtendedEmailPublisherTest {
                 "$DEFAULT_SUBJECT",
                 "$DEFAULT_CONTENT",
                 "",
-                0,
+                AttachBuildLogMode.NONE,
                 "project");
         addEmailType(trigger);
         publisher.getConfiguredTriggers().add(trigger);
@@ -2226,6 +2243,7 @@ class ExtendedEmailPublisherTest {
     @Test
     void testLoadOldConfigurationAndGetterSetters() throws Exception {
         java.net.URL url = this.getClass().getResource("/extended-email-publisher-old-format.xml");
+        assertNotNull(url);
         java.io.File jobConfig = new java.io.File(url.getFile());
 
         ExtendedEmailPublisherDescriptor desc = j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
@@ -2244,8 +2262,7 @@ class ExtendedEmailPublisherTest {
         assertEquals("*.png", pub.getInlineAttachmentsPattern());
         assertEquals("presend", pub.getPresendScript());
         assertEquals("postsend", pub.getPostsendScript());
-        assertTrue(pub.isAttachBuildLog());
-        assertTrue(pub.isCompressBuildLog());
+        assertEquals(AttachBuildLogMode.COMPRESS_AND_ATTACH, pub.getAttachBuildLogMode());
         assertEquals("replyto@example.com", pub.getReplyTo());
         assertEquals("from@example.com", pub.getFrom());
         assertTrue(pub.isSaveOutput());
@@ -2257,11 +2274,9 @@ class ExtendedEmailPublisherTest {
         pub.setContentType("text/plain");
         assertEquals("text/plain", pub.getContentType());
 
-        pub.setAttachBuildLog(false);
-        assertFalse(pub.isAttachBuildLog());
-
-        pub.setCompressBuildLog(false);
-        assertFalse(pub.isCompressBuildLog());
+        pub.setAttachBuildLogMode(AttachBuildLogMode.NONE);
+        assertFalse(pub.getAttachBuildLogMode().isAttaching());
+        assertFalse(pub.getAttachBuildLogMode().isCompressing());
 
         pub.setDisabled(false);
         assertFalse(pub.isDisabled());
@@ -2272,6 +2287,6 @@ class ExtendedEmailPublisherTest {
         // Cover getProjectActions
         java.util.Collection<? extends hudson.model.Action> actions = pub.getProjectActions(prj);
         assertEquals(1, actions.size());
-        assertTrue(actions.iterator().next() instanceof hudson.plugins.emailext.watching.EmailExtWatchAction);
+        assertInstanceOf(EmailExtWatchAction.class, actions.iterator().next());
     }
 }

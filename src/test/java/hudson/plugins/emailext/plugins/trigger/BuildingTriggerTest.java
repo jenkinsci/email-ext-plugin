@@ -1,6 +1,7 @@
 package hudson.plugins.emailext.plugins.trigger;
 
 import hudson.model.Result;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +13,7 @@ class BuildingTriggerTest extends TriggerTestBase {
 
     @Override
     EmailTrigger newInstance() {
-        return new BuildingTrigger(recProviders, "", "", "", "", "", 0, "project");
+        return new BuildingTrigger(recProviders, "", "", "", "", "", AttachBuildLogMode.NONE, "project");
     }
 
     @Test

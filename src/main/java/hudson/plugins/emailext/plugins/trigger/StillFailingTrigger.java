@@ -6,6 +6,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.plugins.emailext.AttachBuildLogMode;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
 import hudson.plugins.emailext.plugins.EmailTrigger;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
@@ -26,7 +27,7 @@ public class StillFailingTrigger extends EmailTrigger {
             String subject,
             String body,
             String attachmentsPattern,
-            int attachBuildLog,
+            AttachBuildLogMode attachBuildLogMode,
             String contentType) {
         super(
                 recipientProviders,
@@ -35,7 +36,28 @@ public class StillFailingTrigger extends EmailTrigger {
                 subject,
                 body,
                 attachmentsPattern,
-                attachBuildLog,
+                attachBuildLogMode,
+                contentType);
+    }
+
+    @Deprecated
+    public StillFailingTrigger(
+            List<RecipientProvider> recipientProviders,
+            String recipientList,
+            String replyTo,
+            String subject,
+            String body,
+            String attachmentsPattern,
+            int attachBuildLog,
+            String contentType) {
+        this(
+                recipientProviders,
+                recipientList,
+                replyTo,
+                subject,
+                body,
+                attachmentsPattern,
+                AttachBuildLogMode.fromLegacyValue(attachBuildLog),
                 contentType);
     }
 

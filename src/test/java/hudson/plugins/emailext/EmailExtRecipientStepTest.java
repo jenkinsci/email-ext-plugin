@@ -1,6 +1,7 @@
 package hudson.plugins.emailext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import hudson.EnvVars;
@@ -12,6 +13,7 @@ import hudson.model.TaskListener;
 import hudson.model.User;
 import hudson.plugins.emailext.plugins.recipients.RequesterRecipientProvider;
 import hudson.tasks.Mailer;
+import java.util.Objects;
 import java.util.Set;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -64,6 +66,7 @@ class EmailExtRecipientStepTest {
         WorkflowJob job = j.createProject(WorkflowJob.class, "wf-recipients");
 
         User user = User.getById("kutzi", true);
+        assertNotNull(user);
         user.setFullName("Christoph Kutzinski");
         user.addProperty(new Mailer.UserProperty("kutzi@xxx.com"));
 
@@ -74,7 +77,7 @@ class EmailExtRecipientStepTest {
                         + " }",
                 true));
 
-        Run<?, ?> run = job.scheduleBuild2(0, new CauseAction(new Cause.UserIdCause("kutzi")))
+        Run<?, ?> run = Objects.requireNonNull(job.scheduleBuild2(0, new CauseAction(new Cause.UserIdCause("kutzi"))))
                 .get();
         j.assertBuildStatusSuccess(run);
 

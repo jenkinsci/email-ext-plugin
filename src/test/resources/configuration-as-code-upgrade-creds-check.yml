@@ -1,5 +1,5 @@
 unclassified:
-  email-ext:
+  extendedEmailPublisher:
     defaultSuffix: "@cool.com"
     charset: "UTF-8"
     defaultContentType: "text/html"
