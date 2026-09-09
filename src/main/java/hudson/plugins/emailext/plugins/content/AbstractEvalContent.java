@@ -30,7 +30,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.emailext.ExtendedEmailPublisher;
-import hudson.remoting.VirtualChannel;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,7 +38,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import jenkins.MasterToSlaveFileCallable;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.lib.configprovider.ConfigProvider;
@@ -155,8 +153,19 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     @Restricted(NoExternalUse.class)
     public static boolean isChildOf(final FilePath potentialChild, final FilePath parent)
             throws IOException, InterruptedException {
-        // TODO JENKINS-26838 use API when available in core
-        return parent.act(new IsChildFileCallable(potentialChild));
+        java.nio.file.Path parentNio =
+                java.nio.file.Paths.get(parent.getRemote()).normalize();
+        java.nio.file.Path childNio =
+                java.nio.file.Paths.get(potentialChild.getRemote()).normalize();
+        try {
+            java.nio.file.Path relative = parentNio.relativize(childNio);
+            if (relative.toString().isEmpty()) {
+                return false;
+            }
+            return parent.isDescendant(relative.toString());
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private InputStream getManagedFile(Run<?, ?> run, String fileName) {
@@ -202,27 +211,5 @@ public abstract class AbstractEvalContent extends DataBoundTokenMacro {
     public static boolean isApprovedScript(final String script, final Language language) {
         final ScriptApproval approval = ScriptApproval.get();
         return approval.isScriptApproved(script, language);
-    }
-
-    private static class IsChildFileCallable extends MasterToSlaveFileCallable<Boolean> {
-        private final FilePath potentialChild;
-
-        private IsChildFileCallable(FilePath potentialChild) {
-            this.potentialChild = potentialChild;
-        }
-
-        @Override
-        public Boolean invoke(File parent, VirtualChannel channel) {
-            if (potentialChild.isRemote()) {
-                // Not on the same machine so can't be a child of the local file
-                return false;
-            }
-            FilePath test = potentialChild.getParent();
-            FilePath target = new FilePath(parent);
-            while (test != null && !target.equals(test)) {
-                test = test.getParent();
-            }
-            return target.equals(test);
-        }
     }
 }
