@@ -14,8 +14,12 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import hudson.FilePath;
 import hudson.Launcher;
@@ -23,6 +27,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.model.TaskListener;
 import hudson.plugins.emailext.plugins.recipients.ListRecipientProvider;
 import hudson.plugins.emailext.plugins.trigger.SuccessTrigger;
 import jakarta.mail.BodyPart;
@@ -63,6 +68,67 @@ class AttachmentUtilsTest {
     @AfterEach
     void tearDown() {
         Mailbox.clearAll();
+    }
+
+    @Test
+    void testAttachPreservesInterrupt() throws Exception {
+        FilePath workspace = mock(FilePath.class);
+        when(workspace.list("*.txt")).thenThrow(new InterruptedException("simulated interruption"));
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(
+                new ExtendedEmailPublisher(), null, workspace, null, TaskListener.NULL);
+
+        try {
+            new AttachmentUtils("*.txt").attach(new MimeMultipart(), context);
+            assertTrue(
+                    Thread.currentThread().isInterrupted(),
+                    "Interrupt flag should be restored after attachment processing is interrupted");
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    void testAttachInlinePreservesInterrupt() throws Exception {
+        FilePath workspace = mock(FilePath.class);
+        when(workspace.list("*.txt")).thenThrow(new InterruptedException("simulated interruption"));
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(
+                new ExtendedEmailPublisher(), null, workspace, null, TaskListener.NULL);
+
+        try {
+            new AttachmentUtils("*.txt").attachInline(new MimeMultipart(), context);
+            assertTrue(
+                    Thread.currentThread().isInterrupted(),
+                    "Interrupt flag should be restored after inline attachment processing is interrupted");
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    void testAttachmentReadInterruptionThrowsIOException() throws Exception {
+        FilePath workspace = mock(FilePath.class);
+        FilePath attachment = mock(FilePath.class);
+        when(workspace.list("*.txt")).thenReturn(new FilePath[] {attachment});
+        when(attachment.getName()).thenReturn("test.txt");
+        when(attachment.length()).thenReturn(10L);
+        InterruptedException interruption = new InterruptedException("simulated interruption");
+        when(attachment.read()).thenThrow(interruption);
+        ExtendedEmailPublisherContext context = new ExtendedEmailPublisherContext(
+                new ExtendedEmailPublisher(), null, workspace, null, TaskListener.NULL);
+        MimeMultipart multipart = new MimeMultipart();
+
+        try {
+            new AttachmentUtils("*.txt").attach(multipart, context);
+            assertEquals(1, multipart.getCount());
+            BodyPart bodyPart = multipart.getBodyPart(0);
+            IOException exception = assertThrows(IOException.class, bodyPart::getInputStream);
+            assertSame(interruption, exception.getCause());
+            assertTrue(
+                    Thread.currentThread().isInterrupted(),
+                    "Interrupt flag should be restored after reading an attachment is interrupted");
+        } finally {
+            Thread.interrupted();
+        }
     }
 
     @Test

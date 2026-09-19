@@ -66,13 +66,12 @@ public class AttachmentUtils implements Serializable {
 
         @Override
         public InputStream getInputStream() throws IOException {
-            InputStream stream = null;
             try {
-                stream = file.read();
+                return file.read();
             } catch (InterruptedException e) {
-                stream = null;
+                Thread.currentThread().interrupt();
+                throw new IOException("Interrupted while reading attachment", e);
             }
-            return stream;
         }
 
         @Override
@@ -226,7 +225,8 @@ public class AttachmentUtils implements Serializable {
         } catch (MessagingException e) {
             context.getListener().error("Error attaching items to message: " + e.getMessage());
         } catch (InterruptedException e) {
-            context.getListener().error("Interrupted in processing attachments: " + e.getMessage());
+            Thread.currentThread().interrupt();
+            context.getListener().error("Interrupted while processing attachments; build may be aborting.");
         }
     }
 
@@ -244,7 +244,8 @@ public class AttachmentUtils implements Serializable {
         } catch (MessagingException e) {
             context.getListener().error("Error attaching inline items to message: " + e.getMessage());
         } catch (InterruptedException e) {
-            context.getListener().error("Interrupted in processing inline attachments: " + e.getMessage());
+            Thread.currentThread().interrupt();
+            context.getListener().error("Interrupted while processing inline attachments; build may be aborting.");
         }
     }
 
