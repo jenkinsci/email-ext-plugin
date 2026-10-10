@@ -230,7 +230,7 @@ class ExtendedEmailPublisherTest {
         badAccount.setCredentialsId("bad-smtp-creds");
         badAccount.setAdvProperties("mail.smtp.class=org.eclipse.angus.mail.smtp.SMTPTransport");
 
-        publisher.from = "smtp-test@example.com";
+        publisher.setFrom("smtp-test@example.com");
 
         ExtendedEmailPublisherDescriptor descriptor = publisher.getDescriptor();
         descriptor.setAddAccounts(List.of(badAccount));
