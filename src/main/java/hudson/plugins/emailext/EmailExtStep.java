@@ -206,7 +206,7 @@ public class EmailExtStep extends Step {
         @Override
         protected Void run() throws Exception {
             ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-            publisher.configuredTriggers.clear();
+            publisher.getConfiguredTriggers().clear();
 
             AlwaysTrigger.DescriptorImpl descriptor =
                     Jenkins.get().getDescriptorByType(AlwaysTrigger.DescriptorImpl.class);
@@ -219,38 +219,38 @@ public class EmailExtStep extends Step {
                         getContext().get(Run.class).getParent().getClass());
                 trigger.getEmail().addRecipientProviders(step.recipientProviders);
             }
-            publisher.configuredTriggers.add(trigger);
+            publisher.getConfiguredTriggers().add(trigger);
 
-            publisher.saveOutput = step.saveOutput;
-            publisher.defaultSubject = step.subject;
-            publisher.defaultContent = step.body;
-            publisher.attachBuildLog = step.attachLog;
-            publisher.compressBuildLog = step.compressLog;
+            publisher.setSaveOutput(step.saveOutput);
+            publisher.setDefaultSubject(step.subject);
+            publisher.setDefaultContent(step.body);
+            publisher.setAttachBuildLog(step.attachLog);
+            publisher.setCompressBuildLog(step.compressLog);
             publisher.setPresendScript(step.presendScript);
             publisher.setPostsendScript(step.postsendScript);
 
             if (StringUtils.isNotBlank(step.to)) {
-                publisher.recipientList = step.to;
+                publisher.setRecipientList(step.to);
             }
 
             if (StringUtils.isNotBlank(step.replyTo)) {
-                publisher.replyTo = step.replyTo;
+                publisher.setReplyTo(step.replyTo);
             }
 
             if (StringUtils.isNotBlank(step.from)) {
-                publisher.from = step.from;
+                publisher.setFrom(step.from);
             }
 
             if (StringUtils.isNotBlank(step.attachmentsPattern)) {
-                publisher.attachmentsPattern = step.attachmentsPattern;
+                publisher.setAttachmentsPattern(step.attachmentsPattern);
             }
 
             if (StringUtils.isNotBlank(step.inlineAttachmentsPattern)) {
-                publisher.inlineAttachmentsPattern = step.inlineAttachmentsPattern;
+                publisher.setInlineAttachmentsPattern(step.inlineAttachmentsPattern);
             }
 
             if (StringUtils.isNotBlank(step.mimeType)) {
-                publisher.contentType = step.mimeType;
+                publisher.setContentType(step.mimeType);
             }
 
             final ExtendedEmailPublisherContext ctx = new ExtendedEmailPublisherContext(
@@ -260,8 +260,10 @@ public class EmailExtStep extends Step {
                     getContext().get(Launcher.class),
                     getContext().get(TaskListener.class));
             final Multimap<String, EmailTrigger> triggered = ArrayListMultimap.create();
-            triggered.put(AlwaysTrigger.TRIGGER_NAME, publisher.configuredTriggers.get(0));
-            ctx.setTrigger(publisher.configuredTriggers.get(0));
+            triggered.put(
+                    AlwaysTrigger.TRIGGER_NAME,
+                    publisher.getConfiguredTriggers().get(0));
+            ctx.setTrigger(publisher.getConfiguredTriggers().get(0));
             ctx.setTriggered(triggered);
             publisher.sendMail(ctx);
             return null;

@@ -69,8 +69,8 @@ class AttachmentUtilsTest {
     void testBuildLogAttachment() throws Exception {
         FreeStyleProject project = j.createFreeStyleProject("foo");
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        publisher.attachBuildLog = true;
-        publisher.recipientList = "mickey@disney.com";
+        publisher.setAttachBuildLog(true);
+        publisher.setRecipientList("mickey@disney.com");
         SuccessTrigger trigger = new SuccessTrigger(
                 Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
         publisher.getConfiguredTriggers().add(trigger);
@@ -103,9 +103,9 @@ class AttachmentUtilsTest {
                 .setMaxAttachmentSize(80000);
         FreeStyleProject project = j.createFreeStyleProject("foo");
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        publisher.attachBuildLog = true;
-        publisher.compressBuildLog = true;
-        publisher.recipientList = "mickey@disney.com";
+        publisher.setAttachBuildLog(true);
+        publisher.setCompressBuildLog(true);
+        publisher.setRecipientList("mickey@disney.com");
         SuccessTrigger trigger = new SuccessTrigger(
                 Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
         publisher.getConfiguredTriggers().add(trigger);
@@ -157,8 +157,8 @@ class AttachmentUtilsTest {
 
         FreeStyleProject project = j.createFreeStyleProject("foo");
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        publisher.attachmentsPattern = "*.pdf";
-        publisher.recipientList = "mickey@disney.com";
+        publisher.setAttachmentsPattern("*.pdf");
+        publisher.setRecipientList("mickey@disney.com");
 
         SuccessTrigger trigger = new SuccessTrigger(
                 Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
@@ -201,8 +201,8 @@ class AttachmentUtilsTest {
 
         FreeStyleProject project = j.createFreeStyleProject("foo");
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        publisher.attachmentsPattern = "**/*.pdf";
-        publisher.recipientList = "mickey@disney.com";
+        publisher.setAttachmentsPattern("**/*.pdf");
+        publisher.setRecipientList("mickey@disney.com");
 
         SuccessTrigger trigger = new SuccessTrigger(
                 Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
@@ -247,8 +247,8 @@ class AttachmentUtilsTest {
 
         FreeStyleProject project = j.createFreeStyleProject("foo");
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        publisher.attachmentsPattern = "**/*.html";
-        publisher.recipientList = "mickey@disney.com";
+        publisher.setAttachmentsPattern("**/*.html");
+        publisher.setRecipientList("mickey@disney.com");
 
         SuccessTrigger trigger = new SuccessTrigger(
                 Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
@@ -295,8 +295,8 @@ class AttachmentUtilsTest {
         FreeStyleProject project = j.createFreeStyleProject("foo");
 
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        publisher.attachmentsPattern = "**/*.txt";
-        publisher.recipientList = "mickey@disney.com";
+        publisher.setAttachmentsPattern("**/*.txt");
+        publisher.setRecipientList("mickey@disney.com");
 
         SuccessTrigger trigger = new SuccessTrigger(
                 Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");

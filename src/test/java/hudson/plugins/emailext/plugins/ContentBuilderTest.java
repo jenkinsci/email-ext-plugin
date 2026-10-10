@@ -42,9 +42,9 @@ class ContentBuilderTest {
         listener = new StreamBuildListener(System.out, StandardCharsets.UTF_8);
 
         publisher = new ExtendedEmailPublisher();
-        publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";
-        publisher.defaultSubject = "How would you like your very own AWESOME-O 4000?";
-        publisher.recipientList = "ashlux@gmail.com";
+        publisher.setDefaultContent("For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!");
+        publisher.setDefaultSubject("How would you like your very own AWESOME-O 4000?");
+        publisher.setRecipientList("ashlux@gmail.com");
 
         Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultBody");
         f.setAccessible(true);
@@ -64,11 +64,11 @@ class ContentBuilderTest {
     @Test
     void testTransformText_shouldExpand_$PROJECT_DEFAULT_CONTENT() {
         assertEquals(
-                publisher.defaultContent,
+                publisher.getDefaultContent(),
                 ContentBuilder.transformText(
                         "$PROJECT_DEFAULT_CONTENT", publisher, build, j.createLocalLauncher(), listener));
         assertEquals(
-                publisher.defaultContent,
+                publisher.getDefaultContent(),
                 ContentBuilder.transformText(
                         "${PROJECT_DEFAULT_CONTENT}", publisher, build, j.createLocalLauncher(), listener));
     }
@@ -76,10 +76,10 @@ class ContentBuilderTest {
     @Test
     void testTransformText_shouldExpand_$PROJECT_DEFAULT_SUBJECT() {
         assertEquals(
-                publisher.defaultSubject,
+                publisher.getDefaultSubject(),
                 ContentBuilder.transformText("$PROJECT_DEFAULT_SUBJECT", publisher, build, listener));
         assertEquals(
-                publisher.defaultSubject,
+                publisher.getDefaultSubject(),
                 ContentBuilder.transformText("${PROJECT_DEFAULT_SUBJECT}", publisher, build, listener));
     }
 

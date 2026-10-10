@@ -54,9 +54,12 @@ public final class ContentBuilder {
             return "";
         }
 
-        String defaultContent = Matcher.quoteReplacement(noNull(context.getPublisher().defaultContent));
-        String defaultSubject = Matcher.quoteReplacement(noNull(context.getPublisher().defaultSubject));
-        String defaultReplyTo = Matcher.quoteReplacement(noNull(context.getPublisher().replyTo));
+        String defaultContent =
+                Matcher.quoteReplacement(noNull(context.getPublisher().getDefaultContent()));
+        String defaultSubject =
+                Matcher.quoteReplacement(noNull(context.getPublisher().getDefaultSubject()));
+        String defaultReplyTo =
+                Matcher.quoteReplacement(noNull(context.getPublisher().getReplyTo()));
         String defaultBody = Matcher.quoteReplacement(
                 noNull(context.getPublisher().getDescriptor().getDefaultBody()));
         String defaultExtSubject = Matcher.quoteReplacement(

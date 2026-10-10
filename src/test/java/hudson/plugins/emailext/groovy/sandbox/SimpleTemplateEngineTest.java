@@ -61,8 +61,11 @@ class SimpleTemplateEngineTest {
     void notSerializableExceptionProducesActionableMessage() throws Exception {
         Template t = engine().createTemplate("Hello!");
 
-        GroovyRuntimeException ex = assertThrows(GroovyRuntimeException.class, () -> t.make(null)
-                .writeTo(writerThrowing(new RuntimeException(new NotSerializableException("java.io.PrintWriter")))));
+        GroovyRuntimeException ex = assertThrows(
+                GroovyRuntimeException.class,
+                () -> t.make(null)
+                        .writeTo(writerThrowing(
+                                new RuntimeException(new NotSerializableException("java.io.PrintWriter")))));
 
         assertTrue(ex.getMessage().contains("node"), "Expected message to mention Pipeline node block");
         assertTrue(ex.getMessage().contains("@NonCPS"), "Expected message to mention @NonCPS");
@@ -73,8 +76,11 @@ class SimpleTemplateEngineTest {
     void unrelatedRuntimeExceptionIsRethrownAsIs() throws Exception {
         Template t = engine().createTemplate("Hello!");
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> t.make(null)
-                .writeTo(writerThrowing(new RuntimeException(new IllegalStateException("something unrelated")))));
+        RuntimeException ex = assertThrows(
+                RuntimeException.class,
+                () -> t.make(null)
+                        .writeTo(writerThrowing(
+                                new RuntimeException(new IllegalStateException("something unrelated")))));
 
         assertTrue(
                 ex.getCause() instanceof IllegalStateException,

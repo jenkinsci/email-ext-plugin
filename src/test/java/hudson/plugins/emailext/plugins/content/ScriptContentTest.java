@@ -69,9 +69,9 @@ class ScriptContentTest {
         JenkinsLocationConfiguration.get().setUrl("http://localhost");
 
         publisher = new ExtendedEmailPublisher();
-        publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";
-        publisher.defaultSubject = "How would you like your very own AWESOME-O 4000?";
-        publisher.recipientList = "ashlux@gmail.com";
+        publisher.setDefaultContent("For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!");
+        publisher.setDefaultSubject("How would you like your very own AWESOME-O 4000?");
+        publisher.setRecipientList("ashlux@gmail.com");
 
         Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultBody");
         f.setAccessible(true);
@@ -319,8 +319,8 @@ class ScriptContentTest {
         FreeStyleProject p = j.createFreeStyleProject("foo");
 
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        publisher.recipientList = "mickey@disney.com";
-        publisher.defaultSubject = "${SCRIPT, script=\"subdir/test.groovy\"}";
+        publisher.setRecipientList("mickey@disney.com");
+        publisher.setDefaultSubject("${SCRIPT, script=\"subdir/test.groovy\"}");
 
         SuccessTrigger trigger = new SuccessTrigger(
                 Collections.singletonList(new ListRecipientProvider()),

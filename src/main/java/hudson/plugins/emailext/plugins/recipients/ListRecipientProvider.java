@@ -49,7 +49,8 @@ public class ListRecipientProvider extends RecipientProvider {
                     to,
                     cc,
                     bcc,
-                    EmailRecipientUtils.getRecipientList(context, context.getPublisher().recipientList),
+                    EmailRecipientUtils.getRecipientList(
+                            context, context.getPublisher().getRecipientList()),
                     env,
                     context.getListener());
         } catch (MessagingException ex) {

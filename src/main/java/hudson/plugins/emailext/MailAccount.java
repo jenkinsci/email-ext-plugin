@@ -32,11 +32,14 @@ import jakarta.mail.Transport;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import jenkins.model.Jenkins;
 import jenkins.security.FIPS140;
 import net.sf.json.JSONObject;
@@ -61,6 +64,10 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     private boolean useTls;
     private String advProperties;
     private boolean defaultAccount;
+
+    private boolean useOAuth2;
+    private static final Pattern HOSTNAME_VALID =
+            Pattern.compile("^(?![0-9]+$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$");
 
     @Deprecated
     public MailAccount(JSONObject jo) {
@@ -92,10 +99,24 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     }
 
     public boolean isSmtpServerValid() {
-        return true;
-        // Note: having no SMTP server is fine, it means localhost.
-        // More control could be implemented here when not null though,
-        // like checking the value looks like an FQDN or IP address.
+        if (StringUtils.isBlank(smtpHost)) {
+            return true; // empty means localhost
+        }
+        return isSyntacticallyValid(smtpHost);
+    }
+
+    private boolean isSyntacticallyValid(String host) {
+        // 1) IPv4 check
+        if (host.contains(":") || host.matches("^(\\d{1,3}\\.){3}\\d{1,3}$")) {
+            try {
+                InetAddress.getByName(host);
+                return true;
+            } catch (UnknownHostException e) {
+                return false;
+            }
+        }
+        // Otherwise treat as hostname
+        return HOSTNAME_VALID.matcher(host).matches() && host.length() <= 255;
     }
 
     public boolean isSmtpAuthValid() {

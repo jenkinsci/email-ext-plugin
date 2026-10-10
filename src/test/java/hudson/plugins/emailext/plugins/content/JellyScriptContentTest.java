@@ -35,9 +35,9 @@ class JellyScriptContentTest {
         listener = StreamTaskListener.fromStdout();
 
         publisher = new ExtendedEmailPublisher();
-        publisher.defaultContent = "For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!";
-        publisher.defaultSubject = "How would you like your very own AWESOME-O 4000?";
-        publisher.recipientList = "ashlux@gmail.com";
+        publisher.setDefaultContent("For only 10 easy payment of $69.99 , AWESOME-O 4000 can be yours!");
+        publisher.setDefaultSubject("How would you like your very own AWESOME-O 4000?");
+        publisher.setRecipientList("ashlux@gmail.com");
 
         Field f = ExtendedEmailPublisherDescriptor.class.getDeclaredField("defaultBody");
         f.setAccessible(true);

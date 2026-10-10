@@ -38,9 +38,9 @@ class AttachmentUtilsOomTest {
     private static void _largeBuildLogDoesNotExhaustMemory(JenkinsRule r) throws Exception {
         FreeStyleProject project = r.createFreeStyleProject("large-log");
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
-        publisher.attachBuildLog = true;
-        publisher.compressBuildLog = true;
-        publisher.recipientList = "morgan@blackhand.com";
+        publisher.setAttachBuildLog(true);
+        publisher.setCompressBuildLog(true);
+        publisher.setRecipientList("morgan@blackhand.com");
         SuccessTrigger trigger = new SuccessTrigger(
                 Collections.singletonList(new ListRecipientProvider()), "", "", "", "", "", 0, "project");
         publisher.getConfiguredTriggers().add(trigger);
