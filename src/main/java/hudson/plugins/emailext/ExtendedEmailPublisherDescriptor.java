@@ -237,11 +237,15 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                         return null;
                     }
 
-                    String address = acc.isDefaultAccount() ? getAdminAddress() : acc.getAddress();
                     final int TOKEN_ATTEMPTS = 2;
                     final long RETRY_DELAY_MS = 2000;
 
                     if (c instanceof GoogleRobotPrivateKeyCredentials googleCred) {
+                        String address = getOAuthAddress(acc);
+                        if (address == null) {
+                            return null;
+                        }
+
                         GoogleCredential credential = googleCred
                                 .getGoogleCredential(new MailScopeRequirement())
                                 .createDelegated(address);
@@ -275,6 +279,11 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                     }
 
                     if (c instanceof EntraOAuthCredentials entraCred) {
+                        String address = getOAuthAddress(acc);
+                        if (address == null) {
+                            return null;
+                        }
+
                         Secret tokenSecret = null;
 
                         for (int attempt = 1; attempt <= TOKEN_ATTEMPTS && tokenSecret == null; attempt++) {
@@ -312,6 +321,22 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                     return null;
                 }
             };
+
+    private String getOAuthAddress(MailAccount acc) {
+        String address = acc.isDefaultAccount() ? getAdminAddress() : acc.getAddress();
+        if (StringUtils.isBlank(address)) {
+            return null;
+        }
+        if (!address.contains("@") && defaultSuffix != null && defaultSuffix.contains("@")) {
+            address += defaultSuffix;
+        }
+        try {
+            return new InternetAddress(address).getAddress();
+        } catch (AddressException e) {
+            LOGGER.log(Level.WARNING, "Invalid sender email address for OAuth authentication", e);
+            return null;
+        }
+    }
 
     private Object readResolve() {
         if (smtpHost != null) {

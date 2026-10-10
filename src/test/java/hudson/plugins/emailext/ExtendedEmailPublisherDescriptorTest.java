@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import jenkins.model.Jenkins;
+import jenkins.model.JenkinsLocationConfiguration;
 import org.htmlunit.ElementNotFoundException;
 import org.htmlunit.html.DomElement;
 import org.htmlunit.html.DomNode;
@@ -583,7 +584,7 @@ class ExtendedEmailPublisherDescriptorTest {
         Mockito.when(entraCred.getAccessToken(null)).thenReturn(Secret.fromString("good-token"));
 
         MailAccount ma = new MailAccount();
-        ma.setAddress("test@example.com");
+        ma.setAddress("Jenkins <test@example.com>");
         ma.setCredentialsId("entra-creds");
 
         Run<?, ?> run = Mockito.mock(Run.class);
@@ -680,12 +681,14 @@ class ExtendedEmailPublisherDescriptorTest {
 
         Mockito.when(googleCred.getGoogleCredential(Mockito.any(MailScopeRequirement.class)))
                 .thenReturn(baseCredential);
-        Mockito.when(baseCredential.createDelegated("test@example.com")).thenReturn(delegatedCredential);
+        Mockito.when(baseCredential.createDelegated("jenkins@example.com")).thenReturn(delegatedCredential);
         Mockito.when(delegatedCredential.getAccessToken()).thenReturn("good-token");
 
         MailAccount ma = new MailAccount();
-        ma.setAddress("test@example.com");
+        ma.setDefaultAccount(true);
         ma.setCredentialsId("google-creds");
+        JenkinsLocationConfiguration.get().setAdminAddress("jenkins");
+        descriptor.setDefaultSuffix("@example.com");
 
         Run<?, ?> run = Mockito.mock(Run.class);
 
@@ -700,7 +703,7 @@ class ExtendedEmailPublisherDescriptorTest {
             Authenticator authenticator = descriptor.getAuthenticatorProvider().apply(ma, run);
             PasswordAuthentication auth = invokeGetPasswordAuthentication(authenticator);
 
-            assertEquals("test@example.com", auth.getUserName());
+            assertEquals("jenkins@example.com", auth.getUserName());
             assertEquals("good-token", auth.getPassword());
             Mockito.verify(delegatedCredential, Mockito.times(1)).refreshToken();
         }
