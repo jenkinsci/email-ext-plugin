@@ -210,9 +210,8 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                 Session session = descriptor.createSession(testAccount, null);
 
                 MimeMessage msg = new MimeMessage(session);
-                String senderAddress = testAccount.isDefaultAccount()
-                        ? descriptor.getAdminAddress()
-                        : testAccount.getAddress();
+                String senderAddress =
+                        testAccount.isDefaultAccount() ? descriptor.getAdminAddress() : testAccount.getAddress();
                 if (StringUtils.isBlank(senderAddress)) {
                     senderAddress = "jenkins@localhost";
                 } else if (!senderAddress.contains("@")
