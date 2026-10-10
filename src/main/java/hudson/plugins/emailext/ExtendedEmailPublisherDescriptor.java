@@ -1,9 +1,14 @@
 package hudson.plugins.emailext;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cloudbees.plugins.credentials.domains.HostnamePortRequirement;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.jenkins.plugins.credentials.oauth.GoogleRobotPrivateKeyCredentials;
+import com.google.jenkins.plugins.credentials.oauth.StandardUsernameOAuth2Credentials;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
@@ -14,12 +19,14 @@ import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
+import hudson.security.ACL;
 import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import io.jenkins.plugins.entraoauth.EntraOAuthCredentials;
 import jakarta.mail.Authenticator;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
@@ -31,6 +38,7 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.BiFunction;
@@ -191,26 +199,144 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
     private transient Secret smtpAuthPassword;
     private transient boolean useSsl = false;
 
+    private StandardUsernameCredentials getCredential(MailAccount acc, Run<?, ?> run) {
+
+        if (StringUtils.isBlank(acc.getCredentialsId())) {
+            return null;
+        }
+
+        DomainRequirement domainRequirement = null;
+
+        if (StringUtils.isNotBlank(acc.getSmtpHost()) && StringUtils.isNotBlank(acc.getSmtpPort())) {
+            domainRequirement = new HostnamePortRequirement(acc.getSmtpHost(), Integer.parseInt(acc.getSmtpPort()));
+        }
+
+        if (run != null) {
+            return CredentialsProvider.findCredentialById(
+                    acc.getCredentialsId(), StandardUsernameCredentials.class, run, domainRequirement);
+        }
+
+        // No Run available - e.g. testing configuration from the system config page.
+        List<DomainRequirement> domainRequirements =
+                domainRequirement == null ? Collections.emptyList() : Collections.singletonList(domainRequirement);
+
+        return CredentialsMatchers.firstOrNull(
+                CredentialsProvider.lookupCredentialsInItemGroup(
+                        StandardUsernameCredentials.class, Jenkins.get(), ACL.SYSTEM2, domainRequirements),
+                CredentialsMatchers.withId(acc.getCredentialsId()));
+    }
+
     private transient BiFunction<MailAccount, Run<?, ?>, Authenticator> authenticatorProvider =
             (acc, run) -> new Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
-                    DomainRequirement domainRequirement = null;
-                    if (StringUtils.isNotBlank(acc.getSmtpHost()) && StringUtils.isNotBlank(acc.getSmtpPort())) {
-                        domainRequirement =
-                                new HostnamePortRequirement(acc.getSmtpHost(), Integer.parseInt(acc.getSmtpPort()));
-                    }
 
-                    StandardUsernamePasswordCredentials c = CredentialsProvider.findCredentialById(
-                            acc.getCredentialsId(), StandardUsernamePasswordCredentials.class, run, domainRequirement);
+                    StandardUsernameCredentials c = getCredential(acc, run);
 
                     if (c == null) {
                         return null;
                     }
 
-                    return new PasswordAuthentication(c.getUsername(), Secret.toString(c.getPassword()));
+                    final int TOKEN_ATTEMPTS = 2;
+                    final long RETRY_DELAY_MS = 2000;
+
+                    if (c instanceof GoogleRobotPrivateKeyCredentials googleCred) {
+                        String address = getOAuthAddress(acc);
+                        if (address == null) {
+                            return null;
+                        }
+
+                        GoogleCredential credential = googleCred
+                                .getGoogleCredential(new MailScopeRequirement())
+                                .createDelegated(address);
+
+                        String token = null;
+                        for (int attempt = 1; attempt <= TOKEN_ATTEMPTS && token == null; attempt++) {
+                            try {
+                                credential.refreshToken();
+                                token = credential.getAccessToken();
+                            } catch (IOException e) {
+                                LOGGER.log(
+                                        Level.WARNING,
+                                        "Failed to obtain Google OAuth access token"
+                                                + (attempt == 1 ? ", retrying once." : " after retry."),
+                                        e);
+
+                                if (attempt == TOKEN_ATTEMPTS) {
+                                    return null;
+                                }
+
+                                try {
+                                    Thread.sleep(RETRY_DELAY_MS);
+                                } catch (InterruptedException ie) {
+                                    Thread.currentThread().interrupt();
+                                    return null;
+                                }
+                            }
+                        }
+
+                        return new PasswordAuthentication(address, token);
+                    }
+
+                    if (c instanceof EntraOAuthCredentials entraCred) {
+                        String address = getOAuthAddress(acc);
+                        if (address == null) {
+                            return null;
+                        }
+
+                        Secret tokenSecret = null;
+
+                        for (int attempt = 1; attempt <= TOKEN_ATTEMPTS && tokenSecret == null; attempt++) {
+
+                            tokenSecret = entraCred.getAccessToken(null);
+
+                            if (tokenSecret == null) {
+                                LOGGER.log(
+                                        Level.WARNING,
+                                        "Failed to obtain Entra OAuth access token"
+                                                + (attempt == 1 ? ", retrying once." : " after retry."));
+
+                                if (attempt == TOKEN_ATTEMPTS) {
+                                    return null;
+                                }
+
+                                try {
+                                    Thread.sleep(RETRY_DELAY_MS);
+                                } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
+                                    return null;
+                                }
+                            }
+                        }
+
+                        return new PasswordAuthentication(address, Secret.toString(tokenSecret));
+                    }
+
+                    // maintain using username from credential for backwards compatibility
+                    if (c instanceof StandardUsernamePasswordCredentials passwordCred) {
+                        return new PasswordAuthentication(
+                                passwordCred.getUsername(), Secret.toString(passwordCred.getPassword()));
+                    }
+
+                    return null;
                 }
             };
+
+    private String getOAuthAddress(MailAccount acc) {
+        String address = acc.isDefaultAccount() ? getAdminAddress() : acc.getAddress();
+        if (StringUtils.isBlank(address)) {
+            return null;
+        }
+        if (!address.contains("@") && defaultSuffix != null && defaultSuffix.contains("@")) {
+            address += defaultSuffix;
+        }
+        try {
+            return new InternetAddress(address).getAddress();
+        } catch (AddressException e) {
+            LOGGER.log(Level.WARNING, "Invalid sender email address for OAuth authentication", e);
+            return null;
+        }
+    }
 
     private Object readResolve() {
         if (smtpHost != null) {
@@ -410,7 +536,9 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
             props.put(SMTP_AUTH_PROPERTY, "true");
         }
 
-        if (acc.isUseOAuth2()) {
+        Run<?, ?> run = context != null ? context.getRun() : null;
+        StandardUsernameCredentials c = getCredential(acc, run);
+        if (c instanceof StandardUsernameOAuth2Credentials) {
             props.put(SMTP_AUTH_MECHANISMS_PROPERTY, "XOAUTH2");
         }
 
@@ -434,7 +562,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
         if (acc == null || StringUtils.isBlank(acc.getCredentialsId())) {
             return null;
         }
-        return authenticatorProvider.apply(acc, context.getRun());
+        Run<?, ?> run = context != null ? context.getRun() : null;
+        return authenticatorProvider.apply(acc, run);
     }
 
     public String getHudsonUrl() {

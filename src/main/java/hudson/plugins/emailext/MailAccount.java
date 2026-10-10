@@ -5,10 +5,12 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernameCredentials;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cloudbees.plugins.credentials.domains.HostnamePortRequirement;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
+import com.google.jenkins.plugins.credentials.oauth.StandardUsernameOAuth2Credentials;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.Util;
@@ -22,10 +24,21 @@ import hudson.util.FormValidation;
 import hudson.util.FormValidation.Kind;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import jakarta.mail.AuthenticationFailedException;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import jenkins.model.Jenkins;
 import jenkins.security.FIPS140;
@@ -35,8 +48,12 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 public class MailAccount extends AbstractDescribableImpl<MailAccount> {
+
+    private static final Logger LOGGER = Logger.getLogger(MailAccount.class.getName());
+
     private String address;
     private String smtpHost;
     private String smtpPort = "25";
@@ -147,10 +164,91 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                     .includeMatchingAs(
                             item instanceof Queue.Task t ? Tasks.getAuthenticationOf2(t) : ACL.SYSTEM2,
                             item,
-                            StandardUsernamePasswordCredentials.class,
+                            StandardUsernameCredentials.class,
                             Collections.emptyList(),
-                            CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class))
+                            CredentialsMatchers.anyOf(
+                                    CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class),
+                                    CredentialsMatchers.instanceOf(StandardUsernameOAuth2Credentials.class)))
                     .includeCurrentValue(credentialsId);
+        }
+
+        @RequirePOST
+        public FormValidation doTestConfig(
+                @QueryParameter String address,
+                @QueryParameter boolean defaultAccount,
+                @QueryParameter String smtpHost,
+                @QueryParameter String smtpPort,
+                @QueryParameter boolean useSsl,
+                @QueryParameter boolean useTls,
+                @QueryParameter String credentialsId,
+                @QueryParameter String defaultSuffix,
+                @QueryParameter String test_recipient) {
+
+            Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+
+            if (StringUtils.isBlank(test_recipient)) {
+                return FormValidation.error(Messages.ExtendedEmailPublisherDescriptor_TestEmail_NoRecipient());
+            }
+
+            try {
+                new InternetAddress(test_recipient);
+            } catch (AddressException e) {
+                return FormValidation.error(Messages.ExtendedEmailPublisherDescriptor_TestEmail_InvalidRecipient());
+            }
+
+            MailAccount testAccount = new MailAccount();
+            testAccount.setAddress(address);
+            testAccount.setDefaultAccount(defaultAccount);
+            testAccount.setSmtpHost(smtpHost);
+            testAccount.setSmtpPort(smtpPort);
+            testAccount.setUseSsl(useSsl);
+            testAccount.setUseTls(useTls);
+            testAccount.setCredentialsId(credentialsId);
+
+            try {
+                ExtendedEmailPublisherDescriptor descriptor = ExtendedEmailPublisher.descriptor();
+                Session session = descriptor.createSession(testAccount, null);
+
+                MimeMessage msg = new MimeMessage(session);
+                String senderAddress =
+                        testAccount.isDefaultAccount() ? descriptor.getAdminAddress() : testAccount.getAddress();
+                if (StringUtils.isBlank(senderAddress)) {
+                    senderAddress = "jenkins@localhost";
+                } else if (!senderAddress.contains("@")
+                        && StringUtils.isNotBlank(defaultSuffix)
+                        && defaultSuffix.contains("@")) {
+                    senderAddress += defaultSuffix;
+                }
+
+                msg.setFrom(new InternetAddress(senderAddress));
+                msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(test_recipient));
+                msg.setSubject(Messages.ExtendedEmailPublisherDescriptor_TestEmail_Subject());
+                msg.setText(Messages.ExtendedEmailPublisherDescriptor_TestEmail_Body());
+                msg.setSentDate(new Date());
+
+                Transport.send(msg);
+                LOGGER.log(
+                        Level.INFO,
+                        "Test email sent successfully to " + test_recipient + " using SMTP host: " + smtpHost);
+                return FormValidation.ok(Messages.ExtendedEmailPublisherDescriptor_TestEmail_Success());
+            } catch (AuthenticationFailedException e) {
+                LOGGER.log(
+                        Level.WARNING,
+                        "Failed to send test email to " + test_recipient + " using SMTP host: " + smtpHost,
+                        e);
+                return FormValidation.error(
+                        e, Messages.ExtendedEmailPublisherDescriptor_TestEmail_AuthenticationFailed());
+            } catch (MessagingException e) {
+                LOGGER.log(
+                        Level.WARNING,
+                        "Failed to send test email to " + test_recipient + " using SMTP host: " + smtpHost,
+                        e);
+                return FormValidation.error(
+                        e, Messages.ExtendedEmailPublisherDescriptor_TestEmail_Failed() + ": " + e.getMessage());
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Unexpected error sending test email", e);
+                return FormValidation.error(e, Messages.ExtendedEmailPublisherDescriptor_TestEmail_UnexpectedError());
+            }
         }
 
         @SuppressWarnings("lgtm[jenkins/csrf]")
@@ -187,7 +285,7 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             }
 
             if (CredentialsProvider.listCredentialsInItem(
-                            StandardUsernamePasswordCredentials.class,
+                            StandardUsernameCredentials.class,
                             item,
                             item instanceof Queue.Task t ? Tasks.getAuthenticationOf2(t) : ACL.SYSTEM2,
                             null,
@@ -295,15 +393,6 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     @DataBoundSetter
     public void setUseTls(boolean useTls) {
         this.useTls = useTls;
-    }
-
-    public boolean isUseOAuth2() {
-        return useOAuth2;
-    }
-
-    @DataBoundSetter
-    public void setUseOAuth2(boolean useOAuth2) {
-        this.useOAuth2 = useOAuth2;
     }
 
     public String getAdvProperties() {

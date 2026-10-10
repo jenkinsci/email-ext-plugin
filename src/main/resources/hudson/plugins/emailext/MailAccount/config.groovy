@@ -11,6 +11,9 @@ if(instance?.defaultAccount) {
         f.textbox()
     }
 }
+f.invisibleEntry {
+    f.textbox(field: "defaultAccount")
+}
 
 f.entry(field: "smtpHost", title: _("SMTP server")) {
     f.textbox()
@@ -29,10 +32,18 @@ f.advanced {
     f.entry(field: "useTls", title: _("Use TLS")) {
         f.checkbox()
     }
-    f.entry(field: "useOAuth2", title: _("Use OAuth 2.0")) {
-        f.checkbox()
-    }
     f.entry(field: "advProperties", title: _("Advanced Email Properties")) {
         f.textarea()
     }
+}
+
+f.section(title: _("Test Configuration")) {
+    f.entry(field: "test_recipient", title: _("Test email recipient")) {
+        f.textbox()
+    }
+    f.validateButton(
+        title: _("Send Test Email"),
+        progress: _("Sending..."),
+        method: "testConfig",
+        with: "address,defaultAccount,smtpHost,smtpPort,useSsl,useTls,credentialsId,test_recipient,defaultSuffix")
 }

@@ -12,8 +12,10 @@ import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import hudson.plugins.emailext.MailAccount.MailAccountDescriptor;
+import hudson.security.ACL;
 import hudson.util.FormValidation.Kind;
 import hudson.util.Secret;
+import java.util.Collections;
 import java.util.List;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -25,6 +27,37 @@ import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 @WithJenkins
 class MailAccountTest {
+
+    @Test
+    void testCanStoreAndResolveTestOAuthCredential(JenkinsRule j) {
+        final String credentialId = "test-oauth-id";
+        final String tokenValue = "test-access-token";
+
+        TestOAuth2CredentialsImpl credential = new TestOAuth2CredentialsImpl(
+                CredentialsScope.GLOBAL, credentialId, "test oauth credential", "oauth-user", tokenValue);
+        SystemCredentialsProvider.getInstance().getCredentials().add(credential);
+
+        List<TestOAuth2CredentialsImpl> credentials = CredentialsProvider.lookupCredentialsInItemGroup(
+                TestOAuth2CredentialsImpl.class, j.jenkins, ACL.SYSTEM2, Collections.emptyList());
+        assertEquals(1, credentials.size());
+        TestOAuth2CredentialsImpl resolved = credentials.get(0);
+        assertEquals(credentialId, resolved.getId());
+        assertEquals("oauth-user", resolved.getUsername());
+        assertEquals(
+                tokenValue,
+                resolved.getAccessToken(new TestOAuth2CredentialsImpl.TestOAuth2Requirement())
+                        .getPlainText());
+
+        TestOAuth2CredentialsImpl byId = CredentialsProvider.findCredentialByIdInItemGroup(
+                credentialId, TestOAuth2CredentialsImpl.class, j.jenkins, ACL.SYSTEM2, Collections.emptyList());
+        assertNotNull(byId);
+        assertEquals(
+                tokenValue,
+                byId.getAccessToken(new TestOAuth2CredentialsImpl.TestOAuth2Requirement())
+                        .getPlainText());
+
+        assertEquals("Test OAuth2 Credentials", byId.getDescriptor().getDisplayName());
+    }
 
     @Test
     @WithoutJenkins
