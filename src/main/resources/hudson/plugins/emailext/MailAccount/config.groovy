@@ -11,6 +11,9 @@ if(instance?.defaultAccount) {
         f.textbox()
     }
 }
+f.invisibleEntry {
+    f.textbox(field: "defaultAccount")
+}
 
 f.entry(field: "smtpHost", title: _("SMTP server")) {
     f.textbox()
@@ -42,6 +45,5 @@ f.section(title: _("Test Configuration")) {
         title: _("Send Test Email"),
         progress: _("Sending..."),
         method: "testConfig",
-        with: "smtpHost,smtpPort,useSsl,useTls,credentialsId,test_recipient,defaultSuffix")
+        with: "address,defaultAccount,smtpHost,smtpPort,useSsl,useTls,credentialsId,test_recipient,defaultSuffix")
 }
-

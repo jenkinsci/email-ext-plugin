@@ -174,6 +174,8 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
 
         @RequirePOST
         public FormValidation doTestConfig(
+                @QueryParameter String address,
+                @QueryParameter boolean defaultAccount,
                 @QueryParameter String smtpHost,
                 @QueryParameter String smtpPort,
                 @QueryParameter boolean useSsl,
@@ -195,7 +197,8 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
             }
 
             MailAccount testAccount = new MailAccount();
-            testAccount.setDefaultAccount(true);
+            testAccount.setAddress(address);
+            testAccount.setDefaultAccount(defaultAccount);
             testAccount.setSmtpHost(smtpHost);
             testAccount.setSmtpPort(smtpPort);
             testAccount.setUseSsl(useSsl);
@@ -207,7 +210,9 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                 Session session = descriptor.createSession(testAccount, null);
 
                 MimeMessage msg = new MimeMessage(session);
-                String senderAddress = descriptor.getAdminAddress();
+                String senderAddress = testAccount.isDefaultAccount()
+                        ? descriptor.getAdminAddress()
+                        : testAccount.getAddress();
                 if (StringUtils.isBlank(senderAddress)) {
                     senderAddress = "jenkins@localhost";
                 } else if (!senderAddress.contains("@")
