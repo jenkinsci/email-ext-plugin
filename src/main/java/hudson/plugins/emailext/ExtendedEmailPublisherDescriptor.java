@@ -1,5 +1,6 @@
 package hudson.plugins.emailext;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
@@ -14,6 +15,7 @@ import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.plugins.emailext.plugins.EmailTriggerDescriptor;
 import hudson.plugins.emailext.plugins.trigger.FailureTrigger;
+import hudson.security.ACL;
 import hudson.security.Permission;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Publisher;
@@ -31,6 +33,7 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.BiFunction;
@@ -201,8 +204,32 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                                 new HostnamePortRequirement(acc.getSmtpHost(), Integer.parseInt(acc.getSmtpPort()));
                     }
 
-                    StandardUsernamePasswordCredentials c = CredentialsProvider.findCredentialById(
-                            acc.getCredentialsId(), StandardUsernamePasswordCredentials.class, run, domainRequirement);
+                    StandardUsernamePasswordCredentials c = null;
+                    // When sending in the context of a build, first resolve the credential as it is
+                    // visible to that build. This preserves the existing behaviour for GLOBAL- and
+                    // folder-scoped credentials (including credential usage tracking against the run).
+                    if (run != null) {
+                        c = CredentialsProvider.findCredentialById(
+                                acc.getCredentialsId(),
+                                StandardUsernamePasswordCredentials.class,
+                                run,
+                                domainRequirement);
+                    }
+                    // The SMTP server credential belongs to the Jenkins instance itself, so fall back
+                    // to a system-scoped lookup against the root item group. This is required to
+                    // resolve SYSTEM-scoped credentials, which are deliberately never visible from an
+                    // Item/Run context, and also covers sending outside of a build (run == null).
+                    if (c == null) {
+                        c = CredentialsMatchers.firstOrNull(
+                                CredentialsProvider.lookupCredentialsInItemGroup(
+                                        StandardUsernamePasswordCredentials.class,
+                                        Jenkins.get(),
+                                        ACL.SYSTEM2,
+                                        domainRequirement == null
+                                                ? Collections.emptyList()
+                                                : Collections.singletonList(domainRequirement)),
+                                CredentialsMatchers.withId(acc.getCredentialsId()));
+                    }
 
                     if (c == null) {
                         return null;

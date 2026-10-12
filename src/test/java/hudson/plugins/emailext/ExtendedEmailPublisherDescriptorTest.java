@@ -46,6 +46,8 @@ import hudson.security.ACLContext;
 import hudson.util.FormValidation.Kind;
 import hudson.util.ListBoxModel;
 import jakarta.mail.Authenticator;
+import jakarta.mail.PasswordAuthentication;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -504,6 +506,65 @@ class ExtendedEmailPublisherDescriptorTest {
         ArgumentCaptor<Run<?, ?>> runCaptor = ArgumentCaptor.forClass(Run.class);
         Mockito.verify(authenticatorProvider, Mockito.atLeast(1))
                 .apply(mailAccountCaptor.capture(), runCaptor.capture());
+    }
+
+    /**
+     * Invokes the protected {@link Authenticator#getPasswordAuthentication()} so tests can assert on
+     * the credential the real authenticator resolves.
+     */
+    private static PasswordAuthentication resolveAuthentication(Authenticator authenticator) throws Exception {
+        Method m = Authenticator.class.getDeclaredMethod("getPasswordAuthentication");
+        m.setAccessible(true);
+        return (PasswordAuthentication) m.invoke(authenticator);
+    }
+
+    @Test
+    void authenticatorResolvesSystemScopedCredential() throws Exception {
+        // A SYSTEM-scoped credential is the correct, more secure scope for the SMTP server
+        // credential because it cannot be loaded by pipeline jobs via withCredentials.
+        UsernamePasswordCredentials c = new UsernamePasswordCredentialsImpl(
+                CredentialsScope.SYSTEM, "sendgrid_smtp_cred", "SMTP relay", "apikey", "s3cr3t");
+        CredentialsProvider.lookupStores(j.jenkins).iterator().next().addCredentials(Domain.global(), c);
+
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        MailAccount ma = new MailAccount();
+        ma.setAddress("test@example.com");
+        ma.setSmtpHost("smtp.example.com");
+        ma.setSmtpPort("587");
+        ma.setCredentialsId("sendgrid_smtp_cred");
+
+        // run == null simulates the Jenkins instance itself sending mail (no build context).
+        Authenticator authenticator = descriptor.getAuthenticatorProvider().apply(ma, null);
+        PasswordAuthentication auth = resolveAuthentication(authenticator);
+
+        assertNotNull(auth, "SYSTEM-scoped credential should resolve for a system-context send");
+        assertEquals("apikey", auth.getUserName());
+        assertEquals("s3cr3t", auth.getPassword());
+    }
+
+    @Test
+    void authenticatorStillResolvesGlobalScopedCredential() throws Exception {
+        UsernamePasswordCredentials c = new UsernamePasswordCredentialsImpl(
+                CredentialsScope.GLOBAL, "email-ext-admin", "Username/password for SMTP", "admin", "honeycomb");
+        CredentialsProvider.lookupStores(j.jenkins).iterator().next().addCredentials(Domain.global(), c);
+
+        ExtendedEmailPublisherDescriptor descriptor =
+                j.jenkins.getDescriptorByType(ExtendedEmailPublisherDescriptor.class);
+
+        MailAccount ma = new MailAccount();
+        ma.setAddress("test@example.com");
+        ma.setSmtpHost("smtp.example.com");
+        ma.setSmtpPort("587");
+        ma.setCredentialsId("email-ext-admin");
+
+        Authenticator authenticator = descriptor.getAuthenticatorProvider().apply(ma, null);
+        PasswordAuthentication auth = resolveAuthentication(authenticator);
+
+        assertNotNull(auth, "GLOBAL-scoped credential should keep resolving");
+        assertEquals("admin", auth.getUserName());
+        assertEquals("honeycomb", auth.getPassword());
     }
 
     @Test
