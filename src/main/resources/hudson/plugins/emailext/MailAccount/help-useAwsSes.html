@@ -1,0 +1,12 @@
+<div>
+  Send email through the <a href="https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_SendEmail.html">Amazon SES v2 <code>SendEmail</code> API</a>
+  over HTTPS instead of connecting to an SMTP server. The message is built exactly as it would be for SMTP
+  (HTML, attachments, pre-send scripts and emergency reroute all apply) and is submitted to SES as a raw MIME message.
+  When this is enabled the SMTP server, port, credentials, SSL/TLS, OAuth 2.0 and advanced email properties are ignored.
+  <p>
+  The AWS identity used must be allowed <code>ses:SendEmail</code> and <code>ses:SendRawEmail</code>,
+  and the sender address must be a verified SES identity. While the SES account is in the sandbox,
+  recipients must be verified as well.
+  <p>
+  The post-send script is still executed, but its <code>transport</code> variable is <code>null</code>.
+</div>

@@ -12,6 +12,18 @@ if(instance?.defaultAccount) {
     }
 }
 
+f.optionalBlock(field: "useAwsSes", title: _("Send with the Amazon SES API instead of SMTP"), inline: true) {
+    f.entry(field: "awsRegion", title: _("AWS region")) {
+        f.textbox()
+    }
+    f.entry(field: "awsCredentialsId", title: _("AWS credentials")) {
+        c.select()
+    }
+    f.entry(field: "sesConfigurationSet", title: _("SES configuration set")) {
+        f.textbox()
+    }
+}
+
 f.entry(field: "smtpHost", title: _("SMTP server")) {
     f.textbox()
 }

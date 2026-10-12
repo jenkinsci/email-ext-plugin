@@ -50,6 +50,7 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest2;
+import software.amazon.awssdk.services.sesv2.SesV2Client;
 
 /**
  * These settings are global configurations
@@ -212,6 +213,8 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
                 }
             };
 
+    private transient BiFunction<MailAccount, Run<?, ?>, SesV2Client> sesClientProvider = SesMailSender::createClient;
+
     private Object readResolve() {
         if (smtpHost != null) {
             mailAccount.setSmtpHost(smtpHost);
@@ -350,6 +353,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     @Restricted(NoExternalUse.class)
     Session createSession(MailAccount acc, ExtendedEmailPublisherContext context) {
+        if (acc.isUseAwsSes()) {
+            // SES only needs a session to build the MIME message, so the SMTP settings do not apply
+            return Session.getInstance(new Properties(System.getProperties()));
+        }
 
         Properties props = new Properties(System.getProperties());
 
@@ -936,6 +943,15 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     void setAuthenticatorProvider(BiFunction<MailAccount, Run<?, ?>, Authenticator> authenticatorProvider) {
         this.authenticatorProvider = authenticatorProvider;
+    }
+
+    @Restricted(NoExternalUse.class)
+    SesV2Client createSesClient(MailAccount acc, ExtendedEmailPublisherContext context) {
+        return sesClientProvider.apply(acc, context.getRun());
+    }
+
+    void setSesClientProvider(BiFunction<MailAccount, Run<?, ?>, SesV2Client> sesClientProvider) {
+        this.sesClientProvider = sesClientProvider;
     }
 
     @SuppressWarnings({"lgtm/jenkins/csrf", "lgtm/jenkins/no-permission-check"})

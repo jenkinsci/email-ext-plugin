@@ -1,5 +1,6 @@
 package hudson.plugins.emailext;
 
+import com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentials;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
@@ -35,6 +36,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
+import software.amazon.awssdk.regions.Region;
 
 public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     private String address;
@@ -49,6 +51,10 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     private boolean defaultAccount;
 
     private boolean useOAuth2;
+    private boolean useAwsSes;
+    private String awsRegion;
+    private String awsCredentialsId;
+    private String sesConfigurationSet;
     private static final Pattern HOSTNAME_VALID =
             Pattern.compile("^(?![0-9]+$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$");
 
@@ -69,7 +75,14 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     public MailAccount() {}
 
     public boolean isValid() {
+        if (useAwsSes) {
+            return isFromAddressValid() && isAwsSesValid();
+        }
         return isFromAddressValid() && isSmtpServerValid() && isSecureAuthWhenFIPS();
+    }
+
+    public boolean isAwsSesValid() {
+        return !useAwsSes || StringUtils.isNotBlank(awsRegion);
     }
 
     public boolean isSecureAuthWhenFIPS() {
@@ -151,6 +164,40 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
                             Collections.emptyList(),
                             CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class))
                     .includeCurrentValue(credentialsId);
+        }
+
+        @SuppressWarnings({"lgtm[jenkins/csrf]", "unused"}) // Used by stapler
+        public ListBoxModel doFillAwsCredentialsIdItems(
+                @AncestorInPath Item item, @QueryParameter String awsCredentialsId) {
+            final StandardListBoxModel result = new StandardListBoxModel();
+            if (item == null) {
+                if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                    return result.includeCurrentValue(awsCredentialsId);
+                }
+            } else {
+                if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return result.includeCurrentValue(awsCredentialsId);
+                }
+            }
+            return result.includeEmptyValue()
+                    .includeMatchingAs(
+                            item instanceof Queue.Task t ? Tasks.getAuthenticationOf2(t) : ACL.SYSTEM2,
+                            item,
+                            AmazonWebServicesCredentials.class,
+                            Collections.emptyList(),
+                            CredentialsMatchers.instanceOf(AmazonWebServicesCredentials.class))
+                    .includeCurrentValue(awsCredentialsId);
+        }
+
+        @SuppressWarnings({"lgtm[jenkins/csrf]", "lgtm[jenkins/no-permission-check]", "unused"}) // Used by stapler
+        public FormValidation doCheckAwsRegion(@QueryParameter String value) {
+            if (StringUtils.isBlank(value)) {
+                return FormValidation.error("An AWS region is required to send email with Amazon SES");
+            }
+            if (!Region.regions().contains(Region.of(value.trim()))) {
+                return FormValidation.warning("Unknown AWS region: " + value.trim());
+            }
+            return FormValidation.ok();
         }
 
         @SuppressWarnings("lgtm[jenkins/csrf]")
@@ -304,6 +351,42 @@ public class MailAccount extends AbstractDescribableImpl<MailAccount> {
     @DataBoundSetter
     public void setUseOAuth2(boolean useOAuth2) {
         this.useOAuth2 = useOAuth2;
+    }
+
+    public boolean isUseAwsSes() {
+        return useAwsSes;
+    }
+
+    @DataBoundSetter
+    public void setUseAwsSes(boolean useAwsSes) {
+        this.useAwsSes = useAwsSes;
+    }
+
+    public String getAwsRegion() {
+        return awsRegion;
+    }
+
+    @DataBoundSetter
+    public void setAwsRegion(String awsRegion) {
+        this.awsRegion = Util.fixEmptyAndTrim(awsRegion);
+    }
+
+    public String getAwsCredentialsId() {
+        return awsCredentialsId;
+    }
+
+    @DataBoundSetter
+    public void setAwsCredentialsId(String awsCredentialsId) {
+        this.awsCredentialsId = Util.fixEmptyAndTrim(awsCredentialsId);
+    }
+
+    public String getSesConfigurationSet() {
+        return sesConfigurationSet;
+    }
+
+    @DataBoundSetter
+    public void setSesConfigurationSet(String sesConfigurationSet) {
+        this.sesConfigurationSet = Util.fixEmptyAndTrim(sesConfigurationSet);
     }
 
     public String getAdvProperties() {

@@ -80,6 +80,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -101,6 +102,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest2;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.services.sesv2.SesV2Client;
 
 /**
  * {@link Publisher} that sends notification e-mail.
@@ -734,6 +737,8 @@ public class ExtendedEmailPublisher extends Notifier {
                                 context.getListener().getLogger(),
                                 "Additional account has invalid from address " + mailAccount.getAddress());
                     }
+                } else if (!mailAccount.isAwsSesValid()) {
+                    context.getListener().getLogger().println("Mail account uses Amazon SES but has no AWS region");
                 } else if (!mailAccount.isSmtpServerValid()) {
                     context.getListener().getLogger().println("Mail account has invalid SMTP server");
                     if (mailAccount.isDefaultAccount()) {
@@ -793,6 +798,10 @@ public class ExtendedEmailPublisher extends Notifier {
 
                     // emergency reroute might have modified recipients:
                     allRecipients = msg.getAllRecipients();
+                    if (mailAccount.isUseAwsSes()) {
+                        sendWithAwsSes(context, mailAccount, msg, session, allRecipients);
+                        return true;
+                    }
                     // all email addresses are of type "rfc822", so just take first one:
                     Transport transport = session.getTransport(allRecipients[0]);
                     while (true) {
@@ -921,6 +930,9 @@ public class ExtendedEmailPublisher extends Notifier {
         } catch (MessagingException e) {
             LOGGER.log(Level.WARNING, "SMTP communication error while sending email.", e);
             Functions.printStackTrace(e, context.getListener().error("SMTP communication error while sending email."));
+        } catch (SdkException e) {
+            LOGGER.log(Level.WARNING, "Amazon SES error while sending email.", e);
+            Functions.printStackTrace(e, context.getListener().error("Amazon SES error while sending email."));
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Unexpected error while sending email.", e);
             Functions.printStackTrace(e, context.getListener().error("Unexpected error while sending email."));
@@ -928,6 +940,36 @@ public class ExtendedEmailPublisher extends Notifier {
 
         debug(context.getListener().getLogger(), "Email sending failed. Please check Jenkins system log for details.");
         return false;
+    }
+
+    private void sendWithAwsSes(
+            ExtendedEmailPublisherContext context,
+            MailAccount mailAccount,
+            MimeMessage msg,
+            Session session,
+            Address[] recipients)
+            throws IOException, MessagingException {
+        List<String> messageIds;
+        try (SesV2Client client = getDescriptor().createSesClient(mailAccount, context)) {
+            messageIds = SesMailSender.send(client, mailAccount, msg, recipients);
+        }
+        context.getListener()
+                .getLogger()
+                .println("Sent email with Amazon SES, message id(s): " + String.join(", ", messageIds));
+        if (getDescriptor().isThrottlingEnabled()) {
+            EmailThrottler.getInstance().incrementEmailCount();
+        }
+
+        // there is no SMTP transport when sending with SES
+        executePostsendScript(context, msg, session, null);
+
+        if (context.getRun().getAction(MailMessageIdAction.class) == null) {
+            // each batch of recipients got a different Message-ID, so later emails reply to all of them
+            context.getRun()
+                    .addAction(new MailMessageIdAction(messageIds.stream()
+                            .map(id -> SesMailSender.toMessageIdHeader(mailAccount.getAwsRegion(), id))
+                            .collect(Collectors.joining(" "))));
+        }
     }
 
     public List<TokenMacro> getRuntimeMacros(ExtendedEmailPublisherContext context) {
@@ -984,9 +1026,8 @@ public class ExtendedEmailPublisher extends Notifier {
                 props = session.getProperties();
                 binding.setVariable("props", props);
             }
-            if (transport != null) {
-                binding.setVariable("transport", transport); // Can't really figure out what to whitelist in this object
-            }
+            // null when sending with Amazon SES. Can't really figure out what to whitelist in this object
+            binding.setVariable("transport", transport);
             binding.setVariable("listener", listener);
             binding.setVariable("logger", logger);
             binding.setVariable("cancel", cancel);

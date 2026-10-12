@@ -222,4 +222,24 @@ class ExtendedEmailPublisherDescriptorJCasCTest {
             assertTrue(account.isUseTls(), "useTls should persist on access " + (i + 2));
         }
     }
+
+    @Test
+    @ConfiguredWithCode("configuration-as-code-aws-ses.yml")
+    void shouldConfigureAwsSesWithJCasC(JenkinsConfiguredWithCodeRule r) {
+        final ExtendedEmailPublisherDescriptor descriptor =
+                ExtensionList.lookupSingleton(ExtendedEmailPublisherDescriptor.class);
+
+        MailAccount account = descriptor.getMailAccount();
+        assertTrue(account.isUseAwsSes());
+        assertEquals("eu-west-1", account.getAwsRegion());
+        assertEquals("aws-ses-credentials", account.getAwsCredentialsId());
+        assertEquals("jenkins-events", account.getSesConfigurationSet());
+        assertTrue(account.isValid());
+
+        MailAccount additional = descriptor.getAddAccounts().get(0);
+        assertTrue(additional.isUseAwsSes());
+        assertEquals("us-east-1", additional.getAwsRegion());
+        assertNull(additional.getAwsCredentialsId());
+        assertNull(additional.getSesConfigurationSet());
+    }
 }

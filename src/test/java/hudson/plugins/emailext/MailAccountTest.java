@@ -3,16 +3,24 @@ package hudson.plugins.emailext;
 import static hudson.plugins.emailext.FormValidationMessageMatcher.hasMessage;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.jvnet.hudson.test.JenkinsMatchers.hasKind;
 
+import com.cloudbees.jenkins.plugins.awscredentials.AWSCredentialsImpl;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
+import hudson.model.FreeStyleProject;
+import hudson.model.Item;
+import hudson.model.User;
 import hudson.plugins.emailext.MailAccount.MailAccountDescriptor;
+import hudson.security.ACL;
+import hudson.security.ACLContext;
 import hudson.util.FormValidation.Kind;
+import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import java.util.List;
 import jenkins.model.Jenkins;
@@ -20,6 +28,7 @@ import net.sf.json.JSONObject;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.MockAuthorizationStrategy;
 import org.jvnet.hudson.test.WithoutJenkins;
 import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
@@ -216,5 +225,91 @@ class MailAccountTest {
         assertTrue(longHost.length() > 255);
         account.setSmtpHost(longHost);
         assertFalse(account.isSmtpServerValid());
+    }
+
+    @Test
+    @WithoutJenkins
+    void testIsValidAwsSesConfig() {
+        MailAccount account = new MailAccount();
+        account.setAddress("foo@bar.com");
+        account.setUseAwsSes(true);
+        // the SMTP server is irrelevant when sending with SES
+        account.setSmtpHost("invalid..host");
+        assertFalse(account.isAwsSesValid());
+        assertFalse(account.isValid());
+
+        account.setAwsRegion("  eu-west-1  ");
+        assertEquals("eu-west-1", account.getAwsRegion());
+        assertTrue(account.isAwsSesValid());
+        assertTrue(account.isValid());
+
+        account.setAddress(null);
+        assertFalse(account.isValid(), "an additional account needs a from address with SES too");
+
+        account.setUseAwsSes(false);
+        assertTrue(account.isAwsSesValid(), "the region is not required when SES is not used");
+        assertFalse(account.isValid());
+    }
+
+    @Test
+    void testDoFillAwsCredentialsIdItems(JenkinsRule j) throws Exception {
+        SystemCredentialsProvider.getInstance()
+                .getCredentials()
+                .add(new AWSCredentialsImpl(CredentialsScope.GLOBAL, "aws-ses", "AKIAEXAMPLE", "secret", "SES"));
+        SystemCredentialsProvider.getInstance().save();
+        FreeStyleProject project = j.createFreeStyleProject();
+        j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
+        j.jenkins.setAuthorizationStrategy(new MockAuthorizationStrategy()
+                .grant(Jenkins.ADMINISTER)
+                .everywhere()
+                .to("admin")
+                .grant(Jenkins.READ, Item.READ)
+                .everywhere()
+                .to("reader")
+                .grant(Jenkins.READ, Item.READ, Item.EXTENDED_READ)
+                .everywhere()
+                .to("configurer")
+                .grant(Jenkins.READ, Item.READ, CredentialsProvider.USE_ITEM)
+                .everywhere()
+                .to("user"));
+        MailAccountDescriptor descriptor = (MailAccountDescriptor) Jenkins.get().getDescriptor(MailAccount.class);
+
+        try (ACLContext ignored = ACL.as2(User.getById("admin", true).impersonate2())) {
+            assertThat(optionValues(descriptor.doFillAwsCredentialsIdItems(null, "")), hasItem("aws-ses"));
+        }
+        try (ACLContext ignored = ACL.as2(User.getById("reader", true).impersonate2())) {
+            assertEquals(List.of("current"), optionValues(descriptor.doFillAwsCredentialsIdItems(null, "current")));
+            assertEquals(List.of("current"), optionValues(descriptor.doFillAwsCredentialsIdItems(project, "current")));
+        }
+        try (ACLContext ignored = ACL.as2(User.getById("configurer", true).impersonate2())) {
+            assertThat(optionValues(descriptor.doFillAwsCredentialsIdItems(project, "")), hasItem("aws-ses"));
+        }
+        try (ACLContext ignored = ACL.as2(User.getById("user", true).impersonate2())) {
+            assertThat(optionValues(descriptor.doFillAwsCredentialsIdItems(project, "")), hasItem("aws-ses"));
+        }
+    }
+
+    private static List<String> optionValues(ListBoxModel model) {
+        return model.stream().map(option -> option.value).toList();
+    }
+
+    @Test
+    @WithoutJenkins
+    void testAwsSesSettersNormalizeBlankValues() {
+        MailAccount account = new MailAccount();
+        account.setAwsRegion(" ");
+        account.setAwsCredentialsId("");
+        account.setSesConfigurationSet("  ");
+        assertNull(account.getAwsRegion());
+        assertNull(account.getAwsCredentialsId());
+        assertNull(account.getSesConfigurationSet());
+    }
+
+    @Test
+    void testDoCheckAwsRegion(JenkinsRule j) {
+        MailAccountDescriptor descriptor = new MailAccountDescriptor();
+        assertThat(descriptor.doCheckAwsRegion(""), hasKind(Kind.ERROR));
+        assertThat(descriptor.doCheckAwsRegion("us-east-1"), hasKind(Kind.OK));
+        assertThat(descriptor.doCheckAwsRegion("mars-north-1"), hasKind(Kind.WARNING));
     }
 }

@@ -56,6 +56,28 @@ This section mirrors that of the https://plugins.jenkins.io/mailer/[Mailer plugi
 The fields labeled *Default Subject* and *Default Content* allow you to configure the subject and content on a system-wide level.
 The field labeled *Default Recipients* can be used to set a default list of email addresses for all projects using this plugin (and can be overridden at the project level); this can be used to greatly simplify the configuration you need to do for all projects.
 
+==== Sending email with Amazon SES
+
+Instead of SMTP, the default account and each additional account can send email through the https://docs.aws.amazon.com/ses/latest/APIReference-V2/API_SendEmail.html[Amazon SES v2 API] over HTTPS.
+Check *Send with the Amazon SES API instead of SMTP* and set the *AWS region*.
+Optionally select *AWS credentials* from the https://plugins.jenkins.io/aws-credentials/[AWS Credentials plugin]; when left empty, the default AWS credentials provider chain of the controller is used (environment variables, profiles, EKS IRSA, or the ECS/EC2 instance role).
+An optional *SES configuration set* can be used to publish delivery, bounce and complaint events.
+
+The message is built exactly as for SMTP and sent to SES as a raw MIME message, so HTML content, attachments, pre-send scripts and emergency reroute keep working.
+The AWS identity needs the `ses:SendEmail` and `ses:SendRawEmail` permissions, and the sender address must be a verified SES identity.
+In a post-send script, the `transport` variable is `null` when sending with SES.
+
+[source,yaml]
+----
+unclassified:
+  email-ext:
+    mailAccount:
+      useAwsSes: true
+      awsRegion: "eu-west-1"
+      awsCredentialsId: "aws-ses-credentials" # optional
+      sesConfigurationSet: "jenkins-events"   # optional
+----
+
 === Project configuration
 
 For a project to use this plugin, you need to enable it in the project configuration page.

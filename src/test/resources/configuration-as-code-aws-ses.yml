@@ -1,0 +1,11 @@
+unclassified:
+  email-ext:
+    mailAccount:
+      useAwsSes: true
+      awsRegion: "eu-west-1"
+      awsCredentialsId: "aws-ses-credentials"
+      sesConfigurationSet: "jenkins-events"
+    addAccounts:
+      - address: "builds@example.com"
+        useAwsSes: true
+        awsRegion: "us-east-1"

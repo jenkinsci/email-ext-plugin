@@ -49,7 +49,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
-    <hpi.bundledArtifacts>jericho-html</hpi.bundledArtifacts>
+    <hpi.bundledArtifacts>jericho-html,sesv2</hpi.bundledArtifacts>
     <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
     <jenkins.baseline>2.516</jenkins.baseline>
     <jenkins.version>${jenkins.baseline}.3</jenkins.version>
@@ -87,9 +87,17 @@
       <artifactId>jakarta-mail-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.jenkins.plugins.aws-java-sdk2</groupId>
+      <artifactId>aws-java-sdk2-core</artifactId>
+    </dependency>
+    <dependency>
       <groupId>net.htmlparser.jericho</groupId>
       <artifactId>jericho-html</artifactId>
       <version>3.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>aws-credentials</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -146,6 +154,20 @@
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-step-api</artifactId>
       <optional>true</optional>
+    </dependency>
+    <dependency>
+      <!-- There is no aws-java-sdk2-sesv2 API plugin, so bundle only the service jar;
+           everything it depends on is provided by aws-java-sdk2-core.
+           Keep the version in sync with the AWS SDK version of aws-java-sdk2-core. -->
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>sesv2</artifactId>
+      <version>2.38.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.jenkins</groupId>
