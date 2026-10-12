@@ -353,6 +353,10 @@ public final class ExtendedEmailPublisherDescriptor extends BuildStepDescriptor<
 
     @Restricted(NoExternalUse.class)
     Session createSession(MailAccount acc, ExtendedEmailPublisherContext context) {
+        if (acc.isUseAwsSes()) {
+            // SES only needs a session to build the MIME message, so the SMTP settings do not apply
+            return Session.getInstance(new Properties(System.getProperties()));
+        }
 
         Properties props = new Properties(System.getProperties());
 

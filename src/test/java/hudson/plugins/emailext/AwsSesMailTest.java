@@ -152,6 +152,59 @@ class AwsSesMailTest {
     }
 
     @Test
+    void keepsMessageIdsOfAllRecipientBatchesForThreading(JenkinsRule j) throws Exception {
+        SesV2Client client = mock(SesV2Client.class);
+        when(client.sendEmail(any(SendEmailRequest.class)))
+                .thenReturn(SendEmailResponse.builder().messageId("batch-1").build())
+                .thenReturn(SendEmailResponse.builder().messageId("batch-2").build());
+        configureSes(j, "us-west-1", (acc, run) -> client);
+        List<String> recipients = new ArrayList<>();
+        for (int i = 0; i <= SesMailSender.MAX_RECIPIENTS_PER_MESSAGE; i++) {
+            recipients.add("user" + i + "@example.com");
+        }
+
+        FreeStyleBuild build = buildAndNotify(j, String.join(",", recipients));
+
+        verify(client, times(2)).sendEmail(any(SendEmailRequest.class));
+        assertEquals(
+                "<batch-1@us-west-1.amazonses.com> <batch-2@us-west-1.amazonses.com>",
+                build.getAction(MailMessageIdAction.class).messageId);
+    }
+
+    @Test
+    void ignoresSmtpSettingsWhenSendingWithSes(JenkinsRule j) throws Exception {
+        SesV2Client client = mock(SesV2Client.class);
+        when(client.sendEmail(any(SendEmailRequest.class)))
+                .thenReturn(SendEmailResponse.builder().messageId("id").build());
+        MailAccount account = configureSes(j, "us-west-1", (acc, run) -> client).getMailAccount();
+        account.setSmtpHost("smtp.example.com");
+        account.setCredentialsId("does-not-exist");
+        // a malformed escape that makes java.util.Properties fail to load
+        account.setAdvProperties("mail.smtp.localhost=\\u12");
+
+        FreeStyleBuild build = buildAndNotify(j, "to@example.com");
+
+        verify(client).sendEmail(any(SendEmailRequest.class));
+        j.assertLogContains("Sent email with Amazon SES", build);
+    }
+
+    @Test
+    void givesPostsendScriptNullTransport(JenkinsRule j) throws Exception {
+        SesV2Client client = mock(SesV2Client.class);
+        when(client.sendEmail(any(SendEmailRequest.class)))
+                .thenReturn(SendEmailResponse.builder().messageId("id").build());
+        configureSes(j, "us-west-1", (acc, run) -> client);
+        ExtendedEmailPublisher publisher = newPublisher("to@example.com", successTrigger());
+        publisher.setPostsendScript("logger.println('transport is ' + transport)");
+        FreeStyleProject project = j.createFreeStyleProject();
+        project.getPublishersList().add(publisher);
+
+        FreeStyleBuild build = j.buildAndAssertSuccess(project);
+
+        j.assertLogContains("transport is null", build);
+    }
+
+    @Test
     void countsSesEmailsTowardsThrottlingLimit(JenkinsRule j) throws Exception {
         SesV2Client client = mock(SesV2Client.class);
         when(client.sendEmail(any(SendEmailRequest.class)))
@@ -293,6 +346,12 @@ class AwsSesMailTest {
 
     private static FreeStyleBuild buildAndNotify(JenkinsRule j, String recipients, EmailTrigger... triggers)
             throws Exception {
+        FreeStyleProject project = j.createFreeStyleProject();
+        project.getPublishersList().add(newPublisher(recipients, triggers));
+        return j.buildAndAssertSuccess(project);
+    }
+
+    private static ExtendedEmailPublisher newPublisher(String recipients, EmailTrigger... triggers) {
         ExtendedEmailPublisher publisher = new ExtendedEmailPublisher();
         publisher.setFrom("");
         publisher.setContentType("default");
@@ -304,9 +363,7 @@ class AwsSesMailTest {
         publisher.setPostsendScript("");
         publisher.setReplyTo("");
         publisher.getConfiguredTriggers().addAll(List.of(triggers));
-        FreeStyleProject project = j.createFreeStyleProject();
-        project.getPublishersList().add(publisher);
-        return j.buildAndAssertSuccess(project);
+        return publisher;
     }
 
     private static SuccessTrigger successTrigger() {

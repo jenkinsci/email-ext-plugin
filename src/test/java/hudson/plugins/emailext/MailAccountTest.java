@@ -268,7 +268,10 @@ class MailAccountTest {
                 .to("reader")
                 .grant(Jenkins.READ, Item.READ, Item.EXTENDED_READ)
                 .everywhere()
-                .to("configurer"));
+                .to("configurer")
+                .grant(Jenkins.READ, Item.READ, CredentialsProvider.USE_ITEM)
+                .everywhere()
+                .to("user"));
         MailAccountDescriptor descriptor = (MailAccountDescriptor) Jenkins.get().getDescriptor(MailAccount.class);
 
         try (ACLContext ignored = ACL.as2(User.getById("admin", true).impersonate2())) {
@@ -279,6 +282,9 @@ class MailAccountTest {
             assertEquals(List.of("current"), optionValues(descriptor.doFillAwsCredentialsIdItems(project, "current")));
         }
         try (ACLContext ignored = ACL.as2(User.getById("configurer", true).impersonate2())) {
+            assertThat(optionValues(descriptor.doFillAwsCredentialsIdItems(project, "")), hasItem("aws-ses"));
+        }
+        try (ACLContext ignored = ACL.as2(User.getById("user", true).impersonate2())) {
             assertThat(optionValues(descriptor.doFillAwsCredentialsIdItems(project, "")), hasItem("aws-ses"));
         }
     }

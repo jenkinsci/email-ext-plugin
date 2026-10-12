@@ -80,6 +80,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -963,9 +964,11 @@ public class ExtendedEmailPublisher extends Notifier {
         executePostsendScript(context, msg, session, null);
 
         if (context.getRun().getAction(MailMessageIdAction.class) == null) {
+            // each batch of recipients got a different Message-ID, so later emails reply to all of them
             context.getRun()
-                    .addAction(new MailMessageIdAction(
-                            SesMailSender.toMessageIdHeader(mailAccount.getAwsRegion(), messageIds.get(0))));
+                    .addAction(new MailMessageIdAction(messageIds.stream()
+                            .map(id -> SesMailSender.toMessageIdHeader(mailAccount.getAwsRegion(), id))
+                            .collect(Collectors.joining(" "))));
         }
     }
 
@@ -1023,9 +1026,8 @@ public class ExtendedEmailPublisher extends Notifier {
                 props = session.getProperties();
                 binding.setVariable("props", props);
             }
-            if (transport != null) {
-                binding.setVariable("transport", transport); // Can't really figure out what to whitelist in this object
-            }
+            // null when sending with Amazon SES. Can't really figure out what to whitelist in this object
+            binding.setVariable("transport", transport);
             binding.setVariable("listener", listener);
             binding.setVariable("logger", logger);
             binding.setVariable("cancel", cancel);
