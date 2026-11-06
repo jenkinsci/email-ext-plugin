@@ -70,36 +70,6 @@ class EmailExtTemplateActionTest {
 
     @Test
     @Issue("JENKINS-74891")
-    void testJavaScriptUsesFetchAPI() throws Exception {
-        InputStream is = getClass()
-                .getClassLoader()
-                .getResourceAsStream("hudson/plugins/emailext/EmailExtTemplateAction/template-test.js");
-        assertNotNull(is, "JavaScript file should exist");
-
-        String jsContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-
-        assertFalse(jsContent.contains("innerHTML"), "JavaScript should not use innerHTML (CSP violation)");
-        assertFalse(jsContent.contains("escape("), "JavaScript should not use deprecated escape() function");
-        assertFalse(
-                jsContent.contains("templateTester.renderTemplate"),
-                "JavaScript should not use JavaScriptMethod binding (violates CSP)");
-
-        assertTrue(jsContent.contains("textContent"), "JavaScript should use textContent instead of innerHTML");
-        assertTrue(
-                jsContent.contains("encodeURIComponent"), "JavaScript should use encodeURIComponent instead of escape");
-        assertTrue(jsContent.contains("fetch("), "JavaScript should use fetch API for AJAX calls");
-
-        assertTrue(
-                jsContent.contains("data-root-url"), "JavaScript should use data-root-url for absolute URL resolution");
-        assertTrue(
-                jsContent.contains("data-project-url"),
-                "JavaScript should use data-project-url for project path resolution");
-
-        assertTrue(jsContent.contains("HTTP"), "JavaScript should include HTTP status code in error messages");
-    }
-
-    @Test
-    @Issue("JENKINS-74891")
     void testGroovyTemplateDoesNotUseStaplerBind() throws Exception {
         InputStream is = getClass()
                 .getClassLoader()

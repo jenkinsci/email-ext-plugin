@@ -6,12 +6,13 @@ function onSubmit() {
     formData.append('templateFile', templateFile);
     formData.append('buildId', buildId);
     
-    var rootURL = document.body.getAttribute('data-root-url') || '';
-    var projectUrl = document.body.getAttribute('data-project-url') || '';
-    var renderUrl = rootURL + projectUrl + 'templateTest/renderTemplate';
+    var rootURL = document.getElementById('email-ext-template-data-holder').getAttribute('data-root-url');
+    var projectUrl = document.getElementById('email-ext-template-data-holder').getAttribute('data-project-url');
+    var renderUrl = rootURL + "/" + projectUrl + 'templateTest/renderTemplate';
     
     fetch(renderUrl, {
         method: 'POST',
+        headers: crumb.wrap({}),
         body: formData
     })
     .then(function(response) {
@@ -23,7 +24,7 @@ function onSubmit() {
         return response.json();
     })
     .then(function(data) {
-        document.getElementById('rendered_template').src = "data:text/html;charset=utf-8," + encodeURIComponent(data.renderedContent);
+        document.getElementById('rendered_template').srcdoc = data.renderedContent;
         var consoleOutput = data.consoleOutput;
         if(consoleOutput.length === 0) {
             document.getElementById('output').style.display = 'none';
