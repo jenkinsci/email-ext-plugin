@@ -500,11 +500,7 @@ public class ExtendedEmailPublisher extends Notifier {
     @NonNull
     @Override
     public Collection<? extends Action> getProjectActions(AbstractProject<?, ?> project) {
-        EmailExtWatchAction action = project.getAction(EmailExtWatchAction.class);
-        if (action == null) {
-            action = new EmailExtWatchAction(project);
-        }
-        return Collections.singletonList(action);
+        return Collections.singletonList(new EmailExtWatchAction(project));
     }
 
     public void debug(PrintStream p, String format, Object... args) {

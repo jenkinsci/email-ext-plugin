@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.ExtensionList;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -54,8 +55,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
+import jenkins.model.TransientActionFactory;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.htmlunit.html.HtmlPage;
@@ -2273,5 +2276,45 @@ class ExtendedEmailPublisherTest {
         java.util.Collection<? extends hudson.model.Action> actions = pub.getProjectActions(prj);
         assertEquals(1, actions.size());
         assertTrue(actions.iterator().next() instanceof hudson.plugins.emailext.watching.EmailExtWatchAction);
+    }
+
+    @Test
+    void testGetProjectActionsDoesNotQueryTransientActionFactories() {
+        AtomicInteger factoryCalls = new AtomicInteger();
+        TransientActionFactory<FreeStyleProject> factory = new TransientActionFactory<>() {
+            @Override
+            public Class<FreeStyleProject> type() {
+                return FreeStyleProject.class;
+            }
+
+            @Override
+            public Class<? extends hudson.model.Action> actionType() {
+                return hudson.plugins.emailext.watching.EmailExtWatchAction.class;
+            }
+
+            @Override
+            public java.util.Collection<? extends hudson.model.Action> createFor(FreeStyleProject project) {
+                factoryCalls.incrementAndGet();
+                return Collections.singletonList(new hudson.plugins.emailext.watching.EmailExtWatchAction(project));
+            }
+        };
+        ExtensionList<TransientActionFactory> factories = ExtensionList.lookup(TransientActionFactory.class);
+        factories.add(factory);
+
+        try {
+            publisher.setDisabled(true);
+
+            java.util.Collection<? extends hudson.model.Action> firstActions = publisher.getProjectActions(project);
+            java.util.Collection<? extends hudson.model.Action> secondActions = publisher.getProjectActions(project);
+
+            assertEquals(0, factoryCalls.get(), "Project action construction must not query transient factories");
+            assertEquals(1, firstActions.size());
+            assertEquals(1, secondActions.size());
+            assertTrue(firstActions.iterator().next() instanceof hudson.plugins.emailext.watching.EmailExtWatchAction);
+            assertNotSame(
+                    firstActions.iterator().next(), secondActions.iterator().next());
+        } finally {
+            factories.remove(factory);
+        }
     }
 }
