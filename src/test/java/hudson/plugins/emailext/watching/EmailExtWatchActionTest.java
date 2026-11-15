@@ -165,6 +165,25 @@ class EmailExtWatchActionTest {
     }
 
     @Test
+    void testUserPreferencesPersistAcrossRestart() throws Throwable {
+        User user = User.getById("alice", true);
+        List<EmailTrigger> triggers =
+                Collections.singletonList(new AlwaysTrigger(Collections.emptyList(), "", "", "", "", "", 0, ""));
+        user.addProperty(new EmailExtWatchAction.UserProperty(project.getFullName(), triggers));
+
+        j.restart();
+
+        project = j.jenkins.getItemByFullName("test-project", FreeStyleProject.class);
+        User reloadedUser = User.getById("alice", false);
+        try (ACLContext ctx = ACL.as(reloadedUser)) {
+            EmailExtWatchAction reloadedAction = new EmailExtWatchAction(project);
+
+            assertTrue(reloadedAction.isWatching());
+            assertEquals(1, reloadedAction.getTriggers().size());
+        }
+    }
+
+    @Test
     void testGetTriggersIgnoresWrongProject() throws Exception {
         User user = User.getById("alice", true);
 
