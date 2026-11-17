@@ -183,4 +183,16 @@ class RecipientListStringAnalyserTest {
         assertEquals(EmailRecipientUtils.TO, analyser.getType(addressWithPersonal));
         assertEquals(EmailRecipientUtils.TO, analyser.getType(new InternetAddress("minnie@disney.com")));
     }
+
+    @Test
+    void getTypeForCcAndBccPrefixedQuotedNames() throws Exception {
+        String recipients = "\"Mouse, Mickey\" <mickey@disney.com>, cc:\"Duck, Donald\" <donald@disney.com>, "
+                + "bcc:\"Goofy G. Goof\" <goofy@disney.com>";
+        RecipientListStringAnalyser analyser = new RecipientListStringAnalyser(recipients);
+        InternetAddress[] addresses =
+                InternetAddress.parse(recipients.replace("bcc:", "").replace("cc:", ""));
+        assertEquals(EmailRecipientUtils.TO, analyser.getType(addresses[0]));
+        assertEquals(EmailRecipientUtils.CC, analyser.getType(addresses[1]));
+        assertEquals(EmailRecipientUtils.BCC, analyser.getType(addresses[2]));
+    }
 }

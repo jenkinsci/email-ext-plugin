@@ -249,6 +249,24 @@ class EmailRecipientUtilsTest {
         assertEquals("Mouse, Mickey", ((InternetAddress) CollectionUtils.get(internetAddresses, 0)).getPersonal());
     }
 
+    @Test
+    void testCCandBCCWithQuotedNames() throws Exception {
+        envVars.put(
+                "EMAIL_LIST",
+                "minnie@disney.com, cc:\"Mouse, Mickey\" <mickey@disney.com>, bcc:\"Donald Duck\" <donald@disney.com>");
+
+        Set<InternetAddress> internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars);
+        assertEquals(setOf("minnie@disney.com"), internetAddresses);
+
+        internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars, EmailRecipientUtils.CC);
+        assertEquals(setOf("mickey@disney.com"), internetAddresses);
+        assertEquals("Mouse, Mickey", ((InternetAddress) CollectionUtils.get(internetAddresses, 0)).getPersonal());
+
+        internetAddresses = EmailRecipientUtils.convertRecipientString("$EMAIL_LIST", envVars, EmailRecipientUtils.BCC);
+        assertEquals(setOf("donald@disney.com"), internetAddresses);
+        assertEquals("Donald Duck", ((InternetAddress) CollectionUtils.get(internetAddresses, 0)).getPersonal());
+    }
+
     // Test helper:
 
     private static Set<InternetAddress> setOf(String... emailAddresses) throws AddressException {

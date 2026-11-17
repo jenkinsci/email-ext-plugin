@@ -67,8 +67,10 @@ class RecipientListStringAnalyser {
         int firstIdx = Integer.MAX_VALUE;
         if (address.getPersonal() != null) {
             firstIdx = findFirst(firstIdx, "bcc:" + address.getPersonal());
+            firstIdx = findFirst(firstIdx, "bcc:\"" + address.getPersonal() + "\"");
             firstIdx = findFirst(firstIdx, "bcc:\"" + address + "\"");
             firstIdx = findFirst(firstIdx, "cc:" + address.getPersonal());
+            firstIdx = findFirst(firstIdx, "cc:\"" + address.getPersonal() + "\"");
             firstIdx = findFirst(firstIdx, "cc:\"" + address + "\"");
             firstIdx = findFirst(firstIdx, address.getPersonal());
             firstIdx = findFirst(firstIdx, "\"" + address + "\"");
